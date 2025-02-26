@@ -13,13 +13,20 @@
     </div>
 
     <!-- Date -->
+    <!-- Date Range Picker -->
     <div class="field-container">
-      <p class="label">วันที่จัดกิจกรรม :</p>
-      <q-input outlined v-model="activityDate" class="inputBox" mask="date">
+      <p class="label">ช่วงวันที่จัดกิจกรรม :</p>
+      <q-input outlined v-model="dateRangeText" class="inputBox" readonly>
         <template v-slot:append>
           <q-icon name="event" class="cursor-pointer">
             <q-popup-proxy cover transition-show="scale" transition-hide="scale">
-              <q-date v-model="activityDate" mask="YYYY-MM-DD" today-btn :locale="thaiLocale" />
+              <q-date
+                v-model="dateRange"
+                range
+                mask="YYYY-MM-DD"
+                @update:model-value="updateDateRangeText"
+                :locale="thaiLocale"
+              />
             </q-popup-proxy>
           </q-icon>
         </template>
@@ -56,7 +63,7 @@
     </div>
 
     <!-- Hours -->
-    <div class="field-container">
+    <div class="field-container" style="width: 404px; display: flex">
       <p class="label">จำนวนชั่วโมง :</p>
       <q-input outlined v-model="totalHours" class="inputBox" />
     </div>
@@ -150,7 +157,6 @@ interface ToggleOption {
 
 // Previous refs remain the same
 const activityName = ref('')
-const activityDate = ref('')
 const startTime = ref('')
 const endTime = ref('')
 const totalHours = ref('')
@@ -164,7 +170,16 @@ const detailActivity = ref('')
 // Modified to array refs for multiple selections
 const departments = ref<string[]>([])
 const years = ref<string[]>([])
+  const dateRange = ref({ from: '', to: '' })
+const dateRangeText = ref('')
 
+const updateDateRangeText = () => {
+  if (dateRange.value.from && dateRange.value.to) {
+    dateRangeText.value = `${dateRange.value.from} ถึง ${dateRange.value.to}`
+  } else {
+    dateRangeText.value = ''
+  }
+}
 // ฟังก์ชันเลือก/ยกเลิก สาขา
 const toggleDepartment = (value: string) => {
   if (departments.value.includes(value)) {

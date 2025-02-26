@@ -25,16 +25,20 @@
             v-model="selectedActivityType"
             :options="activityOptions"
             outlined
-            label="เลือกประเภท"
-            class="dropdown Font bg-white"
+            class="dropdown no-border bg-white"
             popup-content-class="custom-dropdown"
-          />
+          >
+            <template v-slot:selected>
+              <div v-if="selectedActivityType">{{ selectedActivityType }}</div>
+              <div v-else class="text-grey">เลือกประเภท</div>
+            </template>
+          </q-select>
         </div>
 
         <div class="form-section">
-          <CreateActivity_Form />
+          <component :is="getFormComponent || 'div'" />
           <div class="button-group">
-            <q-btn class="cancel-btn Font">ยกเลิก</q-btn>
+            <q-btn class="cancel-btn Font" @click="goToActivitiesManagement">ยกเลิก</q-btn>
             <q-btn class="submit-btn Font">เสร็จสิ้น</q-btn>
           </div>
         </div>
@@ -44,24 +48,36 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted, ref } from 'vue'
+import { onMounted, ref, computed } from 'vue'
 import CreateActivity_Image from './CreateActivity_Image.vue'
-import CreateActivity_Form from './CreateActivity_Form.vue'
-
+import FormSingleDay from './FormSingleDay.vue.vue'
+import FormMultipleDays from './FormMultipleDays.vue'
+import FormMultipleActivities from './FormMultipleActivities.vue'
 import { useRouter } from 'vue-router'
 
 const router = useRouter()
 
-onMounted(() => {
-  
-})
+onMounted(() => {})
 
 const goToActivitiesManagement = async () => {
   await router.push('/ActivitiesManagement')
 }
 
 const activityOptions = ['กิจกรรมวันเดียว', 'กิจกรรมหลายวัน', 'หลายกิจกรรม']
-const selectedActivityType = ref(null) // ค่าเริ่มต้นเป็น null
+const selectedActivityType = ref('กิจกรรมวันเดียว')
+
+const getFormComponent = computed(() => {
+  switch (selectedActivityType.value) {
+    case 'กิจกรรมวันเดียว':
+      return FormSingleDay
+    case 'กิจกรรมหลายวัน':
+      return FormMultipleDays
+    case 'หลายกิจกรรม':
+      return FormMultipleActivities
+    default:
+      return null
+  }
+})
 </script>
 
 <style scoped>
@@ -79,16 +95,24 @@ const selectedActivityType = ref(null) // ค่าเริ่มต้นเ�
 .container {
   max-width: 1400px;
   display: flex;
-  gap: 150px;
+  gap: 50px; /* ลด gap เพื่อให้สัดส่วนดูสมดุล */
   align-items: flex-start;
-}
-
-.form-section {
-  display: flex;
-  flex-direction: column;
   width: 100%;
 }
 
+.image-section {
+  width: 30%; /* ให้รูปภาพใช้พื้นที่ 30% */
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start; /* จัดชิดซ้าย */
+  width: 100%; /* ให้ dropdown กว้างเท่ากับรูปภาพ */
+}
+
+.form-section {
+  width: 70%; /* ให้ฟอร์มใช้พื้นที่ 70% */
+  display: flex;
+  flex-direction: column;
+}
 .button-group {
   display: flex;
   justify-content: flex-end;
@@ -116,11 +140,10 @@ const selectedActivityType = ref(null) // ค่าเริ่มต้นเ�
   font-weight: bold;
   font-family: 'Noto Serif Thai', serif;
 }
-
 .dropdown {
-  border-radius: 10px;
+  border-radius: 5px;
   width: 200px;
-  height: 50px;
+  height: 55px;
   margin-top: 10px;
 }
 </style>

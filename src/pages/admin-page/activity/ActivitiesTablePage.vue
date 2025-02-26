@@ -1,12 +1,12 @@
 <template>
   <q-page class="q-pa-md">
-    <div class="q-mb-md" style="display: flex; justify-content: space-between; align-items: center;">
+    <div class="q-mb-md" style="display: flex; justify-content: space-between; align-items: center">
       <h5>จัดการกิจกรรม</h5>
-      <q-btn class="btnAdd" icon="add" label="เพิ่มกิจกรรม"  @click="goToCreateActivity" />
+      <q-btn class="btnAdd" icon="add" label="เพิ่มกิจกรรม" @click="goToCreateActivity" />
     </div>
-    <div class="q-mb-md" style="display: flex; justify-content: space-between; align-items: center;">
+    <div class="q-mb-md" style="display: flex; justify-content: space-between; align-items: center">
       <h6>กิจกรรมที่กำลังเปิดและปิดลงทะเบียนแล้ว</h6>
-      <q-input class="searchBox"  filled  v-model="searchQuery" />
+      <q-input class="searchBox" filled v-model="searchQuery" />
       <q-select
         filled
         v-model="selectedFilter"
@@ -19,19 +19,19 @@
 </template>
 
 <script setup lang="ts">
-import { useRouter } from 'vue-router';
-import { ref } from 'vue';
+import { useRouter } from 'vue-router'
+import { ref } from 'vue'
 
-const router = useRouter();
-const searchQuery = ref('');
-const selectedFilter = ref(null);
+const router = useRouter()
+const searchQuery = ref('')
+const selectedFilter = ref(null)
 const filterOptions = ref([
   { label: 'ชั่วโมงเตรียมความพร้อม', value: 'option1' },
   { label: 'ชั่วโมงทักษะทางวิชาการ', value: 'option2' },
-]);
+])
 const goToCreateActivity = async () => {
-   await router.push({ name: 'CreateActivity' });
-};
+  await router.push('/ActivitiesManagement/CreateActivity')
+}
 </script>
 
 <style scoped>
@@ -47,7 +47,7 @@ h5 {
   border-radius: 20px;
   width: 200px;
   height: 50px;
-  margin-top: 20px ;
+  margin-top: 20px;
 }
 .searchBox {
   width: 400px;
