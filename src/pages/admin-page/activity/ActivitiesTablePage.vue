@@ -86,3 +86,4 @@ const currentBreadcrumb = computed(() => {
   font-weight: bold !important;
 }
 </style>
+
