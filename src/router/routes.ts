@@ -25,6 +25,14 @@ const routes: RouteRecordRaw[] = [
     meta: { roles: ['admin'] },
   },
   {
+    path: '/ActivitiesManagement/CreateActivity',
+    name: 'CreateActivity',
+    component: () => import('layouts/AdminLayout.vue'),
+    children: [
+      { path: '', component: () => import('pages/admin-page/activity/CreateActivity/CreateActivity.vue') },
+    ],
+  },
+  {
     path: '/StudentManagement',
     name: 'StudentManagement',
     children: [

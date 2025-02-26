@@ -18,6 +18,7 @@
     "@fontsource-variable/noto-serif-thai": "^5.1.1",
     "@quasar/extras": "^1.16.4",
     "axios": "^1.2.1",
+
     "pinia": "^3.0.1",
     "quasar": "^2.16.0",
     "vue": "^3.4.18",
