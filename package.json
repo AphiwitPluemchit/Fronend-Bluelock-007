@@ -15,10 +15,10 @@
     "postinstall": "quasar prepare"
   },
   "dependencies": {
+    "@fontsource-variable/noto-serif-thai": "^5.1.1",
     "@quasar/extras": "^1.16.4",
-    "ant-design-vue": "^4.2.6",
     "axios": "^1.2.1",
-    "luxon": "^3.5.0",
+
     "pinia": "^3.0.1",
     "quasar": "^2.16.0",
     "vue": "^3.4.18",
