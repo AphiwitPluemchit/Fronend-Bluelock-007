@@ -1,57 +1,89 @@
+<script setup lang="ts">
+import { computed, ref } from 'vue';
+import FilterSearchStudentList from './FilterSearchStudentList.vue';
+import TableStudentList from './TableStudentList.vue';
+import RegistrationDetails from './RegistrationDetails.vue';
+
+const tab = ref<string>('students');
+const search = ref<string>('');
+
+// ✅ คำนวณค่า Breadcrumb ตามแท็บที่เลือก
+const currentBreadcrumb = computed(() => {
+  if (tab.value === "activity") return "รายละเอียดกิจกรรม";
+  if (tab.value === "registration") return "รายละเอียดการลงทะเบียน";
+  if (tab.value === "students") return "รายชื่อนิสิต";
+  if (tab.value === "summary") return "สรุปผลกิจกรรม";
+  return "รายละเอียดกิจกรรม"; // ค่าเริ่มต้น
+});
+
+</script>
+
 <template>
   <q-page class="q-pa-md">
-    <div class="q-mb-md" style="display: flex; justify-content: space-between; align-items: center">
-      <h5>จัดการกิจกรรม</h5>
-      <q-btn class="btnAdd" icon="add" label="เพิ่มกิจกรรม" @click="goToCreateActivity" />
+    <q-breadcrumbs class="q-mb-md breadcrumbs-custom" separator="">
+      <q-breadcrumbs-el>
+        <img src="src/pages/admin-page/activity/icon pics/compose.png" alt="icon" width="18" height="18"
+          class="q-mr-sm" />
+        <span class="breadcrumb-text">จัดการกิจกรรม</span>
+      </q-breadcrumbs-el>
+
+      <q-breadcrumbs-separator>
+        <q-icon name="chevron_right" size="18px" color="black" />
+      </q-breadcrumbs-separator>
+
+      <!-- ✅ ทำให้ breadcrumb เปลี่ยนตาม tab ที่เลือก -->
+      <q-breadcrumbs-el :label="currentBreadcrumb" />
+    </q-breadcrumbs>
+
+
+
+    <!-- ✅ หัวข้อจะแสดงอยู่ข้างบนแทนที่จะอยู่ใน q-tab-panel -->
+    <div class="q-mb-md text-left text-h6 page-title">
+      <span v-if="tab === 'students'">รายชื่อนิสิต</span>
+      <span v-else-if="tab === 'activity'">รายละเอียดกิจกรรม</span>
+      <span v-else-if="tab === 'registration'">รายละเอียดการลงทะเบียน</span>
+      <span v-else-if="tab === 'summary'">สรุปผลกิจกรรม</span>
     </div>
-    <div class="q-mb-md" style="display: flex; justify-content: space-between; align-items: center">
-      <h6>กิจกรรมที่กำลังเปิดและปิดลงทะเบียนแล้ว</h6>
-      <q-input class="searchBox" filled v-model="searchQuery" />
-      <q-select
-        filled
-        v-model="selectedFilter"
-        :options="filterOptions"
-        label="ตัวกรอง"
-        class="filterDropdown"
-      />
-    </div>
+
+    <!-- ✅ Tabs -->
+    <q-tabs v-model="tab" align="right" class="q-mb-md">
+      <q-tab name="activity" label="รายละเอียดกิจกรรม" />
+      <q-tab name="registration" label="รายละเอียดการลงทะเบียน" />
+      <q-tab name="students" label="รายชื่อนิสิต" />
+      <q-tab name="summary" label="สรุปผลกิจกรรม" />
+    </q-tabs>
+
+    <q-tab-panels v-model="tab" animated>
+      <q-tab-panel name="activity">
+        <div class="text-center text-h6"></div>
+      </q-tab-panel>
+
+      <q-tab-panel name="registration">
+        <RegistrationDetails />
+      </q-tab-panel>
+
+      <q-tab-panel name="students">
+        <div class="text-h6 q-mb-md"></div>
+
+        <FilterSearchStudentList v-model:search="search" />
+        <TableStudentList :search="search" />
+      </q-tab-panel>
+
+      <q-tab-panel name="summary">
+        <div class="text-center text-h6"></div>
+      </q-tab-panel>
+    </q-tab-panels>
   </q-page>
 </template>
 
-<script setup lang="ts">
-import { useRouter } from 'vue-router'
-import { ref } from 'vue'
-
-const router = useRouter()
-const searchQuery = ref('')
-const selectedFilter = ref(null)
-const filterOptions = ref([
-  { label: 'ชั่วโมงเตรียมความพร้อม', value: 'option1' },
-  { label: 'ชั่วโมงทักษะทางวิชาการ', value: 'option2' },
-])
-const goToCreateActivity = async () => {
-  await router.push('/ActivitiesManagement/CreateActivity')
-}
-</script>
-
 <style scoped>
-h5 {
-  font-weight: semibold;
-  font-size: 30px;
-  font-family: 'Noto Serif Thai', serif;
+.breadcrumb-text {
+  color: black !important;
+  /* ✅ บังคับให้เป็นสีดำ */
 }
-.btnAdd {
-  font-weight: medium;
-  font-size: 20px;
-  font-family: 'Noto Serif Thai', serif;
-  border-radius: 20px;
-  width: 200px;
-  height: 50px;
-  margin-top: 20px;
-}
-.searchBox {
-  width: 400px;
-  height: 50px;
-  border-radius: 20px;
+
+.page-title {
+  font-weight: bold !important;
 }
 </style>
+
