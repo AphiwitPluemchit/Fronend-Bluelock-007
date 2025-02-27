@@ -55,6 +55,7 @@ const linksList = [
   { title: 'จัดการข้อมูลนิสิต', icon: 'people', link: '/StudentManagement' },
   { title: 'รายงานข้อมูล', icon: 'assessment', link: '/Report' },
   { title: 'ใบประกาศนียบัตร', icon: 'school', link: '/CertificateManagement' },
+  { title: 'ExComponent', icon: 'school', link: '/ExComponent' },
 ]
 
 async function logout() {
