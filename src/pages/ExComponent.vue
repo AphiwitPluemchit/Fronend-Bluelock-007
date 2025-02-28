@@ -1,8 +1,13 @@
 <template>
+  <div class="q-pa-md">
   <AppBreadcrumbs :breadcrumbs="breadcrumbs" />
   <div style="justify-self: end;">
-    <q-btn label="filter1" @click="showFilterDialog1 = true"><FilterDialog v-model="showFilterDialog1" :categories="filterCategories1" @apply="applyFilters" /></q-btn>
-    <q-btn label="filter2" @click="showFilterDialog2 = true"><FilterDialog v-model="showFilterDialog2" :categories="filterCategories2" @apply="applyFilters" /></q-btn>
+    <q-btn label="filter1" @click="showFilterDialog1 = true">
+      <FilterDialog v-model="showFilterDialog1" :categories="filterCategories1" @apply="applyFilters" />
+    </q-btn>
+    <q-btn label="filter2" @click="showFilterDialog2 = true">
+      <FilterDialog v-model="showFilterDialog2" :categories="filterCategories2" @apply="applyFilters"/>
+    </q-btn>
 
   </div>
 
@@ -14,7 +19,7 @@
     :pagination="pagination"
   />
 
-
+</div>
 </template>
 
 <script setup lang="ts">
@@ -34,13 +39,15 @@ const filterCategories2 = ref([
   'categoryActivity',
 ])
 
-const filters = ref<{ year: string[]; major: string[]; status: string[] }>({
+const filters = ref<{ year: string[]; major: string[]; statusStudent: string[]; statusActivity: string[]; categoryActivity: string[] }>({
   year: [],
   major: [],
-  status: [],
+  statusStudent: [],
+  statusActivity: [],
+  categoryActivity: [],
 })
 
-const applyFilters = (selectedFilters: { year: string[]; major: string[]; status: string[] }) => {
+const applyFilters = (selectedFilters: { year: string[]; major: string[]; statusStudent: string[]; statusActivity: string[]; categoryActivity: string[] }) => {
   filters.value = selectedFilters
   console.log('Filters Applied:', filters.value)
 }
@@ -68,11 +75,5 @@ const pagination = ref({
 })
 </script>
 <style scoped>
-.filter-dialog {
-  position: absolute;
-  top: 50px; /* ปรับให้ตำแหน่งของ dialog อยู่ใต้ปุ่ม */
-  left: 0;
-  right: 0;
-  z-index: 10; /* ทำให้ dialog อยู่ด้านหน้าของเนื้อหาทั้งหมด */
-}
+
 </style>
