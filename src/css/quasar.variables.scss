@@ -21,34 +21,35 @@ $sky: #D0E3FF;
 $dark: #1d1d1d;
 $dark-page: #121212;
 
-$positive: #21ba45;
-$negative: #c10015;
-$info: #31ccec;
-$warning: #f2c037;
+
 
 
 .btnconfirm {
     background-color: #3676F4 ;
     color: white ;
     height: 40px;
+    min-width: 70px;
     border-radius: 10px
   }
 .btnreject {
     background-color: #F03B2D ;
     color: white ;
-    height: 40px;
+    height: 40px; 
+    min-width: 70px;
     border-radius: 10px
   }
 .btnchange {
     background-color: #000000  ;
     color: white ;
     height: 40px;
+    min-width: 70px;
     border-radius: 10px
   }
 .btnsecces {
     background-color: #2FA54D ;
     color: white ;
     height: 40px;
+    min-width: 70px;
     border-radius: 10px
   }
 .q-chip {

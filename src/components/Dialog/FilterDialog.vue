@@ -51,8 +51,8 @@ const applyFilters = () => {
 </script>
 
 <template>
-  <q-menu :model-value="modelValue"  :transition-show="'jump-down'" :transition-hide="'jump-up'"   :offset="[0, 5]" >
-    <q-card class="q-pa-md" style="min-width: 450px; max-width: 450px; overflow: hidden;">
+  <q-menu :model-value="modelValue"  :transition-show="'jump-down'" :transition-hide="'jump-up'" :offset="[0, 5]" style="border-radius: 10px;  overflow: visible;">
+    <q-card class="q-pa-md" style="min-width: 450px; max-width: 450px; border-radius: 10px">
       <q-card-section>
         <!-- categoryActivity -->
         <div v-if="availableCategories.includes('categoryActivity')" class="q-mt-md">
