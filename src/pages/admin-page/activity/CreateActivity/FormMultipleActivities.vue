@@ -15,17 +15,22 @@
     <!-- Date -->
     <div class="field-container">
       <p class="label">วันที่จัดกิจกรรม :</p>
-      <q-input outlined v-model="activityDate" class="inputBox" mask="date">
+      <q-input outlined v-model="activityDateInput" class="inputBox" mask="date">
         <template v-slot:append>
           <q-icon name="event" class="cursor-pointer">
             <q-popup-proxy cover transition-show="scale" transition-hide="scale">
-              <q-date v-model="activityDate" mask="YYYY-MM-DD" today-btn :locale="thaiLocale" />
+              <q-date
+                v-model="internalDate"
+                mask="DD/MM/YYYY"
+                today-btn
+                @input="handleDateInput"
+              />
             </q-popup-proxy>
           </q-icon>
         </template>
       </q-input>
     </div>
-
+    
     <!-- Time -->
     <div class="time-container">
       <div class="field-container">
@@ -134,14 +139,11 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
+import { computed, ref, watch } from 'vue'
+import dayjs from 'dayjs';
+import buddhistEra from 'dayjs/plugin/buddhistEra';
 
-interface ThaiLocale {
-  days: string[]
-  daysShort: string[]
-  months: string[]
-  monthsShort: string[]
-}
+dayjs.extend(buddhistEra);
 
 interface ToggleOption {
   label: string
@@ -150,7 +152,7 @@ interface ToggleOption {
 
 // Previous refs remain the same
 const activityName = ref('')
-const activityDate = ref('')
+
 const startTime = ref('')
 const endTime = ref('')
 const totalHours = ref('')
@@ -182,40 +184,32 @@ const toggleYear = (value: string) => {
     years.value.push(value)
   }
 }
+const activityDateInput = ref<string | null>(null);
+const internalDate = ref<string | null>(null);
 
-// Thai locale remains the same
-const thaiLocale: ThaiLocale = {
-  days: ['อาทิตย์', 'จันทร์', 'อังคาร', 'พุธ', 'พฤหัสบดี', 'ศุกร์', 'เสาร์'],
-  daysShort: ['อา.', 'จ.', 'อ.', 'พ.', 'พฤ.', 'ศ.', 'ส.'],
-  months: [
-    'มกราคม',
-    'กุมภาพันธ์',
-    'มีนาคม',
-    'เมษายน',
-    'พฤษภาคม',
-    'มิถุนายน',
-    'กรกฎาคม',
-    'สิงหาคม',
-    'กันยายน',
-    'ตุลาคม',
-    'พฤศจิกายน',
-    'ธันวาคม',
-  ],
-  monthsShort: [
-    'ม.ค.',
-    'ก.พ.',
-    'มี.ค.',
-    'เม.ย.',
-    'พ.ค.',
-    'มิ.ย.',
-    'ก.ค.',
-    'ส.ค.',
-    'ก.ย.',
-    'ต.ค.',
-    'พ.ย.',
-    'ธ.ค.',
-  ],
-}
+const convertToBuddhist = (date: string | null) => {
+  if (!date) return null;
+  return dayjs(date).locale('th').format('BBBB-MM-DD');
+};
+
+const convertToGregorian = (date: string | null) => {
+  if (!date) return null;
+  return dayjs(date, 'BBBB-MM-DD').locale('th').format('YYYY-MM-DD');
+};
+
+const handleDateInput = (date: string | null) => {
+  internalDate.value = date;
+  activityDateInput.value = convertToBuddhist(date);
+};
+
+// Update internalDate when activityDateInput changes
+const buddhistDate = computed(() => {
+    return convertToGregorian(activityDateInput.value);
+});
+
+watch(buddhistDate, (newValue) => {
+    internalDate.value = newValue
+})
 
 const departmentOptions: ToggleOption[] = [
   { label: 'CS', value: 'cs' },
