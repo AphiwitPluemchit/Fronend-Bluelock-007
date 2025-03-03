@@ -104,13 +104,13 @@ const getFormComponent = computed(() => {
   
   display: flex;
   flex-direction: column;
-  align-items: flex-start; /* จัดชิดซ้าย */
-  width: 100%; /* ให้ dropdown กว้างเท่ากับรูปภาพ */
-  flex: 1; /* ให้รูปภาพเล็กลง */
+  align-items: flex-start; 
+  width: 100%;
+  flex: 1; 
 }
 
 .form-section {
-  min-width: 600px; /* หรือปรับตามที่ต้องการ */
+  min-width: 600px; 
   flex-grow: 1;
   display: flex;
   flex-direction: column;

@@ -1,24 +1,24 @@
 <template>
-  <q-page class="q-pa-md">
+  <q-page>
     <!-- Status -->
-    <div class="status-container q-mb-md">
+    <div class="container q-mb-md">
       <p class="label">สถานะ:</p>
       <q-btn label="กำลังวางแผน" class="status-btn" />
     </div>
 
     <!-- Activity Name -->
-    <div class="field-container">
+    <div class="container q-mb-md">
       <p class="label">ชื่อกิจกรรม :</p>
       <q-input outlined v-model="activityName" class="inputBox" />
     </div>
 
     <!-- Date -->
-    <div class="field-container">
+    <div class="container q-mb-md">
       <p class="label">วันที่จัดกิจกรรม :</p>
       <q-input outlined v-model="activityDate" class="inputBox" readonly>
         <template v-slot:prepend>
           <q-icon name="event" class="cursor-pointer">
-            <q-popup-proxy ref="datePopupRef" cover transition-show="scale" transition-hide="scale">
+            <q-menu  style="overflow: visible">
               <q-date
                 v-model="activityDateInternal"
                 mask="YYYY-MM-DD"
@@ -31,17 +31,17 @@
                 class="my-custom-calendar"
                 @update:model-value="closeCalendar"
               />
-            </q-popup-proxy>
+            </q-menu>
           </q-icon>
         </template>
       </q-input>
     </div>
 
     <!-- Time -->
-    <div class="time-container">
-      <div class="field-container">
+    <div class="container q-mb-md">
+      <!-- Start Time -->
+      <div class="container q-mb-md">
         <p class="label">เวลาที่จัดกิจกรรม:</p>
-        <!-- Start Time -->
         <q-input
           outlined
           v-model="selectedTime"
@@ -51,109 +51,100 @@
         >
           <template v-slot:prepend>
             <q-icon name="access_time" class="cursor-pointer">
-              <q-popup-proxy ref="timePopupRef" cover>
-                <q-card class="q-pa-md time-picker-card">
-                  <div class="time-container">
-                    <!-- ส่วนเลือกชั่วโมง -->
-                    <div class="time-column">
-                      <q-btn
-                        flat
-                        dense
-                        icon="arrow_drop_up"
-                        @click="adjustHour('start', 'increase')"
-                      />
-                      <div class="time-display">{{ formatHour(hour) }}</div>
-                      <q-btn
-                        flat
-                        dense
-                        icon="arrow_drop_down"
-                        @click="adjustHour('start', 'decrease')"
-                      />
-                    </div>
-                    <div class="separator">:</div>
-                    <!-- ส่วนเลือกนาที -->
-                    <div class="time-column">
-                      <q-btn
-                        flat
-                        dense
-                        icon="arrow_drop_up"
-                        @click="adjustMinute('start', 'increase')"
-                      />
-                      <div class="time-display">{{ formatMinute(minute) }}</div>
-                      <q-btn
-                        flat
-                        dense
-                        icon="arrow_drop_down"
-                        @click="adjustMinute('start', 'decrease')"
-                      />
-                    </div>
+              <q-menu class="q-pa-md time-picker-card" style="overflow: visible">
+                <div class="time-container">
+                  <!-- ส่วนเลือกชั่วโมง -->
+                  <div class="time-column">
+                    <q-btn
+                      flat
+                      dense
+                      icon="arrow_drop_up"
+                      @click="adjustHour('start', 'increase')"
+                    />
+                    <div class="time-display">{{ formatHour(hour) }}</div>
+                    <q-btn
+                      flat
+                      dense
+                      icon="arrow_drop_down"
+                      @click="adjustHour('start', 'decrease')"
+                    />
                   </div>
-                </q-card>
-              </q-popup-proxy>
+                  <div class="separator">:</div>
+                  <!-- ส่วนเลือกนาที -->
+                  <div class="time-column">
+                    <q-btn
+                      flat
+                      dense
+                      icon="arrow_drop_up"
+                      @click="adjustMinute('start', 'increase')"
+                    />
+                    <div class="time-display">{{ formatMinute(minute) }}</div>
+                    <q-btn
+                      flat
+                      dense
+                      icon="arrow_drop_down"
+                      @click="adjustMinute('start', 'decrease')"
+                    />
+                  </div>
+                </div>
+              </q-menu>
             </q-icon>
           </template>
         </q-input>
       </div>
 
       <!-- End Time -->
-      <div class="field-container">
-        <p class="label">ถึง</p>
+      <p class="label">ถึง</p>
+      <div class="q-mb-md">
         <q-input outlined v-model="endTime" class="inputBox" readonly>
           <template v-slot:prepend>
             <q-icon name="access_time" class="cursor-pointer">
-              <q-popup-proxy cover>
-                <q-card class="q-pa-md time-picker-card">
-                  <div class="time-container">
-                    <!-- ส่วนเลือกชั่วโมง -->
-                    <div class="time-column">
-                      <q-btn
-                        flat
-                        dense
-                        icon="arrow_drop_up"
-                        @click="adjustHour('end', 'increase')"
-                      />
-                      <div class="time-display">{{ formatHour(endHour) }}</div>
-                      <q-btn
-                        flat
-                        dense
-                        icon="arrow_drop_down"
-                        @click="adjustHour('end', 'decrease')"
-                      />
-                    </div>
-                    <div class="separator">:</div>
-                    <!-- ส่วนเลือกนาที -->
-                    <div class="time-column">
-                      <q-btn
-                        flat
-                        dense
-                        icon="arrow_drop_up"
-                        @click="adjustMinute('end', 'increase')"
-                      />
-                      <div class="time-display">{{ formatMinute(endMinute) }}</div>
-                      <q-btn
-                        flat
-                        dense
-                        icon="arrow_drop_down"
-                        @click="adjustMinute('end', 'decrease')"
-                      />
-                    </div>
+              <q-menu class="q-pa-md time-picker-card" style="overflow: visible">
+                <div class="time-container">
+                  <!-- ส่วนเลือกชั่วโมง -->
+                  <div class="time-column">
+                    <q-btn flat dense icon="arrow_drop_up" @click="adjustHour('end', 'increase')" />
+                    <div class="time-display">{{ formatHour(endHour) }}</div>
+                    <q-btn
+                      flat
+                      dense
+                      icon="arrow_drop_down"
+                      @click="adjustHour('end', 'decrease')"
+                    />
                   </div>
-                  
-                </q-card>
-              </q-popup-proxy>
+                  <div class="separator">:</div>
+                  <!-- ส่วนเลือกนาที -->
+                  <div class="time-column">
+                    <q-btn
+                      flat
+                      dense
+                      icon="arrow_drop_up"
+                      @click="adjustMinute('end', 'increase')"
+                    />
+                    <div class="time-display">{{ formatMinute(endMinute) }}</div>
+                    <q-btn
+                      flat
+                      dense
+                      icon="arrow_drop_down"
+                      @click="adjustMinute('end', 'decrease')"
+                    />
+                  </div>
+                </div>
+              </q-menu>
             </q-icon>
           </template>
         </q-input>
       </div>
     </div>
+
     <!-- Room -->
-    <div class="field-container" style="width: 404px; display: flex">
+    <div class="container q-mb-md">
       <p class="label">ชื่อห้องที่จัดกิจกรรม :</p>
       <q-input outlined v-model="roomName" class="inputBox" />
     </div>
 
     <!-- Hours & Seats -->
-    <div class="field-container">
+    <div class="container q-mb-md">
       <p class="label">จำนวนชั่วโมง :</p>
       <q-input outlined v-model="totalHours" class="inputBox" />
       <p class="label">จำนวนที่นั่ง :</p>
@@ -161,7 +152,7 @@
     </div>
 
     <!-- Activity Type -->
-    <div class="field-container q-mb-md">
+    <div class="container q-mb-md">
       <p class="label">ประเภทกิจกรรม :</p>
       <q-btn
         :class="{ 'active-btn': activityType === 'prep' }"
@@ -178,7 +169,7 @@
     </div>
 
     <!-- Department -->
-    <div class="field-container q-mb-md">
+    <div class="container q-mb-md">
       <p class="label">สาขา :</p>
       <q-btn
         v-for="option in departmentOptions"
@@ -191,7 +182,7 @@
     </div>
 
     <!-- Year -->
-    <div class="field-container q-mb-md">
+    <div class="container q-mb-md">
       <p class="label">ชั้นปี :</p>
       <q-btn
         v-for="option in yearOptions"
@@ -204,19 +195,19 @@
     </div>
 
     <!-- Lecturer -->
-    <div class="field-container">
+    <div class="container q-mb-md">
       <p class="label">วิทยากร :</p>
       <q-input outlined v-model="lecturer" class="inputBox" />
     </div>
 
     <!-- Food Menu -->
-    <div class="field-container">
+    <div class="container q-mb-md">
       <p class="label">รายการอาหาร :</p>
       <q-input outlined v-model="foodMenu" class="inputBox" />
     </div>
 
     <!-- Detail Activity -->
-    <div class="field-container">
+    <div class="container q-mb-md">
       <p class="label" style="align-self: flex-start">รายละเอียดอื่นๆ :</p>
       <q-input outlined v-model="detailActivity" class="inputBox" type="textarea" />
     </div>
@@ -267,7 +258,6 @@ const activityDateInternal = ref('')
 
 const endTime = ref<string>('00:00')
 const selectedTime = ref<string>('00:00')
-const timePopupRef = ref<QPopupProxy | null>(null)
 const hour = ref<number>(0)
 const minute = ref<number>(0)
 const endHour = ref<number>(0)
@@ -406,41 +396,24 @@ const yearOptions: ToggleOption[] = [
 </script>
 
 <style>
-.field-container {
-  display: flex;
-  align-items: center;
-  gap: 20px;
-  margin-bottom: 30px;
-}
-
 .label {
   font-family: 'Noto Serif Thai', serif;
   font-size: 20px;
-  margin: 0;
-  min-width: 180px;
+  text-align: right;
+  white-space: nowrap;
 }
-
-.time-container {
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-}
-
 .inputBox {
-  flex-grow: 1;
   border: 1px solid black;
   border-radius: 5px;
   background-color: white;
 }
-
-.cursor-pointer {
-  cursor: pointer;
-}
-
-.status-container {
+.container {
   display: flex;
   align-items: center;
   gap: 10px;
+}
+.cursor-pointer {
+  cursor: pointer;
 }
 
 .status-btn {
@@ -473,15 +446,9 @@ const yearOptions: ToggleOption[] = [
   background-color: #d0e4ff !important;
 }
 .time-picker-card {
-  width: 150px;
-  height: 150px;
+  width: 140px;
+  height: 120px;
   text-align: center;
-}
-
-.time-controls {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
 }
 
 .time-display {
@@ -489,13 +456,10 @@ const yearOptions: ToggleOption[] = [
   font-weight: semibold;
   color: black;
 }
-.time-container {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
+
 .separator {
   font-size: 20px;
   font-weight: semibold;
+  margin: 0 5px;
 }
 </style>
