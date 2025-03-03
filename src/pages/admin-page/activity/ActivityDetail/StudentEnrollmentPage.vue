@@ -3,11 +3,21 @@ import { computed, ref } from 'vue';
 import FilterSearchStudentList from './FilterSearchStudentList.vue';
 import TableStudentList from './TableStudentList.vue';
 import RegistrationDetails from './RegistrationDetails.vue';
+import { useRouter } from 'vue-router';
+import SummaryResult from './SummaryResult.vue';
+
+// import { route } from 'quasar/wrappers';
 
 const tab = ref<string>('students');
 const search = ref<string>('');
 
-// ✅ คำนวณค่า Breadcrumb ตามแท็บที่เลือก
+const router = useRouter()
+
+const goToActivitiesManagement = async () => {
+  await router.push('/ActivitiesManagement')
+}
+
+// Breadcrumb ตามแท็บที่เลือก
 const currentBreadcrumb = computed(() => {
   if (tab.value === "activity") return "รายละเอียดกิจกรรม";
   if (tab.value === "registration") return "รายละเอียดการลงทะเบียน";
@@ -15,6 +25,22 @@ const currentBreadcrumb = computed(() => {
   if (tab.value === "summary") return "สรุปผลกิจกรรม";
   return "รายละเอียดกิจกรรม"; // ค่าเริ่มต้น
 });
+
+// กำหนด breadcrumb ตาม route ปัจจุบัน
+// const currentBreadcrumb = computed(() => {
+//   switch (route.name) {
+//     case "activity":
+//       return "รายละเอียดกิจกรรม";
+//     case "registration":
+//       return "รายละเอียดการลงทะเบียน";
+//     case "students":
+//       return "รายชื่อนิสิต";
+//     case "summary":
+//       return "สรุปผลกิจกรรม";
+//     default:
+//       return "จัดการกิจกรรม";
+//   }
+// });
 
 </script>
 
@@ -24,20 +50,22 @@ const currentBreadcrumb = computed(() => {
       <q-breadcrumbs-el>
         <img src="src/pages/admin-page/activity/icon pics/compose.png" alt="icon" width="18" height="18"
           class="q-mr-sm" />
-        <span class="breadcrumb-text">จัดการกิจกรรม</span>
+        <a @click="goToActivitiesManagement" style="cursor: pointer; text-decoration: none; color: black">
+          จัดการกิจกรรม
+        </a>
       </q-breadcrumbs-el>
 
       <q-breadcrumbs-separator>
         <q-icon name="chevron_right" size="18px" color="black" />
       </q-breadcrumbs-separator>
 
-      <!-- ✅ ทำให้ breadcrumb เปลี่ยนตาม tab ที่เลือก -->
-      <q-breadcrumbs-el :label="currentBreadcrumb" />
+      <!-- ทำให้ breadcrumb เปลี่ยนตาม tab ที่เลือก -->
+      <q-breadcrumbs-el :label="currentBreadcrumb" :class="{ 'active-breadcrumb': true }" />
     </q-breadcrumbs>
 
 
 
-    <!-- ✅ หัวข้อจะแสดงอยู่ข้างบนแทนที่จะอยู่ใน q-tab-panel -->
+    <!-- หัวข้อแสดงอยู่ข้างบน-->
     <div class="q-mb-md text-left text-h6 page-title">
       <span v-if="tab === 'students'">รายชื่อนิสิต</span>
       <span v-else-if="tab === 'activity'">รายละเอียดกิจกรรม</span>
@@ -45,7 +73,7 @@ const currentBreadcrumb = computed(() => {
       <span v-else-if="tab === 'summary'">สรุปผลกิจกรรม</span>
     </div>
 
-    <!-- ✅ Tabs -->
+    <!-- Tabs -->
     <q-tabs v-model="tab" align="right" class="q-mb-md">
       <q-tab name="activity" label="รายละเอียดกิจกรรม" />
       <q-tab name="registration" label="รายละเอียดการลงทะเบียน" />
@@ -70,7 +98,7 @@ const currentBreadcrumb = computed(() => {
       </q-tab-panel>
 
       <q-tab-panel name="summary">
-        <div class="text-center text-h6"></div>
+        <SummaryResult />
       </q-tab-panel>
     </q-tab-panels>
   </q-page>
@@ -79,11 +107,14 @@ const currentBreadcrumb = computed(() => {
 <style scoped>
 .breadcrumb-text {
   color: black !important;
-  /* ✅ บังคับให้เป็นสีดำ */
 }
 
 .page-title {
   font-weight: bold !important;
 }
-</style>
 
+.active-breadcrumb {
+  text-decoration: underline;
+  color: black;
+}
+</style>

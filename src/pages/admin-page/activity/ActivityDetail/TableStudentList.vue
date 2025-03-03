@@ -1,9 +1,7 @@
 <script setup lang="ts">
-import { ref, computed } from 'vue';
+import { ref } from 'vue';
 import StudentStatusBadge from './StudentStatusBadge.vue';
 import RemoveStudent from './RemoveStudent.vue';
-
-const props = defineProps<{ search: string }>();
 
 const students = ref([
     { id: 1, studentId: "65160305", name: "ศิวัช รัตนวงศ์", major: "CS", checkIn: "-", checkOut: "-", status: "ชั่วโมงมาก" },
@@ -28,20 +26,13 @@ const columns = [
     { name: "actions", label: "", field: "actions", align: "center" as const }
 ];
 
-// ✅ ฟิลเตอร์ค้นหา
-const filteredStudents = computed(() => {
-    if (!props.search) return students.value;
-    return students.value.filter(student =>
-        student.name.includes(props.search) || student.studentId.includes(props.search)
-    );
-});
-
 </script>
 
 <template>
-    <q-table flat bordered :rows="filteredStudents" :columns="columns" row-key="id" dense>
+    <q-table flat bordered :rows="students" :columns="columns" row-key="id" dense>
+        <!-- ปรับขนาดตัวอักษรของลำดับ -->
         <template v-slot:body-cell-index="props">
-            <q-td :props="props" class="text-center">
+            <q-td :props="props" class="text-center table-text bold-text">
                 {{ props.rowIndex + 1 }}
             </q-td>
         </template>
@@ -57,6 +48,12 @@ const filteredStudents = computed(() => {
                 <RemoveStudent :id="props.row.id" />
             </q-td>
         </template>
-
     </q-table>
 </template>
+
+<style scoped>
+/* ปรับขนาดตัวอักษรของตารางทั้งหมด */
+:deep(.q-table) {
+    font-size: 16px;
+}
+</style>
