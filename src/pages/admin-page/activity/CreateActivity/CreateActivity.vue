@@ -101,7 +101,6 @@ const getFormComponent = computed(() => {
 }
 
 .image-section {
-  
   display: flex;
   flex-direction: column;
   align-items: flex-start; 

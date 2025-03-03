@@ -1,24 +1,24 @@
 <template>
   <q-page>
     <!-- Status -->
-    <div class="container q-mb-md">
-      <p class="label">สถานะ:</p>
+    <div class="input-group ">
+      <p class="label label_minWidth">สถานะ:</p>
       <q-btn label="กำลังวางแผน" class="status-btn" />
     </div>
 
     <!-- Activity Name -->
-    <div class="container q-mb-md">
-      <p class="label">ชื่อกิจกรรม :</p>
-      <q-input outlined v-model="activityName" class="inputBox" />
+    <div class="input-group">
+      <p class="label label_minWidth">ชื่อกิจกรรม :</p>
+      <q-input outlined v-model="activityName" style="width: 600px" />
     </div>
 
     <!-- Date -->
-    <div class="container q-mb-md">
-      <p class="label">วันที่จัดกิจกรรม :</p>
-      <q-input outlined v-model="activityDate" class="inputBox" readonly>
+    <div class="input-group">
+      <p class="label label_minWidth">วันที่จัดกิจกรรม :</p>
+      <q-input outlined v-model="activityDate" style="width: 600px" readonly>
         <template v-slot:prepend>
-          <q-icon name="event" class="cursor-pointer">
-            <q-menu  style="overflow: visible">
+          <q-icon name="event">
+            <q-menu style="overflow: visible">
               <q-date
                 v-model="activityDateInternal"
                 mask="YYYY-MM-DD"
@@ -38,17 +38,11 @@
     </div>
 
     <!-- Time -->
-    <div class="container q-mb-md">
+    <div class="input-group">
       <!-- Start Time -->
-      <div class="container q-mb-md">
-        <p class="label">เวลาที่จัดกิจกรรม:</p>
-        <q-input
-          outlined
-          v-model="selectedTime"
-          placeholder="Select a time"
-          class="inputBox"
-          readonly
-        >
+      <p class="label label_minWidth">เวลาที่จัดกิจกรรม:</p>
+      <div class="input-group">
+        <q-input outlined v-model="selectedTime" style="width: 200px" readonly>
           <template v-slot:prepend>
             <q-icon name="access_time" class="cursor-pointer">
               <q-menu class="q-pa-md time-picker-card" style="overflow: visible">
@@ -95,11 +89,11 @@
 
       <!-- End Time -->
       <p class="label">ถึง</p>
-      <div class="q-mb-md">
-        <q-input outlined v-model="endTime" class="inputBox" readonly>
+      <div>
+        <q-input outlined v-model="endTime" style="width: 200px" readonly>
           <template v-slot:prepend>
             <q-icon name="access_time" class="cursor-pointer">
-              <q-menu class="q-pa-md time-picker-card" style="overflow: visible">
+              <q-menu class="time-picker-card" style="overflow: visible">
                 <div class="time-container">
                   <!-- ส่วนเลือกชั่วโมง -->
                   <div class="time-column">
@@ -138,22 +132,36 @@
     </div>
 
     <!-- Room -->
-    <div class="container q-mb-md">
-      <p class="label">ชื่อห้องที่จัดกิจกรรม :</p>
-      <q-input outlined v-model="roomName" class="inputBox" />
+    <div class="input-group">
+      <p class="label label_minWidth">ชื่อห้องที่จัดกิจกรรม :</p>
+      <q-input outlined v-model="roomName" style="width: 600px" />
     </div>
 
     <!-- Hours & Seats -->
-    <div class="container q-mb-md">
-      <p class="label">จำนวนชั่วโมง :</p>
-      <q-input outlined v-model="totalHours" class="inputBox" />
+    <div class="input-group">
+      <p class="label label_minWidth">จำนวนชั่วโมง :</p>
+      <q-input
+        outlined
+        style="width: 200px"
+        v-model="totalHours"
+        type="number"
+        @keypress="isNumber($event)"
+        @blur="validatePositive('totalHours')"
+      />
       <p class="label">จำนวนที่นั่ง :</p>
-      <q-input outlined v-model="seats" class="inputBox" />
+      <q-input
+        outlined
+        style="width: 240px"
+        v-model="seats"
+        type="number"
+        @keypress="isNumber($event)"
+        @blur="validatePositive('seats')"
+      />
     </div>
 
     <!-- Activity Type -->
-    <div class="container q-mb-md">
-      <p class="label">ประเภทกิจกรรม :</p>
+    <div class="input-group">
+      <p class="label label_minWidth">ประเภทกิจกรรม :</p>
       <q-btn
         :class="{ 'active-btn': activityType === 'prep' }"
         @click="activityType = 'prep'"
@@ -169,8 +177,8 @@
     </div>
 
     <!-- Department -->
-    <div class="container q-mb-md">
-      <p class="label">สาขา :</p>
+    <div class="input-group">
+      <p class="label label_minWidth">สาขา :</p>
       <q-btn
         v-for="option in departmentOptions"
         :key="option.value"
@@ -182,8 +190,8 @@
     </div>
 
     <!-- Year -->
-    <div class="container q-mb-md">
-      <p class="label">ชั้นปี :</p>
+    <div class="input-group">
+      <p class="label label_minWidth">ชั้นปี :</p>
       <q-btn
         v-for="option in yearOptions"
         :key="option.value"
@@ -195,21 +203,21 @@
     </div>
 
     <!-- Lecturer -->
-    <div class="container q-mb-md">
-      <p class="label">วิทยากร :</p>
-      <q-input outlined v-model="lecturer" class="inputBox" />
+    <div class="input-group">
+      <p class="label label_minWidth">วิทยากร :</p>
+      <q-input outlined v-model="lecturer" style="width: 600px" />
     </div>
 
     <!-- Food Menu -->
-    <div class="container q-mb-md">
-      <p class="label">รายการอาหาร :</p>
-      <q-input outlined v-model="foodMenu" class="inputBox" />
+    <div class="input-group">
+      <p class="label label_minWidth">รายการอาหาร :</p>
+      <q-input outlined v-model="foodMenu" style="width: 600px" />
     </div>
 
     <!-- Detail Activity -->
-    <div class="container q-mb-md">
-      <p class="label" style="align-self: flex-start">รายละเอียดอื่นๆ :</p>
-      <q-input outlined v-model="detailActivity" class="inputBox" type="textarea" />
+    <div class="input-group">
+      <p style="align-self: flex-start" class="label label_minWidth">รายละเอียดอื่นๆ :</p>
+      <q-input outlined v-model="detailActivity" style="width: 600px" />
     </div>
   </q-page>
 </template>
@@ -393,29 +401,49 @@ const yearOptions: ToggleOption[] = [
   { label: '3', value: '3' },
   { label: '4', value: '4' },
 ]
+const isNumber = (event: KeyboardEvent) => {
+  const charCode = event.which ? event.which : event.keyCode
+
+  if (charCode < 48 || charCode > 57) {
+    event.preventDefault()
+  }
+}
+const validatePositive = (field: 'totalHours' | 'seats') => {
+  if (eval(field).value < 0 || eval(field).value === '') {
+    eval(field).value = 0
+  }
+}
 </script>
 
-<style>
-.label {
-  font-family: 'Noto Serif Thai', serif;
-  font-size: 20px;
-  text-align: right;
-  white-space: nowrap;
-}
-.inputBox {
-  border: 1px solid black;
-  border-radius: 5px;
+<style scoped>
+::v-deep(.q-field__control) {
+  height: 40px;
   background-color: white;
+  align-items: center;
 }
-.container {
+::v-deep(.q-icon) {
   display: flex;
   align-items: center;
-  gap: 10px;
+  justify-content: center;
+  height: 100%;
 }
-.cursor-pointer {
-  cursor: pointer;
+.input-group {
+  display: flex;
+  gap: 25px;
+  margin-bottom: 20px;
+}
+.label {
+  font-size: 20px;
+  font-weight: normal;
+  text-align: right;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
 }
 
+.label_minWidth {
+  min-width: 200px;
+}
 .status-btn {
   color: #ff6f00;
   background-color: #ffe7ba;
@@ -425,18 +453,23 @@ const yearOptions: ToggleOption[] = [
   width: 200px;
   font-size: 20px;
 }
-
-.activityType-btn,
+.activityType-btn {
+  width: 200px;
+  height: 40px;
+  border-radius: 50px;
+  box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.2);
+  background-color: #ffffff;
+  margin-right: 10px;
+}
 .department-btn,
 .year-btn {
   width: 80px;
   height: 40px;
   border-radius: 50px;
   box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.2);
-  margin-right: 10px;
   background-color: #ffffff;
+  margin-right: 10px;
 }
-
 .activityType-btn:last-child,
 .department-btn:last-child,
 .year-btn:last-child {
@@ -446,20 +479,31 @@ const yearOptions: ToggleOption[] = [
   background-color: #d0e4ff !important;
 }
 .time-picker-card {
-  width: 140px;
-  height: 120px;
-  text-align: center;
+  width: 300px;
+  height: 200px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  border-radius: 10px;
+  background-color: white;
+  box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
 }
 
-.time-display {
-  font-size: 20px;
-  font-weight: semibold;
-  color: black;
+.time-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+}
+
+.time-column {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 
 .separator {
-  font-size: 20px;
-  font-weight: semibold;
-  margin: 0 5px;
+  font-weight: bold;
 }
 </style>

@@ -1,21 +1,21 @@
 <template>
   <q-page>
     <!-- Status -->
-    <div class="container q-mb-md">
-      <p class="label">สถานะ:</p>
+    <div class="input-group">
+      <p class="label label_minWidth">สถานะ:</p>
       <q-btn label="กำลังวางแผน" class="status-btn" />
     </div>
 
     <!-- Activity Name -->
-    <div class="container q-mb-md">
-      <p class="label">ชื่อกิจกรรม :</p>
-      <q-input outlined v-model="activityName" class="inputBox" />
+    <div class="input-group">
+      <p class="label label_minWidth">ชื่อกิจกรรม :</p>
+      <q-input outlined v-model="activityName" style="width: 600px" />
     </div>
 
     <!-- Date -->
-    <div class="container q-mb-md">
-      <p class="label">วันที่จัดกิจกรรม :</p>
-      <q-input outlined v-model="activityDateRange" class="inputBox" readonly>
+    <div class="input-group">
+      <p class="label label_minWidth">วันที่จัดกิจกรรม :</p>
+      <q-input outlined v-model="activityDateRange" style="width: 600px" readonly>
         <template v-slot:prepend>
           <q-icon name="event" class="cursor-pointer">
             <q-menu style="overflow: visible" ref="datePopupRef">
@@ -39,139 +39,98 @@
     </div>
 
     <!-- Time -->
-    <div class="container q-mb-md">
-      <div class="label-container">
-    <p class="label">เวลาที่จัดกิจกรรม:</p>
-  </div>
-  <div class="time-selectors-container" style="width: 100%;">
-    <div v-for="(day, index) in selectedDays" :key="day.date" class="day-time-selector q-my-sm">
-      <div class="day-label q-mb-sm">{{ day.formattedDate }}</div>
-      
-      <!-- รวมเวลาเริ่มและเวลาสิ้นสุดให้อยู่ในแถวเดียวกัน -->
-      <div class="time-row-container">
-        <!-- Start Time -->
-        <div class="time-unit">
-          <q-input
-            outlined
-            v-model="day.startTime"
-            class="inputBox"
-            readonly
-          >
-            <template v-slot:prepend>
-              <q-icon name="access_time" class="cursor-pointer">
-                <q-menu class="q-pa-md time-picker-card" style="overflow: visible">
-                  <div class="time-container">
-                    <div class="time-column">
-                      <q-btn
-                        flat
-                        dense
-                        icon="arrow_drop_up"
-                        @click="adjustHour(index, 'start', 'increase')"
-                      />
-                      <div class="time-display">{{ formatHour(day.startHour) }}</div>
-                      <q-btn
-                        flat
-                        dense
-                        icon="arrow_drop_down"
-                        @click="adjustHour(index, 'start', 'decrease')"
-                      />
-                    </div>
-                    <div class="separator">:</div>
-                    <div class="time-column">
-                      <q-btn
-                        flat
-                        dense
-                        icon="arrow_drop_up"
-                        @click="adjustMinute(index, 'start', 'increase')"
-                      />
-                      <div class="time-display">{{ formatMinute(day.startMinute) }}</div>
-                      <q-btn
-                        flat
-                        dense
-                        icon="arrow_drop_down"
-                        @click="adjustMinute(index, 'start', 'decrease')"
-                      />
-                    </div>
-                  </div>
-                </q-menu>
-              </q-icon>
-            </template>
-          </q-input>
-        </div>
+    <div class="input-group">
+  <p class="label label_minWidth" style="align-self: flex-start">เวลาที่จัดกิจกรรม:</p>
+ 
+  <div class="day-time-container">
+    <q-checkbox v-model="sameTimeForAll" label="เวลาเดิมทุกวัน" @update:model-value="applySameTime" />
 
-        <!-- End Time -->
-        <div class="time-unit">
-          <p style="font-family: 'Noto Serif Thai', serif; font-size: 20px; text-align: right; white-space: nowrap;">ถึง</p> 
-          <q-input
-            outlined
-            v-model="day.endTime"
-            class="inputBox"
-            readonly
-          >
-            <template v-slot:prepend>
-              <q-icon name="access_time" class="cursor-pointer">
-                <q-menu class="q-pa-md time-picker-card" style="overflow: visible">
-                  <div class="time-container">
-                    <div class="time-column">
-                      <q-btn
-                        flat
-                        dense
-                        icon="arrow_drop_up"
-                        @click="adjustHour(index, 'end', 'increase')"
-                      />
-                      <div class="time-display">{{ formatHour(day.endHour) }}</div>
-                      <q-btn
-                        flat
-                        dense
-                        icon="arrow_drop_down"
-                        @click="adjustHour(index, 'end', 'decrease')"
-                      />
-                    </div>
-                    <div class="separator">:</div>
-                    <div class="time-column">
-                      <q-btn
-                        flat
-                        dense
-                        icon="arrow_drop_up"
-                        @click="adjustMinute(index, 'end', 'increase')"
-                      />
-                      <div class="time-display">{{ formatMinute(day.endMinute) }}</div>
-                      <q-btn
-                        flat
-                        dense
-                        icon="arrow_drop_down"
-                        @click="adjustMinute(index, 'end', 'decrease')"
-                      />
-                    </div>
-                  </div>
-                </q-menu>
-              </q-icon>
-            </template>
-          </q-input>
-        </div>
-      </div>
+    <div v-for="(day, index) in selectedDays" :key="day.date" class="day-block">
+      <div class="day-label">{{ day.formattedDate }}</div>
       
+      <div class="time-row">
+        <q-input outlined v-model="day.startTime" style="width: 200px" readonly @update:model-value="updateTime(index, 'start')">
+          <template v-slot:prepend>
+            <q-icon name="access_time" class="cursor-pointer">
+              <q-menu class="q-pa-md time-picker-card" style="overflow: visible">
+                <div class="time-container">
+                  <div class="time-column">
+                    <q-btn flat dense icon="arrow_drop_up" @click="adjustHour(index, 'start', 'increase')" />
+                    <div class="time-display">{{ formatHour(day.startHour) }}</div>
+                    <q-btn flat dense icon="arrow_drop_down" @click="adjustHour(index, 'start', 'decrease')" />
+                  </div>
+                  <div class="separator">:</div>
+                  <div class="time-column">
+                    <q-btn flat dense icon="arrow_drop_up" @click="adjustMinute(index, 'start', 'increase')" />
+                    <div class="time-display">{{ formatMinute(day.startMinute) }}</div>
+                    <q-btn flat dense icon="arrow_drop_down" @click="adjustMinute(index, 'start', 'decrease')" />
+                  </div>
+                </div>
+              </q-menu>
+            </q-icon>
+          </template>
+        </q-input>
+        
+        <p class="label time-separator">ถึง</p>
+
+        <q-input outlined v-model="day.endTime" style="width: 200px" readonly @update:model-value="updateTime(index, 'end')">
+          <template v-slot:prepend>
+            <q-icon name="access_time" class="cursor-pointer">
+              <q-menu class="q-pa-md time-picker-card" style="overflow: visible">
+                <div class="time-container">
+                  <div class="time-column">
+                    <q-btn flat dense icon="arrow_drop_up" @click="adjustHour(index, 'end', 'increase')" />
+                    <div class="time-display">{{ formatHour(day.endHour) }}</div>
+                    <q-btn flat dense icon="arrow_drop_down" @click="adjustHour(index, 'end', 'decrease')" />
+                  </div>
+                  <div class="separator">:</div>
+                  <div class="time-column">
+                    <q-btn flat dense icon="arrow_drop_up" @click="adjustMinute(index, 'end', 'increase')" />
+                    <div class="time-display">{{ formatMinute(day.endMinute) }}</div>
+                    <q-btn flat dense icon="arrow_drop_down" @click="adjustMinute(index, 'end', 'decrease')" />
+                  </div>
+                </div>
+              </q-menu>
+            </q-icon>
+          </template>
+        </q-input>
+      </div>
+
       <q-separator class="q-my-md" v-if="index < selectedDays.length - 1" />
     </div>
   </div>
 </div>
     <!-- Room -->
-    <div class="container q-mb-md">
-      <p class="label">ชื่อห้องที่จัดกิจกรรม :</p>
-      <q-input outlined v-model="roomName" class="inputBox" />
+    <div class="input-group">
+      <p class="label label_minWidth">ชื่อห้องที่จัดกิจกรรม :</p>
+      <q-input outlined v-model="roomName" style="width: 600px" />
     </div>
 
     <!-- Hours & Seats -->
-    <div class="container q-mb-md">
-      <p class="label">จำนวนชั่วโมง :</p>
-      <q-input outlined v-model="totalHours" class="inputBox" />
+    <div class="input-group">
+      <p class="label label_minWidth">จำนวนชั่วโมง :</p>
+      <q-input
+        outlined
+        style="width: 200px"
+        v-model="totalHours"
+        type="number"
+        @keypress="isNumber($event)"
+        @blur="validatePositive('totalHours')"
+      />
       <p class="label">จำนวนที่นั่ง :</p>
-      <q-input outlined v-model="seats" class="inputBox" />
+      <q-input
+        outlined
+        style="width: 240px"
+        v-model="seats"
+        type="number"
+        @keypress="isNumber($event)"
+        @blur="validatePositive('seats')"
+      />
     </div>
 
     <!-- Activity Type -->
-    <div class="container q-mb-md">
-      <p class="label">ประเภทกิจกรรม :</p>
+    <div class="input-group">
+      <p class="label label_minWidth">ประเภทกิจกรรม :</p>
       <q-btn
         :class="{ 'active-btn': activityType === 'prep' }"
         @click="activityType = 'prep'"
@@ -187,8 +146,8 @@
     </div>
 
     <!-- Department -->
-    <div class="container q-mb-md">
-      <p class="label">สาขา :</p>
+    <div class="input-group">
+      <p class="label label_minWidth">สาขา :</p>
       <q-btn
         v-for="option in departmentOptions"
         :key="option.value"
@@ -200,8 +159,8 @@
     </div>
 
     <!-- Year -->
-    <div class="container q-mb-md">
-      <p class="label">ชั้นปี :</p>
+    <div class="input-group">
+      <p class="label label_minWidth">ชั้นปี :</p>
       <q-btn
         v-for="option in yearOptions"
         :key="option.value"
@@ -213,21 +172,21 @@
     </div>
 
     <!-- Lecturer -->
-    <div class="container q-mb-md">
-      <p class="label">วิทยากร :</p>
-      <q-input outlined v-model="lecturer" class="inputBox" />
+    <div class="input-group">
+      <p class="label label_minWidth">วิทยากร :</p>
+      <q-input outlined v-model="lecturer" style="width: 600px" />
     </div>
 
     <!-- Food Menu -->
-    <div class="container q-mb-md">
-      <p class="label">รายการอาหาร :</p>
-      <q-input outlined v-model="foodMenu" class="inputBox" />
+    <div class="input-group">
+      <p class="label label_minWidth">รายการอาหาร :</p>
+      <q-input outlined v-model="foodMenu" style="width: 600px" />
     </div>
 
     <!-- Detail Activity -->
-    <div class="container q-mb-md">
-      <p class="label" style="align-self: flex-start">รายละเอียดอื่นๆ :</p>
-      <q-input outlined v-model="detailActivity" class="inputBox" type="textarea" />
+    <div class="input-group">
+      <p style="align-self: flex-start" class="label label_minWidth">รายละเอียดอื่นๆ :</p>
+      <q-input outlined v-model="detailActivity" style="width: 600px" />
     </div>
   </q-page>
 </template>
@@ -273,7 +232,7 @@ const endHour = ref<number>(0)
 const endMinute = ref<number>(0)
 const activityDateRangeInternal = ref({
   from: '',
-  to: ''
+  to: '',
 })
 const selectedDays = ref<DayTimeSelection[]>([])
 
@@ -315,10 +274,14 @@ const formatMinute = (minute: number): string => {
 }
 
 // ฟังก์ชันปรับชั่วโมงและนาที ที่ใช้ได้ทั้ง start time และ end time
-const adjustHour = (dayIndex: number, timeType: 'start' | 'end', direction: 'increase' | 'decrease'): void => {
+const adjustHour = (
+  dayIndex: number,
+  timeType: 'start' | 'end',
+  direction: 'increase' | 'decrease',
+): void => {
   const day = selectedDays.value[dayIndex]
   if (!day) return
-  
+
   if (timeType === 'start') {
     if (direction === 'increase') {
       day.startHour = (day.startHour + 1) % 24
@@ -336,10 +299,14 @@ const adjustHour = (dayIndex: number, timeType: 'start' | 'end', direction: 'inc
   }
 }
 
-const adjustMinute = (dayIndex: number, timeType: 'start' | 'end', direction: 'increase' | 'decrease'): void => {
+const adjustMinute = (
+  dayIndex: number,
+  timeType: 'start' | 'end',
+  direction: 'increase' | 'decrease',
+): void => {
   const day = selectedDays.value[dayIndex]
   if (!day) return
-  
+
   if (timeType === 'start') {
     if (direction === 'increase') {
       day.startMinute = (day.startMinute + 1) % 60
@@ -358,33 +325,33 @@ const adjustMinute = (dayIndex: number, timeType: 'start' | 'end', direction: 'i
 }
 const activityDateRange = computed(() => {
   const { from, to } = activityDateRangeInternal.value
-  
+
   const fromFormatted = formatThaiDate(from)
   if (!fromFormatted) return ''
-  
+
   const toFormatted = formatThaiDate(to)
   if (!toFormatted) return fromFormatted
-  
+
   return `${fromFormatted} - ${toFormatted}`
 })
 
 const formatThaiDate = (dateStr: string): string => {
   if (!dateStr) return ''
-  
+
   const parts = dateStr.split('-')
   if (parts.length !== 3) return ''
-  
+
   const year = parts[0] ? parseInt(parts[0], 10) : 0
   const monthIndex = parts[1] ? parseInt(parts[1], 10) - 1 : -1
   const day = parts[2] ? parseInt(parts[2], 10) : 0
-  
+
   if (isNaN(year) || isNaN(day) || monthIndex < 0 || monthIndex >= thaiLocale.months.length) {
     return ''
   }
-  
+
   const thaiMonth = thaiLocale.months[monthIndex]
   const thaiYear = year + 543
-  
+
   return `${day} ${thaiMonth} ${thaiYear}`
 }
 
@@ -397,10 +364,10 @@ const closeCalendar = () => {
 }
 const onDateRangeChange = () => {
   const { from, to } = activityDateRangeInternal.value
-  
+
   // ปิด popup ปฏิทิน
   closeCalendar()
-  
+
   // สร้างรายการวันที่อยู่ในช่วงที่เลือก
   generateDaysInRange(from, to)
 }
@@ -408,28 +375,27 @@ const onDateRangeChange = () => {
 // ฟังก์ชันสร้างรายการวันที่ในช่วงที่เลือก
 const generateDaysInRange = (fromDate: string, toDate: string) => {
   if (!fromDate) return
-  
+
   // ล้างข้อมูลเดิมก่อน
   selectedDays.value = []
-  
+
   const fromDateObj = new Date(fromDate)
   const toDateObj = toDate ? new Date(toDate) : new Date(fromDate)
-  
+
   // ตรวจสอบว่าวันที่ถูกต้องหรือไม่
   if (isNaN(fromDateObj.getTime()) || isNaN(toDateObj.getTime())) return
-  
+
   // วนลูปสร้างรายการวันที่
   const currentDate = new Date(fromDateObj)
   while (currentDate <= toDateObj) {
-
     const year = currentDate.getFullYear()
     const month = String(currentDate.getMonth() + 1).padStart(2, '0')
     const day = String(currentDate.getDate()).padStart(2, '0')
     const dateString = `${year}-${month}-${day}`
-    
+
     // สร้างวันที่ในรูปแบบไทย
     const formattedDate = formatThaiDate(dateString)
-    
+
     // เพิ่มข้อมูลวันที่
     selectedDays.value.push({
       date: dateString,
@@ -439,9 +405,9 @@ const generateDaysInRange = (fromDate: string, toDate: string) => {
       endHour: 0, // สิ้นสุดที่ 17:00
       endMinute: 0,
       startTime: '00:00',
-      endTime: '00:00'
+      endTime: '00:00',
     })
-    
+
     // เพิ่มวันถัดไป
     currentDate.setDate(currentDate.getDate() + 1)
   }
@@ -494,6 +460,18 @@ const yearOptions: ToggleOption[] = [
   { label: '3', value: '3' },
   { label: '4', value: '4' },
 ]
+const isNumber = (event: KeyboardEvent) => {
+  const charCode = event.which ? event.which : event.keyCode
+
+  if (charCode < 48 || charCode > 57) {
+    event.preventDefault()
+  }
+}
+const validatePositive = (field: 'totalHours' | 'seats') => {
+  if (eval(field).value < 0 || eval(field).value === '') {
+    eval(field).value = 0
+  }
+}
 onMounted(() => {
   // สร้างวันที่ปัจจุบันในรูปแบบ YYYY-MM-DD
   const today = new Date()
@@ -501,45 +479,103 @@ onMounted(() => {
   const month = String(today.getMonth() + 1).padStart(2, '0')
   const day = String(today.getDate()).padStart(2, '0')
   const dateString = `${year}-${month}-${day}`
-  
+
   // กำหนดค่าเริ่มต้นให้กับตัวแปร
   activityDateRangeInternal.value = {
     from: dateString,
-    to: dateString
+    to: dateString,
   }
-  
+
   // สร้างข้อมูลวันที่เริ่มต้น
   generateDaysInRange(dateString, dateString)
 })
+const sameTimeForAll = ref(false)
+
+const applySameTime = () => {
+  if (sameTimeForAll.value && selectedDays.value.length > 0) {
+    const firstDay = selectedDays.value[0];
+    if (firstDay) {
+      selectedDays.value.forEach((day, index) => {
+        if (index !== 0) {
+          day.startTime = firstDay.startTime;
+          day.endTime = firstDay.endTime;
+          day.startHour = firstDay.startHour;
+          day.startMinute = firstDay.startMinute;
+          day.endHour = firstDay.endHour;
+          day.endMinute = firstDay.endMinute;
+        }
+      });
+    }
+  }
+};
+const updateTime = (index: number, type: 'start' | 'end') => {
+  if (index === 0 && sameTimeForAll.value) {
+    const firstDay = selectedDays.value[0];
+    if (!firstDay) return;
+
+    selectedDays.value.forEach((day, idx) => {
+      if (idx !== 0) {
+        if (type === 'start') {
+          day.startTime = firstDay.startTime;
+          day.startHour = firstDay.startHour;
+          day.startMinute = firstDay.startMinute;
+        } else {
+          day.endTime = firstDay.endTime;
+          day.endHour = firstDay.endHour;
+          day.endMinute = firstDay.endMinute;
+        }
+      }
+    });
+  }
+};
+watch([sameTimeForAll, selectedDays], ([sameTime, days]) => {
+  if (sameTime && days.length > 0) {
+    const firstDay = days[0];
+    if (firstDay) {
+      days.forEach((day, index) => {
+        if (index !== 0) {
+          day.startTime = firstDay.startTime;
+          day.startHour = firstDay.startHour;
+          day.startMinute = firstDay.startMinute;
+          day.endTime = firstDay.endTime;
+          day.endHour = firstDay.endHour;
+          day.endMinute = firstDay.endMinute;
+        }
+      });
+    }
+  }
+}, { deep: true });
 </script>
 
-<style>
-.label {
-  font-family: 'Noto Serif Thai', serif;
-  font-size: 20px;
-  text-align: right;
-  white-space: nowrap;
-}
-
-.inputBox {
-  border: 1px solid black;
-  border-radius: 5px;
+<style scoped>
+::v-deep(.q-field__control) {
+  height: 40px;
   background-color: white;
-  flex: 1;
+  align-items: center;
 }
-
-.container,
-.time-row-container,
-.time-unit {
+::v-deep(.q-icon) {
   display: flex;
   align-items: center;
-  gap: 10px;
+  justify-content: center;
+  height: 100%;
+}
+.input-group {
+  display: flex;
+  gap: 25px;
+  margin-bottom: 20px;
+}
+.label {
+  font-size: 20px;
+  font-weight: normal;
+  text-align: right;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
 }
 
-.cursor-pointer {
-  cursor: pointer;
+.label_minWidth {
+  min-width: 200px;
 }
-
 .status-btn {
   color: #ff6f00;
   background-color: #ffe7ba;
@@ -549,8 +585,14 @@ onMounted(() => {
   width: 200px;
   font-size: 20px;
 }
-
-.activityType-btn,
+.activityType-btn {
+  width: 200px;
+  height: 40px;
+  border-radius: 50px;
+  box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.2);
+  background-color: #ffffff;
+  margin-right: 10px;
+}
 .department-btn,
 .year-btn {
   width: 80px;
@@ -560,46 +602,49 @@ onMounted(() => {
   background-color: #ffffff;
   margin-right: 10px;
 }
-
 .activityType-btn:last-child,
 .department-btn:last-child,
 .year-btn:last-child {
   margin-right: 0;
 }
-
 .active-btn {
   background-color: #d0e4ff !important;
 }
-
 .time-picker-card {
-  width: 140px;
-  height: 120px;
-  text-align: center;
-}
-
-.time-display,
-.separator {
-  font-size: 20px;
-  font-weight: semibold;
-  color: black;
+  width: 300px;
+  height: 200px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  border-radius: 10px;
+  background-color: white;
+  box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
 }
 
 .time-container {
   display: flex;
-  align-items: flex-start;
+  justify-content: center;
+  align-items: center;
   gap: 10px;
 }
 
-.label-container {
-  flex-shrink: 0;
-}
-
-.time-selectors-container {
+.time-column {
   display: flex;
   flex-direction: column;
+  align-items: center;
 }
 
-.time-input {
-  width: 100%;
+.separator {
+  font-weight: bold;
+}
+.time-row {
+  display: flex;
+  align-items: center;
+  gap: 15px; /* ให้เวลา Start และ End อยู่ติดกัน */
+}
+
+.time-separator {
+  margin: 0 10px;
 }
 </style>
