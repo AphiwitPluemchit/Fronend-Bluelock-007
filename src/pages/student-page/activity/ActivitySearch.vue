@@ -11,7 +11,7 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 
-const searchQuery = ref('')
+const searchQuery = ref<string>('')
 </script>
 
 <style scoped>
