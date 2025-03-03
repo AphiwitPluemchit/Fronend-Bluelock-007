@@ -7,8 +7,8 @@
       </div>
 
       <div class="col-9 activity-card">
-        <div class="">
-          <q-item-label class="text-bold text-h6">{{ activity.name }}</q-item-label>
+        <div class="details">
+          <q-item-label class="text-bold text-h6 activity-name">{{ activity.name }}</q-item-label>
           <br />
           <q-item-label>{{ activity.date }} </q-item-label><br />
           <q-item-label>
@@ -18,7 +18,13 @@
 
         <!-- ปุ่มรายละเอียด -->
         <div class="col-md-3 offset-md-3 self-end">
-          <q-btn label="รายละเอียด" dense unelevated class="detail-btn" />
+          <q-btn
+            label="รายละเอียด"
+            dense
+            unelevated
+            class="detail-btn"
+            :to="`/StudentActivityDetail/${activity.id}`"
+          />
         </div>
       </div>
     </div>
@@ -30,6 +36,12 @@ interface Activity {
   id: number
   name: string
   date: string
+  time: string
+  hours: number
+  location: string
+  category: string
+  speaker: string
+  description: string
   availableSeats: number
   maxSeats: number
   image: string
@@ -68,5 +80,16 @@ defineProps<{ activity: Activity }>()
   display: flex;
   flex-direction: column;
   gap: 10px;
+}
+.activity-name {
+  display: -webkit-box;
+  -webkit-line-clamp: 2; /* จำกัดให้แสดง 2 บรรทัด */
+  line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  word-break: break-word;
+  width: 100%; /* ป้องกันไม่ให้เกินขอบเขต */
+  padding-top: 5px; /* ป้องกันตัวอักษรถูกตัดด้านบน */
 }
 </style>
