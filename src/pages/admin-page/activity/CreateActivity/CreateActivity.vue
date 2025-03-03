@@ -95,23 +95,25 @@ const getFormComponent = computed(() => {
 .container {
   max-width: 1400px;
   display: flex;
-  gap: 50px; /* ลด gap เพื่อให้สัดส่วนดูสมดุล */
+  gap: 50px;
   align-items: flex-start;
   width: 100%;
 }
 
 .image-section {
-  width: 30%; /* ให้รูปภาพใช้พื้นที่ 30% */
   display: flex;
   flex-direction: column;
-  align-items: flex-start; /* จัดชิดซ้าย */
-  width: 100%; /* ให้ dropdown กว้างเท่ากับรูปภาพ */
+  align-items: flex-start; 
+  width: 100%;
+  flex: 1; 
 }
 
 .form-section {
-  width: 70%; /* ให้ฟอร์มใช้พื้นที่ 70% */
+  min-width: 600px; 
+  flex-grow: 1;
   display: flex;
   flex-direction: column;
+  flex: 2; 
 }
 .button-group {
   display: flex;

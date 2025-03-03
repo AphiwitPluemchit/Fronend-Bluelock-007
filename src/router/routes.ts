@@ -63,6 +63,17 @@ const routes: RouteRecordRaw[] = [
     meta: { roles: ['admin'] },
   },
   {
+    path: '/ExComponent',
+    name: 'ExComponent',
+    children: [
+      {
+        path: '',
+        component: () => import('pages/ExComponent.vue'),
+      },
+    ],
+    meta: { roles: ['admin'] },
+  },
+  {
     path: '/ActivitiesCalendarPage',
     name: 'ActivitiesCalendarPage',
     children: [

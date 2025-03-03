@@ -15,11 +15,11 @@
     <!-- Date -->
     <div class="field-container">
       <p class="label">วันที่จัดกิจกรรม :</p>
-      <q-input outlined v-model="activityDate" class="inputBox" mask="date">
+      <q-input outlined v-model="activityDateInput" class="inputBox" mask="date">
         <template v-slot:append>
           <q-icon name="event" class="cursor-pointer">
             <q-popup-proxy cover transition-show="scale" transition-hide="scale">
-              <q-date v-model="activityDate" mask="YYYY-MM-DD" today-btn :locale="thaiLocale" />
+              <q-date v-model="internalDate" mask="DD/MM/YYYY" today-btn @input="handleDateInput" />
             </q-popup-proxy>
           </q-icon>
         </template>
@@ -56,7 +56,7 @@
     </div>
 
     <!-- Hours -->
-    <div class="field-container" style="width: 404px; display: flex;">
+    <div class="field-container" style="width: 404px; display: flex">
       <p class="label">จำนวนชั่วโมง :</p>
       <q-input outlined v-model="totalHours" class="inputBox" />
     </div>
@@ -134,14 +134,11 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
+import { computed, ref, watch } from 'vue'
+import dayjs from 'dayjs'
+import buddhistEra from 'dayjs/plugin/buddhistEra'
 
-interface ThaiLocale {
-  days: string[]
-  daysShort: string[]
-  months: string[]
-  monthsShort: string[]
-}
+dayjs.extend(buddhistEra)
 
 interface ToggleOption {
   label: string
@@ -150,7 +147,7 @@ interface ToggleOption {
 
 // Previous refs remain the same
 const activityName = ref('')
-const activityDate = ref('')
+
 const startTime = ref('')
 const endTime = ref('')
 const totalHours = ref('')
@@ -182,40 +179,32 @@ const toggleYear = (value: string) => {
     years.value.push(value)
   }
 }
+const activityDateInput = ref<string | null>(null)
+const internalDate = ref<string | null>(null)
 
-// Thai locale remains the same
-const thaiLocale: ThaiLocale = {
-  days: ['อาทิตย์', 'จันทร์', 'อังคาร', 'พุธ', 'พฤหัสบดี', 'ศุกร์', 'เสาร์'],
-  daysShort: ['อา.', 'จ.', 'อ.', 'พ.', 'พฤ.', 'ศ.', 'ส.'],
-  months: [
-    'มกราคม',
-    'กุมภาพันธ์',
-    'มีนาคม',
-    'เมษายน',
-    'พฤษภาคม',
-    'มิถุนายน',
-    'กรกฎาคม',
-    'สิงหาคม',
-    'กันยายน',
-    'ตุลาคม',
-    'พฤศจิกายน',
-    'ธันวาคม',
-  ],
-  monthsShort: [
-    'ม.ค.',
-    'ก.พ.',
-    'มี.ค.',
-    'เม.ย.',
-    'พ.ค.',
-    'มิ.ย.',
-    'ก.ค.',
-    'ส.ค.',
-    'ก.ย.',
-    'ต.ค.',
-    'พ.ย.',
-    'ธ.ค.',
-  ],
+const convertToBuddhist = (date: string | null) => {
+  if (!date) return null
+  return dayjs(date).locale('th').format('BBBB-MM-DD')
 }
+
+const convertToGregorian = (date: string | null) => {
+  if (!date) return null
+  return dayjs(date, 'BBBB-MM-DD').locale('th').format('YYYY-MM-DD')
+}
+
+const handleDateInput = (date: string | null) => {
+  internalDate.value = date
+  activityDateInput.value = convertToBuddhist(date)
+}
+
+// Update internalDate when activityDateInput changes
+const buddhistDate = computed(() => {
+  return convertToGregorian(activityDateInput.value)
+})
+
+watch(buddhistDate, (newValue) => {
+  internalDate.value = newValue
+})
 
 const departmentOptions: ToggleOption[] = [
   { label: 'CS', value: 'cs' },
@@ -231,89 +220,3 @@ const yearOptions: ToggleOption[] = [
   { label: '4', value: '4' },
 ]
 </script>
-
-<style>
-.field-container {
-  display: flex;
-  align-items: center;
-  gap: 20px;
-  margin-bottom: 30px;
-}
-
-.label {
-  font-family: 'Noto Serif Thai', serif;
-  font-size: 20px;
-  margin: 0;
-  min-width: 180px;
-}
-
-.time-container {
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-}
-
-.inputBox {
-  flex-grow: 1;
-  border: 1px solid black;
-  border-radius: 5px;
-  background-color: white;
-}
-
-.cursor-pointer {
-  cursor: pointer;
-}
-.status-container {
-  display: flex;
-  align-items: center; /* จัดให้อยู่ตรงกลางแนวตั้ง */
-  gap: 10px; /* กำหนดระยะห่างระหว่างข้อความและปุ่ม */
-}
-.status-btn {
-  color: #ff6f00;
-  background-color: #ffe7ba;
-  border: 2px solid #ffa500;
-  border-radius: 50px;
-  height: 40px; /* ปรับความสูงให้เหมาะสม */
-  width: 200px;
-  font-size: 20px;
-}
-/* ปุ่ม ประเภทกิจกรรม */
-.activityType-btn {
-  width: 200px;
-  height: 40px;
-  border-radius: 50px;
-  box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.2);
-  margin-right: 20px;
-  background-color: #ffffff;
-}
-.activityType-btn:last-child {
-  margin-right: 0;
-}
-/* ปุ่ม สาขา */
-.department-btn {
-  width: 80px;
-  height: 40px;
-  border-radius: 50px;
-  box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.2);
-  margin-right: 10px;
-  background-color: #ffffff;
-}
-.department-btn:last-child {
-  margin-right: 0;
-}
-/* ปุ่ม ชั้นปี */
-.year-btn {
-  width: 60px;
-  height: 40px;
-  border-radius: 50px;
-  box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.2);
-  margin-right: 10px;
-  background-color: #ffffff;
-}
-.year-btn:last-child {
-  margin-right: 0;
-}
-.active-btn {
-  background-color: #d0e4ff !important;
-}
-</style>
