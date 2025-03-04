@@ -1,19 +1,387 @@
 <template>
-  <!-- ปุ่มไปหน้า CreateActivity -->
-  <q-btn @click="goToPage('/ActivitiesManagement/CreateActivity')"> ไปหน้าเหนือ </q-btn>
+  <q-page class="q-pa-md">
 
-  <!-- ปุ่มไปหน้า StudentEnrollmentPage -->
-  <q-btn @click="goToPage('/ActivitiesManagement/ActivityDetail/StudentEnrollmentPage')">
-    ไปหน้าเดีย
-  </q-btn>
+
+    <!-- ตาราง 1 -->
+    <section class="q-mt-md">
+      <div class="row justify-between items-center">
+        <h6 class="text-h6">กิจกรรมที่กำลังเปิดและปิดลงทะเบียนแล้ว</h6>
+        <div class="row">
+          <q-input dense outlined v-model="search1" placeholder="ค้นหา" class="q-mr-sm">
+            <template v-slot:append>
+              <q-icon name="search" />
+            </template>
+          </q-input>
+          <q-btn label="filter2" @click="showFilterDialog1 = true">
+            <FilterDialog
+              v-model="showFilterDialog1"
+              :categories="filterCategories1"
+              @apply="applyFilters"
+            />
+          </q-btn>
+        </div>
+      </div>
+      <q-table :rows="data1" :columns="columns" row-key="id" class="q-mt-sm">
+        <template #body-cell-action="props">
+          <q-td class="q-gutter-x-sm" style="min-width: 100px">
+            <q-btn
+              icon="edit"
+              padding="none"
+              flat
+              color="grey-8"
+              @click="goToPageDetail(props.row.id)"
+            ></q-btn
+          ></q-td> </template
+      ></q-table>
+    </section>
+
+    <!-- ตาราง 2 -->
+    <section class="q-mt-md">
+      <div class="row justify-between items-center">
+        <h6 class="text-h6">กิจกรรมที่กำลังวางแผน</h6>
+        <div class="row">
+          <q-input dense outlined v-model="search2" placeholder="ค้นหา" class="q-mr-sm">
+            <template v-slot:append>
+              <q-icon name="search" />
+            </template>
+          </q-input>
+          <q-btn label="filter2" @click="showFilterDialog2 = true">
+            <FilterDialog
+              v-model="showFilterDialog2"
+              :categories="filterCategories2"
+              @apply="applyFilters"
+            />
+          </q-btn>
+        </div>
+      </div>
+      <q-table :rows="data2" :columns="columns" row-key="id" class="q-mt-sm">
+        <template #body-cell-action="props">
+          <q-td class="q-gutter-x-sm" style="min-width: 100px">
+            <q-btn
+              icon="edit"
+              padding="none"
+              flat
+              color="grey-8"
+              @click="goToPage(props.row.action)"
+            ></q-btn
+          ></q-td> </template
+      ></q-table>
+    </section>
+
+    <!-- ตาราง 3 -->
+    <section class="q-mt-md">
+      <div class="row justify-between items-center">
+        <h6 class="text-h6">อื่น ๆ</h6>
+        <div class="row">
+          <q-input dense outlined v-model="search3" placeholder="ค้นหา" class="q-mr-sm">
+            <template v-slot:append>
+              <q-icon name="search" />
+            </template>
+          </q-input>
+          <q-btn label="filter2" @click="showFilterDialog3 = true">
+            <FilterDialog
+              v-model="showFilterDialog3"
+              :categories="filterCategories3"
+              @apply="applyFilters"
+            />
+          </q-btn>
+        </div>
+      </div>
+      <q-table :rows="data3" :columns="columns" row-key="id" class="q-mt-sm">
+        <template #body-cell-action="props">
+          <q-td class="q-gutter-x-sm" style="min-width: 100px">
+            <q-btn
+              icon="edit"
+              padding="none"
+              flat
+              color="grey-8"
+              @click="goToPage(props.row.action)"
+            ></q-btn
+          ></q-td> </template
+      ></q-table>
+    </section>
+  </q-page>
 </template>
 
 <script setup lang="ts">
+import { ref } from 'vue'
 import { useRouter } from 'vue-router'
-
+import FilterDialog from 'src/components/Dialog/FilterDialog.vue'
+import { useActivityStore } from 'src/stores/activity'
+const activityStore = useActivityStore()
+// ใช้ Vue Router
 const router = useRouter()
-
-const goToPage = async (path: string) => {
-  await router.push(path)
+const goToPage = async (path: object) => {
+  console.log(path);
+  await router.push('/ActivitiesManagement/CreateActivity')
 }
+const goToPageDetail = async (id: string) => {
+  console.log(id);
+  await activityStore.fetchOneData(id)
+  await router.push('/ActivitiesManagement/ActivityDetail/StudentEnrollmentPage')
+}
+const filters = ref<{
+  year: string[]
+  major: string[]
+  statusStudent: string[]
+  statusActivity: string[]
+  categoryActivity: string[]
+}>({
+  year: [],
+  major: [],
+  statusStudent: [],
+  statusActivity: [],
+  categoryActivity: [],
+})
+const showFilterDialog1 = ref(false)
+const filterCategories1 = ref([
+  'year',
+  'major',
+  'statusStudent',
+  'statusActivity',
+  'categoryActivity',
+])
+const showFilterDialog2 = ref(false)
+const filterCategories2 = ref([
+  'year',
+  'major',
+  'statusStudent',
+  'statusActivity',
+  'categoryActivity',
+])
+const showFilterDialog3 = ref(false)
+const filterCategories3 = ref([
+  'year',
+  'major',
+  'statusStudent',
+  'statusActivity',
+  'categoryActivity',
+])
+const applyFilters = (selectedFilters: {
+  year: string[]
+  major: string[]
+  statusStudent: string[]
+  statusActivity: string[]
+  categoryActivity: string[]
+}) => {
+  filters.value = selectedFilters
+  console.log('Filters Applied:', filters.value)
+}
+// ตัวแปรสำหรับค้นหา
+const search1 = ref('')
+const search2 = ref('')
+const search3 = ref('')
+
+// กำหนดโครงสร้างของคอลัมน์ในตาราง
+const columns = [
+  { name: 'index', label: 'ลำดับ', field: 'index', align: 'left' as const },
+  { name: 'name', label: 'ชื่อกิจกรรม', field: 'name', align: 'left' as const },
+  { name: 'date', label: 'วันที่', field: 'date', align: 'left' as const },
+  { name: 'time', label: 'เวลา', field: 'time', align: 'left' as const },
+  { name: 'location', label: 'สถานที่', field: 'location', align: 'left' as const },
+  {
+    name: 'participants',
+    label: 'จำนวน (ลง/รับ/เหลือ)',
+    field: 'participants',
+    align: 'left' as const,
+  },
+  { name: 'type', label: 'ประเภท', field: 'type', align: 'left' as const },
+  { name: 'status', label: 'สถานะ', field: 'status', align: 'left' as const },
+  { name: 'action', label: '', field: '', align: 'left' as const },
+]
+
+// ข้อมูลกิจกรรม (ตัวอย่าง)
+const data1 = ref([
+  {
+    id: '67c5aaca254a746b8ca30aef',
+    index: 1,
+    name: 'กิจกรรม A',
+    date: '4 มี.ค. 2568',
+    time: '08:00-12:00',
+    location: 'IF-3C02',
+    participants: '250/123/127',
+    type: 'Soft Skill',
+    status: 'เปิดลงทะเบียน',
+    action: '/ActivitiesManagement/CreateActivity',
+  },
+  {
+    id: '67c5aaca254a746b8ca30aef',
+    index: 1,
+    name: 'กิจกรรม A',
+    date: '4 มี.ค. 2568',
+    time: '08:00-12:00',
+    location: 'IF-3C02',
+    participants: '250/123/127',
+    type: 'Soft Skill',
+    status: 'เปิดลงทะเบียน',
+    action: '/ActivitiesManagement/CreateActivity',
+  },
+  {
+    id: '67c5aaca254a746b8ca30aef',
+    index: 1,
+    name: 'กิจกรรม A',
+    date: '4 มี.ค. 2568',
+    time: '08:00-12:00',
+    location: 'IF-3C02',
+    participants: '250/123/127',
+    type: 'Soft Skill',
+    status: 'เปิดลงทะเบียน',
+    action: '/ActivitiesManagement/CreateActivity',
+  },
+  {
+    id: '67c5aaca254a746b8ca30aef',
+    index: 1,
+    name: 'กิจกรรม A',
+    date: '4 มี.ค. 2568',
+    time: '08:00-12:00',
+    location: 'IF-3C02',
+    participants: '250/123/127',
+    type: 'Soft Skill',
+    status: 'เปิดลงทะเบียน',
+    action: '/ActivitiesManagement/CreateActivity',
+  },
+  {
+    id: '67c5aaca254a746b8ca30aef',
+    index: 1,
+    name: 'กิจกรรม A',
+    date: '4 มี.ค. 2568',
+    time: '08:00-12:00',
+    location: 'IF-3C02',
+    participants: '250/123/127',
+    type: 'Soft Skill',
+    status: 'เปิดลงทะเบียน',
+    action: '/ActivitiesManagement/CreateActivity',
+  },
+])
+
+const data2 = ref([
+  {
+    id: 2,
+    index: 1,
+    name: 'กิจกรรม B',
+    date: '10 มี.ค. 2568',
+    time: '13:00-17:00',
+    location: 'IF-3C02',
+    participants: '200/100/100',
+    type: 'Hard Skill',
+    status: 'กำลังวางแผน',
+    action: '/ActivitiesManagement/CreateActivity',
+  },  {
+    id: 2,
+    index: 1,
+    name: 'กิจกรรม B',
+    date: '10 มี.ค. 2568',
+    time: '13:00-17:00',
+    location: 'IF-3C02',
+    participants: '200/100/100',
+    type: 'Hard Skill',
+    status: 'กำลังวางแผน',
+    action: '/ActivitiesManagement/CreateActivity',
+  },  {
+    id: 2,
+    index: 1,
+    name: 'กิจกรรม B',
+    date: '10 มี.ค. 2568',
+    time: '13:00-17:00',
+    location: 'IF-3C02',
+    participants: '200/100/100',
+    type: 'Hard Skill',
+    status: 'กำลังวางแผน',
+    action: '/ActivitiesManagement/CreateActivity',
+  },  {
+    id: 2,
+    index: 1,
+    name: 'กิจกรรม B',
+    date: '10 มี.ค. 2568',
+    time: '13:00-17:00',
+    location: 'IF-3C02',
+    participants: '200/100/100',
+    type: 'Hard Skill',
+    status: 'กำลังวางแผน',
+    action: '/ActivitiesManagement/CreateActivity',
+  },  {
+    id: 2,
+    index: 1,
+    name: 'กิจกรรม B',
+    date: '10 มี.ค. 2568',
+    time: '13:00-17:00',
+    location: 'IF-3C02',
+    participants: '200/100/100',
+    type: 'Hard Skill',
+    status: 'กำลังวางแผน',
+    action: '/ActivitiesManagement/CreateActivity',
+  },
+])
+
+const data3 = ref([
+  {
+    id: 3,
+    index: 1,
+    name: 'กิจกรรม C',
+    date: '20 มี.ค. 2568',
+    time: '09:00-11:00',
+    location: 'IF-3C02',
+    participants: '150/90/60',
+    type: 'อื่น ๆ',
+    status: 'รอดำเนินการ',
+    action: '/ActivitiesManagement/CreateActivity',
+  },  {
+    id: 3,
+    index: 1,
+    name: 'กิจกรรม C',
+    date: '20 มี.ค. 2568',
+    time: '09:00-11:00',
+    location: 'IF-3C02',
+    participants: '150/90/60',
+    type: 'อื่น ๆ',
+    status: 'รอดำเนินการ',
+    action: '/ActivitiesManagement/CreateActivity',
+  },  {
+    id: 3,
+    index: 1,
+    name: 'กิจกรรม C',
+    date: '20 มี.ค. 2568',
+    time: '09:00-11:00',
+    location: 'IF-3C02',
+    participants: '150/90/60',
+    type: 'อื่น ๆ',
+    status: 'รอดำเนินการ',
+    action: '/ActivitiesManagement/CreateActivity',
+  },  {
+    id: 3,
+    index: 1,
+    name: 'กิจกรรม C',
+    date: '20 มี.ค. 2568',
+    time: '09:00-11:00',
+    location: 'IF-3C02',
+    participants: '150/90/60',
+    type: 'อื่น ๆ',
+    status: 'รอดำเนินการ',
+    action: '/ActivitiesManagement/CreateActivity',
+  },  {
+    id: 3,
+    index: 1,
+    name: 'กิจกรรม C',
+    date: '20 มี.ค. 2568',
+    time: '09:00-11:00',
+    location: 'IF-3C02',
+    participants: '150/90/60',
+    type: 'อื่น ๆ',
+    status: 'รอดำเนินการ',
+    action: 'X',
+  },  {
+    id: 3,
+    index: 1,
+    name: 'กิจกรรม C',
+    date: '20 มี.ค. 2568',
+    time: '09:00-11:00',
+    location: 'IF-3C02',
+    participants: '150/90/60',
+    type: 'อื่น ๆ',
+    status: 'รอดำเนินการ',
+    action: 'X',
+  },
+])
 </script>
+
+<style scoped></style>
