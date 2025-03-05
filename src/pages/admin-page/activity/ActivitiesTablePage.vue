@@ -5,7 +5,7 @@
       <div class="text-h4">จัดการกิจกรรม</div>
     </div>
     <div class="row justify-end items-center">
-      <q-btn dense outlined icon="add" label="เพิ่มข้อมูล" class="btnadd" />
+      <q-btn dense outlined icon="add" label="เพิ่มข้อมูล" class="btnadd" @click="goToPage()"/>
     </div>
     <!-- ตาราง 1 -->
     <section class="q-mt-lg">
@@ -90,7 +90,7 @@
               padding="none"
               flat
               color="grey-8"
-              @click="goToPage(props.row.action)"
+              @click="goToPageDetail(props.row.action)"
             ></q-btn
           ></q-td> </template
       ></q-table>
@@ -131,7 +131,7 @@
               padding="none"
               flat
               color="grey-8"
-              @click="goToPage(props.row.action)"
+              @click="goToPageDetail(props.row.action)"
             ></q-btn
           ></q-td> </template
       ></q-table>
@@ -147,8 +147,7 @@ import { useActivityStore } from 'src/stores/activity'
 const activityStore = useActivityStore()
 // ใช้ Vue Router
 const router = useRouter()
-const goToPage = async (path: object) => {
-  console.log(path)
+const goToPage = async () => {
   await router.push('/ActivitiesManagement/CreateActivity')
 }
 const goToPageDetail = async (id: string) => {
