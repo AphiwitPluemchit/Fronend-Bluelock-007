@@ -143,8 +143,8 @@
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import FilterDialog from 'src/components/Dialog/FilterDialog.vue'
-import { useActivityStore } from 'src/stores/activity'
-const activityStore = useActivityStore()
+// import { useActivityStore } from 'src/stores/activity'
+// const activityStore = useActivityStore()
 // ใช้ Vue Router
 const router = useRouter()
 const goToPage = async () => {
@@ -152,8 +152,8 @@ const goToPage = async () => {
 }
 const goToPageDetail = async (id: string) => {
   console.log(id)
-  await activityStore.fetchOneData(id)
-  await router.push('/ActivitiesManagement/ActivityDetail/ActivityDetail')
+  // await activityStore.fetchOneData(id)
+  await router.push('/ActivitiesManagement/ActivityDetail')
 }
 const filters = ref<{
   year: string[]
