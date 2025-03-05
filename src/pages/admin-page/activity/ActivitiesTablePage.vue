@@ -153,7 +153,7 @@ const goToPage = async () => {
 const goToPageDetail = async (id: string) => {
   console.log(id)
   await activityStore.fetchOneData(id)
-  await router.push('/ActivitiesManagement/ActivityDetail/StudentEnrollmentPage')
+  await router.push('/ActivitiesManagement/ActivityDetail/ActivityDetail')
 }
 const filters = ref<{
   year: string[]
