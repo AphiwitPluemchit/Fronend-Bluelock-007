@@ -35,8 +35,8 @@ const routes: RouteRecordRaw[] = [
     ],
   },
   {
-    path: '/ActivitiesManagement/ActivityDetail/ActivityDetail',
-    name: 'StudentEnrollmentPage',
+    path: '/ActivitiesManagement/ActivityDetail',
+    name: 'ActivityDetail',
     children: [
       { path: '', component: () => import('pages/admin-page/activity/ActivityDetail/ActivityDetail.vue') },
     ],
