@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ref } from 'vue';
+import EvaluationTable from './EvaluationTable.vue';
 
 // ข้อมูลสรุปการลงทะเบียน
 const registrationSummary = ref({
@@ -10,25 +11,22 @@ const registrationSummary = ref({
   absent: 5
 });
 
-// ข้อมูลการประเมินผลความพึงพอใจ
-const evaluationResults = ref([
-  { id: "1.1", topic: "ความรู้และความเข้าใจในเรื่องเนื้อหากิจกรรม", most: 47, high: 31, medium: 24, low: 3, lowest: 0, avg: 3.42 },
-  { id: "1.2", topic: "ความรู้และความเข้าใจในเรื่องเนื้อหากิจกรรม", most: 63, high: 13, medium: 6, low: 2, lowest: 0, avg: 4.12 },
-  { id: "1.3", topic: "ท่านได้รับความรู้ แนวคิด ประสบการณ์ใหม่จากโครงการ", most: 63, high: 13, medium: 6, low: 1, lowest: 0, avg: 4.65 },
-  { id: "1.4", topic: "ท่านสามารถนำสิ่งที่ได้รับจากโครงการไปใช้ประโยชน์ในการปฏิบัติงานได้", most: 24, high: 24, medium: 6, low: 0, lowest: 0, avg: 4.65 },
-  { id: "1.5", topic: "รูปแบบและวิธีการกิจกรรมมีความเหมาะสมกับสถานการณ์ปัจจุบัน", most: 34, high: 24, medium: 1, low: 0, lowest: 0, avg: 3.42 }
-]);
-
 // ตัวแปรควบคุมการเปิด-ปิดไดอะล็อก
 const isDialogOpen = ref(false);
 
 // ฟังก์ชันเปิดไดอะล็อก
-const openDialog = () => {
+const showCreateQR_CodeDialog = () => {
   isDialogOpen.value = true;
 };
 
-// ฟังก์ชันปิดไดอะล็อก
-const closeDialog = () => {
+// ฟังก์ชันยกเลิก QR-Code
+const cancelCreateQR_Code = () => {
+  isDialogOpen.value = false;
+};
+
+// ฟังก์ชันยืนยัน QR-Code
+const confirmCreateQR_Code = () => {
+  console.log("QR-Code เช็คชื่อถูกสร้างแล้ว!");
   isDialogOpen.value = false;
 };
 
@@ -36,7 +34,6 @@ const closeDialog = () => {
 
 <template>
   <div class="summary-container">
-
     <div class="summary-content">
       <!-- ส่วนรูปภาพ -->
       <div class="image-section">
@@ -44,12 +41,13 @@ const closeDialog = () => {
           <q-icon name="image" size="80px" class="image-icon" />
         </div>
         <p class="image-note"></p>
-        <q-btn label="เช็คชื่อ" @click="openDialog" class="check-in-btn" />
-        <!-- ไดอะล็อก -->
+        <q-btn label="เช็คชื่อ" @click="showCreateQR_CodeDialog" class="check-in-btn" />
+
+        <!-- ไดอะล็อกสำหรับสร้าง QR-Code เช็คชื่อ -->
         <q-dialog v-model="isDialogOpen">
           <q-card class="dialog-card">
             <q-card-section class="dialog-title">
-              <span>สร้าง <strong>QR-Code</strong> เช็คชื่อ</span>
+              <span>สร้าง QR-Code เช็คชื่อ</span>
             </q-card-section>
 
             <q-card-section class="dialog-body">
@@ -58,8 +56,8 @@ const closeDialog = () => {
             </q-card-section>
 
             <q-card-actions align="right">
-              <q-btn label="ยกเลิก" color="red" class="cancel-btn" @click="closeDialog" />
-              <q-btn label="ยืนยัน" color="blue" class="confirm-btn" />
+              <q-btn label="ยกเลิก" color="red" class="cancel-btn" @click="cancelCreateQR_Code" />
+              <q-btn label="ยืนยัน" color="blue" class="confirm-btn" @click="confirmCreateQR_Code" />
             </q-card-actions>
           </q-card>
         </q-dialog>
@@ -67,44 +65,45 @@ const closeDialog = () => {
 
       <!-- รายละเอียดการลงทะเบียน -->
       <div class="registration-details">
-        <p>จำนวนนิสิตที่ลงทะเบียน : {{ registrationSummary.totalStudents }} คน</p>
+        <div class="registration-row">
+          <span class="label">จำนวนนิสิตที่ลงทะเบียน :</span>
+          <span class="value">{{ registrationSummary.totalStudents }}</span>
+          <span class="unit">คน</span>
+        </div>
 
-        <p><strong>ผลการเช็คชื่อ :</strong></p>
-        <p>เช็คชื่อเข้า : <span class="number">{{ registrationSummary.checkIn }}</span> คน</p>
-        <p>เช็คชื่อสาย : <span class="number">{{ registrationSummary.late }}</span> คน</p>
-        <p>เช็คชื่อออก : <span class="number">{{ registrationSummary.checkOut }}</span> คน</p>
-        <p>ไม่มา : <span class="number">{{ registrationSummary.absent }}</span> คน</p>
+        <div class="registration-row">
+          <span class="label">ผลการเช็คชื่อ :</span>
+        </div>
+        <div class="registration-row">
+          <span class="sub-label">เช็คชื่อเข้า</span>
+          <span class="middle-text">จำนวน</span>
+          <span class="value">{{ registrationSummary.checkIn }}</span>
+          <span class="unit">คน</span>
+        </div>
+
+        <div class="registration-row">
+          <span class="sub-label">เช็คชื่อสาย</span>
+          <span class="middle-text">จำนวน</span>
+          <span class="value">{{ registrationSummary.late }}</span>
+          <span class="unit">คน</span>
+        </div>
+
+        <div class="registration-row">
+          <span class="sub-label">เช็คชื่อออก</span>
+          <span class="middle-text">จำนวน</span>
+          <span class="value">{{ registrationSummary.checkOut }}</span>
+          <span class="unit">คน</span>
+        </div>
+
+        <div class="registration-row">
+          <span class="sub-label">ไม่มา</span>
+          <span class="middle-text">จำนวน</span>
+          <span class="value">{{ registrationSummary.absent }}</span>
+          <span class="unit">คน</span>
+        </div>
       </div>
     </div>
-
-    <!-- ตารางผลการประเมิน -->
-    <h3 class="evaluation-title">ผลการประเมิน</h3>
-    <table class="evaluation-table">
-      <thead>
-        <tr>
-          <th>ข้อ</th>
-          <th>หัวข้อความพึงพอใจ</th>
-          <th>มากที่สุด</th>
-          <th>มาก</th>
-          <th>ปานกลาง</th>
-          <th>น้อย</th>
-          <th>น้อยที่สุด</th>
-          <th>ค่าเฉลี่ย</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr v-for="result in evaluationResults" :key="result.id">
-          <td>{{ result.id }}</td>
-          <td>{{ result.topic }}</td>
-          <td>{{ result.most }}</td>
-          <td>{{ result.high }}</td>
-          <td>{{ result.medium }}</td>
-          <td>{{ result.low }}</td>
-          <td>{{ result.lowest }}</td>
-          <td>{{ result.avg }}</td>
-        </tr>
-      </tbody>
-    </table>
+    <EvaluationTable />
   </div>
 </template>
 
@@ -120,6 +119,47 @@ const closeDialog = () => {
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
+}
+
+/* รายละเอียดการลงทะเบียน */
+.registration-details {
+  display: flex;
+  align-items: flex-start;
+  flex-direction: column;
+  margin-top: 20px;
+}
+
+.registration-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 5px;
+}
+
+.label {
+  font-weight: bold;
+  min-width: 220px;
+  text-align: right;
+}
+
+.sub-label {
+  min-width: 120px;
+  text-align: right;
+}
+
+.middle-text {
+  min-width: 80px;
+  text-align: right;
+}
+
+.value {
+  font-weight: bold;
+  min-width: 40px;
+  text-align: center;
+}
+
+.unit {
+  min-width: 40px;
 }
 
 /* ส่วนรูปภาพ */
@@ -143,53 +183,6 @@ const closeDialog = () => {
   color: red;
   font-size: 12px;
   margin-top: 5px;
-}
-
-.check-in-btn {
-  margin-top: 10px;
-  background-color: #E0E0E0;
-  color: black;
-}
-
-/* รายละเอียดการลงทะเบียน */
-.registration-details {
-  text-align: left;
-  font-size: 16px;
-}
-
-.number {
-  font-weight: bold;
-  color: #333;
-}
-
-/* ตารางผลการประเมิน */
-.evaluation-title {
-  margin-top: 30px;
-  font-size: 18px;
-  font-weight: bold;
-  text-align: center;
-}
-
-.evaluation-table {
-  width: 100%;
-  border-collapse: collapse;
-  margin-top: 10px;
-}
-
-.evaluation-table th,
-.evaluation-table td {
-  border: 1px solid #000;
-  padding: 8px;
-  text-align: center;
-}
-
-.evaluation-table th {
-  background-color: #D9D9D9;
-  font-weight: bold;
-}
-
-.evaluation-table td {
-  background-color: #FFF;
 }
 
 /* ปุ่มเช็คชื่อ */
