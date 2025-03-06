@@ -40,15 +40,15 @@
     </div>
 
     <!-- Room -->
-    <div class="input-group" >
+    <div class="input-group">
       <p class="label label_minWidth">ชื่อห้องที่จัดกิจกรรม :</p>
       <q-input outlined v-model="roomName" style="width: 600px" />
     </div>
 
     <!--Hours  & Seats -->
-    <div class="input-group">
-      <HoursSelector v-model="totalHours"/>
-      <SeatsSelector v-model="seats"/>
+    <div class="flex-container">
+      <HoursSelector v-model="totalHours" class="input-group" />
+      <SeatsSelector v-model="seats" class="input-group" />
     </div>
 
     <!-- Activity Type -->
@@ -67,14 +67,17 @@
     </div>
 
     <!-- Food Menu -->
-    <FoodSelector v-model:foodMenu="foodMenu" class="input-group"/>
+    <FoodSelector v-model:foodMenu="foodMenu" class="input-group" />
 
     <!-- Detail Activity -->
     <div class="input-group">
       <p style="align-self: flex-start" class="label label_minWidth">รายละเอียดอื่นๆ :</p>
       <q-input outlined v-model="detailActivity" style="width: 600px" />
     </div>
-
+    <div class="button-group">
+            <q-btn class="btnreject" @click="goToActivitiesManagement">ยกเลิก</q-btn>
+            <q-btn class="btnsecces" @click="submitActivity">เสร็จสิ้น</q-btn>
+          </div>
   </q-page>
 </template>
 
@@ -88,7 +91,15 @@ import HoursSelector from 'src/pages/admin-page/activity/CreateActivity/Form/Hou
 import SeatsSelector from 'src/pages/admin-page/activity/CreateActivity/Form/SeatsSelector.vue'
 import TimeSelector from 'src/pages/admin-page/activity/CreateActivity/Form/TimeSelector.vue'
 import FoodSelector from 'src/pages/admin-page/activity/CreateActivity/Form/FoodSelector.vue'
+import { useRouter } from 'vue-router'
 
+const router = useRouter()
+
+onMounted(() => {})
+
+const goToActivitiesManagement = async () => {
+  await router.push('/ActivitiesManagement')
+}
 interface DayTimeSelection {
   date: string
   formattedDate: string
@@ -139,7 +150,7 @@ const applySameTime = async () => {
   await nextTick()
 
   selectedDays.value = selectedDays.value.map((day, index) => {
-    if (index === 0) return day 
+    if (index === 0) return day
 
     return {
       ...day,
@@ -185,7 +196,6 @@ onMounted(() => {
   // สร้างข้อมูลวันที่เริ่มต้น (ใช้ array แทน)
   generateDaysInRange(activityDateRangeInternal.value)
 })
-
 
 const formatThaiDate = (dateStr: string): string => {
   if (!dateStr) return ''
@@ -265,6 +275,35 @@ onMounted(() => {
   // สร้างข้อมูลวันที่เริ่มต้น (ใช้ array แทน)
   generateDaysInRange(activityDateRangeInternal.value)
 })
+
+const submitActivity = () => {
+  const payload = {
+    activityName: activityName.value,
+    selectedDays: selectedDays.value.map((day) => ({
+      date: day.date,
+      startTime: day.startTime,
+      endTime: day.endTime
+    })),
+    roomName: roomName.value,
+    totalHours: totalHours.value,
+    seats: seats.value,
+    activityType: activityType.value,
+    departments: departments.value,
+    years: years.value,
+    lecturer: lecturer.value,
+    foodMenu: foodMenu.value,
+    detailActivity: detailActivity.value
+  };
+
+  console.log("Payload:", payload); // ตรวจสอบค่า payload ในคอนโซล
+
+  // สามารถส่งไปยัง API ได้โดยใช้ fetch หรือ axios
+  // fetch('/api/submit', { method: 'POST', body: JSON.stringify(payload) })
+
+  // หรือเก็บลง localStorage
+  localStorage.setItem('activityPayload', JSON.stringify(payload));
+};
+
 </script>
 
 <style scoped>
@@ -282,8 +321,8 @@ onMounted(() => {
 .input-group {
   display: flex;
   align-items: center;
-  gap: 25px;  
-  margin-bottom: 30px; 
+  gap: 25px;
+  margin-bottom: 30px;
 }
 
 .label {
@@ -310,5 +349,16 @@ onMounted(() => {
 
 .checkbox-left {
   align-self: flex-start;
+}
+.flex-container {
+  display: flex;
+  align-items: center; 
+  gap: 10px; 
+}
+.button-group {
+  display: flex;
+  justify-content: flex-end;
+  gap: 25px;
+  margin-top: 30px; 
 }
 </style>

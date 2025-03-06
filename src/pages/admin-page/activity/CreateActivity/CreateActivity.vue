@@ -37,12 +37,8 @@
 
         <div class="form-section">
           <component :is="getFormComponent || 'div'" />
-          <q-space />
-          <!-- เพิ่ม q-space เพื่อดันปุ่มลง -->
-          <div class="button-group">
-            <q-btn class="btnreject" @click="goToActivitiesManagement">ยกเลิก</q-btn>
-            <q-btn class="btnsecces">เสร็จสิ้น</q-btn>
-          </div>
+      
+          
         </div>
       </div>
     </div>
@@ -110,23 +106,20 @@ const getFormComponent = computed(() => {
 .form-section {
   display: flex;
   flex-direction: column;
-  flex-grow: 1; /* ให้ฟอร์มขยายเต็มพื้นที่ที่เหลือ */
-  min-height: 600px; /* ความสูงขั้นต่ำ */
-  max-height: 800px; /* กำหนด max-height ให้มี scroll */
-  overflow-y: auto; /* ให้ scroll เมื่อเนื้อหายาว */
-  overflow-x: hidden;
+  flex-grow: 1; 
+  min-height: 600px; 
 }
 
 
 .form-section::-webkit-scrollbar {
-  width: 8px; /* ความกว้าง scrollbar */
+  width: 8px; 
   margin-right: 50px; 
 }
 .button-group {
   display: flex;
   justify-content: flex-end;
   gap: 25px;
-  margin-top: auto; /* บังคับให้ปุ่มอยู่ล่างสุด */
+  margin-top: 30px; 
 }
 
 
