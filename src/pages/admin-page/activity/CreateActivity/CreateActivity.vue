@@ -37,9 +37,11 @@
 
         <div class="form-section">
           <component :is="getFormComponent || 'div'" />
+          <q-space />
+          <!-- เพิ่ม q-space เพื่อดันปุ่มลง -->
           <div class="button-group">
-            <q-btn class="cancel-btn Font" @click="goToActivitiesManagement">ยกเลิก</q-btn>
-            <q-btn class="submit-btn Font">เสร็จสิ้น</q-btn>
+            <q-btn class="btnreject" @click="goToActivitiesManagement">ยกเลิก</q-btn>
+            <q-btn class="btnsecces">เสร็จสิ้น</q-btn>
           </div>
         </div>
       </div>
@@ -50,7 +52,6 @@
 <script setup lang="ts">
 import { onMounted, ref, computed } from 'vue'
 import CreateActivity_Image from './CreateActivity_Image.vue'
-import FormSingleDay from './FormSingleDay.vue.vue'
 import FormMultipleDays from './FormMultipleDays.vue'
 import FormMultipleActivities from './FormMultipleActivities.vue'
 import { useRouter } from 'vue-router'
@@ -63,14 +64,12 @@ const goToActivitiesManagement = async () => {
   await router.push('/ActivitiesManagement')
 }
 
-const activityOptions = ['กิจกรรมวันเดียว', 'กิจกรรมหลายวัน', 'หลายกิจกรรม']
-const selectedActivityType = ref('กิจกรรมวันเดียว')
+const activityOptions = ['กิจกรรมเดียว', 'หลายกิจกรรม']
+const selectedActivityType = ref('กิจกรรมเดียว')
 
 const getFormComponent = computed(() => {
   switch (selectedActivityType.value) {
-    case 'กิจกรรมวันเดียว':
-      return FormSingleDay
-    case 'กิจกรรมหลายวัน':
+    case 'กิจกรรมเดียว':
       return FormMultipleDays
     case 'หลายกิจกรรม':
       return FormMultipleActivities
@@ -93,7 +92,7 @@ const getFormComponent = computed(() => {
 }
 
 .container {
-  max-width: 1400px;
+  max-width: 1500px;
   display: flex;
   gap: 50px;
   align-items: flex-start;
@@ -103,38 +102,33 @@ const getFormComponent = computed(() => {
 .image-section {
   display: flex;
   flex-direction: column;
-  align-items: flex-start; 
+  align-items: flex-start;
   width: 100%;
-  flex: 1; 
+  flex: 1;
 }
 
 .form-section {
-  min-width: 600px; 
-  flex-grow: 1;
   display: flex;
   flex-direction: column;
-  flex: 2; 
+  flex-grow: 1; /* ให้ฟอร์มขยายเต็มพื้นที่ที่เหลือ */
+  min-height: 600px; /* ความสูงขั้นต่ำ */
+  max-height: 800px; /* กำหนด max-height ให้มี scroll */
+  overflow-y: auto; /* ให้ scroll เมื่อเนื้อหายาว */
+  overflow-x: hidden;
+}
+
+
+.form-section::-webkit-scrollbar {
+  width: 8px; /* ความกว้าง scrollbar */
+  margin-right: 50px; 
 }
 .button-group {
   display: flex;
   justify-content: flex-end;
   gap: 25px;
-  margin-top: 30px;
+  margin-top: auto; /* บังคับให้ปุ่มอยู่ล่างสุด */
 }
 
-.cancel-btn {
-  width: 90px;
-  height: 50px;
-  border-radius: 15px;
-  background-color: #f03b2d;
-}
-
-.submit-btn {
-  width: 90px;
-  height: 50px;
-  border-radius: 15px;
-  background-color: #2fa54d;
-}
 
 .Font {
   color: #ffffff;
