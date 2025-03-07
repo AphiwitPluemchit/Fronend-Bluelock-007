@@ -6,7 +6,6 @@
     </div>
     <div class="row justify-end items-center">
       <q-btn dense outlined icon="add" label="เพิ่มข้อมูล" class="btnadd" @click="goToPage()" />
-      <q-btn dense outlined icon="add" label="เพิ่มข้อมูล" class="btnadd" @click="goToPage()" />
     </div>
     <!-- ตาราง 1 -->
     <section class="q-mt-lg">
@@ -38,13 +37,12 @@
       <q-table
         bordered
         flat
-        :rows="mapActivitiesToTableRows(activityStore.activities1)"
+        :rows="mapActivitiesToTableRows(activityStore.activitys1)"
         :columns="columns"
         row-key="id"
         class="q-mt-md customtable"
       >
         <template #body-cell-action="props">
-          <q-td class="q-gutter-x-sm">
           <q-td class="q-gutter-x-sm">
             <q-btn
               icon="info"
@@ -85,7 +83,7 @@
         </div>
       </div>
       <q-table
-        :rows="mapActivitiesToTableRows(activityStore.activities2)"
+        :rows="mapActivitiesToTableRows(activityStore.activitys2)"
         :columns="columns"
         row-key="id"
         class="q-mt-md"
@@ -131,7 +129,7 @@
         </div>
       </div>
       <q-table
-        :rows="mapActivitiesToTableRows(activityStore.activities3)"
+        :rows="mapActivitiesToTableRows(activityStore.activitys3)"
         :columns="columns"
         row-key="id"
         class="q-mt-md"
@@ -244,12 +242,12 @@ onMounted(async () => {
   await activityStore.getActivities()
 })
 
-function mapActivitiesToTableRows(activities: Activity[]) {
-  if (!activities || activities.length === 0) {
+function mapActivitiesToTableRows(activitys: Activity[]) {
+  if (!activitys || activitys.length === 0) {
     return [] // ✅ ถ้าไม่มี Activity เลย ให้คืนค่าเป็น Array ว่าง
   }
 
-  return activities.map((activity, index) => {
+  return activitys.map((activity, index) => {
     const firstItem = activity.activityItems?.[0] || {} // ✅ ป้องกัน `undefined` หรือ `null`
     const firstDate = firstItem?.date?.[0] || { date: '-', stime: '-', etime: '-' } // ✅ ตรวจสอบ `date`
 

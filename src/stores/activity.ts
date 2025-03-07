@@ -7,10 +7,11 @@ import { onMounted, ref } from 'vue'
 type TitleForm = 'New Activity' | 'Edit Activity'
 
 export const useActivityStore = defineStore('activity', () => {
-  const activities = ref<Activity[]>([]) // Open and Close Enrollment Table
-  const activities1 = ref<Activity[]>([]) // Open and Close Enrollment Table
-  const activities2 = ref<Activity[]>([]) // Planning Table
-  const activities3 = ref<Activity[]>([]) // Success Table
+
+  const activitys = ref<Activity[]>([]) // Open and Close Enrollment Table
+  const activitys1 = ref<Activity[]>([]) // Open and Close Enrollment Table
+  const activitys2 = ref<Activity[]>([]) // Planning Table
+  const activitys3 = ref<Activity[]>([]) // Success Table
   const titleForm = ref<TitleForm>('New Activity')
   const initForm: Activity = {
     id: '', // เพิ่ม `id` เพื่อป้องกันปัญหาเวลาแก้ไข
@@ -57,10 +58,10 @@ export const useActivityStore = defineStore('activity', () => {
     const data2 = await ActivityService.getAll(query2.value, 'planning')
     const data3 = await ActivityService.getAll(query3.value, 'success')
 
-    activities.value = data.data
-    activities1.value = data1.data
-    activities2.value = data2.data
-    activities3.value = data3.data
+    activitys.value = data.data
+    activitys1.value = data1.data
+    activitys2.value = data2.data
+    activitys3.value = data3.data
     console.log(data.data)
     console.log(data1.data)
     console.log(data2.data)
@@ -75,9 +76,9 @@ export const useActivityStore = defineStore('activity', () => {
     titleForm,
     activity,
     getActivities,
-    activities1,
-    activities2,
-    activities3,
+    activitys1,
+    activitys2,
+    activitys3,
     query1,
     query2,
     query3,
