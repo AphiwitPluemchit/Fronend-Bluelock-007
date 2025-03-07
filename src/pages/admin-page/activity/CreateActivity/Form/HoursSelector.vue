@@ -8,6 +8,7 @@
       type="number"
       @keypress="isNumber($event)"
       @blur="validatePositive"
+      :disable="disable" 
     />
   </div>
 </template>
@@ -15,7 +16,11 @@
 <script setup lang="ts">
 import { defineProps, defineEmits, ref, watch } from 'vue';
 
-const props = defineProps<{ modelValue: string }>();
+const props = defineProps<{ 
+  modelValue: string;
+  disable?: boolean; // เพิ่ม prop disable
+}>();
+
 const emit = defineEmits<{ (event: 'update:modelValue', value: string): void }>();
 
 const localHours = ref(props.modelValue);

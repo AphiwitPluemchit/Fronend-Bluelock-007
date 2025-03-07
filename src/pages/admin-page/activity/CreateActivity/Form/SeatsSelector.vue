@@ -3,11 +3,12 @@
     <p class="label label_minWidth">จำนวนที่รับ :</p>
     <q-input
       outlined
-      style="width: 210px"
+      style="width: 228px"
       v-model="localSeats"
       type="number"
       @keypress="isNumber($event)"
       @blur="validatePositive"
+      :disable="disable"
     />
   </div>
 </template>
@@ -15,7 +16,11 @@
 <script setup lang="ts">
 import { defineProps, defineEmits, ref, watch } from 'vue';
 
-const props = defineProps<{ modelValue: string }>();
+const props = defineProps<{
+  modelValue: string;
+  disable?: boolean;
+}>();
+
 const emit = defineEmits<{ (event: 'update:modelValue', value: string): void }>();
 
 const localSeats = ref(props.modelValue);
@@ -54,5 +59,4 @@ const validatePositive = () => {
   line-height: normal;
   text-align: right;
 }
-
 </style>

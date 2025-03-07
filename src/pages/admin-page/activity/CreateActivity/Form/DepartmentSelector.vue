@@ -8,6 +8,7 @@
       @click="toggleDepartment(option.value)"
       :label="option.label"
       class="department-btn"
+      :disable="disable" 
     />
   </div>
 </template>
@@ -20,7 +21,11 @@ interface DepartmentOption {
   value: string;
 }
 
-const props = defineProps<{ modelValue: string[] }>();
+const props = defineProps<{ 
+  modelValue: string[];
+  disable?: boolean; // เพิ่ม prop disable
+}>();
+
 const emit = defineEmits<{ (event: "update:modelValue", value: string[]): void }>();
 
 const departmentOptions: DepartmentOption[] = [
@@ -31,6 +36,7 @@ const departmentOptions: DepartmentOption[] = [
 ];
 
 const toggleDepartment = (value: string) => {
+  if (props.disable) return; // ถ้า disable ห้ามกด
   const newDepartments = props.modelValue.includes(value)
     ? props.modelValue.filter((item) => item !== value)
     : [...props.modelValue, value];

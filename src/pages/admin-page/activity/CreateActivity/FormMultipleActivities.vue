@@ -55,7 +55,7 @@
         <p class="label">จำนวนที่รับ :</p>
         <q-input
           outlined
-          style="width: 210px"
+          style="width: 213px"
           v-model="subActivity.seats"
           type="number"
           @keypress="isNumber($event)"
@@ -108,14 +108,16 @@
       <!-- Lecturer -->
       <div class="input-group">
         <p class="label label_minWidth">วิทยากร :</p>
-        <q-input outlined v-model="subActivity.lecturer" style="width: 600px" />
+        <q-input outlined v-model="subActivity.lecturer" style="width: 100%" />
       </div>
 
-      <!-- Detail Activity -->
-      <div class="input-group">
-        <p style="align-self: flex-start" class="label label_minWidth">รายละเอียดอื่นๆ :</p>
-        <q-input outlined v-model="subActivity.detailActivity" style="width: 600px" />
-      </div>
+
+       <!-- Detail Activity -->
+       <div class="input-group">
+      <p style="align-self: flex-start" class="label label_minWidth">รายละเอียดอื่นๆ :</p>
+      <q-input type="textarea" rows="10" outlined v-model="detailActivity" style="width: 100%" />
+    </div>
+
       <!-- Add Activity Button -->
     </div>
     <div class="btn-container">
@@ -126,16 +128,28 @@
         </p>
       </q-btn>
     </div>
+    <div class="button-group">
+      <q-btn class="btnreject" @click="goToActivitiesManagement">ยกเลิก</q-btn>
+      <q-btn class="btnsecces">เสร็จสิ้น</q-btn>
+    </div>
   </q-page>
 </template>
 
 <script setup lang="ts">
-import { computed, ref, watch } from 'vue'
+import { computed, onMounted, ref, watch } from 'vue'
 import FoodSelector from 'src/pages/admin-page/activity/CreateActivity/Form/FoodSelector.vue'
 import HoursSelector from 'src/pages/admin-page/activity/CreateActivity/Form/HoursSelector.vue'
 import SingleDate from 'src/pages/admin-page/activity/CreateActivity/Form/SingleDate.vue'
 import TimeSelector from 'src/pages/admin-page/activity/CreateActivity/Form/TimeSelector.vue'
+import { useRouter } from 'vue-router'
 
+const router = useRouter()
+
+onMounted(() => {})
+
+const goToActivitiesManagement = async () => {
+  await router.push('/ActivitiesManagement')
+}
 interface SubActivity {
   subActivityName: string
   roomName: string
@@ -163,6 +177,7 @@ interface ToggleOption {
   label: string
   value: string
 }
+const detailActivity = ref('')
 const activityName = ref('')
 const totalHours = ref('')
 const foodMenu = ref('')
@@ -407,5 +422,12 @@ const yearOptions: ToggleOption[] = [
 }
 .active-btn {
   background-color: #d0e4ff !important;
+}
+
+.button-group {
+  display: flex;
+  justify-content: flex-end;
+  gap: 25px;
+  margin-top: 30px;
 }
 </style>

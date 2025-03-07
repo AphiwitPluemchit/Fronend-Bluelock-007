@@ -5,21 +5,21 @@
     <div class="time-row">
       <div class="time-inputs">
         <!-- Start Time -->
-        <q-input outlined v-model="localStartTime" class="time-box" readonly>
+        <q-input outlined v-model="localStartTime" class="time-box" readonly :disable="disable">
           <template v-slot:prepend>
-            <q-icon name="access_time" class="cursor-pointer">
-              <q-menu ref="menuStart" class="time-picker-card">
+            <q-icon name="access_time" class="cursor-pointer" :class="{ 'disabled-icon': disable }">
+              <q-menu ref="menuStart" class="time-picker-card" v-if="!disable">
                 <div class="time-container">
                   <div class="time-column">
-                    <q-btn flat dense icon="arrow_drop_up" @click="adjustHour('start', 'increase')" />
+                    <q-btn flat dense icon="arrow_drop_up" @click="adjustHour('start', 'increase')" :disable="disable" />
                     <div class="time-display">{{ formatHour(startHour) }}</div>
-                    <q-btn flat dense icon="arrow_drop_down" @click="adjustHour('start', 'decrease')" />
+                    <q-btn flat dense icon="arrow_drop_down" @click="adjustHour('start', 'decrease')" :disable="disable" />
                   </div>
                   <div class="separator">:</div>
                   <div class="time-column">
-                    <q-btn flat dense icon="arrow_drop_up" @click="adjustMinute('start', 'increase')" />
+                    <q-btn flat dense icon="arrow_drop_up" @click="adjustMinute('start', 'increase')" :disable="disable" />
                     <div class="time-display">{{ formatMinute(startMinute) }}</div>
-                    <q-btn flat dense icon="arrow_drop_down" @click="adjustMinute('start', 'decrease')" />
+                    <q-btn flat dense icon="arrow_drop_down" @click="adjustMinute('start', 'decrease')" :disable="disable" />
                   </div>
                 </div>
               </q-menu>
@@ -30,21 +30,21 @@
         <p class="time-separator">ถึง</p>
 
         <!-- End Time -->
-        <q-input outlined v-model="localEndTime" class="time-box" readonly >
+        <q-input outlined v-model="localEndTime" class="time-box" readonly :disable="disable">
           <template v-slot:prepend>
-            <q-icon name="access_time" class="cursor-pointer">
-              <q-menu ref="menuEnd" class="time-picker-card">
+            <q-icon name="access_time" class="cursor-pointer" :class="{ 'disabled-icon': disable }">
+              <q-menu ref="menuEnd" class="time-picker-card" v-if="!disable">
                 <div class="time-container">
                   <div class="time-column">
-                    <q-btn flat dense icon="arrow_drop_up" @click="adjustHour('end', 'increase')" />
+                    <q-btn flat dense icon="arrow_drop_up" @click="adjustHour('end', 'increase')" :disable="disable" />
                     <div class="time-display">{{ formatHour(endHour) }}</div>
-                    <q-btn flat dense icon="arrow_drop_down" @click="adjustHour('end', 'decrease')" />
+                    <q-btn flat dense icon="arrow_drop_down" @click="adjustHour('end', 'decrease')" :disable="disable" />
                   </div>
                   <div class="separator">:</div>
                   <div class="time-column">
-                    <q-btn flat dense icon="arrow_drop_up" @click="adjustMinute('end', 'increase')" />
+                    <q-btn flat dense icon="arrow_drop_up" @click="adjustMinute('end', 'increase')" :disable="disable" />
                     <div class="time-display">{{ formatMinute(endMinute) }}</div>
-                    <q-btn flat dense icon="arrow_drop_down" @click="adjustMinute('end', 'decrease')" />
+                    <q-btn flat dense icon="arrow_drop_down" @click="adjustMinute('end', 'decrease')" :disable="disable" />
                   </div>
                 </div>
               </q-menu>
@@ -60,8 +60,17 @@
 import { defineProps, defineEmits, ref, watch } from 'vue';
 
 // ✅ รับค่าจาก props
-const props = defineProps<{ startTime: string; endTime: string; formattedDate: string }>();
-const emit = defineEmits<{ (event: 'update:startTime', value: string): void; (event: 'update:endTime', value: string): void }>();
+const props = defineProps<{ 
+  startTime: string; 
+  endTime: string; 
+  formattedDate: string;
+  disable?: boolean; // เพิ่ม prop disable
+}>();
+
+const emit = defineEmits<{ 
+  (event: 'update:startTime', value: string): void; 
+  (event: 'update:endTime', value: string): void;
+}>();
 
 // ✅ แปลงค่า startTime และ endTime เป็นชั่วโมงและนาที
 const extractTime = (time: string) => {
@@ -117,6 +126,7 @@ const formatMinute = (minute: number): string => minute.toString().padStart(2, '
 
 // ✅ ปรับค่าเวลาเมื่อกดปุ่มเพิ่ม/ลด
 const adjustHour = (timeType: 'start' | 'end', direction: 'increase' | 'decrease'): void => {
+  if (props.disable) return; // ปิดการแก้ไขเมื่อ disable เป็น true
   if (timeType === 'start') {
     startHour.value = direction === 'increase' ? (startHour.value + 1) % 24 : (startHour.value - 1 + 24) % 24;
   } else {
@@ -125,6 +135,7 @@ const adjustHour = (timeType: 'start' | 'end', direction: 'increase' | 'decrease
 };
 
 const adjustMinute = (timeType: 'start' | 'end', direction: 'increase' | 'decrease'): void => {
+  if (props.disable) return; // ปิดการแก้ไขเมื่อ disable เป็น true
   if (timeType === 'start') {
     startMinute.value = direction === 'increase' ? (startMinute.value + 1) % 60 : (startMinute.value - 1 + 60) % 60;
   } else {

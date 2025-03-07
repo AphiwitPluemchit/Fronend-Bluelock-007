@@ -3,13 +3,14 @@
     <!-- Food Menu Input -->
     <div class="input-group">
       <p class="label label_minWidth">รายการอาหาร :</p>
-      <q-input outlined v-model="foodMenu" class="food-input" readonly>
+      <q-input outlined v-model="foodMenu" class="food-input" readonly :disable="disable">
         <template v-slot:prepend>
           <q-icon
             name="restaurant_menu"
             style="color: black"
             class="cursor-pointer"
-            @click="showFoodDialog = true"
+            @click="openFoodDialog"
+            :class="{ 'disabled-icon': disable }"
           />
         </template>
       </q-input>
@@ -22,7 +23,7 @@
 
         <!-- Wrapper ครอบปุ่มทั้งหมดและจัดให้อยู่ตรงกลาง -->
         <div class="food-container" style="margin-left: 20px;">
-          <div class="food-list" >
+          <div class="food-list">
             <q-btn
               v-for="(item, index) in menuItems"
               :key="index"
@@ -36,9 +37,11 @@
               text-color="black"
               :label="item"
               @click="toggleSelection(item)"
+              :disable="disable"
             />
             <!-- ปุ่มเพิ่มเมนู -->
             <q-btn
+              v-if="!disable"
               ref="editableBtn"
               rounded
               outlined
@@ -64,9 +67,9 @@
         </div>
 
         <div class="button-container">
-          <q-btn class="btnsecces" label="บันทึกและยืนยัน" @click="confirmSelection(true)" />
-          <q-btn class="btnreject" label="ยกเลิก" @click="cancelSelection" />
-          <q-btn class="btnconfirm" label="ยืนยัน" @click="confirmSelection(false)" />
+          <q-btn class="btnsecces" label="บันทึกและยืนยัน" @click="confirmSelection(true)" :disable="disable" />
+          <q-btn class="btnreject" label="ยกเลิก" @click="cancelSelection" :disable="disable" />
+          <q-btn class="btnconfirm" label="ยืนยัน" @click="confirmSelection(false)" :disable="disable" />
         </div>
       </div>
     </q-dialog>
@@ -74,8 +77,9 @@
 </template>
 
 <script setup lang="ts">
-import { ref, defineEmits, onMounted, nextTick } from 'vue';
+import { ref, defineEmits, defineProps, onMounted, nextTick } from 'vue';
 
+const props = defineProps<{ disable?: boolean }>(); // เพิ่ม prop disable
 const emit = defineEmits<{ (event: 'update:foodMenu', value: string): void }>();
 
 const showFoodDialog = ref(false);
@@ -97,7 +101,14 @@ const menuItems = ref([
   'ข้าวไก่ทอด',
 ]);
 
+const openFoodDialog = () => {
+  if (!props.disable) {
+    showFoodDialog.value = true;
+  }
+};
+
 const toggleSelection = (item: string) => {
+  if (props.disable) return;
   if (selectedFoods.value.includes(item)) {
     selectedFoods.value = selectedFoods.value.filter((food) => food !== item);
   } else {
@@ -106,6 +117,7 @@ const toggleSelection = (item: string) => {
 };
 
 const confirmSelection = (saveToLocal: boolean = false) => {
+  if (props.disable) return;
   foodMenu.value = selectedFoods.value.join(', ');
   emit('update:foodMenu', foodMenu.value);
 
@@ -117,11 +129,13 @@ const confirmSelection = (saveToLocal: boolean = false) => {
 };
 
 const cancelSelection = () => {
+  if (props.disable) return;
   selectedFoods.value = [];
   showFoodDialog.value = false;
 };
 
 const startEditing = () => {
+  if (props.disable) return;
   addingNewFood.value = true;
   void nextTick(() => {
     inputField.value?.focus();
@@ -129,6 +143,7 @@ const startEditing = () => {
 };
 
 const addFood = () => {
+  if (props.disable) return;
   if (newFoodName.value.trim() !== '') {
     menuItems.value.push(newFoodName.value.trim());
     localStorage.setItem('menuItems', JSON.stringify(menuItems.value));
@@ -148,10 +163,10 @@ onMounted(() => {
 <style scoped>
 .button-container {
   display: flex;
-  justify-content: flex-end; 
+  justify-content: flex-end;
   gap: 15px;
   padding-top: 30px;
-  border-top: 1px solid #ddd; 
+  border-top: 1px solid #ddd;
 }
 
 .input-group {
@@ -161,7 +176,7 @@ onMounted(() => {
 }
 
 .food-input {
-  width: 595px;
+  width: 600px;
   flex-grow: 1;
 }
 .label {
@@ -194,7 +209,7 @@ onMounted(() => {
 .food-dialog {
   background-color: white;
   width: 600px;
-  height: 600px; 
+  height: 600px;
   border-radius: 10px;
   padding: 20px;
   display: flex;
@@ -202,9 +217,9 @@ onMounted(() => {
 }
 
 .food-container {
-  flex-grow: 1; 
+  flex-grow: 1;
   overflow-y: auto;
-  max-height: 400px; 
+  max-height: 400px;
   padding-bottom: 10px;
 }
 
@@ -239,8 +254,8 @@ onMounted(() => {
   text-align: center;
   font-size: 14px;
   padding: 0;
-  
 }
+
 .food-list {
   display: flex;
   flex-wrap: wrap;
@@ -249,10 +264,16 @@ onMounted(() => {
   gap: 10px;
   padding-bottom: 10px;
 }
+
+.disabled-icon {
+  pointer-events: none;
+  opacity: 0.5;
+}
+
 ::v-deep(.q-field__control) {
-  height: 40px !important; 
-  align-items: center; 
-  padding: 5px 10px; 
+  height: 40px !important;
+  align-items: center;
+  padding: 5px 10px;
 }
 
 ::v-deep(.q-field__prepend) {
@@ -260,9 +281,5 @@ onMounted(() => {
   padding: 5px 10px;
   display: flex;
   align-items: center;
-}
-
-::v-deep(.q-icon) {
-  font-size: 18px;
 }
 </style>

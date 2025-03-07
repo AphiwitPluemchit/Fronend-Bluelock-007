@@ -107,7 +107,9 @@ const getFormComponent = computed(() => {
   display: flex;
   flex-direction: column;
   flex-grow: 1; 
-  min-height: 600px; 
+  overflow-x: hidden;
+  overflow-y: auto;
+  max-height: 700px;
 }
 
 

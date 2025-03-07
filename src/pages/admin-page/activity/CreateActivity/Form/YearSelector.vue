@@ -8,6 +8,7 @@
       @click="toggleYear(option.value)"
       :label="option.label"
       class="year-btn"
+      :disable="disable" 
     />
   </div>
 </template>
@@ -20,7 +21,11 @@ interface YearOption {
   value: string;
 }
 
-const props = defineProps<{ modelValue: string[] }>();
+const props = defineProps<{ 
+  modelValue: string[];
+  disable?: boolean; // เพิ่ม prop disable
+}>();
+
 const emit = defineEmits<{ (event: "update:modelValue", value: string[]): void }>();
 
 const yearOptions: YearOption[] = [
@@ -33,6 +38,7 @@ const yearOptions: YearOption[] = [
 const selectedYears = computed(() => props.modelValue);
 
 const toggleYear = (value: string) => {
+  if (props.disable) return; // ถ้า disable ห้ามกด
   const newYears = selectedYears.value.includes(value)
     ? selectedYears.value.filter((item) => item !== value)
     : [...selectedYears.value, value];
