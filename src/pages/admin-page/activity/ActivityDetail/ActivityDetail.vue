@@ -1,16 +1,16 @@
 <script setup lang="ts">
-import { computed, ref } from 'vue';
-import ActivityDetailTab from './ActivityDetailTab.vue';
-import FilterSearchStudentList from './FilterSearchStudentList.vue';
-import TableStudentList from './TableStudentList.vue';
-import RegistrationDetails from './RegistrationDetails.vue';
-import { useRouter } from 'vue-router';
-import SummaryResult from './SummaryResult.vue';
+import { computed, ref } from 'vue'
+import ActivityDetailTab from './ActivityDetailTab.vue'
+import FilterSearchStudentList from './FilterSearchStudentList.vue'
+import TableStudentList from './TableStudentList.vue'
+import RegistrationDetails from './RegistrationDetails.vue'
+import { useRouter } from 'vue-router'
+import SummaryResult from './SummaryResult.vue'
 
 // import { route } from 'quasar/wrappers';
 
-const tab = ref<string>('activity');
-const search = ref<string>('');
+const tab = ref<string>('activity')
+const search = ref<string>('')
 
 const router = useRouter()
 
@@ -20,12 +20,12 @@ const goToActivitiesManagement = async () => {
 
 // Breadcrumb ตามแท็บที่เลือก
 const currentBreadcrumb = computed(() => {
-  if (tab.value === "activity") return "รายละเอียดกิจกรรม";
-  if (tab.value === "registration") return "รายละเอียดการลงทะเบียน";
-  if (tab.value === "students") return "รายชื่อนิสิต";
-  if (tab.value === "summary") return "สรุปผลกิจกรรม";
-  return "รายละเอียดกิจกรรม"; // ค่าเริ่มต้น
-});
+  if (tab.value === 'activity') return 'รายละเอียดกิจกรรม'
+  if (tab.value === 'registration') return 'รายละเอียดการลงทะเบียน'
+  if (tab.value === 'students') return 'รายชื่อนิสิต'
+  if (tab.value === 'summary') return 'สรุปผลกิจกรรม'
+  return 'รายละเอียดกิจกรรม' // ค่าเริ่มต้น
+})
 
 // กำหนด breadcrumb ตาม route ปัจจุบัน
 // const currentBreadcrumb = computed(() => {
@@ -42,16 +42,23 @@ const currentBreadcrumb = computed(() => {
 //       return "จัดการกิจกรรม";
 //   }
 // });
-
 </script>
 
 <template>
   <q-page class="q-pa-md">
     <q-breadcrumbs class="q-mb-md breadcrumbs-custom" separator="">
       <q-breadcrumbs-el>
-        <img src="src/pages/admin-page/activity/icon pics/compose.png" alt="icon" width="18" height="18"
-          class="q-mr-sm" />
-        <a @click="goToActivitiesManagement" style="cursor: pointer; text-decoration: none; color: black">
+        <img
+          src="src/pages/admin-page/activity/icon pics/compose.png"
+          alt="icon"
+          width="18"
+          height="18"
+          class="q-mr-sm"
+        />
+        <a
+          @click="goToActivitiesManagement"
+          style="cursor: pointer; text-decoration: none; color: black"
+        >
           จัดการกิจกรรม
         </a>
       </q-breadcrumbs-el>
@@ -63,8 +70,6 @@ const currentBreadcrumb = computed(() => {
       <!-- ทำให้ breadcrumb เปลี่ยนตาม tab ที่เลือก -->
       <q-breadcrumbs-el :label="currentBreadcrumb" :class="{ 'active-breadcrumb': true }" />
     </q-breadcrumbs>
-
-
 
     <!-- หัวข้อแสดงอยู่ข้างบน-->
     <div class="q-mb-md text-left text-h6 page-title">
@@ -84,7 +89,7 @@ const currentBreadcrumb = computed(() => {
 
     <q-tab-panels v-model="tab" animated>
       <q-tab-panel name="activity">
-        <ActivityDetailTab ></ActivityDetailTab>
+        <ActivityDetailTab></ActivityDetailTab>
         <div class="text-center text-h6"></div>
       </q-tab-panel>
 

@@ -15,6 +15,7 @@ export const useActivityStore = defineStore('activity', () => {
   const initForm: Activity = {
     id: '', // เพิ่ม `id` เพื่อป้องกันปัญหาเวลาแก้ไข
     name: '',
+    activityItems: [],
   }
   const activity = ref<Activity>(initForm)
 
