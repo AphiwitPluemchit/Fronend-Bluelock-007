@@ -3,7 +3,6 @@ import { ref } from 'vue';
 import FilterDialog from 'src/components/Dialog/FilterDialog.vue'
 
 const showFilterDialog1 = ref(false)
-const search1 = ref('')
 const filterCategories1 = ref(['major', 'statusStudent'])
 
 const filters = ref<{
@@ -21,12 +20,23 @@ const applyFilters = (selectedFilters: {
     filters.value = selectedFilters
     console.log('Filters Applied:', filters.value)
 }
+
+const props = defineProps<{ search: string }>();
+const emit = defineEmits(['update:search']);
+
+const search1 = ref(props.search);
+
+// ฟังก์ชันกรองข้อมูลเฉพาะ "ชื่อนิสิต"
+const updateSearch = () => {
+    emit('update:search', search1.value);
+};
+
 </script>
 
 <template>
     <div class="row q-mb-md justify-end items-center">
         <!-- ช่องค้นหา -->
-        <q-input dense outlined v-model="search1" placeholder="ค้นหา" class="q-mr-sm searchbox"
+        <q-input dense outlined v-model="search1" @update:model-value="updateSearch" placeholder="ค้นหาชื่อนิสิต" class="q-mr-sm searchbox"
             :style="{ boxShadow: 'none' }">
             <template v-slot:append>
                 <q-icon name="search" />

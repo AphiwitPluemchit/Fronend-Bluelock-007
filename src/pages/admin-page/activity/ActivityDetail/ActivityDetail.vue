@@ -2,7 +2,7 @@
 import { computed, ref } from 'vue';
 import ActivityDetailTab from './ActivityDetailTab.vue';
 import FilterSearchStudentList from './FilterSearchStudentList.vue';
-import TableStudentList from './TableStudentList.vue';
+import StudentList from './StudentList.vue';
 import RegistrationDetails from './RegistrationDetails.vue';
 import { useRouter } from 'vue-router';
 import SummaryResult from './SummaryResult.vue';
@@ -84,7 +84,7 @@ const currentBreadcrumb = computed(() => {
 
     <q-tab-panels v-model="tab" animated>
       <q-tab-panel name="activity">
-        <ActivityDetailTab ></ActivityDetailTab>
+        <ActivityDetailTab></ActivityDetailTab>
         <div class="text-center text-h6"></div>
       </q-tab-panel>
 
@@ -96,7 +96,7 @@ const currentBreadcrumb = computed(() => {
         <div class="text-h6 q-mb-md"></div>
 
         <FilterSearchStudentList v-model:search="search" />
-        <TableStudentList :search="search" />
+        <StudentList :search="search" />
       </q-tab-panel>
 
       <q-tab-panel name="summary">

@@ -1,13 +1,17 @@
 <script setup lang="ts">
-import { ref } from 'vue';
+import { ref, defineEmits } from 'vue';
 
+// รับค่า ID ของนิสิต
 const props = defineProps<{ id: number }>();
+
+// ส่งอีเวนต์ออกไปให้ component แม่
+const emit = defineEmits(['removeStudent']);
 
 const showDialog = ref(false);
 
-// ฟังก์ชันยืนยันการลบ (ตอนนี้แค่ console.log)
-const confirmRemove = () => {
+const removeStudentFromActivity = () => {
     console.log(`ลบนิสิต ID: ${props.id} สำเร็จ`);
+    emit('removeStudent', props.id);
     showDialog.value = false;
 };
 </script>
@@ -30,7 +34,7 @@ const confirmRemove = () => {
 
                 <q-card-actions align="center" class="dialog-actions">
                     <q-btn class="dialog-btn cancel-btn" label="ยกเลิก" v-close-popup />
-                    <q-btn class="dialog-btn confirm-btn" label="ตกลง" @click="confirmRemove" />
+                    <q-btn class="dialog-btn confirm-btn" label="ตกลง" @click="removeStudentFromActivity" />
                 </q-card-actions>
             </q-card>
         </q-dialog>

@@ -71,47 +71,61 @@ const confirmCreateQR_Code = () => {
           <span class="unit">คน</span>
         </div>
 
-        <div class="registration-row">
+        <!-- ผลการเช็คชื่อ -->
+        <div class="info-row">
           <span class="label">ผลการเช็คชื่อ :</span>
-        </div>
-        <div class="registration-row">
-          <span class="sub-label">เช็คชื่อเข้า</span>
-          <span class="middle-text">จำนวน</span>
-          <span class="value">{{ registrationSummary.checkIn }}</span>
-          <span class="unit">คน</span>
-        </div>
-
-        <div class="registration-row">
-          <span class="sub-label">เช็คชื่อสาย</span>
-          <span class="middle-text">จำนวน</span>
-          <span class="value">{{ registrationSummary.late }}</span>
-          <span class="unit">คน</span>
-        </div>
-
-        <div class="registration-row">
-          <span class="sub-label">เช็คชื่อออก</span>
-          <span class="middle-text">จำนวน</span>
-          <span class="value">{{ registrationSummary.checkOut }}</span>
-          <span class="unit">คน</span>
-        </div>
-
-        <div class="registration-row">
-          <span class="sub-label">ไม่มา</span>
-          <span class="middle-text">จำนวน</span>
-          <span class="value">{{ registrationSummary.absent }}</span>
-          <span class="unit">คน</span>
+          <div class="registration-info">
+            <div class="row">
+              <span class="sub-label">เช็คชื่อเข้า</span>
+              <span class="text">จำนวน</span>
+              <span class="number">{{ registrationSummary.checkIn }}</span>
+              <span class="unit">คน</span>
+            </div>
+            <div class="row">
+              <span class="sub-label">เช็คชื่อสาย</span>
+              <span class="text">จำนวน</span>
+              <span class="number">{{ registrationSummary.late }}</span>
+              <span class="unit">คน</span>
+            </div>
+            <div class="row">
+              <span class="sub-label">เช็คชื่อออก</span>
+              <span class="text">จำนวน</span>
+              <span class="number">{{ registrationSummary.checkOut }}</span>
+              <span class="unit">คน</span>
+            </div>
+            <div class="row">
+              <span class="sub-label">ไม่มา</span>
+              <span class="text">จำนวน</span>
+              <span class="number">{{ registrationSummary.absent }}</span>
+              <span class="unit">คน</span>
+            </div>
+          </div>
         </div>
       </div>
+      <!-- ตารางผลการประเมิน -->
+      <div class="evaluation-container">
+        <EvaluationTable />
+      </div>
     </div>
-    <EvaluationTable />
   </div>
 </template>
 
 <style scoped>
 .summary-container {
-  padding: 20px;
-  background-color: #F4F6F9;
-  border-radius: 8px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 150px;
+  background-color: #EDF0F5;
+  padding: 30px;
+  border-radius: 12px;
+  width: 100%;
+}
+
+/* ตารางสามารถเลื่อนขึ้นลงได้ */
+.evaluation-container {
+  width: 100%;
+  margin-top: 20px; /* เว้นระยะห่างจากข้อมูลเช็คชื่อ */
 }
 
 /* โครงสร้างเนื้อหาสรุป */
@@ -119,47 +133,75 @@ const confirmCreateQR_Code = () => {
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
+  gap: 200px;
 }
 
 /* รายละเอียดการลงทะเบียน */
 .registration-details {
   display: flex;
-  align-items: flex-start;
   flex-direction: column;
+  gap: 10px;
+}
+
+.info-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
   margin-top: 20px;
+  flex-wrap: nowrap;
+  /* ป้องกันการขึ้นบรรทัดใหม่ */
+}
+
+.registration-info {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
 }
 
 .registration-row {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   gap: 10px;
-  margin-bottom: 5px;
-}
-
-.label {
-  font-weight: bold;
-  min-width: 220px;
-  text-align: right;
+  margin-top: 10px;
+  flex-wrap: nowrap;
 }
 
 .sub-label {
-  min-width: 120px;
-  text-align: right;
-}
-
-.middle-text {
   min-width: 80px;
+  text-align: left;
+  gap: 20px;
+}
+
+.row {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.label {
+  white-space: nowrap;
   text-align: right;
+  margin-right: 15px;
+  min-width: 180px;
 }
 
-.value {
-  font-weight: bold;
-  min-width: 40px;
-  text-align: center;
+.value,
+.unit,
+.text,
+.number {
+  min-width: 30px;
+  text-align: left;
 }
 
-.unit {
-  min-width: 40px;
+.label,
+.sub-label,
+.value,
+.unit,
+.text,
+.number {
+  font-weight: 500;
+  font-size: 16px;
+  color: #000000;
 }
 
 /* ส่วนรูปภาพ */
@@ -191,8 +233,10 @@ const confirmCreateQR_Code = () => {
   color: black;
   border-radius: 8px;
   font-size: 16px;
-  padding: 10px 20px;
-  box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.1);
+  padding: 10px 16px;
+  align-self: flex-start;
+  margin-right: auto;
+  /* box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.1); */
 }
 
 /* ไดอะล็อก */
@@ -200,6 +244,7 @@ const confirmCreateQR_Code = () => {
   width: 400px;
   padding: 20px;
   text-align: center;
+  border-radius: 8px;
 }
 
 .dialog-title {

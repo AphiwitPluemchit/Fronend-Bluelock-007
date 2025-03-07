@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref } from 'vue';
+import { ref, computed, defineProps } from 'vue';
 import StudentStatus from './StudentStatus.vue';
 import RemoveStudent from './RemoveStudent.vue';
 
@@ -26,10 +26,24 @@ const columns = [
     { name: "actions", label: "", field: "actions", align: "center" as const }
 ];
 
+const props = defineProps<{ search: string }>();
+
+// ฟังก์ชันลบนิสิต
+const removeStudentFromList = (studentId: number) => {
+    students.value = students.value.filter(student => student.id !== studentId);
+};
+
+// ฟังก์ชันค้นหาเฉพาะชื่อนิสิต
+const filteredStudents = computed(() => {
+    return students.value.filter(student =>
+        student.name.toLowerCase().includes(props.search.toLowerCase())
+    );
+});
+
 </script>
 
 <template>
-    <q-table flat bordered :rows="students" :columns="columns" row-key="id" dense>
+    <q-table flat bordered :rows="filteredStudents" :columns="columns" row-key="id" dense>
         <!-- ปรับขนาดตัวอักษรของลำดับ -->
         <template v-slot:body-cell-index="props">
             <q-td :props="props" class="text-center table-text bold-text">
@@ -43,16 +57,17 @@ const columns = [
             </q-td>
         </template>
 
+        <!-- ปุ่มลบ -->
         <template v-slot:body-cell-actions="props">
             <q-td :props="props">
-                <RemoveStudent :id="props.row.id" />
+                <RemoveStudent :id="props.row.id" @removeStudent="removeStudentFromList" />
             </q-td>
         </template>
     </q-table>
 </template>
 
 <style scoped>
-/* ปรับขนาดตัวอักษรของตารางทั้งหมด */
+/* ปรับขนาดตัวอักษรของตาราง */
 :deep(.q-table) {
     font-size: 16px;
 }
