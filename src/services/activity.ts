@@ -11,12 +11,14 @@ export class ActivityService {
     const queryParams = { ...params, status }
     try {
       const res = await api.get<PaginationResponse<Activity>>(this.path, { params: queryParams })
+
       return res.data
     } catch (error) {
       console.error('Error fetching activities:', error)
       throw error
     }
   }
+
   static async getOne(id: string) {
     try {
       const res = await api.get(`${this.path}/${id}`)

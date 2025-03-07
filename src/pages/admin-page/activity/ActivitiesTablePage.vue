@@ -5,7 +5,7 @@
       <div class="text-h4">จัดการกิจกรรม</div>
     </div>
     <div class="row justify-end items-center">
-      <q-btn dense outlined icon="add" label="เพิ่มข้อมูล" class="btnadd" @click="goToPage()" />
+      <q-btn dense outlined icon="add" label="เพิ่มข้อมูล" class="btnadd" @click="goToPage()"/>
     </div>
     <!-- ตาราง 1 -->
     <section class="q-mt-lg">

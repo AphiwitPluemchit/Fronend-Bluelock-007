@@ -1,210 +1,296 @@
 <template>
-  <q-page class="q-pa-md">
+  <q-page>
     <!-- Status -->
-    <div class="status-container q-mb-md">
-      <p class="label">สถานะ:</p>
+    <div class="input-group">
+      <p class="label label_minWidth">สถานะ:</p>
       <q-btn label="กำลังวางแผน" class="status-btn" />
     </div>
 
     <!-- Activity Name -->
-    <div class="field-container">
-      <p class="label">ชื่อกิจกรรม :</p>
-      <q-input outlined v-model="activityName" class="inputBox" />
+    <div class="input-group">
+      <p class="label label_minWidth">ชื่อกิจกรรมหลัก :</p>
+      <q-input outlined v-model="activityName" style="width: 600px" />
     </div>
 
     <!-- Date -->
-    <div class="field-container">
-      <p class="label">วันที่จัดกิจกรรม :</p>
-      <q-input outlined v-model="activityDateInput" class="inputBox" mask="date">
-        <template v-slot:append>
-          <q-icon name="event" class="cursor-pointer">
-            <q-popup-proxy cover transition-show="scale" transition-hide="scale">
-              <q-date v-model="internalDate" mask="DD/MM/YYYY" today-btn @input="handleDateInput" />
-            </q-popup-proxy>
-          </q-icon>
-        </template>
-      </q-input>
-    </div>
+    <SingleDate v-model="activityDateInternal" />
 
     <!-- Time -->
-    <div class="time-container">
-      <div class="field-container">
-        <p class="label">เวลาเริ่มกิจกรรม :</p>
-        <q-input outlined v-model="startTime" class="inputBox">
-          <template v-slot:append>
-            <q-icon name="access_time" class="cursor-pointer">
-              <q-popup-proxy cover transition-show="scale" transition-hide="scale">
-                <q-time v-model="startTime" format24h mask="HH:mm" />
-              </q-popup-proxy>
-            </q-icon>
-          </template>
-        </q-input>
+    <div class="input-group">
+      <p class="label label_minWidth">เวลาที่จัดกิจกรรม:</p>
+      <TimeSelector
+        v-model:startTime="selectedTime"
+        v-model:endTime="endTime"
+        :formattedDate="formattedThaiDate"
+      />
+    </div>
+
+    <HoursSelector v-model="totalHours" class="input-group" />
+    <FoodSelector v-model:foodMenu="foodMenu" class="input-group" />
+
+    <!-- Sub Activities List -->
+    <div v-for="(subActivity, index) in subActivities" :key="index" class="sub-activity">
+      <!-- Cancel (X) Icon -->
+      <div class="remove-icon">
+        <q-icon
+          name="close"
+          size="35px"
+          color="red"
+          class="cursor-pointer"
+          @click="removeSubActivity(index)"
+        />
       </div>
 
-      <div class="field-container">
-        <p class="label">เวลาสิ้นสุดกิจกรรม:</p>
-        <q-input outlined v-model="endTime" class="inputBox">
-          <template v-slot:append>
-            <q-icon name="access_time" class="cursor-pointer">
-              <q-popup-proxy cover transition-show="scale" transition-hide="scale">
-                <q-time v-model="startTime" mask="HH:mm:ss" />
-              </q-popup-proxy>
-            </q-icon>
-          </template>
-        </q-input>
+      <!-- SubActivity Name -->
+      <div class="input-group">
+        <p class="label label_minWidth">ชื่อกิจกรรม :</p>
+        <q-input outlined v-model="subActivity.subActivityName" style="width: 600px" />
       </div>
+
+      <!-- Room and Seats -->
+      <div class="input-group">
+        <p class="label label_minWidth">ชื่อห้องที่จัดกิจกรรม :</p>
+        <q-input outlined v-model="subActivity.roomName" style="width: 220px" />
+
+        <p class="label">จำนวนที่รับ :</p>
+        <q-input
+          outlined
+          style="width: 213px"
+          v-model="subActivity.seats"
+          type="number"
+          @keypress="isNumber($event)"
+          @blur="validatePositive('seats', index)"
+        />
+      </div>
+
+      <!-- Activity Type -->
+      <div class="input-group">
+        <p class="label label_minWidth">ประเภทกิจกรรม :</p>
+        <q-btn
+          :class="{ 'active-btn': subActivity.activityType === 'prep' }"
+          @click="subActivity.activityType = 'prep'"
+          label="ชั่วโมงเตรียมความพร้อม"
+          class="activityType-btn"
+        />
+        <q-btn
+          :class="{ 'active-btn': subActivity.activityType === 'academic' }"
+          @click="subActivity.activityType = 'academic'"
+          label="ชั่วโมงทักษะทางวิชาการ"
+          class="activityType-btn"
+        />
+      </div>
+      <!-- Department -->
+      <div class="input-group">
+        <p class="label label_minWidth">สาขา :</p>
+        <q-btn
+          v-for="option in departmentOptions"
+          :key="option.value"
+          :class="{ 'active-btn': subActivity.departments.includes(option.value) }"
+          @click="toggleDepartment(index, option.value)"
+          :label="option.label"
+          class="department-btn"
+        />
+      </div>
+
+      <!-- Year -->
+      <div class="input-group">
+        <p class="label label_minWidth">ชั้นปี :</p>
+        <q-btn
+          v-for="option in yearOptions"
+          :key="option.value"
+          :class="{ 'active-btn': subActivity.years.includes(option.value) }"
+          @click="toggleYear(index, option.value)"
+          :label="option.label"
+          class="year-btn"
+        />
+      </div>
+
+      <!-- Lecturer -->
+      <div class="input-group">
+        <p class="label label_minWidth">วิทยากร :</p>
+        <q-input outlined v-model="subActivity.lecturer" style="width: 100%" />
+      </div>
+
+
+       <!-- Detail Activity -->
+       <div class="input-group">
+      <p style="align-self: flex-start" class="label label_minWidth">รายละเอียดอื่นๆ :</p>
+      <q-input type="textarea" rows="10" outlined v-model="detailActivity" style="width: 100%" />
     </div>
 
-    <!-- Hours -->
-    <div class="field-container" style="width: 404px; display: flex">
-      <p class="label">จำนวนชั่วโมง :</p>
-      <q-input outlined v-model="totalHours" class="inputBox" />
+      <!-- Add Activity Button -->
     </div>
-
-    <!-- Room -->
-    <!-- Seats -->
-    <div class="field-container">
-      <p class="label">ชื่อห้องที่จัดกิจกรรม :</p>
-      <q-input outlined v-model="roomName" class="inputBox" />
-      <p class="label">จำนวนที่นั่ง :</p>
-      <q-input outlined v-model="seats" class="inputBox" />
+    <div class="btn-container">
+      <q-btn class="btnAddActivity" @click="addSubActivity">
+        <p class="label">
+          <q-icon name="add" size="20px" />
+          เพิ่มข้อกิจกรรม
+        </p>
+      </q-btn>
     </div>
-
-    <!-- Activity Type -->
-    <div class="field-container q-mb-md">
-      <p class="label">ประเภทกิจกรรม :</p>
-      <q-btn
-        :class="{ 'active-btn': activityType === 'prep' }"
-        @click="activityType = 'prep'"
-        label="ชั่วโมงเตรียมความพร้อม"
-        class="activityType-btn"
-      />
-      <q-btn
-        :class="{ 'active-btn': activityType === 'academic' }"
-        @click="activityType = 'academic'"
-        label="ชั่วโมงทักษะทางวิชาการ"
-        class="activityType-btn"
-      />
-    </div>
-
-    <!-- Department -->
-    <div class="field-container q-mb-md">
-      <p class="label">สาขา :</p>
-      <q-btn
-        v-for="option in departmentOptions"
-        :key="option.value"
-        :class="{ 'active-btn': departments.includes(option.value) }"
-        @click="toggleDepartment(option.value)"
-        :label="option.label"
-        class="department-btn"
-      />
-    </div>
-
-    <!-- Year -->
-    <div class="field-container q-mb-md">
-      <p class="label">ชั้นปี :</p>
-      <q-btn
-        v-for="option in yearOptions"
-        :key="option.value"
-        :class="{ 'active-btn': years.includes(option.value) }"
-        @click="toggleYear(option.value)"
-        :label="option.label"
-        class="year-btn"
-      />
-    </div>
-
-    <!-- Lecturer -->
-    <div class="field-container">
-      <p class="label">วิทยากร :</p>
-      <q-input outlined v-model="lecturer" class="inputBox" />
-    </div>
-
-    <!-- Food Menu -->
-    <div class="field-container">
-      <p class="label">รายการอาหาร :</p>
-      <q-input outlined v-model="foodMenu" class="inputBox" />
-    </div>
-
-    <!-- Detail Activity -->
-    <div class="field-container">
-      <p class="label" style="align-self: flex-start">รายละเอียดอื่นๆ :</p>
-      <q-input outlined v-model="detailActivity" class="inputBox" type="textarea" />
+    <div class="button-group">
+      <q-btn class="btnreject" @click="goToActivitiesManagement">ยกเลิก</q-btn>
+      <q-btn class="btnsecces">เสร็จสิ้น</q-btn>
     </div>
   </q-page>
 </template>
 
 <script setup lang="ts">
-import { computed, ref, watch } from 'vue'
-import dayjs from 'dayjs'
-import buddhistEra from 'dayjs/plugin/buddhistEra'
+import { computed, onMounted, ref, watch } from 'vue'
+import FoodSelector from 'src/pages/admin-page/activity/CreateActivity/Form/FoodSelector.vue'
+import HoursSelector from 'src/pages/admin-page/activity/CreateActivity/Form/HoursSelector.vue'
+import SingleDate from 'src/pages/admin-page/activity/CreateActivity/Form/SingleDate.vue'
+import TimeSelector from 'src/pages/admin-page/activity/CreateActivity/Form/TimeSelector.vue'
+import { useRouter } from 'vue-router'
 
-dayjs.extend(buddhistEra)
+const router = useRouter()
+
+onMounted(() => {})
+
+const goToActivitiesManagement = async () => {
+  await router.push('/ActivitiesManagement')
+}
+interface SubActivity {
+  subActivityName: string
+  roomName: string
+  seats: number
+  activityType: string
+  lecturer: string
+  detailActivity: string
+  departments: string[]
+  years: string[]
+}
+const addSubActivity = () => {
+  subActivities.value.push({
+    subActivityName: '',
+    roomName: '',
+    seats: 0,
+    activityType: '',
+    lecturer: '',
+    detailActivity: '',
+    departments: [],
+    years: [],
+  })
+}
 
 interface ToggleOption {
   label: string
   value: string
 }
-
-// Previous refs remain the same
-const activityName = ref('')
-
-const startTime = ref('')
-const endTime = ref('')
-const totalHours = ref('')
-const roomName = ref('')
-const seats = ref('')
-const activityType = ref('')
-const lecturer = ref('')
-const foodMenu = ref('')
 const detailActivity = ref('')
+const activityName = ref('')
+const totalHours = ref('')
+const foodMenu = ref('')
+const subActivities = ref<SubActivity[]>([])
+const activityDateInternal = ref('')
+const endTime = ref<string>('00:00')
+const selectedTime = ref<string>('00:00')
+const hour = ref<number>(0)
+const minute = ref<number>(0)
+const endHour = ref<number>(0)
+const endMinute = ref<number>(0)
 
-// Modified to array refs for multiple selections
-const departments = ref<string[]>([])
-const years = ref<string[]>([])
+// ฟังก์ชันสำหรับฟอร์แมตเวลาเป็นสตริง
+const formatTime = (h: number, m: number): string => {
+  return `${formatHour(h)}:${formatMinute(m)}`
+}
+// watch สำหรับ start time
+watch([hour, minute], () => {
+  selectedTime.value = formatTime(hour.value, minute.value)
+})
 
-// ฟังก์ชันเลือก/ยกเลิก สาขา
-const toggleDepartment = (value: string) => {
-  if (departments.value.includes(value)) {
-    departments.value = departments.value.filter((item) => item !== value)
+// watch สำหรับ end time
+watch([endHour, endMinute], () => {
+  endTime.value = formatTime(endHour.value, endMinute.value)
+})
+const formatHour = (hour: number): string => {
+  return hour.toString().padStart(2, '0')
+}
+
+const formatMinute = (minute: number): string => {
+  return minute.toString().padStart(2, '0')
+}
+
+// ฟังก์ชันปรับชั่วโมงและนาที ที่ใช้ได้ทั้ง start time และ end time
+
+const isNumber = (event: KeyboardEvent) => {
+  const charCode = event.which ? event.which : event.keyCode
+
+  if (charCode < 48 || charCode > 57) {
+    event.preventDefault()
+  }
+}
+const formattedThaiDate = computed(() => {
+  if (!activityDateInternal.value) return ''
+
+  const parts = activityDateInternal.value.split('-') // แยก YYYY-MM-DD
+  if (parts.length !== 3) return ''
+
+  const [year, month, day] = parts
+  if (!year || !month || !day) return ''
+
+  const monthIndex = parseInt(month, 10) - 1
+  if (monthIndex < 0 || monthIndex >= thaiLocale.months.length) return ''
+
+  const thaiMonth = thaiLocale.months[monthIndex]
+  const thaiYear = parseInt(year, 10) + 543 // แปลง ค.ศ. เป็น พ.ศ.
+
+  return `${parseInt(day, 10)} ${thaiMonth} ${thaiYear}`
+})
+
+// ✅ Thai locale สำหรับเดือน
+const thaiLocale = {
+  months: [
+    'มกราคม',
+    'กุมภาพันธ์',
+    'มีนาคม',
+    'เมษายน',
+    'พฤษภาคม',
+    'มิถุนายน',
+    'กรกฎาคม',
+    'สิงหาคม',
+    'กันยายน',
+    'ตุลาคม',
+    'พฤศจิกายน',
+    'ธันวาคม',
+  ],
+}
+
+const validatePositive = (field: 'totalHours' | 'seats', index?: number) => {
+  if (field === 'totalHours') {
+    if (!totalHours.value || Number(totalHours.value) < 0) {
+      totalHours.value = '0'
+    }
+  } else if (field === 'seats' && typeof index === 'number' && subActivities.value[index]) {
+    if (!subActivities.value[index].seats || subActivities.value[index].seats < 0) {
+      subActivities.value[index].seats = 0
+    }
+  }
+}
+const removeSubActivity = (index: number) => {
+  subActivities.value.splice(index, 1)
+}
+const toggleDepartment = (index: number, value: string) => {
+  const subActivity = subActivities.value[index]
+  if (!subActivity) return // ✅ ป้องกัน undefined
+
+  if (subActivity.departments.includes(value)) {
+    subActivity.departments = subActivity.departments.filter((item) => item !== value)
   } else {
-    departments.value.push(value)
+    subActivity.departments.push(value)
   }
 }
 
-// ฟังก์ชันเลือก/ยกเลิก ชั้นปี
-const toggleYear = (value: string) => {
-  if (years.value.includes(value)) {
-    years.value = years.value.filter((item) => item !== value)
+const toggleYear = (index: number, value: string) => {
+  const subActivity = subActivities.value[index]
+  if (!subActivity) return // ✅ ป้องกัน undefined
+
+  if (subActivity.years.includes(value)) {
+    subActivity.years = subActivity.years.filter((item) => item !== value)
   } else {
-    years.value.push(value)
+    subActivity.years.push(value)
   }
 }
-const activityDateInput = ref<string | null>(null)
-const internalDate = ref<string | null>(null)
-
-const convertToBuddhist = (date: string | null) => {
-  if (!date) return null
-  return dayjs(date).locale('th').format('BBBB-MM-DD')
-}
-
-const convertToGregorian = (date: string | null) => {
-  if (!date) return null
-  return dayjs(date, 'BBBB-MM-DD').locale('th').format('YYYY-MM-DD')
-}
-
-const handleDateInput = (date: string | null) => {
-  internalDate.value = date
-  activityDateInput.value = convertToBuddhist(date)
-}
-
-// Update internalDate when activityDateInput changes
-const buddhistDate = computed(() => {
-  return convertToGregorian(activityDateInput.value)
-})
-
-watch(buddhistDate, (newValue) => {
-  internalDate.value = newValue
-})
 
 const departmentOptions: ToggleOption[] = [
   { label: 'CS', value: 'cs' },
@@ -220,3 +306,128 @@ const yearOptions: ToggleOption[] = [
   { label: '4', value: '4' },
 ]
 </script>
+
+<style scoped>
+::v-deep(.q-field__control) {
+  height: auto;
+  background-color: white;
+  align-items: center;
+}
+
+::v-deep(.q-field__prepend) {
+  display: flex;
+  align-items: center;
+}
+
+::v-deep(.q-icon) {
+  font-size: 18px;
+}
+.input-group p {
+  align-self: center;
+  margin: 0;
+  line-height: normal;
+  text-align: right;
+}
+
+.input-group {
+  display: flex;
+  align-items: center;
+  gap: 25px;
+  margin-bottom: 20px;
+  width: 100%;
+}
+
+.label {
+  font-size: 20px;
+  font-weight: normal;
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  height: 40px;
+}
+
+.label_minWidth {
+  min-width: 200px;
+}
+.btnAddActivity {
+  background-color: #ffffff;
+  border-radius: 20px;
+  height: 40px;
+  width: 200px;
+  font-size: 20px;
+  display: flex;
+  align-items: center;
+}
+.status-btn {
+  color: #ff6f00;
+  background-color: #ffe7ba;
+  border: 2px solid #ffa500;
+  border-radius: 50px;
+  height: 40px;
+  width: 200px;
+  font-size: 20px;
+}
+.activityType-btn {
+  width: 200px;
+  height: 40px;
+  border-radius: 50px;
+  box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.2);
+  background-color: #ffffff;
+}
+.activityType-btn:last-child,
+.department-btn:last-child,
+.year-btn:last-child {
+  margin-right: 0;
+}
+.time-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+}
+.year-btn {
+  width: 80px;
+  height: 40px;
+  border-radius: 50px;
+  box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.2);
+  background-color: #ffffff;
+  margin-right: 10px;
+}
+.year-btn:last-child {
+  margin-right: 0;
+}
+
+.remove-icon {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 20px;
+}
+.q-icon {
+  cursor: pointer;
+}
+.btn-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 20px;
+  margin-left: 200px;
+}
+.department-btn {
+  width: 80px;
+  height: 40px;
+  border-radius: 50px;
+  box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.2);
+  background-color: #ffffff;
+  margin-right: 10px;
+}
+.active-btn {
+  background-color: #d0e4ff !important;
+}
+
+.button-group {
+  display: flex;
+  justify-content: flex-end;
+  gap: 25px;
+  margin-top: 30px;
+}
+</style>

@@ -1,0 +1,64 @@
+<template>
+  <div class="input-group">
+    <p class="label label_minWidth">จำนวนชั่วโมง :</p>
+    <q-input
+      outlined
+      style="width: 220px"
+      v-model="localHours"
+      type="number"
+      @keypress="isNumber($event)"
+      @blur="validatePositive"
+      :disable="disable" 
+    />
+  </div>
+</template>
+
+<script setup lang="ts">
+import { defineProps, defineEmits, ref, watch } from 'vue';
+
+const props = defineProps<{ 
+  modelValue: string;
+  disable?: boolean; // เพิ่ม prop disable
+}>();
+
+const emit = defineEmits<{ (event: 'update:modelValue', value: string): void }>();
+
+const localHours = ref(props.modelValue);
+
+watch(localHours, (newVal) => {
+  emit('update:modelValue', newVal);
+});
+
+const isNumber = (event: KeyboardEvent) => {
+  const charCode = event.which ? event.which : event.keyCode;
+  if (charCode < 48 || charCode > 57) {
+    event.preventDefault();
+  }
+};
+
+const validatePositive = () => {
+  if (parseInt(localHours.value) < 0 || localHours.value === '') {
+    localHours.value = '0';
+  }
+};
+</script>
+
+<style scoped>
+.label {
+  font-size: 20px;
+  font-weight: normal;
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  height: 40px;
+}
+.label_minWidth {
+  min-width: 200px;
+}
+.input-group p {
+  align-self: center;
+  margin: 0;
+  line-height: normal;
+  text-align: right;
+}
+</style>
