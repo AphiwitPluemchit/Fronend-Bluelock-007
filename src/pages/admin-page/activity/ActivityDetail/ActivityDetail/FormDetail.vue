@@ -9,11 +9,11 @@
     <!-- Activity Name -->
     <div class="input-group">
       <p class="label label_minWidth">ชื่อกิจกรรม :</p>
-      <q-input outlined v-model="activityName" style="width: 600px" />
+      <q-input outlined v-model="activityName" style="width: 600px" :disable="!isEditing" />
     </div>
 
     <!-- Date -->
-    <MutiDate v-model="activityDateRange" @update:modelValue="generateDaysInRange" />
+    <MutiDate v-model="activityDateRange" @update:modelValue="generateDaysInRange" :disable="!isEditing" />
 
     <!-- Time -->
     <div class="input-group">
@@ -24,6 +24,7 @@
           v-model="sameTimeForAll"
           label="เวลาเดิมทุกวัน"
           @update:model-value="applySameTime"
+          :disable="!isEditing"
         />
         <div class="day-time-container">
           <div v-for="(day, index) in selectedDays" :key="day.date" class="day-block">
@@ -33,6 +34,7 @@
               :formattedDate="day.formattedDate"
               @update:startTime="updateDayTime(index, 'start', $event)"
               @update:endTime="updateDayTime(index, 'end', $event)"
+              :disable="!isEditing"
             />
           </div>
         </div>
@@ -42,43 +44,53 @@
     <!-- Room -->
     <div class="input-group">
       <p class="label label_minWidth">ชื่อห้องที่จัดกิจกรรม :</p>
-      <q-input outlined v-model="roomName" style="width: 600px" />
+      <q-input outlined v-model="roomName" style="width: 600px" :disable="!isEditing" />
     </div>
 
-    <!--Hours  & Seats -->
+    <!-- Hours & Seats -->
     <div class="flex-container">
-      <HoursSelector v-model="totalHours" class="input-group" />
-      <SeatsSelector v-model="seats" class="input-group" />
+      <HoursSelector v-model="totalHours" class="input-group" :disable="!isEditing" />
+      <SeatsSelector v-model="seats" class="input-group" :disable="!isEditing" />
     </div>
 
     <!-- Activity Type -->
-    <ActivityType v-model="activityType" class="input-group" />
+    <ActivityType v-model="activityType" class="input-group" :disable="!isEditing" />
 
     <!-- Department -->
-    <DepartmentSelector v-model="departments" class="input-group" />
+    <DepartmentSelector v-model="departments" class="input-group" :disable="!isEditing" />
 
     <!-- Year -->
-    <YearSelector v-model="years" class="input-group" />
+    <YearSelector v-model="years" class="input-group" :disable="!isEditing" />
 
     <!-- Lecturer -->
     <div class="input-group">
       <p class="label label_minWidth">วิทยากร :</p>
-      <q-input outlined v-model="lecturer" style="width: 600px" />
+      <q-input outlined v-model="lecturer" style="width: 600px" :disable="!isEditing" />
     </div>
 
     <!-- Food Menu -->
-    <FoodSelector v-model:foodMenu="foodMenu" class="input-group" />
+    <FoodSelector v-model:foodMenu="foodMenu" class="input-group" :disable="!isEditing" />
 
-   
     <!-- Detail Activity -->
     <div class="input-group">
       <p style="align-self: flex-start" class="label label_minWidth">รายละเอียดอื่นๆ :</p>
-      <q-input type="textarea" rows="10" outlined v-model="detailActivity" style="width: 600px" />
+      <q-input
+        type="textarea"
+        rows="10"
+        outlined
+        v-model="detailActivity"
+        style="width: 600px"
+        :disable="!isEditing"
+      />
     </div>
 
     <div class="button-group">
-      <q-btn class="btnreject" @click="goToActivitiesManagement">ยกเลิก</q-btn>
-      <q-btn class="btnsecces" @click="submitActivity">เสร็จสิ้น</q-btn>
+      <q-btn v-if="!isEditing" class="btnedit" @click="isEditing = true">แก้ไข</q-btn>
+
+      <template v-else>
+        <q-btn class="btnreject" @click="cancelEdit">ยกเลิก</q-btn>
+        <q-btn class="btnsecces" @click="saveChanges">บันทึก</q-btn>
+      </template>
     </div>
   </q-page>
 </template>
@@ -93,15 +105,7 @@ import HoursSelector from 'src/pages/admin-page/activity/CreateActivity/Form/Hou
 import SeatsSelector from 'src/pages/admin-page/activity/CreateActivity/Form/SeatsSelector.vue'
 import TimeSelector from 'src/pages/admin-page/activity/CreateActivity/Form/TimeSelector.vue'
 import FoodSelector from 'src/pages/admin-page/activity/CreateActivity/Form/FoodSelector.vue'
-import { useRouter } from 'vue-router'
 
-const router = useRouter()
-
-onMounted(() => {})
-
-const goToActivitiesManagement = async () => {
-  await router.push('/ActivitiesManagement')
-}
 interface DayTimeSelection {
   date: string
   formattedDate: string
@@ -140,7 +144,7 @@ const menuItems = ref([
 ])
 watch(sameTimeForAll, (newValue) => {
   if (newValue) {
-    void applySameTime() // ✅ ใช้ void ป้องกัน ESLint ฟ้อง
+    void applySameTime()
   }
 })
 const applySameTime = async () => {
@@ -298,16 +302,31 @@ const submitActivity = () => {
   }
 
   console.log('Payload:', payload) // ตรวจสอบค่า payload ในคอนโซล
-
-  // สามารถส่งไปยัง API ได้โดยใช้ fetch หรือ axios
-  // fetch('/api/submit', { method: 'POST', body: JSON.stringify(payload) })
-
   // หรือเก็บลง localStorage
   localStorage.setItem('activityPayload', JSON.stringify(payload))
+}
+const isEditing = ref(false) // เปลี่ยนค่าเริ่มต้นเป็น false (ฟอร์มถูกล็อก)
+
+const cancelEdit = () => {
+  isEditing.value = false
+}
+
+const saveChanges = () => {
+  isEditing.value = false
+  submitActivity()
 }
 </script>
 
 <style scoped>
+::v-deep(.q-field--disabled .q-field__control) {
+  background-color: #e0e0e0 !important; 
+  color: #757575 !important; 
+}
+::v-deep(.q-btn:disabled) {
+  background-color: #e0e0e0 !important;
+  color: #757575 !important;
+}
+
 ::v-deep(.q-field__control) {
   height: auto;
   background-color: white;

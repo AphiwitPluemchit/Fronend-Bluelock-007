@@ -38,7 +38,10 @@ const routes: RouteRecordRaw[] = [
     path: '/ActivitiesManagement/ActivityDetail',
     name: 'ActivityDetail',
     children: [
-      { path: '', component: () => import('pages/admin-page/activity/ActivityDetail/ActivityDetail.vue') },
+      {
+        path: '',
+        component: () => import('pages/admin-page/activity/ActivityDetail/ActivityDetail.vue'),
+      },
     ],
   },
   {
@@ -49,6 +52,18 @@ const routes: RouteRecordRaw[] = [
     ],
     meta: { roles: ['admin'] },
   },
+  {
+    path: '/StudentManagement/StudentDetail',
+    name: 'StudentDetail',
+    children: [
+      {
+        path: ':id',
+        component: () => import('pages/admin-page/student/StudentDetail/StudentDetailPage.vue'),
+      },
+    ],
+    meta: { roles: ['admin'] },
+  },
+
   {
     path: '/Report',
     name: 'Report',

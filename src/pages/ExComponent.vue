@@ -75,5 +75,4 @@ const pagination = ref({
 })
 </script>
 <style scoped>
-
 </style>

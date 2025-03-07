@@ -139,6 +139,7 @@ const confirmCreateQR_Code = () => {
 /* รายละเอียดการลงทะเบียน */
 .registration-details {
   display: flex;
+  align-items: flex-start;
   flex-direction: column;
   gap: 10px;
 }

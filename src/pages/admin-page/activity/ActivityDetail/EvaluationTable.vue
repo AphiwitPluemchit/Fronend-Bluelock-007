@@ -3,6 +3,7 @@ import { ref } from 'vue';
 
 // ข้อมูลการประเมินผลความพึงพอใจ
 const evaluationResults = ref([
+
     { id: "1.1", topic: "ความรู้และความเข้าใจในเรื่องเนื้อหากิจกรรมก่อนการอบรม", most: 47, high: 31, medium: 24, low: 3, lowest: 0, avg: 3.42 },
     { id: "1.2", topic: "ความรู้และความเข้าใจในเรื่องเนื้อหากิจกรรมหลังการอบรม", most: 63, high: 13, medium: 6, low: 2, lowest: 0, avg: 4.12 },
     { id: "1.3", topic: "ท่านได้รับความรู้ แนวคิด ประสบการณ์ใหม่จากโครงการ", most: 63, high: 13, medium: 6, low: 1, lowest: 0, avg: 4.65 },
