@@ -1,36 +1,29 @@
+import type { Major } from './major'
+
 export type Activity = {
   id: string
   name: string
   type?: string
-  activityState?: ActivityState
-  skill?: Skill
+  activityState?: string
+  skill?: string
+  file?: string
+  studentYears?: number[]
   majors?: Major[]
   activityItems?: ActivityItem[]
 }
 
 export type ActivityItem = {
-  id: string
-  activityId: string
+  id?: string
   name: string
+  description: string
   maxParticipants: number
   room: string
-  startDate: string
-  endDate: string
-  duration: number
   hour: number
-}
-
-export type ActivityState = {
-  id: string
-  name: string
-}
-
-export type Skill = {
-  id: string
-  name: string
-}
-
-export type Major = {
-  id: string
-  name: string
+  date: [
+    {
+      date: string
+      stime: string
+      etime: string
+    },
+  ]
 }
