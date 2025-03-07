@@ -7,6 +7,7 @@ import { onMounted, ref } from 'vue'
 type TitleForm = 'New Activity' | 'Edit Activity'
 
 export const useActivityStore = defineStore('activity', () => {
+
   const activitys = ref<Activity[]>([]) // Open and Close Enrollment Table
   const activitys1 = ref<Activity[]>([]) // Open and Close Enrollment Table
   const activitys2 = ref<Activity[]>([]) // Planning Table
