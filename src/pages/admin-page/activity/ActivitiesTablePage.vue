@@ -1,18 +1,31 @@
 <template>
   <q-page class="q-pa-md">
-
-
+    <!-- ชื่อหน้า -->
+    <div class="row justify-start items-center">
+      <div class="text-h4">จัดการกิจกรรม</div>
+    </div>
+    <div class="row justify-end items-center">
+      <q-btn dense outlined icon="add" label="เพิ่มข้อมูล" class="btnadd" />
+    </div>
     <!-- ตาราง 1 -->
-    <section class="q-mt-md">
+    <section class="q-mt-lg">
       <div class="row justify-between items-center">
-        <h6 class="text-h6">กิจกรรมที่กำลังเปิดและปิดลงทะเบียนแล้ว</h6>
+        <div class="text-h6">กิจกรรมที่กำลังเปิดและปิดลงทะเบียนแล้ว</div>
         <div class="row">
-          <q-input dense outlined v-model="search1" placeholder="ค้นหา" class="q-mr-sm">
+          <q-input
+            dense
+            outlined
+            v-model="search1"
+            placeholder="ค้นหา"
+            class="q-mr-sm searchbox"
+            :style="{ boxShadow: 'none' }"
+          >
             <template v-slot:append>
               <q-icon name="search" />
             </template>
           </q-input>
-          <q-btn label="filter2" @click="showFilterDialog1 = true">
+          <q-btn class="btnfilter" @click="showFilterDialog1 = true">
+            <img src="public\icons\sort.svg" alt="Sort Icon" width="30" height="30" />
             <FilterDialog
               v-model="showFilterDialog1"
               :categories="filterCategories1"
@@ -21,11 +34,18 @@
           </q-btn>
         </div>
       </div>
-      <q-table :rows="data1" :columns="columns" row-key="id" class="q-mt-sm">
+      <q-table
+        bordered
+        flat
+        :rows="data1"
+        :columns="columns"
+        row-key="id"
+        class="q-mt-md customtable"
+      >
         <template #body-cell-action="props">
-          <q-td class="q-gutter-x-sm" style="min-width: 100px">
+          <q-td class="q-gutter-x-sm" >
             <q-btn
-              icon="edit"
+              icon="info"
               padding="none"
               flat
               color="grey-8"
@@ -36,16 +56,24 @@
     </section>
 
     <!-- ตาราง 2 -->
-    <section class="q-mt-md">
+    <section class="q-mt-lg">
       <div class="row justify-between items-center">
-        <h6 class="text-h6">กิจกรรมที่กำลังวางแผน</h6>
+        <div class="text-h6">กิจกรรมที่กำลังวางแผน</div>
         <div class="row">
-          <q-input dense outlined v-model="search2" placeholder="ค้นหา" class="q-mr-sm">
+          <q-input
+            dense
+            outlined
+            v-model="search2"
+            placeholder="ค้นหา"
+            class="q-mr-sm searchbox"
+            :style="{ boxShadow: 'none' }"
+          >
             <template v-slot:append>
               <q-icon name="search" />
             </template>
           </q-input>
-          <q-btn label="filter2" @click="showFilterDialog2 = true">
+          <q-btn class="btnfilter" @click="showFilterDialog2 = true">
+            <img src="public\icons\sort.svg" alt="Sort Icon" width="30" height="30" />
             <FilterDialog
               v-model="showFilterDialog2"
               :categories="filterCategories2"
@@ -54,7 +82,7 @@
           </q-btn>
         </div>
       </div>
-      <q-table :rows="data2" :columns="columns" row-key="id" class="q-mt-sm">
+      <q-table :rows="data2" :columns="columns" row-key="id" class="q-mt-md">
         <template #body-cell-action="props">
           <q-td class="q-gutter-x-sm" style="min-width: 100px">
             <q-btn
@@ -69,16 +97,24 @@
     </section>
 
     <!-- ตาราง 3 -->
-    <section class="q-mt-md">
+    <section class="q-mt-lg">
       <div class="row justify-between items-center">
-        <h6 class="text-h6">อื่น ๆ</h6>
+        <div class="text-h6">อื่น ๆ</div>
         <div class="row">
-          <q-input dense outlined v-model="search3" placeholder="ค้นหา" class="q-mr-sm">
+          <q-input
+            dense
+            outlined
+            v-model="search3"
+            placeholder="ค้นหา"
+            class="q-mr-sm searchbox"
+            :style="{ boxShadow: 'none' }"
+          >
             <template v-slot:append>
               <q-icon name="search" />
             </template>
           </q-input>
-          <q-btn label="filter2" @click="showFilterDialog3 = true">
+          <q-btn class="btnfilter" @click="showFilterDialog3 = true">
+            <img src="public\icons\sort.svg" alt="Sort Icon" width="30" height="30" />
             <FilterDialog
               v-model="showFilterDialog3"
               :categories="filterCategories3"
@@ -87,7 +123,7 @@
           </q-btn>
         </div>
       </div>
-      <q-table :rows="data3" :columns="columns" row-key="id" class="q-mt-sm">
+      <q-table :rows="data3" :columns="columns" row-key="id" class="q-mt-md">
         <template #body-cell-action="props">
           <q-td class="q-gutter-x-sm" style="min-width: 100px">
             <q-btn
@@ -112,11 +148,11 @@ const activityStore = useActivityStore()
 // ใช้ Vue Router
 const router = useRouter()
 const goToPage = async (path: object) => {
-  console.log(path);
+  console.log(path)
   await router.push('/ActivitiesManagement/CreateActivity')
 }
 const goToPageDetail = async (id: string) => {
-  console.log(id);
+  console.log(id)
   await activityStore.fetchOneData(id)
   await router.push('/ActivitiesManagement/ActivityDetail/StudentEnrollmentPage')
 }
@@ -266,7 +302,8 @@ const data2 = ref([
     type: 'Hard Skill',
     status: 'กำลังวางแผน',
     action: '/ActivitiesManagement/CreateActivity',
-  },  {
+  },
+  {
     id: 2,
     index: 1,
     name: 'กิจกรรม B',
@@ -277,7 +314,8 @@ const data2 = ref([
     type: 'Hard Skill',
     status: 'กำลังวางแผน',
     action: '/ActivitiesManagement/CreateActivity',
-  },  {
+  },
+  {
     id: 2,
     index: 1,
     name: 'กิจกรรม B',
@@ -288,7 +326,8 @@ const data2 = ref([
     type: 'Hard Skill',
     status: 'กำลังวางแผน',
     action: '/ActivitiesManagement/CreateActivity',
-  },  {
+  },
+  {
     id: 2,
     index: 1,
     name: 'กิจกรรม B',
@@ -299,7 +338,8 @@ const data2 = ref([
     type: 'Hard Skill',
     status: 'กำลังวางแผน',
     action: '/ActivitiesManagement/CreateActivity',
-  },  {
+  },
+  {
     id: 2,
     index: 1,
     name: 'กิจกรรม B',
@@ -325,7 +365,8 @@ const data3 = ref([
     type: 'อื่น ๆ',
     status: 'รอดำเนินการ',
     action: '/ActivitiesManagement/CreateActivity',
-  },  {
+  },
+  {
     id: 3,
     index: 1,
     name: 'กิจกรรม C',
@@ -336,7 +377,8 @@ const data3 = ref([
     type: 'อื่น ๆ',
     status: 'รอดำเนินการ',
     action: '/ActivitiesManagement/CreateActivity',
-  },  {
+  },
+  {
     id: 3,
     index: 1,
     name: 'กิจกรรม C',
@@ -347,7 +389,8 @@ const data3 = ref([
     type: 'อื่น ๆ',
     status: 'รอดำเนินการ',
     action: '/ActivitiesManagement/CreateActivity',
-  },  {
+  },
+  {
     id: 3,
     index: 1,
     name: 'กิจกรรม C',
@@ -358,7 +401,8 @@ const data3 = ref([
     type: 'อื่น ๆ',
     status: 'รอดำเนินการ',
     action: '/ActivitiesManagement/CreateActivity',
-  },  {
+  },
+  {
     id: 3,
     index: 1,
     name: 'กิจกรรม C',
@@ -369,7 +413,8 @@ const data3 = ref([
     type: 'อื่น ๆ',
     status: 'รอดำเนินการ',
     action: 'X',
-  },  {
+  },
+  {
     id: 3,
     index: 1,
     name: 'กิจกรรม C',
