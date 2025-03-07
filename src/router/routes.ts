@@ -35,10 +35,10 @@ const routes: RouteRecordRaw[] = [
     ],
   },
   {
-    path: '/ActivitiesManagement/ActivityDetail/StudentEnrollmentPage',
-    name: 'StudentEnrollmentPage',
+    path: '/ActivitiesManagement/ActivityDetail',
+    name: 'ActivityDetail',
     children: [
-      { path: '', component: () => import('pages/admin-page/activity/ActivityDetail/StudentEnrollmentPage.vue') },
+      { path: '', component: () => import('pages/admin-page/activity/ActivityDetail/ActivityDetail.vue') },
     ],
   },
   {
