@@ -5,7 +5,7 @@
       <div class="text-h4">จัดการกิจกรรม</div>
     </div>
     <div class="row justify-end items-center">
-      <q-btn dense outlined icon="add" label="เพิ่มข้อมูล" class="btnadd" @click="goToPage()"/>
+      <q-btn dense outlined icon="add" label="เพิ่มข้อมูล" class="btnadd" @click="goToPage()" />
     </div>
     <!-- ตาราง 1 -->
     <section class="q-mt-lg">
@@ -34,16 +34,9 @@
           </q-btn>
         </div>
       </div>
-      <q-table
-        bordered
-        flat
-        :rows="data1"
-        :columns="columns"
-        row-key="id"
-        class="q-mt-md customtable"
-      >
+      <q-table :rows="data1" :columns="columns" row-key="id" class="q-mt-md">
         <template #body-cell-action="props">
-          <q-td class="q-gutter-x-sm" >
+          <q-td class="q-gutter-x-sm">
             <q-btn
               icon="info"
               padding="none"
