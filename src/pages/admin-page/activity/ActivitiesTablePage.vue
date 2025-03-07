@@ -25,7 +25,7 @@
             </template>
           </q-input>
           <q-btn class="btnfilter" @click="showFilterDialog1 = true">
-            <img src="public\icons\sort.svg" alt="Sort Icon" width="30" height="30" />
+            <img src="icons\sort.svg" alt="Sort Icon" width="30" height="30" />
             <FilterDialog
               v-model="showFilterDialog1"
               :categories="filterCategories1"
@@ -73,7 +73,7 @@
             </template>
           </q-input>
           <q-btn class="btnfilter" @click="showFilterDialog2 = true">
-            <img src="public\icons\sort.svg" alt="Sort Icon" width="30" height="30" />
+            <img src="icons\sort.svg" alt="Sort Icon" width="30" height="30" />
             <FilterDialog
               v-model="showFilterDialog2"
               :categories="filterCategories2"
@@ -119,7 +119,7 @@
             </template>
           </q-input>
           <q-btn class="btnfilter" @click="showFilterDialog3 = true">
-            <img src="public\icons\sort.svg" alt="Sort Icon" width="30" height="30" />
+            <img src="icons\sort.svg" alt="Sort Icon" width="30" height="30" />
             <FilterDialog
               v-model="showFilterDialog3"
               :categories="filterCategories3"

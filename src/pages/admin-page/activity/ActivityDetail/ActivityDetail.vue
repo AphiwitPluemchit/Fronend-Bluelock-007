@@ -2,7 +2,7 @@
 import { computed, ref } from 'vue'
 import ActivityDetailTab from './ActivityDetailTab.vue'
 import FilterSearchStudentList from './FilterSearchStudentList.vue'
-import TableStudentList from './TableStudentList.vue'
+import StudentList from './StudentList.vue'
 import RegistrationDetails from './RegistrationDetails.vue'
 import { useRouter } from 'vue-router'
 import SummaryResult from './SummaryResult.vue'
@@ -102,7 +102,7 @@ const currentBreadcrumb = computed(() => {
         <div class="text-h6 q-mb-md"></div>
 
         <FilterSearchStudentList v-model:search="search" />
-        <TableStudentList :search="search" />
+        <StudentList :search="search" />
       </q-tab-panel>
 
       <q-tab-panel name="summary">
