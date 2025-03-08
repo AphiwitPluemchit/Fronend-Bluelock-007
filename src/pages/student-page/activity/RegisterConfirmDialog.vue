@@ -10,9 +10,9 @@
       </q-card-section>
 
       <q-card-actions align="right">
-        <q-btn class="cancel-btn" label="ยกเลิก" color="red" @click="cancel" />
+        <q-btn class="btnreject" label="ยกเลิก" color="red" @click="cancel" />
         <q-btn
-          class="confirm-btn"
+          class="btnconfirm"
           label="ยืนยัน"
           style="background-color: #3676f4; color: white"
           @click="confirm"
@@ -45,12 +45,6 @@ const confirm = () => {
 </script>
 <style scoped>
 /*ปรับปุ่ม */
-.cancel-btn,
-.confirm-btn {
-  border-radius: 15px;
-  padding: 10px 20px;
-  font-size: 16px;
-}
 
 .q-card {
   border-radius: 15px;

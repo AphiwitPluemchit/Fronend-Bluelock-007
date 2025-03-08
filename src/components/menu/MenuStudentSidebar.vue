@@ -6,10 +6,10 @@
     side="left"
     bordered
     :width="260"
-    style="font-size: 18px; font-weight: 500; margin-top: 10px; margin-right: 10px"
+    style="font-size: 18px; font-weight: 500; margin-right: 10px"
   >
     <!-- ให้ q-list เต็มความสูง และแบ่งพื้นที่ระหว่างเมนู กับ Logout -->
-    <q-list padding class="menu-list flex column justify-between full-height q-pt-sm">
+    <q-list padding style="" class="menu-list flex column justify-between full-height q-pt-sm">
       <div>
         <router-link v-for="link in linksList" :key="link.title" :to="link.link" class="no-link">
           <q-item
@@ -51,7 +51,7 @@ const leftDrawerOpen = ref(false)
 
 const linksList = [
   { title: 'ตารางกิจกรรม', icon: 'event', link: '/ActivitiesCalendarPage' },
-  { title: 'กิจกรรมทั้งหมด', icon: 'build', link: '/ActivitiesTablePage' },
+  { title: 'กิจกรรมทั้งหมด', icon: 'build', link: '/ActivityTablePage' },
   { title: 'กิจกรรมของฉัน', icon: 'assignment_ind', link: '/MyActivitiesPage' },
   { title: 'บันทึกชั่วโมงอบรม', icon: 'history', link: '/RecordPage' },
   { title: 'ใบประกาศนียบัตร', icon: 'school', link: '/CertificateTablePage' },

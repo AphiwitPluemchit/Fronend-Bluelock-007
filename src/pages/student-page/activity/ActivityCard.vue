@@ -3,7 +3,7 @@
     <div class="row q-pa-md items-stretch">
       <!-- รูปกิจกรรม -->
       <div class="col-md-4">
-        <q-img :src="activity.image" class="rounded-borders activity-img" />
+        <q-img :src="getImageUrl(activity.file)" class="rounded-borders activity-img" />
       </div>
 
       <!-- รายละเอียดกิจกรรม -->
@@ -13,10 +13,17 @@
             <q-item-label class="text-bold activity-name">{{ activity.name }}</q-item-label>
           </div>
           <div class="positionText q-mb-md">
-            <q-item-label class="q-mb-md">{{ activity.date }}</q-item-label>
-            <q-item-label
-              >ที่นั่งว่าง {{ activity.availableSeats }}/{{ activity.maxSeats }}</q-item-label
-            >
+            <!-- แสดงวันที่ -->
+            <q-item-label class="q-mb-md">
+              {{ getActivityDate(activity.activityItems) }}
+            </q-item-label>
+
+            <!-- แสดงจำนวนที่นั่ง -->
+            <q-item-label>
+              ที่นั่งว่าง {{ activity.activityItems?.[0]?.maxParticipants ?? 'N/A' }}/{{
+                activity.activityItems?.[0]?.maxParticipants ?? 'N/A'
+              }}
+            </q-item-label>
           </div>
         </div>
 
@@ -36,22 +43,26 @@
 </template>
 
 <script setup lang="ts">
-interface Activity {
-  id: number
-  name: string
-  date: string
-  time: string
-  hours: number
-  location: string
-  category: string
-  speaker: string
-  description: string
-  availableSeats: number
-  maxSeats: number
-  image: string
+import type { Activity, ActivityItem } from 'src/types/activity'
+
+// รับ props
+defineProps<{ activity: Activity }>()
+
+// ฟังก์ชันจัดการรูปภาพ (เช็คว่า `file` มีค่าหรือไม่)
+const getImageUrl = (fileName: string | undefined) => {
+  return fileName ? `/uploads/${fileName}` : '/icons/default-image.png'
 }
 
-defineProps<{ activity: Activity }>()
+// ฟังก์ชันดึงวันที่จาก `activityItems`
+const getActivityDate = (activityItems: ActivityItem[] | null | undefined): string => {
+  if (!activityItems || activityItems.length === 0 || !activityItems[0]?.date) {
+    return 'ไม่ระบุ'
+  }
+
+  return (
+    activityItems[0].date?.map((d) => `${d.date} (${d.stime} - ${d.etime})`).join(', ') ?? 'ไม่ระบุ'
+  )
+}
 </script>
 
 <style scoped>
@@ -84,33 +95,5 @@ defineProps<{ activity: Activity }>()
   position: absolute;
   bottom: 25px;
   right: 30px;
-}
-
-.details {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-}
-.activity-name {
-  display: -webkit-box;
-  -webkit-line-clamp: 2; /* จำกัดให้แสดง 2 บรรทัด */
-  line-clamp: 2;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  word-break: break-word;
-  width: 100%; /* ป้องกันไม่ให้เกินขอบเขต */
-  padding-top: 5px; /* ป้องกันตัวอักษรถูกตัดด้านบน */
-}
-.positionText {
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  min-height: 50px;
-}
-.content-wrapper {
-  min-height: 70px;
-  display: flex;
-  align-items: center;
 }
 </style>

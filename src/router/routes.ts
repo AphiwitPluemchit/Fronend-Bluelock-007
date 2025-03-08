@@ -103,12 +103,12 @@ const routes: RouteRecordRaw[] = [
     meta: { roles: ['user'] },
   },
   {
-    path: '/ActivitiesTablePage',
-    name: 'ActivitiesTablePage',
+    path: '/ActivityTablePage',
+    name: 'ActivityTablePage',
     children: [
       {
         path: '',
-        component: () => import('pages/student-page/activity/ActivitiesTablePage.vue'),
+        component: () => import('pages/student-page/activity/ActivityTablePage.vue'),
       },
     ],
     meta: { roles: ['user'] },
