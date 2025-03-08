@@ -69,7 +69,6 @@
     <!-- Food Menu -->
     <FoodSelector v-model:foodMenu="foodMenu" class="input-group" />
 
-   
     <!-- Detail Activity -->
     <div class="input-group">
       <p style="align-self: flex-start" class="label label_minWidth">รายละเอียดอื่นๆ :</p>
@@ -264,17 +263,14 @@ const thaiLocale = {
   ],
 }
 onMounted(() => {
-  // สร้างวันที่ปัจจุบันในรูปแบบ YYYY-MM-DD
   const today = new Date()
   const year = today.getFullYear()
   const month = String(today.getMonth() + 1).padStart(2, '0')
   const day = String(today.getDate()).padStart(2, '0')
   const dateString = `${year}-${month}-${day}`
 
-  // กำหนดค่าเริ่มต้นให้กับตัวแปร (เปลี่ยนจาก object เป็น array)
   activityDateRangeInternal.value = [dateString]
 
-  // สร้างข้อมูลวันที่เริ่มต้น (ใช้ array แทน)
   generateDaysInRange(activityDateRangeInternal.value)
 })
 
@@ -297,14 +293,14 @@ const submitActivity = () => {
     detailActivity: detailActivity.value,
   }
 
-  console.log('Payload:', payload) // ตรวจสอบค่า payload ในคอนโซล
-
-  // สามารถส่งไปยัง API ได้โดยใช้ fetch หรือ axios
-  // fetch('/api/submit', { method: 'POST', body: JSON.stringify(payload) })
-
-  // หรือเก็บลง localStorage
+  console.log('Payload:', payload)
   localStorage.setItem('activityPayload', JSON.stringify(payload))
 }
+const isSidebarOpen = ref(false) 
+
+watch(isSidebarOpen, (newVal) => {
+  document.documentElement.style.setProperty('--sidebar-width', newVal ? '250px' : '0px') 
+})
 </script>
 
 <style scoped>
@@ -361,5 +357,6 @@ const submitActivity = () => {
   justify-content: flex-end;
   gap: 25px;
   margin-top: 30px;
+  width: 100%;
 }
 </style>

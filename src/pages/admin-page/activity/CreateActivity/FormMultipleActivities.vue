@@ -55,7 +55,7 @@
         <p class="label">จำนวนที่รับ :</p>
         <q-input
           outlined
-          style="width: 213px"
+          style="width: 225px"
           v-model="subActivity.seats"
           type="number"
           @keypress="isNumber($event)"
