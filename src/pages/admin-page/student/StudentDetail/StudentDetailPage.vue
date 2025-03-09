@@ -116,9 +116,13 @@
       <div class="header-container text-center">
         <div class="text-h6">ประวัติการอบรม</div>
         <div class="filter-container">
-          <q-btn class="btnfilter q-mr-sm q-gp" @click="showFilterDialog1 = true">
+          <q-btn class="btnfilter q-mr-sm" @click="showFilterDialog1 = true">
             <img src="public\icons\sort.svg" alt="Sort Icon" width="30" height="30" />
-            <FilterDialog v-model="showFilterDialog1" :categories="filterCategories1" />
+            <FilterDialog
+              v-model="showFilterDialog1"
+              :categories="filterCategories1"
+              @apply="applyFilters"
+            />
           </q-btn>
         </div>
       </div>
@@ -177,6 +181,7 @@
 import { computed, ref } from 'vue'
 import { useRoute } from 'vue-router'
 import AppBreadcrumbs from 'src/components/AppBreadcrumbs.vue'
+import FilterDialog from 'src/components/Dialog/FilterDialog.vue'
 
 const route = useRoute()
 const id = computed(() => route.params.studentID)
@@ -189,7 +194,16 @@ const breadcrumbs = ref({
 })
 
 const showFilterDialog1 = ref(false)
-const filterCategories1 = ref(['category1', 'category2'])
+const filterCategories1 = ref(['categoryActivity'])
+const filters = ref<{
+  categoryActivity: string[]
+}>({
+  categoryActivity: [],
+})
+const applyFilters = (selectedFilters: { categoryActivity: string[] }) => {
+  filters.value = selectedFilters
+  console.log('Filters Applied:', filters.value)
+}
 
 const isEditMode = ref(false)
 //แก้ไข
