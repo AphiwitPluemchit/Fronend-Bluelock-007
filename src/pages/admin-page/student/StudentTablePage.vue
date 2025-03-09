@@ -52,7 +52,7 @@
         </template>
         <!-- เนื้อหาตาราง -->
         <template v-slot:body="props">
-          <q-tr :props="props" @click="goToDetail(props.row.studentID)" class="clickable-row">
+          <q-tr :props="props">
             <q-td key="index">{{ props.row.index }}</q-td>
             <q-td key="studentID">{{ props.row.studentID }}</q-td>
             <q-td key="name">{{ props.row.name }}</q-td>
@@ -68,10 +68,19 @@
                 unelevated
               />
             </q-td>
-            <q-td class="text-center" key="action"><q-icon name="info" class="info-icon" /></q-td>
+
+            <q-td class="q-gutter-x-sm">
+              <q-btn
+                icon="info"
+                padding="none"
+                flat
+                color="grey-8"
+                @click="goToDetail(props.row.studentID)"
+                class="clickable-row"
+              ></q-btn
+            ></q-td>
           </q-tr>
         </template>
-
         ></q-table
       >
     </section>

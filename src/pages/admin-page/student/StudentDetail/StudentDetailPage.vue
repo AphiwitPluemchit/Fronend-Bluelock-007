@@ -5,7 +5,7 @@
 
     <div class="q-mx-lg">
       <div class="text-h6 q-mt-lg">ข้อมูลนิสิต</div>
-      <q-card flat class="q-pa-md">
+      <q-card flat class="q-mt-md">
         <div v-if="selectedStudent" class="row q-col-gutter-md">
           <div class="col-1 text-right q-pa-lg">
             <p>ชื่อ :</p>
@@ -14,10 +14,38 @@
             <p>สาขา :</p>
           </div>
           <div class="col-4">
-            <q-input v-model="selectedStudent.name" outlined dense />
-            <q-input v-model="selectedStudent.studentID" outlined dense />
-            <q-input v-model="selectedStudent.major" outlined dense />
-            <q-input v-model="selectedStudent.year" outlined dense />
+            <q-input
+              v-model="selectedStudent.name"
+              :readonly="!isEditMode"
+              :class="isEditMode ? 'editable' : 'readonly'"
+              borderless
+              dense
+              class="q-mb-sm"
+            />
+            <q-input
+              v-model="selectedStudent.studentID"
+              :readonly="!isEditMode"
+              :class="isEditMode ? 'editable' : 'readonly'"
+              borderless
+              dense
+              class="q-mb-sm"
+            />
+            <q-input
+              v-model="selectedStudent.major"
+              :readonly="!isEditMode"
+              :class="isEditMode ? 'editable' : 'readonly'"
+              borderless
+              dense
+              class="q-mb-sm"
+            />
+            <q-input
+              v-model="selectedStudent.year"
+              :readonly="!isEditMode"
+              :class="isEditMode ? 'editable' : 'readonly'"
+              borderless
+              dense
+              class="q-mb-sm"
+            />
           </div>
           <div class="col-2 text-right q-pa-lg">
             <p>Email :</p>
@@ -25,16 +53,37 @@
             <p>ชั่วโมงทักษะทางวิชาการ :</p>
           </div>
           <div class="col-4">
-            <q-input label="Email" v-model="selectedStudent.email" outlined dense />
-            <q-input v-model="selectedStudent.softskill" outlined dense />
-            <q-input v-model="selectedStudent.hardskill" outlined dense />
+            <q-input
+              v-model="selectedStudent.email"
+              :readonly="!isEditMode"
+              :class="isEditMode ? 'editable' : 'readonly'"
+              borderless
+              dense
+              class="q-mb-sm"
+            />
+            <q-input
+              v-model="selectedStudent.softskill"
+              :readonly="!isEditMode"
+              :class="isEditMode ? 'editable' : 'readonly'"
+              borderless
+              dense
+              class="q-mb-sm"
+            />
+            <q-input
+              v-model="selectedStudent.hardskill"
+              :readonly="!isEditMode"
+              :class="isEditMode ? 'editable' : 'readonly'"
+              borderless
+              dense
+              class="q-mb-sm"
+            />
           </div>
         </div>
       </q-card>
     </div>
     <div>
-      <div class="text-h6 text-center">ประวัติการอบรม</div>
-      <div class="q-pa-md">
+      <div class="text-h6 text-center q-mb-sm">ประวัติการอบรม</div>
+      <div class="q-mb-sm">
         <div class="filter-container">
           <q-btn class="btnfilter q-mr-sm q-gp" @click="showFilterDialog1 = true">
             <img src="public\icons\sort.svg" alt="Sort Icon" width="30" height="30" />
@@ -80,7 +129,19 @@
           </template>
         </q-table>
         <div class="q-mt-md text-right">
-          <q-btn label="แก้ไข" class="btnedit" unelevated rounded />
+          <template v-if="!isEditMode">
+            <q-btn label="แก้ไข" class="btnedit" unelevated rounded @click="enableEditMode" />
+          </template>
+          <template v-else>
+            <q-btn
+              label="ยกเลิก"
+              class="btnreject q-mr-sm"
+              unelevated
+              rounded
+              @click="cancelEdit"
+            />
+            <q-btn label="บันทึก" class="btnconfirm" unelevated rounded @click="saveChanges" />
+          </template>
         </div>
       </div>
     </div>
@@ -104,6 +165,22 @@ const breadcrumbs = ref({
 
 const showFilterDialog1 = ref(false)
 const filterCategories1 = ref(['category1', 'category2'])
+
+const isEditMode = ref(false)
+//แก้ไข
+const enableEditMode = () => {
+  isEditMode.value = true
+}
+
+// บันทึก
+const saveChanges = () => {
+  isEditMode.value = false
+}
+
+// ยกเลิกการแก้ไข
+const cancelEdit = () => {
+  isEditMode.value = false
+}
 
 // const props = defineProps({
 //   rows: Array
@@ -486,5 +563,17 @@ const mockStudents = ref([
   display: flex;
   justify-content: flex-end; /* จัดชิดขวา */
   margin-bottom: 16px; /* เพิ่มระยะห่างด้านล่าง */
+}
+.q-input {
+  border: 1px solid #ccc;
+  border-radius: 10px;
+  padding-left: 10px;
+}
+.readonly {
+  background-color: #f5f5f5;
+  color: #757575;
+}
+.editable {
+  background-color: white;
 }
 </style>
