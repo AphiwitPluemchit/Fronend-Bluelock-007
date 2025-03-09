@@ -6,7 +6,7 @@
     </div>
     <!-- ตาราง 1 -->
     <section class="q-mt-lg">
-      <div class="row justify-between items-center">
+      <div class="row justify-end items-center">
         <div class="text-h6"></div>
         <div class="row">
           <q-input
@@ -29,9 +29,21 @@
               @apply="applyFilters"
             />
           </q-btn>
-          <q-btn dense outlined icon="settings" label="จัดการข้อมูล" class="btnadd" />
+          <q-btn
+            dense
+            outlined
+            icon="settings"
+            label="จัดการข้อมูล"
+            class="btnadd"
+            @click="toggleManageStudentDialog"
+          />
+        </div>
+        <div class="dialog-container">
+          <!-- ManageStudentDialog -->
+          <ManageStudentDialog v-model="showManageStudentDialog" />
         </div>
       </div>
+
       <!-- ตาราง -->
       <q-table
         bordered
@@ -91,46 +103,44 @@
 import { onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import FilterDialog from 'src/components/Dialog/FilterDialog.vue'
+import ManageStudentDialog from 'src/pages/admin-page/student/ManageStudentDialog.vue'
 import { useStudentStore } from 'src/stores/student'
 const studentStore = useStudentStore()
-// ใช้ Vue Router
 const router = useRouter()
-// const goToPageDetail = async (id: string) => {
-//   console.log(id)
-//   await studentStore.fetchOneData(id)
-//   await router.push(`/StudentManagement/StudentDetail/${id}`)
-// }
+
 const goToDetail = (studentID: string) => {
   void router.push(`/StudentManagement/StudentDetail/${studentID}`)
 }
 
 const filters = ref<{
-  year: string[]
   major: string[]
+  year: string[]
   statusStudent: string[]
-  categoryStudent: string[]
 }>({
-  year: [],
   major: [],
+  year: [],
   statusStudent: [],
-  categoryStudent: [],
 })
 const showFilterDialog1 = ref(false)
 const filterCategories1 = ref(['major', 'year', 'statusStudent'])
 
 const applyFilters = (selectedFilters: {
-  year: string[]
   major: string[]
+  year: string[]
   statusStudent: string[]
-  categoryStudent: string[]
 }) => {
   filters.value = selectedFilters
   console.log('Filters Applied:', filters.value)
 }
-// ตัวแปรสำหรับค้นหา
+
+const showManageStudentDialog = ref(false)
+
+const toggleManageStudentDialog = () => {
+  showManageStudentDialog.value = !showManageStudentDialog.value
+}
+
 const search1 = ref('')
 
-// กำหนดโครงสร้างของคอลัมน์ในตาราง
 const columns = [
   { name: 'index', label: 'ลำดับ', field: 'index', align: 'left' as const },
   { name: 'studentID', label: 'รหัสนิสิต', field: 'studentID', align: 'left' as const },
@@ -152,7 +162,6 @@ const columns = [
   { name: 'action', label: '', field: 'action', align: 'center' as const },
 ]
 
-// ข้อมูลกิจกรรม (ตัวอย่าง)
 onMounted(() => {
   studentStore.fetchData()
 })
@@ -455,5 +464,8 @@ const mockStudents = ref([
 .info-icon {
   cursor: pointer;
   width: 60px;
+}
+.dialog-container {
+  margin-top: 50px;
 }
 </style>
