@@ -6,143 +6,168 @@
     <div class="q-mx-lg">
       <div class="text-h6 q-mt-lg">ข้อมูลนิสิต</div>
       <q-card flat class="q-mt-md">
+        <!-- ข้อมูลนิสิต -->
         <div v-if="selectedStudent" class="row q-col-gutter-md">
-          <div class="col-1 text-right q-pa-lg">
-            <p>ชื่อ :</p>
-            <p>รหัสนิสิต :</p>
-            <p>ชั้นปี :</p>
-            <p>สาขา :</p>
+          <!-- ชื่อและข้อมูลนิสิต -->
+          <div class="col-12 row items-center q-pa-sm">
+            <div class="col-1 text-right q-pr-md">
+              <p class="q-my-none">ชื่อ :</p>
+            </div>
+            <div class="col-4">
+              <q-input
+                v-model="selectedStudent.name"
+                :readonly="!isEditMode"
+                :class="isEditMode ? 'editable' : 'readonly'"
+                borderless
+                dense
+              />
+            </div>
+            <div class="col-2 text-right q-pr-md">
+              <p class="q-my-none">Email :</p>
+            </div>
+            <div class="col-4">
+              <q-input
+                v-model="selectedStudent.email"
+                :readonly="!isEditMode"
+                :class="isEditMode ? 'editable' : 'readonly'"
+                borderless
+                dense
+              />
+            </div>
           </div>
-          <div class="col-4">
-            <q-input
-              v-model="selectedStudent.name"
-              :readonly="!isEditMode"
-              :class="isEditMode ? 'editable' : 'readonly'"
-              borderless
-              dense
-              class="q-mb-sm"
-            />
-            <q-input
-              v-model="selectedStudent.studentID"
-              :readonly="!isEditMode"
-              :class="isEditMode ? 'editable' : 'readonly'"
-              borderless
-              dense
-              class="q-mb-sm"
-            />
-            <q-input
-              v-model="selectedStudent.major"
-              :readonly="!isEditMode"
-              :class="isEditMode ? 'editable' : 'readonly'"
-              borderless
-              dense
-              class="q-mb-sm"
-            />
-            <q-input
-              v-model="selectedStudent.year"
-              :readonly="!isEditMode"
-              :class="isEditMode ? 'editable' : 'readonly'"
-              borderless
-              dense
-              class="q-mb-sm"
-            />
+
+          <!-- รหัสนิสิตและชั่วโมงเตรียมความพร้อม -->
+          <div class="col-12 row items-center q-pa-sm">
+            <div class="col-1 text-right q-pr-md">
+              <p class="q-my-none">รหัสนิสิต :</p>
+            </div>
+            <div class="col-4">
+              <q-input
+                v-model="selectedStudent.studentID"
+                :readonly="!isEditMode"
+                :class="isEditMode ? 'editable' : 'readonly'"
+                borderless
+                dense
+              />
+            </div>
+            <div class="col-2 text-right q-pr-md">
+              <p class="q-my-none">ชั่วโมงเตรียมความพร้อม :</p>
+            </div>
+            <div class="col-4">
+              <q-input
+                v-model="selectedStudent.softskill"
+                :readonly="!isEditMode"
+                :class="isEditMode ? 'editable' : 'readonly'"
+                borderless
+                dense
+              />
+            </div>
           </div>
-          <div class="col-2 text-right q-pa-lg">
-            <p>Email :</p>
-            <p>ชั่วโมงเตรียมความพร้อม :</p>
-            <p>ชั่วโมงทักษะทางวิชาการ :</p>
+
+          <!-- ชั้นปีและชั่วโมงทักษะทางวิชาการ -->
+          <div class="col-12 row items-center q-pa-sm">
+            <div class="col-1 text-right q-pr-md">
+              <p class="q-my-none">ชั้นปี :</p>
+            </div>
+            <div class="col-4">
+              <q-input
+                v-model="selectedStudent.year"
+                :readonly="!isEditMode"
+                :class="isEditMode ? 'editable' : 'readonly'"
+                borderless
+                dense
+              />
+            </div>
+            <div class="col-2 text-right q-pr-md">
+              <p class="q-my-none">ชั่วโมงทักษะทางวิชาการ :</p>
+            </div>
+            <div class="col-4">
+              <q-input
+                v-model="selectedStudent.hardskill"
+                :readonly="!isEditMode"
+                :class="isEditMode ? 'editable' : 'readonly'"
+                borderless
+                dense
+              />
+            </div>
           </div>
-          <div class="col-4">
-            <q-input
-              v-model="selectedStudent.email"
-              :readonly="!isEditMode"
-              :class="isEditMode ? 'editable' : 'readonly'"
-              borderless
-              dense
-              class="q-mb-sm"
-            />
-            <q-input
-              v-model="selectedStudent.softskill"
-              :readonly="!isEditMode"
-              :class="isEditMode ? 'editable' : 'readonly'"
-              borderless
-              dense
-              class="q-mb-sm"
-            />
-            <q-input
-              v-model="selectedStudent.hardskill"
-              :readonly="!isEditMode"
-              :class="isEditMode ? 'editable' : 'readonly'"
-              borderless
-              dense
-              class="q-mb-sm"
-            />
+
+          <!-- สาขา -->
+          <div class="col-12 row items-center q-pa-sm">
+            <div class="col-1 text-right q-pr-md">
+              <p class="q-my-none">สาขา :</p>
+            </div>
+            <div class="col-4">
+              <q-input
+                v-model="selectedStudent.major"
+                :readonly="!isEditMode"
+                :class="isEditMode ? 'editable' : 'readonly'"
+                borderless
+                dense
+              />
+            </div>
           </div>
         </div>
       </q-card>
     </div>
-    <div>
-      <div class="text-h6 text-center q-mb-sm">ประวัติการอบรม</div>
-      <div class="q-mb-sm">
+
+    <!-- ส่วนประวัติการอบรม -->
+    <div class="q-mb-sm">
+      <div class="header-container text-center">
+        <div class="text-h6">ประวัติการอบรม</div>
         <div class="filter-container">
           <q-btn class="btnfilter q-mr-sm q-gp" @click="showFilterDialog1 = true">
             <img src="public\icons\sort.svg" alt="Sort Icon" width="30" height="30" />
             <FilterDialog v-model="showFilterDialog1" :categories="filterCategories1" />
           </q-btn>
         </div>
-        <q-table :columns="columns" :rows="historyActivity" row-key="name">
-          <!-- เนื้อหาตาราง -->
-          <template v-slot:body="props">
-            <q-tr :props="props">
-              <q-td key="index">{{ props.row.index }}</q-td>
-              <q-td
-                key="name"
-                style="
-                  max-width: 250px;
-                  white-space: nowrap;
-                  overflow: hidden;
-                  text-overflow: ellipsis;
-                "
+      </div>
+      <q-table :columns="columns" :rows="historyActivity" row-key="name">
+        <!-- เนื้อหาตาราง -->
+        <template v-slot:body="props">
+          <q-tr :props="props">
+            <q-td key="index">{{ props.row.index }}</q-td>
+            <q-td
+              key="name"
+              style="
+                max-width: 250px;
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
+              "
+            >
+              {{ props.row.name }}
+            </q-td>
+            <q-td key="date">{{ props.row.date }}</q-td>
+            <q-td key="time">{{ props.row.time }}</q-td>
+            <q-td key="location">{{ props.row.location }}</q-td>
+            <!-- แสดงชั่วโมงเตรียมความพร้อม -->
+            <q-td key="softskill" class="text-center">
+              <span
+                :class="{ 'negative-hours': props.row.skill === 'soft' && props.row.hours < 0 }"
               >
-                {{ props.row.name }}
-              </q-td>
-              <q-td key="date">{{ props.row.date }}</q-td>
-              <q-td key="time">{{ props.row.time }}</q-td>
-              <q-td key="location">{{ props.row.location }}</q-td>
-              <!-- แสดงชั่วโมงเตรียมความพร้อม -->
-              <q-td key="softskill" class="text-center">
-                <span
-                  :class="{ 'negative-hours': props.row.skill === 'soft' && props.row.hours < 0 }"
-                >
-                  {{ props.row.skill === 'soft' ? props.row.hours : '-' }}
-                </span>
-              </q-td>
-              <!-- แสดงชั่วโมงทักษะทางวิชาการ -->
-              <q-td key="hardskill" class="text-center">
-                <span
-                  :class="{ 'negative-hours': props.row.skill === 'hard' && props.row.hours < 0 }"
-                >
-                  {{ props.row.skill === 'hard' ? props.row.hours : '-' }}
-                </span>
-              </q-td>
-            </q-tr>
-          </template>
-        </q-table>
-        <div class="q-mt-md text-right">
-          <template v-if="!isEditMode">
-            <q-btn label="แก้ไข" class="btnedit" unelevated rounded @click="enableEditMode" />
-          </template>
-          <template v-else>
-            <q-btn
-              label="ยกเลิก"
-              class="btnreject q-mr-sm"
-              unelevated
-              rounded
-              @click="cancelEdit"
-            />
-            <q-btn label="บันทึก" class="btnconfirm" unelevated rounded @click="saveChanges" />
-          </template>
-        </div>
+                {{ props.row.skill === 'soft' ? props.row.hours : '-' }}
+              </span>
+            </q-td>
+            <!-- แสดงชั่วโมงทักษะทางวิชาการ -->
+            <q-td key="hardskill" class="text-center">
+              <span
+                :class="{ 'negative-hours': props.row.skill === 'hard' && props.row.hours < 0 }"
+              >
+                {{ props.row.skill === 'hard' ? props.row.hours : '-' }}
+              </span>
+            </q-td>
+          </q-tr>
+        </template>
+      </q-table>
+      <div class="q-mt-md text-right">
+        <template v-if="!isEditMode">
+          <q-btn label="แก้ไข" class="btnedit" unelevated rounded @click="enableEditMode" />
+        </template>
+        <template v-else>
+          <q-btn label="ยกเลิก" class="btnreject q-mr-sm" unelevated rounded @click="cancelEdit" />
+          <q-btn label="บันทึก" class="btnconfirm" unelevated rounded @click="saveChanges" />
+        </template>
       </div>
     </div>
   </div>
@@ -570,7 +595,7 @@ const mockStudents = ref([
   padding-left: 10px;
 }
 .readonly {
-  background-color: #f5f5f5;
+  background-color: #e4e4e4;
   color: #757575;
 }
 .editable {

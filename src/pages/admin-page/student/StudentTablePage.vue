@@ -116,7 +116,7 @@ const filters = ref<{
   categoryStudent: [],
 })
 const showFilterDialog1 = ref(false)
-const filterCategories1 = ref(['categoryActivity'])
+const filterCategories1 = ref(['major', 'year', 'statusStudent'])
 
 const applyFilters = (selectedFilters: {
   year: string[]
