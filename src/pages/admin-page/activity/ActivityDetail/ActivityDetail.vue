@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
 import ActivityDetailTab from './ActivityDetailTab.vue'
-import FilterSearchStudentList from './FilterSearchStudentList.vue'
 import StudentList from './StudentList.vue'
 import RegistrationDetails from './RegistrationDetails.vue'
 import { useRouter } from 'vue-router'
@@ -81,14 +80,14 @@ const currentBreadcrumb = computed(() => {
     </div>
 
     <!-- Tabs -->
-    <q-tabs v-model="tab" align="right" class="q-mb-md">
+    <q-tabs v-model="tab" align="right" class="custom-tabs" indicator-color="transparent">
       <q-tab name="activity" label="รายละเอียดกิจกรรม" />
       <q-tab name="registration" label="รายละเอียดการลงทะเบียน" />
       <q-tab name="students" label="รายชื่อนิสิต" />
       <q-tab name="summary" label="สรุปผลกิจกรรม" />
     </q-tabs>
 
-    <q-tab-panels v-model="tab" animated>
+    <q-tab-panels v-model="tab" animated class="custom-panels">
       <q-tab-panel name="activity">
         <ActivityDetailTab></ActivityDetailTab>
         <div class="text-center text-h6"></div>
@@ -99,9 +98,6 @@ const currentBreadcrumb = computed(() => {
       </q-tab-panel>
 
       <q-tab-panel name="students">
-        <div class="text-h6 q-mb-md"></div>
-
-        <FilterSearchStudentList v-model:search="search" />
         <StudentList :search="search" />
       </q-tab-panel>
 
@@ -124,5 +120,26 @@ const currentBreadcrumb = computed(() => {
 .active-breadcrumb {
   text-decoration: underline;
   color: black;
+}
+
+.q-tabs {
+  max-width: 98%;
+  margin-left: 20px;
+}
+
+.custom-tabs {
+  background-color: transparent;
+  border-bottom: none !important;
+}
+
+.custom-tabs .q-tab--active,
+.custom-tabs .q-tab:hover {
+  background-color: #EDF0F5 !important;
+  border-radius: 12px 12px 0 0;
+}
+
+.custom-panels {
+  background-color: #EDF0F5;
+  border-radius: 12px;
 }
 </style>
