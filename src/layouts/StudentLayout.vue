@@ -2,8 +2,8 @@
   <q-layout view="hHh lpR fFf">
     <MenuNavbar @toggleSidebar="studentSidebar?.toggleSidebar" />
     <MenuStudentSidebar ref="studentSidebar" />
-    <q-page-container>
-      <router-view />
+    <q-page-container style="display: flex">
+      <div class="q-mx-auto" style="width: 1600px"><router-view /></div>
     </q-page-container>
   </q-layout>
 </template>
