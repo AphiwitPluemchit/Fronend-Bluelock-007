@@ -182,6 +182,7 @@ import { computed, ref } from 'vue'
 import { useRoute } from 'vue-router'
 import AppBreadcrumbs from 'src/components/AppBreadcrumbs.vue'
 import FilterDialog from 'src/components/Dialog/FilterDialog.vue'
+import studentEditIcon from 'src/pages/admin-page/student/icons pics/user-edit-icon.png'
 
 const route = useRoute()
 const id = computed(() => route.params.studentID)
@@ -190,7 +191,7 @@ console.log(id)
 const breadcrumbs = ref({
   previousPage: { title: 'จัดการข้อมูลนิสิต', path: '/StudentManagement' },
   currentPage: { title: 'รายละเอียดนิสิต', path: `/StudentManagement/StudentDetail/` },
-  icon: 'edit',
+  icon: studentEditIcon,
 })
 
 const showFilterDialog1 = ref(false)
