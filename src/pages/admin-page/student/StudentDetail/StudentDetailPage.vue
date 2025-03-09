@@ -4,66 +4,487 @@
     <div><AppBreadcrumbs :breadcrumbs="breadcrumbs" /></div>
 
     <div class="q-mx-lg">
-      <div class="text-h6">ข้อมูลนิสิต</div>
-      <q-card flat bordered class="q-pa-md">
-        <div class="row q-col-gutter-md">
-          <!-- แถวที่ 1 -->
-          <div class="col-6">
-            <q-input label="ชื่อ" v-model="student.name" outlined dense readonly />
+      <div class="text-h6 q-mt-lg">ข้อมูลนิสิต</div>
+      <q-card flat class="q-pa-md">
+        <div v-if="selectedStudent" class="row q-col-gutter-md">
+          <div class="col-1 text-right q-pa-lg">
+            <p>ชื่อ :</p>
+            <p>รหัสนิสิต :</p>
+            <p>ชั้นปี :</p>
+            <p>สาขา :</p>
           </div>
-          <div class="col-6">
-            <q-input label="Email" v-model="student.email" outlined dense readonly />
+          <div class="col-4">
+            <q-input v-model="selectedStudent.name" outlined dense />
+            <q-input v-model="selectedStudent.studentID" outlined dense />
+            <q-input v-model="selectedStudent.major" outlined dense />
+            <q-input v-model="selectedStudent.year" outlined dense />
           </div>
-
-          <!-- แถวที่ 2 -->
-          <div class="col-6">
-            <q-input label="รหัสนิสิต" v-model="student.id" outlined dense readonly />
+          <div class="col-2 text-right q-pa-lg">
+            <p>Email :</p>
+            <p>ชั่วโมงเตรียมความพร้อม :</p>
+            <p>ชั่วโมงทักษะทางวิชาการ :</p>
           </div>
-          <div class="col-6">
-            <q-input label="ชั้นปี" v-model="student.year" outlined dense readonly />
+          <div class="col-4">
+            <q-input label="Email" v-model="selectedStudent.email" outlined dense />
+            <q-input v-model="selectedStudent.softskill" outlined dense />
+            <q-input v-model="selectedStudent.hardskill" outlined dense />
           </div>
-
-          <!-- แถวที่ 3 -->
-          <div class="col-6">
-            <q-input label="สาขา" v-model="student.major" outlined dense readonly />
-          </div>
-          <div class="col-6">
-            <q-input label="ชั่วโมงเตรียมความพร้อม" v-model="student.prepHours" outlined dense readonly />
-          </div>
-
-          <!-- แถวที่ 4 -->
-          <div class="col-6">
-            <q-input label="ชั่วโมงทักษะทางวิชาการ" v-model="student.academicHours" outlined dense readonly />
-          </div>
-          <div class="col-6"></div> <!-- เว้นช่องให้จัดเรียงสวยขึ้น -->
         </div>
       </q-card>
+    </div>
+    <div>
+      <div class="text-h6 text-center">ประวัติการอบรม</div>
+      <div class="q-pa-md">
+        <div class="filter-container">
+          <q-btn class="btnfilter q-mr-sm q-gp" @click="showFilterDialog1 = true">
+            <img src="public\icons\sort.svg" alt="Sort Icon" width="30" height="30" />
+            <FilterDialog v-model="showFilterDialog1" :categories="filterCategories1" />
+          </q-btn>
+        </div>
+        <q-table :columns="columns" :rows="historyActivity" row-key="name">
+          <!-- เนื้อหาตาราง -->
+          <template v-slot:body="props">
+            <q-tr :props="props">
+              <q-td key="index">{{ props.row.index }}</q-td>
+              <q-td
+                key="name"
+                style="
+                  max-width: 250px;
+                  white-space: nowrap;
+                  overflow: hidden;
+                  text-overflow: ellipsis;
+                "
+              >
+                {{ props.row.name }}
+              </q-td>
+              <q-td key="date">{{ props.row.date }}</q-td>
+              <q-td key="time">{{ props.row.time }}</q-td>
+              <q-td key="location">{{ props.row.location }}</q-td>
+              <!-- แสดงชั่วโมงเตรียมความพร้อม -->
+              <q-td key="softskill" class="text-center">
+                <span
+                  :class="{ 'negative-hours': props.row.skill === 'soft' && props.row.hours < 0 }"
+                >
+                  {{ props.row.skill === 'soft' ? props.row.hours : '-' }}
+                </span>
+              </q-td>
+              <!-- แสดงชั่วโมงทักษะทางวิชาการ -->
+              <q-td key="hardskill" class="text-center">
+                <span
+                  :class="{ 'negative-hours': props.row.skill === 'hard' && props.row.hours < 0 }"
+                >
+                  {{ props.row.skill === 'hard' ? props.row.hours : '-' }}
+                </span>
+              </q-td>
+            </q-tr>
+          </template>
+        </q-table>
+        <div class="q-mt-md text-right">
+          <q-btn label="แก้ไข" class="btnedit" unelevated rounded />
+        </div>
+      </div>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { computed, ref } from "vue";
-import { useRoute } from "vue-router";
-import AppBreadcrumbs from "src/components/AppBreadcrumbs.vue";
+import { computed, ref } from 'vue'
+import { useRoute } from 'vue-router'
+import AppBreadcrumbs from 'src/components/AppBreadcrumbs.vue'
 
-const route = useRoute();
-const id = computed(() => route.params.id);
-console.log(id);
+const route = useRoute()
+const id = computed(() => route.params.studentID)
+console.log(id)
 
 const breadcrumbs = ref({
-  previousPage: { title: "จัดการข้อมูลนิสิต", path: "/StudentManagement" },
-  currentPage: { title: "รายละเอียดนิสิต", path: `/StudentManagement/StudentDetail/` },
-  icon: "description",
-});
+  previousPage: { title: 'จัดการข้อมูลนิสิต', path: '/StudentManagement' },
+  currentPage: { title: 'รายละเอียดนิสิต', path: `/StudentManagement/StudentDetail/` },
+  icon: 'edit',
+})
 
-const student = ref({
-  name: "ศิขรัช จิตอนงค์",
-  id: "65160305",
-  email: "65160305@go.buu.ac.th",
-  year: 4,
-  major: "CS",
-  prepHours: 3,
-  academicHours: 13,
-});
+const showFilterDialog1 = ref(false)
+const filterCategories1 = ref(['category1', 'category2'])
+
+// const props = defineProps({
+//   rows: Array
+// })
+
+const columns = [
+  { name: 'index', label: 'ลำดับ', field: 'index', align: 'left' as const },
+  {
+    name: 'name',
+    label: 'ชื่อกิจกรรม',
+    field: 'name',
+    align: 'left' as const,
+    style: 'max-width: 250px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;',
+  },
+  { name: 'date', label: 'วันที่', field: 'date', align: 'left' as const },
+  { name: 'time', label: 'เวลา', field: 'time', align: 'left' as const },
+  { name: 'location', label: 'สถานที่', field: 'location', align: 'left' as const },
+  {
+    name: 'softskill',
+    label: 'ชั่วโมงเตรียมความพร้อม',
+    field: 'softskill',
+    align: 'center' as const,
+  },
+  {
+    name: 'hardskill',
+    label: 'ชั่วโมงทักษะทางวิชาการ',
+    field: 'hardskill',
+    align: 'center' as const,
+  },
+]
+
+const selectedStudent = computed(() => {
+  return mockStudents.value.find((student) => student.studentID === id.value) || null
+})
+
+//mockup
+const historyActivity = ref([
+  {
+    index: 1,
+    name: 'กิจกรรมเสริมสร้างขความรู้และสร้างความสามารถ',
+    date: '14 มกราคม 2566',
+    time: '08:00-12:00',
+    location: 'IF-3C02',
+    skill: 'hard',
+    hours: 4,
+  },
+  {
+    index: 2,
+    name: 'กิจกรรมเสริมสร้างขความรู้และสร้างความสามารถกิจกรรมเสริมสร้างขความรู้และสร้างความสามารถกิจกรรมเสริมสร้างขความรู้และสร้างความสามารถกิจกรรมเสริมสร้างขความรู้และสร้างความสามารถ',
+    date: '14 มกราคม 2566',
+    time: '08:00-12:00',
+    location: 'IF-3C02',
+    skill: 'soft',
+    hours: 4,
+  },
+  {
+    index: 3,
+    name: 'กิจกรรมเสริมสร้างขความรู้และสร้างความสามารถ',
+    date: '14 มกราคม 2566',
+    time: '08:00-16:00',
+    location: 'IF-3C02',
+    skill: 'soft',
+    hours: -4,
+  },
+  {
+    index: 4,
+    name: 'กิจกรรมเสริมสร้างขความรู้และสร้างความสามารถ',
+    date: '14 มกราคม 2566',
+    time: '09:00-12:00',
+    location: 'IF-3C02',
+    skill: 'soft',
+    hours: 3,
+  },
+  {
+    index: 5,
+    name: 'กิจกรรมเสริมสร้างขความรู้และสร้างความสามารถ',
+    date: '14 มกราคม 2566',
+    time: '08:00-12:00',
+    location: 'IF-3C02',
+    skill: 'hard',
+    hours: 4,
+  },
+  {
+    index: 6,
+    name: 'กิจกรรมเสริมสร้างขความรู้และสร้างความสามารถ',
+    date: '14 มกราคม 2566',
+    time: '08:00-16:00',
+    location: 'IF-3C02',
+    skill: 'soft',
+    hours: 8,
+  },
+])
+const mockStudents = ref([
+  {
+    index: 1,
+    studentID: '65160311',
+    name: 'คิรัชช์ รัตนวงศ์',
+    major: 'CS',
+    softskill: '30',
+    hardskill: '12',
+    year: '3',
+    email: '65160311@go.buu.ac.th',
+  },
+  {
+    index: 2,
+    studentID: '65160312',
+    name: 'กรนิศา ทองเยี่ยม',
+    major: 'CS',
+    softskill: '15',
+    hardskill: '30',
+    year: '3',
+    email: '65160312@go.buu.ac.th',
+  },
+  {
+    index: 3,
+    studentID: '65160313',
+    name: 'อุดม เมธี',
+    major: 'ITDI',
+    softskill: '11',
+    hardskill: '11',
+    year: '3',
+    email: '65160313@go.buu.ac.th',
+  },
+  {
+    index: 4,
+    studentID: '65160314',
+    name: 'ภัทรพล เกียรติคุณ',
+    major: 'ITDI',
+    softskill: '15',
+    hardskill: '20',
+    year: '2',
+    email: '65160313@go.buu.ac.th',
+  },
+  {
+    index: 5,
+    studentID: '65160315',
+    name: 'วณิชชา สีสังข์',
+    major: 'AAI',
+    softskill: '11',
+    hardskill: '30',
+    year: '1',
+    email: '65160313@go.buu.ac.th',
+  },
+  {
+    index: 6,
+    studentID: '65160316',
+    name: 'คิรัชช์ รัตนวงศ์รัตนวงศ์รัตนวงศ์รัตนวงศ์',
+    major: 'CS',
+    softskill: '30',
+    hardskill: '12',
+    year: '3',
+    email: '65160316@go.buu.ac.th',
+  },
+  {
+    index: 7,
+    studentID: '65160317',
+    name: 'กรนิศา ทองเยี่ยม',
+    major: 'CS',
+    softskill: '15',
+    hardskill: '30',
+    year: '4',
+    email: '65160317@go.buu.ac.th',
+  },
+  {
+    index: 8,
+    studentID: '65160318',
+    name: 'อุดม เมธี',
+    major: 'ITDI',
+    softskill: '11',
+    hardskill: '11',
+    year: '4',
+    email: '65160318@go.buu.ac.th',
+  },
+  {
+    index: 9,
+    studentID: '65160319',
+    name: 'ภัทรพล เกียรติคุณ',
+    major: 'ITDI',
+    softskill: '30',
+    hardskill: '20',
+    year: '3',
+    email: '65160319@go.buu.ac.th',
+  },
+  {
+    index: 10,
+    studentID: '65160320',
+    name: 'วณิชชา สีสังข์',
+    major: 'AAI',
+    softskill: '11',
+    hardskill: '30',
+    year: '3',
+    email: '65160320@go.buu.ac.th',
+  },
+  {
+    index: 11,
+    studentID: '65160321',
+    name: 'คิรัชช์ รัตนวงศ์',
+    major: 'CS',
+    softskill: '30',
+    hardskill: '12',
+    year: '3',
+    email: '65160321@go.buu.ac.th',
+  },
+  {
+    index: 12,
+    studentID: '65160322',
+    name: 'กรนิศา ทองเยี่ยม',
+    major: 'CS',
+    softskill: '15',
+    hardskill: '30',
+    year: '3',
+    email: '65160322@go.buu.ac.th',
+  },
+  {
+    index: 13,
+    studentID: '65160323',
+    name: 'อุดม เมธี',
+    major: 'ITDI',
+    softskill: '11',
+    hardskill: '11',
+    year: '3',
+    email: '65160323@go.buu.ac.th',
+  },
+  {
+    index: 14,
+    studentID: '65160324',
+    name: 'ภัทรพล เกียรติคุณ',
+    major: 'ITDI',
+    softskill: '15',
+    hardskill: '20',
+    year: '3',
+    email: '65160324@go.buu.ac.th',
+  },
+  {
+    index: 15,
+    studentID: '65160325',
+    name: 'วณิชชา สีสังข์',
+    major: 'AAI',
+    softskill: '11',
+    hardskill: '30',
+    year: '3',
+    email: '65160325@go.buu.ac.th',
+  },
+  {
+    index: 16,
+    studentID: '65160326',
+    name: 'คิรัชช์ รัตนวงศ์',
+    major: 'CS',
+    softskill: '30',
+    hardskill: '12',
+    year: '3',
+    email: '65160326@go.buu.ac.th',
+  },
+  {
+    index: 17,
+    studentID: '65160327',
+    name: 'กรนิศา ทองเยี่ยม',
+    major: 'CS',
+    softskill: '15',
+    hardskill: '30',
+    year: '3',
+    email: '65160327@go.buu.ac.th',
+  },
+  {
+    index: 18,
+    studentID: '65160328',
+    name: 'อุดม เมธี',
+    major: 'ITDI',
+    softskill: '11',
+    hardskill: '11',
+    year: '2',
+    email: '65160328@go.buu.ac.th',
+  },
+  {
+    index: 19,
+    studentID: '65160329',
+    name: 'ภัทรพล เกียรติคุณ',
+    major: 'ITDI',
+    softskill: '30',
+    hardskill: '20',
+    email: '65160329@go.buu.ac.th',
+  },
+  {
+    index: 20,
+    studentID: '65160330',
+    name: 'วณิชชา สีสังข์',
+    major: 'AAI',
+    softskill: '11',
+    hardskill: '30',
+    year: '2',
+    email: '65160330@go.buu.ac.th',
+  },
+  {
+    index: 21,
+    studentID: '65160331',
+    name: 'อุดม เมธี',
+    major: 'ITDI',
+    softskill: '11',
+    hardskill: '11',
+    year: '3',
+    email: '65160331@go.buu.ac.th',
+  },
+  {
+    index: 22,
+    studentID: '65160332',
+    name: 'ภัทรพล เกียรติคุณ',
+    major: 'ITDI',
+    softskill: '15',
+    hardskill: '20',
+    year: '3',
+    email: '65160332@go.buu.ac.th',
+  },
+  {
+    index: 23,
+    studentID: '65160333',
+    name: 'วณิชชา สีสังข์',
+    major: 'AAI',
+    softskill: '11',
+    hardskill: '30',
+    year: '2',
+    email: '65160333@go.buu.ac.th',
+  },
+  {
+    index: 24,
+    studentID: '65160334',
+    name: 'คิรัชช์ รัตนวงศ์',
+    major: 'CS',
+    softskill: '30',
+    hardskill: '12',
+    year: '2',
+    email: '65160334@go.buu.ac.th',
+  },
+  {
+    index: 25,
+    studentID: '65160335',
+    name: 'กรนิศา ทองเยี่ยม',
+    major: 'CS',
+    softskill: '15',
+    hardskill: '30',
+    year: '4',
+    email: '65160335@go.buu.ac.th',
+  },
+  {
+    index: 26,
+    studentID: '65160336',
+    name: 'อุดม เมธี',
+    major: 'ITDI',
+    softskill: '11',
+    hardskill: '11',
+    year: '3',
+    email: '65160336@go.buu.ac.th',
+  },
+  {
+    index: 27,
+    studentID: '65160337',
+    name: 'ภัทรพล เกียรติคุณ',
+    major: 'ITDI',
+    softskill: '30',
+    hardskill: '20',
+    year: '3',
+    email: '65160337@go.buu.ac.th',
+  },
+  {
+    index: 28,
+    studentID: '65160338',
+    name: 'วณิชชา สีสังข์',
+    major: 'AAI',
+    softskill: '11',
+    hardskill: '30',
+    year: '3',
+    email: '65160338@go.buu.ac.th',
+  },
+])
 </script>
+<style scoped>
+.negative-hours {
+  color: #f03b2d; /* สีแดง */
+}
+.filter-container {
+  display: flex;
+  justify-content: flex-end; /* จัดชิดขวา */
+  margin-bottom: 16px; /* เพิ่มระยะห่างด้านล่าง */
+}
+</style>
