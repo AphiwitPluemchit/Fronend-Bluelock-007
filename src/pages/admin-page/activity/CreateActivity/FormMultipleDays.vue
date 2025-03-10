@@ -40,10 +40,7 @@
     </div>
 
     <!-- Room -->
-    <div class="input-group">
-      <p class="label label_minWidth">ชื่อห้องที่จัดกิจกรรม :</p>
-      <q-input outlined v-model="roomName" style="width: 600px" />
-    </div>
+   <Room v-model="roomName" class="input-group" />
 
     <!--Hours  & Seats -->
     <div class="flex-container">
@@ -92,6 +89,7 @@ import HoursSelector from 'src/pages/admin-page/activity/CreateActivity/Form/Hou
 import SeatsSelector from 'src/pages/admin-page/activity/CreateActivity/Form/SeatsSelector.vue'
 import TimeSelector from 'src/pages/admin-page/activity/CreateActivity/Form/TimeSelector.vue'
 import FoodSelector from 'src/pages/admin-page/activity/CreateActivity/Form/FoodSelector.vue'
+import Room from 'src/pages/admin-page/activity/CreateActivity/Form/RoomSelector.vue'
 import { useRouter } from 'vue-router'
 
 const router = useRouter()

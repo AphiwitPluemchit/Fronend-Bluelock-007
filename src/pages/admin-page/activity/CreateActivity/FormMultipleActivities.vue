@@ -48,11 +48,10 @@
       </div>
 
       <!-- Room and Seats -->
-      <div class="input-group">
-        <p class="label label_minWidth">ชื่อห้องที่จัดกิจกรรม :</p>
-        <q-input outlined v-model="subActivity.roomName" style="width: 220px" />
-
-        <p class="label">จำนวนที่รับ :</p>
+      <Room v-model="roomName" class="input-group" />
+      
+        <div class="input-group">
+        <p class="label label_minWidth">จำนวนที่รับ :</p>
         <q-input
           outlined
           style="width: 225px"
@@ -141,6 +140,7 @@ import FoodSelector from 'src/pages/admin-page/activity/CreateActivity/Form/Food
 import HoursSelector from 'src/pages/admin-page/activity/CreateActivity/Form/HoursSelector.vue'
 import SingleDate from 'src/pages/admin-page/activity/CreateActivity/Form/SingleDate.vue'
 import TimeSelector from 'src/pages/admin-page/activity/CreateActivity/Form/TimeSelector.vue'
+import Room from 'src/pages/admin-page/activity/CreateActivity/Form/RoomSelector.vue'
 import { useRouter } from 'vue-router'
 
 const router = useRouter()
@@ -189,7 +189,7 @@ const hour = ref<number>(0)
 const minute = ref<number>(0)
 const endHour = ref<number>(0)
 const endMinute = ref<number>(0)
-
+  const roomName = ref('')
 // ฟังก์ชันสำหรับฟอร์แมตเวลาเป็นสตริง
 const formatTime = (h: number, m: number): string => {
   return `${formatHour(h)}:${formatMinute(m)}`

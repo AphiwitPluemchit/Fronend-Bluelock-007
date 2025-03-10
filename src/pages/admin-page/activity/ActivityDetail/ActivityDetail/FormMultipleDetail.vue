@@ -3,7 +3,7 @@
     <!-- Status -->
     <div class="input-group">
       <p class="label label_minWidth">สถานะ:</p>
-      <q-btn :label="activityStatus" class="status-btn" />
+      <q-btn :label="activityStatus" :class="statusClass" class="status-btn" />
       <q-btn
         v-if="activityStatus !== 'ยกเลิก' && activityStatus !== 'เสร็จสิ้น'"
         class="btnchange"
@@ -46,13 +46,16 @@
     <!-- Sub Activities List -->
     <div v-for="(subActivity, index) in subActivities" :key="index" class="sub-activity">
       <!-- Cancel (X) Icon -->
-      <div class="remove-icon">
+      <div
+        class="remove-icon"
+        :class="{ 'icon-disabled': !isEditing }"
+        @click="isEditing && removeSubActivity(index)"
+      >
         <q-icon
           name="close"
           size="35px"
-          color="red"
+          :color="isEditing ? 'red' : 'grey-5'"
           class="cursor-pointer"
-          @click="removeSubActivity(index)"
         />
       </div>
 
@@ -66,18 +69,11 @@
           :disable="!isEditing"
         />
       </div>
+      <RoomSelector v-model="selectedRooms" class="input-group" :disable="!isEditing" />
 
       <!-- Room and Seats -->
       <div class="input-group">
-        <p class="label label_minWidth">ชื่อห้องที่จัดกิจกรรม :</p>
-        <q-input
-          outlined
-          v-model="subActivity.roomName"
-          style="width: 220px"
-          :disable="!isEditing"
-        />
-
-        <p class="label">จำนวนที่รับ :</p>
+        <p class="label label_minWidth">จำนวนที่รับ :</p>
         <q-input
           outlined
           style="width: 225px"
@@ -187,6 +183,7 @@ import HoursSelector from 'src/pages/admin-page/activity/CreateActivity/Form/Hou
 import SingleDate from 'src/pages/admin-page/activity/CreateActivity/Form/SingleDate.vue'
 import TimeSelector from 'src/pages/admin-page/activity/CreateActivity/Form/TimeSelector.vue'
 import ChangeStatusDialog from 'src/pages/admin-page/activity/ActivityDetail/ActivityDetail/ChangeStatusDialog.vue'
+import RoomSelector from 'src/pages/admin-page/activity/CreateActivity/Form/RoomSelector.vue'
 
 interface SubActivity {
   subActivityName: string
@@ -228,7 +225,7 @@ const hour = ref<number>(0)
 const minute = ref<number>(0)
 const endHour = ref<number>(0)
 const endMinute = ref<number>(0)
-
+const selectedRooms = ref('')
 // ฟังก์ชันสำหรับฟอร์แมตเวลาเป็นสตริง
 const formatTime = (h: number, m: number): string => {
   return `${formatHour(h)}:${formatMinute(m)}`
@@ -355,6 +352,22 @@ const activityStatus = ref('กำลังวางแผน') // ค่าป�
 const handleStatusChange = (newStatus: string) => {
   activityStatus.value = newStatus
 }
+const statusClass = computed(() => {
+  switch (activityStatus.value) {
+    case 'กำลังวางแผน':
+      return 'status-planning'
+    case 'เปิดลงทะเบียน':
+      return 'status-open'
+    case 'ปิดลงทะเบียน':
+      return 'status-closed'
+    case 'เสร็จสิ้น':
+      return 'status-completed'
+    case 'ยกเลิก':
+      return 'status-canceled'
+    default:
+      return ''
+  }
+})
 </script>
 
 <style scoped>
@@ -487,5 +500,44 @@ const handleStatusChange = (newStatus: string) => {
   justify-content: flex-end;
   gap: 25px;
   margin-top: 30px;
+}
+.status-btn {
+  border-radius: 50px;
+  height: 40px;
+  width: 200px;
+  font-size: 20px;
+}
+
+.status-planning {
+  color: #ff6f00;
+  background-color: #ffe7ba;
+  border: 2px solid #ffa500;
+}
+
+.status-open {
+  color: #009812;
+  background-color: #d0ffc5;
+  border: 2px solid #00bb16;
+}
+
+.status-closed {
+  color: #001780;
+  background-color: #cfd7ff;
+  border: 2px solid #002dff;
+}
+.status-completed {
+  color: #000000;
+  background-color: #dadada;
+  border: 2px solid #575656;
+}
+
+.status-canceled {
+  color: #f32323;
+  background-color: #ffc5c5;
+  border: 2px solid #ff0000;
+}
+.icon-disabled {
+  pointer-events: none;
+  opacity: 0.6;
 }
 </style>

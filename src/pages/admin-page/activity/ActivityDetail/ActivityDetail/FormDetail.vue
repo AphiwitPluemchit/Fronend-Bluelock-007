@@ -59,11 +59,7 @@
     </div>
 
     <!-- Room -->
-    <div class="input-group">
-      <p class="label label_minWidth">ชื่อห้องที่จัดกิจกรรม :</p>
-      <q-input outlined v-model="roomName" style="width: 600px" :disable="!isEditing" />
-    </div>
-
+    <RoomSelector v-model="selectedRooms" class="input-group" :disable="!isEditing" />
     <!-- Hours & Seats -->
     <div class="flex-container">
       <HoursSelector v-model="totalHours" class="input-group" :disable="!isEditing" />
@@ -123,6 +119,7 @@ import SeatsSelector from 'src/pages/admin-page/activity/CreateActivity/Form/Sea
 import TimeSelector from 'src/pages/admin-page/activity/CreateActivity/Form/TimeSelector.vue'
 import FoodSelector from 'src/pages/admin-page/activity/CreateActivity/Form/FoodSelector.vue'
 import ChangeStatusDialog from 'src/pages/admin-page/activity/ActivityDetail/ActivityDetail/ChangeStatusDialog.vue'
+import RoomSelector from 'src/pages/admin-page/activity/CreateActivity/Form/RoomSelector.vue'
 
 interface DayTimeSelection {
   date: string
@@ -149,6 +146,7 @@ const departments = ref<string[]>([])
 const years = ref<string[]>([])
 const activityDateRangeInternal = ref<string[]>([])
 const foodMenu = ref('')
+const selectedRooms = ref('')
 const activityStatus = ref('กำลังวางแผน') // ค่าปัจจุบันของสถานะ
 const handleStatusChange = (newStatus: string) => {
   activityStatus.value = newStatus
@@ -412,25 +410,25 @@ const saveChanges = () => {
 
 .status-open {
   color: #009812;
-  background-color: #D0FFC5;
-  border: 2px solid #00BB16;
+  background-color: #d0ffc5;
+  border: 2px solid #00bb16;
 }
 
 .status-closed {
   color: #001780;
-  background-color: #CFD7FF;
-  border: 2px solid #002DFF;
+  background-color: #cfd7ff;
+  border: 2px solid #002dff;
 }
 .status-completed {
   color: #000000;
-  background-color: #DADADA;
+  background-color: #dadada;
   border: 2px solid #575656;
 }
 
 .status-canceled {
-  color: #F32323;
-  background-color: #FFC5C5;
-  border: 2px solid #FF0000;
+  color: #f32323;
+  background-color: #ffc5c5;
+  border: 2px solid #ff0000;
 }
 .flex-container {
   display: flex;

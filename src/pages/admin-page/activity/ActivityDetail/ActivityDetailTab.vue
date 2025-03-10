@@ -55,11 +55,9 @@ const getFormComponent = computed(() => {
 .wrapper {
   display: flex;
   align-items: flex-start;
-  gap: 150px;
   background-color: #edf0f5;
   padding: 30px;
   border-radius: 12px;
-  margin-top: 20px;
 }
 .container {
   display: flex;
@@ -76,7 +74,7 @@ const getFormComponent = computed(() => {
   flex-grow: 1;
   overflow-x: hidden;
   overflow-y: auto;
-  max-height: 550px;
+  max-height: 600px;
   justify-items: flex-end;
   margin-right: 50px;
 }

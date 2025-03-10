@@ -13,7 +13,9 @@
           :label="option.label"
           class="status-btn"
           :class="[
-            { 'active-status': selectedStatus === option.value },
+            {
+              'active-status': selectedStatus === option.value,
+            },
             option.value === 'กำลังวางแผน'
               ? 'status-planning'
               : option.value === 'เปิดลงทะเบียน'
@@ -27,7 +29,7 @@
                       : '',
           ]"
           @click="selectedStatus = option.value"
-          :outline="selectedStatus !== option.value"
+          :outline="false"
         />
       </q-card-section>
 
@@ -124,18 +126,18 @@ const confirmStatusChange = () => {
 
 /* แต่ละสถานะ */
 .status-planning {
-  color: #FF6F00; /* สีส้ม */
-  border: 2px solid #FFA500;
+  color: #ff6f00; /* สีส้ม */
+  border: 2px solid #ffa500;
 }
 
 .status-open {
   color: #009812; /* สีเขียว */
-  border: 2px solid #00BB16;
+  border: 2px solid #00bb16;
 }
 
 .status-closed {
   color: #001780; /* สีน้ำเงิน */
-  border: 2px solid #002DFF;
+  border: 2px solid #002dff;
 }
 
 .status-completed {
@@ -144,15 +146,30 @@ const confirmStatusChange = () => {
 }
 
 .status-cancelled {
-  color: #FF0000; /* สีแดง */
-  border: 2px solid #F32323;
+  color: #ff0000; /* สีแดง */
+  border: 2px solid #f32323;
 }
 
-/* Active สถานะ */
-/* .active-status {
-  background-color: #ecf0f1; 
-  font-weight: bold;
-} */
+/* Active สถานะพร้อมพื้นหลัง */
+.status-open.active-status {
+  background-color: #d0ffc5 !important;
+}
+
+.status-planning.active-status {
+  background-color: #ffe7ba !important;
+}
+
+.status-closed.active-status {
+  background-color: #cfd7ff !important;
+}
+
+.status-completed.active-status {
+  background-color: #dadada !important;
+}
+
+.status-cancelled.active-status {
+  background-color: #ffc5c5 !important;
+}
 
 .cancel-btn {
   background-color: red;
