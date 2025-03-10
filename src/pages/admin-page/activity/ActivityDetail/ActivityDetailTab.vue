@@ -32,6 +32,7 @@
 import { onMounted, ref, computed } from 'vue'
 import ImageDetail from './ActivityDetail/ImageDetail.vue'
 import FormDetail from './ActivityDetail/FormDetail.vue'
+import FormMultipleDetail from './ActivityDetail/FormMultipleDetail.vue'
 
 onMounted(() => {})
 
@@ -43,7 +44,7 @@ const getFormComponent = computed(() => {
     case 'กิจกรรมเดียว':
       return FormDetail
     case 'หลายกิจกรรม':
-      return FormDetail
+      return FormMultipleDetail
     default:
       return null
   }
@@ -52,53 +53,38 @@ const getFormComponent = computed(() => {
 
 <style scoped>
 .wrapper {
+  display: flex;
+  align-items: flex-start;
+  gap: 150px;
   background-color: #edf0f5;
-  width: 1500px;
-  height: auto;
-  border-radius: 15px;
-  padding: 100px;
-  display: flex;
-  justify-content: center;
-  align-items: center;
+  padding: 30px;
+  border-radius: 12px;
+  margin-top: 20px;
 }
-
 .container {
-  max-width: 1500px;
   display: flex;
-  gap: 50px;
   align-items: flex-start;
   width: 100%;
 }
-
 .image-section {
-  display: flex;
-  flex-direction: column;
   align-items: flex-start;
   width: 100%;
   flex: 1;
+  margin-left: 100px;
 }
-
 .form-section {
-  display: flex;
-  flex-direction: column;
-  flex-grow: 1; 
+  flex-grow: 1;
   overflow-x: hidden;
   overflow-y: auto;
-  max-height: 700px;
+  max-height: 550px;
+  justify-items: flex-end;
+  margin-right: 50px;
 }
-
 
 .form-section::-webkit-scrollbar {
-  width: 8px; 
-  margin-right: 50px; 
+  width: 8px;
+  margin-right: 50px;
 }
-.button-group {
-  display: flex;
-  justify-content: flex-end;
-  gap: 25px;
-  margin-top: 30px;
-}
-
 .Font {
   color: #ffffff;
   font-size: 15px;

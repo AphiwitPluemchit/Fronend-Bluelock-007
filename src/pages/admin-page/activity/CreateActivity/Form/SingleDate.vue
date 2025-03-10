@@ -1,7 +1,7 @@
 <template>
   <div class="input-group">
     <p class="label label_minWidth">วันที่จัดกิจกรรม :</p>
-    <q-input outlined v-model="formattedDate" style="width: 600px" readonly>
+    <q-input outlined v-model="formattedDate" style="width: 600px" readonly  :disable="!props.isEditing">
       <template v-slot:prepend>
         <q-icon name="event">
           <q-menu style="overflow: visible">
@@ -27,8 +27,10 @@
 import { computed, defineProps, defineEmits, ref, watch } from 'vue'
 
 const props = defineProps({
-  modelValue: String, // รับค่าเริ่มต้น
+  modelValue: String,
+  isEditing: Boolean, // รับค่า isEditing จาก parent
 })
+
 const emit = defineEmits(['update:modelValue'])
 
 const selectedDate = ref(props.modelValue || '')
