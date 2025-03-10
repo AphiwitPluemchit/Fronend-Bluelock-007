@@ -1,8 +1,54 @@
 <script setup lang="ts">
-import { ref } from 'vue';
+import type { Activity } from 'src/types/activity';
+import { ActivityService } from "src/services/activity";
+import { onMounted, ref } from 'vue';
+import { useRoute } from 'vue-router';
+
+// ดึง activityId จาก URL
+const route = useRoute();
+const activityId = route.params.activityId as string;
 
 // โหลดรูปจาก Local Storage (ถ้ามี)
 const savedImageUrl = ref(localStorage.getItem('savedImageUrl') || '');
+
+// เก็บข้อมูลกิจกรรม
+const activityData = ref<Activity | null>(null);
+const registeredStudents = ref(0);
+const maxParticipants = ref(0);
+const remainingSeats = ref(0);
+
+// รายชื่อนิสิตที่ลงทะเบียน (แยกตามสาขา)
+const studentRegistrations = ref<{ major: string; count: number }[]>([]);
+
+// ผลการเลือกอาหาร
+const foodSelections = ref<{ name: string; count: number }[]>([]);
+
+// ฟังก์ชันโหลดข้อมูลกิจกรรมจาก API
+const fetchActivity = async () => {
+    try {
+        const response = await ActivityService.getOne(activityId);
+        activityData.value = response;
+
+        maxParticipants.value = response.activityItems?.[0]?.maxParticipants || 0;
+        registeredStudents.value = response.registeredStudents || 0;
+        remainingSeats.value = maxParticipants.value - registeredStudents.value;
+
+        // โหลดข้อมูลนิสิตแยกตามสาขา
+        studentRegistrations.value = response.studentRegistrations || [];
+
+        // โหลดข้อมูลการเลือกอาหาร
+        foodSelections.value = response.foodSelections || [];
+    } catch (error) {
+        console.error("Error fetching activity:", error);
+    }
+};
+
+// โหลดข้อมูลเมื่อ Component ถูกสร้าง
+onMounted(async () => {
+    if (activityId) {
+        await fetchActivity(); // ใช้ await เพื่อรอให้ fetchActivity() ทำงานเสร็จ
+    }
+});
 
 </script>
 
@@ -16,17 +62,17 @@ const savedImageUrl = ref(localStorage.getItem('savedImageUrl') || '');
             <div class="info-group-header">
                 <div class="info-row-header">
                     <span class="label">จำนวนที่รับ :</span>
-                    <span class="value">200</span>
+                    <span class="value">{{ maxParticipants }}</span>
                     <span class="unit">คน</span>
                 </div>
                 <div class="info-row-header">
                     <span class="label">จำนวนนิสิตที่ลงทะเบียน :</span>
-                    <span class="value">165</span>
+                    <span class="value">{{ registeredStudents }}</span>
                     <span class="unit">คน</span>
                 </div>
                 <div class="info-row-header">
                     <span class="label">จำนวนที่ว่าง :</span>
-                    <span class="value">35</span>
+                    <span class="value">{{ remainingSeats }}</span>
                     <span class="unit">คน</span>
                 </div>
             </div>
@@ -35,62 +81,32 @@ const savedImageUrl = ref(localStorage.getItem('savedImageUrl') || '');
             <div class="info-row">
                 <span class="label">ผลการลงทะเบียนนิสิต :</span>
                 <div class="registration-info">
-                    <div class="row">
-                        <span class="major">นิสิตสาขา CS</span>
+                    <div class="row" v-for="student in studentRegistrations" :key="student.major">
+                        <span class="major">นิสิตสาขา {{ student.major }}</span>
                         <span class="text">จำนวน</span>
-                        <span class="number">35</span>
+                        <span class="number">{{ student.count }}</span>
                         <span class="unit">คน</span>
                     </div>
-                    <div class="row">
-                        <span class="major">นิสิตสาขา SE</span>
+                </div>
+            </div>
+            
+            <!-- แสดงเฉพาะเมื่อ foodSelections มีข้อมูล -->
+            <div class="info-row" v-if="foodSelections.length > 0">
+                <span class="label">ผลการเลือกอาหาร :</span>
+                <div class="registration-info">
+                    <div class="row" v-for="food in foodSelections" :key="food.name">
+                        <span class="major">{{ food.name }}</span>
                         <span class="text">จำนวน</span>
-                        <span class="number">10</span>
-                        <span class="unit">คน</span>
-                    </div>
-                    <div class="row">
-                        <span class="major">นิสิตสาขา AAI</span>
-                        <span class="text">จำนวน</span>
-                        <span class="number">120</span>
-                        <span class="unit">คน</span>
-                    </div>
-                    <div class="row">
-                        <span class="major">นิสิตสาขา ITDI</span>
-                        <span class="text">จำนวน</span>
-                        <span class="number">-</span>
+                        <span class="number">{{ food.count }}</span>
                         <span class="unit">คน</span>
                     </div>
                 </div>
             </div>
 
-            <!-- ผลการเลือกอาหาร -->
-            <div class="info-row">
+            <!-- แสดงข้อความเมื่อไม่มีข้อมูลการเลือกอาหาร -->
+            <div class="info-row" v-else>
                 <span class="label">ผลการเลือกอาหาร :</span>
-                <div class="registration-info">
-                    <div class="row">
-                        <span class="major">ข้าวกะเพราไก่</span>
-                        <span class="text">จำนวน</span>
-                        <span class="number">1</span>
-                        <span class="unit">คน</span>
-                    </div>
-                    <div class="row">
-                        <span class="major">ข้าวผัดหมู</span>
-                        <span class="text">จำนวน</span>
-                        <span class="number">12</span>
-                        <span class="unit">คน</span>
-                    </div>
-                    <div class="row">
-                        <span class="major">ข้าวหมูกระเทียม</span>
-                        <span class="text">จำนวน</span>
-                        <span class="number">42</span>
-                        <span class="unit">คน</span>
-                    </div>
-                    <div class="row">
-                        <span class="major">พิซซ่า</span>
-                        <span class="text">จำนวน</span>
-                        <span class="number">240</span>
-                        <span class="unit">คน</span>
-                    </div>
-                </div>
+                <span class="text">ไม่มีข้อมูลการเลือกอาหารสำหรับกิจกรรมนี้</span>
             </div>
 
         </div>
@@ -101,7 +117,7 @@ const savedImageUrl = ref(localStorage.getItem('savedImageUrl') || '');
 .registration-container {
     display: flex;
     align-items: flex-start;
-    gap: 150px;
+    gap: 180px;
     background-color: #EDF0F5;
     padding: 30px;
     border-radius: 12px;
@@ -117,7 +133,8 @@ const savedImageUrl = ref(localStorage.getItem('savedImageUrl') || '');
 .registration-details {
     display: flex;
     flex-direction: column;
-    gap: 20px;
+    gap: 30px;
+    /* padding: 10px; */
 }
 
 .registration-info {
@@ -136,15 +153,15 @@ const savedImageUrl = ref(localStorage.getItem('savedImageUrl') || '');
     display: flex;
     justify-content: flex-start;
     align-items: center;
-    gap: 20px;
+    gap: 30px;
     /* flex-wrap: nowrap; */
 }
 
 .info-row {
     display: flex;
     align-items: flex-start;
-    gap: 20px;
-    margin-top: 20px;
+    gap: 30px;
+    margin-top: 50px;
     flex-wrap: nowrap;
     /* ป้องกันการขึ้นบรรทัดใหม่ */
 }
@@ -152,7 +169,7 @@ const savedImageUrl = ref(localStorage.getItem('savedImageUrl') || '');
 .row {
     display: flex;
     align-items: center;
-    gap: 20px;
+    gap: 30px;
 }
 
 .major {
@@ -170,7 +187,7 @@ const savedImageUrl = ref(localStorage.getItem('savedImageUrl') || '');
     white-space: nowrap;
     text-align: right;
     margin-right: 15px;
-    min-width: 180px;
+    min-width: 250px;
 }
 
 .value {
@@ -198,8 +215,8 @@ const savedImageUrl = ref(localStorage.getItem('savedImageUrl') || '');
 .major,
 .text,
 .number {
-    font-weight: 500;
-    font-size: 16px;
+    /* font-weight: 500; */
+    font-size: 20px;
     color: #000000;
 }
 </style>

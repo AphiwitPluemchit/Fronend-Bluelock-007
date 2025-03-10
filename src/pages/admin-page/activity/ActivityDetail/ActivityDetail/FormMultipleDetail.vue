@@ -3,17 +3,31 @@
     <!-- Status -->
     <div class="input-group">
       <p class="label label_minWidth">สถานะ:</p>
-      <q-btn label="กำลังวางแผน" class="status-btn" />
+      <q-btn :label="activityStatus" :class="statusClass" class="status-btn" />
+      <q-btn
+        v-if="activityStatus !== 'ยกเลิก' && activityStatus !== 'เสร็จสิ้น'"
+        class="btnchange"
+        label="เปลี่ยน"
+        @click="showChangeStatusDialog = true"
+        :disable="!isEditing"
+      />
     </div>
+    <q-dialog v-model="showChangeStatusDialog">
+      <ChangeStatusDialog
+        v-model="showChangeStatusDialog"
+        :currentStatus="activityStatus"
+        @confirm="handleStatusChange"
+      />
+    </q-dialog>
 
     <!-- Activity Name -->
     <div class="input-group">
       <p class="label label_minWidth">ชื่อกิจกรรมหลัก :</p>
-      <q-input outlined v-model="activityName" style="width: 600px" />
+      <q-input outlined v-model="activityName" style="width: 600px" :disable="!isEditing" />
     </div>
 
     <!-- Date -->
-    <SingleDate v-model="activityDateInternal" />
+    <SingleDate v-model="activityDateInternal" :isEditing="isEditing" />
 
     <!-- Time -->
     <div class="input-group">
@@ -22,35 +36,43 @@
         v-model:startTime="selectedTime"
         v-model:endTime="endTime"
         :formattedDate="formattedThaiDate"
+        :disable="!isEditing"
       />
     </div>
 
-    <HoursSelector v-model="totalHours" class="input-group" />
-    <FoodSelector v-model:foodMenu="foodMenu" class="input-group" />
+    <HoursSelector v-model="totalHours" class="input-group" :disable="!isEditing" />
+    <FoodSelector v-model:foodMenu="foodMenu" class="input-group" :disable="!isEditing" />
 
     <!-- Sub Activities List -->
     <div v-for="(subActivity, index) in subActivities" :key="index" class="sub-activity">
       <!-- Cancel (X) Icon -->
-      <div class="remove-icon">
+      <div
+        class="remove-icon"
+        :class="{ 'icon-disabled': !isEditing }"
+        @click="isEditing && removeSubActivity(index)"
+      >
         <q-icon
           name="close"
           size="35px"
-          color="red"
+          :color="isEditing ? 'red' : 'grey-5'"
           class="cursor-pointer"
-          @click="removeSubActivity(index)"
         />
       </div>
 
       <!-- SubActivity Name -->
       <div class="input-group">
         <p class="label label_minWidth">ชื่อกิจกรรม :</p>
-        <q-input outlined v-model="subActivity.subActivityName" style="width: 600px" />
+        <q-input
+          outlined
+          v-model="subActivity.subActivityName"
+          style="width: 600px"
+          :disable="!isEditing"
+        />
       </div>
+      <RoomSelector v-model="selectedRooms" class="input-group" :disable="!isEditing" />
 
       <!-- Room and Seats -->
-      <Room v-model="roomName" class="input-group" />
-      
-        <div class="input-group">
+      <div class="input-group">
         <p class="label label_minWidth">จำนวนที่รับ :</p>
         <q-input
           outlined
@@ -59,6 +81,7 @@
           type="number"
           @keypress="isNumber($event)"
           @blur="validatePositive('seats', index)"
+          :disable="!isEditing"
         />
       </div>
 
@@ -70,12 +93,14 @@
           @click="subActivity.activityType = 'prep'"
           label="ชั่วโมงเตรียมความพร้อม"
           class="activityType-btn"
+          :disable="!isEditing"
         />
         <q-btn
           :class="{ 'active-btn': subActivity.activityType === 'academic' }"
           @click="subActivity.activityType = 'academic'"
           label="ชั่วโมงทักษะทางวิชาการ"
           class="activityType-btn"
+          :disable="!isEditing"
         />
       </div>
       <!-- Department -->
@@ -88,6 +113,7 @@
           @click="toggleDepartment(index, option.value)"
           :label="option.label"
           class="department-btn"
+          :disable="!isEditing"
         />
       </div>
 
@@ -101,26 +127,38 @@
           @click="toggleYear(index, option.value)"
           :label="option.label"
           class="year-btn"
+          :disable="!isEditing"
         />
       </div>
 
       <!-- Lecturer -->
       <div class="input-group">
         <p class="label label_minWidth">วิทยากร :</p>
-        <q-input outlined v-model="subActivity.lecturer" style="width: 100%" />
+        <q-input
+          outlined
+          v-model="subActivity.lecturer"
+          style="width: 100%"
+          :disable="!isEditing"
+        />
       </div>
 
-
-       <!-- Detail Activity -->
-       <div class="input-group">
-      <p style="align-self: flex-start" class="label label_minWidth">รายละเอียดอื่นๆ :</p>
-      <q-input type="textarea" rows="10" outlined v-model="detailActivity" style="width: 100%" />
-    </div>
+      <!-- Detail Activity -->
+      <div class="input-group">
+        <p style="align-self: flex-start" class="label label_minWidth">รายละเอียดอื่นๆ :</p>
+        <q-input
+          type="textarea"
+          rows="10"
+          outlined
+          v-model="detailActivity"
+          style="width: 100%"
+          :disable="!isEditing"
+        />
+      </div>
 
       <!-- Add Activity Button -->
     </div>
     <div class="btn-container">
-      <q-btn class="btnAddActivity" @click="addSubActivity">
+      <q-btn class="btnAddActivity" @click="addSubActivity" :disable="!isEditing">
         <p class="label">
           <q-icon name="add" size="20px" />
           เพิ่มข้อกิจกรรม
@@ -128,28 +166,25 @@
       </q-btn>
     </div>
     <div class="button-group">
-      <q-btn class="btnreject" @click="goToActivitiesManagement">ยกเลิก</q-btn>
-      <q-btn class="btnsecces">เสร็จสิ้น</q-btn>
+      <q-btn v-if="!isEditing" class="btnedit" @click="isEditing = true">แก้ไข</q-btn>
+
+      <template v-else>
+        <q-btn class="btnreject" @click="cancelEdit">ยกเลิก</q-btn>
+        <q-btn class="btnsecces" @click="saveChanges">บันทึก</q-btn>
+      </template>
     </div>
   </q-page>
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted, ref, watch } from 'vue'
+import { computed, ref, watch } from 'vue'
 import FoodSelector from 'src/pages/admin-page/activity/CreateActivity/Form/FoodSelector.vue'
 import HoursSelector from 'src/pages/admin-page/activity/CreateActivity/Form/HoursSelector.vue'
 import SingleDate from 'src/pages/admin-page/activity/CreateActivity/Form/SingleDate.vue'
 import TimeSelector from 'src/pages/admin-page/activity/CreateActivity/Form/TimeSelector.vue'
-import Room from 'src/pages/admin-page/activity/CreateActivity/Form/RoomSelector.vue'
-import { useRouter } from 'vue-router'
+import ChangeStatusDialog from 'src/pages/admin-page/activity/ActivityDetail/ActivityDetail/ChangeStatusDialog.vue'
+import RoomSelector from 'src/pages/admin-page/activity/CreateActivity/Form/RoomSelector.vue'
 
-const router = useRouter()
-
-onMounted(() => {})
-
-const goToActivitiesManagement = async () => {
-  await router.push('/ActivitiesManagement')
-}
 interface SubActivity {
   subActivityName: string
   roomName: string
@@ -177,6 +212,7 @@ interface ToggleOption {
   label: string
   value: string
 }
+const showChangeStatusDialog = ref(false)
 const detailActivity = ref('')
 const activityName = ref('')
 const totalHours = ref('')
@@ -189,7 +225,7 @@ const hour = ref<number>(0)
 const minute = ref<number>(0)
 const endHour = ref<number>(0)
 const endMinute = ref<number>(0)
-  const roomName = ref('')
+const selectedRooms = ref('')
 // ฟังก์ชันสำหรับฟอร์แมตเวลาเป็นสตริง
 const formatTime = (h: number, m: number): string => {
   return `${formatHour(h)}:${formatMinute(m)}`
@@ -198,7 +234,6 @@ const formatTime = (h: number, m: number): string => {
 watch([hour, minute], () => {
   selectedTime.value = formatTime(hour.value, minute.value)
 })
-
 // watch สำหรับ end time
 watch([endHour, endMinute], () => {
   endTime.value = formatTime(endHour.value, endMinute.value)
@@ -238,7 +273,6 @@ const formattedThaiDate = computed(() => {
   return `${parseInt(day, 10)} ${thaiMonth} ${thaiYear}`
 })
 
-// ✅ Thai locale สำหรับเดือน
 const thaiLocale = {
   months: [
     'มกราคม',
@@ -305,9 +339,46 @@ const yearOptions: ToggleOption[] = [
   { label: '3', value: '3' },
   { label: '4', value: '4' },
 ]
+const isEditing = ref(false)
+
+/******  b92a42f8-edcc-4981-a894-dc001fd684d1  *******/ const cancelEdit = () => {
+  isEditing.value = false
+}
+
+const saveChanges = () => {
+  isEditing.value = false
+}
+const activityStatus = ref('กำลังวางแผน') // ค่าปัจจุบันของสถานะ
+const handleStatusChange = (newStatus: string) => {
+  activityStatus.value = newStatus
+}
+const statusClass = computed(() => {
+  switch (activityStatus.value) {
+    case 'กำลังวางแผน':
+      return 'status-planning'
+    case 'เปิดลงทะเบียน':
+      return 'status-open'
+    case 'ปิดลงทะเบียน':
+      return 'status-closed'
+    case 'เสร็จสิ้น':
+      return 'status-completed'
+    case 'ยกเลิก':
+      return 'status-canceled'
+    default:
+      return ''
+  }
+})
 </script>
 
 <style scoped>
+::v-deep(.q-btn:disabled) {
+  background-color: #e0e0e0 !important;
+  color: #757575 !important;
+}
+::v-deep(.q-field--disabled .q-field__control) {
+  background-color: #e0e0e0 !important;
+  color: #757575 !important;
+}
 ::v-deep(.q-field__control) {
   height: auto;
   background-color: white;
@@ -429,5 +500,44 @@ const yearOptions: ToggleOption[] = [
   justify-content: flex-end;
   gap: 25px;
   margin-top: 30px;
+}
+.status-btn {
+  border-radius: 50px;
+  height: 40px;
+  width: 200px;
+  font-size: 20px;
+}
+
+.status-planning {
+  color: #ff6f00;
+  background-color: #ffe7ba;
+  border: 2px solid #ffa500;
+}
+
+.status-open {
+  color: #009812;
+  background-color: #d0ffc5;
+  border: 2px solid #00bb16;
+}
+
+.status-closed {
+  color: #001780;
+  background-color: #cfd7ff;
+  border: 2px solid #002dff;
+}
+.status-completed {
+  color: #000000;
+  background-color: #dadada;
+  border: 2px solid #575656;
+}
+
+.status-canceled {
+  color: #f32323;
+  background-color: #ffc5c5;
+  border: 2px solid #ff0000;
+}
+.icon-disabled {
+  pointer-events: none;
+  opacity: 0.6;
 }
 </style>

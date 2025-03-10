@@ -3,9 +3,22 @@
     <!-- Status -->
     <div class="input-group">
       <p class="label label_minWidth">สถานะ:</p>
-      <q-btn label="กำลังวางแผน" class="status-btn" />
+      <q-btn :label="activityStatus" :class="statusClass" class="status-btn" />
+      <q-btn
+        v-if="activityStatus !== 'ยกเลิก' && activityStatus !== 'เสร็จสิ้น'"
+        class="btnchange"
+        label="เปลี่ยน"
+        @click="showChangeStatusDialog = true"
+        :disable="!isEditing"
+      />
     </div>
-
+    <q-dialog v-model="showChangeStatusDialog">
+      <ChangeStatusDialog
+        v-model="showChangeStatusDialog"
+        :currentStatus="activityStatus"
+        @confirm="handleStatusChange"
+      />
+    </q-dialog>
     <!-- Activity Name -->
     <div class="input-group">
       <p class="label label_minWidth">ชื่อกิจกรรม :</p>
@@ -13,7 +26,11 @@
     </div>
 
     <!-- Date -->
-    <MutiDate v-model="activityDateRange" @update:modelValue="generateDaysInRange" :disable="!isEditing" />
+    <MutiDate
+      v-model="activityDateRange"
+      @update:modelValue="generateDaysInRange"
+      :disable="!isEditing"
+    />
 
     <!-- Time -->
     <div class="input-group">
@@ -42,11 +59,7 @@
     </div>
 
     <!-- Room -->
-    <div class="input-group">
-      <p class="label label_minWidth">ชื่อห้องที่จัดกิจกรรม :</p>
-      <q-input outlined v-model="roomName" style="width: 600px" :disable="!isEditing" />
-    </div>
-
+    <RoomSelector v-model="selectedRooms" class="input-group" :disable="!isEditing" />
     <!-- Hours & Seats -->
     <div class="flex-container">
       <HoursSelector v-model="totalHours" class="input-group" :disable="!isEditing" />
@@ -96,7 +109,7 @@
 </template>
 
 <script setup lang="ts">
-import { nextTick, onMounted, ref, watch } from 'vue'
+import { computed, nextTick, onMounted, ref, watch } from 'vue'
 import YearSelector from 'src/pages/admin-page/activity/CreateActivity/Form/YearSelector.vue'
 import DepartmentSelector from 'src/pages/admin-page/activity/CreateActivity/Form/DepartmentSelector.vue'
 import MutiDate from 'src/pages/admin-page/activity/CreateActivity/Form/MutiDate.vue'
@@ -105,6 +118,8 @@ import HoursSelector from 'src/pages/admin-page/activity/CreateActivity/Form/Hou
 import SeatsSelector from 'src/pages/admin-page/activity/CreateActivity/Form/SeatsSelector.vue'
 import TimeSelector from 'src/pages/admin-page/activity/CreateActivity/Form/TimeSelector.vue'
 import FoodSelector from 'src/pages/admin-page/activity/CreateActivity/Form/FoodSelector.vue'
+import ChangeStatusDialog from 'src/pages/admin-page/activity/ActivityDetail/ActivityDetail/ChangeStatusDialog.vue'
+import RoomSelector from 'src/pages/admin-page/activity/CreateActivity/Form/RoomSelector.vue'
 
 interface DayTimeSelection {
   date: string
@@ -116,6 +131,7 @@ interface DayTimeSelection {
   startTime: string
   endTime: string
 }
+const showChangeStatusDialog = ref(false)
 const selectedDays = ref<DayTimeSelection[]>([])
 const sameTimeForAll = ref(false)
 const totalHours = ref<string>('')
@@ -130,6 +146,11 @@ const departments = ref<string[]>([])
 const years = ref<string[]>([])
 const activityDateRangeInternal = ref<string[]>([])
 const foodMenu = ref('')
+const selectedRooms = ref('')
+const activityStatus = ref('กำลังวางแผน') // ค่าปัจจุบันของสถานะ
+const handleStatusChange = (newStatus: string) => {
+  activityStatus.value = newStatus
+}
 const menuItems = ref([
   'ผัดกะเพราหมู',
   'ผัดกะเพราไก่',
@@ -182,6 +203,23 @@ const updateDayTime = (index: number, type: 'start' | 'end', value: string) => {
     }
   }
 }
+const statusClass = computed(() => {
+  switch (activityStatus.value) {
+    case 'กำลังวางแผน':
+      return 'status-planning'
+    case 'เปิดลงทะเบียน':
+      return 'status-open'
+    case 'ปิดลงทะเบียน':
+      return 'status-closed'
+    case 'เสร็จสิ้น':
+      return 'status-completed'
+    case 'ยกเลิก':
+      return 'status-canceled'
+    default:
+      return ''
+  }
+})
+
 onMounted(() => {
   // โหลดเมนูอาหารจาก localStorage ถ้ามี
   const storedMenuItems = localStorage.getItem('menuItems')
@@ -319,8 +357,8 @@ const saveChanges = () => {
 
 <style scoped>
 ::v-deep(.q-field--disabled .q-field__control) {
-  background-color: #e0e0e0 !important; 
-  color: #757575 !important; 
+  background-color: #e0e0e0 !important;
+  color: #757575 !important;
 }
 ::v-deep(.q-btn:disabled) {
   background-color: #e0e0e0 !important;
@@ -358,17 +396,39 @@ const saveChanges = () => {
   min-width: 200px;
 }
 .status-btn {
-  color: #ff6f00;
-  background-color: #ffe7ba;
-  border: 2px solid #ffa500;
   border-radius: 50px;
   height: 40px;
   width: 200px;
   font-size: 20px;
 }
 
-.checkbox-left {
-  align-self: flex-start;
+.status-planning {
+  color: #ff6f00;
+  background-color: #ffe7ba;
+  border: 2px solid #ffa500;
+}
+
+.status-open {
+  color: #009812;
+  background-color: #d0ffc5;
+  border: 2px solid #00bb16;
+}
+
+.status-closed {
+  color: #001780;
+  background-color: #cfd7ff;
+  border: 2px solid #002dff;
+}
+.status-completed {
+  color: #000000;
+  background-color: #dadada;
+  border: 2px solid #575656;
+}
+
+.status-canceled {
+  color: #f32323;
+  background-color: #ffc5c5;
+  border: 2px solid #ff0000;
 }
 .flex-container {
   display: flex;

@@ -1,61 +1,60 @@
 <template>
   <q-page class="q-pa-md">
     <!-- Breadcrumbs -->
-    <q-breadcrumbs class="q-mb-md breadcrumbs-custom">
-      <q-breadcrumbs>
-        <q-icon name="event" class="q-mr-sm" size="18px" />
-        <span class="breadcrumb-text">กิจกรรมทั้งหมด</span>
-      </q-breadcrumbs>
+    <AppBreadcrumbs :breadcrumbs="breadcrumbs" />
 
-      <q-breadcrumbs-separator>
-        <q-icon name="chevron_right" size="18px" color="black" />
-      </q-breadcrumbs-separator>
-
-      <q-breadcrumbs-el label="รายละเอียดกิจกรรม" />
-    </q-breadcrumbs>
-
-    <div class="text-h5 text-bold q-mb-md">รายละเอียดกิจกรรม</div>
-    <!-- <div class="column items-end" style="font-size: 18px">รายละเอียดกิจกรรม</div> -->
     <div class="activity-detail-card">
       <q-card-section class="row">
         <div class="col-12 col-md-4 text-center">
-          <q-img class="activity-img" />
+          <q-img :src="getImageUrl(activity?.file)" class="activity-img" />
         </div>
 
         <div class="col-12 col-md-8 activity-details">
           <q-list dense>
             <q-item>
-              <q-item-section class="col-8 col-md-3 text-right">
-                <q-item-label class="q-mb-lg q-ml-md">ชื่อกิจกรรม : </q-item-label>
-                <q-item-label class="q-mb-lg q-ml-md">วันที่จัดกิจกรรม : </q-item-label>
-                <q-item-label class="q-mb-lg q-ml-md">เวลาที่จัดกิจกรรม : </q-item-label>
-                <q-item-label class="q-mb-lg q-ml-md">จำนวนชั่วโมงที่ได้รับ : </q-item-label>
-                <q-item-label class="q-mb-lg q-ml-md">สถานที่จัดกิจกรรม : </q-item-label>
-                <q-item-label class="q-mb-lg q-ml-md">ประเภทกิจกรรม : </q-item-label>
-                <q-item-label class="q-mb-lg q-ml-md">วิทยากร : </q-item-label>
-                <q-item-label class="q-mb-lg q-ml-md">รายละเอียดอื่นๆ : </q-item-label>
+              <q-item-section class="col-3 text-right">
+                <q-item-label class="q-mb-lg q-ml-md">ชื่อกิจกรรม:</q-item-label>
+                <q-item-label class="q-mb-lg q-ml-md">วันที่จัดกิจกรรม:</q-item-label>
+                <q-item-label class="q-mb-lg q-ml-md">เวลาที่จัดกิจกรรม:</q-item-label>
+                <q-item-label class="q-mb-lg q-ml-md">จำนวนชั่วโมงที่ได้รับ:</q-item-label>
+                <q-item-label class="q-mb-lg q-ml-md">สถานที่จัดกิจกรรม:</q-item-label>
+                <q-item-label class="q-mb-lg q-ml-md">ประเภทกิจกรรม:</q-item-label>
+                <q-item-label class="q-mb-lg q-ml-md">วิทยากร:</q-item-label>
+                <q-item-label class="q-mb-lg q-ml-md">รายละเอียดอื่นๆ:</q-item-label>
               </q-item-section>
-              <q-item-section class="col-8 col-md-11">
-                <q-item-label class="q-mb-lg q-ml-md">{{ activity?.name }}</q-item-label>
-                <q-item-label class="q-mb-lg q-ml-md">{{ activity?.date }}</q-item-label>
-                <q-item-label class="q-mb-lg q-ml-md">{{ activity?.time }}</q-item-label>
-                <q-item-label class="q-mb-lg q-ml-md">{{ activity?.hours }} ชั่วโมง</q-item-label>
-                <q-item-label class="q-mb-lg q-ml-md">{{ activity?.location }}</q-item-label>
-                <q-item-label class="q-mb-lg q-ml-md">{{ activity?.category }}</q-item-label>
-                <q-item-label class="q-mb-lg q-ml-md">{{ activity?.speaker }}</q-item-label>
-                <q-item-label class="q-mb-lg q-ml-md">{{ activity?.description }}</q-item-label>
+              <q-item-section class="col-9">
+                <q-item-label class="q-mb-lg q-ml-md">{{
+                  activity?.name ?? 'ไม่ระบุ'
+                }}</q-item-label>
+                <q-item-label class="q-mb-lg q-ml-md">{{
+                  getActivityDate(activity?.activityItems)
+                }}</q-item-label>
+                <q-item-label class="q-mb-lg q-ml-md">{{
+                  getActivityTime(activity?.activityItems)
+                }}</q-item-label>
+                <q-item-label class="q-mb-lg q-ml-md"
+                  >{{ getActivityHours(activity?.activityItems) }} ชั่วโมง</q-item-label
+                >
+                <q-item-label class="q-mb-lg q-ml-md">{{
+                  getActivityRoom(activity?.activityItems) ?? 'ไม่ระบุ'
+                }}</q-item-label>
+                <q-item-label class="q-mb-lg q-ml-md">{{
+                  activity?.activityState ?? 'ไม่ระบุ'
+                }}</q-item-label>
+                <q-item-label class="q-mb-lg q-ml-md">{{ 'ไม่ระบุ' }}</q-item-label>
+                <q-item-label class="q-mb-lg q-ml-md">{{
+                  'ไม่มีรายละเอียดเพิ่มเติม'
+                }}</q-item-label>
               </q-item-section>
             </q-item>
           </q-list>
         </div>
-        <q-btn
-          v-if="activity"
-          label="ลงทะเบียน"
-          class="q-mt-md register-button"
-          @click="handleRegisterClick"
-        />
       </q-card-section>
+      <div class="row justify-center">
+        <q-btn v-if="activity" label="ลงทะเบียน" class="btnsecces" @click="handleRegisterClick" />
+      </div>
     </div>
+
     <!-- Confirm Dialog-->
     <RegisterConfirmDialog v-model="showDialog" @confirm="register" />
   </q-page>
@@ -64,193 +63,90 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
-import { type Activity } from './ActivitiesTablePage.vue'
+import AppBreadcrumbs from 'src/components/AppBreadcrumbs.vue'
 import RegisterConfirmDialog from './RegisterConfirmDialog.vue'
+import { useStudentActivitystore } from 'src/stores/student-activity'
+import type { Activity, ActivityItem } from 'src/types/activity'
 
-// ดึงค่าจาก route
+const StudentActivityStore = useStudentActivitystore()
 const route = useRoute()
-const activityId = Number(route.params.id)
 const showDialog = ref(false)
+const activity = ref<Activity | null>(null)
 
-// กําหนดค่าเริ่มต้น
-const activity = ref<Activity>()
-
-onMounted(() => {
-  activity.value = activities.value.find((activity) => activity.id === activityId)
+const breadcrumbs = ref({
+  previousPage: { title: 'จัดการกิจกรรม', path: '/ActivitiesManagement' },
+  currentPage: { title: 'รายละเอียดกิจกรรม', path: `/ActivitiesManagement/ActivityDetail` },
+  icon: 'description',
 })
 
+// ฟังก์ชันดึง URL ของรูปภาพ
+const getImageUrl = (fileName: string | undefined) => {
+  return fileName ? `/uploads/${fileName}` : '/icons/default-image.png'
+}
+
+// ฟังก์ชันดึงวันที่
+const getActivityDate = (activityItems: ActivityItem[] | null | undefined): string => {
+  const firstItem = activityItems?.find((item) => item.date && item.date.length > 0)
+  return firstItem?.date
+    ? firstItem.date.map((d) => `${d.date} (${d.stime} - ${d.etime})`).join(', ')
+    : 'ไม่ระบุ'
+}
+
+// ฟังก์ชันดึงเวลา
+const getActivityTime = (activityItems: ActivityItem[] | null | undefined): string => {
+  const firstItem = activityItems?.find((item) => item.date && item.date.length > 0)
+  return firstItem?.date
+    ? firstItem.date.map((d) => `${d.stime} - ${d.etime}`).join(', ')
+    : 'ไม่ระบุ'
+}
+
+// ฟังก์ชันดึงจำนวนชั่วโมง
+const getActivityHours = (activityItems: ActivityItem[] | null | undefined): string => {
+  return activityItems?.reduce((total, item) => total + (item.hour ?? 0), 0).toString() ?? '0'
+}
+// ฟังก์ชันดึงสถานที่จัดกิจกรรม (Room)
+const getActivityRoom = (activityItems: ActivityItem[] | null | undefined): string => {
+  return activityItems && activityItems.length > 0
+    ? (activityItems[0]?.room ?? 'ไม่ระบุ')
+    : 'ไม่ระบุ'
+}
+
+// ฟังก์ชันลงทะเบียน
 const handleRegisterClick = () => {
   showDialog.value = true
-  console.log('Button clicked, showDialog:', showDialog.value)
 }
 
-// จำลองข้อมูลกิจกรรม
-const activities = ref<Activity[]>([
-  {
-    id: 1,
-    name: 'โครงการเตรียมความพร้อม SoftSkill กับบริษัท IRPC',
-    date: '10 มกราคม 2568',
-    time: '08:00 - 12:00',
-    hours: 4,
-    location: '4M210',
-    category: 'ชั่วโมงทักษะทางวิชาการ',
-    speaker: 'บริษัท IRPC จำกัด (มหาชน)',
-    description: 'โครงการเตรียมความพร้อมสหกิจศึกษาด้านSoftskill กับ บริษัท IRPC จำกัด (มหาชน)',
-    availableSeats: 50,
-    maxSeats: 100,
-    image: 'https://your-image-url.com/image1.jpg',
-  },
-  {
-    id: 2,
-    name: 'โครงการเตรียมความพร้อมสหกิจศึกษาด้าน SoftSkill กับบริษัท IRPC จำกัด (มหาชน)',
-    date: '10 มกราคม 2568',
-    time: '08:00 - 12:00',
-    hours: 4,
-    location: '4M210',
-    category: 'ชั่วโมงทักษะทางวิชาการ',
-    speaker: 'บริษัท IRPC จำกัด (มหาชน)',
-    description: 'โครงการเตรียมความพร้อมสหกิจศึกษาด้านSoftskill กับ บริษัท IRPC จำกัด (มหาชน) แบบ2',
-    availableSeats: 50,
-    maxSeats: 100,
-    image: 'https://your-image-url.com/image1.jpg',
-  },
-  {
-    id: 3,
-    name: 'โครงการเตรียมความพร้อมสหกิจศึกษาด้าน SoftSkill กับบริษัท IRPC จำกัด (มหาชน)',
-    date: '10 มกราคม 2568',
-    time: '08:00 - 12:00',
-    hours: 4,
-    location: '4M210',
-    category: 'ชั่วโมงทักษะทางวิชาการ',
-    speaker: 'บริษัท IRPC จำกัด (มหาชน)',
-    description:
-      'โครงการเตรียมความพร้อมสหกิจศึกษาด้านSoftskill กับ บริษัท IRPC จำกัด (มหาชน)fkdsdjkjl;kjksjdfsakla;jsfjdskfjlkdaslkoejfiroejfjksdodejfldskoekfkfsdjikdsfidjskjdsjlsa;sdjieifhdeiwijdsolasjasiwjdkewlajdusjdklskdiwsjl',
-    availableSeats: 50,
-    maxSeats: 100,
-    image: 'https://your-image-url.com/image1.jpg',
-  },
-  {
-    id: 4,
-    name: 'โครงการเตรียมความพร้อมสหกิจศึกษาด้าน SoftSkill กับบริษัท IRPC จำกัด (มหาชน)',
-    date: '10 มกราคม 2568',
-    time: '08:00 - 12:00',
-    hours: 4,
-    location: '4M210',
-    category: 'ชั่วโมงทักษะทางวิชาการ',
-    speaker: 'บริษัท IRPC จำกัด (มหาชน)',
-    description: 'โครงการเตรียมความพร้อมสหกิจศึกษาด้านSoftskill กับ บริษัท IRPC จำกัด (มหาชน)',
-    availableSeats: 50,
-    maxSeats: 100,
-    image: 'https://your-image-url.com/image1.jpg',
-  },
-  {
-    id: 5,
-    name: 'โครงการเตรียมความพร้อมสหกิจศึกษาด้าน SoftSkill กับบริษัท IRPC จำกัด (มหาชน)',
-    date: '10 มกราคม 2568',
-    time: '08:00 - 12:00',
-    hours: 4,
-    location: '4M210',
-    category: 'ชั่วโมงทักษะทางวิชาการ',
-    speaker: 'บริษัท IRPC จำกัด (มหาชน)',
-    description: 'โครงการเตรียมความพร้อมสหกิจศึกษาด้านSoftskill กับ บริษัท IRPC จำกัด (มหาชน)',
-    availableSeats: 50,
-    maxSeats: 100,
-    image: 'https://your-image-url.com/image1.jpg',
-  },
-  {
-    id: 6,
-    name: 'โครงการเตรียมความพร้อมสหกิจศึกษาด้าน SoftSkill กับบริษัท IRPC จำกัด (มหาชน)',
-    date: '10 มกราคม 2568',
-    time: '08:00 - 12:00',
-    hours: 4,
-    location: '4M210',
-    category: 'ชั่วโมงทักษะทางวิชาการ',
-    speaker: 'บริษัท IRPC จำกัด (มหาชน)',
-    description: 'โครงการเตรียมความพร้อมสหกิจศึกษาด้านSoftskill กับ บริษัท IRPC จำกัด (มหาชน)',
-    availableSeats: 50,
-    maxSeats: 100,
-    image: 'https://your-image-url.com/image1.jpg',
-  },
-  {
-    id: 7,
-    name: 'โครงการเตรียมความพร้อมสหกิจศึกษาด้าน SoftSkill กับบริษัท IRPC จำกัด (มหาชน)',
-    date: '10 มกราคม 2568',
-    time: '08:00 - 12:00',
-    hours: 4,
-    location: '4M210',
-    category: 'ชั่วโมงทักษะทางวิชาการ',
-    speaker: 'บริษัท IRPC จำกัด (มหาชน)',
-    description: 'โครงการเตรียมความพร้อมสหกิจศึกษาด้านSoftskill กับ บริษัท IRPC จำกัด (มหาชน)',
-    availableSeats: 50,
-    maxSeats: 100,
-    image: 'https://your-image-url.com/image1.jpg',
-  },
-  {
-    id: 8,
-    name: 'โครงการเตรียมความพร้อมสหกิจศึกษาด้าน SoftSkill กับบริษัท IRPC จำกัด (มหาชน)',
-    date: '10 มกราคม 2568',
-    time: '08:00 - 12:00',
-    hours: 4,
-    location: '4M210',
-    category: 'ชั่วโมงทักษะทางวิชาการ',
-    speaker: 'บริษัท IRPC จำกัด (มหาชน)',
-    description: 'โครงการเตรียมความพร้อมสหกิจศึกษาด้านSoftskill กับ บริษัท IRPC จำกัด (มหาชน)',
-    availableSeats: 50,
-    maxSeats: 100,
-    image: 'https://your-image-url.com/image1.jpg',
-  },
-])
-
-const register = () => {
-  console.log('ลงทะเบียนสำเร็จ!')
+const register = async () => {
+  const payload = {
+    activityItemId: activity.value?.activityItems?.[0]?.id,
+    studentId: localStorage.getItem('studentId'),
+  }
+  console.log(payload)
+  try {
+    await StudentActivityStore.enrollment(payload)
+    console.log('ลงทะเบียนสำเร็จ!')
+  } catch (error) {
+    console.error('Error registering:', error)
+  }
 }
+
+onMounted(async () => {
+  await StudentActivityStore.fetchOneData(route.params.id as string)
+  activity.value = StudentActivityStore.form as Activity
+})
 </script>
 
 <style scoped>
 .activity-detail-card {
-  /* ระยะห่างระหว่างรูปภาพและข้อมูล */
   background-color: #f5f7fa;
   padding: 20px;
-  border-radius: 8px;
-  font-size: 18px;
+  font-size: 20px;
 }
 
 .activity-img {
   width: 300px;
-  max-width: 300px;
   height: 300px;
   background-color: #d9d9d9;
   border-radius: 10px;
-  /* ทำขอบมน */
-}
-
-.activity-details {
-  flex-direction: column;
-  justify-content: center;
-}
-
-.register-button {
-  background-color: #2fa54d;
-  color: white;
-  padding: 5px 20px;
-  border: none;
-  border-radius: 15px;
-  cursor: pointer;
-  font-size: 18px;
-  margin: auto;
-  width: 180px;
-}
-.q-item-label {
-  margin-bottom: 25px !important;
-}
-
-.q-list {
-  display: flex;
-  flex-direction: column;
-  gap: 25px;
-}
-
-.q-item-section {
-  padding-bottom: 25px !important;
 }
 </style>

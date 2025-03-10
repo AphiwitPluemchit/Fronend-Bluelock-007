@@ -3,7 +3,7 @@
     <p class="label label_minWidth">จำนวนที่รับ :</p>
     <q-input
       outlined
-      style="width: 228px"
+      style="width: 240px"
       v-model="localSeats"
       type="number"
       @keypress="isNumber($event)"
