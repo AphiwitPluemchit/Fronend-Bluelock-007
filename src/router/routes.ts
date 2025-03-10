@@ -119,7 +119,7 @@ const routes: RouteRecordRaw[] = [
     children: [
       {
         path: '',
-        component: () => import('pages/student-page/activity/ActivityDetailPage.vue'),
+        component: () => import('pages/student-page/activity/Detail/ActivityDetailPage.vue'),
       },
     ],
     meta: { roles: ['user'] },

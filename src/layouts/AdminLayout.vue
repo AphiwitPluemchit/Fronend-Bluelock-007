@@ -3,8 +3,8 @@
     <!-- ส่ง event จาก Navbar ไป Sidebar -->
     <MenuNavbar @toggleSidebar="adminSidebar?.toggleSidebar()" />
     <MenuAdminSidebar ref="adminSidebar" />
-    <q-page-container>
-      <router-view />
+    <q-page-container style="display: flex">
+      <div class="q-mx-auto" style="width: 1600px"><router-view /></div>
     </q-page-container>
   </q-layout>
 </template>
