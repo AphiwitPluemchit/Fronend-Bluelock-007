@@ -51,7 +51,13 @@ const applyFilters = () => {
 </script>
 
 <template>
-  <q-menu :model-value="modelValue"  :transition-show="'jump-down'" :transition-hide="'jump-up'" :offset="[0, 5]" style="border-radius: 10px;  overflow: visible;">
+  <q-menu
+    :model-value="modelValue"
+    :transition-show="'jump-down'"
+    :transition-hide="'jump-up'"
+    :offset="[0, 5]"
+    style="border-radius: 10px; overflow: visible"
+  >
     <q-card class="q-pa-md" style="min-width: 450px; max-width: 450px; border-radius: 10px">
       <q-card-section>
         <!-- categoryActivity -->
@@ -128,13 +134,11 @@ const applyFilters = () => {
       </q-card-section>
 
       <q-card-actions align="right">
-        <q-btn label="Cancel" class="btnreject" @click="closeMenu" />
-        <q-btn label="Apply" class="btnconfirm" @click="applyFilters" />
+        <q-btn label="ยกเลิก" class="btnreject" @click="closeMenu" />
+        <q-btn label="ยืนยัน" class="btnconfirm" @click="applyFilters" />
       </q-card-actions>
     </q-card>
   </q-menu>
 </template>
 
-<style scoped>
-
-</style>
+<style scoped></style>
