@@ -35,7 +35,7 @@
   </q-list>
 </template>
 <script setup lang="ts">
-import { Activity, ActivityItem } from 'src/types/activity'
+import type { Activity, ActivityItem } from 'src/types/activity'
 defineProps<{ activity: Activity }>()
 // ฟังก์ชันดึงวันที่
 const getActivityDate = (activityItems: ActivityItem[] | null | undefined): string => {
