@@ -169,7 +169,7 @@
           <q-btn label="แก้ไข" class="btnedit" unelevated rounded @click="enableEditMode" />
         </template>
         <template v-else>
-          <q-btn label="ยกเลิก" class="btnreject q-mr-sm" unelevated rounded @click="cancelEdit" />
+          <q-btn label="ยกเลิก" class="btnreject q-mr-md" unelevated rounded @click="cancelEdit" />
           <q-btn label="บันทึก" class="btnconfirm" unelevated rounded @click="saveChanges" />
         </template>
       </div>

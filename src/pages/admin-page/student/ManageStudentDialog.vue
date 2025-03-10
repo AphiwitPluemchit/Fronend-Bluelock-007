@@ -24,8 +24,6 @@ const options = {
 
 <style scoped>
 .custom-chip:hover {
-  background-color: #3676f4;
-  color: #fff;
-  cursor: pointer;
+  background-color: #f0f0f0; /* เปลี่ยนสีเมื่อ Hover */
 }
 </style>
