@@ -83,7 +83,7 @@ const getFormComponent = computed(() => {
   flex-grow: 1;
   overflow-x: hidden;
   overflow-y: auto;
-  max-height: 690px;
+  max-height: 660px;
   justify-items: flex-end;
   margin-right: 50px;
 }
