@@ -27,7 +27,7 @@
     </div>
 
     <!-- Date -->
-    <SingleDate v-model="activityDateInternal" :isEditing="isEditing" />
+    <SingleDate v-model="activityDateInternal" :isEditing="!isEditing" />
 
     <!-- Time -->
     <div class="input-group">
