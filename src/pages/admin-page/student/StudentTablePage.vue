@@ -29,18 +29,18 @@
               @apply="applyFilters"
             />
           </q-btn>
-          <q-btn
-            dense
-            outlined
-            icon="settings"
-            label="จัดการข้อมูล"
-            class="btnadd"
-            @click="toggleManageStudentDialog"
-          />
-        </div>
-        <div class="dialog-container">
-          <!-- ManageStudentDialog -->
-          <ManageStudentDialog v-model="showManageStudentDialog" />
+          <div>
+            <q-btn
+              dense
+              outlined
+              icon="settings"
+              label="จัดการข้อมูล"
+              class="btnadd"
+              @click="openManageDialog"
+            >
+              <ManageStudentDialog ref="manageDialogRef"
+            /></q-btn>
+          </div>
         </div>
       </div>
 
@@ -100,10 +100,10 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted, ref } from 'vue'
+import { nextTick, onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import FilterDialog from 'src/components/Dialog/FilterDialog.vue'
-import ManageStudentDialog from 'src/pages/admin-page/student/ManageStudentDialog.vue'
+import ManageStudentDialog from './ManageStudentDialog.vue'
 import { useStudentStore } from 'src/stores/student'
 const studentStore = useStudentStore()
 const router = useRouter()
@@ -133,10 +133,14 @@ const applyFilters = (selectedFilters: {
   console.log('Filters Applied:', filters.value)
 }
 
-const showManageStudentDialog = ref(false)
+const manageDialogRef = ref<InstanceType<typeof ManageStudentDialog> | null>(null)
 
-const toggleManageStudentDialog = () => {
-  showManageStudentDialog.value = !showManageStudentDialog.value
+// ฟังก์ชันเปิด ManageStudentDialog
+const openManageDialog = async () => {
+  await nextTick() // รอให้ DOM อัปเดตก่อน
+  if (manageDialogRef.value) {
+    manageDialogRef.value.openDialog()
+  }
 }
 
 const search1 = ref('')
@@ -464,8 +468,5 @@ const mockStudents = ref([
 .info-icon {
   cursor: pointer;
   width: 60px;
-}
-.dialog-container {
-  margin-top: 50px;
 }
 </style>
