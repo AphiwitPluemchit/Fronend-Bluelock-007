@@ -49,19 +49,19 @@ const breadcrumbs = computed(() => ({
 
     <!-- Tab Panels -->
     <q-tab-panels v-model="tab" animated class="custom-panels">
-      <q-tab-panel name="activity">
+      <q-tab-panel name="activity" class="q-my-md">
         <ActivityDetailTab />
       </q-tab-panel>
 
-      <q-tab-panel name="registration">
+      <q-tab-panel name="registration" class="q-my-md">
         <RegistrationDetails />
       </q-tab-panel>
 
-      <q-tab-panel name="students">
+      <q-tab-panel name="students" class="q-my-md">
         <StudentList :search="search" />
       </q-tab-panel>
 
-      <q-tab-panel name="summary">
+      <q-tab-panel name="summary" class="q-my-md">
         <SummaryResult />
       </q-tab-panel>
     </q-tab-panels>
