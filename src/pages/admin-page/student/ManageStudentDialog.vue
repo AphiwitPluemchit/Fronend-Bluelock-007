@@ -3,19 +3,30 @@ import { nextTick, ref } from 'vue'
 import UploadStudentDialog from './UploadStudentDialog.vue'
 
 const dialog = ref(false)
+const uploadDialogRef = ref<InstanceType<typeof UploadStudentDialog> | null>(null)
 
-// ฟังก์ชันเปิด Dialog
+// เปิด ManageStudentDialog
 const openDialog = () => {
   dialog.value = true
 }
 
-const uploadDialogRef = ref<InstanceType<typeof UploadStudentDialog> | null>(null)
+// ปิด ManageStudentDialog
+const closeDialog = () => {
+  dialog.value = false
+}
+
 const openUploadDialog = async () => {
-  console.log('testClick')
   await nextTick()
   if (uploadDialogRef.value) {
     uploadDialogRef.value.openDialogUpload()
   }
+  closeDialog() // ปิด ManageStudentDialog
+}
+
+// ปิด ManageStudentDialog เมื่อกด "จัดเก็บข้อมูลนิสิต"
+const handleSaveData = () => {
+  console.log('จัดเก็บข้อมูลนิสิต...')
+  closeDialog()
 }
 
 defineExpose({ openDialog })
@@ -28,12 +39,12 @@ defineExpose({ openDialog })
     :offset="[0, 5]"
     style="border-radius: 10px; overflow: visible"
   >
-    <q-card class="q-pa-md" style="width: 300px; border-radius: 10px">
+    <q-card class="q-pa-md" style="width: 300px; border-radius: 10px" v-model="dialog">
       <div class="q-mt-md q-mb-md">
         <q-btn class="custom-btn cursor-pointer q-mb-sm" @click="openUploadDialog"
           >อัพโหลดข้อมูลนิสิต
         </q-btn>
-        <q-btn class="custom-btn cursor-pointer">จัดเก็บข้อมูลนิสิต </q-btn>
+        <q-btn class="custom-btn cursor-pointer" @click="handleSaveData">จัดเก็บข้อมูลนิสิต</q-btn>
       </div>
     </q-card>
   </q-menu>

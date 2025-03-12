@@ -22,7 +22,7 @@ const uploadFile = () => {
   closeDialog()
 }
 
-defineExpose({ openDialogUpload })
+defineExpose({ openDialogUpload, closeDialog })
 </script>
 
 <template>
@@ -33,17 +33,21 @@ defineExpose({ openDialogUpload })
         <q-icon name="cloud_upload" size="80px" color="black" style="width: 130px; height: 130px" />
       </q-card-section>
       <q-card-section class="q-gutter-md row justify-center">
-        <template>
-          <q-btn dense flat icon="download" />
-        </template>
-        <q-file v-model="file" label="No Select File" filled clearable style="width: 350px">
+        <q-file
+          v-model="file"
+          label="No Selected File"
+          filled
+          clearable
+          accept=".csv, .xls, .xlsx"
+          style="width: 350px"
+        >
           <template v-slot:append>
             <q-btn dense flat icon="delete" @click="file = null" />
           </template>
         </q-file>
       </q-card-section>
-      <q-card-actions class="row justify-end items-end q-pa-sm">
-        <q-btn label="ยกเลิก" class="btnreject q-mr-md" flat @click="closeDialog" />
+      <q-card-actions class="q-mt-md" style="position: absolute; bottom: 20px; right: 20px">
+        <q-btn label="ยกเลิก" class="btnreject q-mr-sm" flat @click="closeDialog" />
         <q-btn label="ยืนยัน" class="btnconfirm" unelevated @click="uploadFile" />
       </q-card-actions>
     </q-card>
