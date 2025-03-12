@@ -40,7 +40,7 @@
     </div>
 
     <!-- Room -->
-   <Room v-model="roomName" class="input-group" />
+    <Room v-model="roomName" class="input-group" />
 
     <!--Hours  & Seats -->
     <div class="flex-container">
@@ -90,6 +90,7 @@ import SeatsSelector from 'src/pages/admin-page/activity/CreateActivity/Form/Sea
 import TimeSelector from 'src/pages/admin-page/activity/CreateActivity/Form/TimeSelector.vue'
 import FoodSelector from 'src/pages/admin-page/activity/CreateActivity/Form/FoodSelector.vue'
 import Room from 'src/pages/admin-page/activity/CreateActivity/Form/RoomSelector.vue'
+import { ActivityService } from 'src/services/activity'
 import { useRouter } from 'vue-router'
 
 const router = useRouter()
@@ -111,8 +112,8 @@ interface DayTimeSelection {
 }
 const selectedDays = ref<DayTimeSelection[]>([])
 const sameTimeForAll = ref(false)
-const totalHours = ref<string>('')
-const seats = ref<string>('')
+const totalHours = ref<number>(0)
+const seats = ref<number>(0)
 const activityDateRange = ref<string[]>([])
 const activityName = ref('')
 const roomName = ref('')
@@ -272,32 +273,58 @@ onMounted(() => {
   generateDaysInRange(activityDateRangeInternal.value)
 })
 
-const submitActivity = () => {
-  const payload = {
-    activityName: activityName.value,
-    selectedDays: selectedDays.value.map((day) => ({
-      date: day.date,
-      startTime: day.startTime,
-      endTime: day.endTime,
-    })),
-    roomName: roomName.value,
-    totalHours: totalHours.value,
-    seats: seats.value,
-    activityType: activityType.value,
-    departments: departments.value,
-    years: years.value,
-    lecturer: lecturer.value,
-    foodMenu: foodMenu.value,
-    detailActivity: detailActivity.value,
+const submitActivity = async () => {
+  const majorMap: Record<string, { id: string; name: string }> = {
+    cs: { id: '67bf0c358873e448798fed37', name: 'CS' },
+    se: { id: '67bf0bdf8873e448798fed36', name: 'SE' },
+    itdi: { id: '67bf0bda8873e448798fed35', name: 'ITDI' },
+    aai: { id: '67bf0bd48873e448798fed34', name: 'AAI' },
   }
 
-  console.log('Payload:', payload)
-  localStorage.setItem('activityPayload', JSON.stringify(payload))
-}
-const isSidebarOpen = ref(false) 
+  const skill = activityType.value === 'prep' ? 'hard' : 'soft'
+
+  const majors = departments.value
+    .map((dep) => majorMap[dep])
+    .filter((m): m is { id: string; name: string } => m !== undefined)
+
+  const payload = {
+    name: activityName.value,
+    activityState: 'planning',
+    type: 'one',
+    skill,
+    studentYears: years.value.map((y) => parseInt(y, 10)),
+    majors,
+    activityItems: [
+      {
+        name: activityName.value,
+        description: detailActivity.value,
+        hour: totalHours.value,
+        maxParticipants:seats.value,
+        operator: lecturer.value,
+        room: roomName.value,
+        dates: selectedDays.value.map((day) => ({
+          date: day.date,
+          stime: day.startTime,
+          etime: day.endTime,
+        })),
+      },
+    ],
+  }
+
+  try {
+    await ActivityService.createOne(payload)
+    alert('✅ สร้างกิจกรรมสำเร็จ')
+    await router.push('/ActivitiesManagement')
+  } catch (error) {
+    console.error(error)
+    alert('❌ เกิดข้อผิดพลาดในการสร้างกิจกรรม')
+  }
+  }
+
+const isSidebarOpen = ref(false)
 
 watch(isSidebarOpen, (newVal) => {
-  document.documentElement.style.setProperty('--sidebar-width', newVal ? '250px' : '0px') 
+  document.documentElement.style.setProperty('--sidebar-width', newVal ? '250px' : '0px')
 })
 </script>
 

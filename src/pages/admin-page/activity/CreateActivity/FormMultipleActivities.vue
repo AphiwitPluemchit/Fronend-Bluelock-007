@@ -48,9 +48,9 @@
       </div>
 
       <!-- Room and Seats -->
-      <Room v-model="roomName" class="input-group" />
-      
-        <div class="input-group">
+      <Room v-model="subActivity.roomName" class="input-group" />
+
+      <div class="input-group">
         <p class="label label_minWidth">จำนวนที่รับ :</p>
         <q-input
           outlined
@@ -63,46 +63,11 @@
       </div>
 
       <!-- Activity Type -->
-      <div class="input-group">
-        <p class="label label_minWidth">ประเภทกิจกรรม :</p>
-        <q-btn
-          :class="{ 'active-btn': subActivity.activityType === 'prep' }"
-          @click="subActivity.activityType = 'prep'"
-          label="ชั่วโมงเตรียมความพร้อม"
-          class="activityType-btn"
-        />
-        <q-btn
-          :class="{ 'active-btn': subActivity.activityType === 'academic' }"
-          @click="subActivity.activityType = 'academic'"
-          label="ชั่วโมงทักษะทางวิชาการ"
-          class="activityType-btn"
-        />
-      </div>
+      <ActivityType v-model="subActivity.activityType" class="input-group" />
       <!-- Department -->
-      <div class="input-group">
-        <p class="label label_minWidth">สาขา :</p>
-        <q-btn
-          v-for="option in departmentOptions"
-          :key="option.value"
-          :class="{ 'active-btn': subActivity.departments.includes(option.value) }"
-          @click="toggleDepartment(index, option.value)"
-          :label="option.label"
-          class="department-btn"
-        />
-      </div>
-
+      <DepartmentSelector v-model="subActivity.departments" class="input-group" />
       <!-- Year -->
-      <div class="input-group">
-        <p class="label label_minWidth">ชั้นปี :</p>
-        <q-btn
-          v-for="option in yearOptions"
-          :key="option.value"
-          :class="{ 'active-btn': subActivity.years.includes(option.value) }"
-          @click="toggleYear(index, option.value)"
-          :label="option.label"
-          class="year-btn"
-        />
-      </div>
+      <YearSelector v-model="subActivity.years" class="input-group" />
 
       <!-- Lecturer -->
       <div class="input-group">
@@ -110,12 +75,17 @@
         <q-input outlined v-model="subActivity.lecturer" style="width: 100%" />
       </div>
 
-
-       <!-- Detail Activity -->
-       <div class="input-group">
-      <p style="align-self: flex-start" class="label label_minWidth">รายละเอียดอื่นๆ :</p>
-      <q-input type="textarea" rows="10" outlined v-model="detailActivity" style="width: 100%" />
-    </div>
+      <!-- Detail Activity -->
+      <div class="input-group">
+        <p style="align-self: flex-start" class="label label_minWidth">รายละเอียดอื่นๆ :</p>
+        <q-input
+          type="textarea"
+          rows="10"
+          outlined
+          v-model="subActivity.detailActivity"
+          style="width: 100%"
+        />
+      </div>
 
       <!-- Add Activity Button -->
     </div>
@@ -129,7 +99,7 @@
     </div>
     <div class="button-group">
       <q-btn class="btnreject" @click="goToActivitiesManagement">ยกเลิก</q-btn>
-      <q-btn class="btnsecces">เสร็จสิ้น</q-btn>
+      <q-btn class="btnsecces" @click="submitActivity">เสร็จสิ้น</q-btn>
     </div>
   </q-page>
 </template>
@@ -141,6 +111,10 @@ import HoursSelector from 'src/pages/admin-page/activity/CreateActivity/Form/Hou
 import SingleDate from 'src/pages/admin-page/activity/CreateActivity/Form/SingleDate.vue'
 import TimeSelector from 'src/pages/admin-page/activity/CreateActivity/Form/TimeSelector.vue'
 import Room from 'src/pages/admin-page/activity/CreateActivity/Form/RoomSelector.vue'
+import YearSelector from 'src/pages/admin-page/activity/CreateActivity/Form/YearSelector.vue'
+import DepartmentSelector from 'src/pages/admin-page/activity/CreateActivity/Form/DepartmentSelector.vue'
+import ActivityType from 'src/pages/admin-page/activity/CreateActivity/Form/ActivityType.vue'
+import { ActivityService } from 'src/services/activity'
 import { useRouter } from 'vue-router'
 
 const router = useRouter()
@@ -160,6 +134,7 @@ interface SubActivity {
   departments: string[]
   years: string[]
 }
+
 const addSubActivity = () => {
   subActivities.value.push({
     subActivityName: '',
@@ -172,14 +147,8 @@ const addSubActivity = () => {
     years: [],
   })
 }
-
-interface ToggleOption {
-  label: string
-  value: string
-}
-const detailActivity = ref('')
 const activityName = ref('')
-const totalHours = ref('')
+const totalHours = ref<number>(0)
 const foodMenu = ref('')
 const subActivities = ref<SubActivity[]>([])
 const activityDateInternal = ref('')
@@ -189,7 +158,7 @@ const hour = ref<number>(0)
 const minute = ref<number>(0)
 const endHour = ref<number>(0)
 const endMinute = ref<number>(0)
-  const roomName = ref('')
+
 // ฟังก์ชันสำหรับฟอร์แมตเวลาเป็นสตริง
 const formatTime = (h: number, m: number): string => {
   return `${formatHour(h)}:${formatMinute(m)}`
@@ -255,11 +224,10 @@ const thaiLocale = {
     'ธันวาคม',
   ],
 }
-
 const validatePositive = (field: 'totalHours' | 'seats', index?: number) => {
   if (field === 'totalHours') {
-    if (!totalHours.value || Number(totalHours.value) < 0) {
-      totalHours.value = '0'
+    if (!totalHours.value || totalHours.value < 0) {
+      totalHours.value = 0
     }
   } else if (field === 'seats' && typeof index === 'number' && subActivities.value[index]) {
     if (!subActivities.value[index].seats || subActivities.value[index].seats < 0) {
@@ -267,44 +235,60 @@ const validatePositive = (field: 'totalHours' | 'seats', index?: number) => {
     }
   }
 }
+
 const removeSubActivity = (index: number) => {
   subActivities.value.splice(index, 1)
 }
-const toggleDepartment = (index: number, value: string) => {
-  const subActivity = subActivities.value[index]
-  if (!subActivity) return // ✅ ป้องกัน undefined
+const submitActivity = async () => {
+  const majorMap: Record<string, { id: string; name: string }> = {
+    cs: { id: '67bf0c358873e448798fed37', name: 'CS' },
+    se: { id: '67bf0bdf8873e448798fed36', name: 'SE' },
+    itdi: { id: '67bf0bda8873e448798fed35', name: 'ITDI' },
+    aai: { id: '67bf0bd48873e448798fed34', name: 'AAI' },
+  }
 
-  if (subActivity.departments.includes(value)) {
-    subActivity.departments = subActivity.departments.filter((item) => item !== value)
-  } else {
-    subActivity.departments.push(value)
+  const activityItems = subActivities.value.map((sub) => {
+    return {
+      name: sub.subActivityName,
+      description: sub.detailActivity,
+      hour: totalHours.value,
+      maxParticipants: sub.seats,
+      operator: sub.lecturer,
+      room: sub.roomName,
+      dates: [
+        {
+          date: activityDateInternal.value,
+          stime: selectedTime.value,
+          etime: endTime.value,
+        },
+      ],
+      majors: sub.departments
+        .map((dep) => majorMap[dep])
+        .filter((m): m is { id: string; name: string } => m !== undefined),
+      studentYears: sub.years.map((y) => parseInt(y, 10)),
+      skill: sub.activityType === 'prep' ? 'hard' : 'soft',
+    }
+  })
+
+  const payload = {
+    name: activityName.value,
+    activityState: 'planning',
+    type: 'multiple',
+    foodMenu: foodMenu.value,
+    activityItems,
+  }
+
+  try {
+    await ActivityService.createOne(payload)
+    alert('✅ สร้างกิจกรรมหลายรายการสำเร็จ')
+    await router.push('/ActivitiesManagement')
+  } catch (error) {
+    console.error(error)
+    alert('❌ เกิดข้อผิดพลาดในการสร้างกิจกรรม')
+    console.error('❌ สร้างกิจกรรมล้มเหลว:', error)
+    console.log('📤 Payload:', JSON.stringify(payload, null, 2))
   }
 }
-
-const toggleYear = (index: number, value: string) => {
-  const subActivity = subActivities.value[index]
-  if (!subActivity) return // ✅ ป้องกัน undefined
-
-  if (subActivity.years.includes(value)) {
-    subActivity.years = subActivity.years.filter((item) => item !== value)
-  } else {
-    subActivity.years.push(value)
-  }
-}
-
-const departmentOptions: ToggleOption[] = [
-  { label: 'CS', value: 'cs' },
-  { label: 'SE', value: 'se' },
-  { label: 'ITDI', value: 'itdi' },
-  { label: 'AAI', value: 'aai' },
-]
-
-const yearOptions: ToggleOption[] = [
-  { label: '1', value: '1' },
-  { label: '2', value: '2' },
-  { label: '3', value: '3' },
-  { label: '4', value: '4' },
-]
 </script>
 
 <style scoped>
@@ -367,36 +351,12 @@ const yearOptions: ToggleOption[] = [
   width: 200px;
   font-size: 20px;
 }
-.activityType-btn {
-  width: 200px;
-  height: 40px;
-  border-radius: 50px;
-  box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.2);
-  background-color: #ffffff;
-}
-.activityType-btn:last-child,
-.department-btn:last-child,
-.year-btn:last-child {
-  margin-right: 0;
-}
 .time-container {
   display: flex;
   justify-content: center;
   align-items: center;
   gap: 10px;
 }
-.year-btn {
-  width: 80px;
-  height: 40px;
-  border-radius: 50px;
-  box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.2);
-  background-color: #ffffff;
-  margin-right: 10px;
-}
-.year-btn:last-child {
-  margin-right: 0;
-}
-
 .remove-icon {
   display: flex;
   justify-content: flex-end;
@@ -412,18 +372,6 @@ const yearOptions: ToggleOption[] = [
   gap: 20px;
   margin-left: 200px;
 }
-.department-btn {
-  width: 80px;
-  height: 40px;
-  border-radius: 50px;
-  box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.2);
-  background-color: #ffffff;
-  margin-right: 10px;
-}
-.active-btn {
-  background-color: #d0e4ff !important;
-}
-
 .button-group {
   display: flex;
   justify-content: flex-end;

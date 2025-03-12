@@ -1,10 +1,10 @@
 <template>
   <div class="input-group">
     <p class="label label_minWidth">วันที่จัดกิจกรรม :</p>
-    <q-input outlined v-model="formattedDate" style="width: 600px" readonly  :disable="disable">
+    <q-input outlined v-model="formattedDate" style="width: 600px" readonly :disable="disable">
       <template v-slot:prepend>
-        <q-icon name="event">
-          <q-menu style="overflow: visible">
+        <q-icon name="event" class="cursor-pointer" :class="{ 'disabled-icon': disable }">
+          <q-menu style="overflow: visible" v-if="!disable">
             <q-date
               v-model="selectedDate"
               mask="YYYY-MM-DD"
@@ -133,5 +133,9 @@ const thaiLocale = {
 
 ::v-deep(.q-icon) {
   font-size: 18px;
+}
+.disabled-icon {
+  opacity: 0.5;
+  pointer-events: none;
 }
 </style>

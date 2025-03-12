@@ -27,7 +27,7 @@
     </div>
 
     <!-- Date -->
-    <SingleDate v-model="activityDateInternal" :isEditing="!isEditing" />
+    <SingleDate v-model="activityDateInternal" :disable="!isEditing" />
 
     <!-- Time -->
     <div class="input-group">
@@ -86,50 +86,11 @@
       </div>
 
       <!-- Activity Type -->
-      <div class="input-group">
-        <p class="label label_minWidth">ประเภทกิจกรรม :</p>
-        <q-btn
-          :class="{ 'active-btn': subActivity.activityType === 'prep' }"
-          @click="subActivity.activityType = 'prep'"
-          label="ชั่วโมงเตรียมความพร้อม"
-          class="activityType-btn"
-          :disable="!isEditing"
-        />
-        <q-btn
-          :class="{ 'active-btn': subActivity.activityType === 'academic' }"
-          @click="subActivity.activityType = 'academic'"
-          label="ชั่วโมงทักษะทางวิชาการ"
-          class="activityType-btn"
-          :disable="!isEditing"
-        />
-      </div>
+      <ActivityType v-model="subActivity.activityType" class="input-group"  :disable="!isEditing" />
       <!-- Department -->
-      <div class="input-group">
-        <p class="label label_minWidth">สาขา :</p>
-        <q-btn
-          v-for="option in departmentOptions"
-          :key="option.value"
-          :class="{ 'active-btn': subActivity.departments.includes(option.value) }"
-          @click="toggleDepartment(index, option.value)"
-          :label="option.label"
-          class="department-btn"
-          :disable="!isEditing"
-        />
-      </div>
-
+      <DepartmentSelector v-model="subActivity.departments" class="input-group" :disable="!isEditing" />
       <!-- Year -->
-      <div class="input-group">
-        <p class="label label_minWidth">ชั้นปี :</p>
-        <q-btn
-          v-for="option in yearOptions"
-          :key="option.value"
-          :class="{ 'active-btn': subActivity.years.includes(option.value) }"
-          @click="toggleYear(index, option.value)"
-          :label="option.label"
-          class="year-btn"
-          :disable="!isEditing"
-        />
-      </div>
+      <YearSelector v-model="subActivity.years" class="input-group" :disable="!isEditing" />
 
       <!-- Lecturer -->
       <div class="input-group">
@@ -184,6 +145,9 @@ import SingleDate from 'src/pages/admin-page/activity/CreateActivity/Form/Single
 import TimeSelector from 'src/pages/admin-page/activity/CreateActivity/Form/TimeSelector.vue'
 import ChangeStatusDialog from 'src/pages/admin-page/activity/ActivityDetail/ActivityDetail/ChangeStatusDialog.vue'
 import RoomSelector from 'src/pages/admin-page/activity/CreateActivity/Form/RoomSelector.vue'
+import DepartmentSelector from 'src/pages/admin-page/activity/CreateActivity/Form/DepartmentSelector.vue'
+import YearSelector from 'src/pages/admin-page/activity/CreateActivity/Form/YearSelector.vue'
+import ActivityType from 'src/pages/admin-page/activity/CreateActivity/Form/ActivityType.vue'
 
 interface SubActivity {
   subActivityName: string
@@ -208,14 +172,10 @@ const addSubActivity = () => {
   })
 }
 
-interface ToggleOption {
-  label: string
-  value: string
-}
 const showChangeStatusDialog = ref(false)
 const detailActivity = ref('')
 const activityName = ref('')
-const totalHours = ref('')
+const totalHours = ref<number>(0)
 const foodMenu = ref('')
 const subActivities = ref<SubActivity[]>([])
 const activityDateInternal = ref('')
@@ -292,8 +252,8 @@ const thaiLocale = {
 
 const validatePositive = (field: 'totalHours' | 'seats', index?: number) => {
   if (field === 'totalHours') {
-    if (!totalHours.value || Number(totalHours.value) < 0) {
-      totalHours.value = '0'
+    if (!totalHours.value || totalHours.value < 0) {
+      totalHours.value = 0
     }
   } else if (field === 'seats' && typeof index === 'number' && subActivities.value[index]) {
     if (!subActivities.value[index].seats || subActivities.value[index].seats < 0) {
@@ -301,44 +261,10 @@ const validatePositive = (field: 'totalHours' | 'seats', index?: number) => {
     }
   }
 }
+
 const removeSubActivity = (index: number) => {
   subActivities.value.splice(index, 1)
 }
-const toggleDepartment = (index: number, value: string) => {
-  const subActivity = subActivities.value[index]
-  if (!subActivity) return // ✅ ป้องกัน undefined
-
-  if (subActivity.departments.includes(value)) {
-    subActivity.departments = subActivity.departments.filter((item) => item !== value)
-  } else {
-    subActivity.departments.push(value)
-  }
-}
-
-const toggleYear = (index: number, value: string) => {
-  const subActivity = subActivities.value[index]
-  if (!subActivity) return // ✅ ป้องกัน undefined
-
-  if (subActivity.years.includes(value)) {
-    subActivity.years = subActivity.years.filter((item) => item !== value)
-  } else {
-    subActivity.years.push(value)
-  }
-}
-
-const departmentOptions: ToggleOption[] = [
-  { label: 'CS', value: 'cs' },
-  { label: 'SE', value: 'se' },
-  { label: 'ITDI', value: 'itdi' },
-  { label: 'AAI', value: 'aai' },
-]
-
-const yearOptions: ToggleOption[] = [
-  { label: '1', value: '1' },
-  { label: '2', value: '2' },
-  { label: '3', value: '3' },
-  { label: '4', value: '4' },
-]
 const isEditing = ref(false)
 
 /******  b92a42f8-edcc-4981-a894-dc001fd684d1  *******/ const cancelEdit = () => {
