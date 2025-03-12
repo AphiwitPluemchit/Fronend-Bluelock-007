@@ -108,7 +108,6 @@ onMounted(async () => {
                 <span class="label">ผลการเลือกอาหาร :</span>
                 <span class="text">ไม่มีข้อมูลการเลือกอาหารสำหรับกิจกรรมนี้</span>
             </div>
-
         </div>
     </div>
 </template>
@@ -117,24 +116,36 @@ onMounted(async () => {
 .registration-container {
     display: flex;
     align-items: flex-start;
-    gap: 180px;
+    gap: 120px;
     background-color: #EDF0F5;
     padding: 30px;
     border-radius: 12px;
+    height: 680px;
+    overflow: hidden;
+    padding: 45px;
+}
+
+.registration-details {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 30px;
+    max-height: 600px;
+    overflow-y: auto;
+    overflow-x: hidden;
+}
+
+.registration-details::-webkit-scrollbar {
+    width: 8px;
+    margin-right: 50px;
 }
 
 .registration-image {
     width: 430px;
     height: 330px;
     background-color: #D9D9D9;
-    border-radius: 10px;
-}
-
-.registration-details {
-    display: flex;
-    flex-direction: column;
-    gap: 30px;
-    /* padding: 10px; */
+    border-radius: 12px;
+    margin-left: 100px;
 }
 
 .registration-info {

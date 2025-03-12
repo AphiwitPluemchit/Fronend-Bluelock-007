@@ -82,8 +82,9 @@ const filteredStudents = computed(() => {
 </script>
 
 <template>
-    <div class="table-container">
-        <div class="row q-mb-md justify-end items-center">
+    <div class="q-mb-sm student-container">
+    <div class="student-table-wrapper">
+        <div class="row justify-end items-center">
             <!-- ช่องค้นหา -->
             <q-input dense outlined v-model="search1" @update:model-value="updateSearch" placeholder="ค้นหาชื่อนิสิต"
                 class="q-mr-sm searchbox" :style="{ boxShadow: 'none' }">
@@ -120,17 +121,33 @@ const filteredStudents = computed(() => {
             </template>
         </q-table>
     </div>
+</div>
 </template>
 
 <style scoped>
-.table-container {
-    background-color: #EDF0F5;
-    padding: 20px;
-    border-radius: 12px;
+
+.student-container {
+  display: flex;
+  align-items: flex-start;
+  gap: 180px;
+  background-color: #EDF0F5;
+  padding: 45px;
+  border-radius: 12px;
+  height: 680px;
+  overflow: hidden;
 }
 
-/* ปรับขนาดตัวอักษรของตาราง */
-:deep(.q-table) {
-    font-size: 18px;
+.student-table-wrapper {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  max-height: 600px;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+.student-table-wrapper::-webkit-scrollbar {
+  width: 8px;
+  display: none;
 }
 </style>
