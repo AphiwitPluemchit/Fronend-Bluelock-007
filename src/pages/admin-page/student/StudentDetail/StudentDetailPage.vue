@@ -7,7 +7,7 @@
       <div class="text-h6 q-mt-lg">ข้อมูลนิสิต</div>
       <q-card flat class="q-mt-md">
         <!-- ข้อมูลนิสิต -->
-        <div v-if="selectedStudent" class="row q-col-gutter-md">
+        <div v-if="studentStore.student" class="row q-col-gutter-md">
           <!-- ชื่อและข้อมูลนิสิต -->
           <div class="col-12 row items-center q-pa-sm">
             <div class="col-1 text-right q-pr-md">
@@ -15,7 +15,7 @@
             </div>
             <div class="col-4">
               <q-input
-                v-model="selectedStudent.name"
+                v-model="studentStore.student.name"
                 :readonly="!isEditMode"
                 :class="isEditMode ? 'editable' : 'readonly'"
                 borderless
@@ -27,7 +27,7 @@
             </div>
             <div class="col-4">
               <q-input
-                v-model="selectedStudent.email"
+                v-model="studentStore.student.email"
                 :readonly="!isEditMode"
                 :class="isEditMode ? 'editable' : 'readonly'"
                 borderless
@@ -43,7 +43,7 @@
             </div>
             <div class="col-4">
               <q-input
-                v-model="selectedStudent.code"
+                v-model="studentStore.student.code"
                 :readonly="!isEditMode"
                 :class="isEditMode ? 'editable' : 'readonly'"
                 borderless
@@ -55,7 +55,7 @@
             </div>
             <div class="col-4">
               <q-input
-                v-model="selectedStudent.softskill"
+                v-model="studentStore.student.softSkill"
                 :readonly="!isEditMode"
                 :class="isEditMode ? 'editable' : 'readonly'"
                 borderless
@@ -72,7 +72,7 @@
             <div class="col-4">
               <!-- รอแก้ -->
               <q-input
-                v-model="selectedStudent.password"
+                v-model="studentYear"
                 :readonly="!isEditMode"
                 :class="isEditMode ? 'editable' : 'readonly'"
                 borderless
@@ -84,7 +84,7 @@
             </div>
             <div class="col-4">
               <q-input
-                v-model="selectedStudent.hardskill"
+                v-model="studentStore.student.hardSkill"
                 :readonly="!isEditMode"
                 :class="isEditMode ? 'editable' : 'readonly'"
                 borderless
@@ -100,7 +100,7 @@
             </div>
             <div class="col-4">
               <q-input
-                v-model="selectedStudent.major"
+                v-model="studentStore.student.majorNames"
                 :readonly="!isEditMode"
                 :class="isEditMode ? 'editable' : 'readonly'"
                 borderless
@@ -170,12 +170,41 @@
           <q-btn label="แก้ไข" class="btnedit" unelevated rounded @click="enableEditMode" />
         </template>
         <template v-else>
-          <q-btn label="ยกเลิก" class="btnreject q-mr-md" unelevated rounded @click="cancelEdit" />
+          <q-btn
+            label="ยกเลิก"
+            class="btnreject q-mr-md"
+            unelevated
+            rounded
+            @click="confirmCancel"
+          />
           <q-btn label="บันทึก" class="btnconfirm" unelevated rounded @click="saveChanges" />
         </template>
       </div>
     </div>
   </div>
+  <!-- Dialog ยืนยันการยกเลิก -->
+  <q-dialog v-model="showCancelDialog">
+    <q-card
+      style="
+        background-color: white;
+        width: 600px;
+        border-radius: 10px;
+        padding: 20px;
+        box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.2);
+      "
+    >
+      <q-card-section>
+        <div class="text-h6">ยืนยันการยกเลิก</div>
+      </q-card-section>
+      <q-card-section>
+        คุณแน่ใจหรือไม่ว่าต้องการยกเลิกการแก้ไข? การเปลี่ยนแปลงทั้งหมดจะไม่ถูกบันทึก
+      </q-card-section>
+      <q-card-actions align="right">
+        <q-btn flat label="ยกเลิก" class="btnreject q-mr-md" v-close-popup />
+        <q-btn flat label="ยืนยัน" class="btnconfirm" @click="cancelEdit" v-close-popup />
+      </q-card-actions>
+    </q-card>
+  </q-dialog>
 </template>
 
 <script setup lang="ts">
@@ -185,15 +214,37 @@ import AppBreadcrumbs from 'src/components/AppBreadcrumbs.vue'
 import FilterDialog from 'src/components/Dialog/FilterDialog.vue'
 import studentEditIcon from 'src/pages/admin-page/student/icons pics/user-edit-icon.png'
 import { useStudentStore } from 'src/stores/student'
+import type { Student } from 'src/types/student'
 
-const studentStore = useStudentStore()
-onMounted(() => {
-  studentStore.fetchData()
-})
+const originalStudentData = ref<Student | null>(null) // เก็บข้อมูลเดิมก่อนแก้ไข
 
 const route = useRoute()
-const id = computed(() => route.params.studentID)
-console.log(id)
+const studentCode = ref(route.params.code as unknown as string) // ดึงค่า code จาก URL
+const studentStore = useStudentStore()
+onMounted(async () => {
+  if (!studentCode.value) return
+  await studentStore.getStudentByCode(studentCode.value)
+  originalStudentData.value = { ...studentStore.student } // เก็บข้อมูลเดิม
+})
+
+//คำนวณชั้นปี
+const studentYear = computed(() => {
+  if (!studentStore.student?.code || studentStore.student.code.length < 2) return 'N/A'
+
+  const currentDate = new Date()
+  const currentYear = currentDate.getFullYear() + 543 // ปีปัจจุบัน (พ.ศ.)
+  const currentMonth = currentDate.getMonth() + 1 // เดือนปัจจุบัน (1-12)
+
+  const admissionYear = 2500 + parseInt(studentStore.student.code.substring(0, 2), 10) // ปีที่เข้าเรียน
+  const transitionMonth = 6 // เดือนมิถุนายนเป็นจุดเปลี่ยนชั้นปี
+
+  let yearLevel = currentYear - admissionYear
+  if (currentMonth >= transitionMonth) {
+    yearLevel++ // ถ้าเดือนปัจจุบันเป็นมิถุนายนหรือหลังจากนั้น ให้เพิ่มชั้นปีขึ้น 1
+  }
+
+  return yearLevel >= 1 && yearLevel <= 4 ? yearLevel.toString() : 'N/A' // จำกัดชั้นปีที่ 1-4
+})
 
 const breadcrumbs = ref({
   previousPage: { title: 'จัดการข้อมูลนิสิต', path: '/StudentManagement' },
@@ -217,6 +268,7 @@ const isEditMode = ref(false)
 //แก้ไข
 const enableEditMode = () => {
   isEditMode.value = true
+  originalStudentData.value = { ...studentStore.student } // เก็บข้อมูลเดิมก่อนแก้ไข
 }
 
 // บันทึก
@@ -225,7 +277,14 @@ const saveChanges = () => {
 }
 
 // ยกเลิกการแก้ไข
+const showCancelDialog = ref(false)
+const confirmCancel = () => {
+  showCancelDialog.value = true // แสดง Dialog ยืนยันการยกเลิก
+}
+
+// ยกเลิกการแก้ไข
 const cancelEdit = () => {
+  studentStore.student = { ...originalStudentData.value } as Student
   isEditMode.value = false
 }
 
@@ -258,12 +317,7 @@ const columns = [
     align: 'center' as const,
   },
 ]
-
-const selectedStudent = computed(() => {
-  return studentStore.students.find((student) => student.code === id.value) || null
-})
-
-//mockup
+//mockupActivity
 const historyActivity = ref([
   {
     index: 1,

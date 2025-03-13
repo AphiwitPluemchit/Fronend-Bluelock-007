@@ -68,14 +68,14 @@
             <q-td key="index">{{ props.rowIndex + 1 }}</q-td>
             <q-td key="code">{{ props.row.code }}</q-td>
             <q-td key="name">{{ props.row.name }}</q-td>
-            <q-td key="major">{{ props.row.major }}</q-td>
-            <q-td class="text-center" key="softskill">{{ props.row.softskill }}/30</q-td>
-            <q-td class="text-center" key="hardskill">{{ props.row.hardskill }}/12</q-td>
+            <q-td key="major">{{ props.row.majorNames }}</q-td>
+            <q-td class="text-center" key="softskill">{{ props.row.softSkill }}/30</q-td>
+            <q-td class="text-center" key="hardskill">{{ props.row.hardSkill }}/12</q-td>
             <!-- แสดงสถานะพร้อมสี -->
             <q-td class="text-center">
               <q-btn
-                :label="calculateStatus(props.row.softskill, props.row.hardskill)"
-                :class="getStatusClass(calculateStatus(props.row.softskill, props.row.hardskill))"
+                :label="calculateStatus(props.row.softSkill, props.row.hardSkill)"
+                :class="getStatusClass(calculateStatus(props.row.softSkill, props.row.hardSkill))"
                 rounded
                 unelevated
               />
@@ -109,8 +109,8 @@ import { useStudentStore } from 'src/stores/student'
 const studentStore = useStudentStore()
 const router = useRouter()
 
-onMounted(() => {
-  studentStore.fetchData()
+onMounted(async () => {
+  await studentStore.getStudents()
 })
 
 const goToDetail = (code: string) => {
