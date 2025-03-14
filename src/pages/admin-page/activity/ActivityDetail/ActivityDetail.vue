@@ -141,5 +141,6 @@ const currentBreadcrumb = computed(() => {
 .custom-panels {
   background-color: #EDF0F5;
   border-radius: 12px;
+  max-height: 680px;
 }
 </style>

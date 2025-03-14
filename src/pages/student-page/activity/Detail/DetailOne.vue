@@ -22,9 +22,9 @@
         <q-item-label class="q-mb-lg q-ml-md"
           >{{ getActivityHours(activity?.activityItems) }} ชั่วโมง</q-item-label
         >
-        <q-item-label class="q-mb-lg q-ml-md">{{
+        <!-- <q-item-label class="q-mb-lg q-ml-md">{{
           getActivityRoom(activity?.activityItems) ?? 'ไม่ระบุ'
-        }}</q-item-label>
+        }}</q-item-label> -->
         <q-item-label class="q-mb-lg q-ml-md">{{
           activity?.activityState ?? 'ไม่ระบุ'
         }}</q-item-label>
@@ -58,9 +58,9 @@ const getActivityHours = (activityItems: ActivityItem[] | null | undefined): str
   return activityItems?.reduce((total, item) => total + (item.hour ?? 0), 0).toString() ?? '0'
 }
 // ฟังก์ชันดึงสถานที่จัดกิจกรรม (Room)
-const getActivityRoom = (activityItems: ActivityItem[] | null | undefined): string => {
-  return activityItems && activityItems.length > 0
-    ? (activityItems[0]?.room ?? 'ไม่ระบุ')
-    : 'ไม่ระบุ'
-}
+// const getActivityRoom = (activityItems: ActivityItem[] | null | undefined): string => {
+//   // return activityItems && activityItems.length > 0
+//   //   ? (activityItems[0]?.room ?? 'ไม่ระบุ')
+//   //   : 'ไม่ระบุ'
+// }
 </script>

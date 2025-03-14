@@ -24,8 +24,8 @@
             v-for="(room, index) in filteredRooms"
             :key="index"
             clickable
-            @click="toggleRoom(room)"
-            :class="{ 'selected-item': selectedRooms.includes(room) }"
+            @click="selectRoom(room)"
+            :class="{ 'selected-item': selectedRoom.includes(room) }"
           >
             <q-item-section>
               {{ room }}
@@ -40,19 +40,37 @@
 <script setup lang="ts">
 import { ref, watch, computed } from 'vue'
 
-const selectedRooms = ref<string[]>([])
-const showSuggestions = ref(false)
-const searchText = ref('') // ใช้สำหรับค้นหา (แยกจาก input หลัก)
-
-const emit = defineEmits(['update:roomName'])
-watch(selectedRooms, (val) => emit('update:roomName', val))
-
 const props = defineProps<{
-  modelValue: string[] | string
+  modelValue: string[]
   disable?: boolean
 }>()
 
-// ห้องทั้งหมด
+const emit = defineEmits<{
+  (e: 'update:modelValue', value: string[]): void
+}>()
+
+const selectedRoom = computed({
+  get: () => props.modelValue,
+  set: (val: string[]) => emit('update:modelValue', val),
+})
+
+watch(
+  () => props.modelValue,
+  (val) => {
+    selectedRoom.value = Array.isArray(val) ? [...val] : []
+  },
+  { immediate: true }
+)
+
+watch(selectedRoom, (val) => {
+  console.log('📤 emit to parent:', val)
+  emit('update:modelValue', val)
+})
+
+
+const showSuggestions = ref(false)
+const searchText = ref('')
+
 const allRooms = [
   '11M280',
   '5M210',
@@ -80,8 +98,12 @@ const allRooms = [
 
 const filteredRooms = ref<string[]>([])
 
-// แสดงข้อความใน input
-const displayText = computed(() => selectedRooms.value.join(', '))
+const displayText = computed({
+  get: () => selectedRoom.value.join(', '),
+  set: (val: string) => {
+    searchText.value = val
+  },
+})
 
 const onFocus = () => {
   filteredRooms.value = allRooms
@@ -90,23 +112,27 @@ const onFocus = () => {
 
 const filterRooms = () => {
   const query = searchText.value.trim().toLowerCase()
-  if (query === '') {
-    filteredRooms.value = allRooms
-  } else {
-    filteredRooms.value = allRooms.filter((room) => room.toLowerCase().includes(query))
-  }
+  filteredRooms.value = query
+    ? allRooms.filter((room) => room.toLowerCase().includes(query))
+    : allRooms
   showSuggestions.value = true
 }
 
-const toggleRoom = (room: string) => {
-  const index = selectedRooms.value.indexOf(room)
+const selectRoom = (room: string) => {
+  const current = [...selectedRoom.value]
+  const index = current.indexOf(room)
   if (index === -1) {
-    selectedRooms.value.push(room)
+    current.push(room)
   } else {
-    selectedRooms.value.splice(index, 1)
+    current.splice(index, 1)
   }
+  selectedRoom.value = current 
+  console.log('✅ selectedRoom after select:', selectedRoom.value)
 }
+
 </script>
+
+
 
 <style scoped>
 .input-group {
