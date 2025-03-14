@@ -63,7 +63,6 @@ watch(
 )
 
 watch(selectedRoom, (val) => {
-  console.log('📤 emit to parent:', val)
   emit('update:modelValue', val)
 })
 
@@ -127,7 +126,6 @@ const selectRoom = (room: string) => {
     current.splice(index, 1)
   }
   selectedRoom.value = current 
-  console.log('✅ selectedRoom after select:', selectedRoom.value)
 }
 
 </script>

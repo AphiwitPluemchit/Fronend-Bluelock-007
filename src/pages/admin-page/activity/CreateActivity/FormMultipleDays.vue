@@ -64,7 +64,11 @@
     </div>
 
     <!-- Food Menu -->
-    <FoodSelector v-model:foodMenu="foodMenu" class="input-group" />
+    <FoodSelector
+      v-model:foodMenu="foodMenu"
+      v-model:foodMenuDisplay="foodMenuDisplay"
+      class="input-group"
+    />
 
     <!-- Detail Activity -->
     <div class="input-group">
@@ -125,6 +129,7 @@ const departments = ref<string[]>([])
 const years = ref<string[]>([])
 const activityDateRangeInternal = ref<string[]>([])
 const foodMenu = ref<Food[]>([])
+const foodMenuDisplay = ref<string>('')
 const menuItems = ref([
   'ผัดกะเพราหมู',
   'ผัดกะเพราไก่',
@@ -273,6 +278,9 @@ onMounted(() => {
 
   generateDaysInRange(activityDateRangeInternal.value)
 })
+watch(foodMenu, (newVal) => {
+  console.log('📦 foodMenu ใน component แม่:', newVal)
+})
 
 const submitActivity = async () => {
   const skill = activityType.value === 'prep' ? 'hard' : 'soft'
@@ -287,11 +295,9 @@ const submitActivity = async () => {
     .filter((name): name is string => !!name)
   const parsedHour = Number(totalHours.value)
   const parsedSeats = Number(seats.value)
-  const foodVotes = foodMenu.value.map(() => ({
-    activityId: '',
-    foodName : '',
-    id: '',
+  const foodVotes = foodMenu.value.map((food) => ({
     vote: 0,
+    foodName: food.name,
   }))
 
   const payload = {
@@ -318,8 +324,9 @@ const submitActivity = async () => {
       },
     ],
   }
-  console.log('🚀 roomName.value ก่อนส่ง:', selectedRoom.value)
+    console.log('🧾 foodMenu ก่อน map:', foodMenu.value)
   try {
+    console.log(payload)
     await ActivityService.createOne(payload)
     alert('✅ สร้างกิจกรรมสำเร็จ')
     await router.push('/ActivitiesManagement')

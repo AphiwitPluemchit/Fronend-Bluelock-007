@@ -31,7 +31,7 @@ export class ActivityService {
 
   static async createOne(obj: Partial<Activity>) {
     try {
-      console.log('Creating activity:', obj)
+      console.log('📤 ส่งข้อมูล activity:', obj)
       const res = await api.post(this.path, obj)
       return res.status
     } catch (error) {

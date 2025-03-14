@@ -246,8 +246,8 @@ const submitActivity = async () => {
     itdi: 'ITDI',
     aai: 'AAI',
   }
-  const skill = activityType.value === 'prep' ? 'hard' : 'soft'
 
+  const skill = activityType.value === 'prep' ? 'hard' : 'soft'
   const activityItems = subActivities.value.map((sub) => {
     const majorNames = sub.departments
       .map((dep) => majorMap[dep])
@@ -255,9 +255,9 @@ const submitActivity = async () => {
 
     return {
       name: sub.subActivityName,
-      hour: totalHours.value,
-      maxParticipants: sub.seats,
-      room: sub.roomName,
+      hour: Number(totalHours.value),
+      maxParticipants: Number(sub.seats),
+      rooms: sub.roomName,
       dates: [
         {
           date: activityDateInternal.value,
@@ -271,31 +271,32 @@ const submitActivity = async () => {
       description: sub.detailActivity,
     }
   })
+
+  // ✅ สร้าง foodVotes จาก foodMenu
   const foodVotes = foodMenu.value.map((food) => ({
-    activityId: '',
-    foodId: food.id,
-    food,
-    id: '',
+    foodName: food.name,
     vote: 0,
   }))
 
   const payload = {
+    id: '',
     type: 'many',
     name: activityName.value,
     activityState: 'planning',
     skill,
-    Foods: foodMenu.value,
-    foodVotes,
+    file: 'image.jpg',
     activityItems,
+    foodVotes,
   }
+
+  console.log('📦 payload ที่จะส่ง:', payload)
 
   try {
     await ActivityService.createOne(payload)
     alert('✅ สร้างกิจกรรมสำเร็จ')
     await router.push('/ActivitiesManagement')
   } catch (error) {
-    console.error(error)
-    alert('❌ เกิดข้อผิดพลาดในการสร้างกิจกรรม')
+    console.error('❌ เกิดข้อผิดพลาดในการสร้างกิจกรรม:', error)
     console.log(payload)
   }
 }
