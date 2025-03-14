@@ -1,4 +1,4 @@
-import type { Major } from './major'
+import type { Food } from './food'
 
 export type Activity = {
   id?: string
@@ -7,9 +7,8 @@ export type Activity = {
   activityState?: string
   skill?: string
   file?: string
-  studentYears?: number[]
-  majors?: Major[]
   activityItems?: ActivityItem[] | null
+  Foods?: Food[]
 }
 
 export type ActivityItem = {
@@ -17,15 +16,15 @@ export type ActivityItem = {
   name?: string | null
   description?: string | null
   maxParticipants?: number | null
-  room?: string | null
+  room?: string[]
   hour?: number | null
-  date?:
-    | [
-        {
-          date: string
-          stime: string
-          etime: string
-        },
-      ]
-    | null
+  date?: {
+    date: string
+    stime: string
+    etime: string
+  }[] | null
+  operator?: string
+  studentYears?: number[]
+  majors?: string[]
 }
+

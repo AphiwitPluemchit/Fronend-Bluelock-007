@@ -8,40 +8,42 @@
       @click="toggleDepartment(option.value)"
       :label="option.label"
       class="department-btn"
-      :disable="disable" 
+      :disable="disable"
     />
   </div>
 </template>
 
 <script setup lang="ts">
-import { defineProps, defineEmits } from 'vue';
+import { defineProps, defineEmits } from 'vue'
 
 interface DepartmentOption {
-  label: string;
-  value: string;
+  label: string
+  value: string
+  id: string
 }
 
-const props = defineProps<{ 
-  modelValue: string[];
-  disable?: boolean; // เพิ่ม prop disable
-}>();
+const props = defineProps<{
+  modelValue: string[]
+  disable?: boolean // เพิ่ม prop disable
+}>()
 
-const emit = defineEmits<{ (event: "update:modelValue", value: string[]): void }>();
+const emit = defineEmits<{ (event: 'update:modelValue', value: string[]): void }>()
 
+// ✅ ไม่ต้อง map เป็น id ที่นี่
 const departmentOptions: DepartmentOption[] = [
-  { label: 'CS', value: 'cs' },
-  { label: 'SE', value: 'se' },
-  { label: 'ITDI', value: 'itdi' },
-  { label: 'AAI', value: 'aai' },
-];
+  { label: 'CS', value: 'cs', id: '67bf0c358873e448798fed37' },
+  { label: 'SE', value: 'se', id: '67bf0bdf8873e448798fed36' },
+  { label: 'ITDI', value: 'itdi', id: '67bf0bda8873e448798fed35' },
+  { label: 'AAI', value: 'aai', id: '67bf0bd48873e448798fed34' },
+]
 
 const toggleDepartment = (value: string) => {
-  if (props.disable) return; // ถ้า disable ห้ามกด
+  if (props.disable) return // ถ้า disable ห้ามกด
   const newDepartments = props.modelValue.includes(value)
     ? props.modelValue.filter((item) => item !== value)
-    : [...props.modelValue, value];
-  emit("update:modelValue", newDepartments);
-};
+    : [...props.modelValue, value]
+  emit('update:modelValue', newDepartments)
+}
 </script>
 
 <style scoped>

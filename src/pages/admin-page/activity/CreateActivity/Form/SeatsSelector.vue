@@ -4,7 +4,7 @@
     <q-input
       outlined
       style="width: 240px"
-      v-model="localSeats"
+      v-model.number="localSeats"
       type="number"
       @keypress="isNumber($event)"
       @blur="validatePositive"
@@ -14,33 +14,36 @@
 </template>
 
 <script setup lang="ts">
-import { defineProps, defineEmits, ref, watch } from 'vue';
+import { defineProps, defineEmits, ref, watch } from 'vue'
 
 const props = defineProps<{
-  modelValue: string;
-  disable?: boolean;
-}>();
+  modelValue: number
+  disable?: boolean
+}>()
 
-const emit = defineEmits<{ (event: 'update:modelValue', value: string): void }>();
+const emit = defineEmits<{
+  (event: 'update:modelValue', value: number): void
+}>()
 
-const localSeats = ref(props.modelValue);
+// ✅ ใช้ number type
+const localSeats = ref<number>(props.modelValue)
 
 watch(localSeats, (newVal) => {
-  emit('update:modelValue', newVal);
-});
+  emit('update:modelValue', newVal)
+})
 
 const isNumber = (event: KeyboardEvent) => {
-  const charCode = event.which ? event.which : event.keyCode;
+  const charCode = event.which ? event.which : event.keyCode
   if (charCode < 48 || charCode > 57) {
-    event.preventDefault();
+    event.preventDefault()
   }
-};
+}
 
 const validatePositive = () => {
-  if (parseInt(localSeats.value) < 0 || localSeats.value === '') {
-    localSeats.value = '0';
+  if (isNaN(localSeats.value) || localSeats.value < 0) {
+    localSeats.value = 0
   }
-};
+}
 </script>
 
 <style scoped>
