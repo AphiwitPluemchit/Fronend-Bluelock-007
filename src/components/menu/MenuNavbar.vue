@@ -16,25 +16,27 @@
             {{ 'กมลวรรณ แสงระวี' }}
           </div>
           <div class="flex justify-end">
-            {{ userStore.role === 'admin' ? 'เจ้าหน้าที่' : 'นิสิต' }}
+            {{ store.getRole === EnumUserRole.STUDENT ? 'นักศึกษา' : 'ผู้ดูแล' }}
           </div>
         </div>
-        <q-btn outline dense color="white" @click="switchRole">
+        <!-- <q-btn outline dense color="white" @click="switchRole">
           {{ userStore.role === 'admin' ? 'Admin' : 'Student' }}
-        </q-btn>
+        </q-btn> -->
       </div>
     </q-toolbar>
   </q-header>
 </template>
 <script setup lang="ts">
-import { useUserStore } from 'src/stores/user-store'
-
-const userStore = useUserStore()
+// import { useUserStore } from 'src/stores/user-store'
+import { useAuthStore } from 'src/stores/auth'
+import { EnumUserRole } from 'src/data/roles'
+const store = useAuthStore()
+// const userStore = useUserStore()
 const emit = defineEmits(['toggleSidebar'])
 
-const switchRole = () => {
-  userStore.setRole(userStore.role === 'admin' ? 'user' : 'admin')
-}
+// const switchRole = () => {
+//   userStore.setRole(userStore.role === 'admin' ? 'user' : 'admin')
+// }
 
 // แจ้ง Layout ให้เปลี่ยนสถานะ Sidebar
 const toggleLeftDrawer = () => {
