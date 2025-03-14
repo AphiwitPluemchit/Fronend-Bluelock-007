@@ -7,7 +7,7 @@
       <div class="text-h6 q-mt-lg">ข้อมูลนิสิต</div>
       <q-card flat class="q-mt-md">
         <!-- ข้อมูลนิสิต -->
-        <div v-if="selectedStudent" class="row q-col-gutter-md">
+        <div v-if="studentStore.student" class="row q-col-gutter-md">
           <!-- ชื่อและข้อมูลนิสิต -->
           <div class="col-12 row items-center q-pa-sm">
             <div class="col-1 text-right q-pr-md">
@@ -15,7 +15,7 @@
             </div>
             <div class="col-4">
               <q-input
-                v-model="selectedStudent.name"
+                v-model="studentStore.student.name"
                 :readonly="!isEditMode"
                 :class="isEditMode ? 'editable' : 'readonly'"
                 borderless
@@ -27,7 +27,7 @@
             </div>
             <div class="col-4">
               <q-input
-                v-model="selectedStudent.email"
+                v-model="studentStore.student.email"
                 :readonly="!isEditMode"
                 :class="isEditMode ? 'editable' : 'readonly'"
                 borderless
@@ -43,7 +43,7 @@
             </div>
             <div class="col-4">
               <q-input
-                v-model="selectedStudent.studentID"
+                v-model="studentStore.student.code"
                 :readonly="!isEditMode"
                 :class="isEditMode ? 'editable' : 'readonly'"
                 borderless
@@ -55,7 +55,7 @@
             </div>
             <div class="col-4">
               <q-input
-                v-model="selectedStudent.softskill"
+                v-model="studentStore.student.softSkill"
                 :readonly="!isEditMode"
                 :class="isEditMode ? 'editable' : 'readonly'"
                 borderless
@@ -70,8 +70,9 @@
               <p class="q-my-none">ชั้นปี :</p>
             </div>
             <div class="col-4">
+              <!-- รอแก้ -->
               <q-input
-                v-model="selectedStudent.year"
+                v-model="studentYear"
                 :readonly="!isEditMode"
                 :class="isEditMode ? 'editable' : 'readonly'"
                 borderless
@@ -83,7 +84,7 @@
             </div>
             <div class="col-4">
               <q-input
-                v-model="selectedStudent.hardskill"
+                v-model="studentStore.student.hardSkill"
                 :readonly="!isEditMode"
                 :class="isEditMode ? 'editable' : 'readonly'"
                 borderless
@@ -99,7 +100,7 @@
             </div>
             <div class="col-4">
               <q-input
-                v-model="selectedStudent.major"
+                v-model="studentStore.student.majorNames"
                 :readonly="!isEditMode"
                 :class="isEditMode ? 'editable' : 'readonly'"
                 borderless
@@ -169,24 +170,81 @@
           <q-btn label="แก้ไข" class="btnedit" unelevated rounded @click="enableEditMode" />
         </template>
         <template v-else>
-          <q-btn label="ยกเลิก" class="btnreject q-mr-md" unelevated rounded @click="cancelEdit" />
+          <q-btn
+            label="ยกเลิก"
+            class="btnreject q-mr-md"
+            unelevated
+            rounded
+            @click="confirmCancel"
+          />
           <q-btn label="บันทึก" class="btnconfirm" unelevated rounded @click="saveChanges" />
         </template>
       </div>
     </div>
   </div>
+  <!-- Dialog ยืนยันการยกเลิก -->
+  <q-dialog v-model="showCancelDialog">
+    <q-card
+      style="
+        background-color: white;
+        width: 600px;
+        border-radius: 10px;
+        padding: 20px;
+        box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.2);
+      "
+    >
+      <q-card-section>
+        <div class="text-h6">ยืนยันการยกเลิก</div>
+      </q-card-section>
+      <q-card-section>
+        คุณแน่ใจหรือไม่ว่าต้องการยกเลิกการแก้ไข? การเปลี่ยนแปลงทั้งหมดจะไม่ถูกบันทึก
+      </q-card-section>
+      <q-card-actions align="right">
+        <q-btn flat label="ยกเลิก" class="btnreject q-mr-md" v-close-popup />
+        <q-btn flat label="ยืนยัน" class="btnconfirm" @click="cancelEdit" v-close-popup />
+      </q-card-actions>
+    </q-card>
+  </q-dialog>
 </template>
 
 <script setup lang="ts">
-import { computed, ref } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import { useRoute } from 'vue-router'
 import AppBreadcrumbs from 'src/components/AppBreadcrumbs.vue'
 import FilterDialog from 'src/components/Dialog/FilterDialog.vue'
 import studentEditIcon from 'src/pages/admin-page/student/icons pics/user-edit-icon.png'
+import { useStudentStore } from 'src/stores/student'
+import type { Student } from 'src/types/student'
+
+const originalStudentData = ref<Student | null>(null) // เก็บข้อมูลเดิมก่อนแก้ไข
 
 const route = useRoute()
-const id = computed(() => route.params.studentID)
-console.log(id)
+const studentCode = ref(route.params.code as unknown as string) // ดึงค่า code จาก URL
+const studentStore = useStudentStore()
+onMounted(async () => {
+  if (!studentCode.value) return
+  await studentStore.getStudentByCode(studentCode.value)
+  originalStudentData.value = { ...studentStore.student } // เก็บข้อมูลเดิม
+})
+
+//คำนวณชั้นปี
+const studentYear = computed(() => {
+  if (!studentStore.student?.code || studentStore.student.code.length < 2) return 'N/A'
+
+  const currentDate = new Date()
+  const currentYear = currentDate.getFullYear() + 543 // ปีปัจจุบัน (พ.ศ.)
+  const currentMonth = currentDate.getMonth() + 1 // เดือนปัจจุบัน (1-12)
+
+  const admissionYear = 2500 + parseInt(studentStore.student.code.substring(0, 2), 10) // ปีที่เข้าเรียน
+  const transitionMonth = 6 // เดือนมิถุนายนเป็นจุดเปลี่ยนชั้นปี
+
+  let yearLevel = currentYear - admissionYear
+  if (currentMonth >= transitionMonth) {
+    yearLevel++ // ถ้าเดือนปัจจุบันเป็นมิถุนายนหรือหลังจากนั้น ให้เพิ่มชั้นปีขึ้น 1
+  }
+
+  return yearLevel >= 1 && yearLevel <= 4 ? yearLevel.toString() : 'N/A' // จำกัดชั้นปีที่ 1-4
+})
 
 const breadcrumbs = ref({
   previousPage: { title: 'จัดการข้อมูลนิสิต', path: '/StudentManagement' },
@@ -210,6 +268,7 @@ const isEditMode = ref(false)
 //แก้ไข
 const enableEditMode = () => {
   isEditMode.value = true
+  originalStudentData.value = { ...studentStore.student } // เก็บข้อมูลเดิมก่อนแก้ไข
 }
 
 // บันทึก
@@ -218,7 +277,14 @@ const saveChanges = () => {
 }
 
 // ยกเลิกการแก้ไข
+const showCancelDialog = ref(false)
+const confirmCancel = () => {
+  showCancelDialog.value = true // แสดง Dialog ยืนยันการยกเลิก
+}
+
+// ยกเลิกการแก้ไข
 const cancelEdit = () => {
+  studentStore.student = { ...originalStudentData.value } as Student
   isEditMode.value = false
 }
 
@@ -251,12 +317,7 @@ const columns = [
     align: 'center' as const,
   },
 ]
-
-const selectedStudent = computed(() => {
-  return mockStudents.value.find((student) => student.studentID === id.value) || null
-})
-
-//mockup
+//mockupActivity
 const historyActivity = ref([
   {
     index: 1,
@@ -313,287 +374,287 @@ const historyActivity = ref([
     hours: 8,
   },
 ])
-const mockStudents = ref([
-  {
-    index: 1,
-    studentID: '65160311',
-    name: 'คิรัชช์ รัตนวงศ์',
-    major: 'CS',
-    softskill: '30',
-    hardskill: '12',
-    year: '3',
-    email: '65160311@go.buu.ac.th',
-  },
-  {
-    index: 2,
-    studentID: '65160312',
-    name: 'กรนิศา ทองเยี่ยม',
-    major: 'CS',
-    softskill: '15',
-    hardskill: '30',
-    year: '3',
-    email: '65160312@go.buu.ac.th',
-  },
-  {
-    index: 3,
-    studentID: '65160313',
-    name: 'อุดม เมธี',
-    major: 'ITDI',
-    softskill: '11',
-    hardskill: '11',
-    year: '3',
-    email: '65160313@go.buu.ac.th',
-  },
-  {
-    index: 4,
-    studentID: '65160314',
-    name: 'ภัทรพล เกียรติคุณ',
-    major: 'ITDI',
-    softskill: '15',
-    hardskill: '20',
-    year: '2',
-    email: '65160313@go.buu.ac.th',
-  },
-  {
-    index: 5,
-    studentID: '65160315',
-    name: 'วณิชชา สีสังข์',
-    major: 'AAI',
-    softskill: '11',
-    hardskill: '30',
-    year: '1',
-    email: '65160313@go.buu.ac.th',
-  },
-  {
-    index: 6,
-    studentID: '65160316',
-    name: 'คิรัชช์ รัตนวงศ์รัตนวงศ์รัตนวงศ์รัตนวงศ์',
-    major: 'CS',
-    softskill: '30',
-    hardskill: '12',
-    year: '3',
-    email: '65160316@go.buu.ac.th',
-  },
-  {
-    index: 7,
-    studentID: '65160317',
-    name: 'กรนิศา ทองเยี่ยม',
-    major: 'CS',
-    softskill: '15',
-    hardskill: '30',
-    year: '4',
-    email: '65160317@go.buu.ac.th',
-  },
-  {
-    index: 8,
-    studentID: '65160318',
-    name: 'อุดม เมธี',
-    major: 'ITDI',
-    softskill: '11',
-    hardskill: '11',
-    year: '4',
-    email: '65160318@go.buu.ac.th',
-  },
-  {
-    index: 9,
-    studentID: '65160319',
-    name: 'ภัทรพล เกียรติคุณ',
-    major: 'ITDI',
-    softskill: '30',
-    hardskill: '20',
-    year: '3',
-    email: '65160319@go.buu.ac.th',
-  },
-  {
-    index: 10,
-    studentID: '65160320',
-    name: 'วณิชชา สีสังข์',
-    major: 'AAI',
-    softskill: '11',
-    hardskill: '30',
-    year: '3',
-    email: '65160320@go.buu.ac.th',
-  },
-  {
-    index: 11,
-    studentID: '65160321',
-    name: 'คิรัชช์ รัตนวงศ์',
-    major: 'CS',
-    softskill: '30',
-    hardskill: '12',
-    year: '3',
-    email: '65160321@go.buu.ac.th',
-  },
-  {
-    index: 12,
-    studentID: '65160322',
-    name: 'กรนิศา ทองเยี่ยม',
-    major: 'CS',
-    softskill: '15',
-    hardskill: '30',
-    year: '3',
-    email: '65160322@go.buu.ac.th',
-  },
-  {
-    index: 13,
-    studentID: '65160323',
-    name: 'อุดม เมธี',
-    major: 'ITDI',
-    softskill: '11',
-    hardskill: '11',
-    year: '3',
-    email: '65160323@go.buu.ac.th',
-  },
-  {
-    index: 14,
-    studentID: '65160324',
-    name: 'ภัทรพล เกียรติคุณ',
-    major: 'ITDI',
-    softskill: '15',
-    hardskill: '20',
-    year: '3',
-    email: '65160324@go.buu.ac.th',
-  },
-  {
-    index: 15,
-    studentID: '65160325',
-    name: 'วณิชชา สีสังข์',
-    major: 'AAI',
-    softskill: '11',
-    hardskill: '30',
-    year: '3',
-    email: '65160325@go.buu.ac.th',
-  },
-  {
-    index: 16,
-    studentID: '65160326',
-    name: 'คิรัชช์ รัตนวงศ์',
-    major: 'CS',
-    softskill: '30',
-    hardskill: '12',
-    year: '3',
-    email: '65160326@go.buu.ac.th',
-  },
-  {
-    index: 17,
-    studentID: '65160327',
-    name: 'กรนิศา ทองเยี่ยม',
-    major: 'CS',
-    softskill: '15',
-    hardskill: '30',
-    year: '3',
-    email: '65160327@go.buu.ac.th',
-  },
-  {
-    index: 18,
-    studentID: '65160328',
-    name: 'อุดม เมธี',
-    major: 'ITDI',
-    softskill: '11',
-    hardskill: '11',
-    year: '2',
-    email: '65160328@go.buu.ac.th',
-  },
-  {
-    index: 19,
-    studentID: '65160329',
-    name: 'ภัทรพล เกียรติคุณ',
-    major: 'ITDI',
-    softskill: '30',
-    hardskill: '20',
-    email: '65160329@go.buu.ac.th',
-  },
-  {
-    index: 20,
-    studentID: '65160330',
-    name: 'วณิชชา สีสังข์',
-    major: 'AAI',
-    softskill: '11',
-    hardskill: '30',
-    year: '2',
-    email: '65160330@go.buu.ac.th',
-  },
-  {
-    index: 21,
-    studentID: '65160331',
-    name: 'อุดม เมธี',
-    major: 'ITDI',
-    softskill: '11',
-    hardskill: '11',
-    year: '3',
-    email: '65160331@go.buu.ac.th',
-  },
-  {
-    index: 22,
-    studentID: '65160332',
-    name: 'ภัทรพล เกียรติคุณ',
-    major: 'ITDI',
-    softskill: '15',
-    hardskill: '20',
-    year: '3',
-    email: '65160332@go.buu.ac.th',
-  },
-  {
-    index: 23,
-    studentID: '65160333',
-    name: 'วณิชชา สีสังข์',
-    major: 'AAI',
-    softskill: '11',
-    hardskill: '30',
-    year: '2',
-    email: '65160333@go.buu.ac.th',
-  },
-  {
-    index: 24,
-    studentID: '65160334',
-    name: 'คิรัชช์ รัตนวงศ์',
-    major: 'CS',
-    softskill: '30',
-    hardskill: '12',
-    year: '2',
-    email: '65160334@go.buu.ac.th',
-  },
-  {
-    index: 25,
-    studentID: '65160335',
-    name: 'กรนิศา ทองเยี่ยม',
-    major: 'CS',
-    softskill: '15',
-    hardskill: '30',
-    year: '4',
-    email: '65160335@go.buu.ac.th',
-  },
-  {
-    index: 26,
-    studentID: '65160336',
-    name: 'อุดม เมธี',
-    major: 'ITDI',
-    softskill: '11',
-    hardskill: '11',
-    year: '3',
-    email: '65160336@go.buu.ac.th',
-  },
-  {
-    index: 27,
-    studentID: '65160337',
-    name: 'ภัทรพล เกียรติคุณ',
-    major: 'ITDI',
-    softskill: '30',
-    hardskill: '20',
-    year: '3',
-    email: '65160337@go.buu.ac.th',
-  },
-  {
-    index: 28,
-    studentID: '65160338',
-    name: 'วณิชชา สีสังข์',
-    major: 'AAI',
-    softskill: '11',
-    hardskill: '30',
-    year: '3',
-    email: '65160338@go.buu.ac.th',
-  },
-])
+// const mockStudents = ref([
+//   {
+//     index: 1,
+//     studentID: '65160311',
+//     name: 'คิรัชช์ รัตนวงศ์',
+//     major: 'CS',
+//     softskill: '30',
+//     hardskill: '12',
+//     year: '3',
+//     email: '65160311@go.buu.ac.th',
+//   },
+//   {
+//     index: 2,
+//     studentID: '65160312',
+//     name: 'กรนิศา ทองเยี่ยม',
+//     major: 'CS',
+//     softskill: '15',
+//     hardskill: '30',
+//     year: '3',
+//     email: '65160312@go.buu.ac.th',
+//   },
+//   {
+//     index: 3,
+//     studentID: '65160313',
+//     name: 'อุดม เมธี',
+//     major: 'ITDI',
+//     softskill: '11',
+//     hardskill: '11',
+//     year: '3',
+//     email: '65160313@go.buu.ac.th',
+//   },
+//   {
+//     index: 4,
+//     studentID: '65160314',
+//     name: 'ภัทรพล เกียรติคุณ',
+//     major: 'ITDI',
+//     softskill: '15',
+//     hardskill: '20',
+//     year: '2',
+//     email: '65160313@go.buu.ac.th',
+//   },
+//   {
+//     index: 5,
+//     studentID: '65160315',
+//     name: 'วณิชชา สีสังข์',
+//     major: 'AAI',
+//     softskill: '11',
+//     hardskill: '30',
+//     year: '1',
+//     email: '65160313@go.buu.ac.th',
+//   },
+//   {
+//     index: 6,
+//     studentID: '65160316',
+//     name: 'คิรัชช์ รัตนวงศ์รัตนวงศ์รัตนวงศ์รัตนวงศ์',
+//     major: 'CS',
+//     softskill: '30',
+//     hardskill: '12',
+//     year: '3',
+//     email: '65160316@go.buu.ac.th',
+//   },
+//   {
+//     index: 7,
+//     studentID: '65160317',
+//     name: 'กรนิศา ทองเยี่ยม',
+//     major: 'CS',
+//     softskill: '15',
+//     hardskill: '30',
+//     year: '4',
+//     email: '65160317@go.buu.ac.th',
+//   },
+//   {
+//     index: 8,
+//     studentID: '65160318',
+//     name: 'อุดม เมธี',
+//     major: 'ITDI',
+//     softskill: '11',
+//     hardskill: '11',
+//     year: '4',
+//     email: '65160318@go.buu.ac.th',
+//   },
+//   {
+//     index: 9,
+//     studentID: '65160319',
+//     name: 'ภัทรพล เกียรติคุณ',
+//     major: 'ITDI',
+//     softskill: '30',
+//     hardskill: '20',
+//     year: '3',
+//     email: '65160319@go.buu.ac.th',
+//   },
+//   {
+//     index: 10,
+//     studentID: '65160320',
+//     name: 'วณิชชา สีสังข์',
+//     major: 'AAI',
+//     softskill: '11',
+//     hardskill: '30',
+//     year: '3',
+//     email: '65160320@go.buu.ac.th',
+//   },
+//   {
+//     index: 11,
+//     studentID: '65160321',
+//     name: 'คิรัชช์ รัตนวงศ์',
+//     major: 'CS',
+//     softskill: '30',
+//     hardskill: '12',
+//     year: '3',
+//     email: '65160321@go.buu.ac.th',
+//   },
+//   {
+//     index: 12,
+//     studentID: '65160322',
+//     name: 'กรนิศา ทองเยี่ยม',
+//     major: 'CS',
+//     softskill: '15',
+//     hardskill: '30',
+//     year: '3',
+//     email: '65160322@go.buu.ac.th',
+//   },
+//   {
+//     index: 13,
+//     studentID: '65160323',
+//     name: 'อุดม เมธี',
+//     major: 'ITDI',
+//     softskill: '11',
+//     hardskill: '11',
+//     year: '3',
+//     email: '65160323@go.buu.ac.th',
+//   },
+//   {
+//     index: 14,
+//     studentID: '65160324',
+//     name: 'ภัทรพล เกียรติคุณ',
+//     major: 'ITDI',
+//     softskill: '15',
+//     hardskill: '20',
+//     year: '3',
+//     email: '65160324@go.buu.ac.th',
+//   },
+//   {
+//     index: 15,
+//     studentID: '65160325',
+//     name: 'วณิชชา สีสังข์',
+//     major: 'AAI',
+//     softskill: '11',
+//     hardskill: '30',
+//     year: '3',
+//     email: '65160325@go.buu.ac.th',
+//   },
+//   {
+//     index: 16,
+//     studentID: '65160326',
+//     name: 'คิรัชช์ รัตนวงศ์',
+//     major: 'CS',
+//     softskill: '30',
+//     hardskill: '12',
+//     year: '3',
+//     email: '65160326@go.buu.ac.th',
+//   },
+//   {
+//     index: 17,
+//     studentID: '65160327',
+//     name: 'กรนิศา ทองเยี่ยม',
+//     major: 'CS',
+//     softskill: '15',
+//     hardskill: '30',
+//     year: '3',
+//     email: '65160327@go.buu.ac.th',
+//   },
+//   {
+//     index: 18,
+//     studentID: '65160328',
+//     name: 'อุดม เมธี',
+//     major: 'ITDI',
+//     softskill: '11',
+//     hardskill: '11',
+//     year: '2',
+//     email: '65160328@go.buu.ac.th',
+//   },
+//   {
+//     index: 19,
+//     studentID: '65160329',
+//     name: 'ภัทรพล เกียรติคุณ',
+//     major: 'ITDI',
+//     softskill: '30',
+//     hardskill: '20',
+//     email: '65160329@go.buu.ac.th',
+//   },
+//   {
+//     index: 20,
+//     studentID: '65160330',
+//     name: 'วณิชชา สีสังข์',
+//     major: 'AAI',
+//     softskill: '11',
+//     hardskill: '30',
+//     year: '2',
+//     email: '65160330@go.buu.ac.th',
+//   },
+//   {
+//     index: 21,
+//     studentID: '65160331',
+//     name: 'อุดม เมธี',
+//     major: 'ITDI',
+//     softskill: '11',
+//     hardskill: '11',
+//     year: '3',
+//     email: '65160331@go.buu.ac.th',
+//   },
+//   {
+//     index: 22,
+//     studentID: '65160332',
+//     name: 'ภัทรพล เกียรติคุณ',
+//     major: 'ITDI',
+//     softskill: '15',
+//     hardskill: '20',
+//     year: '3',
+//     email: '65160332@go.buu.ac.th',
+//   },
+//   {
+//     index: 23,
+//     studentID: '65160333',
+//     name: 'วณิชชา สีสังข์',
+//     major: 'AAI',
+//     softskill: '11',
+//     hardskill: '30',
+//     year: '2',
+//     email: '65160333@go.buu.ac.th',
+//   },
+//   {
+//     index: 24,
+//     studentID: '65160334',
+//     name: 'คิรัชช์ รัตนวงศ์',
+//     major: 'CS',
+//     softskill: '30',
+//     hardskill: '12',
+//     year: '2',
+//     email: '65160334@go.buu.ac.th',
+//   },
+//   {
+//     index: 25,
+//     studentID: '65160335',
+//     name: 'กรนิศา ทองเยี่ยม',
+//     major: 'CS',
+//     softskill: '15',
+//     hardskill: '30',
+//     year: '4',
+//     email: '65160335@go.buu.ac.th',
+//   },
+//   {
+//     index: 26,
+//     studentID: '65160336',
+//     name: 'อุดม เมธี',
+//     major: 'ITDI',
+//     softskill: '11',
+//     hardskill: '11',
+//     year: '3',
+//     email: '65160336@go.buu.ac.th',
+//   },
+//   {
+//     index: 27,
+//     studentID: '65160337',
+//     name: 'ภัทรพล เกียรติคุณ',
+//     major: 'ITDI',
+//     softskill: '30',
+//     hardskill: '20',
+//     year: '3',
+//     email: '65160337@go.buu.ac.th',
+//   },
+//   {
+//     index: 28,
+//     studentID: '65160338',
+//     name: 'วณิชชา สีสังข์',
+//     major: 'AAI',
+//     softskill: '11',
+//     hardskill: '30',
+//     year: '3',
+//     email: '65160338@go.buu.ac.th',
+//   },
+// ])
 </script>
 <style scoped>
 .negative-hours {
@@ -605,8 +666,8 @@ const mockStudents = ref([
   margin-bottom: 16px; /* เพิ่มระยะห่างด้านล่าง */
 }
 .q-input {
-  border: 1px solid #ccc;
-  border-radius: 10px;
+  border: 1px solid #757575;
+  border-radius: 5px;
   padding-left: 10px;
 }
 .readonly {
