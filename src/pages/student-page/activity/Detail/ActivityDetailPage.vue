@@ -41,15 +41,16 @@ import { useStudentActivitystore } from 'src/stores/student-activity'
 import type { Activity } from 'src/types/activity'
 import DetailOne from './DetailOne.vue'
 import DetailMany from './DetailMany.vue'
+import { useAuthStore } from 'src/stores/auth'
 
 const StudentActivityStore = useStudentActivitystore()
 const route = useRoute()
 const showDialog = ref(false)
 const activity = ref<Activity | null>(null)
-
+const auth = useAuthStore()
 const breadcrumbs = ref({
-  previousPage: { title: 'จัดการกิจกรรม', path: '/ActivitiesManagement' },
-  currentPage: { title: 'รายละเอียดกิจกรรม', path: `/ActivitiesManagement/ActivityDetail` },
+  previousPage: { title: 'จัดการกิจกรรม', path: '/Student/ActivityTablePage' },
+  currentPage: { title: 'รายละเอียดกิจกรรม', path: `/Student/ActivityTablePage/ActivityDetail` },
   icon: 'description',
 })
 
@@ -63,13 +64,13 @@ const handleRegisterClick = () => {
   showDialog.value = true
 }
 
-const register = (activityItemId: string) => {
+const register = async (activityItemId: string) => {
   const payload = {
     activityItemId,
-    studentId: localStorage.getItem('studentId'),
+    studentId: auth.payload?.user?.id,
   }
   console.log('ส่ง payload:', payload)
-  // await StudentActivityStore.enrollment(payload)
+  await StudentActivityStore.enrollment(payload)
 }
 
 onMounted(async () => {

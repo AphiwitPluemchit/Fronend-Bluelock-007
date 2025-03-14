@@ -98,6 +98,7 @@ const breadcrumbs = computed(() => ({
   max-width: 1600px;
   margin: auto;
   background-color: #EDF0F5;
+  border-radius: 12px;
   max-height: 680px;
 }
 </style>

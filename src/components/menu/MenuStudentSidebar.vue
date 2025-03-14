@@ -50,11 +50,11 @@ const router = useRouter()
 const leftDrawerOpen = ref(false)
 
 const linksList = [
-  { title: 'ตารางกิจกรรม', icon: 'event', link: '/ActivitiesCalendarPage' },
-  { title: 'กิจกรรมทั้งหมด', icon: 'build', link: '/ActivityTablePage' },
-  { title: 'กิจกรรมของฉัน', icon: 'assignment_ind', link: '/MyActivitiesPage' },
-  { title: 'บันทึกชั่วโมงอบรม', icon: 'history', link: '/RecordPage' },
-  { title: 'ใบประกาศนียบัตร', icon: 'school', link: '/CertificateTablePage' },
+  { title: 'ตารางกิจกรรม', icon: 'event', link: '/Student/ActivitiesCalendar' },
+  { title: 'กิจกรรมทั้งหมด', icon: 'build', link: '/Student/ActivityTablePage' },
+  { title: 'กิจกรรมของฉัน', icon: 'assignment_ind', link: '/Student/MyActivitiesPage' },
+  { title: 'บันทึกชั่วโมงอบรม', icon: 'history', link: '/Student/RecordPage' },
+  { title: 'ใบประกาศนียบัตร', icon: 'school', link: '/Student/CertificateTablePage' },
 ]
 
 async function logout() {

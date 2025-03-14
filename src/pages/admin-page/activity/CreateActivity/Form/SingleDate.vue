@@ -1,10 +1,10 @@
 <template>
   <div class="input-group">
     <p class="label label_minWidth">วันที่จัดกิจกรรม :</p>
-    <q-input outlined v-model="formattedDate" style="width: 600px" readonly  :disable="!props.isEditing">
+    <q-input outlined v-model="formattedDate" style="width: 600px" readonly :disable="disable">
       <template v-slot:prepend>
-        <q-icon name="event">
-          <q-menu style="overflow: visible">
+        <q-icon name="event" class="cursor-pointer" :class="{ 'disabled-icon': disable }">
+          <q-menu style="overflow: visible" v-if="!disable">
             <q-date
               v-model="selectedDate"
               mask="YYYY-MM-DD"
@@ -26,10 +26,11 @@
 <script setup lang="ts">
 import { computed, defineProps, defineEmits, ref, watch } from 'vue'
 
-const props = defineProps({
-  modelValue: String,
-  isEditing: Boolean, // รับค่า isEditing จาก parent
-})
+const props = defineProps<{ 
+  modelValue: string;
+  disable?: boolean; // เพิ่ม prop disable
+}>();
+
 
 const emit = defineEmits(['update:modelValue'])
 
@@ -132,5 +133,9 @@ const thaiLocale = {
 
 ::v-deep(.q-icon) {
   font-size: 18px;
+}
+.disabled-icon {
+  opacity: 0.5;
+  pointer-events: none;
 }
 </style>

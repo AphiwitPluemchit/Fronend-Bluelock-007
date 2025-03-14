@@ -19,10 +19,10 @@
     <!-- Food Selection Dialog -->
     <q-dialog v-model="showFoodDialog" persistent>
       <div class="q-pa-md food-dialog">
-        <h3 class="label" style="justify-content: flex-start; margin-left: 20px;">เลือกเมนูอาหาร</h3>
+        <h3 class="label" style="justify-content: flex-start; margin-left: 20px">เลือกเมนูอาหาร</h3>
 
         <!-- Wrapper ครอบปุ่มทั้งหมดและจัดให้อยู่ตรงกลาง -->
-        <div class="food-container" style="margin-left: 20px;">
+        <div class="food-container" style="margin-left: 20px">
           <div class="food-list">
             <q-btn
               v-for="(item, index) in menuItems"
@@ -67,9 +67,19 @@
         </div>
 
         <div class="button-container">
-          <q-btn class="btnsecces" label="บันทึกและยืนยัน" @click="confirmSelection(true)" :disable="disable" />
           <q-btn class="btnreject" label="ยกเลิก" @click="cancelSelection" :disable="disable" />
-          <q-btn class="btnconfirm" label="ยืนยัน" @click="confirmSelection(false)" :disable="disable" />
+          <q-btn
+            class="btnsecces"
+            label="บันทึกและยืนยัน"
+            @click="confirmSelection(true)"
+            :disable="disable"
+          />
+          <q-btn
+            class="btnconfirm"
+            label="ยืนยัน"
+            @click="confirmSelection(false)"
+            :disable="disable"
+          />
         </div>
       </div>
     </q-dialog>
@@ -77,87 +87,117 @@
 </template>
 
 <script setup lang="ts">
-import { ref, defineEmits, defineProps, onMounted, nextTick } from 'vue';
+import { ref, defineEmits, defineProps, onMounted, nextTick } from 'vue'
+import { FoodService } from 'src/services/food' // << เพิ่มตรงนี้
+import type { Food } from 'src/types/food'
 
-const props = defineProps<{ disable?: boolean }>(); // เพิ่ม prop disable
-const emit = defineEmits<{ (event: 'update:foodMenu', value: string): void }>();
+const props = defineProps<{ disable?: boolean }>() // เพิ่ม prop disable
+const emit = defineEmits<{
+  (event: 'update:foodMenu', value: Food[]): void
+}>()
 
-const showFoodDialog = ref(false);
-const selectedFoods = ref<string[]>([]);
-const foodMenu = ref('');
-const addingNewFood = ref(false);
-const newFoodName = ref('');
-const inputField = ref<HTMLInputElement | null>(null);
-const menuItems = ref([
-  'ผัดกะเพราหมู',
-  'ผัดกะเพราไก่',
-  'หมูกระเทียม',
-  'ไก่กระเทียม',
-  'ผัดพริกแกงหมู',
-  'ผัดพริกแกงไก่',
-  'ผัดพริกอ่อนหมู',
-  'ผัดพริกอ่อนไก่',
-  'ข้าวหมูทอด',
-  'ข้าวไก่ทอด',
-]);
+
+const showFoodDialog = ref(false)
+const selectedFoods = ref<string[]>([])
+const foodMenu = ref('')
+const addingNewFood = ref(false)
+const newFoodName = ref('')
+const inputField = ref<HTMLInputElement | null>(null)
+const menuItems = ref<string[]>([])
 
 const openFoodDialog = () => {
   if (!props.disable) {
-    showFoodDialog.value = true;
+    showFoodDialog.value = true
   }
-};
+}
 
 const toggleSelection = (item: string) => {
-  if (props.disable) return;
+  if (props.disable) return
   if (selectedFoods.value.includes(item)) {
-    selectedFoods.value = selectedFoods.value.filter((food) => food !== item);
+    selectedFoods.value = selectedFoods.value.filter((food) => food !== item)
   } else {
-    selectedFoods.value.push(item);
+    selectedFoods.value.push(item)
   }
-};
+}
 
-const confirmSelection = (saveToLocal: boolean = false) => {
-  if (props.disable) return;
-  foodMenu.value = selectedFoods.value.join(', ');
-  emit('update:foodMenu', foodMenu.value);
+const confirmSelection = async (saveToBackend: boolean = false) => {
+  if (props.disable) return
 
-  if (saveToLocal) {
-    localStorage.setItem('menuItems', JSON.stringify(menuItems.value));
+  foodMenu.value = selectedFoods.value.join(', ')
+
+  // แปลง selectedFoods (string[]) → Food[]
+  const selectedFoodObjects: Food[] = selectedFoods.value.map((name) => {
+    const id = menuItemsIdMap.value[name] || '' // หา id จาก name หรือเว้นไว้
+    return { id, name }
+  })
+
+  emit('update:foodMenu', selectedFoodObjects)
+
+  if (saveToBackend) {
+    try {
+      await FoodService.createAll(menuItems.value.map((name) => ({ id: '', name })))
+      console.log('บันทึกเมนูไปยัง backend แล้ว')
+    } catch (error) {
+      console.error('บันทึกข้อมูลไม่สำเร็จ:', error)
+    }
   }
 
-  showFoodDialog.value = false;
-};
+  showFoodDialog.value = false
+  localStorage.clear()
+}
+const menuItemsIdMap = ref<Record<string, string>>({})
+
+onMounted(async () => {
+  try {
+    const foods: Food[] = await FoodService.getAll()
+    menuItems.value = foods.map((food) => food.name)
+
+    // ✅ map name → id
+    menuItemsIdMap.value = Object.fromEntries(foods.map((f) => [f.name, f.id]))
+
+    const storedMenuItems = localStorage.getItem('menuItems')
+    if (storedMenuItems) {
+      const localItems = JSON.parse(storedMenuItems)
+      menuItems.value = Array.from(new Set([...menuItems.value, ...localItems]))
+    }
+  } catch (error) {
+    console.error('โหลดรายการอาหารล้มเหลว', error)
+  }
+})
+
 
 const cancelSelection = () => {
-  if (props.disable) return;
-  selectedFoods.value = [];
-  showFoodDialog.value = false;
-};
+  if (props.disable) return
+  selectedFoods.value = []
+  showFoodDialog.value = false
+}
 
 const startEditing = () => {
-  if (props.disable) return;
-  addingNewFood.value = true;
+  if (props.disable) return
+  addingNewFood.value = true
   void nextTick(() => {
-    inputField.value?.focus();
-  });
-};
+    inputField.value?.focus()
+  })
+}
 
 const addFood = () => {
-  if (props.disable) return;
-  if (newFoodName.value.trim() !== '') {
-    menuItems.value.push(newFoodName.value.trim());
-    localStorage.setItem('menuItems', JSON.stringify(menuItems.value));
-  }
-  newFoodName.value = '';
-  addingNewFood.value = false;
-};
+  if (props.disable) return
+  const newName = newFoodName.value.trim()
 
-onMounted(() => {
-  const storedMenuItems = localStorage.getItem('menuItems');
-  if (storedMenuItems) {
-    menuItems.value = JSON.parse(storedMenuItems);
+  // เช็คว่ามีชื่อซ้ำหรือไม่ (ไม่ต้องสนใจตัวพิมพ์เล็ก/ใหญ่)
+  const isDuplicate = menuItems.value.some(
+    existing => existing.toLowerCase() === newName.toLowerCase()
+  )
+
+  if (newName !== '' && !isDuplicate) {
+    menuItems.value.push(newName)
+    localStorage.setItem('menuItems', JSON.stringify(menuItems.value))
   }
-});
+
+  newFoodName.value = ''
+  addingNewFood.value = false
+}
+
 </script>
 
 <style scoped>

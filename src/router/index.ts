@@ -1,13 +1,14 @@
-import { defineRouter } from '#q-app/wrappers'
+import { route } from 'quasar/wrappers'
 import {
   createMemoryHistory,
+  createRouter,
   createWebHashHistory,
   createWebHistory,
-  createRouter,
 } from 'vue-router'
 import routes from './routes'
+import { useAuthStore } from 'src/stores/auth'
 
-export default defineRouter(function (/* { store, ssrContext } */) {
+export default route(function () {
   const createHistory = process.env.SERVER
     ? createMemoryHistory
     : process.env.VUE_ROUTER_MODE === 'history'
@@ -15,21 +16,32 @@ export default defineRouter(function (/* { store, ssrContext } */) {
       : createWebHashHistory
 
   const Router = createRouter({
-    history: createHistory(process.env.VUE_ROUTER_BASE),
-    routes,
     scrollBehavior: () => ({ left: 0, top: 0 }),
+    routes,
+    history: createHistory(process.env.VUE_ROUTER_BASE),
   })
 
-  // การใช้ router guard เพื่อตรวจสอบสถานะการล็อกอิน
   Router.beforeEach((to, from, next) => {
-    const isLoggedIn = localStorage.getItem('user-token') !== null // เช็ค token ว่าผู้ใช้ล็อกอินหรือยัง
+    const auth = useAuthStore()
+    auth.loadUserFromLocalStorage()
+    const userRole = auth.getRole
 
-    // ถ้าหน้านั้นต้องการการล็อกอิน และผู้ใช้ไม่ได้ล็อกอิน
-    if (to.meta.requiresAuth && !isLoggedIn) {
-      next({ name: 'Login' }) // ไปที่หน้า Login
-    } else {
-      next() // ไปยังหน้าที่ต้องการ
+    const isPublic = to.meta.public || false
+    const requiredRole = to.meta.role
+
+    if (isPublic) {
+      return next()
     }
+
+    if (!userRole && !isPublic) {
+      return next('/') // redirect to login
+    }
+
+    if (requiredRole && requiredRole !== userRole) {
+      return next('/') // redirect if role mismatch
+    }
+
+    return next()
   })
 
   return Router

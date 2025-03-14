@@ -1,25 +1,29 @@
 import { api } from 'boot/axios'
+import type { Pagination, PaginationResponse } from 'src/types/pagination'
 import type { Student } from 'src/types/student'
 
 export class StudentService {
   static path = '/students'
 
-  static async getAll() {
+  static async getAll(params: Pagination, status?: string) {
+    // ✅ รวม `status` เข้าไปใน Query
+    const queryParams = { ...params, status }
     try {
-      const res = await api.get(this.path)
+      const res = await api.get<PaginationResponse<Student>>(this.path, { params: queryParams })
+
       return res.data
     } catch (error) {
-      console.error('Error fetching activities:', error)
+      console.error('Error fetching students:', error)
       throw error
     }
   }
 
-  static async getOne(id: string) {
+  static async getOne(code: string) {
     try {
-      const res = await api.get(`${this.path}/${id}`)
+      const res = await api.get(`${this.path}/${code}`)
       return res.data
     } catch (error) {
-      console.error(`Error fetching student ID: ${id}`, error)
+      console.error(`Error fetching student ID: ${code}`, error)
       throw error
     }
   }
