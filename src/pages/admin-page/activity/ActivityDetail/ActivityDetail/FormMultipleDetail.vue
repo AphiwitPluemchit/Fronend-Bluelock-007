@@ -69,7 +69,7 @@
           :disable="!isEditing"
         />
       </div>
-      <RoomSelector v-model="selectedRooms" class="input-group" :disable="!isEditing" />
+      <RoomSelector v-model="roomName" class="input-group" :disable="!isEditing" />
 
       <!-- Room and Seats -->
       <div class="input-group">
@@ -185,7 +185,7 @@ const hour = ref<number>(0)
 const minute = ref<number>(0)
 const endHour = ref<number>(0)
 const endMinute = ref<number>(0)
-const selectedRooms = ref('')
+const roomName = ref<string[]>([])
 // ฟังก์ชันสำหรับฟอร์แมตเวลาเป็นสตริง
 const formatTime = (h: number, m: number): string => {
   return `${formatHour(h)}:${formatMinute(m)}`

@@ -92,7 +92,10 @@ import { FoodService } from 'src/services/food' // << เพิ่มตรง�
 import type { Food } from 'src/types/food'
 
 const props = defineProps<{ disable?: boolean }>() // เพิ่ม prop disable
-const emit = defineEmits<{ (event: 'update:foodMenu', value: string): void }>()
+const emit = defineEmits<{
+  (event: 'update:foodMenu', value: Food[]): void
+}>()
+
 
 const showFoodDialog = ref(false)
 const selectedFoods = ref<string[]>([])
@@ -121,7 +124,14 @@ const confirmSelection = async (saveToBackend: boolean = false) => {
   if (props.disable) return
 
   foodMenu.value = selectedFoods.value.join(', ')
-  emit('update:foodMenu', foodMenu.value)
+
+  // แปลง selectedFoods (string[]) → Food[]
+  const selectedFoodObjects: Food[] = selectedFoods.value.map((name) => {
+    const id = menuItemsIdMap.value[name] || '' // หา id จาก name หรือเว้นไว้
+    return { id, name }
+  })
+
+  emit('update:foodMenu', selectedFoodObjects)
 
   if (saveToBackend) {
     try {
@@ -135,6 +145,26 @@ const confirmSelection = async (saveToBackend: boolean = false) => {
   showFoodDialog.value = false
   localStorage.clear()
 }
+const menuItemsIdMap = ref<Record<string, string>>({})
+
+onMounted(async () => {
+  try {
+    const foods: Food[] = await FoodService.getAll()
+    menuItems.value = foods.map((food) => food.name)
+
+    // ✅ map name → id
+    menuItemsIdMap.value = Object.fromEntries(foods.map((f) => [f.name, f.id]))
+
+    const storedMenuItems = localStorage.getItem('menuItems')
+    if (storedMenuItems) {
+      const localItems = JSON.parse(storedMenuItems)
+      menuItems.value = Array.from(new Set([...menuItems.value, ...localItems]))
+    }
+  } catch (error) {
+    console.error('โหลดรายการอาหารล้มเหลว', error)
+  }
+})
+
 
 const cancelSelection = () => {
   if (props.disable) return
@@ -168,20 +198,6 @@ const addFood = () => {
   addingNewFood.value = false
 }
 
-onMounted(async () => {
-  try {
-    const foods: Food[] = await FoodService.getAll()
-    menuItems.value = foods.map((food) => food.name)
-    const storedMenuItems = localStorage.getItem('menuItems')
-    if (storedMenuItems) {
-      const localItems = JSON.parse(storedMenuItems)
-      // รวมเมนู local และ backend โดยไม่ซ้ำกัน
-      menuItems.value = Array.from(new Set([...menuItems.value, ...localItems]))
-    }
-  } catch (error) {
-    console.error('โหลดรายการอาหารล้มเหลว', error)
-  }
-})
 </script>
 
 <style scoped>

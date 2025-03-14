@@ -40,7 +40,7 @@
     </div>
 
     <!-- Room -->
-    <Room v-model="roomName" class="input-group" />
+    <Room v-model="selectedRoom" class="input-group" />
 
     <!--Hours  & Seats -->
     <div class="flex-container">
@@ -92,6 +92,7 @@ import FoodSelector from 'src/pages/admin-page/activity/CreateActivity/Form/Food
 import Room from 'src/pages/admin-page/activity/CreateActivity/Form/RoomSelector.vue'
 import { ActivityService } from 'src/services/activity'
 import { useRouter } from 'vue-router'
+import type { Food } from 'src/types/food'
 
 const router = useRouter()
 
@@ -116,14 +117,14 @@ const totalHours = ref<number>(0)
 const seats = ref<number>(0)
 const activityDateRange = ref<string[]>([])
 const activityName = ref('')
-const roomName = ref('')
+const selectedRoom = ref<string[]>([])
 const activityType = ref('')
 const lecturer = ref('')
 const detailActivity = ref('')
 const departments = ref<string[]>([])
 const years = ref<string[]>([])
 const activityDateRangeInternal = ref<string[]>([])
-const foodMenu = ref('')
+const foodMenu = ref<Food[]>([])
 const menuItems = ref([
   'ผัดกะเพราหมู',
   'ผัดกะเพราไก่',
@@ -274,43 +275,50 @@ onMounted(() => {
 })
 
 const submitActivity = async () => {
+  const skill = activityType.value === 'prep' ? 'hard' : 'soft'
   const majorMap: Record<string, { id: string; name: string }> = {
     cs: { id: '67bf0c358873e448798fed37', name: 'CS' },
     se: { id: '67bf0bdf8873e448798fed36', name: 'SE' },
     itdi: { id: '67bf0bda8873e448798fed35', name: 'ITDI' },
     aai: { id: '67bf0bd48873e448798fed34', name: 'AAI' },
   }
-
-  const skill = activityType.value === 'prep' ? 'hard' : 'soft'
-
-  const majors = departments.value
-    .map((dep) => majorMap[dep])
-    .filter((m): m is { id: string; name: string } => m !== undefined)
+  const majorNames = departments.value
+    .map((dep) => majorMap[dep]?.name)
+    .filter((name): name is string => !!name)
+  const parsedHour = Number(totalHours.value)
+  const parsedSeats = Number(seats.value)
+  const foodVotes = foodMenu.value.map(() => ({
+    activityId: '',
+    foodName : '',
+    id: '',
+    vote: 0,
+  }))
 
   const payload = {
-    name: activityName.value,
-    activityState: 'planning',
     type: 'one',
+    activityState: 'planning',
+    name: activityName.value,
     skill,
-    studentYears: years.value.map((y) => parseInt(y, 10)),
-    majors,
+    foodVotes,
     activityItems: [
       {
         name: activityName.value,
-        description: detailActivity.value,
-        hour: totalHours.value,
-        maxParticipants:seats.value,
-        operator: lecturer.value,
-        room: roomName.value,
+        hour: isNaN(parsedHour) ? null : parsedHour,
+        maxParticipants: isNaN(parsedSeats) ? null : parsedSeats,
+        rooms: selectedRoom.value,
         dates: selectedDays.value.map((day) => ({
           date: day.date,
           stime: day.startTime,
           etime: day.endTime,
         })),
+        studentYears: years.value.map((y) => parseInt(y, 10)),
+        majors: majorNames,
+        operator: lecturer.value,
+        description: detailActivity.value,
       },
     ],
   }
-
+  console.log('🚀 roomName.value ก่อนส่ง:', selectedRoom.value)
   try {
     await ActivityService.createOne(payload)
     alert('✅ สร้างกิจกรรมสำเร็จ')
@@ -318,11 +326,11 @@ const submitActivity = async () => {
   } catch (error) {
     console.error(error)
     alert('❌ เกิดข้อผิดพลาดในการสร้างกิจกรรม')
+    console.log(payload)
   }
-  }
-
+}
 const isSidebarOpen = ref(false)
-
+watch(selectedRoom, (val) => console.log('✅ ห้องที่เลือก:', val))
 watch(isSidebarOpen, (newVal) => {
   document.documentElement.style.setProperty('--sidebar-width', newVal ? '250px' : '0px')
 })

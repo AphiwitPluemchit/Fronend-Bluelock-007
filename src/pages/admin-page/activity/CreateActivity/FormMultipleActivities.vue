@@ -24,7 +24,8 @@
         :formattedDate="formattedThaiDate"
       />
     </div>
-
+    <!-- Activity Type -->
+    <ActivityType v-model="activityType" class="input-group" />
     <HoursSelector v-model="totalHours" class="input-group" />
     <FoodSelector v-model:foodMenu="foodMenu" class="input-group" />
 
@@ -62,8 +63,6 @@
         />
       </div>
 
-      <!-- Activity Type -->
-      <ActivityType v-model="subActivity.activityType" class="input-group" />
       <!-- Department -->
       <DepartmentSelector v-model="subActivity.departments" class="input-group" />
       <!-- Year -->
@@ -116,6 +115,7 @@ import DepartmentSelector from 'src/pages/admin-page/activity/CreateActivity/For
 import ActivityType from 'src/pages/admin-page/activity/CreateActivity/Form/ActivityType.vue'
 import { ActivityService } from 'src/services/activity'
 import { useRouter } from 'vue-router'
+import type { Food } from 'src/types/food'
 
 const router = useRouter()
 
@@ -126,9 +126,8 @@ const goToActivitiesManagement = async () => {
 }
 interface SubActivity {
   subActivityName: string
-  roomName: string
+  roomName: string[]
   seats: number
-  activityType: string
   lecturer: string
   detailActivity: string
   departments: string[]
@@ -138,18 +137,18 @@ interface SubActivity {
 const addSubActivity = () => {
   subActivities.value.push({
     subActivityName: '',
-    roomName: '',
+    roomName: [],
     seats: 0,
-    activityType: '',
     lecturer: '',
     detailActivity: '',
     departments: [],
     years: [],
   })
 }
+const activityType = ref('')
 const activityName = ref('')
-const totalHours = ref<number>(0)
-const foodMenu = ref('')
+const totalHours = ref(0)
+const foodMenu = ref<Food[]>([])
 const subActivities = ref<SubActivity[]>([])
 const activityDateInternal = ref('')
 const endTime = ref<string>('00:00')
@@ -224,6 +223,7 @@ const thaiLocale = {
     'ธันวาคม',
   ],
 }
+
 const validatePositive = (field: 'totalHours' | 'seats', index?: number) => {
   if (field === 'totalHours') {
     if (!totalHours.value || totalHours.value < 0) {
@@ -240,20 +240,23 @@ const removeSubActivity = (index: number) => {
   subActivities.value.splice(index, 1)
 }
 const submitActivity = async () => {
-  const majorMap: Record<string, { id: string; name: string }> = {
-    cs: { id: '67bf0c358873e448798fed37', name: 'CS' },
-    se: { id: '67bf0bdf8873e448798fed36', name: 'SE' },
-    itdi: { id: '67bf0bda8873e448798fed35', name: 'ITDI' },
-    aai: { id: '67bf0bd48873e448798fed34', name: 'AAI' },
+  const majorMap: Record<string, string> = {
+    cs: 'CS',
+    se: 'SE',
+    itdi: 'ITDI',
+    aai: 'AAI',
   }
+  const skill = activityType.value === 'prep' ? 'hard' : 'soft'
 
   const activityItems = subActivities.value.map((sub) => {
+    const majorNames = sub.departments
+      .map((dep) => majorMap[dep])
+      .filter((name): name is string => !!name)
+
     return {
       name: sub.subActivityName,
-      description: sub.detailActivity,
       hour: totalHours.value,
       maxParticipants: sub.seats,
-      operator: sub.lecturer,
       room: sub.roomName,
       dates: [
         {
@@ -262,31 +265,38 @@ const submitActivity = async () => {
           etime: endTime.value,
         },
       ],
-      majors: sub.departments
-        .map((dep) => majorMap[dep])
-        .filter((m): m is { id: string; name: string } => m !== undefined),
       studentYears: sub.years.map((y) => parseInt(y, 10)),
-      skill: sub.activityType === 'prep' ? 'hard' : 'soft',
+      majors: majorNames,
+      operator: sub.lecturer,
+      description: sub.detailActivity,
     }
   })
+  const foodVotes = foodMenu.value.map((food) => ({
+    activityId: '',
+    foodId: food.id,
+    food,
+    id: '',
+    vote: 0,
+  }))
 
   const payload = {
+    type: 'many',
     name: activityName.value,
     activityState: 'planning',
-    type: 'multiple',
-    foodMenu: foodMenu.value,
+    skill,
+    Foods: foodMenu.value,
+    foodVotes,
     activityItems,
   }
 
   try {
     await ActivityService.createOne(payload)
-    alert('✅ สร้างกิจกรรมหลายรายการสำเร็จ')
+    alert('✅ สร้างกิจกรรมสำเร็จ')
     await router.push('/ActivitiesManagement')
   } catch (error) {
     console.error(error)
     alert('❌ เกิดข้อผิดพลาดในการสร้างกิจกรรม')
-    console.error('❌ สร้างกิจกรรมล้มเหลว:', error)
-    console.log('📤 Payload:', JSON.stringify(payload, null, 2))
+    console.log(payload)
   }
 }
 </script>

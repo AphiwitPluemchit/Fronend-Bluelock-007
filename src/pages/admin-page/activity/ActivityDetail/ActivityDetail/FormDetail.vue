@@ -59,7 +59,7 @@
     </div>
 
     <!-- Room -->
-    <RoomSelector v-model="selectedRooms" class="input-group" :disable="!isEditing" />
+    <RoomSelector v-model="roomName" class="input-group" :disable="!isEditing" />
     <!-- Hours & Seats -->
     <div class="flex-container">
       <HoursSelector v-model="totalHours" class="input-group" :disable="!isEditing" />
@@ -138,7 +138,6 @@ const totalHours = ref<number>(0)
 const seats = ref<number>(0)
 const activityDateRange = ref<string[]>([])
 const activityName = ref('')
-const roomName = ref('')
 const activityType = ref('')
 const lecturer = ref('')
 const detailActivity = ref('')
@@ -146,7 +145,7 @@ const departments = ref<string[]>([])
 const years = ref<string[]>([])
 const activityDateRangeInternal = ref<string[]>([])
 const foodMenu = ref('')
-const selectedRooms = ref('')
+const roomName = ref<string[]>([]) 
 const activityStatus = ref('กำลังวางแผน') // ค่าปัจจุบันของสถานะ
 const handleStatusChange = (newStatus: string) => {
   activityStatus.value = newStatus
