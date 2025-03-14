@@ -9,6 +9,7 @@
       @keypress="isNumber($event)"
       @blur="validatePositive"
       :disable="disable" 
+      :rules="[val => val >= 0 || 'กรุณากรอกชั่วโมงให้ถูกต้อง']"
     />
   </div>
 </template>
@@ -17,11 +18,11 @@
 import { defineProps, defineEmits, ref, watch } from 'vue';
 
 const props = defineProps<{ 
-  modelValue: string;
+  modelValue: number;
   disable?: boolean; // เพิ่ม prop disable
 }>();
 
-const emit = defineEmits<{ (event: 'update:modelValue', value: string): void }>();
+const emit = defineEmits<{ (event: 'update:modelValue', value: number): void }>();
 
 const localHours = ref(props.modelValue);
 
@@ -37,10 +38,10 @@ const isNumber = (event: KeyboardEvent) => {
 };
 
 const validatePositive = () => {
-  if (parseInt(localHours.value) < 0 || localHours.value === '') {
-    localHours.value = '0';
+  if (isNaN(localHours.value) || localHours.value < 0) {
+    localHours.value = 0
   }
-};
+}
 </script>
 
 <style scoped>
