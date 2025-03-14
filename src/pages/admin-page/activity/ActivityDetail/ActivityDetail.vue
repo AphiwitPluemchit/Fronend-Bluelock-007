@@ -3,19 +3,19 @@ import { computed, ref } from 'vue'
 import ActivityDetailTab from './ActivityDetailTab.vue'
 import StudentList from './StudentList.vue'
 import RegistrationDetails from './RegistrationDetails.vue'
-import { useRouter } from 'vue-router'
 import SummaryResult from './SummaryResult.vue'
+import AppBreadcrumbs from 'src/components/AppBreadcrumbs.vue'
 
 // import { route } from 'quasar/wrappers';
 
 const tab = ref<string>('activity')
 const search = ref<string>('')
 
-const router = useRouter()
+// const router = useRouter()
 
-const goToActivitiesManagement = async () => {
-  await router.push('/ActivitiesManagement')
-}
+// const goToActivitiesManagement = async () => {
+//   await router.push('/ActivitiesManagement')
+// }
 
 // Breadcrumb ตามแท็บที่เลือก
 const currentBreadcrumb = computed(() => {
@@ -26,58 +26,18 @@ const currentBreadcrumb = computed(() => {
   return 'รายละเอียดกิจกรรม' // ค่าเริ่มต้น
 })
 
-// กำหนด breadcrumb ตาม route ปัจจุบัน
-// const currentBreadcrumb = computed(() => {
-//   switch (route.name) {
-//     case "activity":
-//       return "รายละเอียดกิจกรรม";
-//     case "registration":
-//       return "รายละเอียดการลงทะเบียน";
-//     case "students":
-//       return "รายชื่อนิสิต";
-//     case "summary":
-//       return "สรุปผลกิจกรรม";
-//     default:
-//       return "จัดการกิจกรรม";
-//   }
-// });
+const breadcrumbs = computed(() => ({
+  previousPage: { title: 'จัดการกิจกรรม', path: '/ActivitiesManagement' },
+  currentPage: { title: currentBreadcrumb.value, path: '/ActivitiesManagement/ActivityDetail' },
+  icon: 'description',
+}))
 
 </script>
 
 <template>
   <q-page class="q-pa-md">
-    <q-breadcrumbs class="q-mb-md breadcrumbs-custom" separator="">
-      <q-breadcrumbs-el>
-        <img
-          src="src/pages/admin-page/activity/icon pics/compose.png"
-          alt="icon"
-          width="18"
-          height="18"
-          class="q-mr-sm"
-        />
-        <a
-          @click="goToActivitiesManagement"
-          style="cursor: pointer; text-decoration: none; color: black"
-        >
-          จัดการกิจกรรม
-        </a>
-      </q-breadcrumbs-el>
 
-      <q-breadcrumbs-separator>
-        <q-icon name="chevron_right" size="18px" color="black" />
-      </q-breadcrumbs-separator>
-
-      <!-- ทำให้ breadcrumb เปลี่ยนตาม tab ที่เลือก -->
-      <q-breadcrumbs-el :label="currentBreadcrumb" :class="{ 'active-breadcrumb': true }" />
-    </q-breadcrumbs>
-
-    <!-- หัวข้อแสดงอยู่ข้างบน-->
-    <div class="q-mb-md text-left text-h6 page-title">
-      <span v-if="tab === 'students'">รายชื่อนิสิต</span>
-      <span v-else-if="tab === 'activity'">รายละเอียดกิจกรรม</span>
-      <span v-else-if="tab === 'registration'">รายละเอียดการลงทะเบียน</span>
-      <span v-else-if="tab === 'summary'">สรุปผลกิจกรรม</span>
-    </div>
+    <AppBreadcrumbs :breadcrumbs="breadcrumbs" />
 
     <!-- Tabs -->
     <q-tabs v-model="tab" align="right" class="custom-tabs" indicator-color="transparent">
@@ -87,21 +47,21 @@ const currentBreadcrumb = computed(() => {
       <q-tab name="summary" label="สรุปผลกิจกรรม" />
     </q-tabs>
 
+    <!-- Tab Panels -->
     <q-tab-panels v-model="tab" animated class="custom-panels">
-      <q-tab-panel name="activity">
-        <ActivityDetailTab></ActivityDetailTab>
-        <div class="text-center text-h6"></div>
+      <q-tab-panel name="activity" class="q-my-md">
+        <ActivityDetailTab />
       </q-tab-panel>
 
-      <q-tab-panel name="registration">
+      <q-tab-panel name="registration" class="q-my-md">
         <RegistrationDetails />
       </q-tab-panel>
 
-      <q-tab-panel name="students">
+      <q-tab-panel name="students" class="q-my-md">
         <StudentList :search="search" />
       </q-tab-panel>
 
-      <q-tab-panel name="summary">
+      <q-tab-panel name="summary" class="q-my-md">
         <SummaryResult />
       </q-tab-panel>
     </q-tab-panels>
@@ -113,17 +73,13 @@ const currentBreadcrumb = computed(() => {
   color: black !important;
 }
 
-.page-title {
-  font-weight: bold !important;
-}
-
 .active-breadcrumb {
   text-decoration: underline;
   color: black;
 }
 
 .q-tabs {
-  max-width: 98%;
+  max-width: 100%;
   margin-left: 20px;
 }
 
@@ -139,6 +95,8 @@ const currentBreadcrumb = computed(() => {
 }
 
 .custom-panels {
+  max-width: 1600px;
+  margin: auto;
   background-color: #EDF0F5;
   border-radius: 12px;
   max-height: 680px;
