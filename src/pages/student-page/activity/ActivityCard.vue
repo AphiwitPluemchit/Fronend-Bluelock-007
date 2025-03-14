@@ -34,7 +34,7 @@
             dense
             unelevated
             class="detail-btn"
-            :to="`/StudentActivityDetail/${activity.id}`"
+            :to="`/Student/Activity/ActivityDetail/${activity.id}`"
           />
         </div>
       </div>
