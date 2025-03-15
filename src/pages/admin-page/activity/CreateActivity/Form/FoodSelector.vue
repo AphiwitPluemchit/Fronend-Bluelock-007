@@ -3,7 +3,13 @@
     <!-- Food Menu Input -->
     <div class="input-group">
       <p class="label label_minWidth">รายการอาหาร :</p>
-      <q-input outlined v-model="foodMenu" class="food-input" readonly :disable="disable">
+      <q-input
+        outlined
+        v-model="foodMenuDisplay"
+        class="food-input"
+        readonly
+        :disable="disable"
+      >
         <template v-slot:prepend>
           <q-icon
             name="restaurant_menu"
@@ -19,9 +25,10 @@
     <!-- Food Selection Dialog -->
     <q-dialog v-model="showFoodDialog" persistent>
       <div class="q-pa-md food-dialog">
-        <h3 class="label" style="justify-content: flex-start; margin-left: 20px">เลือกเมนูอาหาร</h3>
+        <h3 class="label" style="justify-content: flex-start; margin-left: 20px">
+          เลือกเมนูอาหาร
+        </h3>
 
-        <!-- Wrapper ครอบปุ่มทั้งหมดและจัดให้อยู่ตรงกลาง -->
         <div class="food-container" style="margin-left: 20px">
           <div class="food-list">
             <q-btn
@@ -88,22 +95,23 @@
 
 <script setup lang="ts">
 import { ref, defineEmits, defineProps, onMounted, nextTick } from 'vue'
-import { FoodService } from 'src/services/food' // << เพิ่มตรงนี้
+import { FoodService } from 'src/services/food'
 import type { Food } from 'src/types/food'
 
-const props = defineProps<{ disable?: boolean }>() // เพิ่ม prop disable
+const props = defineProps<{ disable?: boolean }>()
 const emit = defineEmits<{
   (event: 'update:foodMenu', value: Food[]): void
+  (event: 'update:foodMenuDisplay', value: string): void
 }>()
-
 
 const showFoodDialog = ref(false)
 const selectedFoods = ref<string[]>([])
-const foodMenu = ref('')
+const foodMenuDisplay = ref('') // ✅ สำหรับ q-input
 const addingNewFood = ref(false)
 const newFoodName = ref('')
 const inputField = ref<HTMLInputElement | null>(null)
 const menuItems = ref<string[]>([])
+const menuItemsIdMap = ref<Record<string, string>>({})
 
 const openFoodDialog = () => {
   if (!props.disable) {
@@ -123,16 +131,15 @@ const toggleSelection = (item: string) => {
 const confirmSelection = async (saveToBackend: boolean = false) => {
   if (props.disable) return
 
-  foodMenu.value = selectedFoods.value.join(', ')
+  foodMenuDisplay.value = selectedFoods.value.join(', ')
+  emit('update:foodMenuDisplay', foodMenuDisplay.value)
 
-  // แปลง selectedFoods (string[]) → Food[]
   const selectedFoodObjects: Food[] = selectedFoods.value.map((name) => {
-    const id = menuItemsIdMap.value[name] || '' // หา id จาก name หรือเว้นไว้
+    const id = menuItemsIdMap.value[name] || ''
     return { id, name }
   })
-
+  console.log('✅ emit update:foodMenu:', selectedFoodObjects)
   emit('update:foodMenu', selectedFoodObjects)
-
   if (saveToBackend) {
     try {
       await FoodService.createAll(menuItems.value.map((name) => ({ id: '', name })))
@@ -142,29 +149,10 @@ const confirmSelection = async (saveToBackend: boolean = false) => {
     }
   }
 
+  
   showFoodDialog.value = false
   localStorage.clear()
 }
-const menuItemsIdMap = ref<Record<string, string>>({})
-
-onMounted(async () => {
-  try {
-    const foods: Food[] = await FoodService.getAll()
-    menuItems.value = foods.map((food) => food.name)
-
-    // ✅ map name → id
-    menuItemsIdMap.value = Object.fromEntries(foods.map((f) => [f.name, f.id]))
-
-    const storedMenuItems = localStorage.getItem('menuItems')
-    if (storedMenuItems) {
-      const localItems = JSON.parse(storedMenuItems)
-      menuItems.value = Array.from(new Set([...menuItems.value, ...localItems]))
-    }
-  } catch (error) {
-    console.error('โหลดรายการอาหารล้มเหลว', error)
-  }
-})
-
 
 const cancelSelection = () => {
   if (props.disable) return
@@ -184,7 +172,6 @@ const addFood = () => {
   if (props.disable) return
   const newName = newFoodName.value.trim()
 
-  // เช็คว่ามีชื่อซ้ำหรือไม่ (ไม่ต้องสนใจตัวพิมพ์เล็ก/ใหญ่)
   const isDuplicate = menuItems.value.some(
     existing => existing.toLowerCase() === newName.toLowerCase()
   )
@@ -198,6 +185,21 @@ const addFood = () => {
   addingNewFood.value = false
 }
 
+onMounted(async () => {
+  try {
+    const foods: Food[] = await FoodService.getAll()
+    menuItems.value = foods.map((food) => food.name)
+    menuItemsIdMap.value = Object.fromEntries(foods.map((f) => [f.name, f.id]))
+
+    const storedMenuItems = localStorage.getItem('menuItems')
+    if (storedMenuItems) {
+      const localItems = JSON.parse(storedMenuItems)
+      menuItems.value = Array.from(new Set([...menuItems.value, ...localItems]))
+    }
+  } catch (error) {
+    console.error('โหลดรายการอาหารล้มเหลว', error)
+  }
+})
 </script>
 
 <style scoped>

@@ -126,7 +126,7 @@ const formatMinute = (minute: number): string => minute.toString().padStart(2, '
 
 // ✅ ปรับค่าเวลาเมื่อกดปุ่มเพิ่ม/ลด
 const adjustHour = (timeType: 'start' | 'end', direction: 'increase' | 'decrease'): void => {
-  if (props.disable) return; // ปิดการแก้ไขเมื่อ disable เป็น true
+  if (props.disable) return; 
   if (timeType === 'start') {
     startHour.value = direction === 'increase' ? (startHour.value + 1) % 24 : (startHour.value - 1 + 24) % 24;
   } else {
@@ -135,7 +135,7 @@ const adjustHour = (timeType: 'start' | 'end', direction: 'increase' | 'decrease
 };
 
 const adjustMinute = (timeType: 'start' | 'end', direction: 'increase' | 'decrease'): void => {
-  if (props.disable) return; // ปิดการแก้ไขเมื่อ disable เป็น true
+  if (props.disable) return; 
   if (timeType === 'start') {
     startMinute.value = direction === 'increase' ? (startMinute.value + 1) % 60 : (startMinute.value - 1 + 60) % 60;
   } else {

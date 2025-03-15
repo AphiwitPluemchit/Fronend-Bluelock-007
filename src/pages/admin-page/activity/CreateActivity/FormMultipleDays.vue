@@ -64,7 +64,11 @@
     </div>
 
     <!-- Food Menu -->
-    <FoodSelector v-model:foodMenu="foodMenu" class="input-group" />
+    <FoodSelector
+      v-model:foodMenu="foodMenu"
+      v-model:foodMenuDisplay="foodMenuDisplay"
+      class="input-group"
+    />
 
     <!-- Detail Activity -->
     <div class="input-group">
@@ -125,6 +129,7 @@ const departments = ref<string[]>([])
 const years = ref<string[]>([])
 const activityDateRangeInternal = ref<string[]>([])
 const foodMenu = ref<Food[]>([])
+const foodMenuDisplay = ref<string>('')
 const menuItems = ref([
   'ผัดกะเพราหมู',
   'ผัดกะเพราไก่',
@@ -273,9 +278,18 @@ onMounted(() => {
 
   generateDaysInRange(activityDateRangeInternal.value)
 })
+watch(foodMenu, (newVal) => {
+  console.log('📦 foodMenu ใน component แม่:', newVal)
+})
 
 const submitActivity = async () => {
-  const skill = activityType.value === 'prep' ? 'hard' : 'soft'
+  const skillMap: Record<string, 'hard' | 'soft' | null> = {
+    prep: 'hard',
+    academic: 'soft',
+    '': null,
+  }
+  const skill = skillMap[activityType.value] ?? null
+
   const majorMap: Record<string, { id: string; name: string }> = {
     cs: { id: '67bf0c358873e448798fed37', name: 'CS' },
     se: { id: '67bf0bdf8873e448798fed36', name: 'SE' },
@@ -287,18 +301,16 @@ const submitActivity = async () => {
     .filter((name): name is string => !!name)
   const parsedHour = Number(totalHours.value)
   const parsedSeats = Number(seats.value)
-  const foodVotes = foodMenu.value.map(() => ({
-    activityId: '',
-    foodName : '',
-    id: '',
+  const foodVotes = foodMenu.value.map((food) => ({
     vote: 0,
+    foodName: food.name,
   }))
 
   const payload = {
     type: 'one',
     activityState: 'planning',
     name: activityName.value,
-    skill,
+    skill: skill ?? '',
     foodVotes,
     activityItems: [
       {
@@ -318,8 +330,9 @@ const submitActivity = async () => {
       },
     ],
   }
-  console.log('🚀 roomName.value ก่อนส่ง:', selectedRoom.value)
+  console.log('🧾 foodMenu ก่อน map:', foodMenu.value)
   try {
+    console.log(payload)
     await ActivityService.createOne(payload)
     alert('✅ สร้างกิจกรรมสำเร็จ')
     await router.push('/ActivitiesManagement')
@@ -329,11 +342,6 @@ const submitActivity = async () => {
     console.log(payload)
   }
 }
-const isSidebarOpen = ref(false)
-watch(selectedRoom, (val) => console.log('✅ ห้องที่เลือก:', val))
-watch(isSidebarOpen, (newVal) => {
-  document.documentElement.style.setProperty('--sidebar-width', newVal ? '250px' : '0px')
-})
 </script>
 
 <style scoped>
