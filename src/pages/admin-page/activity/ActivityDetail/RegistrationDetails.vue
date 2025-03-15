@@ -118,18 +118,16 @@ onMounted(async () => {
     align-items: flex-start;
     gap: 120px;
     background-color: #EDF0F5;
-    padding: 30px;
     border-radius: 12px;
     height: 680px;
     overflow: hidden;
-    padding: 45px;
+    margin-left: 60px;
 }
 
 .registration-details {
     flex: 1;
     display: flex;
     flex-direction: column;
-    gap: 30px;
     max-height: 600px;
     overflow-y: auto;
     overflow-x: hidden;

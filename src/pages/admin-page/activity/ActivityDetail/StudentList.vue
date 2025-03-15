@@ -37,13 +37,6 @@ const updateSearch = () => {
   emit('update:search', search1.value)
 }
 
-const pagination = ref({
-  page: 1,
-  rowPerPage: 10,
-  sortBy: 'studentId',
-  descending: false,
-})
-
 const students = ref([
   {
     id: 1,
@@ -198,46 +191,61 @@ const filteredStudents = computed(() => {
 </script>
 
 <template>
-    <div class="q-mb-sm student-container">
-    <div class="student-table-wrapper">
-        <div class="row justify-end items-center">
-            <!-- ช่องค้นหา -->
-            <q-input dense outlined v-model="search1" @update:model-value="updateSearch" placeholder="ค้นหาชื่อนิสิต"
-                class="q-mr-sm searchbox" :style="{ boxShadow: 'none' }">
-                <template v-slot:append>
-                    <q-icon name="search" />
-                </template>
-            </q-input>
+  <div class="q-mb-sm student-container">
+      <div class="student-table-wrapper">
+          <div class="row justify-end items-center">
+              <!-- ช่องค้นหา -->
+              <q-input dense outlined v-model="search1" @update:model-value="updateSearch"
+                  placeholder="ค้นหาชื่อนิสิต" class="q-mr-sm searchbox" :style="{ boxShadow: 'none' }">
+                  <template v-slot:append>
+                      <q-icon name="search" />
+                  </template>
+              </q-input>
 
-            <q-btn class="btnfilter" @click="showFilterDialog1 = true">
-                <img src="icons\sort.svg" alt="Sort Icon" width="30" height="30" />
-                <FilterDialog v-model="showFilterDialog1" :categories="filterCategories1" @apply="applyFilters" />
-            </q-btn>
-        </div>
+              <q-btn class="btnfilter" @click="showFilterDialog1 = true">
+                  <img src="icons\sort.svg" alt="Sort Icon" width="30" height="30" />
+                  <FilterDialog v-model="showFilterDialog1" :categories="filterCategories1" @apply="applyFilters" />
+              </q-btn>
+          </div>
 
-        <q-table flat bordered :rows="filteredStudents" :columns="columns" row-key="id" class="q-mt-md customtable"
-            :pagination="pagination" :rows-per-page-options="[10, 20, 30, 40, 50]">
-            <template v-slot:body-cell-index="props">
-                <q-td :props="props" class="text-center table-text bold-text">
-                    {{ props.rowIndex + 1 }}
-                </q-td>
-            </template>
+          <q-table 
+          flat bordered 
+          :rows="filteredStudents" 
+          :columns="columns" 
+          row-key="id"
+          class="q-mt-md customtable my-sticky-header-table" 
+          :pagination="{ rowsPerPage: 10 }">
 
-            <template v-slot:body-cell-status="props">
-                <q-td :props="props">
-                    <StudentStatus :status="props.row.status" />
-                </q-td>
-            </template>
+              <!-- หัวตาราง Sticky -->
+              <template v-slot:header="props">
+                  <q-tr :props="props">
+                      <q-th v-for="col in props.cols" :key="col.name" :props="props" class="sticky-header">
+                          {{ col.label }}
+                      </q-th>
+                  </q-tr>
+              </template>
 
-            <!-- ปุ่มลบ -->
-            <template v-slot:body-cell-actions="props">
-                <q-td :props="props">
-                    <RemoveStudent :id="props.row.id" @removeStudent="removeStudentFromList" />
-                </q-td>
-            </template>
-        </q-table>
-    </div>
-</div>
+              <template v-slot:body-cell-index="props">
+                  <q-td :props="props" class="text-center table-text bold-text">
+                      {{ props.rowIndex + 1 }}
+                  </q-td>
+              </template>
+
+              <template v-slot:body-cell-status="props">
+                  <q-td :props="props">
+                      <StudentStatus :status="props.row.status" />
+                  </q-td>
+              </template>
+
+              <!-- ปุ่มลบ -->
+              <template v-slot:body-cell-actions="props">
+                  <q-td :props="props">
+                      <RemoveStudent :id="props.row.id" @removeStudent="removeStudentFromList" />
+                  </q-td>
+              </template>
+          </q-table>
+      </div>
+  </div>
 </template>
 
 <style scoped>
@@ -247,23 +255,40 @@ const filteredStudents = computed(() => {
   align-items: flex-start;
   gap: 180px;
   background-color: #EDF0F5;
-  padding: 45px;
-  border-radius: 12px;
   height: 680px;
-  overflow: hidden;
+  width: 100%;
 }
 
 .student-table-wrapper {
-  flex: 1;
+  flex: none;
+  width: 100%;
+  max-width: 100%;
   display: flex;
   flex-direction: column;
   max-height: 600px;
-  overflow-y: auto;
-  overflow-x: hidden;
 }
 
-.student-table-wrapper::-webkit-scrollbar {
-  width: 8px;
-  display: none;
+.q-table {
+  width: 100%;
 }
+
+.my-sticky-header-table {
+  height: 60vh;
+  max-height: 60vh;
+  overflow-y: auto;
+  overflow-x: hidden;
+  scrollbar-width: none;
+}
+
+/* .my-sticky-header-table::-webkit-scrollbar {
+    display: none;
+} */
+
+.sticky-header {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  background-color: #fff;
+}
+
 </style>
