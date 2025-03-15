@@ -1,54 +1,32 @@
 <script setup lang="ts">
-import type { Activity } from 'src/types/activity';
 import { ActivityService } from "src/services/activity";
+import type { EnrollmentSummary } from "src/types/activity";
 import { onMounted, ref } from 'vue';
-import { useRoute } from 'vue-router';
+// import { useRoute } from 'vue-router';
 
-// ดึง activityId จาก URL
-const route = useRoute();
-const activityId = route.params.activityId as string;
+// const route = useRoute();
+// const activityId = route.params.activityId as string;
+
+const activityId = '67cd9fc07f71d9f9edc32cb0'
 
 // โหลดรูปจาก Local Storage (ถ้ามี)
-const savedImageUrl = ref(localStorage.getItem('savedImageUrl') || '');
+const savedImageUrl = ref(localStorage.getItem('savedImageUrl') || '')
 
-// เก็บข้อมูลกิจกรรม
-const activityData = ref<Activity | null>(null);
-const registeredStudents = ref(0);
-const maxParticipants = ref(0);
-const remainingSeats = ref(0);
+const enrollmentSummary = ref<EnrollmentSummary | null>(null)
 
-// รายชื่อนิสิตที่ลงทะเบียน (แยกตามสาขา)
-const studentRegistrations = ref<{ major: string; count: number }[]>([]);
-
-// ผลการเลือกอาหาร
-const foodSelections = ref<{ name: string; count: number }[]>([]);
-
-// ฟังก์ชันโหลดข้อมูลกิจกรรมจาก API
-const fetchActivity = async () => {
+const fetchEnrollmentSummary = async () => {
     try {
-        const response = await ActivityService.getOne(activityId);
-        activityData.value = response;
-
-        maxParticipants.value = response.activityItems?.[0]?.maxParticipants || 0;
-        registeredStudents.value = response.registeredStudents || 0;
-        remainingSeats.value = maxParticipants.value - registeredStudents.value;
-
-        // โหลดข้อมูลนิสิตแยกตามสาขา
-        studentRegistrations.value = response.studentRegistrations || [];
-
-        // โหลดข้อมูลการเลือกอาหาร
-        foodSelections.value = response.foodSelections || [];
+        const response = await ActivityService.getEnrollmentSummary(activityId)
+        console.log("API Response:", response) // ตรวจสอบข้อมูล API
+        enrollmentSummary.value = response
     } catch (error) {
-        console.error("Error fetching activity:", error);
+        console.error("Error fetching enrollment summary:", error)
     }
-};
+}
 
-// โหลดข้อมูลเมื่อ Component ถูกสร้าง
 onMounted(async () => {
-    if (activityId) {
-        await fetchActivity(); // ใช้ await เพื่อรอให้ fetchActivity() ทำงานเสร็จ
-    }
-});
+    await fetchEnrollmentSummary()
+})
 
 </script>
 
@@ -62,36 +40,57 @@ onMounted(async () => {
             <div class="info-group-header">
                 <div class="info-row-header">
                     <span class="label">จำนวนที่รับ :</span>
-                    <span class="value">{{ maxParticipants }}</span>
+                    <span class="value">{{ enrollmentSummary?.maxParticipants || 0 }}</span>
                     <span class="unit">คน</span>
                 </div>
                 <div class="info-row-header">
                     <span class="label">จำนวนนิสิตที่ลงทะเบียน :</span>
-                    <span class="value">{{ registeredStudents }}</span>
+                    <span class="value">{{ enrollmentSummary?.totalRegistered || 0 }}</span>
                     <span class="unit">คน</span>
                 </div>
                 <div class="info-row-header">
                     <span class="label">จำนวนที่ว่าง :</span>
-                    <span class="value">{{ remainingSeats }}</span>
+                    <span class="value">{{ enrollmentSummary?.remainingSlots || 0 }}</span>
                     <span class="unit">คน</span>
                 </div>
             </div>
 
-            <!-- ผลการลงทะเบียนนิสิต -->
-            <div class="info-row">
+            <!-- กรณีที่มี activityItemName -->
+            <div class="info-row" v-if="enrollmentSummary?.activityItemSums?.some(item => item.activityItemName)">
+                <div class="registration-info">
+                    <div class="row" v-for="item in enrollmentSummary.activityItemSums" :key="item.activityItemName">
+                        <span class="label">ผลการลงทะเบียน &nbsp; {{ item.activityItemName }} :</span>
+                        <div class="row q-gutter-x-sm" v-for="major in item.registeredByMajor" :key="major.majorName">
+                            <span class="text">นิสิตสาขา &nbsp; {{ major.majorName }}</span>
+                            <span class="number">{{ major.count || '-' }}</span>
+                            <span class="unit">คน</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- กรณีที่ไม่มี activityItemName แต่มีข้อมูลนิสิต -->
+            <div class="info-row" v-else-if="enrollmentSummary?.activityItemSums?.[0]?.registeredByMajor?.length">
                 <span class="label">ผลการลงทะเบียนนิสิต :</span>
                 <div class="registration-info">
-                    <div class="row" v-for="student in studentRegistrations" :key="student.major">
-                        <span class="major">นิสิตสาขา {{ student.major }}</span>
-                        <span class="text">จำนวน</span>
-                        <span class="number">{{ student.count }}</span>
+                    <div class="row" v-for="major in enrollmentSummary.activityItemSums[0].registeredByMajor"
+                        :key="major.majorName">
+                        <span class="text">นิสิตสาขา {{ major.majorName }}</span>
+                        <span class="number">{{ major.count || '-' }}</span>
                         <span class="unit">คน</span>
                     </div>
                 </div>
             </div>
-            
+
+            <!-- กรณีไม่มีข้อมูลเลย -->
+            <div class="info-row" v-else>
+                <span class="label">ผลการลงทะเบียนนิสิต :</span>
+                <span class="text">ไม่มีข้อมูลการลงทะเบียนนิสิตสำหรับกิจกรรมนี้</span>
+            </div>
+
+
             <!-- แสดงเฉพาะเมื่อ foodSelections มีข้อมูล -->
-            <div class="info-row" v-if="foodSelections.length > 0">
+            <!-- <div class="info-row" v-if="foodSelections.length > 0">
                 <span class="label">ผลการเลือกอาหาร :</span>
                 <div class="registration-info">
                     <div class="row" v-for="food in foodSelections" :key="food.name">
@@ -101,13 +100,13 @@ onMounted(async () => {
                         <span class="unit">คน</span>
                     </div>
                 </div>
-            </div>
+            </div> -->
 
             <!-- แสดงข้อความเมื่อไม่มีข้อมูลการเลือกอาหาร -->
-            <div class="info-row" v-else>
+            <!-- <div class="info-row" v-else>
                 <span class="label">ผลการเลือกอาหาร :</span>
                 <span class="text">ไม่มีข้อมูลการเลือกอาหารสำหรับกิจกรรมนี้</span>
-            </div>
+            </div> -->
         </div>
     </div>
 </template>
@@ -118,18 +117,16 @@ onMounted(async () => {
     align-items: flex-start;
     gap: 120px;
     background-color: #EDF0F5;
-    padding: 30px;
     border-radius: 12px;
     height: 680px;
     overflow: hidden;
-    padding: 45px;
+    margin-left: 60px;
 }
 
 .registration-details {
     flex: 1;
     display: flex;
     flex-direction: column;
-    gap: 30px;
     max-height: 600px;
     overflow-y: auto;
     overflow-x: hidden;
@@ -183,47 +180,36 @@ onMounted(async () => {
     gap: 30px;
 }
 
-.major {
-    min-width: 120px;
-    margin-left: 5px;
-}
-
 .number {
-    min-width: 30px;
     text-align: left;
-    margin-left: 5px;
 }
 
 .label {
     white-space: nowrap;
     text-align: right;
-    margin-right: 15px;
-    min-width: 250px;
+    margin-right: 10px;
+    min-width: 320px;
 }
 
 .value {
     min-width: 30px;
     text-align: left;
-    margin-left: 5px;
     /* เพิ่มระยะห่างระหว่างตัวเลขกับหน่วย */
 }
 
 .unit {
     min-width: 30px;
     text-align: left;
-    margin-left: 5px;
 }
 
 .text {
-    min-width: 30px;
+    min-width: 50px;
     text-align: left;
-    margin-left: 5px;
 }
 
 .label,
 .value,
 .unit,
-.major,
 .text,
 .number {
     /* font-weight: 500; */

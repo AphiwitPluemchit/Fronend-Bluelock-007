@@ -28,3 +28,17 @@ export type ActivityItem = {
   majors?: string[]
 }
 
+export type EnrollmentSummary = {
+  maxParticipants: number;
+  totalRegistered: number;
+  remainingSlots: number;
+  activityItemSums: ActivityItemSum[];
+};
+
+export type ActivityItemSum = {
+  activityItemName: string;
+  registeredByMajor: {
+      count: number;
+      majorName: string;
+  }[];
+};

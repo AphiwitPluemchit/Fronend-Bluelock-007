@@ -22,16 +22,12 @@ const statusClass = computed(() => {
 .status-wrapper {
     display: flex;
     justify-content: center;
-    /* จัดให้อยู่ตรงกลางแนวนอน */
     align-items: center;
-    /* จัดให้อยู่ตรงกลางแนวตั้ง */
-    min-height: 50px;
-    /* ป้องกันการล้ำหัวข้อ */
 }
 
 .status-chip {
     width: 130px;
-    height: 32px;
+    height: 28px;
     display: flex;
     justify-content: center;
     align-items: center;
@@ -39,7 +35,6 @@ const statusClass = computed(() => {
     font-size: 14px;
     line-height: 32px;
     border-radius: 20px;
-    padding: 0;  /* ลบ Padding ที่เกิน */
     box-sizing: border-box;
     white-space: nowrap;
 }
