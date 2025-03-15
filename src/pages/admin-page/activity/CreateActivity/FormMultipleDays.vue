@@ -283,7 +283,13 @@ watch(foodMenu, (newVal) => {
 })
 
 const submitActivity = async () => {
-  const skill = activityType.value === 'prep' ? 'hard' : 'soft'
+  const skillMap: Record<string, 'hard' | 'soft' | null> = {
+    prep: 'hard',
+    academic: 'soft',
+    '': null,
+  }
+  const skill = skillMap[activityType.value] ?? null
+
   const majorMap: Record<string, { id: string; name: string }> = {
     cs: { id: '67bf0c358873e448798fed37', name: 'CS' },
     se: { id: '67bf0bdf8873e448798fed36', name: 'SE' },
@@ -304,7 +310,7 @@ const submitActivity = async () => {
     type: 'one',
     activityState: 'planning',
     name: activityName.value,
-    skill,
+    skill: skill ?? '',
     foodVotes,
     activityItems: [
       {
@@ -324,7 +330,7 @@ const submitActivity = async () => {
       },
     ],
   }
-    console.log('🧾 foodMenu ก่อน map:', foodMenu.value)
+  console.log('🧾 foodMenu ก่อน map:', foodMenu.value)
   try {
     console.log(payload)
     await ActivityService.createOne(payload)
@@ -336,11 +342,6 @@ const submitActivity = async () => {
     console.log(payload)
   }
 }
-const isSidebarOpen = ref(false)
-watch(selectedRoom, (val) => console.log('✅ ห้องที่เลือก:', val))
-watch(isSidebarOpen, (newVal) => {
-  document.documentElement.style.setProperty('--sidebar-width', newVal ? '250px' : '0px')
-})
 </script>
 
 <style scoped>

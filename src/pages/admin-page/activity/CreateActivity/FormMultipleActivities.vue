@@ -247,7 +247,12 @@ const submitActivity = async () => {
     aai: 'AAI',
   }
 
-  const skill = activityType.value === 'prep' ? 'hard' : 'soft'
+  const skillMap: Record<string, 'hard' | 'soft' | null> = {
+    prep: 'hard',
+    academic: 'soft',
+    '': null,
+  }
+  const skill = skillMap[activityType.value] ?? null
   const activityItems = subActivities.value.map((sub) => {
     const majorNames = sub.departments
       .map((dep) => majorMap[dep])
@@ -283,7 +288,7 @@ const submitActivity = async () => {
     type: 'many',
     name: activityName.value,
     activityState: 'planning',
-    skill,
+    skill: skill ?? '',
     file: 'image.jpg',
     activityItems,
     foodVotes,
