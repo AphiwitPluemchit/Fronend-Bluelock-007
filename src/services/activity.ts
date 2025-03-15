@@ -63,4 +63,16 @@ export class ActivityService {
       throw error
     }
   }
+
+  static async getEnrollmentSummary(activityId: string) {
+    try {
+        const res = await api.get(`${this.path}/${activityId}/enrollment-summary`);
+        console.log("data",res.data)
+        return res.data;
+    } catch (error) {
+        console.error(`Error fetching enrollment summary for activity ID: ${activityId}`, error);
+        throw error;
+    }
+}
+
 }
