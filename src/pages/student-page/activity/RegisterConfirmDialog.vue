@@ -53,7 +53,7 @@ const selectedItemId = ref<string | null>(null)
 
 const itemOptions = computed(() =>
   props.activityItems.map((item) => ({
-    label: `${item.name ?? 'ไม่มีชื่อ'} | ${item.room ?? '-'} | ${item.hour ?? 0} ชม.`,
+    label: `${item.name ?? 'ไม่มีชื่อ'} | ${item.hour ?? 0} ชม.`,
     value: item.id,
   })),
 )
