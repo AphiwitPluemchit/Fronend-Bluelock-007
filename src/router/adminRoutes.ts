@@ -8,10 +8,6 @@ export const adminRoutes: RouteRecordRaw[] = [
     component: () => import('src/layouts/AdminLayout.vue'),
     meta: { role: EnumUserRole.ADMIN },
     children: [
-      // {
-      //   path: 'dashboard',
-      //   component: () => import('pages/DashboardPage.vue'),
-      // },
       {
         path: 'ActivitiesCalendar',
         component: () => import('pages/admin-page/calendar/ActivitiesCalendarPage.vue'),
@@ -25,7 +21,7 @@ export const adminRoutes: RouteRecordRaw[] = [
         component: () => import('pages/admin-page/activity/CreateActivity/CreateActivity.vue'),
       },
       {
-        path: 'ActivitiesManagement/ActivityDetail',
+        path: 'ActivitiesManagement/ActivityDetail/:id',
         component: () => import('pages/admin-page/activity/ActivityDetail/ActivityDetail.vue'),
       },
       {

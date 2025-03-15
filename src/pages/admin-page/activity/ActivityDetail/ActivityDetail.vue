@@ -27,16 +27,17 @@ const currentBreadcrumb = computed(() => {
 })
 
 const breadcrumbs = computed(() => ({
-  previousPage: { title: 'จัดการกิจกรรม', path: '/ActivitiesManagement' },
-  currentPage: { title: currentBreadcrumb.value, path: '/ActivitiesManagement/ActivityDetail' },
+  previousPage: { title: 'จัดการกิจกรรม', path: '/Admin/ActivitiesManagement' },
+  currentPage: {
+    title: currentBreadcrumb.value,
+    path: '/Admin/ActivitiesManagement/ActivityDetail',
+  },
   icon: 'description',
 }))
-
 </script>
 
 <template>
   <q-page class="q-pa-md">
-
     <AppBreadcrumbs :breadcrumbs="breadcrumbs" />
 
     <!-- Tabs -->
@@ -90,14 +91,14 @@ const breadcrumbs = computed(() => ({
 
 .custom-tabs .q-tab--active,
 .custom-tabs .q-tab:hover {
-  background-color: #EDF0F5 !important;
+  background-color: #edf0f5 !important;
   border-radius: 12px 12px 0 0;
 }
 
 .custom-panels {
   max-width: 1600px;
   margin: auto;
-  background-color: #EDF0F5;
+  background-color: #edf0f5;
   max-height: 680px;
 }
 </style>

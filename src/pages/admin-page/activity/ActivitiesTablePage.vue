@@ -5,7 +5,7 @@
       <div class="text-h4">จัดการกิจกรรม</div>
     </div>
     <div class="row justify-end items-center">
-      <q-btn dense outlined icon="add" label="เพิ่มข้อมูล" class="btnadd" @click="goToPage()"/>
+      <q-btn dense outlined icon="add" label="เพิ่มข้อมูล" class="btnadd" @click="goToPage()" />
     </div>
     <!-- ตาราง 1 -->
     <section class="q-mt-lg">
@@ -166,7 +166,8 @@ const goToPage = async () => {
 const goToPageDetail = async (id: string) => {
   console.log(id)
   // await activityStore.fetchOneData(id)
-  await router.push('/ActivitiesManagement/ActivityDetail')
+  // :to="`/Student/Activity/ActivityDetail/${activity.id}`"
+  await router.push(`/Admin/ActivitiesManagement/ActivityDetail/${id}`)
 }
 const filters = ref<{
   year: string[]
@@ -253,6 +254,7 @@ function mapActivitiesToTableRows(activitys: Activity[]) {
 
     return {
       index: index + 1, // ✅ ลำดับ
+      id: activity.id ?? '-',
       name: activity.name ?? '-', // ✅ ถ้า `name` เป็น `undefined` ให้ใช้ "-"
       date: firstDate.date ?? '-', // ✅ ถ้า `date` เป็น `null` หรือ `undefined` ให้ใช้ "-"
       time: firstItem.hour ? `${firstItem.hour} ชม.` : '-', // ✅ แสดงเวลา
@@ -264,208 +266,6 @@ function mapActivitiesToTableRows(activitys: Activity[]) {
     }
   })
 }
-
-// ข้อมูลกิจกรรม (ตัวอย่าง)
-// const data1 = ref([
-//   {
-//     id: '67c5aaca254a746b8ca30aef',
-//     index: 1,
-//     name: 'กิจกรรม A',
-//     date: '4 มี.ค. 2568',
-//     time: '08:00-12:00',
-//     location: 'IF-3C02',
-//     participants: '250/123/127',
-//     type: 'Soft Skill',
-//     status: 'เปิดลงทะเบียน',
-//     action: '/ActivitiesManagement/CreateActivity',
-//   },
-//   {
-//     id: '67c5aaca254a746b8ca30aef',
-//     index: 1,
-//     name: 'กิจกรรม A',
-//     date: '4 มี.ค. 2568',
-//     time: '08:00-12:00',
-//     location: 'IF-3C02',
-//     participants: '250/123/127',
-//     type: 'Soft Skill',
-//     status: 'เปิดลงทะเบียน',
-//     action: '/ActivitiesManagement/CreateActivity',
-//   },
-//   {
-//     id: '67c5aaca254a746b8ca30aef',
-//     index: 1,
-//     name: 'กิจกรรม A',
-//     date: '4 มี.ค. 2568',
-//     time: '08:00-12:00',
-//     location: 'IF-3C02',
-//     participants: '250/123/127',
-//     type: 'Soft Skill',
-//     status: 'เปิดลงทะเบียน',
-//     action: '/ActivitiesManagement/CreateActivity',
-//   },
-//   {
-//     id: '67c5aaca254a746b8ca30aef',
-//     index: 1,
-//     name: 'กิจกรรม A',
-//     date: '4 มี.ค. 2568',
-//     time: '08:00-12:00',
-//     location: 'IF-3C02',
-//     participants: '250/123/127',
-//     type: 'Soft Skill',
-//     status: 'เปิดลงทะเบียน',
-//     action: '/ActivitiesManagement/CreateActivity',
-//   },
-//   {
-//     id: '67c5aaca254a746b8ca30aef',
-//     index: 1,
-//     name: 'กิจกรรม A',
-//     date: '4 มี.ค. 2568',
-//     time: '08:00-12:00',
-//     location: 'IF-3C02',
-//     participants: '250/123/127',
-//     type: 'Soft Skill',
-//     status: 'เปิดลงทะเบียน',
-//     action: '/ActivitiesManagement/CreateActivity',
-//   },
-// ])
-
-// const data2 = ref([
-//   {
-//     id: 2,
-//     index: 1,
-//     name: 'กิจกรรม B',
-//     date: '10 มี.ค. 2568',
-//     time: '13:00-17:00',
-//     location: 'IF-3C02',
-//     participants: '200/100/100',
-//     type: 'Hard Skill',
-//     status: 'กำลังวางแผน',
-//     action: '/ActivitiesManagement/CreateActivity',
-//   },
-//   {
-//     id: 2,
-//     index: 1,
-//     name: 'กิจกรรม B',
-//     date: '10 มี.ค. 2568',
-//     time: '13:00-17:00',
-//     location: 'IF-3C02',
-//     participants: '200/100/100',
-//     type: 'Hard Skill',
-//     status: 'กำลังวางแผน',
-//     action: '/ActivitiesManagement/CreateActivity',
-//   },
-//   {
-//     id: 2,
-//     index: 1,
-//     name: 'กิจกรรม B',
-//     date: '10 มี.ค. 2568',
-//     time: '13:00-17:00',
-//     location: 'IF-3C02',
-//     participants: '200/100/100',
-//     type: 'Hard Skill',
-//     status: 'กำลังวางแผน',
-//     action: '/ActivitiesManagement/CreateActivity',
-//   },
-//   {
-//     id: 2,
-//     index: 1,
-//     name: 'กิจกรรม B',
-//     date: '10 มี.ค. 2568',
-//     time: '13:00-17:00',
-//     location: 'IF-3C02',
-//     participants: '200/100/100',
-//     type: 'Hard Skill',
-//     status: 'กำลังวางแผน',
-//     action: '/ActivitiesManagement/CreateActivity',
-//   },
-//   {
-//     id: 2,
-//     index: 1,
-//     name: 'กิจกรรม B',
-//     date: '10 มี.ค. 2568',
-//     time: '13:00-17:00',
-//     location: 'IF-3C02',
-//     participants: '200/100/100',
-//     type: 'Hard Skill',
-//     status: 'กำลังวางแผน',
-//     action: '/ActivitiesManagement/CreateActivity',
-//   },
-// ])
-
-// const data3 = ref([
-//   {
-//     id: 3,
-//     index: 1,
-//     name: 'กิจกรรม C',
-//     date: '20 มี.ค. 2568',
-//     time: '09:00-11:00',
-//     location: 'IF-3C02',
-//     participants: '150/90/60',
-//     type: 'อื่น ๆ',
-//     status: 'รอดำเนินการ',
-//     action: '/ActivitiesManagement/CreateActivity',
-//   },
-//   {
-//     id: 3,
-//     index: 1,
-//     name: 'กิจกรรม C',
-//     date: '20 มี.ค. 2568',
-//     time: '09:00-11:00',
-//     location: 'IF-3C02',
-//     participants: '150/90/60',
-//     type: 'อื่น ๆ',
-//     status: 'รอดำเนินการ',
-//     action: '/ActivitiesManagement/CreateActivity',
-//   },
-//   {
-//     id: 3,
-//     index: 1,
-//     name: 'กิจกรรม C',
-//     date: '20 มี.ค. 2568',
-//     time: '09:00-11:00',
-//     location: 'IF-3C02',
-//     participants: '150/90/60',
-//     type: 'อื่น ๆ',
-//     status: 'รอดำเนินการ',
-//     action: '/ActivitiesManagement/CreateActivity',
-//   },
-//   {
-//     id: 3,
-//     index: 1,
-//     name: 'กิจกรรม C',
-//     date: '20 มี.ค. 2568',
-//     time: '09:00-11:00',
-//     location: 'IF-3C02',
-//     participants: '150/90/60',
-//     type: 'อื่น ๆ',
-//     status: 'รอดำเนินการ',
-//     action: '/ActivitiesManagement/CreateActivity',
-//   },
-//   {
-//     id: 3,
-//     index: 1,
-//     name: 'กิจกรรม C',
-//     date: '20 มี.ค. 2568',
-//     time: '09:00-11:00',
-//     location: 'IF-3C02',
-//     participants: '150/90/60',
-//     type: 'อื่น ๆ',
-//     status: 'รอดำเนินการ',
-//     action: 'X',
-//   },
-//   {
-//     id: 3,
-//     index: 1,
-//     name: 'กิจกรรม C',
-//     date: '20 มี.ค. 2568',
-//     time: '09:00-11:00',
-//     location: 'IF-3C02',
-//     participants: '150/90/60',
-//     type: 'อื่น ๆ',
-//     status: 'รอดำเนินการ',
-//     action: 'X',
-//   },
-// ])
 </script>
 
 <style scoped></style>

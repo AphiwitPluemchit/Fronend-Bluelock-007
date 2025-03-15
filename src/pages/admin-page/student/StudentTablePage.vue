@@ -22,7 +22,7 @@
             </template>
           </q-input>
           <q-btn class="btnfilter q-mr-sm" @click="showFilterDialog1 = true">
-            <img src="public\icons\sort.svg" alt="Sort Icon" width="30" height="30" />
+            <img src="\icons\sort.svg" alt="Sort Icon" width="30" height="30" />
             <FilterDialog
               v-model="showFilterDialog1"
               :categories="filterCategories1"
@@ -114,7 +114,7 @@ onMounted(async () => {
 })
 
 const goToDetail = (code: string) => {
-  void router.push(`/StudentManagement/StudentDetail/${code}`)
+  void router.push(`/Admin/StudentManagement/StudentDetail/${code}`)
 }
 
 const filters = ref<{

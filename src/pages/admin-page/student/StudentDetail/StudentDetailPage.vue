@@ -118,7 +118,7 @@
         <div class="text-h6">ประวัติการอบรม</div>
         <div class="filter-container">
           <q-btn class="btnfilter q-mr-sm" @click="showFilterDialog1 = true">
-            <img src="public\icons\sort.svg" alt="Sort Icon" width="30" height="30" />
+            <img src="\icons\sort.svg" alt="Sort Icon" width="30" height="30" />
             <FilterDialog
               v-model="showFilterDialog1"
               :categories="filterCategories1"
@@ -247,8 +247,8 @@ const studentYear = computed(() => {
 })
 
 const breadcrumbs = ref({
-  previousPage: { title: 'จัดการข้อมูลนิสิต', path: '/StudentManagement' },
-  currentPage: { title: 'รายละเอียดนิสิต', path: `/StudentManagement/StudentDetail/` },
+  previousPage: { title: 'จัดการข้อมูลนิสิต', path: '/Admin/StudentManagement' },
+  currentPage: { title: 'รายละเอียดนิสิต', path: `/Admin/StudentManagement/StudentDetail/` },
   icon: studentEditIcon,
 })
 
