@@ -16,9 +16,9 @@ export type ActivityItem = {
   name?: string | null
   description?: string | null
   maxParticipants?: number | null
-  room?: string[]
+  rooms?: string[]
   hour?: number | null
-  date?: {
+  dates?: {
     date: string
     stime: string
     etime: string

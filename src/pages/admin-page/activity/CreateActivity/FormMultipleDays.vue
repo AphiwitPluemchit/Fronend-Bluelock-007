@@ -384,10 +384,6 @@ const submitActivity = async () => {
   width: 200px;
   font-size: 20px;
 }
-
-.checkbox-left {
-  align-self: flex-start;
-}
 .flex-container {
   display: flex;
   align-items: center;

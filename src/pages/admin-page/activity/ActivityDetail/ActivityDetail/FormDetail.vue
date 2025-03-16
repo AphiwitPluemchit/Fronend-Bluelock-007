@@ -1,5 +1,5 @@
 <template>
-  <q-page>
+  <q-page v-if="activityLoaded">
     <!-- Status -->
     <div class="input-group">
       <p class="label label_minWidth">สถานะ:</p>
@@ -120,7 +120,11 @@ import TimeSelector from 'src/pages/admin-page/activity/CreateActivity/Form/Time
 import FoodSelector from 'src/pages/admin-page/activity/CreateActivity/Form/FoodSelector.vue'
 import ChangeStatusDialog from 'src/pages/admin-page/activity/ActivityDetail/ActivityDetail/ChangeStatusDialog.vue'
 import RoomSelector from 'src/pages/admin-page/activity/CreateActivity/Form/RoomSelector.vue'
+import type { Activity } from 'src/types/activity'
 
+const props = defineProps<{
+  activity: Activity | null
+}>()
 interface DayTimeSelection {
   date: string
   formattedDate: string
@@ -131,6 +135,7 @@ interface DayTimeSelection {
   startTime: string
   endTime: string
 }
+const activityLoaded = ref(false)
 const showChangeStatusDialog = ref(false)
 const selectedDays = ref<DayTimeSelection[]>([])
 const sameTimeForAll = ref(false)
@@ -145,7 +150,7 @@ const departments = ref<string[]>([])
 const years = ref<string[]>([])
 const activityDateRangeInternal = ref<string[]>([])
 const foodMenu = ref('')
-const roomName = ref<string[]>([]) 
+const roomName = ref<string[]>([])
 const activityStatus = ref('กำลังวางแผน') // ค่าปัจจุบันของสถานะ
 const handleStatusChange = (newStatus: string) => {
   activityStatus.value = newStatus
@@ -352,6 +357,46 @@ const saveChanges = () => {
   isEditing.value = false
   submitActivity()
 }
+onMounted(() => {
+  const a = props.activity
+  if (!a) return
+
+  activityName.value = a.name ?? ''
+  activityType.value =
+    a.skill === 'hard'
+      ? 'prep'
+      : a.skill === 'soft'
+        ? 'academic'
+        : (activityStatus.value = a.activityState ?? 'กำลังวางแผน')
+  foodMenu.value = a.Foods?.map((f) => f.name).join(', ') ?? ''
+
+  const firstItem = a.activityItems?.[0]
+  if (firstItem) {
+    roomName.value = firstItem.rooms ?? []
+    totalHours.value = firstItem.hour ?? 0
+    seats.value = firstItem.maxParticipants ?? 0
+    departments.value = firstItem.majors?.map(String) ?? []
+    detailActivity.value = firstItem.description ?? ''
+    lecturer.value = firstItem.operator ?? ''
+    years.value = firstItem.studentYears?.map(String) ?? []
+
+    if (firstItem.dates?.length) {
+      activityDateRange.value = firstItem.dates.map((d) => d.date)
+      generateDaysInRange(activityDateRange.value)
+
+      selectedDays.value.forEach((day, index) => {
+        const d = firstItem.dates?.[index]
+        if (d) {
+          day.date = d.date
+          day.startTime = d.stime
+          day.endTime = d.etime
+        }
+      })
+    }
+  }
+
+  activityLoaded.value = true
+})
 </script>
 
 <style scoped>
@@ -439,5 +484,7 @@ const saveChanges = () => {
   justify-content: flex-end;
   gap: 25px;
   margin-top: 30px;
+  margin-bottom: 100px;
+  width: 100%;
 }
 </style>

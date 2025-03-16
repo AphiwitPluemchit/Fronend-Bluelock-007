@@ -14,7 +14,7 @@
       <q-item-section class="col-9">
         <q-item-label class="q-mb-lg q-ml-md">{{ activity?.name ?? 'ไม่ระบุ' }}</q-item-label>
         <q-item-label class="q-mb-lg q-ml-md">{{
-          getActivityDate(activity?.activityItems)
+          getActivitydates(activity?.activityItems)
         }}</q-item-label>
         <q-item-label class="q-mb-lg q-ml-md">{{
           getActivityTime(activity?.activityItems)
@@ -38,18 +38,18 @@
 import type { Activity, ActivityItem } from 'src/types/activity'
 defineProps<{ activity: Activity }>()
 // ฟังก์ชันดึงวันที่
-const getActivityDate = (activityItems: ActivityItem[] | null | undefined): string => {
-  const firstItem = activityItems?.find((item) => item.date && item.date.length > 0)
-  return firstItem?.date
-    ? firstItem.date.map((d) => `${d.date} (${d.stime} - ${d.etime})`).join(', ')
+const getActivitydates = (activityItems: ActivityItem[] | null | undefined): string => {
+  const firstItem = activityItems?.find((item) => item.dates && item.dates.length > 0)
+  return firstItem?.dates
+    ? firstItem.dates.map((d) => `${d.date} (${d.stime} - ${d.etime})`).join(', ')
     : 'ไม่ระบุ'
 }
 
 // ฟังก์ชันดึงเวลา
 const getActivityTime = (activityItems: ActivityItem[] | null | undefined): string => {
-  const firstItem = activityItems?.find((item) => item.date && item.date.length > 0)
-  return firstItem?.date
-    ? firstItem.date.map((d) => `${d.stime} - ${d.etime}`).join(', ')
+  const firstItem = activityItems?.find((item) => item.dates && item.dates.length > 0)
+  return firstItem?.dates
+    ? firstItem.dates.map((d) => `${d.stime} - ${d.etime}`).join(', ')
     : 'ไม่ระบุ'
 }
 

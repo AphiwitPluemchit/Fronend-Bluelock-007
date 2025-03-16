@@ -15,7 +15,7 @@
           <div class="positionText q-mb-md">
             <!-- แสดงวันที่ -->
             <q-item-label class="q-mb-md">
-              {{ getActivityDate(activity.activityItems) }}
+              {{ getActivitydates(activity.activityItems) }}
             </q-item-label>
 
             <!-- แสดงจำนวนที่นั่ง -->
@@ -54,13 +54,13 @@ const getImageUrl = (fileName: string | undefined) => {
 }
 
 // ฟังก์ชันดึงวันที่จาก `activityItems`
-const getActivityDate = (activityItems: ActivityItem[] | null | undefined): string => {
-  if (!activityItems || activityItems.length === 0 || !activityItems[0]?.date) {
+const getActivitydates = (activityItems: ActivityItem[] | null | undefined): string => {
+  if (!activityItems || activityItems.length === 0 || !activityItems[0]?.dates) {
     return 'ไม่ระบุ'
   }
 
   return (
-    activityItems[0].date?.map((d) => `${d.date} (${d.stime} - ${d.etime})`).join(', ') ?? 'ไม่ระบุ'
+    activityItems[0].dates?.map((d) => `${d.date} (${d.stime} - ${d.etime})`).join(', ') ?? 'ไม่ระบุ'
   )
 }
 </script>
