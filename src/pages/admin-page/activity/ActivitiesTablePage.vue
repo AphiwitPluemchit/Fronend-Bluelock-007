@@ -28,8 +28,8 @@
             <img src="icons\sort.svg" alt="Sort Icon" width="30" height="30" />
             <FilterDialog
               v-model="showFilterDialog1"
-              :categories="filterCategories1"
-              @apply="applyFilters"
+              :categories="filterCategories"
+              @apply="applyFilters1"
             />
           </q-btn>
         </div>
@@ -83,8 +83,8 @@
             <img src="icons\sort.svg" alt="Sort Icon" width="30" height="30" />
             <FilterDialog
               v-model="showFilterDialog2"
-              :categories="filterCategories2"
-              @apply="applyFilters"
+              :categories="filterCategories"
+              @apply="applyFilters2"
             />
           </q-btn>
         </div>
@@ -131,8 +131,8 @@
             <img src="icons\sort.svg" alt="Sort Icon" width="30" height="30" />
             <FilterDialog
               v-model="showFilterDialog3"
-              :categories="filterCategories3"
-              @apply="applyFilters"
+              :categories="filterCategories"
+              @apply="applyFilters3"
             />
           </q-btn>
         </div>
@@ -187,21 +187,8 @@ const goToPageDetail = async (id: string) => {
   await router.push(`/Admin/ActivitiesManagement/ActivityDetail/${id}`)
 }
 
-const filters = ref<{
-  year: string[]
-  major: string[]
-  statusStudent: string[]
-  statusActivity: string[]
-  categoryActivity: string[]
-}>({
-  year: [],
-  major: [],
-  statusStudent: [],
-  statusActivity: [],
-  categoryActivity: [],
-})
 const showFilterDialog1 = ref(false)
-const filterCategories1 = ref([
+const filterCategories = ref([
   'year',
   'major',
   'statusStudent',
@@ -209,36 +196,48 @@ const filterCategories1 = ref([
   'categoryActivity',
 ])
 const showFilterDialog2 = ref(false)
-const filterCategories2 = ref([
-  'year',
-  'major',
-  'statusStudent',
-  'statusActivity',
-  'categoryActivity',
-])
 const showFilterDialog3 = ref(false)
-const filterCategories3 = ref([
-  'year',
-  'major',
-  'statusStudent',
-  'statusActivity',
-  'categoryActivity',
-])
-const applyFilters = (selectedFilters: {
+
+interface SelectedFilters {
   year: string[]
   major: string[]
-  statusStudent: string[]
   statusActivity: string[]
   categoryActivity: string[]
-}) => {
-  filters.value = selectedFilters
-  console.log('Filters Applied:', filters.value)
+}
+
+const applyFilters1 = async (selectedFilters: SelectedFilters) => {
+  query1.value.studentYear = selectedFilters.year.map(Number)
+  query1.value.major = selectedFilters.major
+  query1.value.activityState = selectedFilters.statusActivity
+  query1.value.skill = selectedFilters.categoryActivity
+  console.log(selectedFilters)
+  console.log(query1.value)
+  const data = await ActivityService.getAll(query1.value)
+
+  activitys1.value = data.data
+}
+const applyFilters2 = async (selectedFilters: SelectedFilters) => {
+  query2.value.studentYear = selectedFilters.year.map(Number)
+  query2.value.major = selectedFilters.major
+  query2.value.activityState = selectedFilters.statusActivity
+  query2.value.skill = selectedFilters.categoryActivity
+  const data = await ActivityService.getAll(query2.value)
+  activitys2.value = data.data
+}
+
+const applyFilters3 = async (selectedFilters: SelectedFilters) => {
+  query3.value.studentYear = selectedFilters.year.map(Number)
+  query3.value.major = selectedFilters.major
+  query3.value.activityState = selectedFilters.statusActivity
+  query3.value.skill = selectedFilters.categoryActivity
+  const data = await ActivityService.getAll(query3.value)
+  activitys3.value = data.data
 }
 
 // กำหนดโครงสร้างของคอลัมน์ในตาราง
 const columns = [
-  { name: '_id', label: 'ลำดับ', field: '_id', align: 'left' as const },
-  { name: 'name', label: 'ชื่อกิจกรรม', field: 'name', align: 'left' as const },
+  { name: '_id', label: 'ลำดับ', field: '_id', sortable: true, align: 'left' as const },
+  { name: 'name', label: 'ชื่อกิจกรรม', field: 'name', sortable: true, align: 'left' as const },
   { name: 'date', label: 'วันที่', field: 'date', align: 'left' as const },
   { name: 'time', label: 'เวลา', field: 'time', align: 'left' as const },
   { name: 'location', label: 'สถานที่', field: 'location', align: 'left' as const },
@@ -248,8 +247,8 @@ const columns = [
     field: 'participants',
     align: 'left' as const,
   },
-  { name: 'type', label: 'ประเภท', field: 'type', align: 'left' as const },
-  { name: 'status', label: 'สถานะ', field: 'status', align: 'left' as const },
+  { name: 'type', label: 'ประเภท', field: 'type', sortable: true, align: 'left' as const },
+  { name: 'status', label: 'สถานะ', field: 'status', sortable: true, align: 'left' as const },
   { name: 'action', label: '', field: '', align: 'left' as const },
 ]
 
@@ -259,7 +258,7 @@ const activitys3 = ref<Activity[]>([]) // Success Table
 
 const query1 = ref<ActivityPagination>({
   page: 1,
-  limit: 10,
+  limit: 5,
   search: '',
   sortBy: '_id',
   order: 'desc',
@@ -270,7 +269,7 @@ const query1 = ref<ActivityPagination>({
 })
 const query2 = ref<ActivityPagination>({
   page: 1,
-  limit: 10,
+  limit: 5,
   search: '',
   sortBy: '_id',
   order: 'desc',
@@ -282,7 +281,7 @@ const query2 = ref<ActivityPagination>({
 
 const query3 = ref<ActivityPagination>({
   page: 1,
-  limit: 10,
+  limit: 5,
   search: '',
   sortBy: '_id',
   order: 'desc',
@@ -316,7 +315,6 @@ onMounted(async () => {
 
 function mapActivitiesToTableRows(activitys: Activity[]) {
   if (!activitys) return []
-  console.log(activitys)
   return activitys.map((activity, index) => {
     if (!activity || !activity.activityItems) return []
     const firstItem = activity.activityItems[0] || { dates: [] }
@@ -331,11 +329,26 @@ function mapActivitiesToTableRows(activitys: Activity[]) {
       location: firstItem.rooms?.[0] || '-', // สถานที่แรก
       participants: enrollmentSummary(activity.activityItems), // ไว้ก่อน ยังไม่แน่ใจข้อมูล
       type: activity.skill ? (activity.skill === 'hard' ? 'ทักษะวิชาการ' : 'เตรียมความพร้อม') : '-', // hard / soft
-      status: activity.activityState || '-',
+      status: activityStatusLebel(activity.activityState || '-'),
       action: '', // ปุ่ม action ภายหลัง
     }
   })
 }
+function activityStatusLebel(status: string) {
+  switch (status) {
+    case 'planning':
+      return 'กำลังวางแผน'
+    case 'open':
+      return 'เปิดลงทะเบียน'
+    case 'close':
+      return 'ปิดลงทะเบียน'
+    case 'success':
+      return 'เสร็จสิ้น'
+    case 'cancel':
+      return 'ยกเลิก'
+  }
+}
+
 function formatDateToThai(dateString: string): string {
   if (!dateString) return '-'
   return dayjs(dateString).format('D MMM BBBB') // D = วัน, MMM = เดือน, BBBB = ปี พ.ศ.
