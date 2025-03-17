@@ -179,7 +179,7 @@ import { onMounted, ref } from 'vue'
 //     },
 //   },
 // })
-export const useStudentStore = defineStore('activity', () => {
+export const useStudentStore = defineStore('student', () => {
   const students = ref<Student[]>([])
   const code = ref('')
 
