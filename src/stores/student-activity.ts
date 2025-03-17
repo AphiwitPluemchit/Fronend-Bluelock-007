@@ -14,12 +14,12 @@ const query = ref<Pagination>({
   sortBy: 'id',
   order: 'DESC',
 })
-export const useStudentActivitystore = defineStore('activity', {
+export const useStudentActivitystore = defineStore('student-activity', {
   state: () => ({
     dialogState: false,
     activity: [] as Activity[],
     form: <Partial<Activity>>{}, // ใช้ Spread Operator เพื่อป้องกันการเปลี่ยนค่าโดยตรง
-    editMode: false,
+    dataInit: true,
     search: '',
   }),
 
@@ -29,16 +29,20 @@ export const useStudentActivitystore = defineStore('activity', {
 
   actions: {
     async fetchData() {
+      this.dataInit = false
       const data1 = await ActivityService.getAll(query.value, 'open')
       this.activity = data1.data
       console.log(data1.data)
+      this.dataInit = true
     },
 
     async fetchOneData(id: string) {
+      this.dataInit = false
       const data = await ActivityService.getOne(id)
       this.form = data.data
       console.log(data)
       console.log(this.form)
+      this.dataInit = true
     },
 
     async enrollment(payload: object) {

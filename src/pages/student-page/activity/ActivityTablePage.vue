@@ -42,7 +42,7 @@
           </div>
         </div>
         <!-- แสดงกิจกรรม -->
-        <div class="row q-col-gutter-md">
+        <div class="row q-col-gutter-md" v-if="StudentActivityStore.dataInit">
           <div
             class="col-xs-12 col-sm-6 col-md-6"
             v-for="activity in activitys"
