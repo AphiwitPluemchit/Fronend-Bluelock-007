@@ -15,7 +15,7 @@
           <q-input
             dense
             outlined
-            v-model="search1"
+            v-model="query1.search"
             placeholder="ค้นหา"
             class="q-mr-sm searchbox"
             :style="{ boxShadow: 'none' }"
@@ -37,8 +37,10 @@
       <q-table
         bordered
         flat
-        :rows="mapActivitiesToTableRows(activityStore.activitys1)"
+        :rows="mapActivitiesToTableRows(activitys1)"
         :columns="columns"
+        v-model:pagination="pagination1"
+        :rows-per-page-options="[5, 10, 15, 20]"
         row-key="id"
         class="q-mt-md customtable"
       >
@@ -68,7 +70,7 @@
           <q-input
             dense
             outlined
-            v-model="search2"
+            v-model="query2.search"
             placeholder="ค้นหา"
             class="q-mr-sm searchbox"
             :style="{ boxShadow: 'none' }"
@@ -88,8 +90,10 @@
         </div>
       </div>
       <q-table
-        :rows="mapActivitiesToTableRows(activityStore.activitys2)"
+        :rows="mapActivitiesToTableRows(activitys2)"
         :columns="columns"
+        :v-model:pagination="pagination2"
+        :rows-per-page-options="[5, 10, 15, 20]"
         row-key="id"
         class="q-mt-md"
       >
@@ -114,7 +118,7 @@
           <q-input
             dense
             outlined
-            v-model="search3"
+            v-model="query3.search"
             placeholder="ค้นหา"
             class="q-mr-sm searchbox"
             :style="{ boxShadow: 'none' }"
@@ -134,8 +138,10 @@
         </div>
       </div>
       <q-table
-        :rows="mapActivitiesToTableRows(activityStore.activitys3)"
+        :rows="mapActivitiesToTableRows(activitys3)"
         :columns="columns"
+        :v-model:pagination="pagination3"
+        :rows-per-page-options="[5, 10, 15, 20]"
         row-key="id"
         class="q-mt-md"
       >
@@ -155,21 +161,20 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted, ref } from 'vue'
+import { nextTick, onMounted, ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import FilterDialog from 'src/components/Dialog/FilterDialog.vue'
-import { useActivityStore } from 'src/stores/activity'
 import type { Activity, ActivityItem } from 'src/types/activity'
 import dayjs from 'dayjs'
 import 'dayjs/locale/th'
 import buddhistEra from 'dayjs/plugin/buddhistEra'
+import type { ActivityPagination } from 'src/types/pagination'
+import { ActivityService } from 'src/services/activity'
 
 dayjs.locale('th')
 dayjs.extend(buddhistEra)
 
 const router = useRouter()
-
-const activityStore = useActivityStore()
 
 const goToPage = async () => {
   await router.push('/ActivitiesManagement/CreateActivity')
@@ -177,7 +182,7 @@ const goToPage = async () => {
 const goToPageDetail = async (id: string) => {
   await router.push(`/ActivitiesManagement/ActivityDetail/${id}`)
   console.log(id)
-  // await activityStore.fetchOneData(id)
+  // await fetchOneData(id)
   // :to="`/Student/Activity/ActivityDetail/${activity.id}`"
   await router.push(`/Admin/ActivitiesManagement/ActivityDetail/${id}`)
 }
@@ -229,14 +234,10 @@ const applyFilters = (selectedFilters: {
   filters.value = selectedFilters
   console.log('Filters Applied:', filters.value)
 }
-// ตัวแปรสำหรับค้นหา
-const search1 = ref('')
-const search2 = ref('')
-const search3 = ref('')
 
 // กำหนดโครงสร้างของคอลัมน์ในตาราง
 const columns = [
-  { name: 'index', label: 'ลำดับ', field: 'index', align: 'left' as const },
+  { name: '_id', label: 'ลำดับ', field: '_id', align: 'left' as const },
   { name: 'name', label: 'ชื่อกิจกรรม', field: 'name', align: 'left' as const },
   { name: 'date', label: 'วันที่', field: 'date', align: 'left' as const },
   { name: 'time', label: 'เวลา', field: 'time', align: 'left' as const },
@@ -252,8 +253,65 @@ const columns = [
   { name: 'action', label: '', field: '', align: 'left' as const },
 ]
 
+const activitys1 = ref<Activity[]>([]) // Open and Close Enrollment Table
+const activitys2 = ref<Activity[]>([]) // Planning Table
+const activitys3 = ref<Activity[]>([]) // Success Table
+
+const query1 = ref<ActivityPagination>({
+  page: 1,
+  limit: 10,
+  search: '',
+  sortBy: '_id',
+  order: 'desc',
+  skill: [],
+  activityState: ['open', 'close'],
+  major: [],
+  studentYear: [],
+})
+const query2 = ref<ActivityPagination>({
+  page: 1,
+  limit: 10,
+  search: '',
+  sortBy: '_id',
+  order: 'desc',
+  skill: [],
+  activityState: ['planning'],
+  major: [],
+  studentYear: [],
+})
+
+const query3 = ref<ActivityPagination>({
+  page: 1,
+  limit: 10,
+  search: '',
+  sortBy: '_id',
+  order: 'desc',
+  skill: [],
+  activityState: ['success', 'cancel'],
+  major: [],
+  studentYear: [],
+})
+
+// **Wrapper function to fetch
+async function getActivities() {
+  const data1 = await ActivityService.getAll(query1.value)
+  const data2 = await ActivityService.getAll(query2.value)
+  const data3 = await ActivityService.getAll(query3.value)
+
+  activitys1.value = data1.data
+  activitys2.value = data2.data
+  activitys3.value = data3.data
+}
+
 onMounted(async () => {
-  await activityStore.getActivities()
+  await nextTick(async () => {
+    if (
+      activitys1.value.length === 0 ||
+      activitys2.value.length === 0 ||
+      activitys3.value.length === 0
+    )
+      await getActivities()
+  })
 })
 
 function mapActivitiesToTableRows(activitys: Activity[]) {
@@ -266,8 +324,7 @@ function mapActivitiesToTableRows(activitys: Activity[]) {
     const firstDate = firstItem.dates[0] || { date: '', stime: '', etime: '' }
 
     return {
-      index: index + 1,
-      id: activity.id,
+      _id: index + 1,
       name: activity.name || '-',
       date: formatDateToThai(firstDate.date), // ✅ ใช้ format ตรงนี้
       time: firstDate.stime && firstDate.etime ? `${firstDate.stime}-${firstDate.etime}` : '-', // เวลาแรก
@@ -301,6 +358,65 @@ function enrollmentSummary(activityItems: ActivityItem[]) {
 
   return `${totalEnrolled}/${totalAccepted}/${totalRemaining}`
 }
+
+const pagination1 = ref({
+  sortBy: query1.value.sortBy,
+  descending: query1.value.order === 'desc',
+  page: query1.value.page,
+  rowsPerPage: query1.value.limit,
+})
+const pagination2 = ref({
+  sortBy: query2.value.sortBy,
+  descending: query2.value.order === 'desc',
+  page: query2.value.page,
+  rowsPerPage: query2.value.limit,
+})
+
+const pagination3 = ref({
+  sortBy: query3.value.sortBy,
+  descending: query3.value.order === 'desc',
+  page: query3.value.page,
+  rowsPerPage: query3.value.limit,
+})
+
+watch(
+  () => pagination1.value,
+  async () => {
+    query1.value.page = pagination1.value.page
+    query1.value.limit = pagination1.value.rowsPerPage
+    query1.value.sortBy = pagination1.value.sortBy
+    query1.value.order = pagination1.value.descending ? 'desc' : 'asc'
+    const data = await ActivityService.getAll(query1.value)
+    activitys1.value = data.data
+  },
+  { deep: true },
+)
+
+watch(
+  () => pagination2.value,
+  async () => {
+    query2.value.page = pagination2.value.page
+    query2.value.limit = pagination2.value.rowsPerPage
+    query2.value.sortBy = pagination2.value.sortBy
+    query2.value.order = pagination2.value.descending ? 'desc' : 'asc'
+    const data = await ActivityService.getAll(query2.value)
+    activitys2.value = data.data
+  },
+  { deep: true },
+)
+
+watch(
+  () => pagination3.value,
+  async () => {
+    query3.value.page = pagination3.value.page
+    query3.value.limit = pagination3.value.rowsPerPage
+    query3.value.sortBy = pagination3.value.sortBy
+    query3.value.order = pagination3.value.descending ? 'desc' : 'asc'
+    const data = await ActivityService.getAll(query3.value)
+    activitys3.value = data.data
+  },
+  { deep: true },
+)
 </script>
 
 <style scoped></style>
