@@ -17,6 +17,7 @@
             outlined
             v-model="query1.search"
             placeholder="ค้นหา"
+            @keyup.enter="data1"
             class="q-mr-sm searchbox"
             :style="{ boxShadow: 'none' }"
           >
@@ -73,6 +74,7 @@
             v-model="query2.search"
             placeholder="ค้นหา"
             class="q-mr-sm searchbox"
+            @keyup.enter="data2"
             :style="{ boxShadow: 'none' }"
           >
             <template v-slot:append>
@@ -120,6 +122,7 @@
             outlined
             v-model="query3.search"
             placeholder="ค้นหา"
+            @keyup.enter="data3"
             class="q-mr-sm searchbox"
             :style="{ boxShadow: 'none' }"
           >
@@ -205,24 +208,36 @@ interface SelectedFilters {
   categoryActivity: string[]
 }
 
+async function getActivityData(qeury: ActivityPagination) {
+  const data = await ActivityService.getAll(qeury)
+  return data.data
+}
+
+const data1 = async () => {
+  console.log('test search click')
+  activitys1.value = await getActivityData(query1.value)
+}
+const data2 = async () => {
+  activitys2.value = await getActivityData(query2.value)
+}
+const data3 = async () => {
+  activitys3.value = await getActivityData(query3.value)
+}
+
 const applyFilters1 = async (selectedFilters: SelectedFilters) => {
   query1.value.studentYear = selectedFilters.year.map(Number)
   query1.value.major = selectedFilters.major
   query1.value.activityState = selectedFilters.statusActivity
   query1.value.skill = selectedFilters.categoryActivity
-  console.log(selectedFilters)
-  console.log(query1.value)
-  const data = await ActivityService.getAll(query1.value)
-
-  activitys1.value = data.data
+  activitys1.value = await getActivityData(query1.value)
 }
+
 const applyFilters2 = async (selectedFilters: SelectedFilters) => {
   query2.value.studentYear = selectedFilters.year.map(Number)
   query2.value.major = selectedFilters.major
   query2.value.activityState = selectedFilters.statusActivity
   query2.value.skill = selectedFilters.categoryActivity
-  const data = await ActivityService.getAll(query2.value)
-  activitys2.value = data.data
+  activitys2.value = await getActivityData(query2.value)
 }
 
 const applyFilters3 = async (selectedFilters: SelectedFilters) => {
@@ -230,8 +245,7 @@ const applyFilters3 = async (selectedFilters: SelectedFilters) => {
   query3.value.major = selectedFilters.major
   query3.value.activityState = selectedFilters.statusActivity
   query3.value.skill = selectedFilters.categoryActivity
-  const data = await ActivityService.getAll(query3.value)
-  activitys3.value = data.data
+  activitys3.value = await getActivityData(query3.value)
 }
 
 // กำหนดโครงสร้างของคอลัมน์ในตาราง
@@ -293,13 +307,9 @@ const query3 = ref<ActivityPagination>({
 
 // **Wrapper function to fetch
 async function getActivities() {
-  const data1 = await ActivityService.getAll(query1.value)
-  const data2 = await ActivityService.getAll(query2.value)
-  const data3 = await ActivityService.getAll(query3.value)
-
-  activitys1.value = data1.data
-  activitys2.value = data2.data
-  activitys3.value = data3.data
+  activitys1.value = await getActivityData(query1.value)
+  activitys2.value = await getActivityData(query2.value)
+  activitys3.value = await getActivityData(query3.value)
 }
 
 onMounted(async () => {
