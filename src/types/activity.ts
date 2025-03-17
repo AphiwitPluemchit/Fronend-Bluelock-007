@@ -29,6 +29,7 @@ export type ActivityItem = {
   operator?: string
   studentYears?: number[]
   majors?: string[]
+  enrollmentCount?: number
 }
 
 export type EnrollmentSummary = {

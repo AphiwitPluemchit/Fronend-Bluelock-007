@@ -49,7 +49,12 @@
               padding="none"
               flat
               color="grey-8"
-              @click="() => { console.log(props.row); void goToPageDetail(props.row.id) }"
+              @click="
+                () => {
+                  console.log(props.row)
+                  void goToPageDetail(props.row.id)
+                }
+              "
             ></q-btn
           ></q-td> </template
       ></q-table>
@@ -154,10 +159,14 @@ import { onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import FilterDialog from 'src/components/Dialog/FilterDialog.vue'
 import { useActivityStore } from 'src/stores/activity'
-import type { Activity } from 'src/types/activity'
-// import { useActivityStore } from 'src/stores/activity'
-// const activityStore = useActivityStore()
-// ใช้ Vue Router
+import type { Activity, ActivityItem } from 'src/types/activity'
+import dayjs from 'dayjs'
+import 'dayjs/locale/th'
+import buddhistEra from 'dayjs/plugin/buddhistEra'
+
+dayjs.locale('th')
+dayjs.extend(buddhistEra)
+
 const router = useRouter()
 
 const activityStore = useActivityStore()
@@ -172,7 +181,6 @@ const goToPageDetail = async (id: string) => {
   // :to="`/Student/Activity/ActivityDetail/${activity.id}`"
   await router.push(`/Admin/ActivitiesManagement/ActivityDetail/${id}`)
 }
-
 
 const filters = ref<{
   year: string[]
@@ -249,27 +257,49 @@ onMounted(async () => {
 })
 
 function mapActivitiesToTableRows(activitys: Activity[]) {
-  if (!activitys || activitys.length === 0) {
-    return [] // ✅ ถ้าไม่มี Activity เลย ให้คืนค่าเป็น Array ว่าง
-  }
-
+  if (!activitys) return []
+  console.log(activitys)
   return activitys.map((activity, index) => {
-    const firstItem = activity.activityItems?.[0] || {} // ✅ ป้องกัน `undefined` หรือ `null`
-    const firstDate = firstItem?.dates?.[0] || { date: '-', stime: '-', etime: '-' } // ✅ ตรวจสอบ `date`
+    if (!activity || !activity.activityItems) return []
+    const firstItem = activity.activityItems[0] || { dates: [] }
+    if (!firstItem.dates || firstItem.dates.length === 0) return []
+    const firstDate = firstItem.dates[0] || { date: '', stime: '', etime: '' }
 
     return {
-      index: index + 1, // ✅ ลำดับ
-      id: activity.id ?? '-',
-      name: activity.name ?? '-', // ✅ ถ้า `name` เป็น `undefined` ให้ใช้ "-"
-      date: firstDate.date ?? '-', // ✅ ถ้า `date` เป็น `null` หรือ `undefined` ให้ใช้ "-"
-      time: firstItem.hour ? `${firstItem.hour} ชม.` : '-', // ✅ แสดงเวลา
-      location: firstItem.rooms ?? '-', // ✅ ถ้า `room` เป็น `null` ให้ใช้ "-"
-      participants: `${firstItem.maxParticipants ?? 0} / ${firstItem.maxParticipants ?? 0} / ${firstItem.maxParticipants ?? 0}`, // ✅ จำนวนผู้เข้าร่วม (Mock Data)
-      type: activity.type ?? '-', // ✅ ประเภท
-      status: activity.activityState ?? '-', // ✅ สถานะ
-      action: '', // ✅ ปุ่ม Action (สามารถใส่ปุ่มเพิ่มได้)
+      index: index + 1,
+      id: activity.id,
+      name: activity.name || '-',
+      date: formatDateToThai(firstDate.date), // ✅ ใช้ format ตรงนี้
+      time: firstDate.stime && firstDate.etime ? `${firstDate.stime}-${firstDate.etime}` : '-', // เวลาแรก
+      location: firstItem.rooms?.[0] || '-', // สถานที่แรก
+      participants: enrollmentSummary(activity.activityItems), // ไว้ก่อน ยังไม่แน่ใจข้อมูล
+      type: activity.skill ? (activity.skill === 'hard' ? 'ทักษะวิชาการ' : 'เตรียมความพร้อม') : '-', // hard / soft
+      status: activity.activityState || '-',
+      action: '', // ปุ่ม action ภายหลัง
     }
   })
+}
+function formatDateToThai(dateString: string): string {
+  if (!dateString) return '-'
+  return dayjs(dateString).format('D MMM BBBB') // D = วัน, MMM = เดือน, BBBB = ปี พ.ศ.
+}
+
+function enrollmentSummary(activityItems: ActivityItem[]) {
+  if (!activityItems || activityItems.length === 0) return '-'
+  // คํานวณจํานวนลงทะเบียน
+  const totalEnrolled = activityItems.reduce(
+    (total, item) => total + (item.enrollmentCount ?? 0),
+    0,
+  )
+  // คํานวณจํานวนรับทะเบียน
+  const totalAccepted = activityItems.reduce(
+    (total, item) => total + (item.maxParticipants ?? 0),
+    0,
+  )
+  // คํานวณจํานวนเหลือ
+  const totalRemaining = totalAccepted - totalEnrolled
+
+  return `${totalEnrolled}/${totalAccepted}/${totalRemaining}`
 }
 </script>
 

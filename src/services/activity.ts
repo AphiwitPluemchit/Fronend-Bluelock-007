@@ -1,16 +1,33 @@
 import { api } from 'boot/axios'
-import type { Pagination, PaginationResponse } from 'src/types/pagination'
-import type { Activity } from 'src/types/activity'
+import type { ActivityPagination, PaginationResponse } from 'src/types/pagination'
+import type { EnrollmentSummary } from 'src/types/activity'
+import { type Activity } from 'src/types/activity'
 
 export class ActivityService {
   static path = 'activitys'
 
   // ✅ รองรับ Pagination และ Status Filter
-  static async getAll(params: Pagination, status?: string) {
+  static async getAll(params: ActivityPagination) {
     // ✅ รวม `status` เข้าไปใน Query
-    const queryParams = { ...params, status }
+
+    const { skill, activityState, major, studentYear, ...rest } = params
+
+    // change array to string to query
+    const skillQuery = skill.join(',')
+    const activityStateQuery = activityState.join(',')
+    const majorQuery = major.join(',')
+    const studentYearQuery = studentYear.join(',')
+
     try {
-      const res = await api.get<PaginationResponse<Activity>>(this.path, { params: queryParams })
+      const res = await api.get<PaginationResponse<Activity>>(this.path, {
+        params: {
+          ...rest,
+          skills: skillQuery,
+          activityStates: activityStateQuery,
+          majors: majorQuery,
+          studentYears: studentYearQuery,
+        },
+      })
 
       return res.data
     } catch (error) {
@@ -66,13 +83,12 @@ export class ActivityService {
 
   static async getEnrollmentSummary(activityId: string) {
     try {
-        const res = await api.get(`${this.path}/${activityId}/enrollment-summary`);
-        console.log("data",res.data)
-        return res.data;
+      const res = await api.get<EnrollmentSummary>(`${this.path}/${activityId}/enrollment-summary`)
+      console.log('data', res.data)
+      return res.data
     } catch (error) {
-        console.error(`Error fetching enrollment summary for activity ID: ${activityId}`, error);
-        throw error;
+      console.error(`Error fetching enrollment summary for activity ID: ${activityId}`, error)
+      throw error
     }
-}
-
+  }
 }
