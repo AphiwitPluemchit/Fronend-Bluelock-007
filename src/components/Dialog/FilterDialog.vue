@@ -14,8 +14,32 @@ const options = {
   year: ['1', '2', '3', '4'],
   major: ['CS', 'SE', 'ITDI', 'AAI'],
   statusStudent: ['ชั่วโมงครบแล้ว', 'ชั่วโมงน้อย', 'ชั่วโมงน้อยมาก', 'พ้นสภาพ'],
-  statusActivity: ['กำลังวางแผน', 'เปิดลงทะเบียน', 'ปิดลงทะเบียน', 'เสร็จสิ้น', 'ยกเลิก'],
-  categoryActivity: ['ชั่วโมงเตรียมความพร้อม', 'ชั่วโมงทักษะทางวิชาการ'],
+  statusActivity: ['planning', 'open', 'close', 'success', 'cancel'],
+  categoryActivity: ['soft', 'hard'],
+}
+// 'ชั่วโมงเตรียมความพร้อม', 'ชั่วโมงทักษะทางวิชาการ'
+function activityStatusLebel(status: string) {
+  switch (status) {
+    case 'planning':
+      return 'กำลังวางแผน'
+    case 'open':
+      return 'เปิดลงทะเบียน'
+    case 'close':
+      return 'ปิดลงทะเบียน'
+    case 'success':
+      return 'เสร็จสิ้น'
+    case 'cancel':
+      return 'ยกเลิก'
+  }
+}
+
+function activityCategoryLebel(category: string) {
+  switch (category) {
+    case 'soft':
+      return 'ชั่วโมงเตรียมความพร้อม'
+    case 'hard':
+      return 'ชั่วโมงทักษะทางวิชาการ'
+  }
 }
 
 // ฟิลเตอร์ที่เลือก
@@ -71,7 +95,7 @@ const applyFilters = () => {
             @click="toggleFilter('categoryActivity', categoryActivity)"
             style="height: 35px; width: 170px"
           >
-            <div style="margin: auto">{{ categoryActivity }}</div>
+            <div style="margin: auto">{{ activityCategoryLebel(categoryActivity) }}</div>
           </q-chip>
         </div>
         <!-- statusActivity -->
@@ -85,7 +109,7 @@ const applyFilters = () => {
             @click="toggleFilter('statusActivity', statusActivity)"
             style="height: 35px; width: 120px"
           >
-            <div style="margin: auto">{{ statusActivity }}</div>
+            <div style="margin: auto">{{ activityStatusLebel(statusActivity) }}</div>
           </q-chip>
         </div>
         <!-- major -->
