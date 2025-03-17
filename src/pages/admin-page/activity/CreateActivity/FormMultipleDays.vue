@@ -62,7 +62,7 @@
       <p class="label label_minWidth">วิทยากร :</p>
       <q-input outlined v-model="lecturer" style="width: 600px" />
     </div>
-
+    
     <!-- Food Menu -->
     <FoodSelector
       v-model:foodMenu="foodMenu"
@@ -289,16 +289,6 @@ const submitActivity = async () => {
     '': null,
   }
   const skill = skillMap[activityType.value] ?? null
-
-  const majorMap: Record<string, { id: string; name: string }> = {
-    cs: { id: '67bf0c358873e448798fed37', name: 'CS' },
-    se: { id: '67bf0bdf8873e448798fed36', name: 'SE' },
-    itdi: { id: '67bf0bda8873e448798fed35', name: 'ITDI' },
-    aai: { id: '67bf0bd48873e448798fed34', name: 'AAI' },
-  }
-  const majorNames = departments.value
-    .map((dep) => majorMap[dep]?.name)
-    .filter((name): name is string => !!name)
   const parsedHour = Number(totalHours.value)
   const parsedSeats = Number(seats.value)
   const foodVotes = foodMenu.value.map((food) => ({
@@ -324,7 +314,7 @@ const submitActivity = async () => {
           etime: day.endTime,
         })),
         studentYears: years.value.map((y) => parseInt(y, 10)),
-        majors: majorNames,
+        majors: departments.value,
         operator: lecturer.value,
         description: detailActivity.value,
       },
@@ -383,10 +373,6 @@ const submitActivity = async () => {
   height: 40px;
   width: 200px;
   font-size: 20px;
-}
-
-.checkbox-left {
-  align-self: flex-start;
 }
 .flex-container {
   display: flex;

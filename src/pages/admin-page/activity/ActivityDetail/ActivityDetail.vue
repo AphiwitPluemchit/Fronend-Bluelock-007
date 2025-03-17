@@ -1,13 +1,16 @@
 <script setup lang="ts">
-import { computed, ref } from 'vue'
+import { computed, ref ,onMounted} from 'vue'
 import ActivityDetailTab from './ActivityDetailTab.vue'
 import StudentList from './StudentList.vue'
 import RegistrationDetails from './RegistrationDetails.vue'
 import SummaryResult from './SummaryResult.vue'
 import AppBreadcrumbs from 'src/components/AppBreadcrumbs.vue'
-
+import { useRoute } from 'vue-router'
+import { ActivityService } from 'src/services/activity'
+import type { Activity } from 'src/types/activity'
 // import { route } from 'quasar/wrappers';
-
+const route = useRoute()
+const activity = ref<Activity | null>(null)
 const tab = ref<string>('activity')
 const search = ref<string>('')
 
@@ -24,6 +27,12 @@ const currentBreadcrumb = computed(() => {
   if (tab.value === 'students') return 'รายชื่อนิสิต'
   if (tab.value === 'summary') return 'สรุปผลกิจกรรม'
   return 'รายละเอียดกิจกรรม' // ค่าเริ่มต้น
+})
+onMounted(async () => {
+  const id = route.params.id as string
+  const res = await ActivityService.getOne(id)
+  console.log('📦 ได้ activity:', res)
+  activity.value = res.data 
 })
 
 const breadcrumbs = computed(() => ({
@@ -51,19 +60,21 @@ const breadcrumbs = computed(() => ({
     <!-- Tab Panels -->
     <q-tab-panels v-model="tab" animated class="custom-panels">
       <q-tab-panel name="activity" class="q-my-md">
-        <ActivityDetailTab />
+        <ActivityDetailTab 
+        v-if="activity"
+        :activity="activity"/>
       </q-tab-panel>
 
       <q-tab-panel name="registration" class="q-my-md">
-        <RegistrationDetails />
+        <RegistrationDetails :activity="activity" />
       </q-tab-panel>
 
       <q-tab-panel name="students" class="q-my-md">
-        <StudentList :search="search" />
+        <StudentList :search="search" :activity="activity" />
       </q-tab-panel>
 
       <q-tab-panel name="summary" class="q-my-md">
-        <SummaryResult />
+        <SummaryResult :activity="activity" />
       </q-tab-panel>
     </q-tab-panels>
   </q-page>

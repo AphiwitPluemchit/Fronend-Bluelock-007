@@ -49,7 +49,7 @@
               padding="none"
               flat
               color="grey-8"
-              @click="goToPageDetail(props.row.id)"
+              @click="() => { console.log(props.row); void goToPageDetail(props.row.id) }"
             ></q-btn
           ></q-td> </template
       ></q-table>
@@ -141,7 +141,7 @@
               padding="none"
               flat
               color="grey-8"
-              @click="goToPageDetail(props.row.action)"
+              @click="() => void goToPageDetail(props.row.id)"
             ></q-btn
           ></q-td> </template
       ></q-table>
@@ -158,17 +158,22 @@ import type { Activity } from 'src/types/activity'
 // import { useActivityStore } from 'src/stores/activity'
 // const activityStore = useActivityStore()
 // ใช้ Vue Router
-const activityStore = useActivityStore()
 const router = useRouter()
+
+const activityStore = useActivityStore()
+
 const goToPage = async () => {
   await router.push('/ActivitiesManagement/CreateActivity')
 }
 const goToPageDetail = async (id: string) => {
+  await router.push(`/ActivitiesManagement/ActivityDetail/${id}`)
   console.log(id)
   // await activityStore.fetchOneData(id)
   // :to="`/Student/Activity/ActivityDetail/${activity.id}`"
   await router.push(`/Admin/ActivitiesManagement/ActivityDetail/${id}`)
 }
+
+
 const filters = ref<{
   year: string[]
   major: string[]
@@ -250,7 +255,7 @@ function mapActivitiesToTableRows(activitys: Activity[]) {
 
   return activitys.map((activity, index) => {
     const firstItem = activity.activityItems?.[0] || {} // ✅ ป้องกัน `undefined` หรือ `null`
-    const firstDate = firstItem?.date?.[0] || { date: '-', stime: '-', etime: '-' } // ✅ ตรวจสอบ `date`
+    const firstDate = firstItem?.dates?.[0] || { date: '-', stime: '-', etime: '-' } // ✅ ตรวจสอบ `date`
 
     return {
       index: index + 1, // ✅ ลำดับ
@@ -258,7 +263,7 @@ function mapActivitiesToTableRows(activitys: Activity[]) {
       name: activity.name ?? '-', // ✅ ถ้า `name` เป็น `undefined` ให้ใช้ "-"
       date: firstDate.date ?? '-', // ✅ ถ้า `date` เป็น `null` หรือ `undefined` ให้ใช้ "-"
       time: firstItem.hour ? `${firstItem.hour} ชม.` : '-', // ✅ แสดงเวลา
-      location: firstItem.room ?? '-', // ✅ ถ้า `room` เป็น `null` ให้ใช้ "-"
+      location: firstItem.rooms ?? '-', // ✅ ถ้า `room` เป็น `null` ให้ใช้ "-"
       participants: `${firstItem.maxParticipants ?? 0} / ${firstItem.maxParticipants ?? 0} / ${firstItem.maxParticipants ?? 0}`, // ✅ จำนวนผู้เข้าร่วม (Mock Data)
       type: activity.type ?? '-', // ✅ ประเภท
       status: activity.activityState ?? '-', // ✅ สถานะ

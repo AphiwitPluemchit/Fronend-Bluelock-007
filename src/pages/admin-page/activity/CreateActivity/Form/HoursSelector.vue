@@ -29,6 +29,12 @@ const localHours = ref(props.modelValue);
 watch(localHours, (newVal) => {
   emit('update:modelValue', newVal);
 });
+watch(
+  () => props.modelValue,
+  (newVal) => {
+    localHours.value = newVal
+  }
+)
 
 const isNumber = (event: KeyboardEvent) => {
   const charCode = event.which ? event.which : event.keyCode;
