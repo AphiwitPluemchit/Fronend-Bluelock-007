@@ -31,10 +31,10 @@ const props = defineProps<{
   disable?: boolean; // เพิ่ม prop disable
 }>();
 
+const selectedDate = ref(props.modelValue || '')
 
 const emit = defineEmits(['update:modelValue'])
 
-const selectedDate = ref(props.modelValue || '')
 
 // คำนวณรูปแบบวันที่ให้เป็นแบบไทย
 const formattedDate = computed(() => {
@@ -54,7 +54,12 @@ const formattedDate = computed(() => {
 
   return `${parseInt(day, 10)} ${thaiMonth} ${thaiYear}`
 })
-
+watch(
+  () => props.modelValue,
+  (newVal) => {
+    selectedDate.value = newVal
+  }
+)
 // อัปเดตค่าเมื่อมีการเลือกวันใหม่
 watch(selectedDate, (newDate) => {
   emit('update:modelValue', newDate)

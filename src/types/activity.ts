@@ -33,7 +33,7 @@ export type EnrollmentSummary = {
   totalRegistered: number;
   remainingSlots: number;
   activityItemSums: ActivityItemSum[];
-};
+}
 
 export type ActivityItemSum = {
   activityItemName: string;

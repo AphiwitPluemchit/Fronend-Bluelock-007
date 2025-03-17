@@ -53,19 +53,9 @@ const selectedRoom = computed({
   get: () => props.modelValue,
   set: (val: string[]) => emit('update:modelValue', val),
 })
-
-watch(
-  () => props.modelValue,
-  (val) => {
-    selectedRoom.value = Array.isArray(val) ? [...val] : []
-  },
-  { immediate: true }
-)
-
 watch(selectedRoom, (val) => {
   emit('update:modelValue', val)
 })
-
 
 const showSuggestions = ref(false)
 const searchText = ref('')

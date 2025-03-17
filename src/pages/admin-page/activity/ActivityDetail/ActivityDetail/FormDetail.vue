@@ -397,6 +397,7 @@ onMounted(() => {
 
   activityLoaded.value = true
 })
+
 </script>
 
 <style scoped>
