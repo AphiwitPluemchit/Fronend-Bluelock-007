@@ -19,7 +19,7 @@ export type ActivityItem = {
   maxParticipants?: number | null
   rooms?: string[]
   hour?: number | null
-  date?:
+  dates?:
     | {
         date: string
         stime: string
