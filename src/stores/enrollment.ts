@@ -24,32 +24,38 @@ export const useEnrollmentStore = defineStore('enrollment', () => {
       const res: PaginationResponse<Enrollment> =
         await EnrollmentService.getEnrollmentsByActivityID(activityId, query.value)
 
-      // กรอง id ที่ไม่ต้องการ
-      const filteredData = res.data.filter((e) => e.id !== '000000000000000000000000')
-      enrollments.value = filteredData
-      total.value = filteredData.length // <<< ต้องเซต total ใหม่หลังกรอง!
+      if (Array.isArray(res.data)) {
+        const PLACEHOLDER_ID = '000000000000000000000000'
+        const filteredData = res.data.filter((e) => e.id !== PLACEHOLDER_ID)
+        enrollments.value = filteredData
+        total.value = res.meta.total
+      } else {
+        enrollments.value = []
+        total.value = 0
+      }
     } catch (error) {
       console.error('Error fetching enrollments:', error)
     }
   }
 
-  //   const resetQuery = () => {
-  //     query.value = {
-  //       page: 1,
-  //       limit: 10,
-  //       search: '',
-  //       sortBy: 'id',
-  //       order: 'DESC',
-  //       major: [],
-  //       status: [],
-  //       studentYears: [],
-  //     }
-  //   }
+  const resetQuery = () => {
+    query.value = {
+      page: 1,
+      limit: 10,
+      search: '',
+      sortBy: 'id',
+      order: 'DESC',
+      major: [],
+      status: [],
+      studentYears: [],
+    }
+  }
 
   return {
     enrollments,
     total,
     query,
     fetchEnrollmentsByActivityID,
+    resetQuery,
   }
 })

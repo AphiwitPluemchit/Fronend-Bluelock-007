@@ -12,7 +12,11 @@ const activityId = route.params.id as string
 const props = defineProps<{ search: string }>()
 
 const showFilterDialog1 = ref(false)
-const filterCategories1 = ref(['year', 'major', 'statusStudent'])
+const filterCategories1 = ref([
+  'year', 
+  'major', 
+  'statusStudent',
+])
 
 const pagination = computed({
   get: () => ({
@@ -42,65 +46,39 @@ const onRequest = async (props: any) => {
   await enrollmentStore.fetchEnrollmentsByActivityID(activityId)
 }
 
-const statusTextToNumber = (statusText: string) => {
-  switch (statusText) {
-    case 'พ้นสภาพ':
-      return 0
-    case 'ชั่วโมงน้อยมาก':
-      return 1
-    case 'ชั่วโมงน้อย':
-      return 2
-    case 'ชั่วโมงครบแล้ว':
-      return 3
-    default:
-      return undefined // หรือ 0 ก็ได้
-  }
-}
-
-const getStatusText = (status: number) => {
+const getStatusText = (status: string) => {
   switch (status) {
-    case 0:
+    case '0':
       return 'พ้นสภาพ'
-    case 1:
+    case '1':
       return 'ชั่วโมงน้อยมาก'
-    case 2:
+    case '2':
       return 'ชั่วโมงน้อย'
-    case 3:
+    case '3':
       return 'ชั่วโมงครบแล้ว'
     default:
       return '-'
   }
 }
 
-const getStatusClass = (status: number) => {
-  if (status === 3) return 'status-complete'
-  if (status === 2) return 'status-medium'
-  if (status === 1) return 'status-low'
-  if (status === 0) return 'status-out'
+const getStatusClass = (status: string) => {
+  if (status === '3') return 'status-complete'
+  if (status === '2') return 'status-medium'
+  if (status === '1') return 'status-low'
+  if (status === '0') return 'status-out'
   return ''
 }
 
-// const applyStudentFilters = async (selectedFilters: {
-//   year: string[]
-//   major: string[]
-//   statusStudent: string[]
-// }) => {
-//   enrollmentStore.query.major = selectedFilters.major
-//   enrollmentStore.query.status = selectedFilters.statusStudent.map(getStatusText)
-//   enrollmentStore.query.studentYears = selectedFilters.year
-//   await fetchStudents()
-// }
-
-const applyStudentFilters = async (selectedFilters: {
+interface SelectedFilters {
   year: string[]
   major: string[]
   statusStudent: string[]
-}) => {
-  enrollmentStore.query.major = selectedFilters.major
-  enrollmentStore.query.status = selectedFilters.statusStudent
-    .map(statusTextToNumber)
-    .filter((v) => v !== undefined) // filter undefined เผื่อป้องกัน
+}
+
+const applyStudentFilters = async (selectedFilters: SelectedFilters) => {
   enrollmentStore.query.studentYears = selectedFilters.year
+  enrollmentStore.query.major = selectedFilters.major
+  enrollmentStore.query.status = selectedFilters.statusStudent // เก็บเป็น string[] ตรง ๆ ไปเลย
   await fetchStudents()
 }
 
@@ -167,7 +145,7 @@ onMounted(async () => {
         <q-btn class="btnfilter" @click="showFilterDialog1 = true">
           <img src="icons/sort.svg" alt="Sort Icon" width="30" height="30" />
           <FilterDialog
-          v-model="showFilterDialog1"
+          :model-value="showFilterDialog1"
           :categories="filterCategories1"
           @apply="applyStudentFilters"
           />

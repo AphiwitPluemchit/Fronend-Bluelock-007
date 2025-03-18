@@ -10,12 +10,12 @@ export type Enrollment = {
     code: string
     name: string
     major: string
-    status: number
+    status: string
   }
 }
 
 export type EnrollmentQuery = Pagination & {
   major?: string[]
-  status?: number[]
+  status?: string[]
   studentYears?: string[]
 }
