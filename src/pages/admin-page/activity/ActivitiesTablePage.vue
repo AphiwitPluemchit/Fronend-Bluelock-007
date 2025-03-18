@@ -38,7 +38,8 @@
         :rows="mapActivitiesToTableRows(activitys1)"
         :columns="columns"
         v-model:pagination="pagination1"
-        :rows-per-page-options="[5, 10, 15, 20]"
+        :rows-per-page-options="[5, 7, 10, 15, 20]"
+        @request="onRequest1"
         row-key="id"
         class="q-mt-md customtable"
       >
@@ -58,6 +59,14 @@
             ></q-btn
           ></q-td> </template
       ></q-table>
+      <!-- <div class="row justify-center q-mt-md">
+        <q-pagination
+          v-model="pagination1.page"
+          color="grey-8"
+          :max="pagination1.rowsNumber / pagination1.rowsPerPage || 1"
+          size="sm"
+        />
+      </div> -->
     </section>
 
     <!-- ตาราง 2 -->
@@ -88,8 +97,9 @@
       <q-table
         :rows="mapActivitiesToTableRows(activitys2)"
         :columns="columns"
-        :v-model:pagination="pagination2"
-        :rows-per-page-options="[5, 10, 15, 20]"
+        v-model:pagination="pagination2"
+        :rows-per-page-options="[5, 7, 10, 15, 20]"
+        @request="onRequest2"
         row-key="id"
         class="q-mt-md"
       >
@@ -104,6 +114,14 @@
             ></q-btn
           ></q-td> </template
       ></q-table>
+      <!-- <div class="row justify-center q-mt-md">
+        <q-pagination
+          v-model="pagination2.page"
+          color="grey-8"
+          :max="query2.totalPages || 1"
+          size="sm"
+        />
+      </div> -->
     </section>
 
     <!-- ตาราง 3 -->
@@ -134,8 +152,9 @@
       <q-table
         :rows="mapActivitiesToTableRows(activitys3)"
         :columns="columns"
-        :v-model:pagination="pagination3"
-        :rows-per-page-options="[5, 10, 15, 20]"
+        v-model:pagination="pagination3"
+        :rows-per-page-options="[5, 7, 10, 15, 20]"
+        @request="onRequest3"
         row-key="id"
         class="q-mt-md"
       >
@@ -155,7 +174,7 @@
 </template>
 
 <script setup lang="ts">
-import { nextTick, onMounted, ref, watch } from 'vue'
+import { nextTick, onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import FilterDialog from 'src/components/Dialog/FilterDialog.vue'
 import type { Activity, ActivityItem } from 'src/types/activity'
@@ -201,18 +220,35 @@ interface SelectedFilters {
 
 async function getActivityData(qeury: ActivityPagination) {
   const data = await ActivityService.getAll(qeury)
-  return data.data
+  return data
 }
 
 const data1 = async () => {
-  console.log('test search click')
-  activitys1.value = await getActivityData(query1.value)
+  const data = await getActivityData(query1.value)
+  pagination1.value.page = query1.value.page
+  pagination1.value.rowsPerPage = query1.value.limit
+  pagination1.value.sortBy = query1.value.sortBy
+  pagination1.value.rowsNumber = data.meta.total
+
+  activitys1.value = data.data
 }
 const data2 = async () => {
-  activitys2.value = await getActivityData(query2.value)
+  const data = await getActivityData(query2.value)
+  pagination2.value.page = query2.value.page
+  pagination2.value.rowsPerPage = query2.value.limit
+  pagination2.value.sortBy = query2.value.sortBy
+  pagination2.value.rowsNumber = data.meta.total
+
+  activitys2.value = data.data
 }
 const data3 = async () => {
-  activitys3.value = await getActivityData(query3.value)
+  const data = await getActivityData(query3.value)
+  pagination3.value.page = query3.value.page
+  pagination3.value.rowsPerPage = query3.value.limit
+  pagination3.value.sortBy = query3.value.sortBy
+  pagination3.value.rowsNumber = data.meta.total
+
+  activitys3.value = data.data
 }
 
 const applyFilters1 = async (selectedFilters: SelectedFilters) => {
@@ -220,7 +256,7 @@ const applyFilters1 = async (selectedFilters: SelectedFilters) => {
   query1.value.major = selectedFilters.major
   query1.value.activityState = selectedFilters.statusActivity
   query1.value.skill = selectedFilters.categoryActivity
-  activitys1.value = await getActivityData(query1.value)
+  await data1()
 }
 
 const applyFilters2 = async (selectedFilters: SelectedFilters) => {
@@ -228,7 +264,7 @@ const applyFilters2 = async (selectedFilters: SelectedFilters) => {
   query2.value.major = selectedFilters.major
   query2.value.activityState = selectedFilters.statusActivity
   query2.value.skill = selectedFilters.categoryActivity
-  activitys2.value = await getActivityData(query2.value)
+  await data2()
 }
 
 const applyFilters3 = async (selectedFilters: SelectedFilters) => {
@@ -236,7 +272,7 @@ const applyFilters3 = async (selectedFilters: SelectedFilters) => {
   query3.value.major = selectedFilters.major
   query3.value.activityState = selectedFilters.statusActivity
   query3.value.skill = selectedFilters.categoryActivity
-  activitys3.value = await getActivityData(query3.value)
+  await data3()
 }
 
 // กำหนดโครงสร้างของคอลัมน์ในตาราง
@@ -298,9 +334,9 @@ const query3 = ref<ActivityPagination>({
 
 // **Wrapper function to fetch
 async function getActivities() {
-  activitys1.value = await getActivityData(query1.value)
-  activitys2.value = await getActivityData(query2.value)
-  activitys3.value = await getActivityData(query3.value)
+  await data1()
+  await data2()
+  await data3()
 }
 
 onMounted(async () => {
@@ -378,12 +414,14 @@ const pagination1 = ref({
   descending: query1.value.order === 'desc',
   page: query1.value.page,
   rowsPerPage: query1.value.limit,
+  rowsNumber: 0,
 })
 const pagination2 = ref({
   sortBy: query2.value.sortBy,
   descending: query2.value.order === 'desc',
   page: query2.value.page,
   rowsPerPage: query2.value.limit,
+  rowsNumber: 0,
 })
 
 const pagination3 = ref({
@@ -391,46 +429,39 @@ const pagination3 = ref({
   descending: query3.value.order === 'desc',
   page: query3.value.page,
   rowsPerPage: query3.value.limit,
+  rowsNumber: 0,
 })
 
-watch(
-  () => pagination1.value,
-  async () => {
-    query1.value.page = pagination1.value.page
-    query1.value.limit = pagination1.value.rowsPerPage
-    query1.value.sortBy = pagination1.value.sortBy
-    query1.value.order = pagination1.value.descending ? 'desc' : 'asc'
-    const data = await ActivityService.getAll(query1.value)
-    activitys1.value = data.data
-  },
-  { deep: true },
-)
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+async function onRequest1(props: any) {
+  const { page, rowsPerPage, sortBy, descending } = props.pagination
+  query1.value.page = page
+  query1.value.limit = rowsPerPage
+  query1.value.sortBy = sortBy
+  query1.value.order = descending ? 'desc' : 'asc'
 
-watch(
-  () => pagination2.value,
-  async () => {
-    query2.value.page = pagination2.value.page
-    query2.value.limit = pagination2.value.rowsPerPage
-    query2.value.sortBy = pagination2.value.sortBy
-    query2.value.order = pagination2.value.descending ? 'desc' : 'asc'
-    const data = await ActivityService.getAll(query2.value)
-    activitys2.value = data.data
-  },
-  { deep: true },
-)
+  await data1()
+}
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+async function onRequest2(props: any) {
+  const { page, rowsPerPage, sortBy, descending } = props.pagination
+  query2.value.page = page
+  query2.value.limit = rowsPerPage
+  query2.value.sortBy = sortBy
+  query2.value.order = descending ? 'desc' : 'asc'
 
-watch(
-  () => pagination3.value,
-  async () => {
-    query3.value.page = pagination3.value.page
-    query3.value.limit = pagination3.value.rowsPerPage
-    query3.value.sortBy = pagination3.value.sortBy
-    query3.value.order = pagination3.value.descending ? 'desc' : 'asc'
-    const data = await ActivityService.getAll(query3.value)
-    activitys3.value = data.data
-  },
-  { deep: true },
-)
+  await data2()
+}
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+async function onRequest3(props: any) {
+  const { page, rowsPerPage, sortBy, descending } = props.pagination
+  query3.value.page = page
+  query3.value.limit = rowsPerPage
+  query3.value.sortBy = sortBy
+  query3.value.order = descending ? 'desc' : 'asc'
+
+  await data3()
+}
 </script>
 
 <style scoped></style>
