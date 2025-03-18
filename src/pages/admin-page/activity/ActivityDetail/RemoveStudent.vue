@@ -2,7 +2,7 @@
 import { ref, defineEmits } from 'vue';
 
 // รับค่า ID ของนิสิต
-const props = defineProps<{ id: number }>();
+const props = defineProps<{ id: string }>();
 
 // ส่งอีเวนต์ออกไปให้ component แม่
 const emit = defineEmits(['removeStudent']);
