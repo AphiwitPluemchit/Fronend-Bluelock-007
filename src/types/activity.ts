@@ -10,6 +10,7 @@ export type Activity = {
   activityItems?: ActivityItem[] | null
   Foods?: Food[]
   foodVotes?: FoodVote[]
+  EnrollmentSummary?: EnrollmentSummary
 }
 
 export type ActivityItem = {
