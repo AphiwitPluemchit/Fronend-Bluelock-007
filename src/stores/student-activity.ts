@@ -34,18 +34,22 @@ export const useStudentActivitystore = defineStore('student-activity', {
   actions: {
     async fetchData() {
       this.dataInit = false
-      const data1 = await ActivityService.getAll(query.value, 'open')
+
+      const data1 = await ActivityService.getAll(query.value)
       this.activity = data1.data
       console.log(data1.data)
+      this.dataInit = true
       this.dataInit = true
     },
 
     async fetchOneData(id: string) {
       this.dataInit = false
+      this.dataInit = false
       const data = await ActivityService.getOne(id)
       this.form = data.data
       console.log(data)
       console.log(this.form)
+      this.dataInit = true
       this.dataInit = true
     },
 
