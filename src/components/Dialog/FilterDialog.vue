@@ -11,6 +11,7 @@ const props = defineProps<{
 }>()
 
 const emit = defineEmits(['update:modelValue', 'apply'])
+const showFilterDialog = ref(false)
 
 // ตัวเลือก
 const options = {
@@ -66,6 +67,7 @@ const toggleFilter = (category: keyof typeof filters.value, value: string) => {
 }
 
 const closeMenu = () => {
+  showFilterDialog.value = false
   emit('update:modelValue', false)
 }
 
@@ -79,6 +81,7 @@ const applyFilters = () => {
   <q-btn class="btnfilter">
     <img src="icons\sort.svg" alt="Sort Icon" width="30" height="30" />
     <q-menu
+      v-model="showFilterDialog"
       :transition-show="'jump-down'"
       :transition-hide="'jump-up'"
       :offset="[0, 5]"

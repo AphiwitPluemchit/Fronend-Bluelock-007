@@ -289,19 +289,40 @@ const applyFilters3 = async (selectedFilters: SelectedFilters) => {
 
 // กำหนดโครงสร้างของคอลัมน์ในตาราง
 const columns = [
-  { name: '_id', label: 'ลำดับ', field: '_id', sortable: true, align: 'left' as const },
-  { name: 'name', label: 'ชื่อกิจกรรม', field: 'name', sortable: true, align: 'left' as const },
-  { name: 'date', label: 'วันที่', field: 'date', align: 'left' as const },
-  { name: 'time', label: 'เวลา', field: 'time', align: 'left' as const },
-  { name: 'location', label: 'สถานที่', field: 'location', align: 'left' as const },
+  {
+    name: '_id',
+    label: 'ลำดับ',
+    field: '_id',
+    align: 'left' as const,
+    style: 'width: 5%',
+  },
+  {
+    name: 'name',
+    label: 'ชื่อกิจกรรม',
+    field: 'name',
+    align: 'left' as const,
+
+    style: 'width: 30%',
+  },
+  {
+    name: 'location',
+    label: 'สถานที่',
+    field: 'location',
+    align: 'left' as const,
+  },
   {
     name: 'participants',
     label: 'จำนวน (ลง/รับ/เหลือ)',
     field: 'participants',
     align: 'left' as const,
   },
-  { name: 'type', label: 'ประเภท', field: 'type', sortable: true, align: 'left' as const },
-  { name: 'status', label: 'สถานะ', field: 'status', sortable: true, align: 'left' as const },
+  { name: 'type', label: 'ประเภท', field: 'type', align: 'left' as const },
+  {
+    name: 'status',
+    label: 'สถานะ',
+    field: 'status',
+    align: 'left' as const,
+  },
   { name: 'action', label: '', field: '', align: 'left' as const },
 ]
 
@@ -478,14 +499,40 @@ async function onRequest3(props: any) {
 
 <style lang="scss">
 .my-sticky-header-table {
-  height: 350px;
-  overflow: auto;
+  /* ตัด max-height ออกจาก q-table */
 
+  /* Fix header */
   thead tr:first-child th {
     position: sticky;
     top: 0;
     z-index: 2;
-    background-color: #f5f5f5; // สี header ให้เด่น
+    background-color: #f5f5f5;
+  }
+
+  /* Make tbody scrollable */
+  tbody {
+    display: block;
+    height: 240px; /* ปรับความสูงตามต้องการ */
+    overflow-y: auto;
+  }
+
+  /* Ensure header and body columns align */
+  thead,
+  tbody tr {
+    display: table;
+    width: 100%;
+    table-layout: fixed;
+  }
+
+  /* Optional: ปรับ scrollbar ไม่ทับ */
+  tbody::-webkit-scrollbar {
+    width: 10px;
+  }
+
+  tbody::-webkit-scrollbar-thumb {
+    background: #a7a7a7;
+    border-radius: 10px;
+    cursor: pointer;
   }
 }
 </style>
