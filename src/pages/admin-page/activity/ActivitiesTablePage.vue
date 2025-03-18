@@ -45,7 +45,7 @@
         :rows-per-page-options="[5, 7, 10, 15, 20]"
         @request="onRequest1"
         row-key="id"
-        class="q-mt-md customtable"
+        class="q-mt-md my-sticky-header-table"
       >
         <template #body-cell-action="props">
           <q-td class="q-gutter-x-sm">
@@ -109,7 +109,7 @@
         :rows-per-page-options="[5, 7, 10, 15, 20]"
         @request="onRequest2"
         row-key="id"
-        class="q-mt-md"
+        class="q-mt-md my-sticky-header-table"
       >
         <template #body-cell-action="props">
           <q-td class="q-gutter-x-sm" style="min-width: 100px">
@@ -168,7 +168,7 @@
         :rows-per-page-options="[5, 7, 10, 15, 20]"
         @request="onRequest3"
         row-key="id"
-        class="q-mt-md"
+        class="q-mt-md my-sticky-header-table"
       >
         <template #body-cell-action="props">
           <q-td class="q-gutter-x-sm" style="min-width: 100px">
@@ -476,4 +476,16 @@ async function onRequest3(props: any) {
 }
 </script>
 
-<style scoped></style>
+<style lang="scss">
+.my-sticky-header-table {
+  height: 350px;
+  overflow: auto;
+
+  thead tr:first-child th {
+    position: sticky;
+    top: 0;
+    z-index: 2;
+    background-color: #f5f5f5; // สี header ให้เด่น
+  }
+}
+</style>
