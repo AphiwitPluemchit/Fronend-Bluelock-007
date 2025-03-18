@@ -25,14 +25,11 @@
               <q-icon name="search" />
             </template>
           </q-input>
-          <q-btn class="btnfilter" @click="showFilterDialog1 = true">
-            <img src="icons\sort.svg" alt="Sort Icon" width="30" height="30" />
-            <FilterDialog
-              v-model="showFilterDialog1"
-              :categories="filterCategories"
-              @apply="applyFilters1"
-            />
-          </q-btn>
+          <FilterDialog
+            :model-value="showFilterDialog1"
+            :categories="filterCategories"
+            @apply="applyFilters1"
+          />
         </div>
       </div>
       <q-table
@@ -81,14 +78,11 @@
               <q-icon name="search" />
             </template>
           </q-input>
-          <q-btn class="btnfilter" @click="showFilterDialog2 = true">
-            <img src="icons\sort.svg" alt="Sort Icon" width="30" height="30" />
-            <FilterDialog
-              v-model="showFilterDialog2"
-              :categories="filterCategories"
-              @apply="applyFilters2"
-            />
-          </q-btn>
+          <FilterDialog
+            :model-value="showFilterDialog2"
+            :categories="filterCategories"
+            @apply="applyFilters2"
+          />
         </div>
       </div>
       <q-table
@@ -130,14 +124,11 @@
               <q-icon name="search" />
             </template>
           </q-input>
-          <q-btn class="btnfilter" @click="showFilterDialog3 = true">
-            <img src="icons\sort.svg" alt="Sort Icon" width="30" height="30" />
-            <FilterDialog
-              v-model="showFilterDialog3"
-              :categories="filterCategories"
-              @apply="applyFilters3"
-            />
-          </q-btn>
+          <FilterDialog
+            :model-value="showFilterDialog3"
+            :categories="filterCategories"
+            @apply="applyFilters3"
+          />
         </div>
       </div>
       <q-table
