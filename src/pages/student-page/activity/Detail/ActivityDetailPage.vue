@@ -2,7 +2,6 @@
   <q-page class="q-pa-md">
     <!-- Breadcrumbs -->
     <AppBreadcrumbs :breadcrumbs="breadcrumbs" />
-    {{ activity }}
     <div class="activity-detail-card">
       <q-card-section class="row">
         <div class="col-12 col-md-4 text-center">

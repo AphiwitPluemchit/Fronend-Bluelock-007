@@ -25,11 +25,21 @@
         <q-item-label class="q-mb-lg q-ml-md">{{
           getActivityRooms(activity?.activityItems) ?? 'ไม่ระบุ'
         }}</q-item-label>
+        <q-item-label class="q-mb-lg q-ml-md">
+          {{
+            activity?.skill === 'hard'
+              ? 'ชั่วโมงทักษะเตรียมความพร้อม'
+              : activity?.skill === 'soft'
+                ? 'ชั่วโมงทักษะทางวิชาการ'
+                : 'ไม่ระบุประเภท'
+          }}</q-item-label
+        >
         <q-item-label class="q-mb-lg q-ml-md">{{
-          activity?.activityState ?? 'ไม่ระบุ'
+          getActivityOperator(activity?.activityItems)
         }}</q-item-label>
-        <q-item-label class="q-mb-lg q-ml-md">{{ 'ไม่ระบุ' }}</q-item-label>
-        <q-item-label class="q-mb-lg q-ml-md">{{ 'ไม่มีรายละเอียดเพิ่มเติม' }}</q-item-label>
+        <q-item-label class="q-mb-lg q-ml-md">{{
+          getActivityDetail(activity?.activityItems)
+        }}</q-item-label>
       </q-item-section>
     </q-item>
   </q-list>
@@ -62,5 +72,14 @@ const getActivityRooms = (activityItems: ActivityItem[] | null | undefined): str
   if (!activityItems || activityItems.length === 0) return 'ไม่ระบุ'
   const rooms = activityItems[0]?.rooms
   return Array.isArray(rooms) && rooms.length > 0 ? rooms.join(', ') : 'ไม่ระบุ'
+}
+const getActivityOperator = (activityItems: ActivityItem[] | null | undefined): string => {
+  const firstItem = activityItems?.[0]
+  return firstItem?.operator || 'ไม่ระบุ'
+}
+
+const getActivityDetail = (activityItems: ActivityItem[] | null | undefined): string => {
+  const firstItem = activityItems?.[0]
+  return firstItem?.description || 'ไม่มีรายละเอียดเพิ่มเติม'
 }
 </script>

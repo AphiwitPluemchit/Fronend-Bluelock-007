@@ -2,16 +2,6 @@
   <q-layout>
     <q-page-container>
       <q-page class="q-pa-md">
-        <!-- กล่องค้นหาและปุ่ม Filter -->
-        <!-- <div class="row items-center justify-end q-gutter-sm q-mb-md q-mr-md">
-          <div class="col-auto">
-            <ActivitySearch />
-          </div>
-
-          <div class="col-auto">
-            <FilterCard />
-          </div>
-        </div> -->
         <div class="row justify-start items-center">
           <div class="text-h4">กิจกรรมทั้งหมด</div>
         </div>
@@ -22,8 +12,9 @@
             <q-input
               dense
               outlined
-              v-model="search"
+              v-model="query.search"
               placeholder="ค้นหา"
+              @keyup.enter="fetchData()"
               class="q-mr-sm searchbox"
               :style="{ boxShadow: 'none' }"
             >
@@ -31,18 +22,15 @@
                 <q-icon name="search" />
               </template>
             </q-input>
-            <q-btn class="btnfilter" @click="showFilterDialog = true">
-              <img src="icons\sort.svg" alt="Sort Icon" width="30" height="30" />
-              <FilterDialog
-                v-model="showFilterDialog"
-                :categories="filterCategories"
-                @apply="applyFilters"
-              />
-            </q-btn>
+            <FilterDialog
+              :model-value="showFilterDialog"
+              :categories="filterCategories"
+              @apply="applyFilters"
+            />
           </div>
         </div>
         <!-- แสดงกิจกรรม -->
-        <div class="row q-col-gutter-md" v-if="StudentActivityStore.dataInit">
+        <div class="row q-col-gutter-md">
           <div
             class="col-xs-12 col-sm-6 col-md-6"
             v-for="activity in activitys"
@@ -60,31 +48,72 @@
 import { onMounted, ref } from 'vue'
 import ActivityCard from '../activity/ActivityCard.vue'
 import FilterDialog from 'src/components/Dialog/FilterDialog.vue'
-import { useStudentActivitystore } from 'src/stores/student-activity'
-const StudentActivityStore = useStudentActivitystore()
-const activitys = ref(StudentActivityStore.activity)
-const search = ref()
+// import { useStudentActivitystore } from 'src/stores/student-activity'
+import { ActivityService } from 'src/services/activity'
+import type { ActivityPagination } from 'src/types/pagination'
+import type { Activity } from 'src/types/activity'
+// const StudentActivityStore = useStudentActivitystore()
+const activitys = ref<Activity[]>([])
+// const search = ref()
 const showFilterDialog = ref(false)
-const filters = ref<{
+interface SelectedFilters {
   year: string[]
   major: string[]
   categoryActivity: string[]
-}>({
-  year: [],
-  major: [],
-  categoryActivity: [],
-})
-const filterCategories = ref(['year', 'major', 'categoryActivity'])
-const applyFilters = (selectedFilters: {
-  year: string[]
-  major: string[]
+}
 
-  categoryActivity: string[]
-}) => {
-  filters.value = selectedFilters
-  console.log('Filters Applied:', filters.value)
+const filterCategories = ref(['year', 'major', 'categoryActivity'])
+// const applyFilters = (selectedFilters: {
+//   year: string[]
+//   major: string[]
+
+//   categoryActivity: string[]
+// }) => {
+//   filters.value = selectedFilters
+//   console.log('Filters Applied:', filters.value)
+// }
+const applyFilters = async (selectedFilters: SelectedFilters) => {
+  console.log(selectedFilters)
+
+  query.value.studentYear = selectedFilters.year.map(Number)
+  query.value.major = selectedFilters.major
+  query.value.skill = selectedFilters.categoryActivity
+  await fetchData()
+}
+// async function getActivityData(qeury: ActivityPagination) {
+//   const data = await ActivityService.getAll(qeury)
+//   return data
+// }
+// const data = async () => {
+//   const data = await getActivityData(query.value)
+//   // pagination.value.page = query.value.page
+//   // pagination.value.rowsPerPage = query.value.limit
+//   // pagination.value.sortBy = query.value.sortBy
+//   // pagination.value.rowsNumber = data.meta.total
+//   activitys.value = data.data
+// }
+const query = ref<ActivityPagination>({
+  page: 1,
+  limit: 99,
+  search: '',
+  sortBy: '_id',
+  order: 'desc',
+  skill: [],
+  activityState: ['open', 'close'],
+  major: [],
+  studentYear: [],
+})
+const fetchData = async () => {
+  try {
+    console.log(query.value)
+    const response = await ActivityService.getAll(query.value)
+    activitys.value = response.data
+    console.log(response)
+  } catch (error) {
+    console.error('เกิดข้อผิดพลาดในการโหลดข้อมูลกิจกรรม:', error)
+  }
 }
 onMounted(async () => {
-  await StudentActivityStore.fetchData()
+  await fetchData()
 })
 </script>

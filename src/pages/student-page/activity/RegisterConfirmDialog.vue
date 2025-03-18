@@ -21,7 +21,7 @@
               v-for="item in activityItems"
               :key="item.id ?? 'default-key'"
               clickable
-              :color="selectedItemId === item.id ? 'blue-grey-3' : 'grey-4'"
+              :class="{ selected: selectedItemId === item.id }"
               text-color="black"
               @click="selectedItemId = item.id ?? null"
             >
@@ -32,7 +32,7 @@
         <div v-else>
           <q-item-label>
             <div class="text-h6">ชื่อกิจกรรม</div>
-            {{ activityItems[0]?.name }}</q-item-label
+            {{ activityItems[0]?.name }} ({{ activityItems[0]?.hour }} ชม.)</q-item-label
           >
         </div>
       </q-card-section>
@@ -50,8 +50,8 @@
               v-for="item in food"
               :key="item.foodName"
               clickable
-              :color="selectedFood === item.foodName ? 'blue-grey-3' : 'grey-4'"
               text-color="black"
+              :class="{ selected: selectedFood === item.foodName }"
               @click="selectedFood = item.foodName"
             >
               {{ item.foodName }}

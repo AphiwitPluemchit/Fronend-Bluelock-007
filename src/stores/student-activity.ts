@@ -3,21 +3,21 @@ import { Notify } from 'quasar'
 import { ActivityService } from 'src/services/activity'
 import { EnrollmentService } from 'src/services/enrollment'
 import type { Activity } from 'src/types/activity'
-import type { ActivityPagination } from 'src/types/pagination'
+// import type { ActivityPagination } from 'src/types/pagination'
 
-import { ref } from 'vue'
+// import { ref } from 'vue'
 
-const query = ref<ActivityPagination>({
-  page: 1,
-  limit: 10,
-  search: '',
-  sortBy: '_id',
-  order: 'desc',
-  skill: [],
-  activityState: ['open'],
-  major: [],
-  studentYear: [],
-})
+// const query = ref<ActivityPagination>({
+//   page: 1,
+//   limit: 10,
+//   search: '',
+//   sortBy: '_id',
+//   order: 'desc',
+//   skill: [],
+//   activityState: ['open'],
+//   major: [],
+//   studentYear: [],
+// })
 export const useStudentActivitystore = defineStore('student-activity', {
   state: () => ({
     dialogState: false,
@@ -32,15 +32,13 @@ export const useStudentActivitystore = defineStore('student-activity', {
   },
 
   actions: {
-    async fetchData() {
-      this.dataInit = false
-
-      const data1 = await ActivityService.getAll(query.value)
-      this.activity = data1.data
-      console.log(data1.data)
-      this.dataInit = true
-      this.dataInit = true
-    },
+    // async fetchData() {
+    //   this.dataInit = false
+    //   const data1 = await ActivityService.getAll(query.value)
+    //   this.activity = data1.data
+    //   console.log(data1.data)
+    //   this.dataInit = true
+    // },
 
     async fetchOneData(id: string) {
       this.dataInit = false
@@ -50,19 +48,18 @@ export const useStudentActivitystore = defineStore('student-activity', {
       console.log(data)
       console.log(this.form)
       this.dataInit = true
-      this.dataInit = true
     },
 
     async enrollment(payload: object) {
       const status = await EnrollmentService.enrollment(payload)
       if (status === 201) {
-        await this.fetchData()
+        // await this.fetchData()
       }
     },
     async createOne() {
       const status = await ActivityService.createOne(this.form)
       if (status === 201) {
-        await this.fetchData()
+        // await this.fetchData()
         this.notifySuccess('เพิ่มกิจกรรมสำเร็จ')
         this.dialogState = false
         this.resetForm()
@@ -72,7 +69,7 @@ export const useStudentActivitystore = defineStore('student-activity', {
     async updateOne() {
       const status = await ActivityService.updateOne(this.form)
       if (status === 200) {
-        await this.fetchData()
+        // await this.fetchData()
         this.notifySuccess('อัปเดตกิจกรรมสำเร็จ')
         this.dialogState = false
         this.resetForm()

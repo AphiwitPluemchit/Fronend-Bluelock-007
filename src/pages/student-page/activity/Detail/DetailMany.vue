@@ -18,7 +18,15 @@
         <q-item-label class="q-mb-lg q-ml-md">{{
           getActivityTime(activity?.activityItems)
         }}</q-item-label>
-        <q-item-label class="q-mb-lg q-ml-md"> {{ activity.skill }}</q-item-label>
+        <q-item-label class="q-mb-lg q-ml-md">
+          {{
+            activity?.skill === 'hard'
+              ? 'ชั่วโมงทักษะเตรียมความพร้อม'
+              : activity?.skill === 'soft'
+                ? 'ชั่วโมงทักษะทางวิชาการ'
+                : 'ไม่ระบุประเภท'
+          }}</q-item-label
+        >
         <q-item-label class="q-mb-lg q-ml-md"> {{ activity.activityItems?.length }}</q-item-label>
       </q-item-section>
     </q-item>
@@ -38,12 +46,14 @@
           <q-item-label class="q-mb-lg q-ml-md">รายละเอียดอื่นๆ :</q-item-label>
         </q-item-section>
         <q-item-section class="col-9">
-          <q-item-label class="q-mb-lg q-ml-md">{{ item.name }}</q-item-label>
-          <q-item-label class="q-mb-lg q-ml-md">{{ item.rooms?? 'ไม่ระบุ' }}</q-item-label>
+          <q-item-label class="q-mb-lg q-ml-md">{{ item.name ?? 'ไม่ระบุ' }}</q-item-label>
+          <q-item-label class="q-mb-lg q-ml-md">{{ item.rooms ?? 'ไม่ระบุ' }}</q-item-label>
 
           <q-item-label class="q-mb-lg q-ml-md">{{ item.hour ?? '-' }}</q-item-label>
-          <q-item-label class="q-mb-lg q-ml-md">{{ item.maxParticipants ?? '-' }}</q-item-label>
-          <q-item-label class="q-mb-lg q-ml-md">{{ '-' }}</q-item-label>
+          <q-item-label class="q-mb-lg q-ml-md">{{
+            item.maxParticipants ?? 'ไม่ระบุ'
+          }}</q-item-label>
+          <q-item-label class="q-mb-lg q-ml-md">{{ item.operator ?? 'ไม่ระบุ' }}</q-item-label>
           <q-item-label class="q-mb-lg q-ml-md">{{ item.description ?? 'ไม่ระบุ' }}</q-item-label>
         </q-item-section>
       </q-item>
