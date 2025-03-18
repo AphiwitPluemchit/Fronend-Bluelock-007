@@ -1,13 +1,11 @@
 <script setup lang="ts">
 import { ActivityService } from 'src/services/activity'
-import type { EnrollmentSummary } from 'src/types/activity'
+import type { Activity, EnrollmentSummary } from 'src/types/activity'
 import { onMounted, ref } from 'vue'
-// import { useRoute } from 'vue-router';
+import { useRoute } from 'vue-router';
 
-// const route = useRoute();
-// const activityId = route.params.activityId as string;
-
-const activityId = '67cd9fc07f71d9f9edc32cb0'
+const route = useRoute();
+const activityId = route.params.id as string;
 
 // โหลดรูปจาก Local Storage (ถ้ามี)
 const savedImageUrl = ref(localStorage.getItem('savedImageUrl') || '')
@@ -24,9 +22,23 @@ const fetchEnrollmentSummary = async () => {
   }
 }
 
+const activityDetail = ref<Activity | null>(null)
+
+const fetchActivityDetail = async () => {
+  try {
+    const response = await ActivityService.getOne(activityId)
+    console.log('Activity Detail:', response)
+    activityDetail.value = response.data
+  } catch (error) {
+    console.error('Error fetching activity detail:', error)
+  }
+}
+
 onMounted(async () => {
   await fetchEnrollmentSummary()
+  await fetchActivityDetail()
 })
+
 </script>
 
 <template>
@@ -55,24 +67,14 @@ onMounted(async () => {
       </div>
 
       <!-- กรณีที่มี activityItemName -->
-      <div
-        class="info-row"
-        v-if="enrollmentSummary?.activityItemSums?.some((item) => item.activityItemName)"
-      >
+      <div class="info-row" v-if="enrollmentSummary?.activityItemSums?.some((item) => item.activityItemName)">
         <div class="registration-info">
-          <div
-            class="row"
-            v-for="item in enrollmentSummary.activityItemSums"
-            :key="item.activityItemName"
-          >
+          <div class="row" v-for="item in enrollmentSummary.activityItemSums" :key="item.activityItemName">
             <span class="label">ผลการลงทะเบียน &nbsp; {{ item.activityItemName }} :</span>
-            <div
-              class="row q-gutter-x-sm"
-              v-for="major in item.registeredByMajor"
-              :key="major.majorName"
-            >
+            <div class="row" v-for="major in item.registeredByMajor" :key="major.majorName">
               <span class="text">นิสิตสาขา &nbsp; {{ major.majorName }}</span>
-              <span class="number">{{ major.count || '-' }}</span>
+              <span class="number">จำนวน</span>
+              <span class="quantity-number">{{ major.count || '-' }}</span>
               <span class="unit">คน</span>
             </div>
           </div>
@@ -80,19 +82,14 @@ onMounted(async () => {
       </div>
 
       <!-- กรณีที่ไม่มี activityItemName แต่มีข้อมูลนิสิต -->
-      <div
-        class="info-row"
-        v-else-if="enrollmentSummary?.activityItemSums?.[0]?.registeredByMajor?.length"
-      >
+      <div class="info-row" v-else-if="enrollmentSummary?.activityItemSums?.[0]?.registeredByMajor?.length">
         <span class="label">ผลการลงทะเบียนนิสิต :</span>
         <div class="registration-info">
-          <div
-            class="row"
-            v-for="major in enrollmentSummary.activityItemSums[0].registeredByMajor"
-            :key="major.majorName"
-          >
-            <span class="text">นิสิตสาขา {{ major.majorName }}</span>
-            <span class="number">{{ major.count || '-' }}</span>
+          <div class="row" v-for="major in enrollmentSummary.activityItemSums[0].registeredByMajor"
+            :key="major.majorName">
+            <span class="text">นิสิตสาขา &nbsp; {{ major.majorName }}</span>
+            <span class="number">จำนวน</span>
+            <span class="quantity-number">{{ major.count || '-' }}</span>
             <span class="unit">คน</span>
           </div>
         </div>
@@ -104,24 +101,18 @@ onMounted(async () => {
         <span class="text">ไม่มีข้อมูลการลงทะเบียนนิสิตสำหรับกิจกรรมนี้</span>
       </div>
 
-      <!-- แสดงเฉพาะเมื่อ foodSelections มีข้อมูล -->
-      <!-- <div class="info-row" v-if="foodSelections.length > 0">
-                <span class="label">ผลการเลือกอาหาร :</span>
-                <div class="registration-info">
-                    <div class="row" v-for="food in foodSelections" :key="food.name">
-                        <span class="major">{{ food.name }}</span>
-                        <span class="text">จำนวน</span>
-                        <span class="number">{{ food.count }}</span>
-                        <span class="unit">คน</span>
-                    </div>
-                </div>
-            </div> -->
-
-      <!-- แสดงข้อความเมื่อไม่มีข้อมูลการเลือกอาหาร -->
-      <!-- <div class="info-row" v-else>
-                <span class="label">ผลการเลือกอาหาร :</span>
-                <span class="text">ไม่มีข้อมูลการเลือกอาหารสำหรับกิจกรรมนี้</span>
-            </div> -->
+      <!-- อาหาร -->
+      <div class="info-row" v-if="activityDetail?.foodVotes?.length">
+        <span class="label">ผลการเลือกอาหาร :</span>
+        <div class="registration-info">
+          <div class="row" v-for="food in activityDetail.foodVotes" :key="food.foodName">
+            <span class="text">{{ food.foodName }}</span>
+            <span class="number">จำนวน</span>
+            <span class="quantity-number">{{ food.vote }}</span>
+            <span class="unit">คน</span>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 </template>
@@ -130,12 +121,11 @@ onMounted(async () => {
 .registration-container {
   display: flex;
   align-items: flex-start;
-  gap: 120px;
+  gap: 20px;
   background-color: #edf0f5;
   border-radius: 12px;
   height: 680px;
   overflow: hidden;
-  margin-left: 60px;
 }
 
 .registration-details {
@@ -157,7 +147,7 @@ onMounted(async () => {
   height: 330px;
   background-color: #d9d9d9;
   border-radius: 12px;
-  margin-left: 100px;
+  margin-left: 40px;
 }
 
 .registration-info {
@@ -176,14 +166,14 @@ onMounted(async () => {
   display: flex;
   justify-content: flex-start;
   align-items: center;
-  gap: 30px;
+  gap: 20px;
   /* flex-wrap: nowrap; */
 }
 
 .info-row {
   display: flex;
   align-items: flex-start;
-  gap: 30px;
+  gap: 20px;
   margin-top: 50px;
   flex-wrap: nowrap;
   /* ป้องกันการขึ้นบรรทัดใหม่ */
@@ -192,18 +182,18 @@ onMounted(async () => {
 .row {
   display: flex;
   align-items: center;
-  gap: 30px;
+  gap: 20px;
 }
 
 .number {
+  min-width: 30px;
   text-align: left;
 }
 
 .label {
   white-space: nowrap;
   text-align: right;
-  margin-right: 10px;
-  min-width: 320px;
+  min-width: 500px;
 }
 
 .value {
@@ -213,12 +203,16 @@ onMounted(async () => {
 }
 
 .unit {
-  min-width: 30px;
   text-align: left;
 }
 
 .text {
-  min-width: 50px;
+  min-width: 270px;
+  text-align: left;
+}
+
+.quantity-number {
+  min-width: 30px;
   text-align: left;
 }
 
@@ -226,7 +220,8 @@ onMounted(async () => {
 .value,
 .unit,
 .text,
-.number {
+.number,
+.quantity-number {
   /* font-weight: 500; */
   font-size: 20px;
   color: #000000;
