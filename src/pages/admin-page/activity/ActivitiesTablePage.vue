@@ -28,6 +28,10 @@
           <FilterDialog
             :model-value="showFilterDialog1"
             :categories="filterCategories"
+            :years="query1.studentYear"
+            :majors="query1.major"
+            :status-activities="query1.activityState"
+            :category-activities="query1.skill"
             @apply="applyFilters1"
           />
         </div>
@@ -90,6 +94,10 @@
           <FilterDialog
             :model-value="showFilterDialog2"
             :categories="filterCategories"
+            :years="query2.studentYear"
+            :majors="query2.major"
+            :status-activities="query2.activityState"
+            :category-activities="query2.skill"
             @apply="applyFilters2"
           />
         </div>
@@ -145,6 +153,10 @@
           <FilterDialog
             :model-value="showFilterDialog3"
             :categories="filterCategories"
+            :years="query3.studentYear"
+            :majors="query3.major"
+            :status-activities="query3.activityState"
+            :category-activities="query3.skill"
             @apply="applyFilters3"
           />
         </div>
