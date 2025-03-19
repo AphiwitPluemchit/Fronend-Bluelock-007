@@ -23,8 +23,22 @@ export const useEnrollmentStore = defineStore('enrollment', () => {
     try {
       console.log('Query Params before API:', query.value)
 
+      const paramsToSend = {
+        page: query.value.page,
+        limit: query.value.limit,
+        search: query.value.search,
+        sortBy: query.value.sortBy,
+        order: query.value.order,
+
+        // KEY สำคัญตรงนี้:
+        majors: query.value.major?.join(','), // backend รับเป็น comma-separated string
+        status: query.value.status?.join(','), // comma-separated string
+        years: query.value.studentYears?.join(','), // comma-separated string
+      }
+
       const res: PaginationResponse<Enrollment> =
-        await EnrollmentService.getEnrollmentsByActivityID(activityId, query.value)
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        await EnrollmentService.getEnrollmentsByActivityID(activityId, paramsToSend as any)
 
       console.log('Fetched enrollments:', res)
 
