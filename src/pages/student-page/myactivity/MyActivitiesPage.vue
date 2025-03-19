@@ -27,6 +27,10 @@
               :model-value="showFilterDialog"
               :categories="filterCategories"
               @apply="applyFilters"
+              :years="query.studentYear"
+              :majors="query.major"
+              :status-activities="query.activityState"
+              :category-activities="query.skill"
             />
           </div>
         </div>
@@ -46,38 +50,37 @@
 import { onMounted, ref } from 'vue'
 import MyActivityCard from '../myactivity/MyActivityCard.vue'
 import FilterDialog from 'src/components/Dialog/FilterDialog.vue'
-// import { ActivityService } from 'src/services/activity'
 import type { Activity } from 'src/types/activity'
-// import type { ActivityPagination } from 'src/types/pagination'
+import type { ActivityPagination } from 'src/types/pagination'
 import { EnrollmentService } from 'src/services/enrollment'
 import { useAuthStore } from 'src/stores/auth'
 const auth = useAuthStore()
 const activitys = ref<Activity[]>([])
 const search = ref()
 const showFilterDialog = ref(false)
+
 interface SelectedFilters {
   categoryActivity: string[]
 }
 
 const filterCategories = ref(['categoryActivity'])
-const applyFilters = (selectedFilters: SelectedFilters) => {
+const applyFilters = async (selectedFilters: SelectedFilters) => {
   console.log(selectedFilters)
-  // query.value.studentYear = selectedFilters.year.map(Number)
-  // query.value.major = selectedFilters.major
-  // query.value.skill = selectedFilters.categoryActivity
-  // await fetchData()
+
+  query.value.skill = selectedFilters.categoryActivity
+  await fetchData()
 }
-// const query = ref<ActivityPagination>({
-//   page: 1,
-//   limit: 99,
-//   search: '',
-//   sortBy: '_id',
-//   order: 'desc',
-//   skill: [],
-//   activityState: ['open', 'close'],
-//   major: [],
-//   studentYear: [],
-// })
+const query = ref<ActivityPagination>({
+  page: 1,
+  limit: 99,
+  search: '',
+  sortBy: '_id',
+  order: 'desc',
+  skill: [],
+  activityState: [],
+  major: [],
+  studentYear: [],
+})
 const fetchData = async () => {
   try {
     const studentId = `${auth.payload?.user?.id}`
