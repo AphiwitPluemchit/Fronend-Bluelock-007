@@ -202,10 +202,9 @@ dayjs.extend(buddhistEra)
 const router = useRouter()
 
 const goToPage = async () => {
-  await router.push('/ActivitiesManagement/CreateActivity')
+  await router.push('/Admin/ActivitiesManagement/CreateActivity')
 }
 const goToPageDetail = async (id: string) => {
-  await router.push(`/ActivitiesManagement/ActivityDetail/${id}`)
   console.log(id)
   // await fetchOneData(id)
   // :to="`/Student/Activity/ActivityDetail/${activity.id}`"
@@ -290,9 +289,9 @@ const applyFilters3 = async (selectedFilters: SelectedFilters) => {
 // กำหนดโครงสร้างของคอลัมน์ในตาราง
 const columns = [
   {
-    name: '_id',
+    name: 'no',
     label: 'ลำดับ',
-    field: '_id',
+    field: 'no',
     align: 'left' as const,
     style: 'width: 5%',
   },
@@ -392,7 +391,8 @@ function mapActivitiesToTableRows(activitys: Activity[]) {
     const firstDate = firstItem.dates[0] || { date: '', stime: '', etime: '' }
 
     return {
-      _id: index + 1,
+      no: index + 1,
+      id: activity.id,
       name: activity.name || '-',
       date: formatDateToThai(firstDate.date), // ✅ ใช้ format ตรงนี้
       time: firstDate.stime && firstDate.etime ? `${firstDate.stime}-${firstDate.etime}` : '-', // เวลาแรก
