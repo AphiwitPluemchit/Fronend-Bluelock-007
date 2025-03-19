@@ -28,6 +28,10 @@
           <FilterDialog
             :model-value="showFilterDialog1"
             :categories="filterCategories"
+            :years="query1.studentYear"
+            :majors="query1.major"
+            :status-activities="query1.activityState"
+            :category-activities="query1.skill"
             @apply="applyFilters1"
           />
         </div>
@@ -41,7 +45,7 @@
         :rows-per-page-options="[5, 7, 10, 15, 20]"
         @request="onRequest1"
         row-key="id"
-        class="q-mt-md customtable"
+        class="q-mt-md my-sticky-header-table"
       >
         <template #body-cell-action="props">
           <q-td class="q-gutter-x-sm">
@@ -90,6 +94,10 @@
           <FilterDialog
             :model-value="showFilterDialog2"
             :categories="filterCategories"
+            :years="query2.studentYear"
+            :majors="query2.major"
+            :status-activities="query2.activityState"
+            :category-activities="query2.skill"
             @apply="applyFilters2"
           />
         </div>
@@ -101,7 +109,7 @@
         :rows-per-page-options="[5, 7, 10, 15, 20]"
         @request="onRequest2"
         row-key="id"
-        class="q-mt-md"
+        class="q-mt-md my-sticky-header-table"
       >
         <template #body-cell-action="props">
           <q-td class="q-gutter-x-sm" style="min-width: 100px">
@@ -145,6 +153,10 @@
           <FilterDialog
             :model-value="showFilterDialog3"
             :categories="filterCategories"
+            :years="query3.studentYear"
+            :majors="query3.major"
+            :status-activities="query3.activityState"
+            :category-activities="query3.skill"
             @apply="applyFilters3"
           />
         </div>
@@ -156,7 +168,7 @@
         :rows-per-page-options="[5, 7, 10, 15, 20]"
         @request="onRequest3"
         row-key="id"
-        class="q-mt-md"
+        class="q-mt-md my-sticky-header-table"
       >
         <template #body-cell-action="props">
           <q-td class="q-gutter-x-sm" style="min-width: 100px">
@@ -277,19 +289,40 @@ const applyFilters3 = async (selectedFilters: SelectedFilters) => {
 
 // กำหนดโครงสร้างของคอลัมน์ในตาราง
 const columns = [
-  { name: '_id', label: 'ลำดับ', field: '_id', sortable: true, align: 'left' as const },
-  { name: 'name', label: 'ชื่อกิจกรรม', field: 'name', sortable: true, align: 'left' as const },
-  { name: 'date', label: 'วันที่', field: 'date', align: 'left' as const },
-  { name: 'time', label: 'เวลา', field: 'time', align: 'left' as const },
-  { name: 'location', label: 'สถานที่', field: 'location', align: 'left' as const },
+  {
+    name: '_id',
+    label: 'ลำดับ',
+    field: '_id',
+    align: 'left' as const,
+    style: 'width: 5%',
+  },
+  {
+    name: 'name',
+    label: 'ชื่อกิจกรรม',
+    field: 'name',
+    align: 'left' as const,
+
+    style: 'width: 30%',
+  },
+  {
+    name: 'location',
+    label: 'สถานที่',
+    field: 'location',
+    align: 'left' as const,
+  },
   {
     name: 'participants',
     label: 'จำนวน (ลง/รับ/เหลือ)',
     field: 'participants',
     align: 'left' as const,
   },
-  { name: 'type', label: 'ประเภท', field: 'type', sortable: true, align: 'left' as const },
-  { name: 'status', label: 'สถานะ', field: 'status', sortable: true, align: 'left' as const },
+  { name: 'type', label: 'ประเภท', field: 'type', align: 'left' as const },
+  {
+    name: 'status',
+    label: 'สถานะ',
+    field: 'status',
+    align: 'left' as const,
+  },
   { name: 'action', label: '', field: '', align: 'left' as const },
 ]
 
@@ -464,4 +497,42 @@ async function onRequest3(props: any) {
 }
 </script>
 
-<style scoped></style>
+<style lang="scss">
+.my-sticky-header-table {
+  /* ตัด max-height ออกจาก q-table */
+
+  /* Fix header */
+  thead tr:first-child th {
+    position: sticky;
+    top: 0;
+    z-index: 2;
+    background-color: #f5f5f5;
+  }
+
+  /* Make tbody scrollable */
+  tbody {
+    display: block;
+    height: 240px; /* ปรับความสูงตามต้องการ */
+    overflow-y: auto;
+  }
+
+  /* Ensure header and body columns align */
+  thead,
+  tbody tr {
+    display: table;
+    width: 100%;
+    table-layout: fixed;
+  }
+
+  /* Optional: ปรับ scrollbar ไม่ทับ */
+  tbody::-webkit-scrollbar {
+    width: 10px;
+  }
+
+  tbody::-webkit-scrollbar-thumb {
+    background: #a7a7a7;
+    border-radius: 10px;
+    cursor: pointer;
+  }
+}
+</style>

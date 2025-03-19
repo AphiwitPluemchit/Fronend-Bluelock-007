@@ -3,21 +3,20 @@ import { Notify } from 'quasar'
 import { ActivityService } from 'src/services/activity'
 import { EnrollmentService } from 'src/services/enrollment'
 import type { Activity } from 'src/types/activity'
-// import type { ActivityPagination } from 'src/types/pagination'
+import type { ActivityPagination } from 'src/types/pagination'
 
 // import { ref } from 'vue'
-
-// const query = ref<ActivityPagination>({
-//   page: 1,
-//   limit: 10,
-//   search: '',
-//   sortBy: '_id',
-//   order: 'desc',
-//   skill: [],
-//   activityState: ['open'],
-//   major: [],
-//   studentYear: [],
-// })
+const query = ref<ActivityPagination>({
+  page: 1,
+  limit: 10,
+  search: '',
+  sortBy: '_id',
+  order: 'desc',
+  skill: [],
+  activityState: ['open'],
+  major: [],
+  studentYear: [],
+})
 export const useStudentActivitystore = defineStore('student-activity', {
   state: () => ({
     dialogState: false,
@@ -32,13 +31,11 @@ export const useStudentActivitystore = defineStore('student-activity', {
   },
 
   actions: {
-    // async fetchData() {
-    //   this.dataInit = false
-    //   const data1 = await ActivityService.getAll(query.value)
-    //   this.activity = data1.data
-    //   console.log(data1.data)
-    //   this.dataInit = true
-    // },
+    async fetchData() {
+      const data1 = await ActivityService.getAll(query.value)
+      this.activity = data1.data
+      console.log(data1.data)
+    },
 
     async fetchOneData(id: string) {
       this.dataInit = false

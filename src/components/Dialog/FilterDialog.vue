@@ -4,17 +4,19 @@ import { ref, defineEmits, defineProps, computed } from 'vue'
 // Props
 const props = defineProps<{
   categories: string[]
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  anchor?: any
+  years?: number[]
+  majors?: string[]
+  statusActivities?: string[]
+  categoryActivities?: string[]
 }>()
 
 const emit = defineEmits(['update:modelValue', 'apply'])
+const showFilterDialog = ref(false)
 
 // ตัวเลือก
 const options = {
   year: ['1', '2', '3', '4'],
   major: ['CS', 'SE', 'ITDI', 'AAI'],
-  statusStudent: ['ชั่วโมงครบแล้ว', 'ชั่วโมงน้อย', 'ชั่วโมงน้อยมาก', 'พ้นสภาพ'],
   statusActivity: ['planning', 'open', 'close', 'success', 'cancel'],
   categoryActivity: ['soft', 'hard'],
 }
@@ -45,11 +47,10 @@ function activityCategoryLebel(category: string) {
 
 // ฟิลเตอร์ที่เลือก
 const filters = ref({
-  year: [] as string[],
-  major: [] as string[],
-  statusStudent: [] as string[],
-  statusActivity: [] as string[],
-  categoryActivity: [] as string[],
+  year: props.years ? props.years?.map((year) => year.toString()) : ([] as string[]),
+  major: props.majors ? props.majors : ([] as string[]),
+  statusActivity: props.statusActivities ? props.statusActivities : ([] as string[]),
+  categoryActivity: props.categoryActivities ? props.categoryActivities : ([] as string[]),
 })
 
 // ตรวจสอบหมวดที่ต้องแสดง
@@ -66,6 +67,7 @@ const toggleFilter = (category: keyof typeof filters.value, value: string) => {
 }
 
 const closeMenu = () => {
+  showFilterDialog.value = false
   emit('update:modelValue', false)
 }
 
@@ -79,6 +81,7 @@ const applyFilters = () => {
   <q-btn class="btnfilter">
     <img src="icons\sort.svg" alt="Sort Icon" width="30" height="30" />
     <q-menu
+      v-model="showFilterDialog"
       :transition-show="'jump-down'"
       :transition-hide="'jump-up'"
       :offset="[0, 5]"
