@@ -39,18 +39,19 @@ export class StudentService {
     }
   }
 
-  static async updateOne(obj: Partial<Student>) {
-    try {
-      if (!obj.id) {
-        throw new Error('Missing ID for update')
-      }
-      console.log('Updating student:', obj)
-      const res = await api.patch(`${this.path}/${obj.id}`, obj)
-      return res.status
-    } catch (error) {
-      console.error('Error updating student:', error)
-      throw error
+  static async updateOne(student: Student) {
+    const payload = {
+      code: student.code,
+      name: student.name,
+      email: student.email,
+      status: student.status,
+      softSkill: student.softSkill,
+      hardSkill: student.hardSkill,
+      major: student.major,
     }
+    console.log('Update Payload:', payload)
+
+    return await api.put(`/students/${student.id}`, payload)
   }
 
   static async removeOne(id: string) {
