@@ -1,5 +1,5 @@
 <template>
-  <q-card class="activity-card q-pa-md col-12">
+  <q-card class="activity-card q-pa-md col-12" @click="onClick(myActivity.id!)">
     <div class="row no-wrap items-center">
       <!-- รูปกิจกรรม -->
       <div class="col-2">
@@ -26,9 +26,15 @@
 </template>
 
 <script setup lang="ts">
+import { useRouter } from 'vue-router'
+
 import ActivityType from '../myactivity/ActivityType.vue'
 import type { Activity, ActivityItem } from 'src/types/activity'
 defineProps<{ myActivity: Activity }>()
+const router = useRouter()
+const onClick = async (id: string) => {
+  await router.push(`/Student/Activity/ActivityDetail/${id}`)
+}
 const getActivitydates = (activityItems: ActivityItem[] | null | undefined): string => {
   const firstItem = activityItems?.find((item) => item.dates && item.dates.length > 0)
   return firstItem?.dates
