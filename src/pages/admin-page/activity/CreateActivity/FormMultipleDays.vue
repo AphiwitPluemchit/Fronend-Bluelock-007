@@ -282,12 +282,18 @@ watch(foodMenu, (newVal) => {
   console.log('📦 foodMenu ใน component แม่:', newVal)
 })
 
+const props = defineProps<{
+  imageFile: File | null
+}>()
+
 const submitActivity = async () => {
+  console.log('🖼️ imageFile:', props.imageFile)
   const skillMap: Record<string, 'hard' | 'soft' | null> = {
     prep: 'hard',
     academic: 'soft',
     '': null,
   }
+
   const skill = skillMap[activityType.value] ?? null
   const parsedHour = Number(totalHours.value)
   const parsedSeats = Number(seats.value)
@@ -320,18 +326,23 @@ const submitActivity = async () => {
       },
     ],
   }
-  console.log('🧾 foodMenu ก่อน map:', foodMenu.value)
+
+  // const formData = new FormData()
+  // formData.append('data', JSON.stringify(payload))
+  // if (props.imageFile) {
+  //   formData.append('file', props.imageFile)
+  // }
+
   try {
-    console.log(payload)
     await ActivityService.createOne(payload)
-    alert('✅ สร้างกิจกรรมสำเร็จ')
+    alert('✅ สร้างกิจกรรมพร้อมรูปสำเร็จ')
     await router.push('/ActivitiesManagement')
   } catch (error) {
     console.error(error)
     alert('❌ เกิดข้อผิดพลาดในการสร้างกิจกรรม')
-    console.log(payload)
   }
 }
+
 </script>
 
 <style scoped>

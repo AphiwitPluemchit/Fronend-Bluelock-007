@@ -273,12 +273,10 @@ const submitActivity = async () => {
   }))
 
   const payload = {
-    id: '',
     type: 'many',
     name: activityName.value,
     activityState: 'planning',
     skill: skill ?? '',
-    file: 'image.jpg',
     activityItems,
     foodVotes,
   }

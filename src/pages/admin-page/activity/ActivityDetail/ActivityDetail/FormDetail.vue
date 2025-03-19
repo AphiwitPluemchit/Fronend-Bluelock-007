@@ -82,7 +82,12 @@
     </div>
 
     <!-- Food Menu -->
-    <FoodSelector v-model:foodMenu="foodMenu" class="input-group" :disable="!isEditing" />
+    <FoodSelector
+      v-model:foodMenu="foodMenu"
+      v-model:foodMenuDisplay="foodMenuDisplay"
+      class="input-group"
+      :disable="!isEditing"
+    />
 
     <!-- Detail Activity -->
     <div class="input-group">
@@ -121,6 +126,7 @@ import FoodSelector from 'src/pages/admin-page/activity/CreateActivity/Form/Food
 import ChangeStatusDialog from 'src/pages/admin-page/activity/ActivityDetail/ActivityDetail/ChangeStatusDialog.vue'
 import RoomSelector from 'src/pages/admin-page/activity/CreateActivity/Form/RoomSelector.vue'
 import type { Activity } from 'src/types/activity'
+import type { Food } from 'src/types/food'
 
 const props = defineProps<{
   activity: Activity | null
@@ -149,9 +155,11 @@ const detailActivity = ref('')
 const departments = ref<string[]>([])
 const years = ref<string[]>([])
 const activityDateRangeInternal = ref<string[]>([])
-const foodMenu = ref('')
 const roomName = ref<string[]>([])
 const activityStatus = ref('กำลังวางแผน') // ค่าปัจจุบันของสถานะ
+const foodMenu = ref<Food[]>([])
+const foodMenuDisplay = ref('')
+
 const handleStatusChange = (newStatus: string) => {
   activityStatus.value = newStatus
 }
@@ -339,7 +347,7 @@ const submitActivity = () => {
     departments: departments.value,
     years: years.value,
     lecturer: lecturer.value,
-    foodMenu: foodMenu.value,
+    foodVotes: foodMenu.value,
     detailActivity: detailActivity.value,
   }
 
@@ -368,7 +376,14 @@ onMounted(() => {
       : a.skill === 'soft'
         ? 'academic'
         : (activityStatus.value = a.activityState ?? 'กำลังวางแผน')
-  foodMenu.value = a.Foods?.map((f) => f.name).join(', ') ?? ''
+
+  foodMenu.value =
+    a.foodVotes?.map((f) => ({
+      id: '',
+      name: f.foodName,
+    })) ?? []
+
+  foodMenuDisplay.value = foodMenu.value.map((f) => f.name).join(', ')
 
   const firstItem = a.activityItems?.[0]
   if (firstItem) {
@@ -397,19 +412,17 @@ onMounted(() => {
 
   activityLoaded.value = true
 })
-
 </script>
 
 <style scoped>
-::v-deep(.q-field--disabled .q-field__control) {
+/* ::v-deep(.q-field--disabled .q-field__control) {
   background-color: #e0e0e0 !important;
   color: #757575 !important;
 }
 ::v-deep(.q-btn:disabled) {
   background-color: #e0e0e0 !important;
   color: #757575 !important;
-}
-
+} */
 ::v-deep(.q-field__control) {
   height: auto;
   background-color: white;

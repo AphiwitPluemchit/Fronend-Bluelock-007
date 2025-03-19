@@ -39,13 +39,14 @@
               unelevated
               flat
               class="FoodChip"
-              :class="{ 'active-btn': selectedFoods.includes(item) }"
+              :class="{ 'active-btn': selectedFoods.some(f => f.name === item) }"
               color="white"
               text-color="black"
               :label="item"
               @click="toggleSelection(item)"
               :disable="disable"
             />
+
             <!-- ปุ่มเพิ่มเมนู -->
             <q-btn
               v-if="!disable"
@@ -94,24 +95,39 @@
 </template>
 
 <script setup lang="ts">
-import { ref, defineEmits, defineProps, onMounted, nextTick } from 'vue'
+import { ref, defineEmits, defineProps, onMounted, nextTick, watch } from 'vue'
 import { FoodService } from 'src/services/food'
 import type { Food } from 'src/types/food'
 
-const props = defineProps<{ disable?: boolean }>()
+const props = defineProps<{
+  disable?: boolean
+  foodMenu?: Food[]
+}>()
+
 const emit = defineEmits<{
   (event: 'update:foodMenu', value: Food[]): void
   (event: 'update:foodMenuDisplay', value: string): void
 }>()
 
 const showFoodDialog = ref(false)
-const selectedFoods = ref<string[]>([])
-const foodMenuDisplay = ref('') // ✅ สำหรับ q-input
+const selectedFoods = ref<Food[]>([])
+const foodMenuDisplay = ref('')
 const addingNewFood = ref(false)
 const newFoodName = ref('')
 const inputField = ref<HTMLInputElement | null>(null)
-const menuItems = ref<string[]>([])
-const menuItemsIdMap = ref<Record<string, string>>({})
+
+const menuItems = ref<string[]>([]) // รายชื่ออาหารทั้งหมด
+const menuItemsIdMap = ref<Record<string, string>>({}) // map: name → id
+  watch(
+  () => props.foodMenu,
+  (newVal) => {
+    if (newVal) {
+      selectedFoods.value = [...newVal]
+      foodMenuDisplay.value = newVal.map(f => f.name).join(', ')
+    }
+  },
+  { immediate: true }
+)
 
 const openFoodDialog = () => {
   if (!props.disable) {
@@ -119,37 +135,35 @@ const openFoodDialog = () => {
   }
 }
 
-const toggleSelection = (item: string) => {
+const toggleSelection = (name: string) => {
   if (props.disable) return
-  if (selectedFoods.value.includes(item)) {
-    selectedFoods.value = selectedFoods.value.filter((food) => food !== item)
+
+  const id = menuItemsIdMap.value[name] || ''
+  const index = selectedFoods.value.findIndex(f => f.name === name)
+
+  if (index >= 0) {
+    selectedFoods.value.splice(index, 1)
   } else {
-    selectedFoods.value.push(item)
+    selectedFoods.value.push({ id, name })
   }
 }
 
 const confirmSelection = async (saveToBackend: boolean = false) => {
   if (props.disable) return
 
-  foodMenuDisplay.value = selectedFoods.value.join(', ')
+  foodMenuDisplay.value = selectedFoods.value.map(f => f.name).join(', ')
+  emit('update:foodMenu', selectedFoods.value)
   emit('update:foodMenuDisplay', foodMenuDisplay.value)
 
-  const selectedFoodObjects: Food[] = selectedFoods.value.map((name) => {
-    const id = menuItemsIdMap.value[name] || ''
-    return { id, name }
-  })
-  console.log('✅ emit update:foodMenu:', selectedFoodObjects)
-  emit('update:foodMenu', selectedFoodObjects)
   if (saveToBackend) {
     try {
       await FoodService.createAll(menuItems.value.map((name) => ({ id: '', name })))
-      console.log('บันทึกเมนูไปยัง backend แล้ว')
+      console.log('✅ บันทึกเมนูไปยัง backend แล้ว')
     } catch (error) {
-      console.error('บันทึกข้อมูลไม่สำเร็จ:', error)
+      console.error('❌ บันทึกข้อมูลไม่สำเร็จ:', error)
     }
   }
 
-  
   showFoodDialog.value = false
   localStorage.clear()
 }
@@ -197,7 +211,7 @@ onMounted(async () => {
       menuItems.value = Array.from(new Set([...menuItems.value, ...localItems]))
     }
   } catch (error) {
-    console.error('โหลดรายการอาหารล้มเหลว', error)
+    console.error('❌ โหลดรายการอาหารล้มเหลว', error)
   }
 })
 </script>

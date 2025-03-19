@@ -1,12 +1,15 @@
 <template>
   <q-page class="q-pa-md">
     <AppBreadcrumbs :breadcrumbs="breadcrumbs" />
-    <!-- กล่องครอบ image และ form -->
+
     <div class="wrapper">
       <div class="container">
         <div class="image-section">
-          <CreateActivity_Image />
-          <!-- Dropdown ใต้รูป -->
+          <CreateActivity_Image
+            ref="imageComponentRef"
+            @file-selected="handleFileSelected"
+          />
+
           <q-select
             v-model="selectedActivityType"
             :options="activityOptions"
@@ -22,7 +25,15 @@
         </div>
 
         <div class="form-section">
-          <component :is="getFormComponent || 'div'" />
+          <!-- ✅ เปลี่ยนตรงนี้ -->
+          <FormMultipleDays
+            v-if="selectedActivityType === 'กิจกรรมเดียว'"
+            :image-file="selectedImageFile"
+          />
+          <FormMultipleActivities
+            v-else
+            :image-file="selectedImageFile"
+          />
         </div>
       </div>
     </div>
@@ -30,30 +41,29 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue'
+import { ref } from 'vue'
 import CreateActivity_Image from './CreateActivity_Image.vue'
 import FormMultipleDays from './FormMultipleDays.vue'
 import FormMultipleActivities from './FormMultipleActivities.vue'
 import AppBreadcrumbs from 'src/components/AppBreadcrumbs.vue'
+
+const imageComponentRef = ref<InstanceType<typeof CreateActivity_Image> | null>(null)
+const selectedImageFile = ref<File | null>(null)
+
+const handleFileSelected = (file: File) => {
+  selectedImageFile.value = file
+}
+
+const activityOptions = ['กิจกรรมเดียว', 'หลายกิจกรรม']
+const selectedActivityType = ref('กิจกรรมเดียว')
 
 const breadcrumbs = ref({
   previousPage: { title: 'จัดการกิจกรรม', path: '/ActivitiesManagement' },
   currentPage: { title: 'สร้างกิจกรรม', path: '/ActivitiesManagement/CreateActivity' },
   icon: 'description',
 })
-const activityOptions = ['กิจกรรมเดียว', 'หลายกิจกรรม']
-const selectedActivityType = ref('กิจกรรมเดียว')
-const getFormComponent = computed(() => {
-  switch (selectedActivityType.value) {
-    case 'กิจกรรมเดียว':
-      return FormMultipleDays
-    case 'หลายกิจกรรม':
-      return FormMultipleActivities
-    default:
-      return null
-  }
-})
 </script>
+
 
 <style scoped>
 .wrapper {
