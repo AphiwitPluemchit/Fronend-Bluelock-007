@@ -1,4 +1,6 @@
 import { api } from 'boot/axios'
+import type { Enrollment, EnrollmentQuery } from 'src/types/enrollment'
+import type { PaginationResponse } from 'src/types/pagination'
 
 export class EnrollmentService {
   static path = 'enrollments'
@@ -20,6 +22,21 @@ export class EnrollmentService {
       return res.status
     } catch (error) {
       console.error(`Error deleting enrollment ID: ${id}`, error)
+      throw error
+    }
+  }
+
+  static async getEnrollmentsByActivityID(activityId: string, params: EnrollmentQuery) {
+    try {
+      console.log('Sending params:', params)
+      const res = await api.get<PaginationResponse<Enrollment>>(
+        `activitys/${activityId}/enrollments`,
+        { params },
+      )
+      console.log('Fetched enrollments:', res.data)
+      return res.data
+    } catch (error) {
+      console.error(`Error fetching enrollments for activity ID: ${activityId}`, error)
       throw error
     }
   }

@@ -1,173 +1,118 @@
 <script setup lang="ts">
-import { ref, defineProps, computed } from 'vue'
-import StudentStatus from './StudentStatus.vue'
+import { ref, defineProps, computed, onMounted } from 'vue'
 import RemoveStudent from './RemoveStudent.vue'
 import FilterDialog from 'src/components/Dialog/FilterDialog.vue'
+import { useEnrollmentStore } from 'src/stores/enrollment'
+import { useRoute } from 'vue-router'
+
+const enrollmentStore = useEnrollmentStore()
+const route = useRoute()
+const activityId = route.params.id as string
 
 const props = defineProps<{ search: string }>()
 
 const showFilterDialog1 = ref(false)
-const filterCategories1 = ref(['year', 'major', 'statusStudent'])
+const filterCategories1 = ref([
+  'year', 
+  'major', 
+  'statusStudent',
+])
 
-const filters = ref<{
-  year: string[]
-  major: string[]
-  statusStudent: string[]
-}>({
-  year: [],
-  major: [],
-  statusStudent: [],
+const pagination = computed({
+  get: () => ({
+    sortBy: enrollmentStore.query.sortBy,
+    descending: enrollmentStore.query.order === 'desc',
+    page: enrollmentStore.query.page,
+    rowsPerPage: enrollmentStore.query.limit,
+    rowsNumber: enrollmentStore.total,
+  }),
+
+  set: (val) => {
+    enrollmentStore.query.page = val.page
+    enrollmentStore.query.limit = val.rowsPerPage
+    enrollmentStore.query.sortBy = val.sortBy
+    enrollmentStore.query.order = val.descending ? 'desc' : 'asc'
+  },
 })
 
-const applyFilters = (selectedFilters: {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const onRequest = async (props: any) => {
+  const { page, rowsPerPage, sortBy, descending } = props.pagination
+  enrollmentStore.query.page = page
+  enrollmentStore.query.limit = rowsPerPage
+  enrollmentStore.query.sortBy = sortBy
+  enrollmentStore.query.order = descending ? 'desc' : 'asc'
+  enrollmentStore.query.search = search1.value
+
+  await enrollmentStore.fetchEnrollmentsByActivityID(activityId)
+}
+
+const getStatusText = (status: string) => {
+  const numStatus = parseInt(status, 10)
+  switch (numStatus) {
+    case 0:
+      return 'พ้นสภาพ'
+    case 1:
+      return 'ชั่วโมงน้อยมาก'
+    case 2:
+      return 'ชั่วโมงน้อย'
+    case 3:
+      return 'ชั่วโมงครบแล้ว'
+    default:
+      return '-'
+  }
+}
+
+const getStatusClass = (status: string) => {
+  const numStatus = parseInt(status, 10)
+  if (numStatus === 3) return 'status-complete'
+  if (numStatus === 2) return 'status-medium'
+  if (numStatus === 1) return 'status-low'
+  if (numStatus === 0) return 'status-out'
+  return ''
+}
+
+interface SelectedFilters {
   year: string[]
   major: string[]
   statusStudent: string[]
-}) => {
-  filters.value = selectedFilters
-  console.log('Filters Applied:', filters.value)
 }
 
-const emit = defineEmits(['update:search'])
+const applyStudentFilters = async (selectedFilters: SelectedFilters) => {
+  enrollmentStore.query.studentYears = selectedFilters.year
+  enrollmentStore.query.major = selectedFilters.major
+  enrollmentStore.query.status = selectedFilters.statusStudent
+  
+  enrollmentStore.query.page = 1 
+
+  await fetchStudents()
+}
+
+const handleApplyFilters = async (selectedFilters: SelectedFilters) => {
+  await applyStudentFilters(selectedFilters)
+  showFilterDialog1.value = false // <<< ปิด dialog หลัง apply
+}
 
 const search1 = ref(props.search)
 
-// ฟังก์ชันกรองข้อมูลเฉพาะ "ชื่อนิสิต"
-const updateSearch = () => {
-  emit('update:search', search1.value)
+const students = computed(() => {
+  return enrollmentStore.enrollments.map((enrollment) => ({
+    id: enrollment.id,
+    studentId: enrollment.student.code,
+    name: enrollment.student.name,
+    major: enrollment.student.major,
+    checkIn: '-',
+    checkOut: '-',
+    status: enrollment.student.status, // ใส่ฟังก์ชันแปลง
+  }))
+})
+
+const fetchStudents = async () => {
+  await onRequest({ pagination: pagination.value }) 
 }
 
-const students = ref([
-  {
-    id: 1,
-    studentId: '65160305',
-    name: 'ศิวัช รัตนวงศ์',
-    major: 'CS',
-    checkIn: '-',
-    checkOut: '-',
-    status: 'ชั่วโมงมาก',
-  },
-  {
-    id: 2,
-    studentId: '65160332',
-    name: 'กรณิสา ทองเอี่ยม',
-    major: 'CS',
-    checkIn: '-',
-    checkOut: '-',
-    status: 'ชั่วโมงน้อยมาก',
-  },
-  {
-    id: 3,
-    studentId: '65160332',
-    name: 'อุดม เมธี',
-    major: 'ITDI',
-    checkIn: '-',
-    checkOut: '-',
-    status: 'ชั่วโมงน้อย',
-  },
-  {
-    id: 4,
-    studentId: '65160332',
-    name: 'ภัทรพล เกียรติคุณ',
-    major: 'ITDI',
-    checkIn: '-',
-    checkOut: '-',
-    status: 'ชั่วโมงน้อย',
-  },
-  {
-    id: 5,
-    studentId: '65160332',
-    name: 'วณิช สีสังข์',
-    major: 'AAI',
-    checkIn: '-',
-    checkOut: '-',
-    status: 'ชั่วโมงน้อย',
-  },
-  {
-    id: 6,
-    studentId: '65160332',
-    name: 'กรรณา สีประสงค์',
-    major: 'CS',
-    checkIn: '-',
-    checkOut: '-',
-    status: 'ชั่วโมงน้อย',
-  },
-  {
-    id: 7,
-    studentId: '65160332',
-    name: 'ธนัชชา วงศ์สุวรรณ',
-    major: 'CS',
-    checkIn: '-',
-    checkOut: '-',
-    status: 'ชั่วโมงน้อย',
-  },
-  {
-    id: 8,
-    studentId: '65160332',
-    name: 'พัชราภา รัตนาราห',
-    major: 'CS',
-    checkIn: '-',
-    checkOut: '-',
-    status: 'ชั่วโมงน้อย',
-  },
-  {
-    id: 9,
-    studentId: '65160332',
-    name: 'กฤติกา รัตนไพโรจน์',
-    major: 'CS',
-    checkIn: '-',
-    checkOut: '-',
-    status: 'ชั่วโมงน้อย',
-  },
-  {
-    id: 5,
-    studentId: '65160332',
-    name: 'วณิช สีสังข์',
-    major: 'AAI',
-    checkIn: '-',
-    checkOut: '-',
-    status: 'ชั่วโมงน้อย',
-  },
-  {
-    id: 6,
-    studentId: '65160332',
-    name: 'กรรณา สีประสงค์',
-    major: 'CS',
-    checkIn: '-',
-    checkOut: '-',
-    status: 'ชั่วโมงน้อย',
-  },
-  {
-    id: 7,
-    studentId: '65160332',
-    name: 'ธนัชชา วงศ์สุวรรณ',
-    major: 'CS',
-    checkIn: '-',
-    checkOut: '-',
-    status: 'ชั่วโมงน้อย',
-  },
-  {
-    id: 8,
-    studentId: '65160332',
-    name: 'พัชราภา รัตนาราห',
-    major: 'CS',
-    checkIn: '-',
-    checkOut: '-',
-    status: 'ชั่วโมงน้อย',
-  },
-  {
-    id: 9,
-    studentId: '65160332',
-    name: 'กฤติกา รัตนไพโรจน์',
-    major: 'CS',
-    checkIn: '-',
-    checkOut: '-',
-    status: 'ชั่วโมงน้อย',
-  },
-])
-
 const columns = [
-  { name: 'index', label: 'ลำดับ', align: 'center' as const, field: 'index' },
+  { name: 'index', label: 'ลำดับ', align: 'left' as const, field: 'index' },
   { name: 'studentId', label: 'รหัสนิสิต', field: 'studentId', align: 'left' as const },
   { name: 'name', label: 'ชื่อ-สกุล', field: 'name', align: 'left' as const },
   { name: 'major', label: 'สาขา', field: 'major', align: 'left' as const },
@@ -177,74 +122,100 @@ const columns = [
   { name: 'actions', label: '', field: 'actions', align: 'center' as const },
 ]
 
-// ฟังก์ชันลบนิสิต
-const removeStudentFromList = (studentId: number) => {
-  students.value = students.value.filter((student) => student.id !== studentId)
+const removeStudentFromActivity = async (studentId: string) => {
+  try {
+    await enrollmentStore.deleteEnrollmentById(studentId)
+    // ลบเสร็จ → Refresh ตาราง
+    await fetchStudents()
+  } catch (error) {
+    console.error('Failed to delete student:', error)
+  }
 }
 
-const filteredStudents = computed(() => {
-  if (!search1.value) return students.value // ถ้า search1 ว่าง ให้แสดงทุกคน
-  return students.value.filter(
-    (student) => student.name.toLowerCase().includes(search1.value.toLowerCase()), // ค้นหาจาก "ชื่อ-สกุล"
-  )
+onMounted(async () => {
+  await enrollmentStore.fetchEnrollmentsByActivityID(activityId)
 })
+
 </script>
 
 <template>
   <div class="q-mb-sm student-container">
-      <div class="student-table-wrapper">
-          <div class="row justify-end items-center">
-              <!-- ช่องค้นหา -->
-              <q-input dense outlined v-model="search1" @update:model-value="updateSearch"
-                  placeholder="ค้นหาชื่อนิสิต" class="q-mr-sm searchbox" :style="{ boxShadow: 'none' }">
-                  <template v-slot:append>
-                      <q-icon name="search" />
-                  </template>
-              </q-input>
+    <div class="student-table-wrapper">
+      <div class="row justify-end items-center">
 
-              <q-btn class="btnfilter" @click="showFilterDialog1 = true">
-                  <img src="icons\sort.svg" alt="Sort Icon" width="30" height="30" />
-                  <FilterDialog v-model="showFilterDialog1" :categories="filterCategories1" @apply="applyFilters" />
-              </q-btn>
-          </div>
+        <!-- ช่องค้นหา -->
+        <q-input 
+        dense outlined 
+        v-model="search1" 
+        @keyup.enter="fetchStudents"
+        placeholder="ค้นหาชื่อนิสิต/ รหัสนิสิต"
+        class="q-mr-sm searchbox" 
+        :style="{ boxShadow: 'none' }"
+        >
+          <template v-slot:append>
+            <q-icon name="search" />
+          </template>
+        </q-input>
 
-          <q-table 
-          flat bordered 
-          :rows="filteredStudents" 
-          :columns="columns" 
-          row-key="id"
-          class="q-mt-md customtable my-sticky-header-table" 
-          :pagination="{ rowsPerPage: 10 }">
-
-              <!-- หัวตาราง Sticky -->
-              <template v-slot:header="props">
-                  <q-tr :props="props">
-                      <q-th v-for="col in props.cols" :key="col.name" :props="props" class="sticky-header">
-                          {{ col.label }}
-                      </q-th>
-                  </q-tr>
-              </template>
-
-              <template v-slot:body-cell-index="props">
-                  <q-td :props="props" class="text-center table-text bold-text">
-                      {{ props.rowIndex + 1 }}
-                  </q-td>
-              </template>
-
-              <template v-slot:body-cell-status="props">
-                  <q-td :props="props">
-                      <StudentStatus :status="props.row.status" />
-                  </q-td>
-              </template>
-
-              <!-- ปุ่มลบ -->
-              <template v-slot:body-cell-actions="props">
-                  <q-td :props="props">
-                      <RemoveStudent :id="props.row.id" @removeStudent="removeStudentFromList" />
-                  </q-td>
-              </template>
-          </q-table>
+        <!-- btnfilter -->
+        <q-btn class="btnfilter" @click="showFilterDialog1 = true">
+          <img src="icons/sort.svg" alt="Sort Icon" width="30" height="30" />
+          <FilterDialog
+          :model-value="showFilterDialog1"
+          :categories="filterCategories1"
+          @apply="handleApplyFilters"
+          @update:modelValue="(val) => showFilterDialog1 = val"
+          />
+        </q-btn>
       </div>
+
+      <q-table 
+      flat bordered 
+      :rows="students" 
+      :columns="columns" 
+      row-key="id"
+      class="q-mt-md customtable my-sticky-header-table" 
+      @request="onRequest" 
+      v-model:pagination="pagination"
+      :rows-per-page-options="[10, 20, 50]"
+      :rows-number="enrollmentStore.total"
+      >
+
+        <!-- หัวตาราง Sticky -->
+        <template v-slot:header="props">
+          <q-tr :props="props">
+            <q-th v-for="col in props.cols" :key="col.name" :props="props" class="sticky-header">
+              {{ col.label }}
+            </q-th>
+          </q-tr>
+        </template>
+
+        <template v-slot:body-cell-index="props">
+          <q-td :props="props" class="text-center table-text bold-text">
+            {{ props.rowIndex + 1 }}
+          </q-td>
+        </template>
+
+        <template v-slot:body-cell-status="props">
+          <q-td :props="props">
+            <q-btn
+            :label="getStatusText(props.row.status)"
+            rounded
+            unelevated
+            class="status-btn"
+            :class="getStatusClass(props.row.status)"
+            />
+          </q-td>
+        </template>
+
+        <!-- ปุ่มลบ -->
+        <template v-slot:body-cell-actions="props">
+          <q-td :props="props">
+            <RemoveStudent :id="props.row.id" @removeStudent="() => removeStudentFromActivity(props.row.id)" />
+          </q-td>
+        </template>
+      </q-table>
+    </div>
   </div>
 </template>
 
@@ -291,4 +262,35 @@ const filteredStudents = computed(() => {
   background-color: #fff;
 }
 
+.status-complete {
+    background-color: #cfd7ff;
+    color: #001780;
+    border: 2px solid #002dff;
+    padding: 3px 30px;
+    width: 130px;
+}
+
+.status-medium {
+    background-color: #ffe7ba;
+    color: #ff6f00;
+    border: 2px solid #ffa500;
+    padding: 3px 30px;
+    width: 130px;
+}
+
+.status-low {
+    background-color: #ffc5c5;
+    color: #ff0000;
+    border: 2px solid #f32323;
+    padding: 3px 30px;
+    width: 130px;
+}
+
+.status-out {
+    background-color: #dadada;
+    color: #000000;
+    border: 2px solid #575656;
+    padding: 3px 30px;
+    width: 130px;
+}
 </style>
