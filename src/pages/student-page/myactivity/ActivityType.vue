@@ -12,17 +12,17 @@
 import { computed } from 'vue'
 
 const props = defineProps({
-  type: String, // 'softSkill' หรือ 'hardSkill'
+  skill: String, // 'softSkill' หรือ 'hardSkill'
 })
 
 // คำนวณป้ายชื่อปุ่ม
 const buttonLabel = computed(() => {
-  return props.type === 'hardSkill' ? 'ทักษะทางวิชาการ' : 'เตรียมความพร้อม'
+  return props.skill === 'hardSkill' ? 'ทักษะทางวิชาการ' : 'เตรียมความพร้อม'
 })
 
 // กำหนดคลาสสีของปุ่ม
 const buttonClass = computed(() => {
-  return props.type === 'hardSkill' ? 'hard-skill' : 'soft-skill'
+  return props.skill === 'hardSkill' ? 'hard-skill' : 'soft-skill'
 })
 </script>
 
