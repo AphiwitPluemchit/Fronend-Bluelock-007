@@ -68,7 +68,7 @@ const register = async (activityItemId: string, selectedFood: string | null) => 
   const payload = {
     activityItemId,
     studentId: auth.payload?.user?.id,
-    selectedFood,
+    food: selectedFood,
   }
   console.log('ส่ง payload:', payload)
   await StudentActivityStore.enrollment(payload)
