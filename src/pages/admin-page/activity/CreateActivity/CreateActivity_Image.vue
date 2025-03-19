@@ -16,23 +16,33 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue';
+import { ref } from 'vue'
 
-const fileInput = ref<HTMLInputElement | null>(null);
-const previewUrl = ref<string | null>(null);
+const emit = defineEmits<{
+  (e: 'file-selected', file: File): void
+}>()
+
+const selectedFile = ref<File | null>(null)
+const fileInput = ref<HTMLInputElement | null>(null)
+const previewUrl = ref<string | null>(null)
 
 const triggerFileInput = () => {
-  fileInput.value?.click();
-};
+  fileInput.value?.click()
+}
 
 const onFileChange = (event: Event) => {
-  const target = event.target as HTMLInputElement;
-  const file = target.files?.[0];
+  const target = event.target as HTMLInputElement
+  const file = target.files?.[0]
   if (file) {
-    previewUrl.value = URL.createObjectURL(file);
+    selectedFile.value = file
+    previewUrl.value = URL.createObjectURL(file)
+    emit('file-selected', file) // ✅ ส่งให้แม่
   }
-};
+}
+
+defineExpose({ selectedFile })
 </script>
+
 
 <style scoped>
 .upload-box {

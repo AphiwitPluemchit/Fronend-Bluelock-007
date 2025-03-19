@@ -6,7 +6,7 @@
     <div class="activity-detail-card">
       <q-card-section class="row">
         <div class="col-12 col-md-4 text-center">
-          <q-img :src="getImageUrl(activity?.file)" class="activity-img" />
+          <!-- <q-img :src="getImageUrl(activity?.file)" class="activity-img" /> -->
         </div>
 
         <div class="col-12 col-md-8" v-if="activity">
@@ -56,9 +56,9 @@ const breadcrumbs = ref({
 })
 
 // ฟังก์ชันดึง URL ของรูปภาพ
-const getImageUrl = (fileName: string | undefined) => {
-  return fileName ? `/uploads/${fileName}` : '/icons/default-image.png'
-}
+// const getImageUrl = (fileName: string | undefined) => {
+//   return fileName ? `/uploads/${fileName}` : '/icons/default-image.png'
+// }
 
 // ฟังก์ชันลงทะเบียน
 const handleRegisterClick = () => {

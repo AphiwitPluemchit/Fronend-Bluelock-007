@@ -14,7 +14,7 @@
       <q-item-section class="col-9">
         <q-item-label class="q-mb-lg q-ml-md">{{ activity?.name ?? 'ไม่ระบุ' }}</q-item-label>
         <q-item-label class="q-mb-lg q-ml-md">{{
-          getActivityDate(activity?.activityItems) ?? 'ไม่ระบุ'
+          getActivitydates(activity?.activityItems) ?? 'ไม่ระบุ'
         }}</q-item-label>
         <q-item-label class="q-mb-lg q-ml-md">{{
           getActivityTime(activity?.activityItems) ?? 'ไม่ระบุ'
@@ -60,7 +60,7 @@ const getActivityHours = (activityItems: ActivityItem[] | null | undefined): str
 // ฟังก์ชันดึงรายชื่อห้องกิจกรรม
 const getActivityRooms = (activityItems: ActivityItem[] | null | undefined): string => {
   if (!activityItems || activityItems.length === 0) return 'ไม่ระบุ'
-  const rooms = activityItems[0]?.room
+  const rooms = activityItems[0]?.rooms
   return Array.isArray(rooms) && rooms.length > 0 ? rooms.join(', ') : 'ไม่ระบุ'
 }
 </script>

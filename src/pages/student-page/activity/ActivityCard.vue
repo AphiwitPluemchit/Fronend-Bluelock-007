@@ -3,7 +3,7 @@
     <div class="row q-pa-md items-stretch">
       <!-- รูปกิจกรรม -->
       <div class="col-md-4">
-        <q-img :src="getImageUrl(activity.file)" class="rounded-borders activity-img" />
+        <!-- <q-img :src="getImageUrl(activity.file)" class="rounded-borders activity-img" /> -->
       </div>
 
       <!-- รายละเอียดกิจกรรม -->
@@ -49,9 +49,9 @@ import type { Activity, ActivityItem } from 'src/types/activity'
 defineProps<{ activity: Activity }>()
 
 // ฟังก์ชันจัดการรูปภาพ (เช็คว่า `file` มีค่าหรือไม่)
-const getImageUrl = (fileName: string | undefined) => {
-  return fileName ? `/uploads/${fileName}` : '/icons/default-image.png'
-}
+// const getImageUrl = (fileName: string | undefined) => {
+//   return fileName ? `/uploads/${fileName}` : '/icons/default-image.png'
+// }
 
 // ฟังก์ชันดึงวันที่จาก `activityItems`
 const getActivitydates = (activityItems: ActivityItem[] | null | undefined): string => {

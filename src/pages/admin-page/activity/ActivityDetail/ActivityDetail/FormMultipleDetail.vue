@@ -43,7 +43,11 @@
     <!-- Activity Type -->
     <ActivityType v-model="activityType" class="input-group" :disable="!isEditing" />
     <HoursSelector v-model="totalHours" class="input-group" :disable="!isEditing" />
-    <FoodSelector v-model:foodMenu="foodMenu" class="input-group" :disable="!isEditing" />
+    <FoodSelector
+      v-model:foodMenu="foodMenu"
+      v-model:foodMenuDisplay="foodMenuDisplay"
+      :disable="!isEditing"
+    />
 
     <!-- Sub Activities List -->
     <div v-for="(subActivity, index) in subActivities" :key="index" class="sub-activity">
@@ -153,6 +157,7 @@ import DepartmentSelector from 'src/pages/admin-page/activity/CreateActivity/For
 import YearSelector from 'src/pages/admin-page/activity/CreateActivity/Form/YearSelector.vue'
 import ActivityType from 'src/pages/admin-page/activity/CreateActivity/Form/ActivityType.vue'
 import type { Activity } from 'src/types/activity'
+import type { Food } from 'src/types/food'
 
 const props = defineProps<{
   activity: Activity | null
@@ -182,7 +187,6 @@ const activityType = ref('')
 const showChangeStatusDialog = ref(false)
 const activityName = ref('')
 const totalHours = ref<number>(0)
-const foodMenu = ref('')
 const subActivities = ref<SubActivity[]>([])
 const activityDateInternal = ref('')
 const endTime = ref<string>('00:00')
@@ -191,6 +195,8 @@ const hour = ref<number>(0)
 const minute = ref<number>(0)
 const endHour = ref<number>(0)
 const endMinute = ref<number>(0)
+const foodMenuDisplay = ref('')
+const foodMenu = ref<Food[]>([])
 // ฟังก์ชันสำหรับฟอร์แมตเวลาเป็นสตริง
 const formatTime = (h: number, m: number): string => {
   return `${formatHour(h)}:${formatMinute(m)}`
@@ -309,7 +315,14 @@ onMounted(() => {
       : a.skill === 'soft'
         ? 'academic'
         : (activityStatus.value = a.activityState ?? 'กำลังวางแผน')
-  foodMenu.value = a.Foods?.map((f) => f.name).join(', ') ?? ''
+
+  foodMenu.value =
+    a.foodVotes?.map((f) => ({
+      id: '',
+      name: f.foodName,
+    })) ?? []
+
+  foodMenuDisplay.value = foodMenu.value.map((f) => f.name).join(', ')
 
   // ✅ เช็กก่อนว่า activityItems มีข้อมูล
   if (a.activityItems?.length) {
@@ -349,14 +362,14 @@ onMounted(() => {
 </script>
 
 <style scoped>
-::v-deep(.q-btn:disabled) {
+/* ::v-deep(.q-btn:disabled) {
   background-color: #e0e0e0 !important;
   color: #757575 !important;
 }
 ::v-deep(.q-field--disabled .q-field__control) {
   background-color: #e0e0e0 !important;
   color: #757575 !important;
-}
+} */
 ::v-deep(.q-field__control) {
   height: auto;
   background-color: white;
@@ -416,34 +429,11 @@ onMounted(() => {
   width: 200px;
   font-size: 20px;
 }
-.activityType-btn {
-  width: 200px;
-  height: 40px;
-  border-radius: 50px;
-  box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.2);
-  background-color: #ffffff;
-}
-.activityType-btn:last-child,
-.department-btn:last-child,
-.year-btn:last-child {
-  margin-right: 0;
-}
 .time-container {
   display: flex;
   justify-content: center;
   align-items: center;
   gap: 10px;
-}
-.year-btn {
-  width: 80px;
-  height: 40px;
-  border-radius: 50px;
-  box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.2);
-  background-color: #ffffff;
-  margin-right: 10px;
-}
-.year-btn:last-child {
-  margin-right: 0;
 }
 
 .remove-icon {
@@ -472,7 +462,6 @@ onMounted(() => {
 .active-btn {
   background-color: #d0e4ff !important;
 }
-
 .button-group {
   display: flex;
   justify-content: flex-end;
