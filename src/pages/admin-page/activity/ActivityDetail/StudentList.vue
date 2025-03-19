@@ -83,7 +83,6 @@ const applyStudentFilters = async (selectedFilters: SelectedFilters) => {
   enrollmentStore.query.major = selectedFilters.major
   enrollmentStore.query.status = selectedFilters.statusStudent
   
-  // กลับไปหน้าแรกก่อน!
   enrollmentStore.query.page = 1 
 
   await fetchStudents()
@@ -123,9 +122,14 @@ const columns = [
   { name: 'actions', label: '', field: 'actions', align: 'center' as const },
 ]
 
-// ฟังก์ชันลบนิสิต
-const removeStudentFromList = () => {
-  // students.value = students.value.filter((student) => student.id !== studentId)
+const removeStudentFromActivity = async (studentId: string) => {
+  try {
+    await enrollmentStore.deleteEnrollmentById(studentId)
+    // ลบเสร็จ → Refresh ตาราง
+    await fetchStudents()
+  } catch (error) {
+    console.error('Failed to delete student:', error)
+  }
 }
 
 onMounted(async () => {
@@ -207,7 +211,7 @@ onMounted(async () => {
         <!-- ปุ่มลบ -->
         <template v-slot:body-cell-actions="props">
           <q-td :props="props">
-            <RemoveStudent :id="props.row.id" @removeStudent="removeStudentFromList" />
+            <RemoveStudent :id="props.row.id" @removeStudent="() => removeStudentFromActivity(props.row.id)" />
           </q-td>
         </template>
       </q-table>
@@ -257,12 +261,6 @@ onMounted(async () => {
   z-index: 1;
   background-color: #fff;
 }
-
-/* .status-wrapper {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-} */
 
 .status-complete {
     background-color: #cfd7ff;
