@@ -26,6 +26,7 @@ const pagination = computed({
     rowsPerPage: enrollmentStore.query.limit,
     rowsNumber: enrollmentStore.total,
   }),
+
   set: (val) => {
     enrollmentStore.query.page = val.page
     enrollmentStore.query.limit = val.rowsPerPage
@@ -47,14 +48,15 @@ const onRequest = async (props: any) => {
 }
 
 const getStatusText = (status: string) => {
-  switch (status) {
-    case '0':
+  const numStatus = parseInt(status, 10)
+  switch (numStatus) {
+    case 0:
       return 'พ้นสภาพ'
-    case '1':
+    case 1:
       return 'ชั่วโมงน้อยมาก'
-    case '2':
+    case 2:
       return 'ชั่วโมงน้อย'
-    case '3':
+    case 3:
       return 'ชั่วโมงครบแล้ว'
     default:
       return '-'
@@ -62,10 +64,11 @@ const getStatusText = (status: string) => {
 }
 
 const getStatusClass = (status: string) => {
-  if (status === '3') return 'status-complete'
-  if (status === '2') return 'status-medium'
-  if (status === '1') return 'status-low'
-  if (status === '0') return 'status-out'
+  const numStatus = parseInt(status, 10)
+  if (numStatus === 3) return 'status-complete'
+  if (numStatus === 2) return 'status-medium'
+  if (numStatus === 1) return 'status-low'
+  if (numStatus === 0) return 'status-out'
   return ''
 }
 
@@ -78,8 +81,17 @@ interface SelectedFilters {
 const applyStudentFilters = async (selectedFilters: SelectedFilters) => {
   enrollmentStore.query.studentYears = selectedFilters.year
   enrollmentStore.query.major = selectedFilters.major
-  enrollmentStore.query.status = selectedFilters.statusStudent // เก็บเป็น string[] ตรง ๆ ไปเลย
+  enrollmentStore.query.status = selectedFilters.statusStudent
+  
+  // กลับไปหน้าแรกก่อน!
+  enrollmentStore.query.page = 1 
+
   await fetchStudents()
+}
+
+const handleApplyFilters = async (selectedFilters: SelectedFilters) => {
+  await applyStudentFilters(selectedFilters)
+  showFilterDialog1.value = false // <<< ปิด dialog หลัง apply
 }
 
 const search1 = ref(props.search)
@@ -132,7 +144,7 @@ onMounted(async () => {
         dense outlined 
         v-model="search1" 
         @keyup.enter="fetchStudents"
-        placeholder="ค้นหาชื่อนิสิต/รหัสนิสิต"
+        placeholder="ค้นหาชื่อนิสิต/ รหัสนิสิต"
         class="q-mr-sm searchbox" 
         :style="{ boxShadow: 'none' }"
         >
@@ -147,7 +159,8 @@ onMounted(async () => {
           <FilterDialog
           :model-value="showFilterDialog1"
           :categories="filterCategories1"
-          @apply="applyStudentFilters"
+          @apply="handleApplyFilters"
+          @update:modelValue="(val) => showFilterDialog1 = val"
           />
         </q-btn>
       </div>

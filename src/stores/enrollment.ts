@@ -21,8 +21,26 @@ export const useEnrollmentStore = defineStore('enrollment', () => {
 
   const fetchEnrollmentsByActivityID = async (activityId: string) => {
     try {
+      console.log('Query Params before API:', query.value) // <<< ใส่ตรงนี้
+
+      const paramsToSend = {
+        page: query.value.page,
+        limit: query.value.limit,
+        search: query.value.search,
+        sortBy: query.value.sortBy,
+        order: query.value.order,
+
+        // KEY สำคัญตรงนี้:
+        majors: query.value.major?.join(','), // backend รับเป็น comma-separated string
+        status: query.value.status?.join(','), // comma-separated string
+        years: query.value.studentYears?.join(','), // comma-separated string
+      }
+
       const res: PaginationResponse<Enrollment> =
-        await EnrollmentService.getEnrollmentsByActivityID(activityId, query.value)
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        await EnrollmentService.getEnrollmentsByActivityID(activityId, paramsToSend as any)
+
+      console.log('Fetched enrollments:', res) // <<< ดู response ด้วย
 
       if (Array.isArray(res.data)) {
         const PLACEHOLDER_ID = '000000000000000000000000'

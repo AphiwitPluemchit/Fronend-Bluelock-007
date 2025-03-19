@@ -1,6 +1,6 @@
 import { api } from 'boot/axios'
-import type { Enrollment } from 'src/types/enrollment'
-import type { Pagination, PaginationResponse } from 'src/types/pagination'
+import type { Enrollment, EnrollmentQuery } from 'src/types/enrollment'
+import type { PaginationResponse } from 'src/types/pagination'
 
 export class EnrollmentService {
   static path = 'enrollments'
@@ -26,8 +26,9 @@ export class EnrollmentService {
     }
   }
 
-  static async getEnrollmentsByActivityID(activityId: string, params: Pagination) {
+  static async getEnrollmentsByActivityID(activityId: string, params: EnrollmentQuery) {
     try {
+      console.log('Sending params:', params)
       const res = await api.get<PaginationResponse<Enrollment>>(
         `activitys/${activityId}/enrollments`,
         { params },
