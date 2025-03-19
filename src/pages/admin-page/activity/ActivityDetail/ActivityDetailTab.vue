@@ -1,4 +1,3 @@
-
 <template>
   <q-page class="q-pa-md">
     <div class="wrapper">
@@ -6,22 +5,16 @@
         <div class="image-section">
           <ImageDetail />
           <!-- Dropdown ใต้รูป -->
-          <q-select
-            v-model="selectedActivityType"
-            :options="activityOptions"
-            outlined
-            class="dropdown no-border bg-white"
-            popup-content-class="custom-dropdown"
-          >
+          <q-select v-model="selectedActivityType" outlined class="dropdown no-border bg-white">
             <template v-slot:selected>
               <div v-if="selectedActivityType">{{ selectedActivityType }}</div>
-              <div v-else class="text-grey">เลือกประเภท</div>
+              <div v-else class="text-black">เลือกประเภท</div>
             </template>
           </q-select>
         </div>
 
         <div class="form-section">
-          <component :is="getFormComponent || 'div'" />
+          <component :is="getFormComponent || 'div'" :activity="activity" />
         </div>
       </div>
     </div>
@@ -29,16 +22,31 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted, ref, computed } from 'vue'
+import { ref, computed, watch } from 'vue'
 import ImageDetail from './ActivityDetail/ImageDetail.vue'
 import FormDetail from './ActivityDetail/FormDetail.vue'
 import FormMultipleDetail from './ActivityDetail/FormMultipleDetail.vue'
+import type { Activity } from 'src/types/activity'
 
-onMounted(() => {})
+const props = defineProps<{
+  activity: Activity | null
+}>()
 
-const activityOptions = ['กิจกรรมเดียว', 'หลายกิจกรรม']
-const selectedActivityType = ref('กิจกรรมเดียว')
+const selectedActivityType = ref('')
 
+watch(
+  () => props.activity?.type,
+  (newType) => {
+    if (newType === 'one') {
+      selectedActivityType.value = 'กิจกรรมเดียว'
+    } else if (newType === 'many') {
+      selectedActivityType.value = 'หลายกิจกรรม'
+    } else {
+      selectedActivityType.value = ''
+    }
+  },
+  { immediate: true },
+)
 const getFormComponent = computed(() => {
   switch (selectedActivityType.value) {
     case 'กิจกรรมเดียว':
@@ -56,25 +64,27 @@ const getFormComponent = computed(() => {
   display: flex;
   align-items: flex-start;
   background-color: #edf0f5;
-  padding: 30px;
   border-radius: 12px;
 }
+
 .container {
   display: flex;
   align-items: flex-start;
   width: 100%;
 }
+
 .image-section {
   align-items: flex-start;
   width: 100%;
   flex: 1;
   margin-left: 100px;
 }
+
 .form-section {
   flex-grow: 1;
   overflow-x: hidden;
   overflow-y: auto;
-  max-height: 600px;
+  max-height: 680px;
   justify-items: flex-end;
   margin-right: 50px;
 }

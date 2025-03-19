@@ -40,6 +40,8 @@
       />
     </div>
 
+    <!-- Activity Type -->
+    <ActivityType v-model="activityType" class="input-group" :disable="!isEditing" />
     <HoursSelector v-model="totalHours" class="input-group" :disable="!isEditing" />
     <FoodSelector v-model:foodMenu="foodMenu" class="input-group" :disable="!isEditing" />
 
@@ -69,7 +71,7 @@
           :disable="!isEditing"
         />
       </div>
-      <RoomSelector v-model="roomName" class="input-group" :disable="!isEditing" />
+      <RoomSelector v-model="subActivity.roomName" class="input-group" :disable="!isEditing" />
 
       <!-- Room and Seats -->
       <div class="input-group">
@@ -85,10 +87,12 @@
         />
       </div>
 
-      <!-- Activity Type -->
-      <ActivityType v-model="subActivity.activityType" class="input-group"  :disable="!isEditing" />
       <!-- Department -->
-      <DepartmentSelector v-model="subActivity.departments" class="input-group" :disable="!isEditing" />
+      <DepartmentSelector
+        v-model="subActivity.departments"
+        class="input-group"
+        :disable="!isEditing"
+      />
       <!-- Year -->
       <YearSelector v-model="subActivity.years" class="input-group" :disable="!isEditing" />
 
@@ -110,7 +114,7 @@
           type="textarea"
           rows="10"
           outlined
-          v-model="detailActivity"
+          v-model="subActivity.detailActivity"
           style="width: 100%"
           :disable="!isEditing"
         />
@@ -138,7 +142,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref, watch } from 'vue'
+import { computed, onMounted, ref, watch } from 'vue'
 import FoodSelector from 'src/pages/admin-page/activity/CreateActivity/Form/FoodSelector.vue'
 import HoursSelector from 'src/pages/admin-page/activity/CreateActivity/Form/HoursSelector.vue'
 import SingleDate from 'src/pages/admin-page/activity/CreateActivity/Form/SingleDate.vue'
@@ -148,12 +152,15 @@ import RoomSelector from 'src/pages/admin-page/activity/CreateActivity/Form/Room
 import DepartmentSelector from 'src/pages/admin-page/activity/CreateActivity/Form/DepartmentSelector.vue'
 import YearSelector from 'src/pages/admin-page/activity/CreateActivity/Form/YearSelector.vue'
 import ActivityType from 'src/pages/admin-page/activity/CreateActivity/Form/ActivityType.vue'
+import type { Activity } from 'src/types/activity'
 
+const props = defineProps<{
+  activity: Activity | null
+}>()
 interface SubActivity {
   subActivityName: string
-  roomName: string
+  roomName: string[]
   seats: number
-  activityType: string
   lecturer: string
   detailActivity: string
   departments: string[]
@@ -162,18 +169,17 @@ interface SubActivity {
 const addSubActivity = () => {
   subActivities.value.push({
     subActivityName: '',
-    roomName: '',
+    roomName: [],
     seats: 0,
-    activityType: '',
     lecturer: '',
     detailActivity: '',
     departments: [],
     years: [],
   })
 }
-
+const activityLoaded = ref(false)
+const activityType = ref('')
 const showChangeStatusDialog = ref(false)
-const detailActivity = ref('')
 const activityName = ref('')
 const totalHours = ref<number>(0)
 const foodMenu = ref('')
@@ -185,7 +191,6 @@ const hour = ref<number>(0)
 const minute = ref<number>(0)
 const endHour = ref<number>(0)
 const endMinute = ref<number>(0)
-const roomName = ref<string[]>([])
 // ฟังก์ชันสำหรับฟอร์แมตเวลาเป็นสตริง
 const formatTime = (h: number, m: number): string => {
   return `${formatHour(h)}:${formatMinute(m)}`
@@ -266,15 +271,14 @@ const removeSubActivity = (index: number) => {
   subActivities.value.splice(index, 1)
 }
 const isEditing = ref(false)
-
-/******  b92a42f8-edcc-4981-a894-dc001fd684d1  *******/ const cancelEdit = () => {
+const cancelEdit = () => {
   isEditing.value = false
 }
 
 const saveChanges = () => {
   isEditing.value = false
 }
-const activityStatus = ref('กำลังวางแผน') // ค่าปัจจุบันของสถานะ
+const activityStatus = ref('กำลังวางแผน')
 const handleStatusChange = (newStatus: string) => {
   activityStatus.value = newStatus
 }
@@ -293,6 +297,54 @@ const statusClass = computed(() => {
     default:
       return ''
   }
+})
+onMounted(() => {
+  const a = props.activity
+  if (!a) return
+
+  activityName.value = a.name ?? ''
+  activityType.value =
+    a.skill === 'hard'
+      ? 'prep'
+      : a.skill === 'soft'
+        ? 'academic'
+        : (activityStatus.value = a.activityState ?? 'กำลังวางแผน')
+  foodMenu.value = a.Foods?.map((f) => f.name).join(', ') ?? ''
+
+  // ✅ เช็กก่อนว่า activityItems มีข้อมูล
+  if (a.activityItems?.length) {
+    const firstItem = a.activityItems[0]
+    if (!firstItem) return
+
+    // ✅ วันที่
+    const firstDate = firstItem.dates?.[0]?.date
+    if (firstDate) {
+      activityDateInternal.value = firstDate
+    }
+
+    // ✅ เวลา
+    const firstDateTime = firstItem.dates?.[0]
+    if (firstDateTime) {
+      selectedTime.value = firstDateTime.stime
+      endTime.value = firstDateTime.etime
+    }
+
+    // ✅ เวลาอบรมรวม
+    totalHours.value = firstItem.hour ?? 0
+
+    // ✅ Sub-activities
+    subActivities.value = a.activityItems.map((item) => ({
+      subActivityName: item.name ?? '',
+      roomName: Array.isArray(item.rooms) ? item.rooms : [],
+      seats: item.maxParticipants ?? 0,
+      lecturer: item.operator ?? '',
+      detailActivity: item.description ?? '',
+      departments: item.majors?.map(String) ?? [],
+      years: item.studentYears?.map(String) ?? [],
+    }))
+  }
+
+  activityLoaded.value = true
 })
 </script>
 
@@ -426,6 +478,8 @@ const statusClass = computed(() => {
   justify-content: flex-end;
   gap: 25px;
   margin-top: 30px;
+  margin-bottom: 100px;
+  width: 100%;
 }
 .status-btn {
   border-radius: 50px;

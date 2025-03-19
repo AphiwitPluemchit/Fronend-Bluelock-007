@@ -9,6 +9,7 @@ export type Activity = {
   file?: string
   activityItems?: ActivityItem[] | null
   Foods?: Food[]
+  EnrollmentSummary?: EnrollmentSummary
 }
 
 export type ActivityItem = {
@@ -16,29 +17,32 @@ export type ActivityItem = {
   name?: string | null
   description?: string | null
   maxParticipants?: number | null
-  room?: string[]
+  rooms?: string[]
   hour?: number | null
-  date?: {
-    date: string
-    stime: string
-    etime: string
-  }[] | null
+  dates?:
+    | {
+        date: string
+        stime: string
+        etime: string
+      }[]
+    | null
   operator?: string
   studentYears?: number[]
   majors?: string[]
+  enrollmentCount?: number
 }
 
 export type EnrollmentSummary = {
-  maxParticipants: number;
-  totalRegistered: number;
-  remainingSlots: number;
-  activityItemSums: ActivityItemSum[];
-};
+  maxParticipants: number
+  totalRegistered: number
+  remainingSlots: number
+  activityItemSums: ActivityItemSum[]
+}
 
 export type ActivityItemSum = {
-  activityItemName: string;
+  activityItemName: string
   registeredByMajor: {
-      count: number;
-      majorName: string;
-  }[];
-};
+    count: number
+    majorName: string
+  }[]
+}

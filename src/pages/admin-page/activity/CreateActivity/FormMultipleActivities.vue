@@ -179,8 +179,6 @@ const formatMinute = (minute: number): string => {
   return minute.toString().padStart(2, '0')
 }
 
-// ฟังก์ชันปรับชั่วโมงและนาที ที่ใช้ได้ทั้ง start time และ end time
-
 const isNumber = (event: KeyboardEvent) => {
   const charCode = event.which ? event.which : event.keyCode
 
@@ -240,12 +238,7 @@ const removeSubActivity = (index: number) => {
   subActivities.value.splice(index, 1)
 }
 const submitActivity = async () => {
-  const majorMap: Record<string, string> = {
-    cs: 'CS',
-    se: 'SE',
-    itdi: 'ITDI',
-    aai: 'AAI',
-  }
+
 
   const skillMap: Record<string, 'hard' | 'soft' | null> = {
     prep: 'hard',
@@ -254,9 +247,6 @@ const submitActivity = async () => {
   }
   const skill = skillMap[activityType.value] ?? null
   const activityItems = subActivities.value.map((sub) => {
-    const majorNames = sub.departments
-      .map((dep) => majorMap[dep])
-      .filter((name): name is string => !!name)
 
     return {
       name: sub.subActivityName,
@@ -271,13 +261,12 @@ const submitActivity = async () => {
         },
       ],
       studentYears: sub.years.map((y) => parseInt(y, 10)),
-      majors: majorNames,
+      majors: sub.departments,
       operator: sub.lecturer,
       description: sub.detailActivity,
     }
   })
 
-  // ✅ สร้าง foodVotes จาก foodMenu
   const foodVotes = foodMenu.value.map((food) => ({
     foodName: food.name,
     vote: 0,

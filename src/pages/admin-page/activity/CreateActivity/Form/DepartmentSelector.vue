@@ -31,10 +31,10 @@ const emit = defineEmits<{ (event: 'update:modelValue', value: string[]): void }
 
 // ✅ ไม่ต้อง map เป็น id ที่นี่
 const departmentOptions: DepartmentOption[] = [
-  { label: 'CS', value: 'cs', id: '67bf0c358873e448798fed37' },
-  { label: 'SE', value: 'se', id: '67bf0bdf8873e448798fed36' },
-  { label: 'ITDI', value: 'itdi', id: '67bf0bda8873e448798fed35' },
-  { label: 'AAI', value: 'aai', id: '67bf0bd48873e448798fed34' },
+  { label: 'CS', value: 'CS', id: '67bf0c358873e448798fed37' },
+  { label: 'SE', value: 'SE', id: '67bf0bdf8873e448798fed36' },
+  { label: 'ITDI', value: 'ITDI', id: '67bf0bda8873e448798fed35' },
+  { label: 'AAI', value: 'AAI', id: '67bf0bd48873e448798fed34' },
 ]
 
 const toggleDepartment = (value: string) => {
