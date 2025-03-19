@@ -2,7 +2,6 @@
   <q-page class="q-pa-md">
     <!-- Breadcrumbs -->
     <AppBreadcrumbs :breadcrumbs="breadcrumbs" />
-
     <div class="activity-detail-card">
       <q-card-section class="row">
         <div class="col-12 col-md-4 text-center">
@@ -27,6 +26,7 @@
     <RegisterConfirmDialog
       v-model="showDialog"
       :activityItems="activity?.activityItems ?? []"
+      :food="activity?.foodVotes ?? []"
       @confirm="register"
     />
   </q-page>
@@ -64,10 +64,11 @@ const handleRegisterClick = () => {
   showDialog.value = true
 }
 
-const register = async (activityItemId: string) => {
+const register = async (activityItemId: string, selectedFood: string | null) => {
   const payload = {
     activityItemId,
     studentId: auth.payload?.user?.id,
+    selectedFood,
   }
   console.log('ส่ง payload:', payload)
   await StudentActivityStore.enrollment(payload)

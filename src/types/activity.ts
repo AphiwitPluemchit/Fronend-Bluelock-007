@@ -1,4 +1,4 @@
-import type { Food } from './food'
+import type { Food, FoodVote } from './food'
 
 export type Activity = {
   id?: string
@@ -9,6 +9,7 @@ export type Activity = {
   file?: string
   activityItems?: ActivityItem[] | null
   Foods?: Food[]
+  foodVotes?: FoodVote[]
   EnrollmentSummary?: EnrollmentSummary
 }
 

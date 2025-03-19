@@ -14,22 +14,32 @@
       <q-item-section class="col-9">
         <q-item-label class="q-mb-lg q-ml-md">{{ activity?.name ?? 'ไม่ระบุ' }}</q-item-label>
         <q-item-label class="q-mb-lg q-ml-md">{{
-          getActivitydates(activity?.activityItems)
+          getActivitydates(activity?.activityItems) ?? 'ไม่ระบุ'
         }}</q-item-label>
         <q-item-label class="q-mb-lg q-ml-md">{{
-          getActivityTime(activity?.activityItems)
+          getActivityTime(activity?.activityItems) ?? 'ไม่ระบุ'
         }}</q-item-label>
         <q-item-label class="q-mb-lg q-ml-md"
-          >{{ getActivityHours(activity?.activityItems) }} ชั่วโมง</q-item-label
+          >{{ getActivityHours(activity?.activityItems) ?? 'ไม่ระบุ' }} ชั่วโมง</q-item-label
         >
-        <!-- <q-item-label class="q-mb-lg q-ml-md">{{
-          getActivityRoom(activity?.activityItems) ?? 'ไม่ระบุ'
-        }}</q-item-label> -->
         <q-item-label class="q-mb-lg q-ml-md">{{
-          activity?.activityState ?? 'ไม่ระบุ'
+          getActivityRooms(activity?.activityItems) ?? 'ไม่ระบุ'
         }}</q-item-label>
-        <q-item-label class="q-mb-lg q-ml-md">{{ 'ไม่ระบุ' }}</q-item-label>
-        <q-item-label class="q-mb-lg q-ml-md">{{ 'ไม่มีรายละเอียดเพิ่มเติม' }}</q-item-label>
+        <q-item-label class="q-mb-lg q-ml-md">
+          {{
+            activity?.skill === 'hard'
+              ? 'ชั่วโมงทักษะเตรียมความพร้อม'
+              : activity?.skill === 'soft'
+                ? 'ชั่วโมงทักษะทางวิชาการ'
+                : 'ไม่ระบุประเภท'
+          }}</q-item-label
+        >
+        <q-item-label class="q-mb-lg q-ml-md">{{
+          getActivityOperator(activity?.activityItems)
+        }}</q-item-label>
+        <q-item-label class="q-mb-lg q-ml-md">{{
+          getActivityDetail(activity?.activityItems)
+        }}</q-item-label>
       </q-item-section>
     </q-item>
   </q-list>
@@ -57,10 +67,19 @@ const getActivityTime = (activityItems: ActivityItem[] | null | undefined): stri
 const getActivityHours = (activityItems: ActivityItem[] | null | undefined): string => {
   return activityItems?.reduce((total, item) => total + (item.hour ?? 0), 0).toString() ?? '0'
 }
-// ฟังก์ชันดึงสถานที่จัดกิจกรรม (Room)
-// const getActivityRoom = (activityItems: ActivityItem[] | null | undefined): string => {
-//   // return activityItems && activityItems.length > 0
-//   //   ? (activityItems[0]?.room ?? 'ไม่ระบุ')
-//   //   : 'ไม่ระบุ'
-// }
+// ฟังก์ชันดึงรายชื่อห้องกิจกรรม
+const getActivityRooms = (activityItems: ActivityItem[] | null | undefined): string => {
+  if (!activityItems || activityItems.length === 0) return 'ไม่ระบุ'
+  const rooms = activityItems[0]?.rooms
+  return Array.isArray(rooms) && rooms.length > 0 ? rooms.join(', ') : 'ไม่ระบุ'
+}
+const getActivityOperator = (activityItems: ActivityItem[] | null | undefined): string => {
+  const firstItem = activityItems?.[0]
+  return firstItem?.operator || 'ไม่ระบุ'
+}
+
+const getActivityDetail = (activityItems: ActivityItem[] | null | undefined): string => {
+  const firstItem = activityItems?.[0]
+  return firstItem?.description || 'ไม่มีรายละเอียดเพิ่มเติม'
+}
 </script>

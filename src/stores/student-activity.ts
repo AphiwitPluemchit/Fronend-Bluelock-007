@@ -5,8 +5,7 @@ import { EnrollmentService } from 'src/services/enrollment'
 import type { Activity } from 'src/types/activity'
 import type { ActivityPagination } from 'src/types/pagination'
 
-import { ref } from 'vue'
-
+// import { ref } from 'vue'
 const query = ref<ActivityPagination>({
   page: 1,
   limit: 10,
@@ -23,7 +22,7 @@ export const useStudentActivitystore = defineStore('student-activity', {
     dialogState: false,
     activity: [] as Activity[],
     form: <Partial<Activity>>{}, // ใช้ Spread Operator เพื่อป้องกันการเปลี่ยนค่าโดยตรง
-    editMode: false,
+    dataInit: true,
     search: '',
   }),
 
@@ -39,22 +38,25 @@ export const useStudentActivitystore = defineStore('student-activity', {
     },
 
     async fetchOneData(id: string) {
+      this.dataInit = false
+      this.dataInit = false
       const data = await ActivityService.getOne(id)
       this.form = data.data
       console.log(data)
       console.log(this.form)
+      this.dataInit = true
     },
 
     async enrollment(payload: object) {
       const status = await EnrollmentService.enrollment(payload)
       if (status === 201) {
-        await this.fetchData()
+        // await this.fetchData()
       }
     },
     async createOne() {
       const status = await ActivityService.createOne(this.form)
       if (status === 201) {
-        await this.fetchData()
+        // await this.fetchData()
         this.notifySuccess('เพิ่มกิจกรรมสำเร็จ')
         this.dialogState = false
         this.resetForm()
@@ -64,7 +66,7 @@ export const useStudentActivitystore = defineStore('student-activity', {
     async updateOne() {
       const status = await ActivityService.updateOne(this.form)
       if (status === 200) {
-        await this.fetchData()
+        // await this.fetchData()
         this.notifySuccess('อัปเดตกิจกรรมสำเร็จ')
         this.dialogState = false
         this.resetForm()
