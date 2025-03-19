@@ -29,7 +29,7 @@ export const adminRoutes: RouteRecordRaw[] = [
         component: () => import('pages/admin-page/student/StudentTablePage.vue'),
       },
       {
-        path: 'StudentManagement/StudentDetail/:studentID',
+        path: 'StudentManagement/StudentDetail/:code',
         component: () => import('pages/admin-page/student/StudentDetail/StudentDetailPage.vue'),
       },
       {

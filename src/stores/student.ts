@@ -2,7 +2,7 @@ import { defineStore } from 'pinia'
 import { StudentService } from 'src/services/student'
 import type { Pagination } from 'src/types/pagination'
 import type { Student } from 'src/types/student'
-import { onMounted, ref } from 'vue'
+import { ref } from 'vue'
 
 export const useStudentStore = defineStore('student', () => {
   const students = ref<Student[]>([])
@@ -14,10 +14,10 @@ export const useStudentStore = defineStore('student', () => {
     name: '',
     email: '',
     password: '',
-    status: '',
+    status: 0,
     softSkill: 0,
     hardSkill: 0,
-    majorNames: '',
+    major: '',
   })
 
   // query
@@ -33,13 +33,6 @@ export const useStudentStore = defineStore('student', () => {
     const data = await StudentService.getAll(query.value)
     students.value = data.data
     console.log(data.data)
-
-    students.value = data.data.map((student) => ({
-      ...student,
-      majorNames: Array.isArray(student.majorNames)
-        ? student.majorNames.join(', ')
-        : student.majorNames || 'ไม่ระบุ',
-    }))
   }
 
   const getStudentByCode = async (code: string) => {
@@ -53,17 +46,27 @@ export const useStudentStore = defineStore('student', () => {
     student.value.status = data.status
     student.value.softSkill = data.softSkill
     student.value.hardSkill = data.hardSkill
-    student.value.majorNames = Array.isArray(data.majorNames)
-      ? data.majorNames.join(', ')
-      : data.majorNames || 'ไม่ระบุ'
+    student.value.major = data.major
   }
 
-  onMounted(async () => {
-    await getStudents()
-    if (code.value) {
-      await getStudentByCode(code.value)
+  const updateStudent = async () => {
+    try {
+      // แปลงค่าที่เป็นตัวเลขจาก String → Number ก่อนส่ง
+      const payload = {
+        ...student.value,
+        softSkill: Number(student.value.softSkill),
+        hardSkill: Number(student.value.hardSkill),
+        status: Number(student.value.status),
+      }
+      console.log('Update Payload:', payload) // debug
+      const res = await StudentService.updateOne(payload)
+      console.log('Update success:', res)
+      return true
+    } catch (error) {
+      console.error('Update failed:', error)
+      return false
     }
-  })
+  }
 
   return {
     getStudentByCode,
@@ -72,5 +75,6 @@ export const useStudentStore = defineStore('student', () => {
     query,
     students,
     code,
+    updateStudent,
   }
 })

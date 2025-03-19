@@ -5,8 +5,8 @@ export interface Student {
 
   email: string
   password: string
-  status: string
+  status: number
   softSkill: number
   hardSkill: number
-  majorNames: string
+  major: string
 }
