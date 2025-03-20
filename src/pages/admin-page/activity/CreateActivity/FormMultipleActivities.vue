@@ -237,9 +237,16 @@ const validatePositive = (field: 'totalHours' | 'seats', index?: number) => {
 const removeSubActivity = (index: number) => {
   subActivities.value.splice(index, 1)
 }
+const props = defineProps<{
+  imageFile: File | null
+  activity?: { file?: string | null } // 👈 ถ้ามีเฉพาะ field file ก็พอ
+}>()
+
+const goToPageDetail = async (id: string) => {
+  console.log('ไปหน้า ActivityDetail ID:', id)
+  await router.push(`/Admin/ActivitiesManagement/ActivityDetail/${id}`)
+}
 const submitActivity = async () => {
-
-
   const skillMap: Record<string, 'hard' | 'soft' | null> = {
     prep: 'hard',
     academic: 'soft',
@@ -284,12 +291,31 @@ const submitActivity = async () => {
   console.log('📦 payload ที่จะส่ง:', payload)
 
   try {
-    await ActivityService.createOne(payload)
-    alert('✅ สร้างกิจกรรมสำเร็จ')
-    await router.push('/ActivitiesManagement')
-  } catch (error) {
-    console.error('❌ เกิดข้อผิดพลาดในการสร้างกิจกรรม:', error)
-    console.log(payload)
+    const { status, id } = await ActivityService.createOne(payload)
+
+    if ((status === 200 || status === 201) && props.imageFile) {
+      try {
+        const uploadStatus = await ActivityService.uploadImage(
+          id,
+          props.imageFile,
+          props.activity?.file ?? undefined,
+        )
+
+        if (uploadStatus === 200 || uploadStatus === 201) {
+          alert('✅ สร้างกิจกรรม + อัปโหลดรูปสำเร็จ')
+        } else {
+          alert('⚠️ สร้างกิจกรรมสำเร็จ แต่อัปโหลดรูปไม่สำเร็จ')
+        }
+      } catch (uploadErr) {
+        console.error('Upload image failed:', uploadErr)
+        alert('❌ อัปโหลดรูปภาพไม่สำเร็จ')
+      }
+    }
+
+    await goToPageDetail(id)
+  } catch (err) {
+    console.error('Create activity failed:', err)
+    alert('❌ สร้างกิจกรรมไม่สำเร็จ')
   }
 }
 </script>

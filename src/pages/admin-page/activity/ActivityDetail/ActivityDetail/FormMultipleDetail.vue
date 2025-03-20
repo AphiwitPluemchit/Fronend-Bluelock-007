@@ -158,6 +158,8 @@ import YearSelector from 'src/pages/admin-page/activity/CreateActivity/Form/Year
 import ActivityType from 'src/pages/admin-page/activity/CreateActivity/Form/ActivityType.vue'
 import type { Activity } from 'src/types/activity'
 import type { Food } from 'src/types/food'
+import { ActivityService } from 'src/services/activity'
+import cloneDeep from 'lodash/cloneDeep'
 
 const props = defineProps<{
   activity: Activity | null
@@ -281,9 +283,55 @@ const cancelEdit = () => {
   isEditing.value = false
 }
 
-const saveChanges = () => {
+const saveChanges = async () => {
   isEditing.value = false
+
+  if (!props.activity?.id) {
+    console.error('ไม่พบ activity id')
+    return
+  }
+
+  const updated: Partial<Activity> = cloneDeep(props.activity)
+
+  updated.name = activityName.value
+  updated.skill = activityType.value === 'prep' ? 'hard' : 'soft'
+  updated.activityState = activityStatus.value
+
+  // ✅ Food Menu
+  updated.foodVotes = foodMenu.value.map(f => ({
+    foodName: f.name,
+    vote: 1
+  }))
+  // ✅ วันที่และเวลา
+  const date = activityDateInternal.value
+  const stime = selectedTime.value
+  const etime = endTime.value
+
+  // ✅ ActivityItems
+  updated.activityItems = subActivities.value.map(sub => ({
+    name: sub.subActivityName,
+    hour: Number(totalHours.value),
+    maxParticipants: Number(sub.seats),
+    rooms: sub.roomName,
+    description: sub.detailActivity,
+    operator: sub.lecturer,
+    majors: sub.departments.map(String),
+    studentYears: sub.years.map(y => Number(y)),
+    dates: [{
+      date,
+      stime,
+      etime
+    }]
+  }))
+
+  try {
+    const result = await ActivityService.updateOne(updated)
+    console.log('✅ อัปเดตกิจกรรมเรียบร้อย', result)
+  } catch (err) {
+    console.error('❌ ไม่สามารถอัปเดตกิจกรรมได้:', err)
+  }
 }
+
 const activityStatus = ref('กำลังวางแผน')
 const handleStatusChange = (newStatus: string) => {
   activityStatus.value = newStatus

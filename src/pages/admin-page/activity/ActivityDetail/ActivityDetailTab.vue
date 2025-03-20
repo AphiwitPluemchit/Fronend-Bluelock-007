@@ -3,7 +3,7 @@
     <div class="wrapper">
       <div class="container">
         <div class="image-section">
-          <ImageDetail />
+          <ImageDetail :imageFileName="activity?.file" @file-selected="handleFileSelected" />
           <!-- Dropdown ใต้รูป -->
           <q-select v-model="selectedActivityType" outlined class="dropdown no-border bg-white">
             <template v-slot:selected>
@@ -27,6 +27,12 @@ import ImageDetail from './ActivityDetail/ImageDetail.vue'
 import FormDetail from './ActivityDetail/FormDetail.vue'
 import FormMultipleDetail from './ActivityDetail/FormMultipleDetail.vue'
 import type { Activity } from 'src/types/activity'
+
+const selectedImageFile = ref<File | null>(null)
+
+const handleFileSelected = (file: File) => {
+  selectedImageFile.value = file
+}
 
 const props = defineProps<{
   activity: Activity | null

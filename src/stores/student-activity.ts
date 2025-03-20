@@ -55,13 +55,13 @@ export const useStudentActivitystore = defineStore('student-activity', {
       }
     },
     async createOne() {
-      const status = await ActivityService.createOne(this.form)
-      if (status === 201) {
-        // await this.fetchData()
-        this.notifySuccess('เพิ่มกิจกรรมสำเร็จ')
-        this.dialogState = false
-        this.resetForm()
-      }
+      // const status = await ActivityService.createOne(this.form)
+      // if (status === 201) {
+      //   // await this.fetchData()
+      //   this.notifySuccess('เพิ่มกิจกรรมสำเร็จ')
+      //   this.dialogState = false
+      //   this.resetForm()
+      // }
     },
 
     async updateOne() {

@@ -62,7 +62,7 @@
       <p class="label label_minWidth">วิทยากร :</p>
       <q-input outlined v-model="lecturer" style="width: 600px" />
     </div>
-    
+
     <!-- Food Menu -->
     <FoodSelector
       v-model:foodMenu="foodMenu"
@@ -278,16 +278,18 @@ onMounted(() => {
 
   generateDaysInRange(activityDateRangeInternal.value)
 })
-watch(foodMenu, (newVal) => {
-  console.log('📦 foodMenu ใน component แม่:', newVal)
-})
 
 const props = defineProps<{
   imageFile: File | null
+  activity?: { file?: string | null } // 👈 ถ้ามีเฉพาะ field file ก็พอ
 }>()
 
+const goToPageDetail = async (id: string) => {
+  console.log('ไปหน้า ActivityDetail ID:', id)
+  await router.push(`/Admin/ActivitiesManagement/ActivityDetail/${id}`)
+}
+
 const submitActivity = async () => {
-  console.log('🖼️ imageFile:', props.imageFile)
   const skillMap: Record<string, 'hard' | 'soft' | null> = {
     prep: 'hard',
     academic: 'soft',
@@ -307,6 +309,7 @@ const submitActivity = async () => {
     activityState: 'planning',
     name: activityName.value,
     skill: skill ?? '',
+    file: props.imageFile?.name ?? '',
     foodVotes,
     activityItems: [
       {
@@ -326,23 +329,34 @@ const submitActivity = async () => {
       },
     ],
   }
-
-  // const formData = new FormData()
-  // formData.append('data', JSON.stringify(payload))
-  // if (props.imageFile) {
-  //   formData.append('file', props.imageFile)
-  // }
-
   try {
-    await ActivityService.createOne(payload)
-    alert('✅ สร้างกิจกรรมพร้อมรูปสำเร็จ')
-    await router.push('/ActivitiesManagement')
-  } catch (error) {
-    console.error(error)
-    alert('❌ เกิดข้อผิดพลาดในการสร้างกิจกรรม')
+    const { status, id } = await ActivityService.createOne(payload)
+
+    if ((status === 200 || status === 201) && props.imageFile) {
+      try {
+        const uploadStatus = await ActivityService.uploadImage(
+          id,
+          props.imageFile,
+          props.activity?.file ?? undefined,
+        )
+
+        if (uploadStatus === 200 || uploadStatus === 201) {
+          alert('✅ สร้างกิจกรรม + อัปโหลดรูปสำเร็จ')
+        } else {
+          alert('⚠️ สร้างกิจกรรมสำเร็จ แต่อัปโหลดรูปไม่สำเร็จ')
+        }
+      } catch (uploadErr) {
+        console.error('Upload image failed:', uploadErr)
+        alert('❌ อัปโหลดรูปภาพไม่สำเร็จ')
+      }
+    }
+
+    await goToPageDetail(id)
+  } catch (err) {
+    console.error('Create activity failed:', err)
+    alert('❌ สร้างกิจกรรมไม่สำเร็จ')
   }
 }
-
 </script>
 
 <style scoped>
