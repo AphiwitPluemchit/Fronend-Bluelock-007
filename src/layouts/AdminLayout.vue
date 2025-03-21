@@ -4,7 +4,7 @@
     <MenuNavbar @toggleSidebar="adminSidebar?.toggleSidebar()" />
     <MenuAdminSidebar ref="adminSidebar" />
     <q-page-container>
-      <div class="q-mx-auto" style="width: 1600px"><router-view /></div>
+      <div class="q-mx-auto" style="max-width: 1600px"><router-view /></div>
     </q-page-container>
   </q-layout>
 </template>
