@@ -47,30 +47,71 @@
         row-key="id"
         class="q-mt-md my-sticky-header-table"
       >
-        <template #body-cell-action="props">
-          <q-td class="q-gutter-x-sm">
-            <q-btn
-              icon="info"
-              padding="none"
-              flat
-              color="grey-8"
-              @click="
-                () => {
-                  console.log(props.row)
-                  void goToPageDetail(props.row.id)
-                }
+        <!-- หัวตาราง Sticky -->
+        <template v-slot:header="props">
+          <q-tr :props="props">
+            <q-th
+              v-for="col in props.cols"
+              :key="col.name"
+              :props="props"
+              :style="
+                col.name === 'no'
+                  ? 'width: 5%'
+                  : '' + col.name === 'name'
+                    ? 'width: 32%'
+                    : '' + col.name === 'date'
+                      ? 'width: 10%'
+                      : '' + col.name === 'time'
+                        ? 'width: 10%'
+                        : '' + col.name === 'location'
+                          ? 'width: 6%'
+                          : '' + col.name === 'participants'
+                            ? 'width: 12%'
+                            : '' + col.name === 'type'
+                              ? 'width: 10%'
+                              : '' + col.name === 'status'
+                                ? 'width: 10%'
+                                : '' + col.name === 'action'
+                                  ? 'width: 5%'
+                                  : ''
               "
-            ></q-btn
-          ></q-td> </template
-      ></q-table>
-      <!-- <div class="row justify-center q-mt-md">
-        <q-pagination
-          v-model="pagination1.page"
-          color="grey-8"
-          :max="pagination1.rowsNumber / pagination1.rowsPerPage || 1"
-          size="sm"
-        />
-      </div> -->
+            >
+              {{ col.label }}
+            </q-th>
+          </q-tr>
+        </template>
+        <!-- เนื้อหาตาราง -->
+        <template v-slot:body="props">
+          <q-tr :props="props">
+            <q-td key="no" style="width: 5%">{{ props.rowIndex + 1 }}</q-td>
+            <q-td key="name" style="width: 32%; overflow: hidden; text-overflow: ellipsis">{{
+              props.row.name
+            }}</q-td>
+            <q-td key="date" style="width: 10%">{{ props.row.date }}</q-td>
+            <q-td key="time" style="width: 10%">{{ props.row.time }}</q-td>
+            <q-td key="location" style="width: 6%">{{ props.row.location }}</q-td>
+            <q-td key="participants" style="width: 12%; text-align: center">{{
+              props.row.participants
+            }}</q-td>
+            <q-td key="type" style="width: 10%">{{ props.row.type }}</q-td>
+            <q-td key="status" style="width: 10%">{{ props.row.status }}</q-td>
+            <q-td class="q-gutter-x-sm" key="action" style="width: 5%">
+              <q-btn
+                icon="info"
+                padding="none"
+                flat
+                color="grey-8"
+                @click="
+                  () => {
+                    console.log(props.row)
+                    void goToPageDetail(props.row.id)
+                  }
+                "
+              ></q-btn
+            ></q-td>
+          </q-tr>
+        </template>
+      </q-table>
     </section>
 
     <!-- ตาราง 2 -->
@@ -111,25 +152,70 @@
         row-key="id"
         class="q-mt-md my-sticky-header-table"
       >
-        <template #body-cell-action="props">
-          <q-td class="q-gutter-x-sm" style="min-width: 100px">
-            <q-btn
-              icon="edit"
-              padding="none"
-              flat
-              color="grey-8"
-              @click="goToPageDetail(props.row.action)"
-            ></q-btn
-          ></q-td> </template
+        <!-- หัวตาราง Sticky -->
+        <template v-slot:header="props">
+          <q-tr :props="props">
+            <q-th
+              v-for="col in props.cols"
+              :key="col.name"
+              :props="props"
+              :style="
+                col.name === 'no'
+                  ? 'width: 5%'
+                  : '' + col.name === 'name'
+                    ? 'width: 32%'
+                    : '' + col.name === 'date'
+                      ? 'width: 10%'
+                      : '' + col.name === 'time'
+                        ? 'width: 10%'
+                        : '' + col.name === 'location'
+                          ? 'width: 6%'
+                          : '' + col.name === 'participants'
+                            ? 'width: 12%'
+                            : '' + col.name === 'type'
+                              ? 'width: 10%'
+                              : '' + col.name === 'status'
+                                ? 'width: 10%'
+                                : '' + col.name === 'action'
+                                  ? 'width: 5%'
+                                  : ''
+              "
+            >
+              {{ col.label }}
+            </q-th>
+          </q-tr>
+        </template>
+        <!-- เนื้อหาตาราง -->
+        <template v-slot:body="props">
+          <q-tr :props="props">
+            <q-td key="no" style="width: 5%">{{ props.rowIndex + 1 }}</q-td>
+            <q-td key="name" style="width: 32%; overflow: hidden; text-overflow: ellipsis">{{
+              props.row.name
+            }}</q-td>
+            <q-td key="date" style="width: 10%">{{ props.row.date }}</q-td>
+            <q-td key="time" style="width: 10%">{{ props.row.time }}</q-td>
+            <q-td key="location" style="width: 6%">{{ props.row.location }}</q-td>
+            <q-td key="participants" style="width: 12%; text-align: center">{{
+              props.row.participants
+            }}</q-td>
+            <q-td key="type" style="width: 10%">{{ props.row.type }}</q-td>
+            <q-td key="status" style="width: 10%">{{ props.row.status }}</q-td>
+            <q-td class="q-gutter-x-sm" key="action" style="width: 5%">
+              <q-btn
+                icon="info"
+                padding="none"
+                flat
+                color="grey-8"
+                @click="
+                  () => {
+                    console.log(props.row)
+                    void goToPageDetail(props.row.id)
+                  }
+                "
+              ></q-btn
+            ></q-td>
+          </q-tr> </template
       ></q-table>
-      <!-- <div class="row justify-center q-mt-md">
-        <q-pagination
-          v-model="pagination2.page"
-          color="grey-8"
-          :max="query2.totalPages || 1"
-          size="sm"
-        />
-      </div> -->
     </section>
 
     <!-- ตาราง 3 -->
@@ -170,16 +256,69 @@
         row-key="id"
         class="q-mt-md my-sticky-header-table"
       >
-        <template #body-cell-action="props">
-          <q-td class="q-gutter-x-sm" style="min-width: 100px">
-            <q-btn
-              icon="edit"
-              padding="none"
-              flat
-              color="grey-8"
-              @click="() => void goToPageDetail(props.row.id)"
-            ></q-btn
-          ></q-td> </template
+        <!-- หัวตาราง Sticky -->
+        <template v-slot:header="props">
+          <q-tr :props="props">
+            <q-th
+              v-for="col in props.cols"
+              :key="col.name"
+              :props="props"
+              :style="
+                col.name === 'no'
+                  ? 'width: 5%'
+                  : '' + col.name === 'name'
+                    ? 'width: 32%'
+                    : '' + col.name === 'date'
+                      ? 'width: 10%'
+                      : '' + col.name === 'time'
+                        ? 'width: 10%'
+                        : '' + col.name === 'location'
+                          ? 'width: 6%'
+                          : '' + col.name === 'participants'
+                            ? 'width: 12%'
+                            : '' + col.name === 'type'
+                              ? 'width: 10%'
+                              : '' + col.name === 'status'
+                                ? 'width: 10%'
+                                : '' + col.name === 'action'
+                                  ? 'width: 5%'
+                                  : ''
+              "
+            >
+              {{ col.label }}
+            </q-th>
+          </q-tr>
+        </template>
+        <!-- เนื้อหาตาราง -->
+        <template v-slot:body="props">
+          <q-tr :props="props">
+            <q-td key="no" style="width: 5%">{{ props.rowIndex + 1 }}</q-td>
+            <q-td key="name" style="width: 32%; overflow: hidden; text-overflow: ellipsis">{{
+              props.row.name
+            }}</q-td>
+            <q-td key="date" style="width: 10%">{{ props.row.date }}</q-td>
+            <q-td key="time" style="width: 10%">{{ props.row.time }}</q-td>
+            <q-td key="location" style="width: 6%">{{ props.row.location }}</q-td>
+            <q-td key="participants" style="width: 12%; text-align: center">{{
+              props.row.participants
+            }}</q-td>
+            <q-td key="type" style="width: 10%">{{ props.row.type }}</q-td>
+            <q-td key="status" style="width: 10%">{{ props.row.status }}</q-td>
+            <q-td class="q-gutter-x-sm" key="action" style="width: 5%">
+              <q-btn
+                icon="info"
+                padding="none"
+                flat
+                color="grey-8"
+                @click="
+                  () => {
+                    console.log(props.row)
+                    void goToPageDetail(props.row.id)
+                  }
+                "
+              ></q-btn
+            ></q-td>
+          </q-tr> </template
       ></q-table>
     </section>
   </q-page>
@@ -212,13 +351,7 @@ const goToPageDetail = async (id: string) => {
 }
 
 const showFilterDialog1 = ref(false)
-const filterCategories = ref([
-  'year',
-  'major',
-  'statusStudent',
-  'statusActivity',
-  'categoryActivity',
-])
+const filterCategories = ref(['year', 'major', 'statusActivity', 'categoryActivity'])
 const showFilterDialog2 = ref(false)
 const showFilterDialog3 = ref(false)
 
@@ -293,15 +426,24 @@ const columns = [
     label: 'ลำดับ',
     field: 'no',
     align: 'left' as const,
-    style: 'width: 5%',
   },
   {
     name: 'name',
     label: 'ชื่อกิจกรรม',
     field: 'name',
     align: 'left' as const,
-
-    style: 'width: 30%',
+  },
+  {
+    name: 'date',
+    label: 'วันที่',
+    field: 'name',
+    align: 'left' as const,
+  },
+  {
+    name: 'time',
+    label: 'เวลา',
+    field: 'name',
+    align: 'left' as const,
   },
   {
     name: 'location',
@@ -322,7 +464,12 @@ const columns = [
     field: 'status',
     align: 'left' as const,
   },
-  { name: 'action', label: '', field: '', align: 'left' as const },
+  {
+    name: 'actions',
+    label: '',
+    field: 'actions',
+    align: 'center' as const,
+  },
 ]
 
 const activitys1 = ref<Activity[]>([]) // Open and Close Enrollment Table
@@ -428,7 +575,7 @@ function enrollmentSummary(activityItems: ActivityItem[]) {
   if (!activityItems || activityItems.length === 0) return '-'
   // คํานวณจํานวนลงทะเบียน
   const totalEnrolled = activityItems.reduce(
-    (total, item) => total + (item.enrollmentCount ?? 0),
+    (total, item) => total + (item.enrollmentCount || 0),
     0,
   )
   // คํานวณจํานวนรับทะเบียน
@@ -503,9 +650,6 @@ async function onRequest3(props: any) {
 
   /* Fix header */
   thead tr:first-child th {
-    position: sticky;
-    top: 0;
-    z-index: 2;
     background-color: #f5f5f5;
   }
 
@@ -526,7 +670,7 @@ async function onRequest3(props: any) {
 
   /* Optional: ปรับ scrollbar ไม่ทับ */
   tbody::-webkit-scrollbar {
-    width: 10px;
+    width: 12px;
   }
 
   tbody::-webkit-scrollbar-thumb {

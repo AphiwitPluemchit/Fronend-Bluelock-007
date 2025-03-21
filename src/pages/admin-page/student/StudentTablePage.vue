@@ -21,14 +21,12 @@
               <q-icon name="search" />
             </template>
           </q-input>
-          <q-btn class="btnfilter q-mr-sm" @click="showFilterDialog1 = true">
-            <img src="\icons\sort.svg" alt="Sort Icon" width="30" height="30" />
-            <FilterDialog
-              v-model="showFilterDialog1"
-              :categories="filterCategories1"
-              @apply="applyFilters"
-            />
-          </q-btn>
+          <FilterDialog
+            v-model="showFilterDialog1"
+            :categories="filterCategories1"
+            @apply="applyFilters"
+            class="q-mr-sm"
+          />
           <div>
             <q-btn
               dense
@@ -68,7 +66,7 @@
             <q-td key="index">{{ props.rowIndex + 1 }}</q-td>
             <q-td key="code">{{ props.row.code }}</q-td>
             <q-td key="name">{{ props.row.name }}</q-td>
-            <q-td key="major">{{ props.row.majorNames }}</q-td>
+            <q-td key="major">{{ props.row.major }}</q-td>
             <q-td class="text-center" key="softskill">{{ props.row.softSkill }}/30</q-td>
             <q-td class="text-center" key="hardskill">{{ props.row.hardSkill }}/12</q-td>
             <!-- แสดงสถานะพร้อมสี -->

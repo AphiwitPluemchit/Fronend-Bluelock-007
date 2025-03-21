@@ -64,15 +64,24 @@
             </div>
           </div>
 
-          <!-- ชั้นปีและชั่วโมงทักษะทางวิชาการ -->
+          <!-- สาขาและชั่วโมงทักษะทางวิชาการ -->
           <div class="col-12 row items-center q-pa-sm">
             <div class="col-1 text-right q-pr-md">
-              <p class="q-my-none">ชั้นปี :</p>
+              <p class="q-my-none">สาขา :</p>
             </div>
-            <div class="col-4">
-              <!-- รอแก้ -->
-              <q-input
+            <!-- <div class="col-4"> -->
+            <!-- รอแก้ -->
+            <!-- <q-input
                 v-model="studentYear"
+                :readonly="!isEditMode"
+                :class="isEditMode ? 'editable' : 'readonly'"
+                borderless
+                dense
+              />
+            </div> -->
+            <div class="col-4">
+              <q-input
+                v-model="studentStore.student.major"
                 :readonly="!isEditMode"
                 :class="isEditMode ? 'editable' : 'readonly'"
                 borderless
@@ -94,20 +103,12 @@
           </div>
 
           <!-- สาขา -->
-          <div class="col-12 row items-center q-pa-sm">
+          <!-- <div class="col-12 row items-center q-pa-sm">
             <div class="col-1 text-right q-pr-md">
               <p class="q-my-none">สาขา :</p>
-            </div>
-            <div class="col-4">
-              <q-input
-                v-model="studentStore.student.majorNames"
-                :readonly="!isEditMode"
-                :class="isEditMode ? 'editable' : 'readonly'"
-                borderless
-                dense
-              />
-            </div>
-          </div>
+            </div> -->
+
+          <!-- </div> -->
         </div>
       </q-card>
     </div>
@@ -115,16 +116,14 @@
     <!-- ส่วนประวัติการอบรม -->
     <div class="q-mb-sm">
       <div class="header-container text-center">
-        <div class="text-h6">ประวัติการอบรม</div>
+        <div class="text-h6 q-mt-lg">ประวัติการอบรม</div>
         <div class="filter-container">
-          <q-btn class="btnfilter q-mr-sm" @click="showFilterDialog1 = true">
-            <img src="\icons\sort.svg" alt="Sort Icon" width="30" height="30" />
-            <FilterDialog
-              v-model="showFilterDialog1"
-              :categories="filterCategories1"
-              @apply="applyFilters"
-            />
-          </q-btn>
+          <FilterDialog
+            v-model="showFilterDialog1"
+            :categories="filterCategories1"
+            @apply="applyFilters"
+            class="q-mr-sm"
+          />
         </div>
       </div>
       <q-table :columns="columns" :rows="historyActivity" row-key="name">
@@ -208,7 +207,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted, ref } from 'vue'
+import { onMounted, ref } from 'vue'
 import { useRoute } from 'vue-router'
 import AppBreadcrumbs from 'src/components/AppBreadcrumbs.vue'
 import FilterDialog from 'src/components/Dialog/FilterDialog.vue'
@@ -228,23 +227,23 @@ onMounted(async () => {
 })
 
 //คำนวณชั้นปี
-const studentYear = computed(() => {
-  if (!studentStore.student?.code || studentStore.student.code.length < 2) return 'N/A'
+// const studentYear = computed(() => {
+//   if (!studentStore.student?.code || studentStore.student.code.length < 2) return 'N/A'
 
-  const currentDate = new Date()
-  const currentYear = currentDate.getFullYear() + 543 // ปีปัจจุบัน (พ.ศ.)
-  const currentMonth = currentDate.getMonth() + 1 // เดือนปัจจุบัน (1-12)
+//   const currentDate = new Date()
+//   const currentYear = currentDate.getFullYear() + 543 // ปีปัจจุบัน (พ.ศ.)
+//   const currentMonth = currentDate.getMonth() + 1 // เดือนปัจจุบัน (1-12)
 
-  const admissionYear = 2500 + parseInt(studentStore.student.code.substring(0, 2), 10) // ปีที่เข้าเรียน
-  const transitionMonth = 6 // เดือนมิถุนายนเป็นจุดเปลี่ยนชั้นปี
+//   const admissionYear = 2500 + parseInt(studentStore.student.code.substring(0, 2), 10) // ปีที่เข้าเรียน
+//   const transitionMonth = 6 // เดือนมิถุนายนเป็นจุดเปลี่ยนชั้นปี
 
-  let yearLevel = currentYear - admissionYear
-  if (currentMonth >= transitionMonth) {
-    yearLevel++ // ถ้าเดือนปัจจุบันเป็นมิถุนายนหรือหลังจากนั้น ให้เพิ่มชั้นปีขึ้น 1
-  }
+//   let yearLevel = currentYear - admissionYear
+//   if (currentMonth >= transitionMonth) {
+//     yearLevel++ // ถ้าเดือนปัจจุบันเป็นมิถุนายนหรือหลังจากนั้น ให้เพิ่มชั้นปีขึ้น 1
+//   }
 
-  return yearLevel >= 1 && yearLevel <= 4 ? yearLevel.toString() : 'N/A' // จำกัดชั้นปีที่ 1-4
-})
+//   return yearLevel >= 1 && yearLevel <= 4 ? yearLevel.toString() : 'N/A' // จำกัดชั้นปีที่ 1-4
+// })
 
 const breadcrumbs = ref({
   previousPage: { title: 'จัดการข้อมูลนิสิต', path: '/Admin/StudentManagement' },
@@ -271,11 +270,15 @@ const enableEditMode = () => {
   originalStudentData.value = { ...studentStore.student } // เก็บข้อมูลเดิมก่อนแก้ไข
 }
 
-// บันทึก
-const saveChanges = () => {
-  isEditMode.value = false
+// บันทึกแก้ไข
+const saveChanges = async () => {
+  const result = await studentStore.updateStudent()
+  console.log('Update result:', result)
+  if (result) {
+    // ปิด Edit Mode
+    isEditMode.value = false
+  }
 }
-
 // ยกเลิกการแก้ไข
 const showCancelDialog = ref(false)
 const confirmCancel = () => {
