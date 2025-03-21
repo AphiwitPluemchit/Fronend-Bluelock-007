@@ -1,6 +1,10 @@
 <template>
   <div class="upload-container">
-    <div class="upload-box" @click="triggerFileInput">
+    <div
+      class="upload-box"
+      @click="!disable && triggerFileInput()"
+      :class="{ 'disabled-box': disable }"
+    >
       <input
         type="file"
         accept="image/*"
@@ -12,7 +16,7 @@
       <!-- ✅ แสดงรูปที่เลือกใหม่ หรือ fallback เป็นรูปจาก server -->
       <img
         v-if="previewUrl || serverImageUrl"
-         :src="(previewUrl || serverImageUrl) ?? ''"
+        :src="(previewUrl || serverImageUrl) ?? ''"
         alt="Image preview"
         class="preview-img"
       />
@@ -25,11 +29,15 @@
 
 <script setup lang="ts">
 import { ref, computed } from 'vue'
+const resetPreview = () => {
+  previewUrl.value = null
+}
 
+defineExpose({ resetPreview }) // ให้ parent เรียกใช้
 const props = defineProps<{
-  imageFileName?: string | null | undefined  // ✅ รองรับ undefined ด้วย
+  imageFileName?: string | null | undefined
+  disable?: boolean
 }>()
-
 
 const emit = defineEmits<{
   (e: 'file-selected', file: File): void
@@ -41,7 +49,7 @@ const previewUrl = ref<string | null>(null)
 const serverImageUrl = computed(() =>
   props.imageFileName
     ? `http://localhost:8888/uploads/activity/images/${props.imageFileName}`
-    : null
+    : null,
 )
 
 const triggerFileInput = () => {
@@ -59,6 +67,13 @@ const onFileChange = (event: Event) => {
 </script>
 
 <style scoped>
+.disabled-box {
+  pointer-events: none;
+  opacity: 0.6;
+}
+.q-icon {
+  cursor: pointer;
+}
 .upload-box {
   width: 430px;
   height: 330px;

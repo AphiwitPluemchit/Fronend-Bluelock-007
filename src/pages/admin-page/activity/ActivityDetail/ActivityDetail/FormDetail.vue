@@ -103,10 +103,12 @@
     </div>
 
     <div class="button-group">
-      <q-btn v-if="!isEditing" class="btnedit" @click="isEditing = true">แก้ไข</q-btn>
+      <q-btn v-if="!props.isEditing" class="btnedit" @click="emit('update:isEditing', true)">
+        แก้ไข
+      </q-btn>
 
       <template v-else>
-        <q-btn class="btnreject" @click="cancelEdit">ยกเลิก</q-btn>
+        <q-btn class="btnreject" @click="emit('update:isEditing', false)">ยกเลิก</q-btn>
         <q-btn class="btnsecces" @click="saveChanges">บันทึก</q-btn>
       </template>
     </div>
@@ -133,7 +135,13 @@ import cloneDeep from 'lodash/cloneDeep'
 const originalActivity = ref<Activity | null>(null)
 const props = defineProps<{
   activity: Activity | null
+  isEditing: boolean
+  imageFile: File | null
 }>()
+const emit = defineEmits<{
+  (e: 'update:isEditing', value: boolean): void
+}>()
+
 interface DayTimeSelection {
   date: string
   formattedDate: string
@@ -219,16 +227,17 @@ const updateDayTime = (index: number, type: 'start' | 'end', value: string) => {
   }
 }
 const statusClass = computed(() => {
-  switch (activityStatus.value) {
-    case 'กำลังวางแผน':
+  const engStatus = statusReverseMap[activityStatus.value]
+  switch (engStatus) {
+    case 'planning':
       return 'status-planning'
-    case 'เปิดลงทะเบียน':
+    case 'open':
       return 'status-open'
-    case 'ปิดลงทะเบียน':
+    case 'close':
       return 'status-closed'
-    case 'เสร็จสิ้น':
+    case 'success':
       return 'status-completed'
-    case 'ยกเลิก':
+    case 'cancel':
       return 'status-canceled'
     default:
       return ''
@@ -335,15 +344,30 @@ onMounted(() => {
   generateDaysInRange(activityDateRangeInternal.value)
 })
 
-const isEditing = ref(false) // เปลี่ยนค่าเริ่มต้นเป็น false (ฟอร์มถูกล็อก)
+// const isEditing = ref(false) // เปลี่ยนค่าเริ่มต้นเป็น false (ฟอร์มถูกล็อก)
 
-const cancelEdit = () => {
-  isEditing.value = false
+// const cancelEdit = () => {
+//   isEditing.value = false
+// }
+const statusMap: Record<string, string> = {
+  planning: 'กำลังวางแผน',
+  open: 'เปิดลงทะเบียน',
+  close: 'ปิดลงทะเบียน',
+  cancel: 'ยกเลิก',
+  success: 'เสร็จสิ้น',
+}
+
+const statusReverseMap: Record<string, string> = {
+  กำลังวางแผน: 'planning',
+  เปิดลงทะเบียน: 'open',
+  ปิดลงทะเบียน: 'close',
+  ยกเลิก: 'cancel',
+  เสร็จสิ้น: 'success',
 }
 
 const saveChanges = async () => {
-  isEditing.value = false
-
+  emit('update:isEditing', false)
+  
   if (!originalActivity.value?.id) {
     console.error('ไม่พบ activity id สำหรับการอัปเดต')
     return
@@ -353,7 +377,7 @@ const saveChanges = async () => {
 
   updated.name = activityName.value
   updated.skill = activityType.value === 'prep' ? 'hard' : 'soft'
-  updated.activityState = activityStatus.value
+  updated.activityState = statusReverseMap[activityStatus.value] || 'planning'
 
   // ✅ foodVotes
   updated.foodVotes = foodMenu.value.map((f) => ({
@@ -381,10 +405,31 @@ const saveChanges = async () => {
   }
 
   try {
-    const status = await ActivityService.updateOne(updated)
-    console.log('✅ อัปเดตกิจกรรมแล้ว:', status)
+    const updateStatus = await ActivityService.updateOne(updated)
+
+    if ((updateStatus === 200 || updateStatus === 201) && props.imageFile) {
+      try {
+        const uploadStatus = await ActivityService.uploadImage(
+          originalActivity.value.id, 
+          props.imageFile,           
+          props.activity?.file ?? undefined 
+        )
+
+        if (uploadStatus === 200 || uploadStatus === 201) {
+          alert('✅ บันทึกกิจกรรม + อัปโหลดรูปสำเร็จ')
+        } else {
+          alert('⚠️ บันทึกกิจกรรมสำเร็จ แต่อัปโหลดรูปไม่สำเร็จ')
+        }
+      } catch (uploadErr) {
+        console.error('❌ Upload image failed:', uploadErr)
+        alert('❌ อัปโหลดรูปภาพไม่สำเร็จ')
+      }
+    } else {
+      alert('✅ บันทึกกิจกรรมสำเร็จ')
+    }
   } catch (err) {
-    console.error('❌ ไม่สามารถอัปเดตกิจกรรมได้:', err)
+    console.error('❌ Update activity failed:', err)
+    alert('❌ บันทึกกิจกรรมไม่สำเร็จ')
   }
 }
 
@@ -394,12 +439,12 @@ onMounted(() => {
   originalActivity.value = cloneDeep(a)
 
   activityName.value = a.name ?? ''
-  activityType.value =
-    a.skill === 'hard'
-      ? 'prep'
-      : a.skill === 'soft'
-        ? 'academic'
-        : (activityStatus.value = a.activityState ?? 'กำลังวางแผน')
+  activityType.value = a.skill === 'hard' ? 'prep' : a.skill === 'soft' ? 'academic' : ''
+
+  // ✅ แปลง activityState (จาก backend) → ภาษาไทยสำหรับแสดงผล
+  if (a.activityState) {
+    activityStatus.value = statusMap[a.activityState] || 'กำลังวางแผน'
+  }
 
   foodMenu.value =
     a.foodVotes?.map((f) => ({
