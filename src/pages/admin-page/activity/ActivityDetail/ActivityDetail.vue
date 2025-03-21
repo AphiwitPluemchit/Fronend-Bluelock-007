@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, ref ,onMounted} from 'vue'
+import { computed, ref, onMounted, watch } from 'vue'
 import ActivityDetailTab from './ActivityDetailTab.vue'
 import StudentList from './StudentList.vue'
 import RegistrationDetails from './RegistrationDetails.vue'
@@ -13,6 +13,8 @@ const route = useRoute()
 const activity = ref<Activity | null>(null)
 const tab = ref<string>('activity')
 const search = ref<string>('')
+const isPlanning = computed(() => activity.value?.activityState === 'planning')
+
 
 // const router = useRouter()
 
@@ -32,7 +34,7 @@ onMounted(async () => {
   const id = route.params.id as string
   const res = await ActivityService.getOne(id)
   console.log('📦 ได้ activity:', res)
-  activity.value = res.data 
+  activity.value = res.data
 })
 
 const breadcrumbs = computed(() => ({
@@ -43,6 +45,12 @@ const breadcrumbs = computed(() => ({
   },
   icon: 'description',
 }))
+watch([tab, isPlanning], () => {
+  if (isPlanning.value && tab.value !== 'activity') {
+    tab.value = 'activity'
+  }
+})
+
 </script>
 
 <template>
@@ -52,17 +60,15 @@ const breadcrumbs = computed(() => ({
     <!-- Tabs -->
     <q-tabs v-model="tab" align="right" class="custom-tabs" indicator-color="transparent">
       <q-tab name="activity" label="รายละเอียดกิจกรรม" />
-      <q-tab name="registration" label="รายละเอียดการลงทะเบียน" />
-      <q-tab name="students" label="รายชื่อนิสิต" />
-      <q-tab name="summary" label="สรุปผลกิจกรรม" />
+      <q-tab name="registration" label="รายละเอียดการลงทะเบียน" :disable="isPlanning" />
+      <q-tab name="students" label="รายชื่อนิสิต" :disable="isPlanning" />
+      <q-tab name="summary" label="สรุปผลกิจกรรม" :disable="isPlanning" />
     </q-tabs>
 
     <!-- Tab Panels -->
     <q-tab-panels v-model="tab" animated class="custom-panels">
       <q-tab-panel name="activity" class="q-my-md">
-        <ActivityDetailTab 
-        v-if="activity"
-        :activity="activity"/>
+        <ActivityDetailTab v-if="activity" :activity="activity" />
       </q-tab-panel>
 
       <q-tab-panel name="registration" class="q-my-md">

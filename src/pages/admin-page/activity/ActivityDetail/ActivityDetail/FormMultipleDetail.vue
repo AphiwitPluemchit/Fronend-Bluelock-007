@@ -135,10 +135,12 @@
       </q-btn>
     </div>
     <div class="button-group">
-      <q-btn v-if="!isEditing" class="btnedit" @click="isEditing = true">แก้ไข</q-btn>
+      <q-btn v-if="!props.isEditing" class="btnedit" @click="emit('update:isEditing', true)">
+        แก้ไข
+      </q-btn>
 
       <template v-else>
-        <q-btn class="btnreject" @click="cancelEdit">ยกเลิก</q-btn>
+        <q-btn class="btnreject" @click="emit('update:isEditing', false)">ยกเลิก</q-btn>
         <q-btn class="btnsecces" @click="saveChanges">บันทึก</q-btn>
       </template>
     </div>
@@ -163,7 +165,12 @@ import cloneDeep from 'lodash/cloneDeep'
 
 const props = defineProps<{
   activity: Activity | null
+  isEditing: boolean
 }>()
+const emit = defineEmits<{
+  (e: 'update:isEditing', value: boolean): void
+}>()
+
 interface SubActivity {
   subActivityName: string
   roomName: string[]
@@ -278,13 +285,9 @@ const validatePositive = (field: 'totalHours' | 'seats', index?: number) => {
 const removeSubActivity = (index: number) => {
   subActivities.value.splice(index, 1)
 }
-const isEditing = ref(false)
-const cancelEdit = () => {
-  isEditing.value = false
-}
 
 const saveChanges = async () => {
-  isEditing.value = false
+  emit('update:isEditing', false)
 
   if (!props.activity?.id) {
     console.error('ไม่พบ activity id')
@@ -295,12 +298,12 @@ const saveChanges = async () => {
 
   updated.name = activityName.value
   updated.skill = activityType.value === 'prep' ? 'hard' : 'soft'
-  updated.activityState = activityStatus.value
+  updated.activityState = statusReverseMap[activityStatus.value] || 'planning'
 
   // ✅ Food Menu
-  updated.foodVotes = foodMenu.value.map(f => ({
+  updated.foodVotes = foodMenu.value.map((f) => ({
     foodName: f.name,
-    vote: 1
+    vote: 1,
   }))
   // ✅ วันที่และเวลา
   const date = activityDateInternal.value
@@ -308,7 +311,7 @@ const saveChanges = async () => {
   const etime = endTime.value
 
   // ✅ ActivityItems
-  updated.activityItems = subActivities.value.map(sub => ({
+  updated.activityItems = subActivities.value.map((sub) => ({
     name: sub.subActivityName,
     hour: Number(totalHours.value),
     maxParticipants: Number(sub.seats),
@@ -316,12 +319,14 @@ const saveChanges = async () => {
     description: sub.detailActivity,
     operator: sub.lecturer,
     majors: sub.departments.map(String),
-    studentYears: sub.years.map(y => Number(y)),
-    dates: [{
-      date,
-      stime,
-      etime
-    }]
+    studentYears: sub.years.map((y) => Number(y)),
+    dates: [
+      {
+        date,
+        stime,
+        etime,
+      },
+    ],
   }))
 
   try {
@@ -336,33 +341,51 @@ const activityStatus = ref('กำลังวางแผน')
 const handleStatusChange = (newStatus: string) => {
   activityStatus.value = newStatus
 }
+const statusMap: Record<string, string> = {
+  planning: 'กำลังวางแผน',
+  open: 'เปิดลงทะเบียน',
+  close: 'ปิดลงทะเบียน',
+  cancel: 'ยกเลิก',
+  success: 'เสร็จสิ้น',
+}
+
+const statusReverseMap: Record<string, string> = {
+  กำลังวางแผน: 'planning',
+  เปิดลงทะเบียน: 'open',
+  ปิดลงทะเบียน: 'close',
+  ยกเลิก: 'cancel',
+  เสร็จสิ้น: 'success',
+}
+
 const statusClass = computed(() => {
-  switch (activityStatus.value) {
-    case 'กำลังวางแผน':
+  const engStatus = statusReverseMap[activityStatus.value]
+  switch (engStatus) {
+    case 'planning':
       return 'status-planning'
-    case 'เปิดลงทะเบียน':
+    case 'open':
       return 'status-open'
-    case 'ปิดลงทะเบียน':
+    case 'close':
       return 'status-closed'
-    case 'เสร็จสิ้น':
+    case 'success':
       return 'status-completed'
-    case 'ยกเลิก':
+    case 'cancel':
       return 'status-canceled'
     default:
       return ''
   }
 })
+
 onMounted(() => {
   const a = props.activity
   if (!a) return
 
   activityName.value = a.name ?? ''
-  activityType.value =
-    a.skill === 'hard'
-      ? 'prep'
-      : a.skill === 'soft'
-        ? 'academic'
-        : (activityStatus.value = a.activityState ?? 'กำลังวางแผน')
+  activityType.value = a.skill === 'hard' ? 'prep' : a.skill === 'soft' ? 'academic' : ''
+
+  // ✅ แปลง activityState (จาก backend) → ภาษาไทยสำหรับแสดงผล
+  if (a.activityState) {
+    activityStatus.value = statusMap[a.activityState] || 'กำลังวางแผน'
+  }
 
   foodMenu.value =
     a.foodVotes?.map((f) => ({

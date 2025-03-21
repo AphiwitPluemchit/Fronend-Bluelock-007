@@ -3,7 +3,13 @@
     <div class="wrapper">
       <div class="container">
         <div class="image-section">
-          <ImageDetail :imageFileName="activity?.file" @file-selected="handleFileSelected" />
+          <ImageDetail
+            ref="imageRef"
+            :imageFileName="activity?.file"
+            :disable="!isEditing"
+            @file-selected="handleFileSelected"
+          />
+
           <!-- Dropdown ใต้รูป -->
           <q-select v-model="selectedActivityType" outlined class="dropdown no-border bg-white">
             <template v-slot:selected>
@@ -14,7 +20,13 @@
         </div>
 
         <div class="form-section">
-          <component :is="getFormComponent || 'div'" :activity="activity" />
+          <component
+            :is="getFormComponent || 'div'"
+            :activity="activity"
+            :imageFile="selectedImageFile"
+            v-model:isEditing="isEditing"
+            @saved="handleSave"
+          />
         </div>
       </div>
     </div>
@@ -27,8 +39,11 @@ import ImageDetail from './ActivityDetail/ImageDetail.vue'
 import FormDetail from './ActivityDetail/FormDetail.vue'
 import FormMultipleDetail from './ActivityDetail/FormMultipleDetail.vue'
 import type { Activity } from 'src/types/activity'
+import { ActivityService } from 'src/services/activity'
 
+const imageRef = ref<InstanceType<typeof ImageDetail> | null>(null)
 const selectedImageFile = ref<File | null>(null)
+const isEditing = ref(false)
 
 const handleFileSelected = (file: File) => {
   selectedImageFile.value = file
@@ -39,6 +54,22 @@ const props = defineProps<{
 }>()
 
 const selectedActivityType = ref('')
+const handleSave = async () => {
+  await uploadImageIfChanged()
+  selectedImageFile.value = null
+  imageRef.value?.resetPreview()
+}
+const uploadImageIfChanged = async () => {
+  if (!selectedImageFile.value || !props.activity?.id) return
+
+  const oldFile = props.activity.file ?? undefined
+  const status = await ActivityService.uploadImage(
+    props.activity.id,
+    selectedImageFile.value,
+    oldFile
+  )
+  console.log('📤 uploaded new image:', status)
+}
 
 watch(
   () => props.activity?.type,
@@ -61,6 +92,12 @@ const getFormComponent = computed(() => {
       return FormMultipleDetail
     default:
       return null
+  }
+})
+watch(isEditing, (newVal) => {
+  if (!newVal) {
+    selectedImageFile.value = null
+    imageRef.value?.resetPreview()
   }
 })
 </script>
