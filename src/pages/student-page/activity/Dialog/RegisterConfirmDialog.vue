@@ -5,7 +5,10 @@
     persistent
   >
     <q-card class="q-pa-md" style="min-width: 300px" rounded standout>
-      <div class="text-h5">ยืนยันการลงทะเบียน</div>
+      <q-card-actions align="left">
+        <div class="text-h5">ยืนยันการลงทะเบียน</div>
+      </q-card-actions>
+
       <q-card-section>
         <div v-if="activityItems.length > 1">
           <div class="text-h6">เลือกกิจกรรม</div>
