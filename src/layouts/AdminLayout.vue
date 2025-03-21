@@ -4,7 +4,7 @@
     <MenuNavbar @toggleSidebar="adminSidebar?.toggleSidebar()" />
     <MenuAdminSidebar ref="adminSidebar" style="max-height: 98%" />
     <q-page-container class="form-section">
-      <div class="q-mx-auto" style="width: 1600px"><router-view /></div>
+      <div class="q-mx-auto q-px-lg"><router-view /></div>
     </q-page-container>
   </q-layout>
 </template>
@@ -20,7 +20,7 @@ const adminSidebar = ref<InstanceType<typeof MenuAdminSidebar> | null>(null)
 .form-section {
   overflow-x: hidden;
   overflow-y: auto;
-  max-height: 920px;
+  max-height: 100vh;
 }
 .form-section::-webkit-scrollbar {
   display: none;

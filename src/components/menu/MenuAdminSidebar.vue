@@ -13,11 +13,12 @@
       <!-- <q-item-label header>เมนูแอดมิน</q-item-label> -->
       <div>
         <router-link v-for="link in linksList" :key="link.title" :to="link.link" class="no-link">
+          <!-- if router.currentRoute.value.path includes link.link -->
           <q-item
             v-ripple
             clickable
             class="q-pa-md q-my-md q-mr-sm"
-            :class="{ 'active-menu': router.currentRoute.value.path === link.link }"
+            :class="{ 'active-menu': router.currentRoute.value.path.includes(link.link) }"
           >
             <q-item-section avatar>
               <q-icon :name="link.icon" />
@@ -30,7 +31,7 @@
       </div>
       <!-- q-space ดันปุ่ม Logout ไปด้านล่าง -->
       <q-space />
-      <q-item clickable @click="logout" class="q-pa-md q-my-md q-mr-sm logout-button">
+      <q-item clickable @click="logout" class="q-pa-md q-mr-sm logout-button">
         <q-item-section avatar>
           <q-icon name="exit_to_app" />
         </q-item-section>
