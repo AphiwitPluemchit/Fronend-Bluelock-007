@@ -9,7 +9,7 @@
     style="font-size: 18px; font-weight: 500; margin-right: 10px"
   >
     <!-- ให้ q-list เต็มความสูง และแบ่งพื้นที่ระหว่างเมนู กับ Logout -->
-    <q-list padding style="" class="menu-list flex column justify-between full-height q-pt-sm">
+    <q-list padding style="" class="menu-list flex column justify-between full-height">
       <div>
         <router-link v-for="link in linksList" :key="link.title" :to="link.link" class="no-link">
           <q-item
