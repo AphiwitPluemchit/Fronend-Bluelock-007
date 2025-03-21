@@ -7,10 +7,21 @@ import { useRoute } from 'vue-router';
 const route = useRoute();
 const activityId = route.params.id as string;
 
-// โหลดรูปจาก Local Storage (ถ้ามี)
-const savedImageUrl = ref(localStorage.getItem('savedImageUrl') || '')
+const getImagePath = (fileName: string | undefined | null) => {
+  if (!fileName) {
+    return '/default-placeholder.jpg' // ถ้าไม่มีไฟล์
+  }
+  return `http://127.0.0.1:8888/uploads/activity/images/${fileName}`
+}
 
 const enrollmentSummary = ref<EnrollmentSummary | null>(null)
+
+const majorList = [
+  { majorName: 'CS' },
+  { majorName: 'SE' },
+  { majorName: 'AAI' },
+  { majorName: 'ITDI' },
+];
 
 const fetchEnrollmentSummary = async () => {
   try {
@@ -29,6 +40,10 @@ const fetchActivityDetail = async () => {
     const response = await ActivityService.getOne(activityId)
     console.log('Activity Detail:', response)
     activityDetail.value = response.data
+
+    // console.log('🖼️ file name:', activityDetail.value?.file)
+    // console.log('🌐 Full Path:', getImagePath(activityDetail.value?.file))
+
   } catch (error) {
     console.error('Error fetching activity detail:', error)
   }
@@ -44,7 +59,7 @@ onMounted(async () => {
 <template>
   <div class="registration-container">
     <!-- แสดงรูปภาพที่เลือกไว้ -->
-    <q-img :src="savedImageUrl || 'path_to_placeholder_image'" class="registration-image" />
+    <q-img :src="getImagePath(activityDetail?.file)" class="registration-image" error-src="/default-placeholder.jpg" />
 
     <!-- รายละเอียดข้อมูล -->
     <div class="registration-details">
@@ -66,50 +81,48 @@ onMounted(async () => {
         </div>
       </div>
 
-      <!-- กรณีที่มี activityItemName -->
-      <div class="info-row" v-if="enrollmentSummary?.activityItemSums?.some((item) => item.activityItemName)">
-        <div class="registration-info">
-          <div class="row" v-for="item in enrollmentSummary.activityItemSums" :key="item.activityItemName">
-            <span class="label">ผลการลงทะเบียน &nbsp; {{ item.activityItemName }} :</span>
-            <div class="row" v-for="major in item.registeredByMajor" :key="major.majorName">
+      <!-- มีข้อมูล -->
+      <div v-if="enrollmentSummary?.activityItemSums?.some((item) => item.activityItemName)">
+
+        <!-- Label -->
+        <div class="info-row">
+          <span class="label">ผลการลงทะเบียน</span>
+        </div>
+
+        <!-- Loop activityItem -->
+        <div class="registration-info" v-for="(item, index) in enrollmentSummary.activityItemSums" :key="index">
+
+          <!-- Loop major -->
+          <div class="row" v-for="(major, mIndex) in majorList" :key="mIndex">
+
+            <div class="activity-name-block">
+              <span v-if="mIndex === 0" class="activity-name">{{ item.activityItemName }} :</span>
+              <span v-else class="activity-name-placeholder"></span>
+            </div>
+
+            <div class="student-major-block">
               <span class="text">นิสิตสาขา &nbsp; {{ major.majorName }}</span>
               <span class="number">จำนวน</span>
-              <span class="quantity-number">{{ major.count || '-' }}</span>
+              <span class="quantity-number">
+                {{
+                  item.registeredByMajor?.find(m => m.majorName === major.majorName)?.count || '0'
+                }}
+              </span>
               <span class="unit">คน</span>
             </div>
           </div>
         </div>
-      </div>
 
-      <!-- กรณีที่ไม่มี activityItemName แต่มีข้อมูลนิสิต -->
-      <div class="info-row" v-else-if="enrollmentSummary?.activityItemSums?.[0]?.registeredByMajor?.length">
-        <span class="label">ผลการลงทะเบียนนิสิต :</span>
-        <div class="registration-info">
-          <div class="row" v-for="major in enrollmentSummary.activityItemSums[0].registeredByMajor"
-            :key="major.majorName">
-            <span class="text">นิสิตสาขา &nbsp; {{ major.majorName }}</span>
-            <span class="number">จำนวน</span>
-            <span class="quantity-number">{{ major.count || '-' }}</span>
-            <span class="unit">คน</span>
-          </div>
-        </div>
-      </div>
-
-      <!-- กรณีไม่มีข้อมูลเลย -->
-      <div class="info-row" v-else>
-        <span class="label">ผลการลงทะเบียนนิสิต :</span>
-        <span class="text">ไม่มีข้อมูลการลงทะเบียนนิสิตสำหรับกิจกรรมนี้</span>
-      </div>
-
-      <!-- อาหาร -->
-      <div class="info-row" v-if="activityDetail?.foodVotes?.length">
-        <span class="label">ผลการเลือกอาหาร :</span>
-        <div class="registration-info">
-          <div class="row" v-for="food in activityDetail.foodVotes" :key="food.foodName">
-            <span class="text">{{ food.foodName }}</span>
-            <span class="number">จำนวน</span>
-            <span class="quantity-number">{{ food.vote }}</span>
-            <span class="unit">คน</span>
+        <!-- อาหาร -->
+        <div class="info-row" v-if="activityDetail?.foodVotes?.length">
+          <span class="label">ผลการเลือกอาหาร :</span>
+          <div class="registration-info">
+            <div class="row" v-for="food in activityDetail.foodVotes" :key="food.foodName">
+              <span class="text">{{ food.foodName }}</span>
+              <span class="number">จำนวน</span>
+              <span class="quantity-number">{{ food.vote }}</span>
+              <span class="unit">คน</span>
+            </div>
           </div>
         </div>
       </div>
@@ -121,7 +134,6 @@ onMounted(async () => {
 .registration-container {
   display: flex;
   align-items: flex-start;
-  gap: 20px;
   background-color: #edf0f5;
   border-radius: 12px;
   height: 680px;
@@ -156,6 +168,22 @@ onMounted(async () => {
   gap: 10px;
 }
 
+.activity-name {
+  min-width: 20px;
+}
+
+.activity-name-placeholder {
+  min-width: 500px;
+  /* ขนาดเท่ากับ .activity-name */
+  display: inline-block;
+}
+
+.activity-name-block {
+  min-width: 500px;
+  display: inline-block;
+  text-align: right;
+}
+
 .info-group-header {
   display: flex;
   flex-direction: column;
@@ -177,6 +205,13 @@ onMounted(async () => {
   margin-top: 50px;
   flex-wrap: nowrap;
   /* ป้องกันการขึ้นบรรทัดใหม่ */
+  margin-bottom: 10px;
+}
+
+.student-major-block {
+  display: flex;
+  align-items: center;
+  gap: 20px;
 }
 
 .row {
@@ -207,8 +242,9 @@ onMounted(async () => {
 }
 
 .text {
-  min-width: 270px;
+  min-width: 180px;
   text-align: left;
+  margin-right: 20px;
 }
 
 .quantity-number {
@@ -221,7 +257,8 @@ onMounted(async () => {
 .unit,
 .text,
 .number,
-.quantity-number {
+.quantity-number,
+.activity-name-block {
   /* font-weight: 500; */
   font-size: 20px;
   color: #000000;

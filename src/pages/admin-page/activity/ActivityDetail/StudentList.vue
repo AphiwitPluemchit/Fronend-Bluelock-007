@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, defineProps, computed, onMounted } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import RemoveStudent from './RemoveStudent.vue'
 import FilterDialog from 'src/components/Dialog/FilterDialog.vue'
 import { useEnrollmentStore } from 'src/stores/enrollment'
@@ -9,12 +9,9 @@ const enrollmentStore = useEnrollmentStore()
 const route = useRoute()
 const activityId = route.params.id as string
 
-const props = defineProps<{ search: string }>()
-
-const showFilterDialog1 = ref(false)
 const filterCategories1 = ref([
-  'year', 
-  'major', 
+  'year',
+  'major',
   'statusStudent',
 ])
 
@@ -42,7 +39,6 @@ const onRequest = async (props: any) => {
   enrollmentStore.query.limit = rowsPerPage
   enrollmentStore.query.sortBy = sortBy
   enrollmentStore.query.order = descending ? 'desc' : 'asc'
-  enrollmentStore.query.search = search1.value
 
   await enrollmentStore.fetchEnrollmentsByActivityID(activityId)
 }
@@ -82,18 +78,16 @@ const applyStudentFilters = async (selectedFilters: SelectedFilters) => {
   enrollmentStore.query.studentYears = selectedFilters.year
   enrollmentStore.query.major = selectedFilters.major
   enrollmentStore.query.status = selectedFilters.statusStudent
-  
-  enrollmentStore.query.page = 1 
+
+  enrollmentStore.query.page = 1
 
   await fetchStudents()
 }
 
-const handleApplyFilters = async (selectedFilters: SelectedFilters) => {
-  await applyStudentFilters(selectedFilters)
-  showFilterDialog1.value = false // <<< ปิด dialog หลัง apply
-}
-
-const search1 = ref(props.search)
+const search1 = computed({
+  get: () => enrollmentStore.query.search,
+  set: (val) => enrollmentStore.query.search = val,
+})
 
 const students = computed(() => {
   return enrollmentStore.enrollments.map((enrollment) => ({
@@ -108,7 +102,7 @@ const students = computed(() => {
 })
 
 const fetchStudents = async () => {
-  await onRequest({ pagination: pagination.value }) 
+  await onRequest({ pagination: pagination.value })
 }
 
 const columns = [
@@ -145,28 +139,23 @@ onMounted(async () => {
 
         <!-- ช่องค้นหา -->
         <q-input 
-        dense outlined 
+        dense 
+        outlined 
         v-model="search1" 
-        @keyup.enter="fetchStudents"
+        @keyup.enter="fetchStudents" 
         placeholder="ค้นหาชื่อนิสิต/ รหัสนิสิต"
         class="q-mr-sm searchbox" 
-        :style="{ boxShadow: 'none' }"
-        >
-          <template v-slot:append>
-            <q-icon name="search" />
-          </template>
+        :style="{ boxShadow: 'none' }">
+        
+        <template v-slot:append>
+          <q-icon name="search" />
+        </template>
         </q-input>
 
-        <!-- btnfilter -->
-        <q-btn class="btnfilter" @click="showFilterDialog1 = true">
-          <img src="icons/sort.svg" alt="Sort Icon" width="30" height="30" />
-          <FilterDialog
-          :model-value="showFilterDialog1"
-          :categories="filterCategories1"
-          @apply="handleApplyFilters"
-          @update:modelValue="(val) => showFilterDialog1 = val"
-          />
-        </q-btn>
+        <FilterDialog 
+        :categories="filterCategories1"
+        @apply="applyStudentFilters"
+        />
       </div>
 
       <q-table 
@@ -177,7 +166,7 @@ onMounted(async () => {
       class="q-mt-md customtable my-sticky-header-table" 
       @request="onRequest" 
       v-model:pagination="pagination"
-      :rows-per-page-options="[10, 20, 50]"
+      :rows-per-page-options="[10, 20, 30, 40, 50]" 
       :rows-number="enrollmentStore.total"
       >
 
@@ -198,13 +187,8 @@ onMounted(async () => {
 
         <template v-slot:body-cell-status="props">
           <q-td :props="props">
-            <q-btn
-            :label="getStatusText(props.row.status)"
-            rounded
-            unelevated
-            class="status-btn"
-            :class="getStatusClass(props.row.status)"
-            />
+            <q-btn :label="getStatusText(props.row.status)" rounded unelevated class="status-btn"
+              :class="getStatusClass(props.row.status)" />
           </q-td>
         </template>
 
@@ -220,7 +204,6 @@ onMounted(async () => {
 </template>
 
 <style scoped>
-
 .student-container {
   display: flex;
   align-items: flex-start;
@@ -263,34 +246,34 @@ onMounted(async () => {
 }
 
 .status-complete {
-    background-color: #cfd7ff;
-    color: #001780;
-    border: 2px solid #002dff;
-    padding: 3px 30px;
-    width: 130px;
+  background-color: #cfd7ff;
+  color: #001780;
+  border: 2px solid #002dff;
+  padding: 3px 30px;
+  width: 130px;
 }
 
 .status-medium {
-    background-color: #ffe7ba;
-    color: #ff6f00;
-    border: 2px solid #ffa500;
-    padding: 3px 30px;
-    width: 130px;
+  background-color: #ffe7ba;
+  color: #ff6f00;
+  border: 2px solid #ffa500;
+  padding: 3px 30px;
+  width: 130px;
 }
 
 .status-low {
-    background-color: #ffc5c5;
-    color: #ff0000;
-    border: 2px solid #f32323;
-    padding: 3px 30px;
-    width: 130px;
+  background-color: #ffc5c5;
+  color: #ff0000;
+  border: 2px solid #f32323;
+  padding: 3px 30px;
+  width: 130px;
 }
 
 .status-out {
-    background-color: #dadada;
-    color: #000000;
-    border: 2px solid #575656;
-    padding: 3px 30px;
-    width: 130px;
+  background-color: #dadada;
+  color: #000000;
+  border: 2px solid #575656;
+  padding: 3px 30px;
+  width: 130px;
 }
 </style>
