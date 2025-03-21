@@ -127,7 +127,10 @@ import ChangeStatusDialog from 'src/pages/admin-page/activity/ActivityDetail/Act
 import RoomSelector from 'src/pages/admin-page/activity/CreateActivity/Form/RoomSelector.vue'
 import type { Activity } from 'src/types/activity'
 import type { Food } from 'src/types/food'
+import { ActivityService } from 'src/services/activity'
+import cloneDeep from 'lodash/cloneDeep'
 
+const originalActivity = ref<Activity | null>(null)
 const props = defineProps<{
   activity: Activity | null
 }>()
@@ -332,42 +335,63 @@ onMounted(() => {
   generateDaysInRange(activityDateRangeInternal.value)
 })
 
-const submitActivity = () => {
-  const payload = {
-    activityName: activityName.value,
-    selectedDays: selectedDays.value.map((day) => ({
-      date: day.date,
-      startTime: day.startTime,
-      endTime: day.endTime,
-    })),
-    roomName: roomName.value,
-    totalHours: totalHours.value,
-    seats: seats.value,
-    activityType: activityType.value,
-    departments: departments.value,
-    years: years.value,
-    lecturer: lecturer.value,
-    foodVotes: foodMenu.value,
-    detailActivity: detailActivity.value,
-  }
-
-  console.log('Payload:', payload) // ตรวจสอบค่า payload ในคอนโซล
-  // หรือเก็บลง localStorage
-  localStorage.setItem('activityPayload', JSON.stringify(payload))
-}
 const isEditing = ref(false) // เปลี่ยนค่าเริ่มต้นเป็น false (ฟอร์มถูกล็อก)
 
 const cancelEdit = () => {
   isEditing.value = false
 }
 
-const saveChanges = () => {
+const saveChanges = async () => {
   isEditing.value = false
-  submitActivity()
+
+  if (!originalActivity.value?.id) {
+    console.error('ไม่พบ activity id สำหรับการอัปเดต')
+    return
+  }
+
+  const updated: Partial<Activity> = cloneDeep(originalActivity.value)
+
+  updated.name = activityName.value
+  updated.skill = activityType.value === 'prep' ? 'hard' : 'soft'
+  updated.activityState = activityStatus.value
+
+  // ✅ foodVotes
+  updated.foodVotes = foodMenu.value.map((f) => ({
+    foodName: f.name,
+    vote: 1,
+  }))
+  // ✅ activityItems[0]
+  if (updated.activityItems && updated.activityItems.length > 0) {
+    updated.activityItems[0] = {
+      ...updated.activityItems[0],
+      name: activityName.value,
+      hour: Number(totalHours.value),
+      maxParticipants: Number(seats.value),
+      rooms: roomName.value,
+      description: detailActivity.value,
+      operator: lecturer.value,
+      majors: departments.value.map(String),
+      studentYears: years.value.map((y) => Number(y)),
+      dates: selectedDays.value.map((d) => ({
+        date: d.date,
+        stime: d.startTime,
+        etime: d.endTime,
+      })),
+    }
+  }
+
+  try {
+    const status = await ActivityService.updateOne(updated)
+    console.log('✅ อัปเดตกิจกรรมแล้ว:', status)
+  } catch (err) {
+    console.error('❌ ไม่สามารถอัปเดตกิจกรรมได้:', err)
+  }
 }
+
 onMounted(() => {
   const a = props.activity
   if (!a) return
+  originalActivity.value = cloneDeep(a)
 
   activityName.value = a.name ?? ''
   activityType.value =
@@ -415,14 +439,6 @@ onMounted(() => {
 </script>
 
 <style scoped>
-/* ::v-deep(.q-field--disabled .q-field__control) {
-  background-color: #e0e0e0 !important;
-  color: #757575 !important;
-}
-::v-deep(.q-btn:disabled) {
-  background-color: #e0e0e0 !important;
-  color: #757575 !important;
-} */
 ::v-deep(.q-field__control) {
   height: auto;
   background-color: white;

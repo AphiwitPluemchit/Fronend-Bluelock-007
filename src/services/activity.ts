@@ -50,13 +50,35 @@ export class ActivityService {
     try {
       console.log('📤 ส่งข้อมูล activity:', obj)
       const res = await api.post(this.path, obj)
-      return res.status
+      return {
+        status: res.status,
+        id: res.data.data.id
+      }
     } catch (error) {
       console.error('Error creating activity:', error)
       throw error
     }
   }
-
+  static async uploadImage(id: string, file: File, oldFileName?: string) {
+    try {
+      const formData = new FormData()
+      formData.append('file', file)
+  
+      const query = oldFileName ? `?filename=${oldFileName}` : ''
+      const res = await api.post(`${this.path}/${id}/image${query}`, formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      })
+  
+      return res.status
+    } catch (error) {
+      console.error('Error uploading image:', error)
+      throw error
+    }
+  }
+  
+  
   static async updateOne(obj: Partial<Activity>) {
     try {
       if (!obj.id) {
