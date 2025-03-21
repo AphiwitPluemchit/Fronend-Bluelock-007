@@ -65,7 +65,16 @@
           <q-tr :props="props">
             <q-td key="index">{{ props.rowIndex + 1 }}</q-td>
             <q-td key="code">{{ props.row.code }}</q-td>
-            <q-td key="name">{{ props.row.name }}</q-td>
+            <q-td
+              key="name"
+              style="
+                max-width: 200px;
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
+              "
+              >{{ props.row.name }}</q-td
+            >
             <q-td key="major">{{ props.row.major }}</q-td>
             <q-td class="text-center" key="softskill">{{ props.row.softSkill }}/30</q-td>
             <q-td class="text-center" key="hardskill">{{ props.row.hardSkill }}/12</q-td>
@@ -156,7 +165,6 @@ const columns = [
     label: 'ชื่อ-สกุล',
     field: 'name',
     align: 'left' as const,
-    style: 'max-width: 100px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;',
   },
   { name: 'major', label: 'สาขา', field: 'major', align: 'left' as const },
   {
@@ -194,234 +202,6 @@ const calculateStatus = (softskill: number, hardskill: number) => {
     return 'ชั่วโมงน้อยมาก'
   }
 }
-
-//mockup
-// const mockStudents = ref([
-//   {
-//     index: 1,
-//     studentID: '65160311',
-//     name: 'คิรัชช์ รัตนวงศ์',
-//     major: 'CS',
-//     softskill: '30',
-//     hardskill: '12',
-//   },
-//   {
-//     index: 2,
-//     studentID: '65160312',
-//     name: 'กรนิศา ทองเยี่ยม',
-//     major: 'CS',
-//     softskill: '15',
-//     hardskill: '30',
-//   },
-//   {
-//     index: 3,
-//     studentID: '65160313',
-//     name: 'อุดม เมธี',
-//     major: 'ITDI',
-//     softskill: '11',
-//     hardskill: '11',
-//   },
-//   {
-//     index: 4,
-//     studentID: '65160314',
-//     name: 'ภัทรพล เกียรติคุณ',
-//     major: 'ITDI',
-//     softskill: '10',
-//     hardskill: '2',
-//   },
-//   {
-//     index: 5,
-//     studentID: '65160315',
-//     name: 'วณิชชา สีสังข์',
-//     major: 'AAI',
-//     softskill: '12',
-//     hardskill: '5',
-//   },
-//   {
-//     index: 6,
-//     studentID: '65160316',
-//     name: 'คิรัชช์ รัตนวงศ์รัตนวงศ์รัตนวงศ์รัตนวงศ์',
-//     major: 'CS',
-//     softskill: '3',
-//     hardskill: '1',
-//   },
-//   {
-//     index: 7,
-//     studentID: '65160317',
-//     name: 'กรนิศา ทองเยี่ยม',
-//     major: 'CS',
-//     softskill: '15',
-//     hardskill: '30',
-//   },
-//   {
-//     index: 8,
-//     studentID: '65160318',
-//     name: 'อุดม เมธี',
-//     major: 'ITDI',
-//     softskill: '11',
-//     hardskill: '11',
-//   },
-//   {
-//     index: 9,
-//     studentID: '65160319',
-//     name: 'ภัทรพล เกียรติคุณ',
-//     major: 'ITDI',
-//     softskill: '30',
-//     hardskill: '20',
-//   },
-//   {
-//     index: 10,
-//     studentID: '65160320',
-//     name: 'วณิชชา สีสังข์',
-//     major: 'AAI',
-//     softskill: '11',
-//     hardskill: '30',
-//   },
-//   {
-//     index: 11,
-//     studentID: '65160321',
-//     name: 'คิรัชช์ รัตนวงศ์',
-//     major: 'CS',
-//     softskill: '30',
-//     hardskill: '12',
-//   },
-//   {
-//     index: 12,
-//     studentID: '65160322',
-//     name: 'กรนิศา ทองเยี่ยม',
-//     major: 'CS',
-//     softskill: '15',
-//     hardskill: '30',
-//   },
-//   {
-//     index: 13,
-//     studentID: '65160323',
-//     name: 'อุดม เมธี',
-//     major: 'ITDI',
-//     softskill: '11',
-//     hardskill: '11',
-//   },
-//   {
-//     index: 14,
-//     studentID: '65160324',
-//     name: 'ภัทรพล เกียรติคุณ',
-//     major: 'ITDI',
-//     softskill: '15',
-//     hardskill: '20',
-//   },
-//   {
-//     index: 15,
-//     studentID: '65160325',
-//     name: 'วณิชชา สีสังข์',
-//     major: 'AAI',
-//     softskill: '11',
-//     hardskill: '30',
-//   },
-//   {
-//     index: 16,
-//     studentID: '65160326',
-//     name: 'คิรัชช์ รัตนวงศ์',
-//     major: 'CS',
-//     softskill: '30',
-//     hardskill: '12',
-//   },
-//   {
-//     index: 17,
-//     studentID: '65160327',
-//     name: 'กรนิศา ทองเยี่ยม',
-//     major: 'CS',
-//     softskill: '15',
-//     hardskill: '30',
-//   },
-//   {
-//     index: 18,
-//     studentID: '65160328',
-//     name: 'อุดม เมธี',
-//     major: 'ITDI',
-//     softskill: '11',
-//     hardskill: '11',
-//   },
-//   {
-//     index: 19,
-//     studentID: '65160329',
-//     name: 'ภัทรพล เกียรติคุณ',
-//     major: 'ITDI',
-//     softskill: '30',
-//     hardskill: '20',
-//   },
-//   {
-//     index: 20,
-//     studentID: '65160330',
-//     name: 'วณิชชา สีสังข์',
-//     major: 'AAI',
-//     softskill: '11',
-//     hardskill: '30',
-//   },
-//   {
-//     index: 21,
-//     studentID: '65160331',
-//     name: 'อุดม เมธี',
-//     major: 'ITDI',
-//     softskill: '11',
-//     hardskill: '11',
-//   },
-//   {
-//     index: 22,
-//     studentID: '65160332',
-//     name: 'ภัทรพล เกียรติคุณ',
-//     major: 'ITDI',
-//     softskill: '15',
-//     hardskill: '20',
-//   },
-//   {
-//     index: 23,
-//     studentID: '65160333',
-//     name: 'วณิชชา สีสังข์',
-//     major: 'AAI',
-//     softskill: '11',
-//     hardskill: '30',
-//   },
-//   {
-//     index: 24,
-//     studentID: '65160334',
-//     name: 'คิรัชช์ รัตนวงศ์',
-//     major: 'CS',
-//     softskill: '30',
-//     hardskill: '12',
-//   },
-//   {
-//     index: 25,
-//     studentID: '65160335',
-//     name: 'กรนิศา ทองเยี่ยม',
-//     major: 'CS',
-//     softskill: '15',
-//     hardskill: '30',
-//   },
-//   {
-//     index: 26,
-//     studentID: '65160336',
-//     name: 'อุดม เมธี',
-//     major: 'ITDI',
-//     softskill: '11',
-//     hardskill: '11',
-//   },
-//   {
-//     index: 27,
-//     studentID: '65160337',
-//     name: 'ภัทรพล เกียรติคุณ',
-//     major: 'ITDI',
-//     softskill: '30',
-//     hardskill: '20',
-//   },
-//   {
-//     index: 28,
-//     studentID: '65160338',
-//     name: 'วณิชชา สีสังข์',
-//     major: 'AAI',
-//     softskill: '11',
-//     hardskill: '30',
-//   },
-// ])
 </script>
 
 <style scoped>
