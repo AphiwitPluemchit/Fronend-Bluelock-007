@@ -17,6 +17,7 @@ const showFilterDialog = ref(false)
 const options = {
   year: ['1', '2', '3', '4'],
   major: ['CS', 'SE', 'ITDI', 'AAI'],
+  statusStudent: ['ชั่วโมงครบแล้ว', 'ชั่วโมงน้อย', 'ชั่วโมงน้อยมาก', 'พ้นสภาพ'],
   statusActivity: ['planning', 'open', 'close', 'success', 'cancel'],
   categoryActivity: ['soft', 'hard'],
 }
@@ -51,6 +52,7 @@ const filters = ref({
   major: props.majors ? props.majors : ([] as string[]),
   statusActivity: props.statusActivities ? props.statusActivities : ([] as string[]),
   categoryActivity: props.categoryActivities ? props.categoryActivities : ([] as string[]),
+  statusStudent: props.statusActivities ? props.statusActivities : ([] as string[]),
 })
 
 // ตรวจสอบหมวดที่ต้องแสดง
@@ -143,6 +145,21 @@ const applyFilters = () => {
               style="height: 35px; width: 80px"
             >
               <div style="margin: auto">{{ year }}</div>
+            </q-chip>
+          </div>
+          <!-- statusStudent -->
+          <div v-if="availableCategories.includes('statusStudent')" class="q-mt-md">
+            <p class="q-mb-sm text-h6">สถานะนิสิต</p>
+
+            <q-chip
+              v-for="statusStudent in options.statusStudent"
+              :key="statusStudent"
+              clickable
+              :class="{ selected: filters.statusStudent.includes(statusStudent) }"
+              @click="toggleFilter('statusStudent', statusStudent)"
+              style="height: 35px; width: 120px"
+            >
+              <div style="margin: auto">{{ statusStudent }}</div>
             </q-chip>
           </div>
         </q-card-section>

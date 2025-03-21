@@ -212,13 +212,7 @@ const goToPageDetail = async (id: string) => {
 }
 
 const showFilterDialog1 = ref(false)
-const filterCategories = ref([
-  'year',
-  'major',
-  'statusStudent',
-  'statusActivity',
-  'categoryActivity',
-])
+const filterCategories = ref(['year', 'major', 'statusActivity', 'categoryActivity'])
 const showFilterDialog2 = ref(false)
 const showFilterDialog3 = ref(false)
 
