@@ -50,4 +50,14 @@ export class EnrollmentService {
       throw error
     }
   }
+  static async getEnrollmentsByStudentIDAndActivityID(studentId: string, activityId: string) {
+    try {
+      const res = await api.get(`${this.path}/student/${studentId}/activity/${activityId}`)
+      console.log('Fetched enrollments:', res.data)
+      return res.data
+    } catch (error) {
+      console.error(`Error fetching enrollments for activity ID: ${studentId}`, error)
+      throw error
+    }
+  }
 }
