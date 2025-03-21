@@ -13,7 +13,7 @@
       <div class="flex q-gutter-md">
         <div style="font-size: 16px">
           <div>
-            {{ 'กมลวรรณ แสงระวี' }}
+            {{ store.getName }}
           </div>
           <div class="flex justify-end">
             {{ store.getRole === EnumUserRole.STUDENT ? 'นักศึกษา' : 'ผู้ดูแล' }}
