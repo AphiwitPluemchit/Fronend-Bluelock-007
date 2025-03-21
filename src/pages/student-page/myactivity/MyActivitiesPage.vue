@@ -84,7 +84,7 @@ const query = ref<ActivityPagination>({
 const fetchData = async () => {
   try {
     const studentId = `${auth.payload?.user?.id}`
-    const response = await EnrollmentService.getEnrollmentsByStudentID(studentId)
+    const response = await EnrollmentService.getEnrollmentsByStudentID(studentId, query.value)
     activitys.value = response.data
     console.log(response)
     console.log(activitys.value)
