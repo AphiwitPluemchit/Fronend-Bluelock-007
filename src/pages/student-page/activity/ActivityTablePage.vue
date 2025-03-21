@@ -26,6 +26,10 @@
               :model-value="showFilterDialog"
               :categories="filterCategories"
               @apply="applyFilters"
+              :years="query.studentYear"
+              :majors="query.major"
+              :status-activities="query.activityState"
+              :category-activities="query.skill"
             />
           </div>
         </div>
