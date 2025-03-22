@@ -38,7 +38,7 @@ export default route(function () {
     }
 
     if (requiredRole && requiredRole !== userRole) {
-      return next('/') // redirect if role mismatch
+      return next('/unauthorized') // redirect if role mismatch
     }
 
     return next()
