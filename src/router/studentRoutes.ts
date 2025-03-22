@@ -30,7 +30,7 @@ export const studentRoutes: RouteRecordRaw[] = [
       },
       {
         path: 'CertificateTablePage',
-        component: () => import('pages/student-page/certificate/CertificateTablePage.vue'),
+        component: () => import('pages/student-page/upload-certificate/UploadCertificate.vue'),
       },
     ],
   },
