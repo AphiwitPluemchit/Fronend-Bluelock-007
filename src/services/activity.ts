@@ -70,14 +70,25 @@ export class ActivityService {
           'Content-Type': 'multipart/form-data',
         },
       })
-  
-      return res.status
+      return {
+        status: res.status,
+        fileName: res.data.fileName, // 👈 backend ต้องส่งกลับมา
+      }
+      
     } catch (error) {
       console.error('Error uploading image:', error)
       throw error
     }
   }
-  
+  static async deleteImage(id: string, fileName: string) {
+    try {
+      const res = await api.delete(`${this.path}/${id}/image?filename=${fileName}`)
+      return res.status
+    } catch (error) {
+      console.error('Error deleting image:', error)
+      throw error
+    }
+  }
   
   static async updateOne(obj: Partial<Activity>) {
     try {

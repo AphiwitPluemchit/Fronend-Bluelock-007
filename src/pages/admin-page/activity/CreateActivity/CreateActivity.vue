@@ -58,8 +58,8 @@ const activityOptions = ['กิจกรรมเดียว', 'หลาย�
 const selectedActivityType = ref('กิจกรรมเดียว')
 
 const breadcrumbs = ref({
-  previousPage: { title: 'จัดการกิจกรรม', path: '/ActivitiesManagement' },
-  currentPage: { title: 'สร้างกิจกรรม', path: '/ActivitiesManagement/CreateActivity' },
+  previousPage: { title: 'จัดการกิจกรรม', path: '/Admin/ActivitiesManagement' },
+  currentPage: { title: 'สร้างกิจกรรม', path: '/Admin/ActivitiesManagement/CreateActivity' },
   icon: 'description',
 })
 </script>

@@ -21,6 +21,7 @@
 
         <div class="form-section">
           <component
+            :key="selectedActivityType"
             :is="getFormComponent || 'div'"
             :activity="activity"
             :imageFile="selectedImageFile"
@@ -40,6 +41,9 @@ import FormDetail from './ActivityDetail/FormDetail.vue'
 import FormMultipleDetail from './ActivityDetail/FormMultipleDetail.vue'
 import type { Activity } from 'src/types/activity'
 import { ActivityService } from 'src/services/activity'
+const emit = defineEmits<{
+  (e: 'update-activity', updated: Activity): void
+}>()
 
 const imageRef = ref<InstanceType<typeof ImageDetail> | null>(null)
 const selectedImageFile = ref<File | null>(null)
@@ -54,21 +58,45 @@ const props = defineProps<{
 }>()
 
 const selectedActivityType = ref('')
-const handleSave = async () => {
+const handleSave = async (fileName?: string) => {
   await uploadImageIfChanged()
+
   selectedImageFile.value = null
   imageRef.value?.resetPreview()
+
+  if (props.activity?.id) {
+    const res = await ActivityService.getOne(props.activity.id)
+    emit('update-activity', {
+      ...res.data,
+      file: fileName ?? res.data.file, 
+    })
+  }
 }
+
 const uploadImageIfChanged = async () => {
   if (!selectedImageFile.value || !props.activity?.id) return
 
-  const oldFile = props.activity.file ?? undefined
-  const status = await ActivityService.uploadImage(
-    props.activity.id,
-    selectedImageFile.value,
-    oldFile
-  )
-  console.log('📤 uploaded new image:', status)
+  const oldFile = props.activity.file ?? ''
+  const newFileName = imageRef.value?.getSelectedFileName() ?? ''
+
+  if (oldFile && oldFile !== newFileName) {
+    try {
+      await ActivityService.deleteImage(props.activity.id, oldFile)
+      console.log('🗑 ลบรูปเก่าแล้ว:', oldFile)
+    } catch (err) {
+      console.warn('⚠️ ลบรูปเก่าไม่สำเร็จ:', err)
+    }
+  }
+
+  try {
+    const res = await ActivityService.uploadImage(props.activity.id, selectedImageFile.value)
+
+    if (res.status === 200 || res.status === 201) {
+      console.log('📤 อัปโหลดรูปใหม่สำเร็จ')
+    }
+  } catch (err) {
+    console.error('❌ upload image failed:', err)
+  }
 }
 
 watch(
