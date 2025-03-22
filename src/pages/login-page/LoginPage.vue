@@ -4,7 +4,7 @@
     <div class="left-side col-6 flex flex-center">
       <!-- ใส่รูปหรือ icon ตรงนี้ได้ -->
       <div class="icon-placeholder" />
-      <div class="text-white text-subtitle2 q-mt-md">(example)</div>
+      <!-- <div class="row text-white text-subtitle2 q-mt-md"></div> -->
     </div>
 
     <!-- ขวา: กล่อง login -->
@@ -40,7 +40,10 @@
             </template>
           </q-input>
 
-          <div class="text-right text-caption q-mb-md text-primary cursor-pointer">
+          <div
+            class="text-right text-caption q-mb-md text-primary cursor-pointer"
+            @click="handResetPassword()"
+          >
             ลืมรหัสผ่านใช่หรือไม่?
           </div>
 
@@ -81,6 +84,9 @@ const handleLogin = async () => {
   } catch (err) {
     console.error(err)
   }
+}
+function handResetPassword() {
+  console.log('ลืมรหัสผ่าน')
 }
 </script>
 
