@@ -139,13 +139,14 @@ onMounted(async () => {
 
         <!-- ช่องค้นหา -->
         <q-input 
-        dense 
-        outlined 
-        v-model="search1" 
-        @keyup.enter="fetchStudents" 
-        placeholder="ค้นหาชื่อนิสิต/ รหัสนิสิต"
-        class="q-mr-sm searchbox" 
-        :style="{ boxShadow: 'none' }">
+          dense 
+          outlined 
+          v-model="search1" 
+          @keyup.enter="fetchStudents" 
+          placeholder="ค้นหาชื่อ-นามสกุล/ รหัสนิสิต"
+          class="q-mr-sm searchbox" 
+          :style="{ boxShadow: 'none' }"
+        >
         
         <template v-slot:append>
           <q-icon name="search" />
@@ -159,15 +160,15 @@ onMounted(async () => {
       </div>
 
       <q-table 
-      flat bordered 
-      :rows="students" 
-      :columns="columns" 
-      row-key="id"
-      class="q-mt-md customtable my-sticky-header-table" 
-      @request="onRequest" 
-      v-model:pagination="pagination"
-      :rows-per-page-options="[10, 20, 30, 40, 50]" 
-      :rows-number="enrollmentStore.total"
+        flat bordered 
+        :rows="students" 
+        :columns="columns" 
+        row-key="id"
+        class="q-mt-md customtable my-sticky-header-table" 
+        @request="onRequest" 
+        v-model:pagination="pagination"
+        :rows-per-page-options="[10, 20, 30, 40, 50]" 
+        :rows-number="enrollmentStore.total"
       >
 
         <!-- หัวตาราง Sticky -->
@@ -187,8 +188,11 @@ onMounted(async () => {
 
         <template v-slot:body-cell-status="props">
           <q-td :props="props">
-            <q-btn :label="getStatusText(props.row.status)" rounded unelevated class="status-btn"
-              :class="getStatusClass(props.row.status)" />
+            <q-btn 
+              :label="getStatusText(props.row.status)" 
+              rounded unelevated class="status-btn"
+              :class="getStatusClass(props.row.status)" 
+            />
           </q-td>
         </template>
 
