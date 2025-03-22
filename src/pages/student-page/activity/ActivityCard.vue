@@ -3,7 +3,10 @@
     <div class="row q-pa-md items-stretch">
       <!-- รูปกิจกรรม -->
       <div class="col-md-4">
-        <!-- <q-img :src="getImageUrl(activity.file)" class="rounded-borders activity-img" /> -->
+        <q-img
+          :src="'http://localhost:8888/uploads/activity/images/' + activity.file"
+          class="activity-img"
+        />
       </div>
 
       <!-- รายละเอียดกิจกรรม -->
