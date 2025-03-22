@@ -54,7 +54,7 @@ const linksList = [
   { title: 'กิจกรรมทั้งหมด', icon: 'build', link: '/Student/ActivityTablePage' },
   { title: 'กิจกรรมของฉัน', icon: 'assignment_ind', link: '/Student/MyActivitiesPage' },
   { title: 'บันทึกชั่วโมงอบรม', icon: 'history', link: '/Student/RecordPage' },
-  { title: 'ใบประกาศนียบัตร', icon: 'school', link: '/Student/CertificateTablePage' },
+  { title: 'ใบประกาศนียบัตร', icon: 'school', link: '/Student/CertificatePage' },
 ]
 
 async function logout() {
