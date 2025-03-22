@@ -19,7 +19,7 @@ import { useRouter } from 'vue-router'
 
 const router = useRouter()
 const goHome = () => {
-  router.push('/') // หรือเปลี่ยนเป็น push ตาม role ได้
+  void router.push('/') // หรือเปลี่ยนเป็น push ตาม role ได้
 }
 </script>
 
