@@ -35,7 +35,7 @@ const confirmCreateQR_Code = () => {
 <template>
   <div class="summary-container">
     <div class="summary-content">
-      <!-- ส่วนรูปภาพ -->
+      <!-- ส่วนรูปภาพ (ซ้าย) -->
       <div class="image-section">
         <div class="upload-box">
           <q-icon name="image" size="80px" class="image-icon" />
@@ -56,55 +56,69 @@ const confirmCreateQR_Code = () => {
             </q-card-section>
 
             <q-card-actions align="right">
-              <q-btn label="ยกเลิก" color="red" class="cancel-btn" @click="cancelCreateQR_Code" />
-              <q-btn label="ยืนยัน" color="blue" class="confirm-btn" @click="confirmCreateQR_Code" />
+              <q-btn label="ยกเลิก" color="red" @click="cancelCreateQR_Code" />
+              <q-btn label="ยืนยัน" color="blue" @click="confirmCreateQR_Code" />
             </q-card-actions>
           </q-card>
         </q-dialog>
       </div>
 
-      <!-- รายละเอียดการลงทะเบียน -->
-      <div class="registration-details">
-        <div class="registration-row">
-          <span class="label">จำนวนนิสิตที่ลงทะเบียน :</span>
-          <span class="value">{{ registrationSummary.totalStudents }}</span>
-          <span class="unit">คน</span>
-        </div>
+      <!-- ฝั่งขวา: ข้อมูล + ตาราง -->
+      <div class="details-section">
+        <!-- รายละเอียดการลงทะเบียน -->
+        <div class="registration-details">
+          <div class="registration-row">
+            <span class="label">จำนวนนิสิตที่ลงทะเบียน :</span>
+            <span class="value">{{ registrationSummary.totalStudents }}</span>
+            <span class="unit">คน</span>
+          </div>
 
-        <!-- ผลการเช็คชื่อ -->
-        <div class="info-row">
-          <span class="label">ผลการเช็คชื่อ :</span>
-          <div class="registration-info">
-            <div class="row">
-              <span class="sub-label">เช็คชื่อเข้า</span>
-              <span class="text">จำนวน</span>
-              <span class="number">{{ registrationSummary.checkIn }}</span>
-              <span class="unit">คน</span>
-            </div>
-            <div class="row">
-              <span class="sub-label">เช็คชื่อสาย</span>
-              <span class="text">จำนวน</span>
-              <span class="number">{{ registrationSummary.late }}</span>
-              <span class="unit">คน</span>
-            </div>
-            <div class="row">
-              <span class="sub-label">เช็คชื่อออก</span>
-              <span class="text">จำนวน</span>
-              <span class="number">{{ registrationSummary.checkOut }}</span>
-              <span class="unit">คน</span>
-            </div>
-            <div class="row">
-              <span class="sub-label">ไม่มา</span>
-              <span class="text">จำนวน</span>
-              <span class="number">{{ registrationSummary.absent }}</span>
-              <span class="unit">คน</span>
+          <!-- ผลการเช็คชื่อ -->
+          <div class="info-row">
+            <div class="registration-info">
+
+              <!-- แถวแรก -->
+              <div class="row">
+                <span class="label">ผลการเช็คชื่อ :</span>
+                <span class="sub-label">เช็คชื่อเข้า</span>
+                <span class="text">จำนวน</span>
+                <span class="number">{{ registrationSummary.checkIn }}</span>
+                <span class="unit">คน</span>
+              </div>
+
+              <!-- แถวอื่น ให้เว้นช่อง label -->
+              <div class="row">
+                <span class="label">&nbsp;</span> <!-- ช่องว่าง -->
+                <span class="sub-label">เช็คชื่อสาย</span>
+                <span class="text">จำนวน</span>
+                <span class="number">{{ registrationSummary.late }}</span>
+                <span class="unit">คน</span>
+              </div>
+
+              <div class="row">
+                <span class="label">&nbsp;</span> <!-- ช่องว่าง -->
+                <span class="sub-label">เช็คชื่อออก</span>
+                <span class="text">จำนวน</span>
+                <span class="number">{{ registrationSummary.checkOut }}</span>
+                <span class="unit">คน</span>
+              </div>
+
+              <div class="row">
+                <span class="label">&nbsp;</span> <!-- ช่องว่าง -->
+                <span class="sub-label">ไม่มา</span>
+                <span class="text">จำนวน</span>
+                <span class="number">{{ registrationSummary.absent }}</span>
+                <span class="unit">คน</span>
+              </div>
+
             </div>
           </div>
+
+          <!-- ตารางผลการประเมิน -->
+          <div class="evaluation-container">
+            <EvaluationTable />
+          </div>
         </div>
-      </div>
-      <!-- ตารางผลการประเมิน -->
-      <div class="evaluation-container">
-        <EvaluationTable />
       </div>
     </div>
   </div>
@@ -115,17 +129,18 @@ const confirmCreateQR_Code = () => {
   display: flex;
   flex-direction: column;
   align-items: flex-start;
-  gap: 150px;
+  gap: 50px;
   background-color: #EDF0F5;
   padding: 30px;
   border-radius: 12px;
-  width: 100%;
+  height: 680px;
 }
 
 /* ตารางสามารถเลื่อนขึ้นลงได้ */
 .evaluation-container {
   width: 100%;
-  margin-top: 20px; /* เว้นระยะห่างจากข้อมูลเช็คชื่อ */
+  margin-top: 20px;
+  /* เว้นระยะห่างจากข้อมูลเช็คชื่อ */
 }
 
 /* โครงสร้างเนื้อหาสรุป */
@@ -139,9 +154,23 @@ const confirmCreateQR_Code = () => {
 /* รายละเอียดการลงทะเบียน */
 .registration-details {
   display: flex;
-  align-items: flex-start;
   flex-direction: column;
   gap: 10px;
+}
+
+.details-section {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  max-height: 600px;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding-right: 10px;
+}
+
+.details-section::-webkit-scrollbar {
+  width: 0px;
+  /* Hide scrollbar */
 }
 
 .info-row {
@@ -162,35 +191,37 @@ const confirmCreateQR_Code = () => {
 .registration-row {
   display: flex;
   align-items: flex-start;
-  gap: 10px;
+  gap: 20px;
   margin-top: 10px;
   flex-wrap: nowrap;
 }
 
 .sub-label {
-  min-width: 80px;
+  min-width: 120px;
   text-align: left;
   gap: 20px;
 }
 
 .row {
   display: flex;
+  justify-content: flex-start;
   align-items: center;
-  gap: 20px;
+  gap: 30px;
 }
 
 .label {
   white-space: nowrap;
   text-align: right;
-  margin-right: 15px;
-  min-width: 180px;
+  margin-right: px;
+  /* min-width: 180px; */
+  min-width: 200px;
 }
 
 .value,
 .unit,
 .text,
 .number {
-  min-width: 30px;
+  min-width: 40px;
   text-align: left;
 }
 
@@ -201,7 +232,7 @@ const confirmCreateQR_Code = () => {
 .text,
 .number {
   font-weight: 500;
-  font-size: 16px;
+  font-size: 20px;
   color: #000000;
 }
 
