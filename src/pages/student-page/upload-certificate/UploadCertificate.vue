@@ -5,7 +5,7 @@
         <div class="text-h6">อัปโหลดใบ Certificate</div>
         <q-uploader
           label="อัปโหลดไฟล์ PDF หรือ PNG"
-          url="http://localhost:8888/ocr/upload"
+          :url="baseurl + '/ocr/upload'"
           accept=".pdf,image/*"
           :auto-upload="true"
           field-name="file"
@@ -82,6 +82,8 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import { api } from 'boot/axios'
+
+const baseurl = api.defaults.baseURL
 
 // 🟢 Type ของผล OCR
 interface OcrResult {
