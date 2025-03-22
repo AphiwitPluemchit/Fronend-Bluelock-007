@@ -12,8 +12,6 @@
         style="display: none"
         @change="onFileChange"
       />
-
-      <!-- ✅ แสดงรูปที่เลือกใหม่ หรือ fallback เป็นรูปจาก server -->
       <img
         v-if="previewUrl || serverImageUrl"
         :src="(previewUrl || serverImageUrl) ?? ''"
@@ -29,11 +27,7 @@
 
 <script setup lang="ts">
 import { ref, computed } from 'vue'
-const resetPreview = () => {
-  previewUrl.value = null
-}
 
-defineExpose({ resetPreview }) // ให้ parent เรียกใช้
 const props = defineProps<{
   imageFileName?: string | null | undefined
   disable?: boolean
@@ -45,6 +39,7 @@ const emit = defineEmits<{
 
 const fileInput = ref<HTMLInputElement | null>(null)
 const previewUrl = ref<string | null>(null)
+const selectedFileName = ref<string | null>(null)
 
 const serverImageUrl = computed(() =>
   props.imageFileName
@@ -56,14 +51,28 @@ const triggerFileInput = () => {
   fileInput.value?.click()
 }
 
+const resetPreview = () => {
+  previewUrl.value = null
+}
+
+const getSelectedFileName = () => selectedFileName.value
+
+// ✅ รวมไว้ใน defineExpose เดียว
+defineExpose({
+  resetPreview,
+  getSelectedFileName,
+})
+
 const onFileChange = (event: Event) => {
   const target = event.target as HTMLInputElement
   const file = target.files?.[0]
   if (file) {
+    selectedFileName.value = file.name
     previewUrl.value = URL.createObjectURL(file)
     emit('file-selected', file)
   }
 }
+
 </script>
 
 <style scoped>

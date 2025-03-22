@@ -15,7 +15,6 @@ const tab = ref<string>('activity')
 const search = ref<string>('')
 const isPlanning = computed(() => activity.value?.activityState === 'planning')
 
-
 // const router = useRouter()
 
 // const goToActivitiesManagement = async () => {
@@ -50,7 +49,6 @@ watch([tab, isPlanning], () => {
     tab.value = 'activity'
   }
 })
-
 </script>
 
 <template>
@@ -68,7 +66,11 @@ watch([tab, isPlanning], () => {
     <!-- Tab Panels -->
     <q-tab-panels v-model="tab" animated class="custom-panels">
       <q-tab-panel name="activity" class="q-my-md">
-        <ActivityDetailTab v-if="activity" :activity="activity" />
+        <ActivityDetailTab
+          v-if="activity"
+          :activity="activity"
+          @update-activity="(updated) => (activity = updated)"
+        />
       </q-tab-panel>
 
       <q-tab-panel name="registration" class="q-my-md">

@@ -140,6 +140,7 @@ const props = defineProps<{
 }>()
 const emit = defineEmits<{
   (e: 'update:isEditing', value: boolean): void
+  (e: 'saved', fileName?: string): void // ✅ ส่ง fileName กลับ
 }>()
 
 interface DayTimeSelection {
@@ -367,7 +368,7 @@ const statusReverseMap: Record<string, string> = {
 
 const saveChanges = async () => {
   emit('update:isEditing', false)
-  
+
   if (!originalActivity.value?.id) {
     console.error('ไม่พบ activity id สำหรับการอัปเดต')
     return
@@ -405,31 +406,34 @@ const saveChanges = async () => {
   }
 
   try {
-    const updateStatus = await ActivityService.updateOne(updated)
+    const status = await ActivityService.updateOne(updated)
 
-    if ((updateStatus === 200 || updateStatus === 201) && props.imageFile) {
+    if ((status === 200 || status === 201) && props.imageFile) {
       try {
-        const uploadStatus = await ActivityService.uploadImage(
-          originalActivity.value.id, 
-          props.imageFile,           
-          props.activity?.file ?? undefined 
+        const uploadResult = await ActivityService.uploadImage(
+          originalActivity.value.id,
+          props.imageFile,
+          props.activity?.file ?? undefined,
         )
 
-        if (uploadStatus === 200 || uploadStatus === 201) {
+        if (uploadResult.status === 200 || uploadResult.status === 201) {
           alert('✅ บันทึกกิจกรรม + อัปโหลดรูปสำเร็จ')
+          emit('saved', uploadResult.fileName) // ✅ ส่งชื่อไฟล์ใหม่กลับ
         } else {
           alert('⚠️ บันทึกกิจกรรมสำเร็จ แต่อัปโหลดรูปไม่สำเร็จ')
+          emit('saved') // ✅ ไม่มีไฟล์ → ก็ส่ง saved
         }
       } catch (uploadErr) {
-        console.error('❌ Upload image failed:', uploadErr)
+        console.error('❌ Upload image failed:', uploadErr) // ✅ ใช้งานจริง
         alert('❌ อัปโหลดรูปภาพไม่สำเร็จ')
+        emit('saved')
       }
     } else {
-      alert('✅ บันทึกกิจกรรมสำเร็จ')
+      emit('saved') // ✅ ไม่ได้อัปโหลดรูป แต่อัปเดตข้อมูลกิจกรรมเสร็จ
     }
   } catch (err) {
-    console.error('❌ Update activity failed:', err)
-    alert('❌ บันทึกกิจกรรมไม่สำเร็จ')
+    console.error('Create activity failed:', err)
+    alert('❌ สร้างกิจกรรมไม่สำเร็จ')
   }
 }
 
