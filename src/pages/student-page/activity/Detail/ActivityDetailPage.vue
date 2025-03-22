@@ -5,7 +5,7 @@
     <div class="activity-detail-card">
       <q-card-section class="row">
         <div class="col-12 col-md-4 text-center">
-          <!-- <q-img :src="getImageUrl(activity?.file)" class="activity-img" /> -->
+          <q-img :src="getImagePath(activity?.file)" class="image" error-src="/default-placeholder.jpg" />
         </div>
 
         <div class="col-12 col-md-8" v-if="activity">
@@ -72,6 +72,12 @@ const breadcrumbs = ref({
 // const getImageUrl = (fileName: string | undefined) => {
 //   return fileName ? `/uploads/${fileName}` : '/icons/default-image.png'
 // }
+const getImagePath = (fileName: string | undefined | null) => {
+  if (!fileName) {
+    return '/default-placeholder.jpg' // ถ้าไม่มีไฟล์
+  }
+  return `http://127.0.0.1:8888/uploads/activity/images/${fileName}`
+}
 
 // ฟังก์ชันลงทะเบียน
 const handleRegisterClick = () => {
@@ -118,5 +124,12 @@ onMounted(async () => {
   height: 300px;
   background-color: #d9d9d9;
   border-radius: 10px;
+}
+.image {
+  width: 430px;
+  height: 330px;
+  background-color: #d9d9d9;
+  border-radius: 12px;
+  object-fit: cover;
 }
 </style>
