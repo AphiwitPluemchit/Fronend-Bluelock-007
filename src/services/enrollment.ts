@@ -40,9 +40,10 @@ export class EnrollmentService {
       throw error
     }
   }
-  static async getEnrollmentsByStudentID(studentId: string) {
+  static async getEnrollmentsByStudentID(studentId: string, params: EnrollmentQuery) {
     try {
-      const res = await api.get(`${this.path}/student/${studentId}`)
+      console.log('Sending params:', params)
+      const res = await api.get(`${this.path}/student/${studentId}`, { params })
       console.log('Fetched enrollments:', res.data)
       return res.data
     } catch (error) {

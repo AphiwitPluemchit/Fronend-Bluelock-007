@@ -3,7 +3,16 @@
     <div class="row no-wrap items-center">
       <!-- รูปกิจกรรม -->
       <div class="col-2">
-        <q-img :src="myActivity.file" class="activity-img" />
+        <!-- <img
+        v-if="previewUrl || serverImageUrl"
+        :src="(previewUrl || serverImageUrl) ?? ''"
+        alt="Image preview"
+        class="preview-img"
+      /> -->
+        <q-img
+          :src="'http://localhost:8888/uploads/activity/images/' + myActivity.file"
+          class="activity-img"
+        />
       </div>
 
       <!-- ข้อมูลกิจกรรม -->
