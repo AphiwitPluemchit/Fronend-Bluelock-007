@@ -40,10 +40,6 @@ export const adminRoutes: RouteRecordRaw[] = [
         path: 'CertificateManagement',
         component: () => import('pages/admin-page/certificate/CertificateTablePage.vue'),
       },
-      {
-        path: 'ExComponent',
-        component: () => import('pages/ExComponent.vue'),
-      },
     ],
   },
 ]

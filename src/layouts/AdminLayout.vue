@@ -1,10 +1,10 @@
 <template>
-  <q-layout view="hHh lpR fFf">
+  <q-layout view="hHh Lpr lFf">
     <!-- ส่ง event จาก Navbar ไป Sidebar -->
     <MenuNavbar @toggleSidebar="adminSidebar?.toggleSidebar()" />
-    <MenuAdminSidebar ref="adminSidebar" style="max-height: 98%" />
-    <q-page-container class="form-section">
-      <div class="q-mx-auto q-px-lg"><router-view /></div>
+    <MenuAdminSidebar ref="adminSidebar" />
+    <q-page-container>
+      <div class="q-mx-auto" style="max-width: 1600px"><router-view /></div>
     </q-page-container>
   </q-layout>
 </template>
@@ -16,13 +16,4 @@ import { ref } from 'vue'
 
 const adminSidebar = ref<InstanceType<typeof MenuAdminSidebar> | null>(null)
 </script>
-<style scoped>
-.form-section {
-  overflow-x: hidden;
-  overflow-y: auto;
-  max-height: 100vh;
-}
-.form-section::-webkit-scrollbar {
-  display: none;
-}
-</style>
+<style scoped></style>
