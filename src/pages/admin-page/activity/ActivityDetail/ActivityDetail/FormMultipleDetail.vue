@@ -172,13 +172,16 @@ import type { Activity } from 'src/types/activity'
 import type { Food } from 'src/types/food'
 import { ActivityService } from 'src/services/activity'
 import cloneDeep from 'lodash/cloneDeep'
+import type ImageDetail from './ImageDetail.vue'
 
 const props = defineProps<{
   activity: Activity | null
   isEditing: boolean
+  imageRef?: InstanceType<typeof ImageDetail>
 }>()
 const emit = defineEmits<{
   (e: 'update:isEditing', value: boolean): void
+  (e: 'saved', fileName?: string): void // ✅ ส่ง fileName กลับ
 }>()
 
 interface SubActivity {
@@ -309,18 +312,13 @@ const saveChanges = async () => {
   updated.name = activityName.value
   updated.skill = activityType.value === 'prep' ? 'hard' : 'soft'
   updated.activityState = statusReverseMap[activityStatus.value] || 'planning'
+  updated.foodVotes = foodMenu.value.map((f) => ({ foodName: f.name, vote: 1 }))
 
-  // ✅ Food Menu
-  updated.foodVotes = foodMenu.value.map((f) => ({
-    foodName: f.name,
-    vote: 1,
-  }))
   // ✅ วันที่และเวลา
   const date = activityDateInternal.value
   const stime = selectedTime.value
   const etime = endTime.value
 
-  // ✅ ActivityItems
   updated.activityItems = subActivities.value.map((sub) => ({
     name: sub.subActivityName,
     hour: Number(totalHours.value),
@@ -330,23 +328,41 @@ const saveChanges = async () => {
     operator: sub.lecturer,
     majors: sub.departments.map(String),
     studentYears: sub.years.map((y) => Number(y)),
-    dates: [
-      {
-        date,
-        stime,
-        etime,
-      },
-    ],
+    dates: [{ date, stime, etime }],
   }))
 
   try {
     const result = await ActivityService.updateOne(updated)
-    console.log('✅ อัปเดตกิจกรรมเรียบร้อย', result)
+
+    // ✅ หลังอัปเดตข้อมูลเสร็จ → อัปโหลดรูป
+    if ((result === 200 || result === 201) && props.imageRef) {
+      const file = props.imageRef.getSelectedFile?.()
+      const fileName = props.imageRef.getSelectedFileName?.()
+      const oldFile = props.activity?.file ?? ''
+
+      if (file && fileName && fileName !== oldFile) {
+        try {
+          if (oldFile) {
+            await ActivityService.deleteImage(props.activity.id, oldFile)
+            console.log('🗑 ลบรูปเก่าเรียบร้อย:', oldFile)
+          }
+          const uploadResult = await ActivityService.uploadImage(props.activity.id, file)
+
+          if (uploadResult.status === 200 || uploadResult.status === 201) {
+            emit('saved', uploadResult.fileName)
+            return
+          }
+        } catch (uploadErr) {
+          console.error('❌ Upload image failed:', uploadErr)
+        }
+      }
+    }
+
+    emit('saved') // ✅ ส่ง event กลับไปยัง parent เพื่อ refresh
   } catch (err) {
     console.error('❌ ไม่สามารถอัปเดตกิจกรรมได้:', err)
   }
 }
-
 
 const handleStatusChange = (newStatus: string) => {
   activityStatus.value = newStatus
@@ -393,7 +409,6 @@ onMounted(() => {
   activityName.value = a.name ?? ''
   activityType.value = a.skill === 'hard' ? 'prep' : a.skill === 'soft' ? 'academic' : ''
 
-  // ✅ แปลง activityState (จาก backend) → ภาษาไทยสำหรับแสดงผล
   if (a.activityState) {
     activityStatus.value = statusMap[a.activityState] || 'กำลังวางแผน'
   }
@@ -423,11 +438,7 @@ onMounted(() => {
       selectedTime.value = firstDateTime.stime
       endTime.value = firstDateTime.etime
     }
-
-    // ✅ เวลาอบรมรวม
     totalHours.value = firstItem.hour ?? 0
-
-    // ✅ Sub-activities
     subActivities.value = a.activityItems.map((item) => ({
       subActivityName: item.name ?? '',
       roomName: Array.isArray(item.rooms) ? item.rooms : [],

@@ -142,13 +142,16 @@ import type { Activity } from 'src/types/activity'
 import type { Food } from 'src/types/food'
 import { ActivityService } from 'src/services/activity'
 import cloneDeep from 'lodash/cloneDeep'
+import type ImageDetail from './ImageDetail.vue'
 
 const originalActivity = ref<Activity | null>(null)
 const props = defineProps<{
   activity: Activity | null
   isEditing: boolean
   imageFile: File | null
+  imageRef: InstanceType<typeof ImageDetail> | undefined
 }>()
+
 const emit = defineEmits<{
   (e: 'update:isEditing', value: boolean): void
   (e: 'saved', fileName?: string): void // ✅ ส่ง fileName กลับ
@@ -431,17 +434,11 @@ const saveChanges = async () => {
   }
 
   const updated: Partial<Activity> = cloneDeep(originalActivity.value)
-
   updated.name = activityName.value
   updated.skill = activityType.value === 'prep' ? 'hard' : 'soft'
   updated.activityState = statusReverseMap[activityStatus.value] || 'planning'
+  updated.foodVotes = foodMenu.value.map((f) => ({ foodName: f.name, vote: 1 }))
 
-  // ✅ foodVotes
-  updated.foodVotes = foodMenu.value.map((f) => ({
-    foodName: f.name,
-    vote: 1,
-  }))
-  // ✅ activityItems[0]
   if (updated.activityItems && updated.activityItems.length > 0) {
     updated.activityItems[0] = {
       ...updated.activityItems[0],
@@ -464,32 +461,33 @@ const saveChanges = async () => {
   try {
     const status = await ActivityService.updateOne(updated)
 
-    if ((status === 200 || status === 201) && props.imageFile) {
-      try {
-        const uploadResult = await ActivityService.uploadImage(
-          originalActivity.value.id,
-          props.imageFile,
-          props.activity?.file ?? undefined,
-        )
+    if ((status === 200 || status === 201) && props.imageRef) {
+      const file = props.imageRef.getSelectedFile?.()
+      const fileName = props.imageRef.getSelectedFileName?.()
+      const oldFile = props.activity?.file ?? ''
 
-        if (uploadResult.status === 200 || uploadResult.status === 201) {
-          alert('✅ บันทึกกิจกรรม + อัปโหลดรูปสำเร็จ')
-          emit('saved', uploadResult.fileName) // ✅ ส่งชื่อไฟล์ใหม่กลับ
-        } else {
-          alert('⚠️ บันทึกกิจกรรมสำเร็จ แต่อัปโหลดรูปไม่สำเร็จ')
-          emit('saved') // ✅ ไม่มีไฟล์ → ก็ส่ง saved
+      if (file && fileName && fileName !== oldFile) {
+        try {
+          if (oldFile) {
+            await ActivityService.deleteImage(originalActivity.value.id, oldFile)
+            console.log('🗑 ลบรูปเก่าแล้ว:', oldFile)
+          }
+
+          const uploadResult = await ActivityService.uploadImage(originalActivity.value.id, file)
+
+          if (uploadResult.status === 200 || uploadResult.status === 201) {
+            emit('saved', uploadResult.fileName)
+            return
+          }
+        } catch (uploadErr) {
+          console.error('❌ Upload image failed:', uploadErr)
         }
-      } catch (uploadErr) {
-        console.error('❌ Upload image failed:', uploadErr) // ✅ ใช้งานจริง
-        alert('❌ อัปโหลดรูปภาพไม่สำเร็จ')
-        emit('saved')
       }
-    } else {
-      emit('saved') // ✅ ไม่ได้อัปโหลดรูป แต่อัปเดตข้อมูลกิจกรรมเสร็จ
     }
+
+    emit('saved')
   } catch (err) {
-    console.error('Create activity failed:', err)
-    alert('❌ สร้างกิจกรรมไม่สำเร็จ')
+    console.error('❌ อัปเดตกิจกรรมไม่สำเร็จ:', err)
   }
 }
 

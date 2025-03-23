@@ -62,10 +62,11 @@ const resetPreview = () => {
 }
 
 const getSelectedFileName = () => selectedFileName.value
-
+const selectedFile = ref<File | null>(null)
 defineExpose({
   resetPreview,
   getSelectedFileName,
+  getSelectedFile: () => selectedFile.value
 })
 const imageSrc = computed(() => {
   return previewUrl.value ?? serverImageUrl.value ?? undefined
@@ -75,6 +76,7 @@ const onFileChange = (event: Event) => {
   const target = event.target as HTMLInputElement
   const file = target.files?.[0]
   if (file) {
+    selectedFile.value = file
     selectedFileName.value = file.name
     previewUrl.value = URL.createObjectURL(file)
     emit('file-selected', file)
