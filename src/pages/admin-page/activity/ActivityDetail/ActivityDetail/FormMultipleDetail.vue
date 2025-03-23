@@ -140,7 +140,17 @@
       </q-btn>
 
       <template v-else>
-        <q-btn class="btnreject" @click="emit('update:isEditing', false)">ยกเลิก</q-btn>
+        <q-btn
+          class="btnreject"
+          @click="
+            () => {
+              resetFormToOriginal()
+              emit('update:isEditing', false)
+            }
+          "
+          >ยกเลิก</q-btn
+        >
+
         <q-btn class="btnsecces" @click="saveChanges">บันทึก</q-btn>
       </template>
     </div>
@@ -162,13 +172,16 @@ import type { Activity } from 'src/types/activity'
 import type { Food } from 'src/types/food'
 import { ActivityService } from 'src/services/activity'
 import cloneDeep from 'lodash/cloneDeep'
+import type ImageDetail from './ImageDetail.vue'
 
 const props = defineProps<{
   activity: Activity | null
   isEditing: boolean
+  imageRef?: InstanceType<typeof ImageDetail>
 }>()
 const emit = defineEmits<{
   (e: 'update:isEditing', value: boolean): void
+  (e: 'saved', fileName?: string): void // ✅ ส่ง fileName กลับ
 }>()
 
 interface SubActivity {
@@ -191,6 +204,7 @@ const addSubActivity = () => {
     years: [],
   })
 }
+const originalActivity = ref<Activity | null>(null)
 const activityLoaded = ref(false)
 const activityType = ref('')
 const showChangeStatusDialog = ref(false)
@@ -206,6 +220,7 @@ const endHour = ref<number>(0)
 const endMinute = ref<number>(0)
 const foodMenuDisplay = ref('')
 const foodMenu = ref<Food[]>([])
+const activityStatus = ref('กำลังวางแผน')
 // ฟังก์ชันสำหรับฟอร์แมตเวลาเป็นสตริง
 const formatTime = (h: number, m: number): string => {
   return `${formatHour(h)}:${formatMinute(m)}`
@@ -225,8 +240,6 @@ const formatHour = (hour: number): string => {
 const formatMinute = (minute: number): string => {
   return minute.toString().padStart(2, '0')
 }
-
-// ฟังก์ชันปรับชั่วโมงและนาที ที่ใช้ได้ทั้ง start time และ end time
 
 const isNumber = (event: KeyboardEvent) => {
   const charCode = event.which ? event.which : event.keyCode
@@ -299,18 +312,13 @@ const saveChanges = async () => {
   updated.name = activityName.value
   updated.skill = activityType.value === 'prep' ? 'hard' : 'soft'
   updated.activityState = statusReverseMap[activityStatus.value] || 'planning'
+  updated.foodVotes = foodMenu.value.map((f) => ({ foodName: f.name, vote: 1 }))
 
-  // ✅ Food Menu
-  updated.foodVotes = foodMenu.value.map((f) => ({
-    foodName: f.name,
-    vote: 1,
-  }))
   // ✅ วันที่และเวลา
   const date = activityDateInternal.value
   const stime = selectedTime.value
   const etime = endTime.value
 
-  // ✅ ActivityItems
   updated.activityItems = subActivities.value.map((sub) => ({
     name: sub.subActivityName,
     hour: Number(totalHours.value),
@@ -320,24 +328,42 @@ const saveChanges = async () => {
     operator: sub.lecturer,
     majors: sub.departments.map(String),
     studentYears: sub.years.map((y) => Number(y)),
-    dates: [
-      {
-        date,
-        stime,
-        etime,
-      },
-    ],
+    dates: [{ date, stime, etime }],
   }))
 
   try {
     const result = await ActivityService.updateOne(updated)
-    console.log('✅ อัปเดตกิจกรรมเรียบร้อย', result)
+
+    // ✅ หลังอัปเดตข้อมูลเสร็จ → อัปโหลดรูป
+    if ((result === 200 || result === 201) && props.imageRef) {
+      const file = props.imageRef.getSelectedFile?.()
+      const fileName = props.imageRef.getSelectedFileName?.()
+      const oldFile = props.activity?.file ?? ''
+
+      if (file && fileName && fileName !== oldFile) {
+        try {
+          if (oldFile) {
+            await ActivityService.deleteImage(props.activity.id, oldFile)
+            console.log('🗑 ลบรูปเก่าเรียบร้อย:', oldFile)
+          }
+          const uploadResult = await ActivityService.uploadImage(props.activity.id, file)
+
+          if (uploadResult.status === 200 || uploadResult.status === 201) {
+            emit('saved', uploadResult.fileName)
+            return
+          }
+        } catch (uploadErr) {
+          console.error('❌ Upload image failed:', uploadErr)
+        }
+      }
+    }
+
+    emit('saved') // ✅ ส่ง event กลับไปยัง parent เพื่อ refresh
   } catch (err) {
     console.error('❌ ไม่สามารถอัปเดตกิจกรรมได้:', err)
   }
 }
 
-const activityStatus = ref('กำลังวางแผน')
 const handleStatusChange = (newStatus: string) => {
   activityStatus.value = newStatus
 }
@@ -379,10 +405,10 @@ onMounted(() => {
   const a = props.activity
   if (!a) return
 
+  originalActivity.value = cloneDeep(a)
   activityName.value = a.name ?? ''
   activityType.value = a.skill === 'hard' ? 'prep' : a.skill === 'soft' ? 'academic' : ''
 
-  // ✅ แปลง activityState (จาก backend) → ภาษาไทยสำหรับแสดงผล
   if (a.activityState) {
     activityStatus.value = statusMap[a.activityState] || 'กำลังวางแผน'
   }
@@ -412,11 +438,7 @@ onMounted(() => {
       selectedTime.value = firstDateTime.stime
       endTime.value = firstDateTime.etime
     }
-
-    // ✅ เวลาอบรมรวม
     totalHours.value = firstItem.hour ?? 0
-
-    // ✅ Sub-activities
     subActivities.value = a.activityItems.map((item) => ({
       subActivityName: item.name ?? '',
       roomName: Array.isArray(item.rooms) ? item.rooms : [],
@@ -430,17 +452,44 @@ onMounted(() => {
 
   activityLoaded.value = true
 })
+const resetFormToOriginal = () => {
+  const a = originalActivity.value
+  if (!a) return
+
+  activityName.value = a.name ?? ''
+  activityType.value = a.skill === 'hard' ? 'prep' : a.skill === 'soft' ? 'academic' : ''
+  activityStatus.value = statusMap[a.activityState ?? 'planning'] ?? 'กำลังวางแผน'
+
+  foodMenu.value =
+    a.foodVotes?.map((f) => ({
+      id: '',
+      name: f.foodName,
+    })) ?? []
+  foodMenuDisplay.value = foodMenu.value.map((f) => f.name).join(', ')
+
+  const firstItem = a.activityItems?.[0]
+  if (firstItem?.dates?.[0]) {
+    activityDateInternal.value = firstItem.dates[0].date ?? ''
+    selectedTime.value = firstItem.dates[0].stime ?? '00:00'
+    endTime.value = firstItem.dates[0].etime ?? '00:00'
+  }
+
+  totalHours.value = firstItem?.hour ?? 0
+
+  subActivities.value =
+    a.activityItems?.map((item) => ({
+      subActivityName: item.name ?? '',
+      roomName: Array.isArray(item.rooms) ? item.rooms : [],
+      seats: item.maxParticipants ?? 0,
+      lecturer: item.operator ?? '',
+      detailActivity: item.description ?? '',
+      departments: item.majors?.map(String) ?? [],
+      years: item.studentYears?.map(String) ?? [],
+    })) ?? []
+}
 </script>
 
 <style scoped>
-/* ::v-deep(.q-btn:disabled) {
-  background-color: #e0e0e0 !important;
-  color: #757575 !important;
-}
-::v-deep(.q-field--disabled .q-field__control) {
-  background-color: #e0e0e0 !important;
-  color: #757575 !important;
-} */
 ::v-deep(.q-field__control) {
   height: auto;
   background-color: white;

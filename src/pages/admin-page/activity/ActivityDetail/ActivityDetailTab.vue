@@ -5,11 +5,10 @@
         <div class="image-section">
           <ImageDetail
             ref="imageRef"
-            :imageFileName="activity?.file"
+            :imageFileName="props.activity?.file"
             :disable="!isEditing"
             @file-selected="handleFileSelected"
           />
-
           <!-- Dropdown ใต้รูป -->
           <q-select v-model="selectedActivityType" outlined class="dropdown no-border bg-white">
             <template v-slot:selected>
@@ -25,6 +24,7 @@
             :is="getFormComponent || 'div'"
             :activity="activity"
             :imageFile="selectedImageFile"
+            :imageRef="imageRef"
             v-model:isEditing="isEditing"
             @saved="handleSave"
           />
@@ -59,8 +59,9 @@ const props = defineProps<{
 
 const selectedActivityType = ref('')
 const handleSave = async (fileName?: string) => {
-  await uploadImageIfChanged()
-
+  if (selectedImageFile.value && props.activity?.id) {
+    await uploadImageIfChanged()
+  }
   selectedImageFile.value = null
   imageRef.value?.resetPreview()
 
@@ -68,7 +69,7 @@ const handleSave = async (fileName?: string) => {
     const res = await ActivityService.getOne(props.activity.id)
     emit('update-activity', {
       ...res.data,
-      file: fileName ?? res.data.file, 
+      file: fileName ?? res.data.file,
     })
   }
 }

@@ -108,7 +108,18 @@
       </q-btn>
 
       <template v-else>
-        <q-btn class="btnreject" @click="emit('update:isEditing', false)">ยกเลิก</q-btn>
+        <q-btn
+          class="btnreject"
+          @click="
+            () => {
+              resetFormToOriginal()
+              emit('update:isEditing', false)
+            }
+          "
+        >
+          ยกเลิก
+        </q-btn>
+
         <q-btn class="btnsecces" @click="saveChanges">บันทึก</q-btn>
       </template>
     </div>
@@ -131,13 +142,16 @@ import type { Activity } from 'src/types/activity'
 import type { Food } from 'src/types/food'
 import { ActivityService } from 'src/services/activity'
 import cloneDeep from 'lodash/cloneDeep'
+import type ImageDetail from './ImageDetail.vue'
 
 const originalActivity = ref<Activity | null>(null)
 const props = defineProps<{
   activity: Activity | null
   isEditing: boolean
   imageFile: File | null
+  imageRef: InstanceType<typeof ImageDetail> | undefined
 }>()
+
 const emit = defineEmits<{
   (e: 'update:isEditing', value: boolean): void
   (e: 'saved', fileName?: string): void // ✅ ส่ง fileName กลับ
@@ -214,6 +228,51 @@ const applySameTime = async () => {
     }
   })
 }
+const resetFormToOriginal = () => {
+  const a = originalActivity.value
+  if (!a) return
+
+  activityName.value = a.name ?? ''
+  activityType.value = a.skill === 'hard' ? 'prep' : a.skill === 'soft' ? 'academic' : ''
+
+  if (a.activityState) {
+    activityStatus.value = statusMap[a.activityState] || 'กำลังวางแผน'
+  }
+
+  foodMenu.value =
+    a.foodVotes?.map((f) => ({
+      id: '',
+      name: f.foodName,
+    })) ?? []
+
+  foodMenuDisplay.value = foodMenu.value.map((f) => f.name).join(', ')
+
+  const firstItem = a.activityItems?.[0]
+  if (firstItem) {
+    roomName.value = firstItem.rooms ?? []
+    totalHours.value = firstItem.hour ?? 0
+    seats.value = firstItem.maxParticipants ?? 0
+    departments.value = firstItem.majors?.map(String) ?? []
+    detailActivity.value = firstItem.description ?? ''
+    lecturer.value = firstItem.operator ?? ''
+    years.value = firstItem.studentYears?.map(String) ?? []
+
+    if (firstItem.dates?.length) {
+      activityDateRange.value = firstItem.dates.map((d) => d.date)
+      generateDaysInRange(activityDateRange.value)
+
+      selectedDays.value.forEach((day, index) => {
+        const d = firstItem.dates?.[index]
+        if (d) {
+          day.date = d.date
+          day.startTime = d.stime
+          day.endTime = d.etime
+        }
+      })
+    }
+  }
+}
+
 const updateDayTime = (index: number, type: 'start' | 'end', value: string) => {
   if (selectedDays.value[index]) {
     if (type === 'start') {
@@ -375,17 +434,11 @@ const saveChanges = async () => {
   }
 
   const updated: Partial<Activity> = cloneDeep(originalActivity.value)
-
   updated.name = activityName.value
   updated.skill = activityType.value === 'prep' ? 'hard' : 'soft'
   updated.activityState = statusReverseMap[activityStatus.value] || 'planning'
+  updated.foodVotes = foodMenu.value.map((f) => ({ foodName: f.name, vote: 1 }))
 
-  // ✅ foodVotes
-  updated.foodVotes = foodMenu.value.map((f) => ({
-    foodName: f.name,
-    vote: 1,
-  }))
-  // ✅ activityItems[0]
   if (updated.activityItems && updated.activityItems.length > 0) {
     updated.activityItems[0] = {
       ...updated.activityItems[0],
@@ -408,32 +461,33 @@ const saveChanges = async () => {
   try {
     const status = await ActivityService.updateOne(updated)
 
-    if ((status === 200 || status === 201) && props.imageFile) {
-      try {
-        const uploadResult = await ActivityService.uploadImage(
-          originalActivity.value.id,
-          props.imageFile,
-          props.activity?.file ?? undefined,
-        )
+    if ((status === 200 || status === 201) && props.imageRef) {
+      const file = props.imageRef.getSelectedFile?.()
+      const fileName = props.imageRef.getSelectedFileName?.()
+      const oldFile = props.activity?.file ?? ''
 
-        if (uploadResult.status === 200 || uploadResult.status === 201) {
-          alert('✅ บันทึกกิจกรรม + อัปโหลดรูปสำเร็จ')
-          emit('saved', uploadResult.fileName) // ✅ ส่งชื่อไฟล์ใหม่กลับ
-        } else {
-          alert('⚠️ บันทึกกิจกรรมสำเร็จ แต่อัปโหลดรูปไม่สำเร็จ')
-          emit('saved') // ✅ ไม่มีไฟล์ → ก็ส่ง saved
+      if (file && fileName && fileName !== oldFile) {
+        try {
+          if (oldFile) {
+            await ActivityService.deleteImage(originalActivity.value.id, oldFile)
+            console.log('🗑 ลบรูปเก่าแล้ว:', oldFile)
+          }
+
+          const uploadResult = await ActivityService.uploadImage(originalActivity.value.id, file)
+
+          if (uploadResult.status === 200 || uploadResult.status === 201) {
+            emit('saved', uploadResult.fileName)
+            return
+          }
+        } catch (uploadErr) {
+          console.error('❌ Upload image failed:', uploadErr)
         }
-      } catch (uploadErr) {
-        console.error('❌ Upload image failed:', uploadErr) // ✅ ใช้งานจริง
-        alert('❌ อัปโหลดรูปภาพไม่สำเร็จ')
-        emit('saved')
       }
-    } else {
-      emit('saved') // ✅ ไม่ได้อัปโหลดรูป แต่อัปเดตข้อมูลกิจกรรมเสร็จ
     }
+
+    emit('saved')
   } catch (err) {
-    console.error('Create activity failed:', err)
-    alert('❌ สร้างกิจกรรมไม่สำเร็จ')
+    console.error('❌ อัปเดตกิจกรรมไม่สำเร็จ:', err)
   }
 }
 

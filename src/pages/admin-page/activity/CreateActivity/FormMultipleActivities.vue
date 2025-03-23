@@ -308,14 +308,12 @@ const submitActivity = async () => {
         }
       } catch (uploadErr) {
         console.error('Upload image failed:', uploadErr)
-        alert('❌ อัปโหลดรูปภาพไม่สำเร็จ')
       }
     }
 
     await goToPageDetail(id)
   } catch (err) {
     console.error('Create activity failed:', err)
-    alert('❌ สร้างกิจกรรมไม่สำเร็จ')
   }
 }
 </script>

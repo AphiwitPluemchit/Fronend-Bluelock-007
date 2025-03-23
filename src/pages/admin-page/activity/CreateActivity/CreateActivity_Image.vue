@@ -1,6 +1,6 @@
 <template>
   <div class="upload-container">
-    <div class="upload-box" @click="triggerFileInput">
+    <q-card flat bordered class="upload-box" @click="triggerFileInput">
       <input
         type="file"
         accept="image/*"
@@ -8,9 +8,16 @@
         style="display: none"
         @change="onFileChange"
       />
-      <img v-if="previewUrl" :src="previewUrl" alt="Image preview" class="preview-img" />
+      <q-img
+        v-if="previewUrl"
+        :src="previewUrl"
+        class="preview-img"
+        :ratio="430 / 330"
+        contain
+        alt="Image preview"
+      />
       <q-icon v-else name="image" size="50px" />
-    </div>
+    </q-card>
     <p class="image-size-text">*ขนาดรูป 430x330 px</p>
   </div>
 </template>
@@ -36,17 +43,16 @@ const onFileChange = (event: Event) => {
   if (file) {
     selectedFile.value = file
     previewUrl.value = URL.createObjectURL(file)
-    emit('file-selected', file) // ✅ ส่งให้แม่
+    emit('file-selected', file)
   }
 }
 
 defineExpose({ selectedFile })
 </script>
 
-
 <style scoped>
 .upload-box {
-  width: 430px; 
+  width: 430px;
   height: 330px;
   border-radius: 10px;
   display: flex;
@@ -58,20 +64,20 @@ defineExpose({ selectedFile })
 }
 
 .preview-img {
-  object-fit: fill; 
   width: 100%;
   height: 100%;
   border-radius: 8px;
 }
+
 .image-size-text {
   margin-top: 10px;
   font-size: 14px;
-  color: #F03B2D;
+  color: #f03b2d;
   font-weight: bold;
   font-family: 'Noto Serif Thai', serif;
   align-self: flex-start;
-
 }
+
 .upload-container {
   display: flex;
   flex-direction: column;
