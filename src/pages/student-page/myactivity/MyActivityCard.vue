@@ -48,7 +48,7 @@ defineProps<{ myActivity: Activity }>()
 const router = useRouter()
 const baseurl = api.defaults.baseURL
 const onClick = async (id: string) => {
-  await router.push(`/Student/Activity/ActivityDetail/${id}`)
+  await router.push(`/Student/Activity/MyActivityDetail/${id}`)
 }
 const getActivitydates = (activityItems: ActivityItem[] | null | undefined): string => {
   const firstItem = activityItems?.find((item) => item.dates && item.dates.length > 0)

@@ -19,6 +19,10 @@ const studentChildren: RouteRecordRaw[] = [
     component: () => import('pages/student-page/myactivity/MyActivitiesPage.vue'),
   },
   {
+    path: 'Activity/MyActivityDetail/:id',
+    component: () => import('pages/student-page/myactivity/Detail/ActivityDetailPage.vue'),
+  },
+  {
     path: 'RecordPage',
     component: () => import('pages/student-page/record/RecordPage.vue'),
   },
