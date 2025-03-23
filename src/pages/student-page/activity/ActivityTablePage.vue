@@ -103,7 +103,7 @@ const query = ref<ActivityPagination>({
   sortBy: '_id',
   order: 'desc',
   skill: [],
-  activityState: ['open', 'close'],
+  activityState: ['open'],
   major: [],
   studentYear: [],
 })

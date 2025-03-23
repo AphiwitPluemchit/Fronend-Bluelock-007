@@ -6,7 +6,7 @@
       <q-card-section class="row">
         <div class="col-12 col-md-4 text-center">
           <q-img
-            :src="getImagePath(activity?.file)"
+            :src="baseurl + '/uploads/activity/images/' + activity?.file"
             class="image"
             error-src="/default-placeholder.jpg"
           />
@@ -44,6 +44,8 @@ import type { Activity } from 'src/types/activity'
 import DetailOne from './DetailOne.vue'
 import DetailMany from './DetailMany.vue'
 import { useAuthStore } from 'src/stores/auth'
+import { api } from 'boot/axios'
+const baseurl = api.defaults.baseURL
 type Enroll = {
   isEnrolled: boolean
 }
@@ -59,12 +61,12 @@ const auth = useAuthStore()
 // const getImageUrl = (fileName: string | undefined) => {
 //   return fileName ? `/uploads/${fileName}` : '/icons/default-image.png'
 // }
-const getImagePath = (fileName: string | undefined | null) => {
-  if (!fileName) {
-    return '/default-placeholder.jpg' // ถ้าไม่มีไฟล์
-  }
-  return `http://127.0.0.1:8888/uploads/activity/images/${fileName}`
-}
+// const getImagePath = (fileName: string | undefined | null) => {
+//   if (!fileName) {
+//     return '/default-placeholder.jpg' // ถ้าไม่มีไฟล์
+//   }
+//   return `${baseurl}/uploads/activity/images/${fileName}`
+// }
 
 // ฟังก์ชันลงทะเบียน
 const handleRegisterClick = () => {
