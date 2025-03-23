@@ -160,26 +160,32 @@ onMounted(async () => {
   background-color: #d9d9d9;
   border-radius: 12px;
   margin-left: 40px;
+  margin-right: 80px;
 }
 
 .registration-info {
   display: flex;
   flex-direction: column;
   gap: 10px;
+  margin-bottom: 30px;
 }
 
 .activity-name {
-  min-width: 20px;
+  display: inline-block;
+  word-wrap: break-word;
+  white-space: normal;
+  /* บังคับตัดบรรทัด */
+  min-width: 30px;
 }
 
 .activity-name-placeholder {
-  min-width: 500px;
-  /* ขนาดเท่ากับ .activity-name */
+  max-width: 400px;
   display: inline-block;
 }
 
 .activity-name-block {
-  min-width: 500px;
+  max-width: 400px;
+  display: flex;
   display: inline-block;
   text-align: right;
 }
@@ -194,14 +200,14 @@ onMounted(async () => {
   display: flex;
   justify-content: flex-start;
   align-items: center;
-  gap: 20px;
+  gap: 30px;
   /* flex-wrap: nowrap; */
 }
 
 .info-row {
   display: flex;
   align-items: flex-start;
-  gap: 20px;
+  gap: 30px;
   margin-top: 50px;
   flex-wrap: nowrap;
   /* ป้องกันการขึ้นบรรทัดใหม่ */
@@ -211,13 +217,13 @@ onMounted(async () => {
 .student-major-block {
   display: flex;
   align-items: center;
-  gap: 20px;
+  gap: 30px;
 }
 
 .row {
   display: flex;
-  align-items: center;
-  gap: 20px;
+  align-items: flex-end;
+  gap: 30px;
 }
 
 .number {
@@ -228,7 +234,7 @@ onMounted(async () => {
 .label {
   white-space: nowrap;
   text-align: right;
-  min-width: 500px;
+  min-width: 400px;
 }
 
 .value {
@@ -244,7 +250,7 @@ onMounted(async () => {
 .text {
   min-width: 180px;
   text-align: left;
-  margin-right: 20px;
+  margin-right: 30px;
 }
 
 .quantity-number {
@@ -262,5 +268,11 @@ onMounted(async () => {
   /* font-weight: 500; */
   font-size: 20px;
   color: #000000;
+}
+
+.activity-name-block,
+.activity-name-placeholder {
+  width: 400px;       /* กำหนดขนาดให้เท่ากันแน่นอน */
+  text-align: right;
 }
 </style>

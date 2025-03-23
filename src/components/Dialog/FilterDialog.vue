@@ -8,6 +8,7 @@ const props = defineProps<{
   majors?: string[]
   statusActivities?: string[]
   categoryActivities?: string[]
+  statusStudent?: string[]
 }>()
 
 const emit = defineEmits(['update:modelValue', 'apply'])
@@ -17,10 +18,11 @@ const showFilterDialog = ref(false)
 const options = {
   year: ['1', '2', '3', '4'],
   major: ['CS', 'SE', 'ITDI', 'AAI'],
-  statusStudent: ['ชั่วโมงครบแล้ว', 'ชั่วโมงน้อย', 'ชั่วโมงน้อยมาก', 'พ้นสภาพ'],
+  statusStudent: ['3', '2', '1', '0'],
   statusActivity: ['planning', 'open', 'close', 'success', 'cancel'],
   categoryActivity: ['soft', 'hard'],
 }
+
 // 'ชั่วโมงเตรียมความพร้อม', 'ชั่วโมงทักษะทางวิชาการ'
 function activityStatusLebel(status: string) {
   switch (status) {
@@ -46,13 +48,29 @@ function activityCategoryLebel(category: string) {
   }
 }
 
+const getStatusText = (status: string) => {
+  const numStatus = parseInt(status, 10)
+  switch (numStatus) {
+    case 0:
+      return 'พ้นสภาพ'
+    case 1:
+      return 'ชั่วโมงน้อยมาก'
+    case 2:
+      return 'ชั่วโมงน้อย'
+    case 3:
+      return 'ชั่วโมงครบแล้ว'
+    default:
+      return '-'
+  }
+}
+
 // ฟิลเตอร์ที่เลือก
 const filters = ref({
   year: props.years ? props.years?.map((year) => year.toString()) : ([] as string[]),
   major: props.majors ? props.majors : ([] as string[]),
   statusActivity: props.statusActivities ? props.statusActivities : ([] as string[]),
   categoryActivity: props.categoryActivities ? props.categoryActivities : ([] as string[]),
-  statusStudent: props.statusActivities ? props.statusActivities : ([] as string[]),
+  statusStudent: props.statusStudent ? props.statusStudent : ([] as string[]),
 })
 
 // ตรวจสอบหมวดที่ต้องแสดง
@@ -159,7 +177,7 @@ const applyFilters = () => {
               @click="toggleFilter('statusStudent', statusStudent)"
               style="height: 35px; width: 120px"
             >
-              <div style="margin: auto">{{ statusStudent }}</div>
+              <div style="margin: auto">{{ getStatusText(statusStudent) }}</div>
             </q-chip>
           </div>
         </q-card-section>
@@ -172,4 +190,5 @@ const applyFilters = () => {
   ></q-btn>
 </template>
 
-<style scoped></style>
+<style scoped>
+</style>
