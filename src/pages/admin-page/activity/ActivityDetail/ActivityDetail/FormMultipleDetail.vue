@@ -140,7 +140,17 @@
       </q-btn>
 
       <template v-else>
-        <q-btn class="btnreject" @click="emit('update:isEditing', false)">ยกเลิก</q-btn>
+        <q-btn
+          class="btnreject"
+          @click="
+            () => {
+              resetFormToOriginal()
+              emit('update:isEditing', false)
+            }
+          "
+          >ยกเลิก</q-btn
+        >
+
         <q-btn class="btnsecces" @click="saveChanges">บันทึก</q-btn>
       </template>
     </div>
@@ -191,6 +201,7 @@ const addSubActivity = () => {
     years: [],
   })
 }
+const originalActivity = ref<Activity | null>(null)
 const activityLoaded = ref(false)
 const activityType = ref('')
 const showChangeStatusDialog = ref(false)
@@ -206,6 +217,7 @@ const endHour = ref<number>(0)
 const endMinute = ref<number>(0)
 const foodMenuDisplay = ref('')
 const foodMenu = ref<Food[]>([])
+const activityStatus = ref('กำลังวางแผน')
 // ฟังก์ชันสำหรับฟอร์แมตเวลาเป็นสตริง
 const formatTime = (h: number, m: number): string => {
   return `${formatHour(h)}:${formatMinute(m)}`
@@ -225,8 +237,6 @@ const formatHour = (hour: number): string => {
 const formatMinute = (minute: number): string => {
   return minute.toString().padStart(2, '0')
 }
-
-// ฟังก์ชันปรับชั่วโมงและนาที ที่ใช้ได้ทั้ง start time และ end time
 
 const isNumber = (event: KeyboardEvent) => {
   const charCode = event.which ? event.which : event.keyCode
@@ -337,7 +347,7 @@ const saveChanges = async () => {
   }
 }
 
-const activityStatus = ref('กำลังวางแผน')
+
 const handleStatusChange = (newStatus: string) => {
   activityStatus.value = newStatus
 }
@@ -379,6 +389,7 @@ onMounted(() => {
   const a = props.activity
   if (!a) return
 
+  originalActivity.value = cloneDeep(a)
   activityName.value = a.name ?? ''
   activityType.value = a.skill === 'hard' ? 'prep' : a.skill === 'soft' ? 'academic' : ''
 
@@ -430,17 +441,44 @@ onMounted(() => {
 
   activityLoaded.value = true
 })
+const resetFormToOriginal = () => {
+  const a = originalActivity.value
+  if (!a) return
+
+  activityName.value = a.name ?? ''
+  activityType.value = a.skill === 'hard' ? 'prep' : a.skill === 'soft' ? 'academic' : ''
+  activityStatus.value = statusMap[a.activityState ?? 'planning'] ?? 'กำลังวางแผน'
+
+  foodMenu.value =
+    a.foodVotes?.map((f) => ({
+      id: '',
+      name: f.foodName,
+    })) ?? []
+  foodMenuDisplay.value = foodMenu.value.map((f) => f.name).join(', ')
+
+  const firstItem = a.activityItems?.[0]
+  if (firstItem?.dates?.[0]) {
+    activityDateInternal.value = firstItem.dates[0].date ?? ''
+    selectedTime.value = firstItem.dates[0].stime ?? '00:00'
+    endTime.value = firstItem.dates[0].etime ?? '00:00'
+  }
+
+  totalHours.value = firstItem?.hour ?? 0
+
+  subActivities.value =
+    a.activityItems?.map((item) => ({
+      subActivityName: item.name ?? '',
+      roomName: Array.isArray(item.rooms) ? item.rooms : [],
+      seats: item.maxParticipants ?? 0,
+      lecturer: item.operator ?? '',
+      detailActivity: item.description ?? '',
+      departments: item.majors?.map(String) ?? [],
+      years: item.studentYears?.map(String) ?? [],
+    })) ?? []
+}
 </script>
 
 <style scoped>
-/* ::v-deep(.q-btn:disabled) {
-  background-color: #e0e0e0 !important;
-  color: #757575 !important;
-}
-::v-deep(.q-field--disabled .q-field__control) {
-  background-color: #e0e0e0 !important;
-  color: #757575 !important;
-} */
 ::v-deep(.q-field__control) {
   height: auto;
   background-color: white;

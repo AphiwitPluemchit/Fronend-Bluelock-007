@@ -1,6 +1,8 @@
 <template>
   <div class="upload-container">
-    <div
+    <q-card
+      flat
+      bordered
       class="upload-box"
       @click="!disable && triggerFileInput()"
       :class="{ 'disabled-box': disable }"
@@ -12,15 +14,19 @@
         style="display: none"
         @change="onFileChange"
       />
-      <img
-        v-if="previewUrl || serverImageUrl"
-        :src="(previewUrl || serverImageUrl) ?? ''"
+
+      <q-img
+        v-if="imageSrc"
+        :src="imageSrc"
         alt="Image preview"
         class="preview-img"
+        :ratio="430 / 330"
+        contain
       />
 
       <q-icon v-else name="image" size="50px" />
-    </div>
+    </q-card>
+
     <p class="image-size-text">*ขนาดรูป 430x330 px</p>
   </div>
 </template>
@@ -57,10 +63,12 @@ const resetPreview = () => {
 
 const getSelectedFileName = () => selectedFileName.value
 
-// ✅ รวมไว้ใน defineExpose เดียว
 defineExpose({
   resetPreview,
   getSelectedFileName,
+})
+const imageSrc = computed(() => {
+  return previewUrl.value ?? serverImageUrl.value ?? undefined
 })
 
 const onFileChange = (event: Event) => {
@@ -72,17 +80,9 @@ const onFileChange = (event: Event) => {
     emit('file-selected', file)
   }
 }
-
 </script>
 
 <style scoped>
-.disabled-box {
-  pointer-events: none;
-  opacity: 0.6;
-}
-.q-icon {
-  cursor: pointer;
-}
 .upload-box {
   width: 430px;
   height: 330px;
@@ -94,9 +94,7 @@ const onFileChange = (event: Event) => {
   cursor: pointer;
   transition: border-color 0.3s;
 }
-
 .preview-img {
-  object-fit: fill;
   width: 100%;
   height: 100%;
   border-radius: 8px;
@@ -113,5 +111,9 @@ const onFileChange = (event: Event) => {
   display: flex;
   flex-direction: column;
   align-items: center;
+}
+.disabled-box {
+  pointer-events: none;
+  opacity: 0.6;
 }
 </style>

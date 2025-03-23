@@ -108,7 +108,18 @@
       </q-btn>
 
       <template v-else>
-        <q-btn class="btnreject" @click="emit('update:isEditing', false)">ยกเลิก</q-btn>
+        <q-btn
+          class="btnreject"
+          @click="
+            () => {
+              resetFormToOriginal()
+              emit('update:isEditing', false)
+            }
+          "
+        >
+          ยกเลิก
+        </q-btn>
+
         <q-btn class="btnsecces" @click="saveChanges">บันทึก</q-btn>
       </template>
     </div>
@@ -214,6 +225,51 @@ const applySameTime = async () => {
     }
   })
 }
+const resetFormToOriginal = () => {
+  const a = originalActivity.value
+  if (!a) return
+
+  activityName.value = a.name ?? ''
+  activityType.value = a.skill === 'hard' ? 'prep' : a.skill === 'soft' ? 'academic' : ''
+
+  if (a.activityState) {
+    activityStatus.value = statusMap[a.activityState] || 'กำลังวางแผน'
+  }
+
+  foodMenu.value =
+    a.foodVotes?.map((f) => ({
+      id: '',
+      name: f.foodName,
+    })) ?? []
+
+  foodMenuDisplay.value = foodMenu.value.map((f) => f.name).join(', ')
+
+  const firstItem = a.activityItems?.[0]
+  if (firstItem) {
+    roomName.value = firstItem.rooms ?? []
+    totalHours.value = firstItem.hour ?? 0
+    seats.value = firstItem.maxParticipants ?? 0
+    departments.value = firstItem.majors?.map(String) ?? []
+    detailActivity.value = firstItem.description ?? ''
+    lecturer.value = firstItem.operator ?? ''
+    years.value = firstItem.studentYears?.map(String) ?? []
+
+    if (firstItem.dates?.length) {
+      activityDateRange.value = firstItem.dates.map((d) => d.date)
+      generateDaysInRange(activityDateRange.value)
+
+      selectedDays.value.forEach((day, index) => {
+        const d = firstItem.dates?.[index]
+        if (d) {
+          day.date = d.date
+          day.startTime = d.stime
+          day.endTime = d.etime
+        }
+      })
+    }
+  }
+}
+
 const updateDayTime = (index: number, type: 'start' | 'end', value: string) => {
   if (selectedDays.value[index]) {
     if (type === 'start') {

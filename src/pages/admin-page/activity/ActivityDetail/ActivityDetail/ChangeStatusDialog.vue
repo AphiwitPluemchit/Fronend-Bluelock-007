@@ -5,7 +5,6 @@
         <div class="label">เปลี่ยนสถานะกิจกรรม</div>
       </q-card-section>
 
-      <!-- ปุ่มเลือกสถานะ -->
       <q-card-section class="status-section">
         <q-btn
           v-for="option in availableStatuses"
