@@ -1,49 +1,71 @@
 <template>
   <q-list dense>
-    <q-item>
-      <q-item-section class="col-3 text-right">
-        <q-item-label class="q-mb-lg q-ml-md">ชื่อกิจกรรม :</q-item-label>
-        <q-item-label class="q-mb-lg q-ml-md">วันที่จัดกิจกรรม :</q-item-label>
-        <q-item-label class="q-mb-lg q-ml-md">เวลาที่จัดกิจกรรม :</q-item-label>
-        <q-item-label class="q-mb-lg q-ml-md">จำนวนชั่วโมงที่ได้รับ :</q-item-label>
-        <q-item-label class="q-mb-lg q-ml-md">สถานที่จัดกิจกรรม :</q-item-label>
-        <q-item-label class="q-mb-lg q-ml-md">ประเภทกิจกรรม :</q-item-label>
-        <q-item-label class="q-mb-lg q-ml-md">วิทยากร :</q-item-label>
-        <q-item-label class="q-mb-lg q-ml-md">รายละเอียดอื่นๆ :</q-item-label>
-      </q-item-section>
-      <q-item-section class="col-9">
-        <q-item-label class="q-mb-lg q-ml-md">{{ activity?.name ?? 'ไม่ระบุ' }}</q-item-label>
-        <q-item-label class="q-mb-lg q-ml-md">{{
-          getActivitydates(activity?.activityItems) ?? 'ไม่ระบุ'
-        }}</q-item-label>
-        <q-item-label class="q-mb-lg q-ml-md">{{
-          getActivityTime(activity?.activityItems) ?? 'ไม่ระบุ'
-        }}</q-item-label>
-        <q-item-label class="q-mb-lg q-ml-md"
-          >{{ getActivityHours(activity?.activityItems) ?? 'ไม่ระบุ' }} ชั่วโมง</q-item-label
-        >
-        <q-item-label class="q-mb-lg q-ml-md">{{
-          getActivityRooms(activity?.activityItems) ?? 'ไม่ระบุ'
-        }}</q-item-label>
-        <q-item-label class="q-mb-lg q-ml-md">
+    <!-- แถว: ชื่อกิจกรรม -->
+    <div class="row">
+      <div class="col-3 text-right">
+        <div class="q-mb-lg q-ml-md">ชื่อกิจกรรม :</div>
+      </div>
+      <div class="col-9">
+        <div class="q-mb-lg q-ml-md">{{ activity?.name ?? 'ไม่ระบุ' }}</div>
+      </div>
+    </div>
+
+    <!-- แถว: วันที่จัดกิจกรรม -->
+    <div class="row">
+      <div class="col-3 text-right">
+        <div class="q-mb-lg q-ml-md">วันที่จัดกิจกรรม :</div>
+      </div>
+      <div class="col-9">
+        <div class="q-mb-lg q-ml-md">
+          {{ getActivitydates(activity?.activityItems) ?? 'ไม่ระบุ' }}
+        </div>
+      </div>
+    </div>
+
+    <!-- แถว: เวลาที่จัดกิจกรรม -->
+    <div class="row">
+      <div class="col-3 text-right">
+        <div class="q-mb-lg q-ml-md">เวลาที่จัดกิจกรรม :</div>
+      </div>
+      <div class="col-9">
+        <div class="q-mb-lg q-ml-md">
+          {{ getActivityTime(activity?.activityItems) ?? 'ไม่ระบุ' }}
+        </div>
+      </div>
+    </div>
+
+    <!-- แถว: จำนวนชั่วโมง, สถานที่, ประเภท, วิทยากร, รายละเอียด -->
+    <div class="row">
+      <div class="col-3 text-right">
+        <div class="q-mb-lg q-ml-md">จำนวนชั่วโมงที่ได้รับ :</div>
+        <div class="q-mb-lg q-ml-md">สถานที่จัดกิจกรรม :</div>
+        <div class="q-mb-lg q-ml-md">ประเภทกิจกรรม :</div>
+        <div class="q-mb-lg q-ml-md">วิทยากร :</div>
+        <div class="q-mb-lg q-ml-md">รายละเอียดอื่นๆ :</div>
+      </div>
+      <div class="col-9">
+        <div class="q-mb-lg q-ml-md">
+          {{ getActivityHours(activity?.activityItems) ?? 'ไม่ระบุ' }} ชั่วโมง
+        </div>
+        <div class="q-mb-lg q-ml-md">
+          {{ getActivityRooms(activity?.activityItems) ?? 'ไม่ระบุ' }}
+        </div>
+        <div class="q-mb-lg q-ml-md">
           {{
             activity?.skill === 'hard'
               ? 'ชั่วโมงทักษะทางวิชาการ'
               : activity?.skill === 'soft'
                 ? 'ชั่วโมงทักษะเตรียมความพร้อม'
                 : 'ไม่ระบุประเภท'
-          }}</q-item-label
-        >
-        <q-item-label class="q-mb-lg q-ml-md">{{
-          getActivityOperator(activity?.activityItems)
-        }}</q-item-label>
-        <q-item-label class="q-mb-lg q-ml-md">{{
-          getActivityDetail(activity?.activityItems)
-        }}</q-item-label>
-      </q-item-section>
-    </q-item>
+          }}
+        </div>
+        <div class="q-mb-lg q-ml-md">{{ getActivityOperator(activity?.activityItems) }}</div>
+        <div class="q-mb-lg q-ml-md">{{ getActivityDetail(activity?.activityItems) }}</div>
+      </div>
+    </div>
   </q-list>
 </template>
+
 <script setup lang="ts">
 import type { Activity, ActivityItem } from 'src/types/activity'
 defineProps<{ activity: Activity }>()
