@@ -55,9 +55,9 @@ const confirmCreateQR_Code = () => {
               <q-btn outline label="เช็คชื่อออก" class="check-type-btn" />
             </q-card-section>
 
-            <q-card-actions align="right">
-              <q-btn label="ยกเลิก" color="red" @click="cancelCreateQR_Code" />
-              <q-btn label="ยืนยัน" color="blue" @click="confirmCreateQR_Code" />
+            <q-card-actions align="right" class="action-buttons">
+              <q-btn label="ยกเลิก" class="cancel-btn" @click="cancelCreateQR_Code" />
+              <q-btn label="ยืนยัน" class="confirm-btn" @click="confirmCreateQR_Code" />
             </q-card-actions>
           </q-card>
         </q-dialog>
@@ -261,7 +261,7 @@ const confirmCreateQR_Code = () => {
 
 /* ปุ่มเช็คชื่อ */
 .check-in-btn {
-  background-color: #f5f5f5;
+  background-color: #D9D9D9;
   color: black;
   border-radius: 8px;
   font-size: 16px;
@@ -275,34 +275,50 @@ const confirmCreateQR_Code = () => {
 .dialog-card {
   width: 400px;
   padding: 20px;
-  text-align: center;
+  text-align: left;
   border-radius: 8px;
 }
 
 .dialog-title {
-  font-size: 18px;
-  font-weight: bold;
+  font-size: 20px;
+}
+
+.dialog-body {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 5px;
 }
 
 /* ปุ่มเลือกประเภทเช็คชื่อ */
 .check-type-btn {
   display: block;
-  width: 100%;
+  width: 60%;
   margin: 10px 0;
   font-size: 16px;
+  border-radius: 12px;
   border: 1px solid black;
+}
+
+.action-buttons {
+  justify-content: flex-end;
+  gap: 10px;
 }
 
 /* ปุ่มยกเลิกและยืนยัน */
 .cancel-btn {
-  background-color: #d9534f;
+  background-color: #F03B2D;
   color: white;
-  font-size: 14px;
+  height: 40px;
+  min-width: 70px;
+  border-radius: 10px
 }
 
 .confirm-btn {
-  background-color: #007bff;
+  background-color: #3676F4;
   color: white;
-  font-size: 14px;
+  height: 40px;
+  min-width: 70px;
+  border-radius: 10px
 }
 </style>
