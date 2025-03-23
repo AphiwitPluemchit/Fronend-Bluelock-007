@@ -4,7 +4,7 @@
     @update:model-value="emit('update:modelValue', $event)"
     persistent
   >
-    <q-card class="q-pa-md" style="min-width: 300px" rounded standout>
+    <q-card class="q-pa-md" rounded>
       <q-card-actions align="left">
         <div class="text-h5">ยืนยันการลงทะเบียน</div>
       </q-card-actions>
@@ -27,8 +27,9 @@
               :class="{ selected: selectedItemId === item.id }"
               text-color="black"
               @click="selectedItemId = item.id ?? null"
+              :label="`${item.name} (${item.hour} ชม.)`"
             >
-              {{ item.name }} ({{ item.hour }} ชม.)
+              <!-- {{ item.name }} ({{ item.hour }} ชม.) -->
             </q-chip>
           </div>
         </div>

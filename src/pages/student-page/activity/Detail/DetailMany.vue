@@ -1,65 +1,118 @@
 <template>
   <!-- รายละเอียดกิจกรรม -->
-  <q-list dense>
-    <q-item>
-      <q-item-section class="col-3 text-right">
-        <q-item-label class="q-mb-lg q-ml-md">ชื่อกิจกรรม :</q-item-label>
-        <q-item-label class="q-mb-lg q-ml-md">วันที่จัดกิจกรรม :</q-item-label>
-        <q-item-label class="q-mb-lg q-ml-md">เวลาที่จัดกิจกรรม :</q-item-label>
-        <q-item-label class="q-mb-lg q-ml-md">ประเภทกิจกรรม :</q-item-label>
-        <q-item-label class="q-mb-lg q-ml-md">จำนวนกิจกรรม :</q-item-label>
-      </q-item-section>
-      <q-item-section class="col-9">
-        <q-item-label class="q-mb-lg q-ml-md"> {{ activity.name }}</q-item-label>
-
-        <q-item-label class="q-mb-lg q-ml-md">{{
-          getActivitydates(activity?.activityItems)
-        }}</q-item-label>
-        <q-item-label class="q-mb-lg q-ml-md">{{
-          getActivityTime(activity?.activityItems)
-        }}</q-item-label>
-        <q-item-label class="q-mb-lg q-ml-md">
+  <div class="q-pa-sm">
+    <div class="row">
+      <div class="col-3 text-right">
+        <div class="q-mb-lg q-ml-md">ชื่อกิจกรรม :</div>
+      </div>
+      <div class="col-9">
+        <div class="q-mb-lg q-ml-md">{{ activity?.name ?? 'ไม่ระบุ' }}</div>
+      </div>
+    </div>
+    <div class="row">
+      <div class="col-3 text-right">
+        <div class="q-mb-lg q-ml-md">วันที่จัดกิจกรรม :</div>
+      </div>
+      <div class="col-9">
+        <div class="q-mb-lg q-ml-md">{{ getActivitydates(activity?.activityItems) }}</div>
+      </div>
+    </div>
+    <div class="row">
+      <div class="col-3 text-right">
+        <div class="q-mb-lg q-ml-md">เวลาที่จัดกิจกรรม :</div>
+      </div>
+      <div class="col-9">
+        <div class="q-mb-lg q-ml-md">{{ getActivityTime(activity?.activityItems) }}</div>
+      </div>
+    </div>
+    <div class="row">
+      <div class="col-3 text-right">
+        <div class="q-mb-lg q-ml-md">ประเภทกิจกรรม :</div>
+      </div>
+      <div class="col-9">
+        <div class="q-mb-lg q-ml-md">
           {{
             activity?.skill === 'hard'
               ? 'ชั่วโมงทักษะทางวิชาการ'
               : activity?.skill === 'soft'
                 ? 'ชั่วโมงทักษะเตรียมความพร้อม'
                 : 'ไม่ระบุประเภท'
-          }}</q-item-label
-        >
-        <q-item-label class="q-mb-lg q-ml-md"> {{ activity.activityItems?.length }}</q-item-label>
-      </q-item-section>
-    </q-item>
+          }}
+        </div>
+      </div>
+    </div>
+    <div class="row">
+      <div class="col-3 text-right">
+        <div class="q-mb-lg q-ml-md">จำนวนกิจกรรม :</div>
+      </div>
+      <div class="col-9">
+        <div class="q-mb-lg q-ml-md">{{ activity.activityItems?.length }}</div>
+      </div>
+    </div>
 
     <q-separator spaced />
 
     <!-- รายการรอบกิจกรรม -->
     <div v-for="item in activity.activityItems" :key="item.id || ''">
-      <q-item>
-        <q-item-section class="col-3 text-right">
-          <q-item-label class="q-mb-lg q-ml-md">ชื่อกิจกรรม :</q-item-label>
-          <q-item-label class="q-mb-lg q-ml-md">สถานที่ :</q-item-label>
+      <div class="row">
+        <div class="col-3 text-right">
+          <div class="q-mb-lg q-ml-md">ชื่อกิจกรรม :</div>
+        </div>
+        <div class="col-9">
+          <div class="q-mb-lg q-ml-md">{{ item.name ?? 'ไม่ระบุ' }}</div>
+        </div>
+      </div>
 
-          <q-item-label class="q-mb-lg q-ml-md">จำนวนชั่วโมง :</q-item-label>
-          <q-item-label class="q-mb-lg q-ml-md">จำนวนที่ลง :</q-item-label
-          ><q-item-label class="q-mb-lg q-ml-md">วิทยากร :</q-item-label>
-          <q-item-label class="q-mb-lg q-ml-md">รายละเอียดอื่นๆ :</q-item-label>
-        </q-item-section>
-        <q-item-section class="col-9">
-          <q-item-label class="q-mb-lg q-ml-md">{{ item.name ?? 'ไม่ระบุ' }}</q-item-label>
-          <q-item-label class="q-mb-lg q-ml-md">{{ item.rooms ?? 'ไม่ระบุ' }}</q-item-label>
+      <div class="row">
+        <div class="col-3 text-right">
+          <div class="q-mb-lg q-ml-md">สถานที่ :</div>
+        </div>
+        <div class="col-9">
+          <div class="q-mb-lg q-ml-md">
+            {{ Array.isArray(item.rooms) ? item.rooms.join(', ') : (item.rooms ?? 'ไม่ระบุ') }}
+          </div>
+        </div>
+      </div>
 
-          <q-item-label class="q-mb-lg q-ml-md">{{ item.hour ?? '-' }}</q-item-label>
-          <q-item-label class="q-mb-lg q-ml-md">{{
-            item.maxParticipants ?? 'ไม่ระบุ'
-          }}</q-item-label>
-          <q-item-label class="q-mb-lg q-ml-md">{{ item.operator ?? 'ไม่ระบุ' }}</q-item-label>
-          <q-item-label class="q-mb-lg q-ml-md">{{ item.description ?? 'ไม่ระบุ' }}</q-item-label>
-        </q-item-section>
-      </q-item>
+      <div class="row">
+        <div class="col-3 text-right">
+          <div class="q-mb-lg q-ml-md">จำนวนชั่วโมง :</div>
+        </div>
+        <div class="col-9">
+          <div class="q-mb-lg q-ml-md">{{ item.hour ?? '-' }}</div>
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="col-3 text-right">
+          <div class="q-mb-lg q-ml-md">จำนวนที่ลง :</div>
+        </div>
+        <div class="col-9">
+          <div class="q-mb-lg q-ml-md">{{ item.maxParticipants ?? 'ไม่ระบุ' }}</div>
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="col-3 text-right">
+          <div class="q-mb-lg q-ml-md">วิทยากร :</div>
+        </div>
+        <div class="col-9">
+          <div class="q-mb-lg q-ml-md">{{ item.operator ?? 'ไม่ระบุ' }}</div>
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="col-3 text-right">
+          <div class="q-mb-lg q-ml-md">รายละเอียดอื่นๆ :</div>
+        </div>
+        <div class="col-9">
+          <div class="q-mb-lg q-ml-md">{{ item.description ?? 'ไม่ระบุ' }}</div>
+        </div>
+      </div>
+
       <q-separator spaced />
     </div>
-  </q-list>
+  </div>
 </template>
 
 <script setup lang="ts">
