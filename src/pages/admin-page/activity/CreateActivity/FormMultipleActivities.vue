@@ -301,7 +301,7 @@ const submitActivity = async () => {
           props.activity?.file ?? undefined,
         )
 
-        if (uploadStatus === 200 || uploadStatus === 201) {
+        if (uploadStatus.status === 200 || uploadStatus.status === 201) {
           alert('✅ สร้างกิจกรรม + อัปโหลดรูปสำเร็จ')
         } else {
           alert('⚠️ สร้างกิจกรรมสำเร็จ แต่อัปโหลดรูปไม่สำเร็จ')

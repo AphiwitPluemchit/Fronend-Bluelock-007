@@ -9,8 +9,12 @@
         alt="Image preview"
         class="preview-img"
       /> -->
-        <q-img
+        <!-- <q-img
           :src="'http://localhost:8888/uploads/activity/images/' + myActivity.file"
+          class="activity-img"
+        /> -->
+        <q-img
+          :src="baseurl + '/uploads/activity/images/' + myActivity.file"
           class="activity-img"
         />
       </div>
@@ -36,11 +40,13 @@
 
 <script setup lang="ts">
 import { useRouter } from 'vue-router'
-
+import { api } from 'boot/axios'
 import ActivityType from '../myactivity/ActivityType.vue'
 import type { Activity, ActivityItem } from 'src/types/activity'
+
 defineProps<{ myActivity: Activity }>()
 const router = useRouter()
+const baseurl = api.defaults.baseURL
 const onClick = async (id: string) => {
   await router.push(`/Student/Activity/ActivityDetail/${id}`)
 }

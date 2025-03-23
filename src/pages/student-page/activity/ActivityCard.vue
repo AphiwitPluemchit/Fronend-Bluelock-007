@@ -3,10 +3,11 @@
     <div class="row q-pa-md items-stretch">
       <!-- รูปกิจกรรม -->
       <div class="col-md-4">
-        <q-img
+        <!-- <q-img
           :src="'http://localhost:8888/uploads/activity/images/' + activity.file"
           class="activity-img"
-        />
+        /> -->
+        <q-img :src="baseurl + '/uploads/activity/images/' + activity.file" class="activity-img" />
       </div>
 
       <!-- รายละเอียดกิจกรรม -->
@@ -47,6 +48,8 @@
 
 <script setup lang="ts">
 import type { Activity, ActivityItem } from 'src/types/activity'
+import { api } from 'boot/axios'
+const baseurl = api.defaults.baseURL
 
 // รับ props
 defineProps<{ activity: Activity }>()
@@ -63,7 +66,8 @@ const getActivitydates = (activityItems: ActivityItem[] | null | undefined): str
   }
 
   return (
-    activityItems[0].dates?.map((d) => `${d.date} (${d.stime} - ${d.etime})`).join(', ') ?? 'ไม่ระบุ'
+    activityItems[0].dates?.map((d) => `${d.date} (${d.stime} - ${d.etime})`).join(', ') ??
+    'ไม่ระบุ'
   )
 }
 </script>
