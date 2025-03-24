@@ -103,4 +103,13 @@ const getActivitydates = (activityItems: ActivityItem[] | null | undefined): str
   bottom: 25px;
   right: 30px;
 }
+.activity-name {
+  display: -webkit-box;
+  -webkit-line-clamp: 2; /* แสดงแค่ 2 บรรทัด */
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis; /* ใช้ ... เมื่อข้อความยาวเกิน */
+  width: 100%; /* กำหนดความกว้างให้เต็มพื้นที่ */
+  line-clamp: 2;
+}
 </style>
