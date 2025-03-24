@@ -1,47 +1,47 @@
 <template>
-  <q-btn
-    :label="buttonLabel"
-    outline
-    rounded
-    class="category-btn q-ml-md text-h7"
-    :class="buttonClass"
-  />
+  <q-btn :label="buttonLabel" :class="buttonClass" class="category-btn" />
 </template>
 
 <script setup lang="ts">
 import { computed } from 'vue'
 
-const props = defineProps({
-  skill: String, // 'softSkill' หรือ 'hardSkill'
-})
+interface Props {
+  skill: 'hardSkill' | 'softSkill'
+}
 
-// คำนวณป้ายชื่อปุ่ม
+// กำหนด props สำหรับรับค่า
+const props = defineProps<Props>()
+
+// กำหนดข้อความที่จะแสดงในปุ่ม
 const buttonLabel = computed(() => {
-  return props.skill === 'hardSkill' ? 'ทักษะทางวิชาการ' : 'เตรียมความพร้อม'
+  return props.skill === 'hardSkill' ? 'ทักษาทางวิชาการ' : 'เตรียมความพร้อม'
 })
 
-// กำหนดคลาสสีของปุ่ม
+// กำหนดคลาสของปุ่มตามประเภททักษะ
 const buttonClass = computed(() => {
   return props.skill === 'hardSkill' ? 'hard-skill' : 'soft-skill'
 })
 </script>
 
 <style scoped>
-/* ทักษะทางวิชาการ*/
+/* สำหรับทักษาทางวิชาการ (HardSkill) */
 .hard-skill {
   color: #001780;
-  border: 1px solid #002dff;
-  background-color: #cfd7ff;
+  border: 2px solid #002dff; /* สีขอบ */
+  background-color: #cfd7ff; /* สีพื้นหลัง */
 }
 
-/* เตรียมความพร้อม */
+/* สำหรับเตรียมความพร้อม (SoftSkill) */
 .soft-skill {
   color: #009812;
-  border: 1px solid #00bb16;
-  background-color: #d0ffc5;
+  border: 2px solid #00bb16; /* สีขอบ */
+  background-color: #d2ffc7; /* สีพื้นหลัง */
 }
+
+/* ปรับขนาดปุ่ม */
 .category-btn {
   padding: 4px 12px;
   font-size: 16px;
+  border-radius: 20px; /* ทำให้ปุ่มมน */
 }
 </style>
