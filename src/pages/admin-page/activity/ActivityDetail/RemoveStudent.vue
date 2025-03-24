@@ -32,9 +32,9 @@ const removeStudentFromActivity = () => {
                     <p>คุณต้องการลบข้อมูลนี้หรือไม่ ?</p>
                 </q-card-section>
 
-                <q-card-actions align="center" class="dialog-actions">
-                    <q-btn class="dialog-btn cancel-btn" label="ยกเลิก" v-close-popup />
-                    <q-btn class="dialog-btn confirm-btn" label="ตกลง" @click="removeStudentFromActivity" />
+                <q-card-actions align="right" class="dialog-actions">
+                    <q-btn class="cancel-btn" label="ยกเลิก" v-close-popup />
+                    <q-btn class="confirm-btn" label="ตกลง" @click="removeStudentFromActivity" />
                 </q-card-actions>
             </q-card>
         </q-dialog>
@@ -50,44 +50,40 @@ const removeStudentFromActivity = () => {
 }
 
 .dialog-header {
-    text-align: center;
-    font-size: 18px;
-    font-weight: bold;
-    padding: 16px;
-    border-bottom: 1px solid #ddd;
+    text-align: left;
+    font-size: 20px;
+    padding: 20px;
 }
 
 .dialog-body {
-    padding: 16px;
+    padding: 20px;
     text-align: center;
-    font-size: 15px;
-    color: #555;
+    font-size: 16px;
+    color: #000000;
 }
 
 /* ปรับปุ่มกด */
 .dialog-actions {
     display: flex;
-    justify-content: center;
-    gap: 15px;
-    padding-bottom: 16px;
-}
-
-/* ปรับสไตล์ปุ่ม */
-.dialog-btn {
-    width: 120px;
-    font-size: 14px;
-    border-radius: 8px;
-    font-weight: bold;
+    justify-content: flex-end;
+    gap: 5px;
+    padding: 16px;
 }
 
 .cancel-btn {
     background-color: #F03B2D;
     color: white;
+    height: 40px;
+    min-width: 70px;
+    border-radius: 10px;
 }
 
 .confirm-btn {
     background-color: #2FA54D;
     color: white;
+    height: 40px;
+    min-width: 70px;
+    border-radius: 10px;
 }
 
 .remove-icon {
