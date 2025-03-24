@@ -26,7 +26,11 @@
         </div>
         <!-- ActivityType -->
         <div class="col-2 justify-between">
-          <ActivityType v-if="myActivity.skill" :skill="myActivity.skill" class="q-ml-md" />
+          <ActivityType
+            v-if="myActivity.skill === 'hard' || myActivity.skill === 'soft'"
+            :skill="myActivity.skill === 'hard' ? 'hardSkill' : 'softSkill'"
+            class="q-ml-md"
+          />
           <!-- <div class="q-mr-md col-4">{{ myActivity.skill }}</div> -->
         </div>
         <div class="row q-mt-sm col-5">
@@ -78,10 +82,12 @@ const getActivityRooms = (activityItems: ActivityItem[] | null | undefined): str
 }
 
 .activity-img {
-  width: 150px;
-  height: 150px;
-  object-fit: cover;
-  border-radius: 8px;
+  width: 90%; /* Full width of the container */
+  height: auto; /* Maintain aspect ratio */
+  object-fit: cover; /* Cover the container, cropping as needed */
+  border-radius: 8px; /* Optional border radius for rounded corners */
+  aspect-ratio: 4 / 3; /* Maintain 4:3 aspect ratio */
+  margin: 10px;
 }
 
 .detail-btn {
