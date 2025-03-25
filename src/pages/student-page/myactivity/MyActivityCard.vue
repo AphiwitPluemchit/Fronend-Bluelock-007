@@ -29,11 +29,13 @@
           <ActivityType
             v-if="myActivity.skill === 'hard' || myActivity.skill === 'soft'"
             :skill="myActivity.skill === 'hard' ? 'hardSkill' : 'softSkill'"
-            class="q-ml-md"
           />
           <!-- <div class="q-mr-md col-4">{{ myActivity.skill }}</div> -->
         </div>
         <div class="row q-mt-sm col-5">
+          <!-- <div class="q-mr-md col-3">2025-03-24</div>
+          <div class="q-mr-md col-3">08:00 - 12:00</div>
+          <div class="col-2 text-right">5T01</div> -->
           <div class="q-mr-md col-5">{{ getActivitydates(myActivity.activityItems) }}</div>
           <div class="col-2 text-right">{{ getActivityRooms(myActivity.activityItems) }}</div>
         </div>
