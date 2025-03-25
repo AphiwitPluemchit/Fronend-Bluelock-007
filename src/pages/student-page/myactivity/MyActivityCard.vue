@@ -36,9 +36,9 @@
           <!-- <div class="q-mr-md col-3">2025-03-24</div>
           <div class="q-mr-md col-3">08:00 - 12:00</div>
           <div class="col-2 text-right">5T01</div> -->
-          <div class="q-mr-md col-3">{{ getActivitydates(myActivity.activityItems) }}</div>
+          <div class="q-mr-md col-4">{{ getActivitydates(myActivity.activityItems) }}</div>
           <div class="q-mr-md col-3">{{ getActivityTime(myActivity.activityItems) }}</div>
-          <div class="col-2 text-right">{{ getActivityRooms(myActivity.activityItems) }}</div>
+          <div class="col-1 text-right">{{ getActivityRooms(myActivity.activityItems) }}</div>
         </div>
       </div>
     </div>
