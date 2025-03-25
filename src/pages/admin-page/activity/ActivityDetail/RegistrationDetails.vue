@@ -11,7 +11,7 @@ const getImagePath = (fileName: string | undefined | null) => {
   if (!fileName) {
     return '/default-placeholder.jpg' // ถ้าไม่มีไฟล์
   }
-  return `http://127.0.0.1:8888/uploads/activity/images/${fileName}`
+  return `${import.meta.env.VITE_API_URL}/uploads/activity/images/${fileName}`
 }
 
 const enrollmentSummary = ref<EnrollmentSummary | null>(null)
