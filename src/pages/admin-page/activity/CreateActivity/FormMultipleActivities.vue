@@ -122,7 +122,7 @@ const router = useRouter()
 onMounted(() => {})
 
 const goToActivitiesManagement = async () => {
-  await router.push('/ActivitiesManagement')
+  await router.push('/admin/ActivitiesManagement')
 }
 interface SubActivity {
   subActivityName: string
@@ -141,11 +141,11 @@ const addSubActivity = () => {
     seats: 0,
     lecturer: '',
     detailActivity: '',
-    departments: [],
-    years: [],
+    departments: ['CS', 'SE', 'ITDI', 'AAI'],
+    years: ['1','2','3','4'],
   })
 }
-const activityType = ref('')
+const activityType = ref('prep')
 const activityName = ref('')
 const totalHours = ref(0)
 const foodMenu = ref<Food[]>([])
@@ -302,9 +302,9 @@ const submitActivity = async () => {
         )
 
         if (uploadStatus.status === 200 || uploadStatus.status === 201) {
-          alert('✅ สร้างกิจกรรม + อัปโหลดรูปสำเร็จ')
+          console.log('อัปโหลดรูปสําเร็จ')
         } else {
-          alert('⚠️ สร้างกิจกรรมสำเร็จ แต่อัปโหลดรูปไม่สำเร็จ')
+          console.log('อัปโหลดรูปไม่สําเร็จ')
         }
       } catch (uploadErr) {
         console.error('Upload image failed:', uploadErr)

@@ -434,10 +434,18 @@ const saveChanges = async () => {
   }
 
   const updated: Partial<Activity> = cloneDeep(originalActivity.value)
+
+  // กำหนดค่าที่แก้ไข
   updated.name = activityName.value
   updated.skill = activityType.value === 'prep' ? 'hard' : 'soft'
   updated.activityState = statusReverseMap[activityStatus.value] || 'planning'
-  updated.foodVotes = foodMenu.value.map((f) => ({ foodName: f.name, vote: 1 }))
+  updated.foodVotes = foodMenu.value.map((f) => {
+    const existingVote = updated.foodVotes?.find(vote => vote.foodName === f.name);
+    return {
+      foodName: f.name,
+      vote: existingVote ? existingVote.vote : 0  
+    };
+  });
 
   if (updated.activityItems && updated.activityItems.length > 0) {
     updated.activityItems[0] = {
@@ -461,35 +469,40 @@ const saveChanges = async () => {
   try {
     const status = await ActivityService.updateOne(updated)
 
+    // ถ้าบันทึกกิจกรรมสำเร็จ
     if ((status === 200 || status === 201) && props.imageRef) {
       const file = props.imageRef.getSelectedFile?.()
       const fileName = props.imageRef.getSelectedFileName?.()
       const oldFile = props.activity?.file ?? ''
 
-      if (file && fileName && fileName !== oldFile) {
+      if (file && fileName) {
         try {
-          if (oldFile) {
+          if (oldFile && fileName !== oldFile) {
             await ActivityService.deleteImage(originalActivity.value.id, oldFile)
             console.log('🗑 ลบรูปเก่าแล้ว:', oldFile)
           }
 
+
           const uploadResult = await ActivityService.uploadImage(originalActivity.value.id, file)
 
           if (uploadResult.status === 200 || uploadResult.status === 201) {
+            console.log('✅ อัปโหลดรูปใหม่สำเร็จ:', uploadResult.fileName)
             emit('saved', uploadResult.fileName)
             return
+          } else {
+            console.warn('⚠️ อัปโหลดรูปไม่สำเร็จ')
           }
         } catch (uploadErr) {
           console.error('❌ Upload image failed:', uploadErr)
         }
       }
     }
-
     emit('saved')
   } catch (err) {
     console.error('❌ อัปเดตกิจกรรมไม่สำเร็จ:', err)
   }
 }
+
 
 onMounted(() => {
   const a = props.activity
@@ -499,7 +512,6 @@ onMounted(() => {
   activityName.value = a.name ?? ''
   activityType.value = a.skill === 'hard' ? 'prep' : a.skill === 'soft' ? 'academic' : ''
 
-  // ✅ แปลง activityState (จาก backend) → ภาษาไทยสำหรับแสดงผล
   if (a.activityState) {
     activityStatus.value = statusMap[a.activityState] || 'กำลังวางแผน'
   }
