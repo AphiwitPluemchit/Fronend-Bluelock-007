@@ -53,10 +53,10 @@ const removeStudentFromActivity = () => {
     text-align: left;
     font-size: 20px;
     padding: 20px;
+    border-bottom: 1px solid #ddd;
 }
 
 .dialog-body {
-    padding: 20px;
     text-align: center;
     font-size: 16px;
     color: #000000;
