@@ -26,7 +26,7 @@
           v-if="enrollment?.isEnrolled && !isRegistrationNotAllowed"
           label="ยกเลิกลงทะเบียน"
           class="btnreject"
-          @click="handleRegisterClick"
+          @click="handleUnRegisterClick"
         />
         <q-btn
           v-else-if="!enrollment?.isEnrolled && !isRegistrationNotAllowed"
@@ -50,14 +50,25 @@
       </div>
     </div>
   </q-page>
+  <!-- Confirm Dialog-->
+  <RegisterConfirmDialog
+    v-model="showRegisterDialog"
+    :activityItems="activity?.activityItems ?? []"
+    :food="activity?.foodVotes ?? []"
+    @confirm="register"
+  />
+  <RegisterFailDialog v-model="showFailDialog" />
+  <UnRegisterDialog v-model="showUnRegisterDialog" @confirm="unRegister" />
 </template>
 
 <script setup lang="ts">
 import { ref, onMounted, computed } from 'vue'
 import { useRoute } from 'vue-router'
-
 import { useStudentActivitystore } from 'src/stores/student-activity'
 import { EnrollmentService } from 'src/services/enrollment'
+import RegisterConfirmDialog from '../Dialog/RegisterConfirmDialog.vue'
+import RegisterFailDialog from '../Dialog/RegisterFailDialog.vue'
+import UnRegisterDialog from '../Dialog/UnRegisterDialog.vue'
 import type { Activity } from 'src/types/activity'
 import DetailOne from './DetailOne.vue'
 import DetailMany from './DetailMany.vue'
@@ -66,14 +77,45 @@ import { api } from 'boot/axios'
 const baseurl = api.defaults.baseURL
 type Enroll = {
   isEnrolled: boolean
+  enrollmentId: string
 }
 const StudentActivityStore = useStudentActivitystore()
 const route = useRoute()
-const showDialog = ref(false)
+const showRegisterDialog = ref(false)
+const showUnRegisterDialog = ref(false)
+const showFailDialog = ref(false)
 const activity = ref<Activity | null>(null)
-const enrollment = ref<Enroll>({ isEnrolled: false })
+const enrollment = ref<Enroll>({ isEnrolled: false, enrollmentId: '' })
 const screen = ref(false)
 const auth = useAuthStore()
+
+// ฟังก์ชันลงทะเบียน
+const handleRegisterClick = () => {
+  showRegisterDialog.value = true
+}
+const handleUnRegisterClick = () => {
+  showUnRegisterDialog.value = true
+}
+const register = async (activityItemId: string, selectedFood: string | null) => {
+  const payload = {
+    activityItemId,
+    studentId: auth.payload?.user?.id,
+    food: selectedFood,
+  }
+  try {
+    console.log('ส่ง payload:', payload)
+    await StudentActivityStore.enrollment(payload)
+    await fetchData()
+  } catch (error) {
+    console.log('error:', error)
+    showFailDialog.value = true
+  }
+}
+const unRegister = async (modelValue: boolean) => {
+  console.log('ยกเลิกลงทะเบียน', modelValue)
+  await EnrollmentService.removeOne(enrollment.value.enrollmentId)
+  await fetchData()
+}
 
 const isRegistrationNotAllowed = computed(() => {
   // ตรวจสอบว่า activity.value?.activityItems มีข้อมูลหรือไม่
@@ -99,31 +141,24 @@ const isRegistrationNotAllowed = computed(() => {
   return diffDays < 7 // ถ้ามีวันเหลือมากกว่า 7 วัน จึงจะสามารถลงทะเบียนได้
 })
 
-// ฟังก์ชันดึง URL ของรูปภาพ
-// const getImageUrl = (fileName: string | undefined) => {
-//   return fileName ? `/uploads/${fileName}` : '/icons/default-image.png'
-// }
-// const getImagePath = (fileName: string | undefined | null) => {
-//   if (!fileName) {
-//     return '/default-placeholder.jpg' // ถ้าไม่มีไฟล์
-//   }
-//   return `${baseurl}/uploads/activity/images/${fileName}`
-// }
-
-// ฟังก์ชันลงทะเบียน
-const handleRegisterClick = () => {
-  showDialog.value = true
+async function fetchData() {
+  await StudentActivityStore.fetchOneData(route.params.id as string)
+  activity.value = StudentActivityStore.form as Activity
+  try {
+    const response = await EnrollmentService.getEnrollmentsByStudentIDAndActivityID(
+      `${auth.payload?.user?.id}`,
+      `${activity.value.id}`,
+    )
+    enrollment.value = response
+    console.log(enrollment.value)
+  } catch (error) {
+    console.log(error)
+    enrollment.value = { isEnrolled: false, enrollmentId: '' }
+  }
 }
 
 onMounted(async () => {
-  await StudentActivityStore.fetchOneData(route.params.id as string)
-  activity.value = StudentActivityStore.form as Activity
-  const response = await EnrollmentService.getEnrollmentsByStudentIDAndActivityID(
-    `${auth.payload?.user?.id}`,
-    `${activity.value.id}`,
-  )
-  enrollment.value = response
-  console.log(enrollment.value?.isEnrolled)
+  await fetchData()
   screen.value = true
 })
 </script>

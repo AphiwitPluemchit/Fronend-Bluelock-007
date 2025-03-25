@@ -13,7 +13,7 @@
             dense
             outlined
             v-model="search1"
-            placeholder="ค้นหา"
+            placeholder="ค้นหา ชื่อนิสิต"
             class="q-mr-sm searchbox"
             :style="{ boxShadow: 'none' }"
           >
