@@ -11,24 +11,28 @@ const registrationSummary = ref({
   absent: 5
 });
 
-// ตัวแปรควบคุมการเปิด-ปิดไดอะล็อก
 const isDialogOpen = ref(false);
 
-// ฟังก์ชันเปิดไดอะล็อก
+// เปิด dialog → รีเซตค่า
 const showCreateQR_CodeDialog = () => {
+  selectedCheckType.value = '';
   isDialogOpen.value = true;
 };
 
-// ฟังก์ชันยกเลิก QR-Code
+// ยกเลิก → ปิด + รีเซตค่า
 const cancelCreateQR_Code = () => {
   isDialogOpen.value = false;
+  selectedCheckType.value = '';
 };
 
-// ฟังก์ชันยืนยัน QR-Code
+// ยืนยัน
 const confirmCreateQR_Code = () => {
   console.log("QR-Code เช็คชื่อถูกสร้างแล้ว!");
   isDialogOpen.value = false;
+  selectedCheckType.value = '';
 };
+
+const selectedCheckType = ref('');
 
 </script>
 
@@ -51,8 +55,24 @@ const confirmCreateQR_Code = () => {
             </q-card-section>
 
             <q-card-section class="dialog-body">
-              <q-btn outline label="เช็คชื่อเข้า" class="check-type-btn" />
-              <q-btn outline label="เช็คชื่อออก" class="check-type-btn" />
+              <q-btn
+                flat
+                label="เช็คชื่อเข้า"
+                class="check-type-btn"
+                :style="selectedCheckType === 'check-in'
+                  ? 'background-color: #e0e0e0; color: black'
+                  : 'background-color: white; color: black'"
+                @click="selectedCheckType = 'check-in'"
+              />
+              <q-btn
+                flat
+                label="เช็คชื่อออก"
+                class="check-type-btn"
+                :style="selectedCheckType === 'check-out'
+                  ? 'background-color: #e0e0e0; color: black'
+                  : 'background-color: white; color: black'"
+                @click="selectedCheckType = 'check-out'"
+              />
             </q-card-section>
 
             <q-card-actions align="right" class="action-buttons">
@@ -274,7 +294,7 @@ const confirmCreateQR_Code = () => {
 /* ไดอะล็อก */
 .dialog-card {
   width: 400px;
-  padding: 20px;
+  padding: 10px;
   text-align: left;
   border-radius: 8px;
 }
@@ -297,12 +317,13 @@ const confirmCreateQR_Code = () => {
   margin: 10px 0;
   font-size: 16px;
   border-radius: 12px;
-  border: 1px solid black;
+  border: 2px solid black;
+  transition: background-color 0.2s ease;
 }
 
 .action-buttons {
   justify-content: flex-end;
-  gap: 10px;
+  gap: 5px;
 }
 
 /* ปุ่มยกเลิกและยืนยัน */

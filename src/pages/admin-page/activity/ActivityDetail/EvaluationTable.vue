@@ -39,7 +39,7 @@ const evaluationResults = ref([
                 </tr>
                 <tr v-for="result in evaluationResults" :key="result.id">
                     <td>{{ result.id }}</td>
-                    <td>{{ result.topic }}</td>
+                    <td class="left-align">{{ result.topic }}</td>
                     <td>{{ result.highest }}</td>
                     <td>{{ result.high }}</td>
                     <td>{{ result.medium }}</td>
@@ -81,5 +81,9 @@ const evaluationResults = ref([
     font-weight: bold;
     text-align: left;
     padding-left: 10px;
+}
+
+.left-align {
+  text-align: left;
 }
 </style>
