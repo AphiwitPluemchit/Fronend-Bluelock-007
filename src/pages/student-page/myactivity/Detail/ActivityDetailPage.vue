@@ -1,19 +1,25 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+import { computed, ref } from 'vue'
 import AppBreadcrumbs from 'src/components/AppBreadcrumbs.vue'
 
 import DetailSum from './DetailSum.vue'
 // import { route } from 'quasar/wrappers';
 
+const currentBreadcrumb = computed(() => {
+  if (tab.value === 'activity') return 'รายละเอียดกิจกรรม'
+  if (tab.value === 'checkInOut') return 'เช็คชื่อเข้า/ออกกิจกรรม'
+  return 'รายละเอียดกิจกรรม' // ค่าเริ่มต้น
+})
+
 const tab = ref<string>('activity')
-const breadcrumbs = ref({
-  previousPage: { title: 'กิจกรรมของฉัน', path: '/Student/ActivityTablePage' },
+const breadcrumbs = computed(() => ({
+  previousPage: { title: 'กิจกรรมของฉัน', path: '/Student/MyActivitiesPage' },
   currentPage: {
-    title: 'รายละเอียดกิจกรรมของฉัน',
+    title: currentBreadcrumb.value,
     path: `/Student/ActivityTablePage/ActivityDetail`,
   },
   icon: 'description',
-})
+}))
 // onMounted(async () => {
 //   const id = route.params.id as string
 //   const res = await ActivityService.getOne(id)
@@ -27,8 +33,8 @@ const breadcrumbs = ref({
     <!-- Tabs -->
     <AppBreadcrumbs :breadcrumbs="breadcrumbs" />
     <q-tabs v-model="tab" align="right" class="custom-tabs" indicator-color="transparent">
-      <q-tab name="activity" label="อัพโหลดใบประกาศนียบัตร" />
-      <q-tab name="history" label="ประวัติ" />
+      <q-tab name="activity" label="รายละเอียดกิจกรรม" />
+      <q-tab name="checkInOut" label="เช็คชื่อเข้า/ออกกิจกรรม" />
     </q-tabs>
 
     <!-- Tab Panels -->
@@ -37,7 +43,7 @@ const breadcrumbs = ref({
         <DetailSum />
       </q-tab-panel>
 
-      <q-tab-panel name="history" class="q-my-md">
+      <q-tab-panel name="checkInOut" class="q-my-md">
         <!-- <RegistrationDetails :activity="activity" /> -->
       </q-tab-panel>
     </q-tab-panels>

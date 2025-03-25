@@ -24,9 +24,7 @@
 
             <!-- แสดงจำนวนที่นั่ง -->
             <q-item-label>
-              ที่นั่งว่าง {{ activity.activityItems?.[0]?.maxParticipants ?? 'N/A' }}/{{
-                activity.activityItems?.[0]?.maxParticipants ?? 'N/A'
-              }}
+              จำนวนที่รับ {{ enrollmentSummary(activity.activityItems ?? []) }}
             </q-item-label>
           </div>
         </div>
@@ -70,6 +68,22 @@ const getActivitydates = (activityItems: ActivityItem[] | null | undefined): str
     'ไม่ระบุ'
   )
 }
+
+function enrollmentSummary(activityItems: ActivityItem[]) {
+  if (!activityItems || activityItems.length === 0) return '-'
+  // คํานวณจํานวนลงทะเบียน
+  const totalEnrolled = activityItems.reduce(
+    (total, item) => total + (item.enrollmentCount || 0),
+    0,
+  )
+  // คํานวณจํานวนรับทะเบียน
+  const totalAccepted = activityItems.reduce(
+    (total, item) => total + (item.maxParticipants ?? 0),
+    0,
+  )
+
+  return `${totalEnrolled}/${totalAccepted}`
+}
 </script>
 
 <style scoped>
@@ -86,9 +100,9 @@ const getActivitydates = (activityItems: ActivityItem[] | null | undefined): str
 }
 
 .activity-img {
-  width: 150px;
-  height: 150px;
   object-fit: cover;
+  width: 90%;
+  height: 60%;
   border-radius: 8px;
 }
 
@@ -102,5 +116,14 @@ const getActivitydates = (activityItems: ActivityItem[] | null | undefined): str
   position: absolute;
   bottom: 25px;
   right: 30px;
+}
+.activity-name {
+  display: -webkit-box;
+  -webkit-line-clamp: 2; /* แสดงแค่ 2 บรรทัด */
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis; /* ใช้ ... เมื่อข้อความยาวเกิน */
+  width: 100%; /* กำหนดความกว้างให้เต็มพื้นที่ */
+  line-clamp: 2;
 }
 </style>

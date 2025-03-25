@@ -21,14 +21,21 @@
           </div>
         </div>
       </q-card-section>
+
       <div class="row justify-center">
         <q-btn
-          v-if="enrollment?.isEnrolled"
+          v-if="enrollment?.isEnrolled && !isRegistrationNotAllowed"
           label="ยกเลิกลงทะเบียน"
           class="btnreject"
           @click="handleRegisterClick"
         />
-        <q-btn v-else label="ลงทะเบียน" class="btnsecces" @click="handleRegisterClick" />
+        <q-btn
+          v-else-if="!enrollment?.isEnrolled && !isRegistrationNotAllowed"
+          label="ลงทะเบียน"
+          class="btnsecces"
+          @click="handleRegisterClick"
+        />
+        <q-btn v-else label="ปิดลงทะเบียน" class="btngrey" :disabled="true" />
       </div>
     </div>
 
@@ -44,7 +51,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, computed } from 'vue'
 import { useRoute } from 'vue-router'
 import AppBreadcrumbs from 'src/components/AppBreadcrumbs.vue'
 import RegisterConfirmDialog from '../Dialog/RegisterConfirmDialog.vue'
@@ -72,6 +79,30 @@ const breadcrumbs = ref({
   previousPage: { title: 'จัดการกิจกรรม', path: '/Student/ActivityTablePage' },
   currentPage: { title: 'รายละเอียดกิจกรรม', path: `/Student/ActivityTablePage/ActivityDetail` },
   icon: 'description',
+})
+
+const isRegistrationNotAllowed = computed(() => {
+  // ตรวจสอบว่า activity.value?.activityItems มีข้อมูลหรือไม่
+  if (!activity.value?.activityItems || activity.value.activityItems.length === 0) {
+    return false // ถ้าไม่มีข้อมูลให้คืนค่า false หรือค่าอื่นๆ ตามที่ต้องการ
+  }
+
+  // ดึงวันที่จาก activityItems และตรวจสอบก่อน
+  const dateString = activity.value.activityItems[0]?.dates?.[0]?.date
+
+  if (!dateString) {
+    return false // ถ้าไม่มีวันที่ให้คืนค่า false หรือค่าอื่นๆ ตามที่ต้องการ
+  }
+
+  // สร้าง Date จากวันที่
+  const activityDate = new Date(dateString)
+  const now = new Date() // วันที่ปัจจุบัน
+  const diffTime = activityDate.getTime() - now.getTime() // หาค่าความแตกต่างระหว่างวันที่
+
+  const diffDays = diffTime / (1000 * 3600 * 24) // แปลงเวลาเป็นจำนวนวัน
+
+  // ตรวจสอบว่าเหลือ 7 วันก่อนวันกิจกรรม
+  return diffDays < 7 // ถ้ามีวันเหลือมากกว่า 7 วัน จึงจะสามารถลงทะเบียนได้
 })
 
 // ฟังก์ชันดึง URL ของรูปภาพ

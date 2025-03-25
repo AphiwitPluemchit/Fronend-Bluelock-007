@@ -16,7 +16,7 @@
             dense
             outlined
             v-model="query1.search"
-            placeholder="ค้นหา"
+            placeholder="ค้นหา ชื่อกิจกรรม"
             @keyup.enter="data1"
             class="q-mr-sm searchbox"
             :style="{ boxShadow: 'none' }"
@@ -94,7 +94,13 @@
               props.row.participants
             }}</q-td>
             <q-td key="type" style="width: 10%">{{ props.row.type }}</q-td>
-            <q-td key="status" style="width: 10%">{{ props.row.status }}</q-td>
+            <q-td key="status" style="width: 10%">
+              <q-btn
+                :label="props.row.status"
+                :class="getStatusClass(props.row.status)"
+                rounded
+                unelevated
+            /></q-td>
             <q-td class="q-gutter-x-sm" key="action" style="width: 5%">
               <q-btn
                 icon="info"
@@ -123,7 +129,7 @@
             dense
             outlined
             v-model="query2.search"
-            placeholder="ค้นหา"
+            placeholder="ค้นหา ชื่อกิจกรรม"
             class="q-mr-sm searchbox"
             @keyup.enter="data2"
             :style="{ boxShadow: 'none' }"
@@ -199,7 +205,13 @@
               props.row.participants
             }}</q-td>
             <q-td key="type" style="width: 10%">{{ props.row.type }}</q-td>
-            <q-td key="status" style="width: 10%">{{ props.row.status }}</q-td>
+            <q-td key="status" style="width: 10%">
+              <q-btn
+                :label="props.row.status"
+                :class="getStatusClass(props.row.status)"
+                rounded
+                unelevated
+            /></q-td>
             <q-td class="q-gutter-x-sm" key="action" style="width: 5%">
               <q-btn
                 icon="info"
@@ -227,7 +239,7 @@
             dense
             outlined
             v-model="query3.search"
-            placeholder="ค้นหา"
+            placeholder="ค้นหา ชื่อกิจกรรม"
             @keyup.enter="data3"
             class="q-mr-sm searchbox"
             :style="{ boxShadow: 'none' }"
@@ -303,7 +315,13 @@
               props.row.participants
             }}</q-td>
             <q-td key="type" style="width: 10%">{{ props.row.type }}</q-td>
-            <q-td key="status" style="width: 10%">{{ props.row.status }}</q-td>
+            <q-td key="status" style="width: 10%">
+              <q-btn
+                :label="props.row.status"
+                :class="getStatusClass(props.row.status)"
+                rounded
+                unelevated
+            /></q-td>
             <q-td class="q-gutter-x-sm" key="action" style="width: 5%">
               <q-btn
                 icon="info"
@@ -348,6 +366,15 @@ const goToPageDetail = async (id: string) => {
   // await fetchOneData(id)
   // :to="`/Student/Activity/ActivityDetail/${activity.id}`"
   await router.push(`/Admin/ActivitiesManagement/ActivityDetail/${id}`)
+}
+
+const getStatusClass = (status: string) => {
+  if (status === 'กำลังวางแผน') return 'status-planning'
+  if (status === 'เปิดลงทะเบียน') return 'status-open'
+  if (status === 'ปิดลงทะเบียน') return 'status-close'
+  if (status === 'เสร็จสิ้น') return 'status-success'
+  if (status === 'ยกเลิก') return 'status-cancel'
+  return ''
 }
 
 const showFilterDialog1 = ref(false)
@@ -650,13 +677,13 @@ async function onRequest3(props: any) {
 
   /* Fix header */
   thead tr:first-child th {
-    background-color: #f5f5f5;
+    // background-color: #f5f5f5;
   }
 
   /* Make tbody scrollable */
   tbody {
     display: block;
-    height: 240px; /* ปรับความสูงตามต้องการ */
+    height: 255px; /* ปรับความสูงตามต้องการ */
     overflow-y: auto;
   }
 
@@ -678,5 +705,40 @@ async function onRequest3(props: any) {
     border-radius: 10px;
     cursor: pointer;
   }
+}
+
+.status-close {
+  background-color: #cfd7ff;
+  color: #001780;
+  border: 2px solid #002dff;
+  width: 130px;
+}
+.status-open {
+  background-color: #d0ffc5;
+  color: #009812;
+  border: 2px solid #00bb16;
+  width: 130px;
+}
+
+.status-planning {
+  background-color: #ffe7ba;
+  color: #ff6f00;
+  border: 2px solid #ffa500;
+
+  width: 130px;
+}
+.status-cancel {
+  background-color: #ffc5c5;
+  color: #ff0000;
+  border: 2px solid #f32323;
+
+  width: 130px;
+}
+.status-success {
+  background-color: #dadada;
+  color: #000000; /* สีม่วง */
+  border: 2px solid #575656;
+
+  width: 130px;
 }
 </style>
