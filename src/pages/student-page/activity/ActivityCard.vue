@@ -126,10 +126,11 @@ function enrollmentSummary(activityItems: ActivityItem[]) {
 }
 
 .activity-img {
-  object-fit: cover;
-  width: 90%;
-  height: 60%;
-  border-radius: 8px;
+  width: 90%; /* Full width of the container */
+  height: auto; /* Maintain aspect ratio */
+  object-fit: cover; /* Cover the container, cropping as needed */
+  border-radius: 8px; /* Optional border radius for rounded corners */
+  aspect-ratio: 4 / 3; /* Maintain 4:3 aspect ratio */
 }
 
 .detail-btn {
