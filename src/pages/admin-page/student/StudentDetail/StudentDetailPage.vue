@@ -60,6 +60,7 @@
                 :class="isEditMode ? 'editable' : 'readonly'"
                 borderless
                 dense
+                type="number"
               />
             </div>
           </div>
@@ -118,6 +119,7 @@
                 :class="isEditMode ? 'editable' : 'readonly'"
                 borderless
                 dense
+                type="number"
               />
             </div>
           </div>
