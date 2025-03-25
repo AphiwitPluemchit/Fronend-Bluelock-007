@@ -36,7 +36,8 @@
           <!-- <div class="q-mr-md col-3">2025-03-24</div>
           <div class="q-mr-md col-3">08:00 - 12:00</div>
           <div class="col-2 text-right">5T01</div> -->
-          <div class="q-mr-md col-5">{{ getActivitydates(myActivity.activityItems) }}</div>
+          <div class="q-mr-md col-3">{{ getActivitydates(myActivity.activityItems) }}</div>
+          <div class="q-mr-md col-3">{{ getActivityTime(myActivity.activityItems) }}</div>
           <div class="col-2 text-right">{{ getActivityRooms(myActivity.activityItems) }}</div>
         </div>
       </div>
@@ -49,6 +50,36 @@ import { useRouter } from 'vue-router'
 import { api } from 'boot/axios'
 import ActivityType from '../myactivity/ActivityType.vue'
 import type { Activity, ActivityItem } from 'src/types/activity'
+import dayjs from 'dayjs'
+import 'dayjs/locale/th'
+import buddhistEra from 'dayjs/plugin/buddhistEra'
+
+dayjs.locale('th')
+dayjs.extend(buddhistEra)
+
+function formatDateToThai(dateString: string): string {
+  if (!dateString) return '-'
+  return dayjs(dateString).format('D MMMM BBBB') // D = วัน, MMM = เดือน, BBBB = ปี พ.ศ.
+}
+
+// ฟังก์ชันดึงวันที่
+const getActivitydates = (activityItems: ActivityItem[] | null | undefined): string => {
+  if (!activityItems || activityItems.length === 0 || !activityItems[0]?.dates) {
+    return 'ไม่ระบุ'
+  }
+
+  // ใช้ formatDateToThai เพื่อแปลงวันที่
+  const firstDate = activityItems[0].dates[0]?.date // เลือกวันที่แรก
+  return firstDate ? formatDateToThai(firstDate) : 'ไม่ระบุ' // แสดงวันที่แรกในรูปแบบที่ต้องการ
+}
+
+// ฟังก์ชันดึงเวลา
+const getActivityTime = (activityItems: ActivityItem[] | null | undefined): string => {
+  const firstItem = activityItems?.find((item) => item.dates && item.dates.length > 0)
+  return firstItem?.dates
+    ? firstItem.dates.map((d) => `${d.stime} - ${d.etime}`).join(', ')
+    : 'ไม่ระบุ'
+}
 
 defineProps<{ myActivity: Activity }>()
 const router = useRouter()
@@ -56,12 +87,12 @@ const baseurl = api.defaults.baseURL
 const onClick = async (id: string) => {
   await router.push(`/Student/Activity/MyActivityDetail/${id}`)
 }
-const getActivitydates = (activityItems: ActivityItem[] | null | undefined): string => {
-  const firstItem = activityItems?.find((item) => item.dates && item.dates.length > 0)
-  return firstItem?.dates
-    ? firstItem.dates.map((d) => `${d.date} (${d.stime} - ${d.etime})`).join(', ')
-    : 'ไม่ระบุ'
-}
+// const getActivitydates = (activityItems: ActivityItem[] | null | undefined): string => {
+//   const firstItem = activityItems?.find((item) => item.dates && item.dates.length > 0)
+//   return firstItem?.dates
+//     ? firstItem.dates.map((d) => `${d.date} (${d.stime} - ${d.etime})`).join(', ')
+//     : 'ไม่ระบุ'
+// }
 
 const getActivityRooms = (activityItems: ActivityItem[] | null | undefined): string => {
   if (!activityItems || activityItems.length === 0) return 'ไม่ระบุ'

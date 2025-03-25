@@ -14,7 +14,7 @@
       <div class="col-md-8 column justify-between text-h6">
         <div>
           <div class="content-wrapper q-mb-md">
-            <q-item-label class="text-bold activity-name">{{ activity.name }}</q-item-label>
+            <q-item-label class="text-bold activity-name q-pt-sm">{{ activity.name }}</q-item-label>
           </div>
           <div class="positionText q-mb-md">
             <!-- แสดงวันที่ -->
@@ -47,8 +47,13 @@
 <script setup lang="ts">
 import type { Activity, ActivityItem } from 'src/types/activity'
 import { api } from 'boot/axios'
+import dayjs from 'dayjs'
+import 'dayjs/locale/th'
+import buddhistEra from 'dayjs/plugin/buddhistEra'
 const baseurl = api.defaults.baseURL
 
+dayjs.locale('th')
+dayjs.extend(buddhistEra)
 // รับ props
 defineProps<{ activity: Activity }>()
 
@@ -57,16 +62,37 @@ defineProps<{ activity: Activity }>()
 //   return fileName ? `/uploads/${fileName}` : '/icons/default-image.png'
 // }
 
+function formatDateToThai(dateString: string, stime: string, etime: string): string {
+  if (!dateString) return '-'
+
+  // แปลงวันที่และเวลาเป็นรูปแบบ 'วัน เดือน ปี พ.ศ. (เวลาเริ่ม - เวลาสิ้นสุด)'
+  return dayjs(dateString).format('D MMMM BBBB') + ` (${stime} - ${etime})`
+}
+
+// ฟังก์ชันดึงวันที่จาก `activityItems`
+// const getActivitydates = (activityItems: ActivityItem[] | null | undefined): string => {
+//   if (!activityItems || activityItems.length === 0 || !activityItems[0]?.dates) {
+//     return 'ไม่ระบุ'
+//   }
+
+//   return (
+//     activityItems[0].dates?.map((d) => `${d.date} (${d.stime} - ${d.etime})`).join(', ') ??
+//     'ไม่ระบุ'
+//   )
+// }
+
 // ฟังก์ชันดึงวันที่จาก `activityItems`
 const getActivitydates = (activityItems: ActivityItem[] | null | undefined): string => {
   if (!activityItems || activityItems.length === 0 || !activityItems[0]?.dates) {
     return 'ไม่ระบุ'
   }
 
-  return (
-    activityItems[0].dates?.map((d) => `${d.date} (${d.stime} - ${d.etime})`).join(', ') ??
-    'ไม่ระบุ'
-  )
+  // ใช้ formatDateToThai เพื่อแปลงวันที่และเวลา
+  const firstDate = activityItems[0].dates[0]?.date // เลือกวันที่แรก
+  const stime = activityItems[0].dates[0]?.stime // เวลาที่เริ่ม
+  const etime = activityItems[0].dates[0]?.etime // เวลาที่สิ้นสุด
+
+  return firstDate ? formatDateToThai(firstDate, stime ?? '', etime ?? '') : 'ไม่ระบุ' // แสดงวันที่แรกพร้อมเวลา
 }
 
 function enrollmentSummary(activityItems: ActivityItem[]) {

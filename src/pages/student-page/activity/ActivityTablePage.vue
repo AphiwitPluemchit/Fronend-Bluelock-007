@@ -3,7 +3,7 @@
     <q-page-container>
       <q-page class="q-pa-md">
         <div class="row justify-start items-center">
-          <div class="text-h4">กิจกรรมทั้งหมดของฉัน</div>
+          <div class="text-h4">กิจกรรมทั้งหมด</div>
         </div>
 
         <div class="row justify-between items-center">

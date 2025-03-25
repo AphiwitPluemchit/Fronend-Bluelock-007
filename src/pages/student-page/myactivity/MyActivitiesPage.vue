@@ -7,7 +7,7 @@
           <div class="text-h4">กิจกรรมทั้งหมด</div>
         </div>
 
-        <div class="row justify-between items-center">
+        <div class="row justify-between items-center q-pa-md">
           <div class="text-h6"></div>
           <div class="row">
             <q-input
@@ -33,14 +33,6 @@
               :category-activities="query.skill"
             />
           </div>
-        </div>
-        <!-- Header Row for the table -->
-        <div class="q-pt-lg row text-h6 header-row" style="color: #4e4e4e">
-          <div class="col-3 text-right">ชื่อกิจกรรม</div>
-          <div class="col-4 text-right">ประเภทกิจกรรม</div>
-          <div class="col-1 text-right">วันที่</div>
-          <div class="col-1 text-right">เวลา</div>
-          <div class="col-2 text-right">สถานที่</div>
         </div>
 
         <!-- แสดงกิจกรรม -->

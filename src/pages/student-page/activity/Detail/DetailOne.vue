@@ -68,13 +68,21 @@
 
 <script setup lang="ts">
 import type { Activity, ActivityItem } from 'src/types/activity'
+import dayjs from 'dayjs'
+import 'dayjs/locale/th'
+import buddhistEra from 'dayjs/plugin/buddhistEra'
+dayjs.locale('th')
+dayjs.extend(buddhistEra)
 defineProps<{ activity: Activity }>()
 // ฟังก์ชันดึงวันที่
 const getActivitydates = (activityItems: ActivityItem[] | null | undefined): string => {
-  const firstItem = activityItems?.find((item) => item.dates && item.dates.length > 0)
-  return firstItem?.dates
-    ? firstItem.dates.map((d) => `${d.date} (${d.stime} - ${d.etime})`).join(', ')
-    : 'ไม่ระบุ'
+  if (!activityItems || activityItems.length === 0 || !activityItems[0]?.dates) {
+    return 'ไม่ระบุ'
+  }
+
+  // ใช้ formatDateToThai เพื่อแปลงวันที่
+  const firstDate = activityItems[0].dates[0]?.date // เลือกวันที่แรก
+  return firstDate ? formatDateToThai(firstDate) : 'ไม่ระบุ' // แสดงวันที่แรกในรูปแบบที่ต้องการ
 }
 
 // ฟังก์ชันดึงเวลา
@@ -83,6 +91,11 @@ const getActivityTime = (activityItems: ActivityItem[] | null | undefined): stri
   return firstItem?.dates
     ? firstItem.dates.map((d) => `${d.stime} - ${d.etime}`).join(', ')
     : 'ไม่ระบุ'
+}
+
+function formatDateToThai(dateString: string): string {
+  if (!dateString) return '-'
+  return dayjs(dateString).format('D MMMM BBBB') // D = วัน, MMM = เดือน, BBBB = ปี พ.ศ.
 }
 
 // ฟังก์ชันดึงจำนวนชั่วโมง
