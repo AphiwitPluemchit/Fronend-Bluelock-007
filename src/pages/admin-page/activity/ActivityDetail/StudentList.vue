@@ -106,13 +106,63 @@ const fetchStudents = async () => {
 }
 
 const columns = [
-  { name: 'index', label: 'ลำดับ', align: 'left' as const, field: 'index' },
-  { name: 'studentId', label: 'รหัสนิสิต', field: 'studentId', align: 'left' as const },
-  { name: 'name', label: 'ชื่อ-สกุล', field: 'name', align: 'left' as const },
-  { name: 'major', label: 'สาขา', field: 'major', align: 'left' as const },
-  { name: 'checkIn', label: 'เช็คชื่อเข้า', field: 'checkIn', align: 'center' as const },
-  { name: 'checkOut', label: 'เช็คชื่อออก', field: 'checkOut', align: 'center' as const },
-  { name: 'status', label: 'สถานะ', field: 'status', align: 'center' as const },
+  {
+    name: 'index',
+    label: 'ลำดับ',
+    align: 'left' as const,
+    field: 'index',
+    style: 'width: 7%;',
+    headerStyle: 'width: 7%;',
+  },
+  {
+    name: 'studentId',
+    label: 'รหัสนิสิต',
+    field: 'studentId',
+    align: 'left' as const,
+    style: 'width: 12%;',
+    headerStyle: 'width: 12%;',
+  },
+  {
+    name: 'name',
+    label: 'ชื่อ-สกุล',
+    field: 'name',
+    align: 'left' as const,
+    style: 'width: 20%;',
+    headerStyle: 'width: 19.5%;',
+    classes: 'ellipsis-cell',
+  },
+  {
+    name: 'major',
+    label: 'สาขา',
+    field: 'major',
+    align: 'left' as const,
+    style: 'width: 7%;',
+    headerStyle: 'width: 7.5%;',
+  },
+  {
+    name: 'checkIn',
+    label: 'เช็คชื่อเข้า',
+    field: 'checkIn',
+    align: 'center' as const,
+    style: 'width: 15%;',
+    headerStyle: 'width: 14%;',
+  },
+  {
+    name: 'checkOut',
+    label: 'เช็คชื่อออก',
+    field: 'checkOut',
+    align: 'center' as const,
+    style: 'width: 15%;',
+    headerStyle: 'width: 16%;',
+  },
+  {
+    name: 'status',
+    label: 'สถานะ',
+    field: 'status',
+    align: 'center' as const,
+    style: 'width: 13%;',
+    headerStyle: 'width: 12%;',
+  },
   { name: 'actions', label: '', field: 'actions', align: 'center' as const },
 ]
 
@@ -142,32 +192,29 @@ onMounted(async () => {
           dense 
           outlined 
           v-model="search1" 
-          @keyup.enter="fetchStudents" 
-          placeholder="ค้นหาชื่อ-นามสกุล/ รหัสนิสิต"
+          @keyup.enter="fetchStudents"
+          placeholder="ค้นหาชื่อ-นามสกุล/ รหัสนิสิต" 
           class="q-mr-sm searchbox" 
           :style="{ boxShadow: 'none' }"
         >
-        
-        <template v-slot:append>
-          <q-icon name="search" />
-        </template>
+
+          <template v-slot:append>
+            <q-icon name="search" />
+          </template>
         </q-input>
 
-        <FilterDialog 
-        :categories="filterCategories1"
-        @apply="applyStudentFilters"
-        />
+        <FilterDialog :categories="filterCategories1" @apply="applyStudentFilters" />
       </div>
 
       <q-table 
         flat bordered 
         :rows="students" 
         :columns="columns" 
-        row-key="id"
-        class="q-mt-md customtable my-sticky-header-table" 
+        row-key="id" 
+        class="q-mt-md new-sticky-header"
         @request="onRequest" 
-        v-model:pagination="pagination"
-        :rows-per-page-options="[10, 20, 30, 40, 50]" 
+        v-model:pagination="pagination" 
+        :rows-per-page-options="[10, 20, 30, 40, 50]"
         :rows-number="enrollmentStore.total"
       >
 
@@ -188,11 +235,8 @@ onMounted(async () => {
 
         <template v-slot:body-cell-status="props">
           <q-td :props="props">
-            <q-btn 
-              :label="getStatusText(props.row.status)" 
-              rounded unelevated class="status-btn"
-              :class="getStatusClass(props.row.status)" 
-            />
+            <q-btn :label="getStatusText(props.row.status)" rounded unelevated class="status-btn"
+              :class="getStatusClass(props.row.status)" />
           </q-td>
         </template>
 
@@ -207,46 +251,76 @@ onMounted(async () => {
   </div>
 </template>
 
-<style scoped>
+<style lang="scss" scoped>
 .student-container {
-  display: flex;
-  align-items: flex-start;
-  gap: 180px;
   background-color: #EDF0F5;
   height: 680px;
   width: 100%;
 }
 
-.student-table-wrapper {
-  flex: none;
-  width: 100%;
-  max-width: 100%;
-  display: flex;
-  flex-direction: column;
-  max-height: 600px;
+// .student-table-wrapper {
+//   display: flex;
+//   width: 100%;
+//   max-width: 100%;
+//   display: flex;
+//   flex-direction: column;
+// }
+
+// .my-sticky-header-table {
+//   min-height: 450px; 
+//   overflow: auto;
+// }
+
+.q-table table {
+  table-layout: fixed;
 }
 
-.q-table {
-  width: 100%;
-}
-
-.my-sticky-header-table {
-  height: 60vh;
-  max-height: 60vh;
-  overflow-y: auto;
-  overflow-x: hidden;
-  scrollbar-width: none;
-}
-
-/* .my-sticky-header-table::-webkit-scrollbar {
-    display: none;
-} */
-
-.sticky-header {
+.my-sticky-header-table thead th {
   position: sticky;
   top: 0;
   z-index: 1;
-  background-color: #fff;
+  background-color: #f5f5f5;
+}
+
+.new-sticky-header {
+  .my-sticky-header-table {
+
+    /* Fix header */
+    thead tr:first-child th {
+      background-color: #f5f5f5;
+    }
+
+    /* Make tbody scrollable */
+    tbody {
+      display: block;
+      overflow-y: auto;
+    }
+
+    /* Ensure header and body columns align */
+    thead,
+    tbody tr {
+      display: table;
+      width: 100%;
+      table-layout: fixed;
+    }
+
+    /* Optional: ปรับ scrollbar ไม่ทับ */
+    tbody::-webkit-scrollbar {
+      width: 12px;
+    }
+
+    tbody::-webkit-scrollbar-thumb {
+      background: #a7a7a7;
+      border-radius: 10px;
+      cursor: pointer;
+    }
+  }
+}
+
+.ellipsis-cell {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .status-complete {
