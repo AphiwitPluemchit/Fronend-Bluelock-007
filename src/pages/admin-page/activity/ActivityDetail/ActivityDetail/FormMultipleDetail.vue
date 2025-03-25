@@ -312,9 +312,8 @@ const saveChanges = async () => {
   updated.name = activityName.value
   updated.skill = activityType.value === 'prep' ? 'hard' : 'soft'
   updated.activityState = statusReverseMap[activityStatus.value] || 'planning'
-  updated.foodVotes = foodMenu.value.map((f) => ({ foodName: f.name, vote: 1 }))
+  updated.foodVotes = foodMenu.value.map((f) => ({ foodName: f.name, vote: 0 }))
 
-  // ✅ วันที่และเวลา
   const date = activityDateInternal.value
   const stime = selectedTime.value
   const etime = endTime.value
@@ -334,23 +333,31 @@ const saveChanges = async () => {
   try {
     const result = await ActivityService.updateOne(updated)
 
-    // ✅ หลังอัปเดตข้อมูลเสร็จ → อัปโหลดรูป
+    // ✅ ถ้าบันทึกข้อมูลกิจกรรมสำเร็จ → อัปโหลดรูป
     if ((result === 200 || result === 201) && props.imageRef) {
       const file = props.imageRef.getSelectedFile?.()
       const fileName = props.imageRef.getSelectedFileName?.()
       const oldFile = props.activity?.file ?? ''
 
-      if (file && fileName && fileName !== oldFile) {
-        try {
-          if (oldFile) {
+      if (file && fileName) {
+        // ✅ ลบรูปเก่า (ถ้ามี และชื่อไม่ตรงกับรูปใหม่)
+        if (oldFile && oldFile !== fileName) {
+          try {
             await ActivityService.deleteImage(props.activity.id, oldFile)
             console.log('🗑 ลบรูปเก่าเรียบร้อย:', oldFile)
+          } catch (err) {
+            console.warn('⚠️ ลบรูปเก่าไม่สำเร็จ:', err)
           }
-          const uploadResult = await ActivityService.uploadImage(props.activity.id, file)
+        }
 
+        // ✅ อัปโหลดรูปใหม่
+        try {
+          const uploadResult = await ActivityService.uploadImage(props.activity.id, file)
           if (uploadResult.status === 200 || uploadResult.status === 201) {
             emit('saved', uploadResult.fileName)
             return
+          } else {
+            console.warn('⚠️ รูปใหม่อัปโหลดไม่สำเร็จ')
           }
         } catch (uploadErr) {
           console.error('❌ Upload image failed:', uploadErr)
@@ -358,11 +365,12 @@ const saveChanges = async () => {
       }
     }
 
-    emit('saved') // ✅ ส่ง event กลับไปยัง parent เพื่อ refresh
+    emit('saved')
   } catch (err) {
     console.error('❌ ไม่สามารถอัปเดตกิจกรรมได้:', err)
   }
 }
+
 
 const handleStatusChange = (newStatus: string) => {
   activityStatus.value = newStatus

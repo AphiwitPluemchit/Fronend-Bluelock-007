@@ -49,10 +49,9 @@ const selectedFileName = ref<string | null>(null)
 
 const serverImageUrl = computed(() =>
   props.imageFileName
-    ? `http://localhost:8888/uploads/activity/images/${props.imageFileName}`
+    ? `${import.meta.env.VITE_API_URL}/uploads/activity/images/${props.imageFileName}`
     : null,
 )
-
 const triggerFileInput = () => {
   fileInput.value?.click()
 }

@@ -103,7 +103,7 @@ const router = useRouter()
 onMounted(() => {})
 
 const goToActivitiesManagement = async () => {
-  await router.push('/ActivitiesManagement')
+  await router.push('/admin/ActivitiesManagement')
 }
 interface DayTimeSelection {
   date: string
@@ -122,11 +122,11 @@ const seats = ref<number>(0)
 const activityDateRange = ref<string[]>([])
 const activityName = ref('')
 const selectedRoom = ref<string[]>([])
-const activityType = ref('')
+const activityType = ref('prep')
 const lecturer = ref('')
 const detailActivity = ref('')
-const departments = ref<string[]>([])
-const years = ref<string[]>([])
+const departments = ref<string[]>(['CS', 'SE', 'ITDI', 'AAI'])
+const years = ref<string[]>(['1', '2', '3', '4'])
 const activityDateRangeInternal = ref<string[]>([])
 const foodMenu = ref<Food[]>([])
 const foodMenuDisplay = ref<string>('')
@@ -341,20 +341,18 @@ const submitActivity = async () => {
         )
 
         if (uploadStatus.status === 200 || uploadStatus.status === 201) {
-          alert('✅ สร้างกิจกรรม + อัปโหลดรูปสำเร็จ')
+          console.log('Upload image successfully')
         } else {
-          alert('⚠️ สร้างกิจกรรมสำเร็จ แต่อัปโหลดรูปไม่สำเร็จ')
+          console.log('Upload image failed:', uploadStatus)
         }
       } catch (uploadErr) {
         console.error('Upload image failed:', uploadErr)
-        alert('❌ อัปโหลดรูปภาพไม่สำเร็จ')
       }
     }
 
     await goToPageDetail(id)
   } catch (err) {
     console.error('Create activity failed:', err)
-    alert('❌ สร้างกิจกรรมไม่สำเร็จ')
   }
 }
 </script>
