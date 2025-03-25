@@ -312,7 +312,13 @@ const saveChanges = async () => {
   updated.name = activityName.value
   updated.skill = activityType.value === 'prep' ? 'hard' : 'soft'
   updated.activityState = statusReverseMap[activityStatus.value] || 'planning'
-  updated.foodVotes = foodMenu.value.map((f) => ({ foodName: f.name, vote: 0 }))
+  updated.foodVotes = foodMenu.value.map((f) => {
+    const existingVote = updated.foodVotes?.find(vote => vote.foodName === f.name);
+    return {
+      foodName: f.name,
+      vote: existingVote ? existingVote.vote : 0  
+    };
+  });
 
   const date = activityDateInternal.value
   const stime = selectedTime.value
