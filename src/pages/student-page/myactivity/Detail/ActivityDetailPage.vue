@@ -59,5 +59,10 @@ const breadcrumbs = computed(() => ({
 
 .custom-panels {
   background-color: #edf0f5;
+  padding: 20px;
+  font-size: 20px;
+  height: 700px;
+  overflow-y: auto; 
 }
+
 </style>
