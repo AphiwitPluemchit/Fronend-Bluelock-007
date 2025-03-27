@@ -12,13 +12,11 @@
         :disable="!isEditing"
       />
     </div>
-    <q-dialog v-model="showChangeStatusDialog">
       <ChangeStatusDialog
         v-model="showChangeStatusDialog"
         :currentStatus="activityStatus"
         @confirm="handleStatusChange"
       />
-    </q-dialog>
     <!-- Activity Name -->
     <div class="input-group">
       <p class="label label_minWidth">ชื่อกิจกรรม :</p>
@@ -182,7 +180,7 @@ const departments = ref<string[]>([])
 const years = ref<string[]>([])
 const activityDateRangeInternal = ref<string[]>([])
 const roomName = ref<string[]>([])
-const activityStatus = ref('กำลังวางแผน') // ค่าปัจจุบันของสถานะ
+const activityStatus = ref('กำลังวางแผน') 
 const foodMenu = ref<Food[]>([])
 const foodMenuDisplay = ref('')
 
@@ -404,11 +402,6 @@ onMounted(() => {
   generateDaysInRange(activityDateRangeInternal.value)
 })
 
-// const isEditing = ref(false) // เปลี่ยนค่าเริ่มต้นเป็น false (ฟอร์มถูกล็อก)
-
-// const cancelEdit = () => {
-//   isEditing.value = false
-// }
 const statusMap: Record<string, string> = {
   planning: 'กำลังวางแผน',
   open: 'เปิดลงทะเบียน',
