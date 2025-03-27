@@ -12,13 +12,11 @@
         :disable="!isEditing"
       />
     </div>
-    <q-dialog v-model="showChangeStatusDialog">
       <ChangeStatusDialog
         v-model="showChangeStatusDialog"
         :currentStatus="activityStatus"
         @confirm="handleStatusChange"
       />
-    </q-dialog>
 
     <!-- Activity Name -->
     <div class="input-group">
@@ -130,7 +128,7 @@
       <q-btn class="btnAddActivity" @click="addSubActivity" :disable="!isEditing">
         <p class="label">
           <q-icon name="add" size="20px" />
-          เพิ่มข้อกิจกรรม
+          เพิ่มกิจกรรม
         </p>
       </q-btn>
     </div>
@@ -220,7 +218,7 @@ const endHour = ref<number>(0)
 const endMinute = ref<number>(0)
 const foodMenuDisplay = ref('')
 const foodMenu = ref<Food[]>([])
-const activityStatus = ref('กำลังวางแผน')
+const activityStatus = ref('')
 // ฟังก์ชันสำหรับฟอร์แมตเวลาเป็นสตริง
 const formatTime = (h: number, m: number): string => {
   return `${formatHour(h)}:${formatMinute(m)}`

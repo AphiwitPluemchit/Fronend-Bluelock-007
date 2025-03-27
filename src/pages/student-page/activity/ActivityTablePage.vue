@@ -13,7 +13,7 @@
               dense
               outlined
               v-model="query.search"
-              placeholder="ค้นหา"
+              placeholder="ค้นหา ชื่อกิจกรรม"
               @keyup.enter="fetchData()"
               class="q-mr-sm searchbox"
               :style="{ boxShadow: 'none' }"

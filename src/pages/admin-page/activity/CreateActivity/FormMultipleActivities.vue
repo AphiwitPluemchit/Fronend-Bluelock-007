@@ -92,7 +92,7 @@
       <q-btn class="btnAddActivity" @click="addSubActivity">
         <p class="label">
           <q-icon name="add" size="20px" />
-          เพิ่มข้อกิจกรรม
+          เพิ่มกิจกรรม
         </p>
       </q-btn>
     </div>

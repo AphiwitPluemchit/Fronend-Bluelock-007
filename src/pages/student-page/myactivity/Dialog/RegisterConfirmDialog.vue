@@ -69,7 +69,7 @@
           class="btnconfirm"
           label="ยืนยัน"
           style="background-color: #3676f4; color: white"
-          :disable="(activityItems.length > 1 && !selectedItemId) || (food.length > 0 && !selectedFood)"
+           :disable="(activityItems.length > 1 && !selectedItemId) || (food.length > 0 && !selectedFood)"
           @click="confirm"
         />
       </q-card-actions>

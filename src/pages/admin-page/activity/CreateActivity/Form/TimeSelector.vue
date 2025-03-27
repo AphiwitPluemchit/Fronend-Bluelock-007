@@ -5,9 +5,19 @@
     <div class="time-row">
       <div class="time-inputs">
         <!-- Start Time -->
-        <q-input outlined v-model="localStartTime" class="time-box" readonly :disable="disable">
+        <q-input
+          outlined
+          v-model="localStartTime"
+          class="time-box"
+          :disable="disable"
+          @blur="onManualTimeInput('start')"
+        >
           <template v-slot:prepend>
-            <q-icon name="access_time" class="cursor-pointer" :class="{ 'disabled-icon': disable }">
+            <q-icon
+              name="access_time"
+              class="cursor-pointer"
+              :class="{ 'disabled-icon': disable }"
+            >
               <q-menu ref="menuStart" class="time-picker-card" v-if="!disable">
                 <div class="time-container">
                   <div class="time-column">
@@ -30,9 +40,19 @@
         <p class="time-separator">ถึง</p>
 
         <!-- End Time -->
-        <q-input outlined v-model="localEndTime" class="time-box" readonly :disable="disable">
+        <q-input
+          outlined
+          v-model="localEndTime"
+          class="time-box"
+          :disable="disable"
+          @blur="onManualTimeInput('end')"
+        >
           <template v-slot:prepend>
-            <q-icon name="access_time" class="cursor-pointer" :class="{ 'disabled-icon': disable }">
+            <q-icon
+              name="access_time"
+              class="cursor-pointer"
+              :class="{ 'disabled-icon': disable }"
+            >
               <q-menu ref="menuEnd" class="time-picker-card" v-if="!disable">
                 <div class="time-container">
                   <div class="time-column">
@@ -142,6 +162,36 @@ const adjustMinute = (timeType: 'start' | 'end', direction: 'increase' | 'decrea
     endMinute.value = direction === 'increase' ? (endMinute.value + 1) % 60 : (endMinute.value - 1 + 60) % 60;
   }
 };
+const onManualTimeInput = (type: 'start' | 'end') => {
+  const raw = type === 'start' ? localStartTime.value : localEndTime.value;
+  const value = raw ?? '';
+  const regex = /^(\d{1,2}):(\d{2})$/;
+  const match = value.match(regex);
+
+  if (match) {
+    const [ , hourStr, minuteStr ] = match;
+    const h = Math.min(23, Math.max(0, Number(hourStr)));
+    const m = Math.min(59, Math.max(0, Number(minuteStr)));
+
+    if (type === 'start') {
+      startHour.value = h;
+      startMinute.value = m;
+    } else {
+      endHour.value = h;
+      endMinute.value = m;
+    }
+  } else {
+    if (type === 'start') {
+      localStartTime.value = formatTime(startHour.value, startMinute.value);
+    } else {
+      localEndTime.value = formatTime(endHour.value, endMinute.value);
+    }
+  }
+};
+
+
+
+
 </script>
 
 <style scoped>
