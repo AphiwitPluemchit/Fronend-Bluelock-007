@@ -139,13 +139,10 @@ defineProps<{ activity: Activity }>()
 
 // ฟังก์ชันดึงวันที่จาก `activityItems`
 const getActivitydates = (activityItems: ActivityItem[] | null | undefined): string => {
-  if (!activityItems || activityItems.length === 0 || !activityItems[0]?.dates) {
-    return 'ไม่ระบุ'
-  }
-
-  // เลือกวันที่แรกจาก `activityItems`
-  const firstDate = activityItems[0].dates[0]?.date
-  return firstDate ? formatDateToThai(firstDate) : 'ไม่ระบุ'
+  const firstItem = activityItems?.find((item) => item.dates && item.dates.length > 0)
+  return firstItem?.dates
+    ? firstItem.dates.map((d) => formatDateToThai(d.date)).join(', ')
+    : 'ไม่ระบุ'
 }
 
 // ฟังก์ชันดึงเวลา
