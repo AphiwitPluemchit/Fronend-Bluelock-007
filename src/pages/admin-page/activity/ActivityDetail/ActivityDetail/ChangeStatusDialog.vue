@@ -18,7 +18,7 @@
             option.value === 'กำลังวางแผน'
               ? 'status-planning'
               : option.value === 'เปิดลงทะเบียน'
-                ? 'status-open'
+                ? 'status-opens'
                 : option.value === 'ปิดลงทะเบียน'
                   ? 'status-closed'
                   : option.value === 'เสร็จสิ้น'
@@ -42,7 +42,7 @@
 </template>
 
 <script setup lang="ts">
-import { defineProps, defineEmits, ref, computed } from 'vue'
+import { defineProps, defineEmits, ref, computed, watch } from 'vue'
 
 const props = defineProps({
   modelValue: Boolean, // รับค่าจาก v-model
@@ -50,10 +50,20 @@ const props = defineProps({
 })
 
 const emit = defineEmits(['update:modelValue', 'confirm'])
+const selectedStatus = ref<string>('')
+const showDialog = computed({
+  get: () => props.modelValue,
+  set: (val) => emit('update:modelValue', val),
+})
 
-const showDialog = ref(props.modelValue)
-const selectedStatus = ref('') // สถานะที่เลือก
-
+watch(
+  () => props.modelValue,
+  (val) => {
+    if (val) {
+      selectedStatus.value = ''
+    }
+  },
+)
 // กำหนดตัวเลือกสถานะที่แสดงตามสถานะปัจจุบัน
 const availableStatuses = computed(() => {
   switch (props.currentStatus) {
@@ -114,7 +124,6 @@ const confirmStatusChange = () => {
   margin-bottom: 10px;
 }
 
-/* สไตล์หลัก */
 .status-btn {
   width: 200px;
   height: 40px;
@@ -129,8 +138,8 @@ const confirmStatusChange = () => {
   border: 2px solid #ffa500;
 }
 
-.status-open {
-  color: #009812; /* สีเขียว */
+.status-opens {
+  color: #009812;
   border: 2px solid #00bb16;
 }
 
@@ -149,25 +158,24 @@ const confirmStatusChange = () => {
   border: 2px solid #f32323;
 }
 
-/* Active สถานะพร้อมพื้นหลัง */
-.status-open.active-status {
-  background-color: #d0ffc5 !important;
+.status-opens.active-status {
+  background-color: #d0ffc5 ;
 }
 
 .status-planning.active-status {
-  background-color: #ffe7ba !important;
+  background-color: #ffe7ba ;
 }
 
 .status-closed.active-status {
-  background-color: #cfd7ff !important;
+  background-color: #cfd7ff ;
 }
 
 .status-completed.active-status {
-  background-color: #dadada !important;
+  background-color: #dadada ;
 }
 
 .status-cancelled.active-status {
-  background-color: #ffc5c5 !important;
+  background-color: #ffc5c5 ;
 }
 
 .cancel-btn {
