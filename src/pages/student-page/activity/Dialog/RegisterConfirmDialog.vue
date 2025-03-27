@@ -41,7 +41,7 @@
         </div>
       </q-card-section>
       <q-card-section>
-        <div v-if="food">
+        <div v-if="food.length > 0">
           <div class="text-h6">เลือกอาหาร</div>
           <!-- <q-option-group
             v-model="selectedFood"
@@ -69,7 +69,9 @@
           class="btnconfirm"
           label="ยืนยัน"
           style="background-color: #3676f4; color: white"
-          :disable="(activityItems.length > 1 && !selectedItemId) || (food.length > 0 && !selectedFood)"
+          :disable="
+            (activityItems.length > 1 && !selectedItemId) || (food.length > 0 && !selectedFood)
+          "
           @click="confirm"
         />
       </q-card-actions>
