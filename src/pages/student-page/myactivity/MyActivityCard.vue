@@ -30,15 +30,13 @@
             v-if="myActivity.skill === 'hard' || myActivity.skill === 'soft'"
             :skill="myActivity.skill === 'hard' ? 'hardSkill' : 'softSkill'"
           />
-          <!-- <div class="q-mr-md col-4">{{ myActivity.skill }}</div> -->
         </div>
-        <div class="row q-mt-sm col-5">
-          <!-- <div class="q-mr-md col-3">2025-03-24</div>
-          <div class="q-mr-md col-3">08:00 - 12:00</div>
-          <div class="col-2 text-right">5T01</div> -->
+        <div class="row q-mt-sm col-4">
           <div class="q-mr-md col-4">{{ getActivitydates(myActivity.activityItems) }}</div>
-          <div class="q-mr-md col-3">{{ getActivityTime(myActivity.activityItems) }}</div>
-          <div class="col-2 text-right">{{ getActivityRooms(myActivity.activityItems) }}</div>
+          <div class="q-mr-md col-4 text-right">
+            {{ getActivityTime(myActivity.activityItems) }}
+          </div>
+          <div class="col-3 text-right">{{ getActivityRooms(myActivity.activityItems) }}</div>
         </div>
       </div>
     </div>
@@ -64,20 +62,17 @@ function formatDateToThai(dateString: string): string {
 
 // ฟังก์ชันดึงวันที่
 const getActivitydates = (activityItems: ActivityItem[] | null | undefined): string => {
-  if (!activityItems || activityItems.length === 0 || !activityItems[0]?.dates) {
-    return 'ไม่ระบุ'
-  }
-
-  // ใช้ formatDateToThai เพื่อแปลงวันที่
-  const firstDate = activityItems[0].dates[0]?.date // เลือกวันที่แรก
-  return firstDate ? formatDateToThai(firstDate) : 'ไม่ระบุ' // แสดงวันที่แรกในรูปแบบที่ต้องการ
+  const firstItem = activityItems?.find((item) => item.dates && item.dates.length > 0)
+  return firstItem?.dates
+    ? firstItem.dates.map((d) => formatDateToThai(d.date)).join(' ')
+    : 'ไม่ระบุ'
 }
 
 // ฟังก์ชันดึงเวลา
 const getActivityTime = (activityItems: ActivityItem[] | null | undefined): string => {
   const firstItem = activityItems?.find((item) => item.dates && item.dates.length > 0)
   return firstItem?.dates
-    ? firstItem.dates.map((d) => `${d.stime} - ${d.etime}`).join(', ')
+    ? firstItem.dates.map((d) => `${d.stime} - ${d.etime}`).join(' ')
     : 'ไม่ระบุ'
 }
 
@@ -97,7 +92,7 @@ const onClick = async (id: string) => {
 const getActivityRooms = (activityItems: ActivityItem[] | null | undefined): string => {
   if (!activityItems || activityItems.length === 0) return 'ไม่ระบุ'
   const rooms = activityItems[0]?.rooms
-  return Array.isArray(rooms) && rooms.length > 0 ? rooms.join(', ') : 'ไม่ระบุ'
+  return Array.isArray(rooms) && rooms.length > 0 ? rooms.join(' ') : 'ไม่ระบุ'
 }
 </script>
 
