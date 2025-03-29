@@ -3,6 +3,7 @@ import { computed, ref } from 'vue'
 import AppBreadcrumbs from 'src/components/AppBreadcrumbs.vue'
 
 import DetailSum from './DetailSum.vue'
+import CheckInCheckOut from './CheckInCheckOut.vue'
 // import { route } from 'quasar/wrappers';
 
 const currentBreadcrumb = computed(() => {
@@ -44,7 +45,7 @@ const breadcrumbs = computed(() => ({
       </q-tab-panel>
 
       <q-tab-panel name="checkInOut" class="q-my-md">
-        <!-- <RegistrationDetails :activity="activity" /> -->
+        <CheckInCheckOut />
       </q-tab-panel>
     </q-tab-panels>
   </q-page>
@@ -62,7 +63,6 @@ const breadcrumbs = computed(() => ({
   padding: 20px;
   font-size: 20px;
   height: 700px;
-  overflow-y: auto; 
+  overflow-y: auto;
 }
-
 </style>
