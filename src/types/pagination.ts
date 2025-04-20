@@ -4,6 +4,11 @@ export type Pagination = {
   search: string
   sortBy: string
   order: string
+  skill?: string[]
+  activityState?: string[]
+  major?: string[]
+  studentYear?: number[]
+  statusStudent?: string[]
 }
 
 export type ActivityPagination = {
