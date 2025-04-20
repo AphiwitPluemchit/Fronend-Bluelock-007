@@ -25,8 +25,11 @@ export const useStudentStore = defineStore('student', () => {
     page: 1,
     limit: 10,
     search: '',
-    sortBy: 'id',
-    order: 'DESC',
+    sortBy: '_id',
+    order: 'desc',
+    skill: [],
+    major: [],
+    studentYear: [],
   })
 
   const getStudents = async () => {
