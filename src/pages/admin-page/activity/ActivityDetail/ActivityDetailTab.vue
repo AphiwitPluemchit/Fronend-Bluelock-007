@@ -25,7 +25,7 @@
             :activity="activity"
             :imageFile="selectedImageFile"
             :imageRef="imageRef"
-            v-model:isEditing="isEditing"
+            :isEditing="route.query.disable !== 'true'"
             @saved="handleSave"
           />
         </div>
@@ -41,13 +41,15 @@ import FormDetail from './ActivityDetail/FormDetail.vue'
 import FormMultipleDetail from './ActivityDetail/FormMultipleDetail.vue'
 import type { Activity } from 'src/types/activity'
 import { ActivityService } from 'src/services/activity'
+import { useRoute } from 'vue-router'
 const emit = defineEmits<{
   (e: 'update-activity', updated: Activity): void
 }>()
 
 const imageRef = ref<InstanceType<typeof ImageDetail> | null>(null)
 const selectedImageFile = ref<File | null>(null)
-const isEditing = ref(false)
+const route = useRoute()
+const isEditing = computed(() => route.query.disable !== 'true')
 
 const handleFileSelected = (file: File) => {
   selectedImageFile.value = file

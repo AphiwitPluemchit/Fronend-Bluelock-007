@@ -74,13 +74,13 @@
 
               <q-menu>
                 <q-list style="min-width: 200px">
-                  <q-item clickable @click="goToPageDetail(props.row.id)">
+                  <q-item clickable  @click="goToPageDetail(props.row.id, true)">
                     <q-item-section avatar>
                       <q-icon name="visibility" />
                     </q-item-section>
                     <q-item-section>ดูรายละเอียด</q-item-section>
                   </q-item>
-                  <q-item clickable @click="goToPageDetail(props.row.id)">
+                  <q-item clickable  @click="goToPageDetail(props.row.id, false)">
                     <q-item-section avatar>
                       <q-icon name="edit" />
                     </q-item-section>
@@ -161,13 +161,13 @@
               ></q-btn>
               <q-menu>
                 <q-list style="min-width: 200px">
-                  <q-item clickable @click="goToPageDetail(props.row.id)">
+                  <q-item clickable  @click="goToPageDetail(props.row.id, true)">
                     <q-item-section avatar>
                       <q-icon name="visibility" />
                     </q-item-section>
                     <q-item-section>ดูรายละเอียด</q-item-section>
                   </q-item>
-                  <q-item clickable @click="goToPageDetail(props.row.id)">
+                  <q-item clickable  @click="goToPageDetail(props.row.id, false)">
                     <q-item-section avatar>
                       <q-icon name="edit" />
                     </q-item-section>
@@ -245,13 +245,13 @@
               <q-btn icon="info" padding="none" flat color="grey-8"></q-btn>
               <q-menu>
                 <q-list style="min-width: 200px">
-                  <q-item clickable @click="goToPageDetail(props.row.id)">
+                  <q-item clickable  @click="goToPageDetail(props.row.id, true)">
                     <q-item-section avatar>
                       <q-icon name="visibility" />
                     </q-item-section>
                     <q-item-section>ดูรายละเอียด</q-item-section>
                   </q-item>
-                  <q-item clickable @click="goToPageDetail(props.row.id)">
+                  <q-item clickable @click="goToPageDetail(props.row.id, false)">
                     <q-item-section avatar>
                       <q-icon name="edit" />
                     </q-item-section>
@@ -284,11 +284,17 @@ const router = useRouter()
 const goToPage = async () => {
   await router.push('/Admin/ActivitiesManagement/CreateActivity')
 }
-const goToPageDetail = async (id: string) => {
+const goToPageDetail = async (id: string,disable:boolean) => {
   console.log(id)
+  console.log('Disable:', disable)
   // await fetchOneData(id)
   // :to="`/Student/Activity/ActivityDetail/${activity.id}`"
-  await router.push(`/Admin/ActivitiesManagement/ActivityDetail/${id}`)
+  await router.push({
+  path: `/Admin/ActivitiesManagement/ActivityDetail/${id}`,
+  query: {
+    disable: String(disable)
+  }
+})
 }
 
 const getStatusClass = (status: string) => {
