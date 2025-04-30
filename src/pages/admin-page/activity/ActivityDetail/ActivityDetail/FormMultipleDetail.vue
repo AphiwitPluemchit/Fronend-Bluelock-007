@@ -4,19 +4,11 @@
     <div class="input-group">
       <p class="label label_minWidth">สถานะ:</p>
       <q-btn :label="activityStatus" :class="statusClass" class="status-btn" />
-      <q-btn
-        v-if="activityStatus !== 'ยกเลิก' && activityStatus !== 'เสร็จสิ้น'"
-        class="btnchange"
-        label="เปลี่ยน"
-        @click="showChangeStatusDialog = true"
-        :disable="!isEditing"
-      />
+      <q-btn v-if="activityStatus !== 'ยกเลิก' && activityStatus !== 'เสร็จสิ้น'" class="btnchange" label="เปลี่ยน"
+        @click="showChangeStatusDialog = true" :disable="!isEditing" />
     </div>
-      <ChangeStatusDialog
-        v-model="showChangeStatusDialog"
-        :currentStatus="activityStatus"
-        @confirm="handleStatusChange"
-      />
+    <ChangeStatusDialog v-model="showChangeStatusDialog" :currentStatus="activityStatus"
+      @confirm="handleStatusChange" />
 
     <!-- Activity Name -->
     <div class="input-group">
@@ -30,96 +22,52 @@
     <!-- Time -->
     <div class="input-group">
       <p class="label label_minWidth">เวลาที่จัดกิจกรรม:</p>
-      <TimeSelector
-        v-model:startTime="selectedTime"
-        v-model:endTime="endTime"
-        :formattedDate="formattedThaiDate"
-        :disable="!isEditing"
-      />
+      <TimeSelector v-model:startTime="selectedTime" v-model:endTime="endTime" :formattedDate="formattedThaiDate"
+        :disable="!isEditing" />
     </div>
 
     <!-- Activity Type -->
     <ActivityType v-model="activityType" class="input-group" :disable="!isEditing" />
     <HoursSelector v-model="totalHours" class="input-group" :disable="!isEditing" />
-    <FoodSelector
-      v-model:foodMenu="foodMenu"
-      v-model:foodMenuDisplay="foodMenuDisplay"
-      :disable="!isEditing"
-    />
+    <FoodSelector v-model:foodMenu="foodMenu" v-model:foodMenuDisplay="foodMenuDisplay" :disable="!isEditing" />
 
     <!-- Sub Activities List -->
     <div v-for="(subActivity, index) in subActivities" :key="index" class="sub-activity">
       <!-- Cancel (X) Icon -->
-      <div
-        class="remove-icon"
-        :class="{ 'icon-disabled': !isEditing }"
-        @click="isEditing && removeSubActivity(index)"
-      >
-        <q-icon
-          name="close"
-          size="35px"
-          :color="isEditing ? 'red' : 'grey-5'"
-          class="cursor-pointer"
-        />
+      <div class="remove-icon" :class="{ 'icon-disabled': !isEditing }" @click="isEditing && removeSubActivity(index)">
+        <q-icon name="close" size="35px" :color="isEditing ? 'red' : 'grey-5'" class="cursor-pointer" />
       </div>
 
       <!-- SubActivity Name -->
       <div class="input-group">
         <p class="label label_minWidth">ชื่อกิจกรรม :</p>
-        <q-input
-          outlined
-          v-model="subActivity.subActivityName"
-          style="width: 600px"
-          :disable="!isEditing"
-        />
+        <q-input outlined v-model="subActivity.subActivityName" style="width: 600px" :disable="!isEditing" />
       </div>
       <RoomSelector v-model="subActivity.roomName" class="input-group" :disable="!isEditing" />
 
       <!-- Room and Seats -->
       <div class="input-group">
         <p class="label label_minWidth">จำนวนที่รับ :</p>
-        <q-input
-          outlined
-          style="width: 225px"
-          v-model="subActivity.seats"
-          type="number"
-          @keypress="isNumber($event)"
-          @blur="validatePositive('seats', index)"
-          :disable="!isEditing"
-        />
+        <q-input outlined style="width: 225px" v-model="subActivity.seats" type="number" @keypress="isNumber($event)"
+          @blur="validatePositive('seats', index)" :disable="!isEditing" />
       </div>
 
       <!-- Department -->
-      <DepartmentSelector
-        v-model="subActivity.departments"
-        class="input-group"
-        :disable="!isEditing"
-      />
+      <DepartmentSelector v-model="subActivity.departments" class="input-group" :disable="!isEditing" />
       <!-- Year -->
       <YearSelector v-model="subActivity.years" class="input-group" :disable="!isEditing" />
 
       <!-- Lecturer -->
       <div class="input-group">
         <p class="label label_minWidth">วิทยากร :</p>
-        <q-input
-          outlined
-          v-model="subActivity.lecturer"
-          style="width: 100%"
-          :disable="!isEditing"
-        />
+        <q-input outlined v-model="subActivity.lecturer" style="width: 100%" :disable="!isEditing" />
       </div>
 
       <!-- Detail Activity -->
       <div class="input-group">
         <p style="align-self: flex-start" class="label label_minWidth">รายละเอียดอื่นๆ :</p>
-        <q-input
-          type="textarea"
-          rows="10"
-          outlined
-          v-model="subActivity.detailActivity"
-          style="width: 100%"
-          :disable="!isEditing"
-        />
+        <q-input type="textarea" rows="10" outlined v-model="subActivity.detailActivity" style="width: 100%"
+          :disable="!isEditing" />
       </div>
 
       <!-- Add Activity Button -->
@@ -132,26 +80,17 @@
         </p>
       </q-btn>
     </div>
-    <div class="button-group">
-      <q-btn v-if="!props.isEditing" class="btnedit" @click="emit('update:isEditing', true)">
-        แก้ไข
-      </q-btn>
-
-      <template v-else>
-        <q-btn
-          class="btnreject"
-          @click="
-            () => {
-              resetFormToOriginal()
-              emit('update:isEditing', false)
-            }
-          "
-          >ยกเลิก</q-btn
-        >
-
-        <q-btn class="btnsecces" @click="saveChanges">บันทึก</q-btn>
-      </template>
-    </div>
+    <div class="button-group" v-if="props.isEditing">
+  <q-btn class="btnreject" @click="
+    () => {
+      resetFormToOriginal()
+      emit('update:isEditing', false)
+    }
+  ">
+    ยกเลิก
+  </q-btn>
+  <q-btn class="btnsecces" @click="saveChanges">บันทึก</q-btn>
+</div>
   </q-page>
 </template>
 
@@ -314,7 +253,7 @@ const saveChanges = async () => {
     const existingVote = updated.foodVotes?.find(vote => vote.foodName === f.name);
     return {
       foodName: f.name,
-      vote: existingVote ? existingVote.vote : 0  
+      vote: existingVote ? existingVote.vote : 0
     };
   });
 
@@ -516,6 +455,7 @@ const resetFormToOriginal = () => {
 ::v-deep(.q-icon) {
   font-size: 18px;
 }
+
 .input-group p {
   align-self: center;
   margin: 0;
@@ -543,6 +483,7 @@ const resetFormToOriginal = () => {
 .label_minWidth {
   min-width: 200px;
 }
+
 .btnAddActivity {
   background-color: #ffffff;
   border-radius: 20px;
@@ -552,6 +493,7 @@ const resetFormToOriginal = () => {
   display: flex;
   align-items: center;
 }
+
 .status-btn {
   color: #ff6f00;
   background-color: #ffe7ba;
@@ -561,6 +503,7 @@ const resetFormToOriginal = () => {
   width: 200px;
   font-size: 20px;
 }
+
 .time-container {
   display: flex;
   justify-content: center;
@@ -573,9 +516,11 @@ const resetFormToOriginal = () => {
   justify-content: flex-end;
   margin-bottom: 20px;
 }
+
 .q-icon {
   cursor: pointer;
 }
+
 .btn-container {
   display: flex;
   align-items: center;
@@ -583,6 +528,7 @@ const resetFormToOriginal = () => {
   gap: 20px;
   margin-left: 200px;
 }
+
 .department-btn {
   width: 80px;
   height: 40px;
@@ -591,9 +537,11 @@ const resetFormToOriginal = () => {
   background-color: #ffffff;
   margin-right: 10px;
 }
+
 .active-btn {
   background-color: #d0e4ff !important;
 }
+
 .button-group {
   display: flex;
   justify-content: flex-end;
@@ -602,6 +550,7 @@ const resetFormToOriginal = () => {
   margin-bottom: 100px;
   width: 100%;
 }
+
 .status-btn {
   border-radius: 50px;
   height: 40px;
@@ -626,6 +575,7 @@ const resetFormToOriginal = () => {
   background-color: #cfd7ff;
   border: 2px solid #002dff;
 }
+
 .status-completed {
   color: #000000;
   background-color: #dadada;
@@ -637,6 +587,7 @@ const resetFormToOriginal = () => {
   background-color: #ffc5c5;
   border: 2px solid #ff0000;
 }
+
 .icon-disabled {
   pointer-events: none;
   opacity: 0.6;
