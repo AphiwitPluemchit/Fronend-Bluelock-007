@@ -19,21 +19,13 @@
     <div class="input-group">
       <p class="label label_minWidth" style="align-self: flex-start">เวลาที่จัดกิจกรรม:</p>
       <div class="day-time-container">
-        <q-checkbox
-          class="checkbox-left"
-          v-model="sameTimeForAll"
-          label="เวลาเดิมทุกวัน"
-          @update:model-value="applySameTime"
-        />
+        <q-checkbox class="checkbox-left" v-model="sameTimeForAll" label="เวลาเดิมทุกวัน"
+          @update:model-value="applySameTime" />
         <div class="day-time-container">
           <div v-for="(day, index) in selectedDays" :key="day.date" class="day-block">
-            <TimeSelector
-              v-model:startTime="day.startTime"
-              v-model:endTime="day.endTime"
-              :formattedDate="day.formattedDate"
-              @update:startTime="updateDayTime(index, 'start', $event)"
-              @update:endTime="updateDayTime(index, 'end', $event)"
-            />
+            <TimeSelector v-model:startTime="day.startTime" v-model:endTime="day.endTime"
+              :formattedDate="day.formattedDate" @update:startTime="updateDayTime(index, 'start', $event)"
+              @update:endTime="updateDayTime(index, 'end', $event)" />
           </div>
         </div>
       </div>
@@ -64,11 +56,7 @@
     </div>
 
     <!-- Food Menu -->
-    <FoodSelector
-      v-model:foodMenu="foodMenu"
-      v-model:foodMenuDisplay="foodMenuDisplay"
-      class="input-group"
-    />
+    <FoodSelector v-model:foodMenu="foodMenu" v-model:foodMenuDisplay="foodMenuDisplay" class="input-group" />
 
     <!-- Detail Activity -->
     <div class="input-group">
@@ -100,7 +88,7 @@ import type { Food } from 'src/types/food'
 
 const router = useRouter()
 
-onMounted(() => {})
+onMounted(() => { })
 
 const goToActivitiesManagement = async () => {
   await router.push('/admin/ActivitiesManagement')
@@ -130,18 +118,7 @@ const years = ref<string[]>(['1', '2', '3', '4'])
 const activityDateRangeInternal = ref<string[]>([])
 const foodMenu = ref<Food[]>([])
 const foodMenuDisplay = ref<string>('')
-const menuItems = ref([
-  'ผัดกะเพราหมู',
-  'ผัดกะเพราไก่',
-  'หมูกระเทียม',
-  'ไก่กระเทียม',
-  'ผัดพริกแกงหมู',
-  'ผัดพริกแกงไก่',
-  'ผัดพริกอ่อนหมู',
-  'ผัดพริกอ่อนไก่',
-  'ข้าวหมูทอด',
-  'ข้าวไก่ทอด',
-])
+
 watch(sameTimeForAll, (newValue) => {
   if (newValue) {
     void applySameTime() // ✅ ใช้ void ป้องกัน ESLint ฟ้อง
@@ -183,11 +160,6 @@ const updateDayTime = (index: number, type: 'start' | 'end', value: string) => {
   }
 }
 onMounted(() => {
-  // โหลดเมนูอาหารจาก localStorage ถ้ามี
-  const storedMenuItems = localStorage.getItem('menuItems')
-  if (storedMenuItems) {
-    menuItems.value = JSON.parse(storedMenuItems)
-  }
 
   // สร้างวันที่ปัจจุบันในรูปแบบ YYYY-MM-DD
   const today = new Date()
@@ -199,7 +171,6 @@ onMounted(() => {
   // กำหนดค่าเริ่มต้นให้กับตัวแปร (เปลี่ยนจาก object เป็น array)
   activityDateRangeInternal.value = [dateString]
 
-  // สร้างข้อมูลวันที่เริ่มต้น (ใช้ array แทน)
   generateDaysInRange(activityDateRangeInternal.value)
 })
 
@@ -284,11 +255,13 @@ const props = defineProps<{
   activity?: { file?: string | null } // 👈 ถ้ามีเฉพาะ field file ก็พอ
 }>()
 
-const goToPageDetail = async (id: string) => {
-  console.log('ไปหน้า ActivityDetail ID:', id)
-  await router.push(`/Admin/ActivitiesManagement/ActivityDetail/${id}`)
+// const goToPageDetail = async (id: string) => {
+//   console.log('ไปหน้า ActivityDetail ID:', id)
+//   await router.push(`/Admin/ActivitiesManagement/ActivityDetail/${id}`)
+// }
+const goToPageTable = async () => {
+  await router.push(`/Admin/ActivitiesManagement`)
 }
-
 const submitActivity = async () => {
   const skillMap: Record<string, 'hard' | 'soft' | null> = {
     prep: 'hard',
@@ -350,7 +323,7 @@ const submitActivity = async () => {
       }
     }
 
-    await goToPageDetail(id)
+    await goToPageTable()
   } catch (err) {
     console.error('Create activity failed:', err)
   }
@@ -363,12 +336,14 @@ const submitActivity = async () => {
   background-color: white;
   align-items: center;
 }
+
 .input-group p {
   align-self: center;
   margin: 0;
   line-height: normal;
   text-align: right;
 }
+
 .input-group {
   display: flex;
   align-items: center;
@@ -388,6 +363,7 @@ const submitActivity = async () => {
 .label_minWidth {
   min-width: 200px;
 }
+
 .status-btn {
   color: #ff6f00;
   background-color: #ffe7ba;
@@ -397,11 +373,13 @@ const submitActivity = async () => {
   width: 200px;
   font-size: 20px;
 }
+
 .flex-container {
   display: flex;
   align-items: center;
   gap: 10px;
 }
+
 .button-group {
   display: flex;
   justify-content: flex-end;

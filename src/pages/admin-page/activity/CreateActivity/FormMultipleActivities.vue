@@ -158,16 +158,13 @@ const minute = ref<number>(0)
 const endHour = ref<number>(0)
 const endMinute = ref<number>(0)
 
-// ฟังก์ชันสำหรับฟอร์แมตเวลาเป็นสตริง
 const formatTime = (h: number, m: number): string => {
   return `${formatHour(h)}:${formatMinute(m)}`
 }
-// watch สำหรับ start time
 watch([hour, minute], () => {
   selectedTime.value = formatTime(hour.value, minute.value)
 })
 
-// watch สำหรับ end time
 watch([endHour, endMinute], () => {
   endTime.value = formatTime(endHour.value, endMinute.value)
 })
@@ -204,7 +201,6 @@ const formattedThaiDate = computed(() => {
   return `${parseInt(day, 10)} ${thaiMonth} ${thaiYear}`
 })
 
-// ✅ Thai locale สำหรับเดือน
 const thaiLocale = {
   months: [
     'มกราคม',
@@ -242,9 +238,12 @@ const props = defineProps<{
   activity?: { file?: string | null } // 👈 ถ้ามีเฉพาะ field file ก็พอ
 }>()
 
-const goToPageDetail = async (id: string) => {
-  console.log('ไปหน้า ActivityDetail ID:', id)
-  await router.push(`/Admin/ActivitiesManagement/ActivityDetail/${id}`)
+// const goToPageDetail = async (id: string) => {
+//   console.log('ไปหน้า ActivityDetail ID:', id)
+//   await router.push(`/Admin/ActivitiesManagement/ActivityDetail/${id}`)
+// }
+const goToPageTable = async()=>{
+  await router.push(`/Admin/ActivitiesManagement`)
 }
 const submitActivity = async () => {
   const skillMap: Record<string, 'hard' | 'soft' | null> = {
@@ -311,7 +310,7 @@ const submitActivity = async () => {
       }
     }
 
-    await goToPageDetail(id)
+    await goToPageTable()
   } catch (err) {
     console.error('Create activity failed:', err)
   }
