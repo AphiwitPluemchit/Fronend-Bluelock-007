@@ -4,7 +4,7 @@
     <div class="input-group">
       <p class="label label_minWidth">สถานะ:</p>
       <q-btn :label="activityStatus" :class="statusClass" class="status-btn" />
-      <q-btn v-if="activityStatus !== 'ยกเลิก' && activityStatus !== 'เสร็จสิ้น'" class="btnchange" label="เปลี่ยน"
+      <q-btn  v-if="props.isEditing" class="btnchange" label="เปลี่ยน" 
         @click="showChangeStatusDialog = true" :disable="!isEditing" />
     </div>
     <ChangeStatusDialog v-model="showChangeStatusDialog" :currentStatus="activityStatus"
