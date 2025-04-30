@@ -12,70 +12,43 @@
       <div class="row justify-between items-center">
         <div class="text-h6">กิจกรรมที่กำลังเปิดและปิดลงทะเบียนแล้ว</div>
         <div class="row">
-          <q-input
-            dense
-            outlined
-            v-model="query1.search"
-            placeholder="ค้นหา ชื่อกิจกรรม"
-            @keyup.enter="data1"
-            class="q-mr-sm searchbox"
-            :style="{ boxShadow: 'none' }"
-          >
+          <q-input dense outlined v-model="query1.search" placeholder="ค้นหา ชื่อกิจกรรม" @keyup.enter="data1"
+            class="q-mr-sm searchbox" :style="{ boxShadow: 'none' }">
             <template v-slot:append>
               <q-icon name="search" />
             </template>
           </q-input>
-          <FilterDialog
-            :model-value="showFilterDialog1"
-            :categories="filterCategories"
-            :years="query1.studentYear"
-            :majors="query1.major"
-            :status-activities="query1.activityState"
-            :category-activities="query1.skill"
-            @apply="applyFilters1"
-          />
+          <FilterDialog :model-value="showFilterDialog1" :categories="filterCategories" :years="query1.studentYear"
+            :majors="query1.major" :status-activities="query1.activityState" :category-activities="query1.skill"
+            @apply="applyFilters1" />
         </div>
       </div>
-      <q-table
-        bordered
-        flat
-        :rows="mapActivitiesToTableRows(activitys1)"
-        :columns="columns"
-        v-model:pagination="pagination1"
-        :rows-per-page-options="[5, 7, 10, 15, 20]"
-        @request="onRequest1"
-        row-key="id"
-        class="q-mt-md my-sticky-header-table"
-      >
+      <q-table bordered flat :rows="mapActivitiesToTableRows(activitys1)" :columns="columns"
+        v-model:pagination="pagination1" :rows-per-page-options="[5, 7, 10, 15, 20]" @request="onRequest1" row-key="id"
+        class="q-mt-md my-sticky-header-table">
         <!-- หัวตาราง Sticky -->
         <template v-slot:header="props">
           <q-tr :props="props">
-            <q-th
-              v-for="col in props.cols"
-              :key="col.name"
-              :props="props"
-              :style="
-                col.name === 'no'
-                  ? 'width: 5%'
-                  : '' + col.name === 'name'
-                    ? 'width: 32%'
-                    : '' + col.name === 'date'
-                      ? 'width: 10%'
-                      : '' + col.name === 'time'
-                        ? 'width: 10%'
-                        : '' + col.name === 'location'
-                          ? 'width: 6%'
-                          : '' + col.name === 'participants'
-                            ? 'width: 12%'
-                            : '' + col.name === 'type'
-                              ? 'width: 10%'
-                              : '' + col.name === 'status'
-                                ? 'width: 10%'
-                                : '' + col.name === 'action'
-                                  ? 'width: 5%'
-                                  : ''
-              "
-            >
+            <q-th v-for="col in props.cols" :key="col.name" :props="props" :style="col.name === 'no'
+              ? 'width: 5%'
+              : '' + col.name === 'name'
+                ? 'width: 32%'
+                : '' + col.name === 'date'
+                  ? 'width: 10%'
+                  : '' + col.name === 'time'
+                    ? 'width: 10%'
+                    : '' + col.name === 'location'
+                      ? 'width: 6%'
+                      : '' + col.name === 'participants'
+                        ? 'width: 12%'
+                        : '' + col.name === 'type'
+                          ? 'width: 10%'
+                          : '' + col.name === 'status'
+                            ? 'width: 10%'
+                            : '' + col.name === 'action'
+                              ? 'width: 5%'
+                              : ''
+              ">
               {{ col.label }}
             </q-th>
           </q-tr>
@@ -95,26 +68,27 @@
             }}</q-td>
             <q-td key="type" style="width: 10%">{{ props.row.type }}</q-td>
             <q-td key="status" style="width: 10%">
-              <q-btn
-                :label="props.row.status"
-                :class="getStatusClass(props.row.status)"
-                rounded
-                unelevated
-            /></q-td>
+              <q-btn :label="props.row.status" :class="getStatusClass(props.row.status)" rounded unelevated /></q-td>
             <q-td class="q-gutter-x-sm" key="action" style="width: 5%">
-              <q-btn
-                icon="info"
-                padding="none"
-                flat
-                color="grey-8"
-                @click="
-                  () => {
-                    console.log(props.row)
-                    void goToPageDetail(props.row.id)
-                  }
-                "
-              ></q-btn
-            ></q-td>
+              <q-btn icon="info" padding="none" flat color="grey-8"></q-btn>
+
+              <q-menu>
+                <q-list style="min-width: 200px">
+                  <q-item clickable @click="goToPageDetail(props.row.id)">
+                    <q-item-section avatar>
+                      <q-icon name="visibility" />
+                    </q-item-section>
+                    <q-item-section>ดูรายละเอียด</q-item-section>
+                  </q-item>
+                  <q-item clickable @click="goToPageDetail(props.row.id)">
+                    <q-item-section avatar>
+                      <q-icon name="edit" />
+                    </q-item-section>
+                    <q-item-section>แก้ไข</q-item-section>
+                  </q-item>
+                </q-list>
+              </q-menu>
+            </q-td>
           </q-tr>
         </template>
       </q-table>
@@ -125,68 +99,43 @@
       <div class="row justify-between items-center">
         <div class="text-h6">กิจกรรมที่กำลังวางแผน</div>
         <div class="row">
-          <q-input
-            dense
-            outlined
-            v-model="query2.search"
-            placeholder="ค้นหา ชื่อกิจกรรม"
-            class="q-mr-sm searchbox"
-            @keyup.enter="data2"
-            :style="{ boxShadow: 'none' }"
-          >
+          <q-input dense outlined v-model="query2.search" placeholder="ค้นหา ชื่อกิจกรรม" class="q-mr-sm searchbox"
+            @keyup.enter="data2" :style="{ boxShadow: 'none' }">
             <template v-slot:append>
               <q-icon name="search" />
             </template>
           </q-input>
-          <FilterDialog
-            :model-value="showFilterDialog2"
-            :categories="filterCategories"
-            :years="query2.studentYear"
-            :majors="query2.major"
-            :status-activities="query2.activityState"
-            :category-activities="query2.skill"
-            @apply="applyFilters2"
-          />
+          <FilterDialog :model-value="showFilterDialog2" :categories="filterCategories" :years="query2.studentYear"
+            :majors="query2.major" :status-activities="query2.activityState" :category-activities="query2.skill"
+            @apply="applyFilters2" />
         </div>
       </div>
-      <q-table
-        :rows="mapActivitiesToTableRows(activitys2)"
-        :columns="columns"
-        v-model:pagination="pagination2"
-        :rows-per-page-options="[5, 7, 10, 15, 20]"
-        @request="onRequest2"
-        row-key="id"
-        class="q-mt-md my-sticky-header-table"
-      >
+      <q-table :rows="mapActivitiesToTableRows(activitys2)" :columns="columns" v-model:pagination="pagination2"
+        :rows-per-page-options="[5, 7, 10, 15, 20]" @request="onRequest2" row-key="id"
+        class="q-mt-md my-sticky-header-table">
         <!-- หัวตาราง Sticky -->
         <template v-slot:header="props">
           <q-tr :props="props">
-            <q-th
-              v-for="col in props.cols"
-              :key="col.name"
-              :props="props"
-              :style="
-                col.name === 'no'
-                  ? 'width: 5%'
-                  : '' + col.name === 'name'
-                    ? 'width: 32%'
-                    : '' + col.name === 'date'
-                      ? 'width: 10%'
-                      : '' + col.name === 'time'
-                        ? 'width: 10%'
-                        : '' + col.name === 'location'
-                          ? 'width: 6%'
-                          : '' + col.name === 'participants'
-                            ? 'width: 12%'
-                            : '' + col.name === 'type'
-                              ? 'width: 10%'
-                              : '' + col.name === 'status'
-                                ? 'width: 10%'
-                                : '' + col.name === 'action'
-                                  ? 'width: 5%'
-                                  : ''
-              "
-            >
+            <q-th v-for="col in props.cols" :key="col.name" :props="props" :style="col.name === 'no'
+              ? 'width: 5%'
+              : '' + col.name === 'name'
+                ? 'width: 32%'
+                : '' + col.name === 'date'
+                  ? 'width: 10%'
+                  : '' + col.name === 'time'
+                    ? 'width: 10%'
+                    : '' + col.name === 'location'
+                      ? 'width: 6%'
+                      : '' + col.name === 'participants'
+                        ? 'width: 12%'
+                        : '' + col.name === 'type'
+                          ? 'width: 10%'
+                          : '' + col.name === 'status'
+                            ? 'width: 10%'
+                            : '' + col.name === 'action'
+                              ? 'width: 5%'
+                              : ''
+              ">
               {{ col.label }}
             </q-th>
           </q-tr>
@@ -206,28 +155,28 @@
             }}</q-td>
             <q-td key="type" style="width: 10%">{{ props.row.type }}</q-td>
             <q-td key="status" style="width: 10%">
-              <q-btn
-                :label="props.row.status"
-                :class="getStatusClass(props.row.status)"
-                rounded
-                unelevated
-            /></q-td>
+              <q-btn :label="props.row.status" :class="getStatusClass(props.row.status)" rounded unelevated /></q-td>
             <q-td class="q-gutter-x-sm" key="action" style="width: 5%">
-              <q-btn
-                icon="info"
-                padding="none"
-                flat
-                color="grey-8"
-                @click="
-                  () => {
-                    console.log(props.row)
-                    void goToPageDetail(props.row.id)
-                  }
-                "
-              ></q-btn
-            ></q-td>
-          </q-tr> </template
-      ></q-table>
+              <q-btn icon="info" padding="none" flat color="grey-8"
+              ></q-btn>
+              <q-menu>
+                <q-list style="min-width: 200px">
+                  <q-item clickable @click="goToPageDetail(props.row.id)">
+                    <q-item-section avatar>
+                      <q-icon name="visibility" />
+                    </q-item-section>
+                    <q-item-section>ดูรายละเอียด</q-item-section>
+                  </q-item>
+                  <q-item clickable @click="goToPageDetail(props.row.id)">
+                    <q-item-section avatar>
+                      <q-icon name="edit" />
+                    </q-item-section>
+                    <q-item-section>แก้ไข</q-item-section>
+                  </q-item>
+                </q-list>
+              </q-menu>
+            </q-td>
+          </q-tr> </template></q-table>
     </section>
 
     <!-- ตาราง 3 -->
@@ -235,68 +184,43 @@
       <div class="row justify-between items-center">
         <div class="text-h6">อื่น ๆ</div>
         <div class="row">
-          <q-input
-            dense
-            outlined
-            v-model="query3.search"
-            placeholder="ค้นหา ชื่อกิจกรรม"
-            @keyup.enter="data3"
-            class="q-mr-sm searchbox"
-            :style="{ boxShadow: 'none' }"
-          >
+          <q-input dense outlined v-model="query3.search" placeholder="ค้นหา ชื่อกิจกรรม" @keyup.enter="data3"
+            class="q-mr-sm searchbox" :style="{ boxShadow: 'none' }">
             <template v-slot:append>
               <q-icon name="search" />
             </template>
           </q-input>
-          <FilterDialog
-            :model-value="showFilterDialog3"
-            :categories="filterCategories"
-            :years="query3.studentYear"
-            :majors="query3.major"
-            :status-activities="query3.activityState"
-            :category-activities="query3.skill"
-            @apply="applyFilters3"
-          />
+          <FilterDialog :model-value="showFilterDialog3" :categories="filterCategories" :years="query3.studentYear"
+            :majors="query3.major" :status-activities="query3.activityState" :category-activities="query3.skill"
+            @apply="applyFilters3" />
         </div>
       </div>
-      <q-table
-        :rows="mapActivitiesToTableRows(activitys3)"
-        :columns="columns"
-        v-model:pagination="pagination3"
-        :rows-per-page-options="[5, 7, 10, 15, 20]"
-        @request="onRequest3"
-        row-key="id"
-        class="q-mt-md my-sticky-header-table"
-      >
+      <q-table :rows="mapActivitiesToTableRows(activitys3)" :columns="columns" v-model:pagination="pagination3"
+        :rows-per-page-options="[5, 7, 10, 15, 20]" @request="onRequest3" row-key="id"
+        class="q-mt-md my-sticky-header-table">
         <!-- หัวตาราง Sticky -->
         <template v-slot:header="props">
           <q-tr :props="props">
-            <q-th
-              v-for="col in props.cols"
-              :key="col.name"
-              :props="props"
-              :style="
-                col.name === 'no'
-                  ? 'width: 5%'
-                  : '' + col.name === 'name'
-                    ? 'width: 32%'
-                    : '' + col.name === 'date'
-                      ? 'width: 10%'
-                      : '' + col.name === 'time'
-                        ? 'width: 10%'
-                        : '' + col.name === 'location'
-                          ? 'width: 6%'
-                          : '' + col.name === 'participants'
-                            ? 'width: 12%'
-                            : '' + col.name === 'type'
-                              ? 'width: 10%'
-                              : '' + col.name === 'status'
-                                ? 'width: 10%'
-                                : '' + col.name === 'action'
-                                  ? 'width: 5%'
-                                  : ''
-              "
-            >
+            <q-th v-for="col in props.cols" :key="col.name" :props="props" :style="col.name === 'no'
+              ? 'width: 5%'
+              : '' + col.name === 'name'
+                ? 'width: 32%'
+                : '' + col.name === 'date'
+                  ? 'width: 10%'
+                  : '' + col.name === 'time'
+                    ? 'width: 10%'
+                    : '' + col.name === 'location'
+                      ? 'width: 6%'
+                      : '' + col.name === 'participants'
+                        ? 'width: 12%'
+                        : '' + col.name === 'type'
+                          ? 'width: 10%'
+                          : '' + col.name === 'status'
+                            ? 'width: 10%'
+                            : '' + col.name === 'action'
+                              ? 'width: 5%'
+                              : ''
+              ">
               {{ col.label }}
             </q-th>
           </q-tr>
@@ -316,28 +240,27 @@
             }}</q-td>
             <q-td key="type" style="width: 10%">{{ props.row.type }}</q-td>
             <q-td key="status" style="width: 10%">
-              <q-btn
-                :label="props.row.status"
-                :class="getStatusClass(props.row.status)"
-                rounded
-                unelevated
-            /></q-td>
+              <q-btn :label="props.row.status" :class="getStatusClass(props.row.status)" rounded unelevated /></q-td>
             <q-td class="q-gutter-x-sm" key="action" style="width: 5%">
-              <q-btn
-                icon="info"
-                padding="none"
-                flat
-                color="grey-8"
-                @click="
-                  () => {
-                    console.log(props.row)
-                    void goToPageDetail(props.row.id)
-                  }
-                "
-              ></q-btn
-            ></q-td>
-          </q-tr> </template
-      ></q-table>
+              <q-btn icon="info" padding="none" flat color="grey-8"></q-btn>
+              <q-menu>
+                <q-list style="min-width: 200px">
+                  <q-item clickable @click="goToPageDetail(props.row.id)">
+                    <q-item-section avatar>
+                      <q-icon name="visibility" />
+                    </q-item-section>
+                    <q-item-section>ดูรายละเอียด</q-item-section>
+                  </q-item>
+                  <q-item clickable @click="goToPageDetail(props.row.id)">
+                    <q-item-section avatar>
+                      <q-icon name="edit" />
+                    </q-item-section>
+                    <q-item-section>แก้ไข</q-item-section>
+                  </q-item>
+                </q-list>
+              </q-menu>
+            </q-td>
+          </q-tr> </template></q-table>
     </section>
   </q-page>
 </template>
@@ -683,7 +606,8 @@ async function onRequest3(props: any) {
   /* Make tbody scrollable */
   tbody {
     display: block;
-    height: 255px; /* ปรับความสูงตามต้องการ */
+    height: 255px;
+    /* ปรับความสูงตามต้องการ */
     overflow-y: auto;
   }
 
@@ -713,6 +637,7 @@ async function onRequest3(props: any) {
   border: 2px solid #002dff;
   width: 130px;
 }
+
 .status-open {
   background-color: #d0ffc5;
   color: #009812;
@@ -727,6 +652,7 @@ async function onRequest3(props: any) {
 
   width: 130px;
 }
+
 .status-cancel {
   background-color: #ffc5c5;
   color: #ff0000;
@@ -734,9 +660,11 @@ async function onRequest3(props: any) {
 
   width: 130px;
 }
+
 .status-success {
   background-color: #dadada;
-  color: #000000; /* สีม่วง */
+  color: #000000;
+  /* สีม่วง */
   border: 2px solid #575656;
 
   width: 130px;
