@@ -13,7 +13,18 @@ export type Enrollment = {
     status: string
   }
 }
-
+export type StudentEnrollment = {
+  id: string
+  code: string
+  name: string
+  food?: string
+  engName: string
+  major: string
+  status: string
+  hardSkill: number
+  softSkill: number
+  registrationDate: string
+}
 export type EnrollmentQuery = Pagination & {
   major?: string[]
   status?: string[]
