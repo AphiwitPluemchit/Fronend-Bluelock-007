@@ -33,14 +33,8 @@ defineExpose({ openDialogUpload, closeDialog })
         <q-icon name="cloud_upload" size="80px" color="black" style="width: 130px; height: 130px" />
       </q-card-section>
       <q-card-section class="q-gutter-md row justify-center">
-        <q-file
-          v-model="file"
-          label="No Selected File"
-          filled
-          clearable
-          accept=".csv, .xls, .xlsx"
-          style="width: 350px"
-        >
+        <q-file v-model="file" label="No Selected File" filled clearable accept=".csv, .xls, .xlsx"
+          style="width: 350px">
           <template v-slot:append>
             <q-btn dense flat icon="delete" @click="file = null" />
           </template>
