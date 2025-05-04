@@ -9,13 +9,6 @@
             :disable="!isEditing"
             @file-selected="handleFileSelected"
           />
-          <!-- Dropdown ใต้รูป -->
-          <q-select v-model="selectedActivityType" outlined class="dropdown no-border bg-white">
-            <template v-slot:selected>
-              <div v-if="selectedActivityType">{{ selectedActivityType }}</div>
-              <div v-else class="text-black">เลือกประเภท</div>
-            </template>
-          </q-select>
         </div>
 
         <div class="form-section">

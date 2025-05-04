@@ -84,7 +84,6 @@
         <p class="label">
           <q-icon name="add" size="20px" />
           เพิ่มกิจกรรม
-          เพิ่มกิจกรรม
         </p>
       </q-btn>
     </div>
@@ -193,7 +192,7 @@ const addSubActivity = () => {
   const today = new Date()
   const formattedToday = today.toISOString().split('T')[0] as string
 
-  const index = subActivities.value.length // index ใหม่ของ subActivity
+  const index = subActivities.value.length 
 
   subActivities.value.push({
     subActivityName: '',
@@ -342,7 +341,6 @@ const submitActivity = async () => {
       }
     }
 
-    await goToPageTable()
     await goToPageTable()
   } catch (err) {
     console.error('Create activity failed:', err)

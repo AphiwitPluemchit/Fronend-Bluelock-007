@@ -1,16 +1,13 @@
 <template>
   <q-page>
+
     <!-- Status -->
     <div class="input-group">
       <p class="label label_minWidth">สถานะ:</p>
       <q-btn :label="activityStatus" :class="statusClass" class="status-btn" />
-      <q-btn v-if="props.isEditing" class="btnchange" label="เปลี่ยน" @click="showChangeStatusDialog = true"
-        :disable="!isEditing" />
+      <q-btn v-if="props.isEditing" class="btnchange" label="เปลี่ยน" @click="showChangeStatusDialog = true" :disable="!isEditing" />
     </div>
-    <ChangeStatusDialog v-model="showChangeStatusDialog" :currentStatus="activityStatus"
-      @confirm="handleStatusChange" />
-    <ChangeStatusDialog v-model="showChangeStatusDialog" :currentStatus="activityStatus"
-      @confirm="handleStatusChange" />
+    <ChangeStatusDialog v-model="showChangeStatusDialog" :currentStatus="activityStatus" @confirm="handleStatusChange" />
 
     <!-- Activity Name -->
     <div class="input-group">
@@ -20,108 +17,119 @@
 
     <!-- Activity Type -->
     <ActivityType v-model="activityType" class="input-group" :disable="!isEditing" />
+
+    <!-- Food Selector -->
     <FoodSelector v-model:foodMenu="foodMenu" v-model:foodMenuDisplay="foodMenuDisplay" :disable="!isEditing" />
 
     <!-- Sub Activities List -->
     <div v-for="(subActivity, index) in subActivities" :key="index" class="sub-activity">
-      <!-- Cancel (X) Icon -->
+
+      <!-- Remove Icon -->
       <div class="remove-icon" :class="{ 'icon-disabled': !isEditing }" @click="isEditing && removeSubActivity(index)">
         <q-icon name="close" size="35px" :color="isEditing ? 'red' : 'grey-5'" class="cursor-pointer" />
-        <div class="remove-icon" :class="{ 'icon-disabled': !isEditing }"
-          @click="isEditing && removeSubActivity(index)">
-          <q-icon name="close" size="35px" :color="isEditing ? 'red' : 'grey-5'" class="cursor-pointer" />
-        </div>
+      </div>
 
-        <!-- SubActivity Name -->
-        <div class="input-group">
-          <p class="label label_minWidth">ชื่อกิจกรรม :</p>
-          <q-input outlined v-model="subActivity.subActivityName" style="width: 600px" :disable="!isEditing" />
-        </div>
+      <!-- SubActivity Name -->
+      <div class="input-group">
+        <p class="label label_minWidth">ชื่อกิจกรรม :</p>
+        <q-input outlined v-model="subActivity.subActivityName" style="width: 600px" :disable="!isEditing" />
+      </div>
 
-        <!-- Date -->
-        <MutiDate v-model="subActivity.activityDateInternal"
-          @update:modelValue="(dates: string[]) => generateDaysInRange(dates, index)" :disable="!isEditing" v />
+      <!-- Date -->
+      <MutiDate v-model="subActivity.activityDateInternal" @update:modelValue="(dates) => generateDaysInRange(dates, index)" :disable="!isEditing" />
 
-        <!-- Time -->
-        <div class="input-group">
-          <p class="label label_minWidth" style="align-self: flex-start">เวลาที่จัดกิจกรรม:</p>
+      <!-- Time -->
+      <div class="input-group">
+        <p class="label label_minWidth" style="align-self: flex-start">เวลาที่จัดกิจกรรม:</p>
+        <div class="day-time-container">
+          <q-checkbox class="checkbox-left" v-model="sameTimeForAll" label="เวลาเดิมทุกวัน" @update:model-value="() => applySameTime(index)" :disable="!isEditing" />
           <div class="day-time-container">
-            <q-checkbox class="checkbox-left" v-model="sameTimeForAll" label="เวลาเดิมทุกวัน"
-              @update:model-value="() => applySameTime(index)" :disable="!isEditing" />
-            <div class="day-time-container">
-              <div v-for="(day, dIndex) in subActivity.selectedDays" :key="day.date">
-                <TimeSelector v-model:startTime="day.startTime" v-model:endTime="day.endTime"
-                  :formattedDate="day.formattedDate" @update:startTime="v => updateDayTime(index, dIndex, 'start', v)"
-                  @update:endTime="v => updateDayTime(index, dIndex, 'end', v)" :disable="!isEditing" />
-              </div>
+            <div v-for="(day, dIndex) in subActivity.selectedDays" :key="day.date">
+              <TimeSelector
+                v-model:startTime="day.startTime"
+                v-model:endTime="day.endTime"
+                :formattedDate="day.formattedDate"
+                @update:startTime="v => updateDayTime(index, dIndex, 'start', v)"
+                @update:endTime="v => updateDayTime(index, dIndex, 'end', v)"
+                :disable="!isEditing"
+              />
             </div>
           </div>
         </div>
-
-        <HoursSelector v-model="subActivity.totalHours" class="input-group" :disable="!isEditing" />
-        <RoomSelector v-model="subActivity.roomName" class="input-group" :disable="!isEditing" />
-
-        <!-- Room and Seats -->
-        <div class="input-group">
-          <p class="label label_minWidth">จำนวนที่รับ :</p>
-          <q-input outlined style="width: 225px" v-model="subActivity.seats" type="number" @keypress="isNumber($event)"
-            @blur="validatePositive('seats', index)" :disable="!isEditing" />
-          <q-input outlined style="width: 225px" v-model="subActivity.seats" type="number" @keypress="isNumber($event)"
-            @blur="validatePositive('seats', index)" :disable="!isEditing" />
-        </div>
-
-        <!-- Department -->
-        <DepartmentSelector v-model="subActivity.departments" class="input-group" :disable="!isEditing" />
-        <DepartmentSelector v-model="subActivity.departments" class="input-group" :disable="!isEditing" />
-        <!-- Year -->
-        <YearSelector v-model="subActivity.years" class="input-group" :disable="!isEditing" />
-
-        <!-- Lecturer -->
-        <div class="input-group">
-          <p class="label label_minWidth">วิทยากร :</p>
-          <q-input outlined v-model="subActivity.lecturer" style="width: 100%" :disable="!isEditing" />
-          <q-input outlined v-model="subActivity.lecturer" style="width: 100%" :disable="!isEditing" />
-        </div>
-
-        <!-- Detail Activity -->
-        <div class="input-group">
-          <p style="align-self: flex-start" class="label label_minWidth">รายละเอียดอื่นๆ :</p>
-          <q-input type="textarea" rows="10" outlined v-model="subActivity.detailActivity" style="width: 100%"
-            :disable="!isEditing" />
-          <q-input type="textarea" rows="10" outlined v-model="subActivity.detailActivity" style="width: 100%"
-            :disable="!isEditing" />
-        </div>
-
-        <!-- Add Activity Button -->
       </div>
-      <div class="btn-container">
-        <q-btn class="btnAddActivity" @click="addSubActivity" :disable="!isEditing">
-          <p class="label">
-            <q-icon name="add" size="20px" />
-            เพิ่มกิจกรรม
-            เพิ่มกิจกรรม
-          </p>
-        </q-btn>
+
+      <!-- Hours -->
+      <HoursSelector v-model="subActivity.totalHours" class="input-group" :disable="!isEditing" />
+
+      <!-- Room -->
+      <RoomSelector v-model="subActivity.roomName" class="input-group" :disable="!isEditing" />
+
+      <!-- Seats -->
+      <div class="input-group">
+        <p class="label label_minWidth">จำนวนที่รับ :</p>
+        <q-input
+          outlined
+          style="width: 225px"
+          v-model="subActivity.seats"
+          type="number"
+          @keypress="isNumber($event)"
+          @blur="validatePositive('seats', index)"
+          :disable="!isEditing"
+        />
       </div>
-      <div class="button-group" v-if="props.isEditing">
-        <q-btn class="btnreject" @click="
-          () => {
-            resetFormToOriginal()
-            emit('update:isEditing', false)
-          }
-        ">
-          ยกเลิก
-        </q-btn>
-        <q-btn class="btnsecces" @click="saveChanges">บันทึก</q-btn>
+
+      <!-- Department -->
+      <DepartmentSelector v-model="subActivity.departments" class="input-group" :disable="!isEditing" />
+
+      <!-- Year -->
+      <YearSelector v-model="subActivity.years" class="input-group" :disable="!isEditing" />
+
+      <!-- Lecturer -->
+      <div class="input-group">
+        <p class="label label_minWidth">วิทยากร :</p>
+        <q-input outlined v-model="subActivity.lecturer" style="width: 100%" :disable="!isEditing" />
       </div>
-  </q-page>
-  <q-dialog v-model="showSuccessDialog" persistent>
-    <div class="q-pa-md text-h6 text-center successDialog">
-      บันทึกสำเร็จ
+
+      <!-- Detail Activity -->
+      <div class="input-group">
+        <p style="align-self: flex-start" class="label label_minWidth">รายละเอียดอื่นๆ :</p>
+        <q-input
+          type="textarea"
+          rows="10"
+          outlined
+          v-model="subActivity.detailActivity"
+          style="width: 100%"
+          :disable="!isEditing"
+        />
+      </div>
     </div>
-  </q-dialog>
 
+    <!-- Add SubActivity Button -->
+    <div class="btn-container">
+      <q-btn class="btnAddActivity" style="  margin-bottom: 100px;" @click="addSubActivity" :disable="!isEditing">
+        <p class="label">
+          <q-icon name="add" size="20px" />
+          เพิ่มกิจกรรม
+        </p>
+      </q-btn>
+    </div>
+
+    <!-- Save / Cancel Button -->
+    <div class="button-group" v-if="props.isEditing">
+      <q-btn class="btnreject" @click="() => { resetFormToOriginal(); emit('update:isEditing', false); }">ยกเลิก</q-btn>
+      <q-btn class="btnsecces" @click="saveChanges">บันทึก</q-btn>
+    </div>
+
+    <!-- Success Dialog -->
+    <q-dialog v-model="showSuccessDialog" persistent>
+      <div class="q-pa-md text-h6 text-center successDialog">
+        บันทึกสำเร็จ
+      </div>
+    </q-dialog>
+
+  </q-page>
 </template>
+
 
 <script setup lang="ts">
 import { computed, onMounted, ref, watch } from 'vue'
@@ -606,6 +614,7 @@ const statusClass = computed(() => {
   font-size: 20px;
   display: flex;
   align-items: center;
+  margin-bottom: 20px;
 }
 
 
@@ -667,7 +676,6 @@ const statusClass = computed(() => {
   display: flex;
   justify-content: flex-end;
   gap: 25px;
-  margin-top: 30px;
   margin-bottom: 100px;
   width: 100%;
 }

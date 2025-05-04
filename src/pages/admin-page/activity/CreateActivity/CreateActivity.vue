@@ -10,18 +10,6 @@
             @file-selected="handleFileSelected"
           />
 
-          <q-select
-            v-model="selectedActivityType"
-            :options="activityOptions"
-            outlined
-            class="dropdown no-border bg-white"
-            popup-content-class="custom-dropdown"
-          >
-            <template v-slot:selected>
-              <div v-if="selectedActivityType">{{ selectedActivityType }}</div>
-              <div v-else class="text-grey">เลือกประเภท</div>
-            </template>
-          </q-select>
         </div>
 
         <div class="form-section">
@@ -54,8 +42,7 @@ const handleFileSelected = (file: File) => {
   selectedImageFile.value = file
 }
 
-const activityOptions = ['กิจกรรมเดียว', 'หลายกิจกรรม']
-const selectedActivityType = ref('กิจกรรมเดียว')
+const selectedActivityType = ref('หลายกิจกรรม')
 
 const breadcrumbs = ref({
   previousPage: { title: 'จัดการกิจกรรม', path: '/Admin/ActivitiesManagement' },

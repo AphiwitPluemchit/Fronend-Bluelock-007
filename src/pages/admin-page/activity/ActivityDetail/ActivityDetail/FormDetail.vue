@@ -4,13 +4,12 @@
     <div class="input-group">
       <p class="label label_minWidth">สถานะ:</p>
       <q-btn :label="activityStatus" :class="statusClass" class="status-btn" />
-      <q-btn v-if="activityStatus !== 'ยกเลิก' && activityStatus !== 'เสร็จสิ้น'" class="btnchange" label="เปลี่ยน"
-        @click="showChangeStatusDialog = true" :disable="!isEditing" />
+      <q-btn v-if="props.isEditing" class="btnchange" label="เปลี่ยน" @click="showChangeStatusDialog = true"
+        :disable="!isEditing" />
     </div>
     <ChangeStatusDialog v-model="showChangeStatusDialog" :currentStatus="activityStatus"
       @confirm="handleStatusChange" />
-    <ChangeStatusDialog v-model="showChangeStatusDialog" :currentStatus="activityStatus"
-      @confirm="handleStatusChange" />
+
     <!-- Activity Name -->
     <div class="input-group">
       <p class="label label_minWidth">ชื่อกิจกรรม :</p>
@@ -19,7 +18,6 @@
 
     <!-- Date -->
     <MutiDate v-model="activityDateRange" @update:modelValue="generateDaysInRange" :disable="!isEditing" />
-    <MutiDate v-model="activityDateRange" @update:modelValue="generateDaysInRange" :disable="!isEditing" />
 
     <!-- Time -->
     <div class="input-group">
@@ -27,13 +25,8 @@
       <div class="day-time-container">
         <q-checkbox class="checkbox-left" v-model="sameTimeForAll" label="เวลาเดิมทุกวัน"
           @update:model-value="applySameTime" :disable="!isEditing" />
-        <q-checkbox class="checkbox-left" v-model="sameTimeForAll" label="เวลาเดิมทุกวัน"
-          @update:model-value="applySameTime" :disable="!isEditing" />
         <div class="day-time-container">
-          <div v-for="(day, index) in selectedDays" :key="day.date" class="day-block">
-            <TimeSelector v-model:startTime="day.startTime" v-model:endTime="day.endTime"
-              :formattedDate="day.formattedDate" @update:startTime="updateDayTime(index, 'start', $event)"
-              @update:endTime="updateDayTime(index, 'end', $event)" :disable="!isEditing" />
+          <div v-for="(day, index) in selectedDays" :key="`${day.date}-${index}`" class="day-block">
             <TimeSelector v-model:startTime="day.startTime" v-model:endTime="day.endTime"
               :formattedDate="day.formattedDate" @update:startTime="updateDayTime(index, 'start', $event)"
               @update:endTime="updateDayTime(index, 'end', $event)" :disable="!isEditing" />
@@ -44,6 +37,7 @@
 
     <!-- Room -->
     <RoomSelector v-model="roomName" class="input-group" :disable="!isEditing" />
+
     <!-- Hours & Seats -->
     <div class="flex-container">
       <HoursSelector v-model="totalHours" class="input-group" :disable="!isEditing" />
@@ -68,36 +62,22 @@
     <!-- Food Menu -->
     <FoodSelector v-model:foodMenu="foodMenu" v-model:foodMenuDisplay="foodMenuDisplay" class="input-group"
       :disable="!isEditing" />
-    <FoodSelector v-model:foodMenu="foodMenu" v-model:foodMenuDisplay="foodMenuDisplay" class="input-group"
-      :disable="!isEditing" />
 
     <!-- Detail Activity -->
     <div class="input-group">
       <p style="align-self: flex-start" class="label label_minWidth">รายละเอียดอื่นๆ :</p>
-      <q-input type="textarea" rows="10" outlined v-model="detailActivity" style="width: 600px" :disable="!isEditing" />
-      <q-input type="textarea" rows="10" outlined v-model="detailActivity" style="width: 600px" :disable="!isEditing" />
+      <q-input type="textarea" rows="10" outlined v-model="detailActivity" style="width: 600px;   margin-bottom: 100px;" :disable="!isEditing" />
     </div>
 
-    <div class="button-group">
-      <q-btn v-if="!props.isEditing" class="btnedit" @click="emit('update:isEditing', true)">
-        แก้ไข
-      </q-btn>
-
-      <template v-else>
-        <q-btn class="btnreject" @click="
-          () => {
-            resetFormToOriginal()
-            emit('update:isEditing', false)
-          }
-        ">
-          ยกเลิก
-        </q-btn>
-
-        <q-btn class="btnsecces" @click="saveChanges">บันทึก</q-btn>
-      </template>
+    <!-- Button Group -->
+    <div class="button-group" v-if="props.isEditing">
+      <q-btn class="btnreject" @click="() => { resetFormToOriginal(); emit('update:isEditing', false); }">ยกเลิก</q-btn>
+      <q-btn class="btnsecces" @click="saveChanges">บันทึก</q-btn>
     </div>
-  </q-page>
+    </q-page>
+
 </template>
+
 
 <script setup lang="ts">
 import { computed, nextTick, onMounted, ref, watch } from 'vue'
@@ -598,7 +578,6 @@ onMounted(() => {
   display: flex;
   justify-content: flex-end;
   gap: 25px;
-  margin-top: 30px;
   margin-bottom: 100px;
   width: 100%;
 }
