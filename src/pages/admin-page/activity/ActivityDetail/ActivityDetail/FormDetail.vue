@@ -4,19 +4,11 @@
     <div class="input-group">
       <p class="label label_minWidth">สถานะ:</p>
       <q-btn :label="activityStatus" :class="statusClass" class="status-btn" />
-      <q-btn
-        v-if="activityStatus !== 'ยกเลิก' && activityStatus !== 'เสร็จสิ้น'"
-        class="btnchange"
-        label="เปลี่ยน"
-        @click="showChangeStatusDialog = true"
-        :disable="!isEditing"
-      />
+      <q-btn v-if="activityStatus !== 'ยกเลิก' && activityStatus !== 'เสร็จสิ้น'" class="btnchange" label="เปลี่ยน"
+        @click="showChangeStatusDialog = true" :disable="!isEditing" />
     </div>
-      <ChangeStatusDialog
-        v-model="showChangeStatusDialog"
-        :currentStatus="activityStatus"
-        @confirm="handleStatusChange"
-      />
+    <ChangeStatusDialog v-model="showChangeStatusDialog" :currentStatus="activityStatus"
+      @confirm="handleStatusChange" />
     <!-- Activity Name -->
     <div class="input-group">
       <p class="label label_minWidth">ชื่อกิจกรรม :</p>
@@ -24,33 +16,19 @@
     </div>
 
     <!-- Date -->
-    <MutiDate
-      v-model="activityDateRange"
-      @update:modelValue="generateDaysInRange"
-      :disable="!isEditing"
-    />
+    <MutiDate v-model="activityDateRange" @update:modelValue="generateDaysInRange" :disable="!isEditing" />
 
     <!-- Time -->
     <div class="input-group">
       <p class="label label_minWidth" style="align-self: flex-start">เวลาที่จัดกิจกรรม:</p>
       <div class="day-time-container">
-        <q-checkbox
-          class="checkbox-left"
-          v-model="sameTimeForAll"
-          label="เวลาเดิมทุกวัน"
-          @update:model-value="applySameTime"
-          :disable="!isEditing"
-        />
+        <q-checkbox class="checkbox-left" v-model="sameTimeForAll" label="เวลาเดิมทุกวัน"
+          @update:model-value="applySameTime" :disable="!isEditing" />
         <div class="day-time-container">
           <div v-for="(day, index) in selectedDays" :key="day.date" class="day-block">
-            <TimeSelector
-              v-model:startTime="day.startTime"
-              v-model:endTime="day.endTime"
-              :formattedDate="day.formattedDate"
-              @update:startTime="updateDayTime(index, 'start', $event)"
-              @update:endTime="updateDayTime(index, 'end', $event)"
-              :disable="!isEditing"
-            />
+            <TimeSelector v-model:startTime="day.startTime" v-model:endTime="day.endTime"
+              :formattedDate="day.formattedDate" @update:startTime="updateDayTime(index, 'start', $event)"
+              @update:endTime="updateDayTime(index, 'end', $event)" :disable="!isEditing" />
           </div>
         </div>
       </div>
@@ -80,24 +58,13 @@
     </div>
 
     <!-- Food Menu -->
-    <FoodSelector
-      v-model:foodMenu="foodMenu"
-      v-model:foodMenuDisplay="foodMenuDisplay"
-      class="input-group"
-      :disable="!isEditing"
-    />
+    <FoodSelector v-model:foodMenu="foodMenu" v-model:foodMenuDisplay="foodMenuDisplay" class="input-group"
+      :disable="!isEditing" />
 
     <!-- Detail Activity -->
     <div class="input-group">
       <p style="align-self: flex-start" class="label label_minWidth">รายละเอียดอื่นๆ :</p>
-      <q-input
-        type="textarea"
-        rows="10"
-        outlined
-        v-model="detailActivity"
-        style="width: 600px"
-        :disable="!isEditing"
-      />
+      <q-input type="textarea" rows="10" outlined v-model="detailActivity" style="width: 600px" :disable="!isEditing" />
     </div>
 
     <div class="button-group">
@@ -106,15 +73,12 @@
       </q-btn>
 
       <template v-else>
-        <q-btn
-          class="btnreject"
-          @click="
-            () => {
-              resetFormToOriginal()
-              emit('update:isEditing', false)
-            }
-          "
-        >
+        <q-btn class="btnreject" @click="
+          () => {
+            resetFormToOriginal()
+            emit('update:isEditing', false)
+          }
+        ">
           ยกเลิก
         </q-btn>
 
@@ -152,7 +116,7 @@ const props = defineProps<{
 
 const emit = defineEmits<{
   (e: 'update:isEditing', value: boolean): void
-  (e: 'saved', fileName?: string): void // ✅ ส่ง fileName กลับ
+  (e: 'saved', fileName?: string): void
 }>()
 
 interface DayTimeSelection {
@@ -180,25 +144,15 @@ const departments = ref<string[]>([])
 const years = ref<string[]>([])
 const activityDateRangeInternal = ref<string[]>([])
 const roomName = ref<string[]>([])
-const activityStatus = ref('กำลังวางแผน') 
+const activityStatus = ref('กำลังวางแผน')
+const activityStatus = ref('กำลังวางแผน')
 const foodMenu = ref<Food[]>([])
 const foodMenuDisplay = ref('')
 
 const handleStatusChange = (newStatus: string) => {
   activityStatus.value = newStatus
 }
-const menuItems = ref([
-  'ผัดกะเพราหมู',
-  'ผัดกะเพราไก่',
-  'หมูกระเทียม',
-  'ไก่กระเทียม',
-  'ผัดพริกแกงหมู',
-  'ผัดพริกแกงไก่',
-  'ผัดพริกอ่อนหมู',
-  'ผัดพริกอ่อนไก่',
-  'ข้าวหมูทอด',
-  'ข้าวไก่ทอด',
-])
+const menuItems = ref([])
 watch(sameTimeForAll, (newValue) => {
   if (newValue) {
     void applySameTime()
@@ -436,7 +390,7 @@ const saveChanges = async () => {
     const existingVote = updated.foodVotes?.find(vote => vote.foodName === f.name);
     return {
       foodName: f.name,
-      vote: existingVote ? existingVote.vote : 0  
+      vote: existingVote ? existingVote.vote : 0
     };
   });
 
@@ -552,12 +506,14 @@ onMounted(() => {
   background-color: white;
   align-items: center;
 }
+
 .input-group p {
   align-self: center;
   margin: 0;
   line-height: normal;
   text-align: right;
 }
+
 .input-group {
   display: flex;
   align-items: center;
@@ -577,6 +533,7 @@ onMounted(() => {
 .label_minWidth {
   min-width: 200px;
 }
+
 .status-btn {
   border-radius: 50px;
   height: 40px;
@@ -601,6 +558,7 @@ onMounted(() => {
   background-color: #cfd7ff;
   border: 2px solid #002dff;
 }
+
 .status-completed {
   color: #000000;
   background-color: #dadada;
@@ -612,11 +570,13 @@ onMounted(() => {
   background-color: #ffc5c5;
   border: 2px solid #ff0000;
 }
+
 .flex-container {
   display: flex;
   align-items: center;
   gap: 10px;
 }
+
 .button-group {
   display: flex;
   justify-content: flex-end;

@@ -6,30 +6,22 @@
       </q-card-section>
 
       <q-card-section class="status-section">
-        <q-btn
-          v-for="option in availableStatuses"
-          :key="option.value"
-          :label="option.label"
-          class="status-btn"
-          :class="[
-            {
-              'active-status': selectedStatus === option.value,
-            },
-            option.value === 'กำลังวางแผน'
-              ? 'status-planning'
-              : option.value === 'เปิดลงทะเบียน'
-                ? 'status-opens'
-                : option.value === 'ปิดลงทะเบียน'
-                  ? 'status-closed'
-                  : option.value === 'เสร็จสิ้น'
-                    ? 'status-completed'
-                    : option.value === 'ยกเลิก'
-                      ? 'status-cancelled'
-                      : '',
-          ]"
-          @click="selectedStatus = option.value"
-          :outline="false"
-        />
+        <q-btn v-for="option in availableStatuses" :key="option.value" :label="option.label" class="status-btn" :class="[
+          {
+            'active-status': selectedStatus === option.value,
+          },
+          option.value === 'กำลังวางแผน'
+            ? 'status-plannings'
+            : option.value === 'เปิดลงทะเบียน'
+              ? 'status-opens'
+              : option.value === 'ปิดลงทะเบียน'
+                ? 'status-closed'
+                : option.value === 'เสร็จสิ้น'
+                  ? 'status-completed'
+                  : option.value === 'ยกเลิก'
+                    ? 'status-cancelled'
+                    : '',
+        ]" @click="selectedStatus = option.value" :outline="false" />
       </q-card-section>
 
       <!-- ปุ่มยืนยัน & ยกเลิก -->
@@ -70,29 +62,47 @@ const availableStatuses = computed(() => {
     case 'กำลังวางแผน':
       return [
         { label: 'เปิดลงทะเบียน', value: 'เปิดลงทะเบียน' },
+        { label: 'ปิดลงทะเบียน', value: 'ปิดลงทะเบียน' },
+        { label: 'เสร็จสิ้น', value: 'เสร็จสิ้น' },
         { label: 'ยกเลิก', value: 'ยกเลิก' },
       ]
     case 'เปิดลงทะเบียน':
       return [
+        { label: 'กำลังวางแผน', value: 'กำลังวางแผน' },
         { label: 'ปิดลงทะเบียน', value: 'ปิดลงทะเบียน' },
+        { label: 'เสร็จสิ้น', value: 'เสร็จสิ้น' },
         { label: 'ยกเลิก', value: 'ยกเลิก' },
       ]
     case 'ปิดลงทะเบียน':
       return [
+        { label: 'กำลังวางแผน', value: 'กำลังวางแผน' },
+        { label: 'เปิดลงทะเบียน', value: 'เปิดลงทะเบียน' },
         { label: 'เสร็จสิ้น', value: 'เสร็จสิ้น' },
         { label: 'ยกเลิก', value: 'ยกเลิก' },
+      ]
+    case 'เสร็จสิ้น':
+      return [
+        { label: 'กำลังวางแผน', value: 'กำลังวางแผน' },
+        { label: 'เปิดลงทะเบียน', value: 'เปิดลงทะเบียน' },
+        { label: 'ปิดลงทะเบียน', value: 'ปิดลงทะเบียน' },
+        { label: 'ยกเลิก', value: 'ยกเลิก' },
+      ]
+    case 'ยกเลิก':
+      return [
+        { label: 'กำลังวางแผน', value: 'กำลังวางแผน' },
+        { label: 'เปิดลงทะเบียน', value: 'เปิดลงทะเบียน' },
+        { label: 'ปิดลงทะเบียน', value: 'ปิดลงทะเบียน' },
+        { label: 'เสร็จสิ้น', value: 'เสร็จสิ้น' },
       ]
     default:
       return []
   }
 })
 
-// ปิด Dialog
 const closeDialog = () => {
   emit('update:modelValue', false)
 }
 
-// ยืนยันการเปลี่ยนสถานะ
 const confirmStatusChange = () => {
   if (selectedStatus.value) {
     emit('confirm', selectedStatus.value)
@@ -110,6 +120,7 @@ const confirmStatusChange = () => {
   align-items: center;
   height: 40px;
 }
+
 .dialog-box {
   width: 400px;
   padding: 20px;
@@ -132,9 +143,8 @@ const confirmStatusChange = () => {
   text-align: center;
 }
 
-/* แต่ละสถานะ */
-.status-planning {
-  color: #ff6f00; /* สีส้ม */
+.status-plannings {
+  color: #ff6f00;
   border: 2px solid #ffa500;
 }
 
@@ -144,38 +154,41 @@ const confirmStatusChange = () => {
 }
 
 .status-closed {
-  color: #001780; /* สีน้ำเงิน */
+  color: #001780;
+  /* สีน้ำเงิน */
   border: 2px solid #002dff;
 }
 
 .status-completed {
-  color: #000000; /* สีม่วง */
+  color: #000000;
+  /* สีม่วง */
   border: 2px solid #575656;
 }
 
 .status-cancelled {
-  color: #ff0000; /* สีแดง */
+  color: #ff0000;
+  /* สีแดง */
   border: 2px solid #f32323;
 }
 
 .status-opens.active-status {
-  background-color: #d0ffc5 ;
+  background-color: #d0ffc5;
 }
 
-.status-planning.active-status {
-  background-color: #ffe7ba ;
+.status-plannings.active-status {
+  background-color: #ffe7ba;
 }
 
 .status-closed.active-status {
-  background-color: #cfd7ff ;
+  background-color: #cfd7ff;
 }
 
 .status-completed.active-status {
-  background-color: #dadada ;
+  background-color: #dadada;
 }
 
 .status-cancelled.active-status {
-  background-color: #ffc5c5 ;
+  background-color: #ffc5c5;
 }
 
 .cancel-btn {

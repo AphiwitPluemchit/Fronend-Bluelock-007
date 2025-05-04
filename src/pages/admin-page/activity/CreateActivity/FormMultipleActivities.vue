@@ -12,34 +12,15 @@
       <q-input outlined v-model="activityName" style="width: 600px" />
     </div>
 
-    <!-- Date -->
-    <SingleDate v-model="activityDateInternal" />
-
-    <!-- Time -->
-    <div class="input-group">
-      <p class="label label_minWidth">เวลาที่จัดกิจกรรม:</p>
-      <TimeSelector
-        v-model:startTime="selectedTime"
-        v-model:endTime="endTime"
-        :formattedDate="formattedThaiDate"
-      />
-    </div>
     <!-- Activity Type -->
     <ActivityType v-model="activityType" class="input-group" />
-    <HoursSelector v-model="totalHours" class="input-group" />
     <FoodSelector v-model:foodMenu="foodMenu" class="input-group" />
 
     <!-- Sub Activities List -->
     <div v-for="(subActivity, index) in subActivities" :key="index" class="sub-activity">
       <!-- Cancel (X) Icon -->
       <div class="remove-icon">
-        <q-icon
-          name="close"
-          size="35px"
-          color="red"
-          class="cursor-pointer"
-          @click="removeSubActivity(index)"
-        />
+        <q-icon name="close" size="35px" color="red" class="cursor-pointer" @click="removeSubActivity(index)" />
       </div>
 
       <!-- SubActivity Name -->
@@ -48,19 +29,35 @@
         <q-input outlined v-model="subActivity.subActivityName" style="width: 600px" />
       </div>
 
+      <!-- Date -->
+      <MutiDate v-model="subActivity.activityDateInternal"
+        @update:modelValue="(dates) => generateDaysInRange(dates, index)" />
+
+      <!-- Time -->
+      <div class="input-group">
+        <p class="label label_minWidth" style="align-self: flex-start">เวลาที่จัดกิจกรรม:</p>
+        <div class="day-time-container">
+          <q-checkbox class="checkbox-left" v-model="sameTimeForAll" label="เวลาเดิมทุกวัน"
+            @update:model-value="() => applySameTime(index)" />
+          <div class="day-time-container">
+            <div v-for="(day, dIndex) in subActivity.selectedDays" :key="day.date">
+              <TimeSelector v-model:startTime="day.startTime" v-model:endTime="day.endTime"
+                :formattedDate="day.formattedDate" @update:startTime="v => updateDayTime(index, dIndex, 'start', v)"
+                @update:endTime="v => updateDayTime(index, dIndex, 'end', v)" />
+            </div>
+
+          </div>
+        </div>
+      </div>
+
+      <HoursSelector v-model="subActivity.totalHours" class="input-group" />
       <!-- Room and Seats -->
       <Room v-model="subActivity.roomName" class="input-group" />
 
       <div class="input-group">
         <p class="label label_minWidth">จำนวนที่รับ :</p>
-        <q-input
-          outlined
-          style="width: 225px"
-          v-model="subActivity.seats"
-          type="number"
-          @keypress="isNumber($event)"
-          @blur="validatePositive('seats', index)"
-        />
+        <q-input outlined style="width: 225px" v-model="subActivity.seats" type="number" @keypress="isNumber($event)"
+          @blur="validatePositive('seats', index)" />
       </div>
 
       <!-- Department -->
@@ -77,13 +74,7 @@
       <!-- Detail Activity -->
       <div class="input-group">
         <p style="align-self: flex-start" class="label label_minWidth">รายละเอียดอื่นๆ :</p>
-        <q-input
-          type="textarea"
-          rows="10"
-          outlined
-          v-model="subActivity.detailActivity"
-          style="width: 100%"
-        />
+        <q-input type="textarea" rows="10" outlined v-model="subActivity.detailActivity" style="width: 100%" />
       </div>
 
       <!-- Add Activity Button -->
@@ -104,22 +95,19 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted, ref, watch } from 'vue'
+import { onMounted, ref, watch } from 'vue'
 import FoodSelector from 'src/pages/admin-page/activity/CreateActivity/Form/FoodSelector.vue'
 import HoursSelector from 'src/pages/admin-page/activity/CreateActivity/Form/HoursSelector.vue'
-import SingleDate from 'src/pages/admin-page/activity/CreateActivity/Form/SingleDate.vue'
+import MutiDate from 'src/pages/admin-page/activity/CreateActivity/Form/MutiDate.vue'
 import TimeSelector from 'src/pages/admin-page/activity/CreateActivity/Form/TimeSelector.vue'
 import Room from 'src/pages/admin-page/activity/CreateActivity/Form/RoomSelector.vue'
 import YearSelector from 'src/pages/admin-page/activity/CreateActivity/Form/YearSelector.vue'
 import DepartmentSelector from 'src/pages/admin-page/activity/CreateActivity/Form/DepartmentSelector.vue'
 import ActivityType from 'src/pages/admin-page/activity/CreateActivity/Form/ActivityType.vue'
-import { ActivityService } from 'src/services/activity'
 import { useRouter } from 'vue-router'
 import type { Food } from 'src/types/food'
-
+import { ActivityService } from 'src/services/activity'
 const router = useRouter()
-
-onMounted(() => {})
 
 const goToActivitiesManagement = async () => {
   await router.push('/admin/ActivitiesManagement')
@@ -132,9 +120,80 @@ interface SubActivity {
   detailActivity: string
   departments: string[]
   years: string[]
+  activityDateInternal: string[]
+  selectedDays: DayTimeSelection[]
+  totalHours: number
+}
+interface DayTimeSelection {
+  date: string
+  formattedDate: string
+  startHour: number
+  startMinute: number
+  endHour: number
+  endMinute: number
+  startTime: string
+  endTime: string
 }
 
+const activityType = ref('prep')
+const activityName = ref('')
+const foodMenu = ref<Food[]>([])
+const subActivities = ref<SubActivity[]>([])
+const sameTimeForAll = ref(false)
+
+const generateDaysInRange = (selectedDates: string[], subActivityIndex: number) => {
+  const sub = subActivities.value[subActivityIndex]
+  if (!sub) return
+
+  sub.selectedDays = selectedDates.map((dateString) => ({
+    date: dateString,
+    formattedDate: formatThaiDate(dateString),
+    startHour: 9,
+    startMinute: 0,
+    endHour: 12,
+    endMinute: 0,
+    startTime: '09:00',
+    endTime: '12:00',
+  }))
+}
+const applySameTime = (subActivityIndex: number) => {
+  const sub = subActivities.value[subActivityIndex]
+  if (!sub) return
+  const days = sub.selectedDays
+  const firstDay = days[0]
+  if (!firstDay) return
+
+  sub.selectedDays = days.map((day, index) =>
+    index === 0 ? day : { ...day, ...firstDay }
+  )
+}
+const updateDayTime = (
+  subActivityIndex: number,
+  index: number,
+  type: 'start' | 'end',
+  value: string
+) => {
+  const sub = subActivities.value[subActivityIndex]
+  if (!sub) return
+  const day = sub.selectedDays[index]
+  if (!day) return
+
+  if (type === 'start') {
+    day.startTime = value
+  } else {
+    day.endTime = value
+  }
+
+  if (sameTimeForAll.value) {
+    applySameTime(subActivityIndex)
+  }
+}
 const addSubActivity = () => {
+  const today = new Date()
+  const formattedToday = today.toISOString().split('T')[0] as string
+
+  const index = subActivities.value.length // index ใหม่ของ subActivity
+
   subActivities.value.push({
     subActivityName: '',
     roomName: [],
@@ -142,43 +201,22 @@ const addSubActivity = () => {
     lecturer: '',
     detailActivity: '',
     departments: ['CS', 'SE', 'ITDI', 'AAI'],
-    years: ['1','2','3','4'],
+    years: ['1', '2', '3', '4'],
+    activityDateInternal: [formattedToday],
+    selectedDays: [],
+    totalHours: 0,
   })
-}
-const activityType = ref('prep')
-const activityName = ref('')
-const totalHours = ref(0)
-const foodMenu = ref<Food[]>([])
-const subActivities = ref<SubActivity[]>([])
-const activityDateInternal = ref('')
-const endTime = ref<string>('00:00')
-const selectedTime = ref<string>('00:00')
-const hour = ref<number>(0)
-const minute = ref<number>(0)
-const endHour = ref<number>(0)
-const endMinute = ref<number>(0)
 
-// ฟังก์ชันสำหรับฟอร์แมตเวลาเป็นสตริง
-const formatTime = (h: number, m: number): string => {
-  return `${formatHour(h)}:${formatMinute(m)}`
-}
-// watch สำหรับ start time
-watch([hour, minute], () => {
-  selectedTime.value = formatTime(hour.value, minute.value)
-})
+  generateDaysInRange([formattedToday], index)
 
-// watch สำหรับ end time
-watch([endHour, endMinute], () => {
-  endTime.value = formatTime(endHour.value, endMinute.value)
-})
-const formatHour = (hour: number): string => {
-  return hour.toString().padStart(2, '0')
+  watch(
+    () => subActivities.value[index]?.selectedDays,
+    (newVal) => {
+      console.log('⏱️ selectedDays changed for subActivity', index, newVal)
+    },
+    { deep: true }
+  )
 }
-
-const formatMinute = (minute: number): string => {
-  return minute.toString().padStart(2, '0')
-}
-
 const isNumber = (event: KeyboardEvent) => {
   const charCode = event.which ? event.which : event.keyCode
 
@@ -186,25 +224,25 @@ const isNumber = (event: KeyboardEvent) => {
     event.preventDefault()
   }
 }
-const formattedThaiDate = computed(() => {
-  if (!activityDateInternal.value) return ''
+const formatThaiDate = (dateStr: string): string => {
+  if (!dateStr) return ''
 
-  const parts = activityDateInternal.value.split('-') // แยก YYYY-MM-DD
+  const parts = dateStr.split('-')
   if (parts.length !== 3) return ''
 
-  const [year, month, day] = parts
-  if (!year || !month || !day) return ''
+  const year = parts[0] ? parseInt(parts[0], 10) : 0
+  const monthIndex = parts[1] ? parseInt(parts[1], 10) - 1 : -1
+  const day = parts[2] ? parseInt(parts[2], 10) : 0
 
-  const monthIndex = parseInt(month, 10) - 1
-  if (monthIndex < 0 || monthIndex >= thaiLocale.months.length) return ''
+  if (isNaN(year) || isNaN(day) || monthIndex < 0 || monthIndex >= thaiLocale.months.length) {
+    return ''
+  }
 
   const thaiMonth = thaiLocale.months[monthIndex]
-  const thaiYear = parseInt(year, 10) + 543 // แปลง ค.ศ. เป็น พ.ศ.
+  const thaiYear = year + 543
 
-  return `${parseInt(day, 10)} ${thaiMonth} ${thaiYear}`
-})
-
-// ✅ Thai locale สำหรับเดือน
+  return `${day} ${thaiMonth} ${thaiYear}`
+}
 const thaiLocale = {
   months: [
     'มกราคม',
@@ -222,12 +260,8 @@ const thaiLocale = {
   ],
 }
 
-const validatePositive = (field: 'totalHours' | 'seats', index?: number) => {
-  if (field === 'totalHours') {
-    if (!totalHours.value || totalHours.value < 0) {
-      totalHours.value = 0
-    }
-  } else if (field === 'seats' && typeof index === 'number' && subActivities.value[index]) {
+const validatePositive = (field: 'seats', index?: number) => {
+  if (field === 'seats' && typeof index === 'number' && subActivities.value[index]) {
     if (!subActivities.value[index].seats || subActivities.value[index].seats < 0) {
       subActivities.value[index].seats = 0
     }
@@ -239,12 +273,10 @@ const removeSubActivity = (index: number) => {
 }
 const props = defineProps<{
   imageFile: File | null
-  activity?: { file?: string | null } // 👈 ถ้ามีเฉพาะ field file ก็พอ
+  activity?: { file?: string | null }
 }>()
-
-const goToPageDetail = async (id: string) => {
-  console.log('ไปหน้า ActivityDetail ID:', id)
-  await router.push(`/Admin/ActivitiesManagement/ActivityDetail/${id}`)
+const goToPageTable = async () => {
+  await router.push(`/Admin/ActivitiesManagement`)
 }
 const submitActivity = async () => {
   const skillMap: Record<string, 'hard' | 'soft' | null> = {
@@ -254,19 +286,17 @@ const submitActivity = async () => {
   }
   const skill = skillMap[activityType.value] ?? null
   const activityItems = subActivities.value.map((sub) => {
-
+    const dates = sub.selectedDays.map((day) => ({
+      date: day.date,
+      stime: day.startTime,
+      etime: day.endTime,
+    }))
     return {
       name: sub.subActivityName,
-      hour: Number(totalHours.value),
+      hour: Number(sub.totalHours),
       maxParticipants: Number(sub.seats),
       rooms: sub.roomName,
-      dates: [
-        {
-          date: activityDateInternal.value,
-          stime: selectedTime.value,
-          etime: endTime.value,
-        },
-      ],
+      dates,
       studentYears: sub.years.map((y) => parseInt(y, 10)),
       majors: sub.departments,
       operator: sub.lecturer,
@@ -311,11 +341,35 @@ const submitActivity = async () => {
       }
     }
 
-    await goToPageDetail(id)
+    await goToPageTable()
   } catch (err) {
     console.error('Create activity failed:', err)
   }
 }
+watch(sameTimeForAll, (newValue) => {
+  if (newValue) {
+    subActivities.value.forEach((_, index) => {
+      applySameTime(index)
+    })
+  }
+})
+onMounted(() => {
+  const today = new Date()
+  const year = today.getFullYear()
+  const month = String(today.getMonth() + 1).padStart(2, '0')
+  const day = String(today.getDate()).padStart(2, '0')
+  const dateString = `${year}-${month}-${day}`
+  addSubActivity()
+  subActivities.value.forEach((sub, index) => {
+    sub.activityDateInternal = [dateString]
+    generateDaysInRange(sub.activityDateInternal, index)
+
+    if (sameTimeForAll.value) {
+      applySameTime(index)
+    }
+  })
+})
+
 </script>
 
 <style scoped>
@@ -333,6 +387,7 @@ const submitActivity = async () => {
 ::v-deep(.q-icon) {
   font-size: 18px;
 }
+
 .input-group p {
   align-self: center;
   margin: 0;
@@ -360,6 +415,7 @@ const submitActivity = async () => {
 .label_minWidth {
   min-width: 200px;
 }
+
 .btnAddActivity {
   background-color: #ffffff;
   border-radius: 20px;
@@ -369,6 +425,7 @@ const submitActivity = async () => {
   display: flex;
   align-items: center;
 }
+
 .status-btn {
   color: #ff6f00;
   background-color: #ffe7ba;
@@ -378,20 +435,24 @@ const submitActivity = async () => {
   width: 200px;
   font-size: 20px;
 }
+
 .time-container {
   display: flex;
   justify-content: center;
   align-items: center;
   gap: 10px;
 }
+
 .remove-icon {
   display: flex;
   justify-content: flex-end;
   margin-bottom: 20px;
 }
+
 .q-icon {
   cursor: pointer;
 }
+
 .btn-container {
   display: flex;
   align-items: center;
@@ -399,6 +460,7 @@ const submitActivity = async () => {
   gap: 20px;
   margin-left: 200px;
 }
+
 .button-group {
   display: flex;
   justify-content: flex-end;

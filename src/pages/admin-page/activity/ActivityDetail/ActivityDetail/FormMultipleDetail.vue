@@ -4,19 +4,11 @@
     <div class="input-group">
       <p class="label label_minWidth">สถานะ:</p>
       <q-btn :label="activityStatus" :class="statusClass" class="status-btn" />
-      <q-btn
-        v-if="activityStatus !== 'ยกเลิก' && activityStatus !== 'เสร็จสิ้น'"
-        class="btnchange"
-        label="เปลี่ยน"
-        @click="showChangeStatusDialog = true"
-        :disable="!isEditing"
-      />
+      <q-btn v-if="props.isEditing" class="btnchange" label="เปลี่ยน" @click="showChangeStatusDialog = true"
+        :disable="!isEditing" />
     </div>
-      <ChangeStatusDialog
-        v-model="showChangeStatusDialog"
-        :currentStatus="activityStatus"
-        @confirm="handleStatusChange"
-      />
+    <ChangeStatusDialog v-model="showChangeStatusDialog" :currentStatus="activityStatus"
+      @confirm="handleStatusChange" />
 
     <!-- Activity Name -->
     <div class="input-group">
@@ -24,102 +16,69 @@
       <q-input outlined v-model="activityName" style="width: 600px" :disable="!isEditing" />
     </div>
 
-    <!-- Date -->
-    <SingleDate v-model="activityDateInternal" :disable="!isEditing" />
-
-    <!-- Time -->
-    <div class="input-group">
-      <p class="label label_minWidth">เวลาที่จัดกิจกรรม:</p>
-      <TimeSelector
-        v-model:startTime="selectedTime"
-        v-model:endTime="endTime"
-        :formattedDate="formattedThaiDate"
-        :disable="!isEditing"
-      />
-    </div>
-
     <!-- Activity Type -->
     <ActivityType v-model="activityType" class="input-group" :disable="!isEditing" />
-    <HoursSelector v-model="totalHours" class="input-group" :disable="!isEditing" />
-    <FoodSelector
-      v-model:foodMenu="foodMenu"
-      v-model:foodMenuDisplay="foodMenuDisplay"
-      :disable="!isEditing"
-    />
+    <FoodSelector v-model:foodMenu="foodMenu" v-model:foodMenuDisplay="foodMenuDisplay" :disable="!isEditing" />
 
     <!-- Sub Activities List -->
     <div v-for="(subActivity, index) in subActivities" :key="index" class="sub-activity">
       <!-- Cancel (X) Icon -->
-      <div
-        class="remove-icon"
-        :class="{ 'icon-disabled': !isEditing }"
-        @click="isEditing && removeSubActivity(index)"
-      >
-        <q-icon
-          name="close"
-          size="35px"
-          :color="isEditing ? 'red' : 'grey-5'"
-          class="cursor-pointer"
-        />
+      <div class="remove-icon" :class="{ 'icon-disabled': !isEditing }" @click="isEditing && removeSubActivity(index)">
+        <q-icon name="close" size="35px" :color="isEditing ? 'red' : 'grey-5'" class="cursor-pointer" />
       </div>
 
       <!-- SubActivity Name -->
       <div class="input-group">
         <p class="label label_minWidth">ชื่อกิจกรรม :</p>
-        <q-input
-          outlined
-          v-model="subActivity.subActivityName"
-          style="width: 600px"
-          :disable="!isEditing"
-        />
+        <q-input outlined v-model="subActivity.subActivityName" style="width: 600px" :disable="!isEditing" />
       </div>
+
+      <!-- Date -->
+      <MutiDate v-model="subActivity.activityDateInternal"
+        @update:modelValue="(dates: string[]) => generateDaysInRange(dates, index)" :disable="!isEditing" v />
+
+      <!-- Time -->
+      <div class="input-group">
+        <p class="label label_minWidth" style="align-self: flex-start">เวลาที่จัดกิจกรรม:</p>
+        <div class="day-time-container">
+          <q-checkbox class="checkbox-left" v-model="sameTimeForAll" label="เวลาเดิมทุกวัน"
+            @update:model-value="() => applySameTime(index)" :disable="!isEditing" />
+          <div class="day-time-container">
+            <div v-for="(day, dIndex) in subActivity.selectedDays" :key="day.date">
+              <TimeSelector v-model:startTime="day.startTime" v-model:endTime="day.endTime"
+                :formattedDate="day.formattedDate" @update:startTime="v => updateDayTime(index, dIndex, 'start', v)"
+                @update:endTime="v => updateDayTime(index, dIndex, 'end', v)" :disable="!isEditing" />
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <HoursSelector v-model="subActivity.totalHours" class="input-group" :disable="!isEditing" />
       <RoomSelector v-model="subActivity.roomName" class="input-group" :disable="!isEditing" />
 
       <!-- Room and Seats -->
       <div class="input-group">
         <p class="label label_minWidth">จำนวนที่รับ :</p>
-        <q-input
-          outlined
-          style="width: 225px"
-          v-model="subActivity.seats"
-          type="number"
-          @keypress="isNumber($event)"
-          @blur="validatePositive('seats', index)"
-          :disable="!isEditing"
-        />
+        <q-input outlined style="width: 225px" v-model="subActivity.seats" type="number" @keypress="isNumber($event)"
+          @blur="validatePositive('seats', index)" :disable="!isEditing" />
       </div>
 
       <!-- Department -->
-      <DepartmentSelector
-        v-model="subActivity.departments"
-        class="input-group"
-        :disable="!isEditing"
-      />
+      <DepartmentSelector v-model="subActivity.departments" class="input-group" :disable="!isEditing" />
       <!-- Year -->
       <YearSelector v-model="subActivity.years" class="input-group" :disable="!isEditing" />
 
       <!-- Lecturer -->
       <div class="input-group">
         <p class="label label_minWidth">วิทยากร :</p>
-        <q-input
-          outlined
-          v-model="subActivity.lecturer"
-          style="width: 100%"
-          :disable="!isEditing"
-        />
+        <q-input outlined v-model="subActivity.lecturer" style="width: 100%" :disable="!isEditing" />
       </div>
 
       <!-- Detail Activity -->
       <div class="input-group">
         <p style="align-self: flex-start" class="label label_minWidth">รายละเอียดอื่นๆ :</p>
-        <q-input
-          type="textarea"
-          rows="10"
-          outlined
-          v-model="subActivity.detailActivity"
-          style="width: 100%"
-          :disable="!isEditing"
-        />
+        <q-input type="textarea" rows="10" outlined v-model="subActivity.detailActivity" style="width: 100%"
+          :disable="!isEditing" />
       </div>
 
       <!-- Add Activity Button -->
@@ -132,34 +91,31 @@
         </p>
       </q-btn>
     </div>
-    <div class="button-group">
-      <q-btn v-if="!props.isEditing" class="btnedit" @click="emit('update:isEditing', true)">
-        แก้ไข
+    <div class="button-group" v-if="props.isEditing">
+      <q-btn class="btnreject" @click="
+        () => {
+          resetFormToOriginal()
+          emit('update:isEditing', false)
+        }
+      ">
+        ยกเลิก
       </q-btn>
-
-      <template v-else>
-        <q-btn
-          class="btnreject"
-          @click="
-            () => {
-              resetFormToOriginal()
-              emit('update:isEditing', false)
-            }
-          "
-          >ยกเลิก</q-btn
-        >
-
-        <q-btn class="btnsecces" @click="saveChanges">บันทึก</q-btn>
-      </template>
+      <q-btn class="btnsecces" @click="saveChanges">บันทึก</q-btn>
     </div>
   </q-page>
+  <q-dialog v-model="showSuccessDialog" persistent>
+    <div class="q-pa-md text-h6 text-center successDialog">
+      บันทึกสำเร็จ
+    </div>
+  </q-dialog>
+
 </template>
 
 <script setup lang="ts">
 import { computed, onMounted, ref, watch } from 'vue'
 import FoodSelector from 'src/pages/admin-page/activity/CreateActivity/Form/FoodSelector.vue'
 import HoursSelector from 'src/pages/admin-page/activity/CreateActivity/Form/HoursSelector.vue'
-import SingleDate from 'src/pages/admin-page/activity/CreateActivity/Form/SingleDate.vue'
+import MutiDate from 'src/pages/admin-page/activity/CreateActivity/Form/MutiDate.vue'
 import TimeSelector from 'src/pages/admin-page/activity/CreateActivity/Form/TimeSelector.vue'
 import ChangeStatusDialog from 'src/pages/admin-page/activity/ActivityDetail/ActivityDetail/ChangeStatusDialog.vue'
 import RoomSelector from 'src/pages/admin-page/activity/CreateActivity/Form/RoomSelector.vue'
@@ -172,14 +128,28 @@ import { ActivityService } from 'src/services/activity'
 import cloneDeep from 'lodash/cloneDeep'
 import type ImageDetail from './ImageDetail.vue'
 
+const originalActivity = ref<Activity | null>(null)
+const activityLoaded = ref(false)
+const activityType = ref('')
+const showChangeStatusDialog = ref(false)
+const activityName = ref('')
+const subActivities = ref<SubActivity[]>([])
+const foodMenuDisplay = ref('')
+const foodMenu = ref<Food[]>([])
+const activityStatus = ref('')
+const sameTimeForAll = ref(false)
+const showSuccessDialog = ref(false)
+
+
 const props = defineProps<{
   activity: Activity | null
   isEditing: boolean
   imageRef?: InstanceType<typeof ImageDetail>
 }>()
+
 const emit = defineEmits<{
   (e: 'update:isEditing', value: boolean): void
-  (e: 'saved', fileName?: string): void // ✅ ส่ง fileName กลับ
+  (e: 'saved', fileName?: string): void
 }>()
 
 interface SubActivity {
@@ -190,53 +160,116 @@ interface SubActivity {
   detailActivity: string
   departments: string[]
   years: string[]
+  activityDateInternal: string[]
+  selectedDays: DayTimeSelection[]
+  totalHours: number
+}
+
+interface DayTimeSelection {
+  date: string
+  formattedDate: string
+  startHour: number
+  startMinute: number
+  endHour: number
+  endMinute: number
+  startTime: string
+  endTime: string
 }
 const addSubActivity = () => {
+  const today = new Date()
+  const formattedToday = today.toISOString().split('T')[0] as string
+
+  const index = subActivities.value.length // index ใหม่ของ subActivity
+
   subActivities.value.push({
     subActivityName: '',
     roomName: [],
     seats: 0,
     lecturer: '',
     detailActivity: '',
-    departments: [],
-    years: [],
+    departments: ['CS', 'SE', 'ITDI', 'AAI'],
+    years: ['1', '2', '3', '4'],
+    activityDateInternal: [formattedToday],
+    selectedDays: [],
+    totalHours: 0,
   })
-}
-const originalActivity = ref<Activity | null>(null)
-const activityLoaded = ref(false)
-const activityType = ref('')
-const showChangeStatusDialog = ref(false)
-const activityName = ref('')
-const totalHours = ref<number>(0)
-const subActivities = ref<SubActivity[]>([])
-const activityDateInternal = ref('')
-const endTime = ref<string>('00:00')
-const selectedTime = ref<string>('00:00')
-const hour = ref<number>(0)
-const minute = ref<number>(0)
-const endHour = ref<number>(0)
-const endMinute = ref<number>(0)
-const foodMenuDisplay = ref('')
-const foodMenu = ref<Food[]>([])
-const activityStatus = ref('')
-// ฟังก์ชันสำหรับฟอร์แมตเวลาเป็นสตริง
-const formatTime = (h: number, m: number): string => {
-  return `${formatHour(h)}:${formatMinute(m)}`
-}
-// watch สำหรับ start time
-watch([hour, minute], () => {
-  selectedTime.value = formatTime(hour.value, minute.value)
-})
-// watch สำหรับ end time
-watch([endHour, endMinute], () => {
-  endTime.value = formatTime(endHour.value, endMinute.value)
-})
-const formatHour = (hour: number): string => {
-  return hour.toString().padStart(2, '0')
+
+  generateDaysInRange([formattedToday], index)
+
+  watch(
+    () => subActivities.value[index]?.selectedDays,
+    (newVal) => {
+      console.log('⏱️ selectedDays changed for subActivity', index, newVal)
+    },
+    { deep: true }
+  )
 }
 
-const formatMinute = (minute: number): string => {
-  return minute.toString().padStart(2, '0')
+const generateDaysInRange = (selectedDates: string[], subActivityIndex: number) => {
+  const sub = subActivities.value[subActivityIndex]
+  if (!sub) return
+
+  sub.selectedDays = selectedDates.map((dateString) => ({
+    date: dateString,
+    formattedDate: formatThaiDate(dateString),
+    startHour: 9,
+    startMinute: 0,
+    endHour: 12,
+    endMinute: 0,
+    startTime: '09:00',
+    endTime: '12:00',
+  }))
+}
+const applySameTime = (subActivityIndex: number) => {
+  const sub = subActivities.value[subActivityIndex]
+  if (!sub) return
+  const days = sub.selectedDays
+  const firstDay = days[0]
+  if (!firstDay) return
+
+  sub.selectedDays = days.map((day, index) =>
+    index === 0 ? day : { ...day, ...firstDay }
+  )
+}
+const updateDayTime = (
+  subActivityIndex: number,
+  index: number,
+  type: 'start' | 'end',
+  value: string
+) => {
+  const sub = subActivities.value[subActivityIndex]
+  if (!sub) return
+  const day = sub.selectedDays[index]
+  if (!day) return
+
+  if (type === 'start') {
+    day.startTime = value
+  } else {
+    day.endTime = value
+  }
+
+  if (sameTimeForAll.value) {
+    applySameTime(subActivityIndex)
+  }
+}
+const formatThaiDate = (dateStr: string): string => {
+  if (!dateStr) return ''
+
+  const parts = dateStr.split('-')
+  if (parts.length !== 3) return ''
+
+  const year = parts[0] ? parseInt(parts[0], 10) : 0
+  const monthIndex = parts[1] ? parseInt(parts[1], 10) - 1 : -1
+  const day = parts[2] ? parseInt(parts[2], 10) : 0
+
+  if (isNaN(year) || isNaN(day) || monthIndex < 0 || monthIndex >= thaiLocale.months.length) {
+    return ''
+  }
+
+  const thaiMonth = thaiLocale.months[monthIndex]
+  const thaiYear = year + 543
+
+  return `${day} ${thaiMonth} ${thaiYear}`
 }
 
 const isNumber = (event: KeyboardEvent) => {
@@ -246,23 +279,6 @@ const isNumber = (event: KeyboardEvent) => {
     event.preventDefault()
   }
 }
-const formattedThaiDate = computed(() => {
-  if (!activityDateInternal.value) return ''
-
-  const parts = activityDateInternal.value.split('-') // แยก YYYY-MM-DD
-  if (parts.length !== 3) return ''
-
-  const [year, month, day] = parts
-  if (!year || !month || !day) return ''
-
-  const monthIndex = parseInt(month, 10) - 1
-  if (monthIndex < 0 || monthIndex >= thaiLocale.months.length) return ''
-
-  const thaiMonth = thaiLocale.months[monthIndex]
-  const thaiYear = parseInt(year, 10) + 543 // แปลง ค.ศ. เป็น พ.ศ.
-
-  return `${parseInt(day, 10)} ${thaiMonth} ${thaiYear}`
-})
 
 const thaiLocale = {
   months: [
@@ -281,12 +297,8 @@ const thaiLocale = {
   ],
 }
 
-const validatePositive = (field: 'totalHours' | 'seats', index?: number) => {
-  if (field === 'totalHours') {
-    if (!totalHours.value || totalHours.value < 0) {
-      totalHours.value = 0
-    }
-  } else if (field === 'seats' && typeof index === 'number' && subActivities.value[index]) {
+const validatePositive = (field: 'seats', index?: number) => {
+  if (field === 'seats' && typeof index === 'number' && subActivities.value[index]) {
     if (!subActivities.value[index].seats || subActivities.value[index].seats < 0) {
       subActivities.value[index].seats = 0
     }
@@ -314,37 +326,35 @@ const saveChanges = async () => {
     const existingVote = updated.foodVotes?.find(vote => vote.foodName === f.name);
     return {
       foodName: f.name,
-      vote: existingVote ? existingVote.vote : 0  
-    };
-  });
-
-  const date = activityDateInternal.value
-  const stime = selectedTime.value
-  const etime = endTime.value
+      vote: existingVote ? existingVote.vote : 0
+    }
+  })
 
   updated.activityItems = subActivities.value.map((sub) => ({
     name: sub.subActivityName,
-    hour: Number(totalHours.value),
+    hour: Number(sub.totalHours),
     maxParticipants: Number(sub.seats),
     rooms: sub.roomName,
     description: sub.detailActivity,
     operator: sub.lecturer,
     majors: sub.departments.map(String),
     studentYears: sub.years.map((y) => Number(y)),
-    dates: [{ date, stime, etime }],
+    dates: sub.selectedDays.map(day => ({
+      date: day.date,
+      stime: day.startTime,
+      etime: day.endTime,
+    }))
   }))
 
   try {
     const result = await ActivityService.updateOne(updated)
 
-    // ✅ ถ้าบันทึกข้อมูลกิจกรรมสำเร็จ → อัปโหลดรูป
     if ((result === 200 || result === 201) && props.imageRef) {
       const file = props.imageRef.getSelectedFile?.()
       const fileName = props.imageRef.getSelectedFileName?.()
       const oldFile = props.activity?.file ?? ''
 
       if (file && fileName) {
-        // ✅ ลบรูปเก่า (ถ้ามี และชื่อไม่ตรงกับรูปใหม่)
         if (oldFile && oldFile !== fileName) {
           try {
             await ActivityService.deleteImage(props.activity.id, oldFile)
@@ -354,7 +364,6 @@ const saveChanges = async () => {
           }
         }
 
-        // ✅ อัปโหลดรูปใหม่
         try {
           const uploadResult = await ActivityService.uploadImage(props.activity.id, file)
           if (uploadResult.status === 200 || uploadResult.status === 201) {
@@ -370,9 +379,126 @@ const saveChanges = async () => {
     }
 
     emit('saved')
+    showSuccessDialog.value = true
+    setTimeout(() => {
+      showSuccessDialog.value = false
+    }, 1000)
+
   } catch (err) {
     console.error('❌ ไม่สามารถอัปเดตกิจกรรมได้:', err)
   }
+}
+
+onMounted(() => {
+  const a = props.activity
+  if (!a) return
+
+  originalActivity.value = cloneDeep(a)
+  activityName.value = a.name ?? ''
+  activityType.value = a.skill === 'hard' ? 'prep' : a.skill === 'soft' ? 'academic' : ''
+
+  if (a.activityState) {
+    activityStatus.value = statusMap[a.activityState] || 'กำลังวางแผน'
+  }
+
+  foodMenu.value = a.foodVotes?.map((f) => ({
+    id: '',
+    name: f.foodName,
+  })) ?? []
+
+  foodMenuDisplay.value = foodMenu.value.map((f) => f.name).join(', ')
+
+  if (a.activityItems?.length) {
+    subActivities.value = a.activityItems.map((item) => {
+      const dates = item.dates ?? []
+
+      return {
+        subActivityName: item.name ?? '',
+        roomName: Array.isArray(item.rooms) ? item.rooms : [],
+        seats: item.maxParticipants ?? 0,
+        lecturer: item.operator ?? '',
+        detailActivity: item.description ?? '',
+        departments: item.majors?.map(String) ?? [],
+        years: item.studentYears?.map(String) ?? [],
+        activityDateInternal: dates.map(d => d.date),
+        selectedDays: dates.map(d => {
+          const [startHourStr, startMinuteStr] = (d.stime ?? '00:00').split(':')
+          const [endHourStr, endMinuteStr] = (d.etime ?? '00:00').split(':')
+
+          const startHour = Number(startHourStr ?? '0')
+          const startMinute = Number(startMinuteStr ?? '0')
+          const endHour = Number(endHourStr ?? '0')
+          const endMinute = Number(endMinuteStr ?? '0')
+
+          return {
+            date: d.date,
+            formattedDate: formatThaiDate(d.date),
+            startTime: d.stime ?? '00:00',
+            endTime: d.etime ?? '00:00',
+            startHour,
+            startMinute,
+            endHour,
+            endMinute,
+          }
+        }),
+        totalHours: item.hour ?? 0,
+      }
+    })
+  }
+
+  activityLoaded.value = true
+})
+
+const resetFormToOriginal = () => {
+  const a = originalActivity.value
+  if (!a) return
+
+  activityName.value = a.name ?? ''
+  activityType.value = a.skill === 'hard' ? 'prep' : a.skill === 'soft' ? 'academic' : ''
+  activityStatus.value = statusMap[a.activityState ?? 'planning'] ?? 'กำลังวางแผน'
+
+  foodMenu.value = a.foodVotes?.map((f) => ({
+    id: '',
+    name: f.foodName,
+  })) ?? []
+
+  foodMenuDisplay.value = foodMenu.value.map((f) => f.name).join(', ')
+
+  subActivities.value = a.activityItems?.map((item) => {
+    const dates = item.dates ?? []
+
+    return {
+      subActivityName: item.name ?? '',
+      roomName: Array.isArray(item.rooms) ? item.rooms : [],
+      seats: item.maxParticipants ?? 0,
+      lecturer: item.operator ?? '',
+      detailActivity: item.description ?? '',
+      totalHours: item.hour ?? 0,
+      departments: item.majors?.map(String) ?? [],
+      years: item.studentYears?.map(String) ?? [],
+      activityDateInternal: dates.map(d => d.date),
+      selectedDays: dates.map(d => {
+        const [startHourStr, startMinuteStr] = (d.stime ?? '09:00').split(':')
+        const [endHourStr, endMinuteStr] = (d.etime ?? '16:00').split(':')
+
+        const startHour = Number(startHourStr ?? '0')
+        const startMinute = Number(startMinuteStr ?? '0')
+        const endHour = Number(endHourStr ?? '0')
+        const endMinute = Number(endMinuteStr ?? '0')
+
+        return {
+          date: d.date,
+          formattedDate: formatThaiDate(d.date),
+          startTime: d.stime ?? '09:00',
+          endTime: d.etime ?? '16:00',
+          startHour,
+          startMinute,
+          endHour,
+          endMinute,
+        }
+      }),
+    }
+  }) ?? []
 }
 
 
@@ -412,93 +538,6 @@ const statusClass = computed(() => {
       return ''
   }
 })
-
-onMounted(() => {
-  const a = props.activity
-  if (!a) return
-
-  originalActivity.value = cloneDeep(a)
-  activityName.value = a.name ?? ''
-  activityType.value = a.skill === 'hard' ? 'prep' : a.skill === 'soft' ? 'academic' : ''
-
-  if (a.activityState) {
-    activityStatus.value = statusMap[a.activityState] || 'กำลังวางแผน'
-  }
-
-  foodMenu.value =
-    a.foodVotes?.map((f) => ({
-      id: '',
-      name: f.foodName,
-    })) ?? []
-
-  foodMenuDisplay.value = foodMenu.value.map((f) => f.name).join(', ')
-
-  // ✅ เช็กก่อนว่า activityItems มีข้อมูล
-  if (a.activityItems?.length) {
-    const firstItem = a.activityItems[0]
-    if (!firstItem) return
-
-    // ✅ วันที่
-    const firstDate = firstItem.dates?.[0]?.date
-    if (firstDate) {
-      activityDateInternal.value = firstDate
-    }
-
-    // ✅ เวลา
-    const firstDateTime = firstItem.dates?.[0]
-    if (firstDateTime) {
-      selectedTime.value = firstDateTime.stime
-      endTime.value = firstDateTime.etime
-    }
-    totalHours.value = firstItem.hour ?? 0
-    subActivities.value = a.activityItems.map((item) => ({
-      subActivityName: item.name ?? '',
-      roomName: Array.isArray(item.rooms) ? item.rooms : [],
-      seats: item.maxParticipants ?? 0,
-      lecturer: item.operator ?? '',
-      detailActivity: item.description ?? '',
-      departments: item.majors?.map(String) ?? [],
-      years: item.studentYears?.map(String) ?? [],
-    }))
-  }
-
-  activityLoaded.value = true
-})
-const resetFormToOriginal = () => {
-  const a = originalActivity.value
-  if (!a) return
-
-  activityName.value = a.name ?? ''
-  activityType.value = a.skill === 'hard' ? 'prep' : a.skill === 'soft' ? 'academic' : ''
-  activityStatus.value = statusMap[a.activityState ?? 'planning'] ?? 'กำลังวางแผน'
-
-  foodMenu.value =
-    a.foodVotes?.map((f) => ({
-      id: '',
-      name: f.foodName,
-    })) ?? []
-  foodMenuDisplay.value = foodMenu.value.map((f) => f.name).join(', ')
-
-  const firstItem = a.activityItems?.[0]
-  if (firstItem?.dates?.[0]) {
-    activityDateInternal.value = firstItem.dates[0].date ?? ''
-    selectedTime.value = firstItem.dates[0].stime ?? '00:00'
-    endTime.value = firstItem.dates[0].etime ?? '00:00'
-  }
-
-  totalHours.value = firstItem?.hour ?? 0
-
-  subActivities.value =
-    a.activityItems?.map((item) => ({
-      subActivityName: item.name ?? '',
-      roomName: Array.isArray(item.rooms) ? item.rooms : [],
-      seats: item.maxParticipants ?? 0,
-      lecturer: item.operator ?? '',
-      detailActivity: item.description ?? '',
-      departments: item.majors?.map(String) ?? [],
-      years: item.studentYears?.map(String) ?? [],
-    })) ?? []
-}
 </script>
 
 <style scoped>
@@ -516,6 +555,7 @@ const resetFormToOriginal = () => {
 ::v-deep(.q-icon) {
   font-size: 18px;
 }
+
 .input-group p {
   align-self: center;
   margin: 0;
@@ -543,6 +583,7 @@ const resetFormToOriginal = () => {
 .label_minWidth {
   min-width: 200px;
 }
+
 .btnAddActivity {
   background-color: #ffffff;
   border-radius: 20px;
@@ -552,6 +593,7 @@ const resetFormToOriginal = () => {
   display: flex;
   align-items: center;
 }
+
 .status-btn {
   color: #ff6f00;
   background-color: #ffe7ba;
@@ -561,6 +603,7 @@ const resetFormToOriginal = () => {
   width: 200px;
   font-size: 20px;
 }
+
 .time-container {
   display: flex;
   justify-content: center;
@@ -573,9 +616,11 @@ const resetFormToOriginal = () => {
   justify-content: flex-end;
   margin-bottom: 20px;
 }
+
 .q-icon {
   cursor: pointer;
 }
+
 .btn-container {
   display: flex;
   align-items: center;
@@ -583,6 +628,7 @@ const resetFormToOriginal = () => {
   gap: 20px;
   margin-left: 200px;
 }
+
 .department-btn {
   width: 80px;
   height: 40px;
@@ -591,9 +637,11 @@ const resetFormToOriginal = () => {
   background-color: #ffffff;
   margin-right: 10px;
 }
+
 .active-btn {
   background-color: #d0e4ff !important;
 }
+
 .button-group {
   display: flex;
   justify-content: flex-end;
@@ -602,6 +650,7 @@ const resetFormToOriginal = () => {
   margin-bottom: 100px;
   width: 100%;
 }
+
 .status-btn {
   border-radius: 50px;
   height: 40px;
@@ -626,6 +675,7 @@ const resetFormToOriginal = () => {
   background-color: #cfd7ff;
   border: 2px solid #002dff;
 }
+
 .status-completed {
   color: #000000;
   background-color: #dadada;
@@ -637,8 +687,15 @@ const resetFormToOriginal = () => {
   background-color: #ffc5c5;
   border: 2px solid #ff0000;
 }
+
 .icon-disabled {
   pointer-events: none;
   opacity: 0.6;
+}
+
+.successDialog {
+  background-color: white;
+  max-width: 200px;
+  max-height: 100px;
 }
 </style>
