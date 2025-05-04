@@ -8,6 +8,8 @@ export class StudentService {
   static async getAll(params: Pagination, status?: string) {
     // ✅ รวม `status` เข้าไปใน Query
     const queryParams = { ...params, status }
+    console.log(queryParams)
+
     try {
       const res = await api.get<PaginationResponse<Student>>(this.path, { params: queryParams })
 

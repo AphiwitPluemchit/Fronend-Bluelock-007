@@ -112,39 +112,58 @@ import { useRouter } from 'vue-router'
 import FilterDialog from 'src/components/Dialog/FilterDialog.vue'
 import ManageStudentDialog from './ManageStudentDialog.vue'
 import { useStudentStore } from 'src/stores/student'
+import type { Pagination } from 'src/types/pagination'
+import { StudentService } from 'src/services/student'
 
 const studentStore = useStudentStore()
 const router = useRouter()
-
+const search1 = ref('')
 onMounted(async () => {
-  await studentStore.getStudents()
+  await data()
 })
 
 const goToDetail = (code: string) => {
   void router.push(`/Admin/StudentManagement/StudentDetail/${code}`)
 }
-
-const filters = ref<{
-  major: string[]
+interface SelectedFilters {
   year: string[]
-  statusStudent: string[]
-}>({
-  major: [],
-  year: [],
-  statusStudent: [],
-})
+  major: string[]
+  statusActivity: string[]
+}
 const showFilterDialog1 = ref(false)
 const filterCategories1 = ref(['major', 'year', 'statusStudent'])
 
-const applyFilters = (selectedFilters: {
-  major: string[]
-  year: string[]
-  statusStudent: string[]
-}) => {
-  filters.value = selectedFilters
-  console.log('Filters Applied:', filters.value)
+const applyFilters = async (selectedFilters: SelectedFilters) => {
+  query.value.studentYear = selectedFilters.year.map(Number)
+  query.value.major = selectedFilters.major
+  query.value.activityState = selectedFilters.statusActivity
+  await data()
 }
-
+const data = async () => {
+  const data = await getStudents(query.value)
+  pagination.value.page = query.value.page
+  pagination.value.rowsPerPage = query.value.limit
+  pagination.value.sortBy = query.value.sortBy
+  pagination.value.rowsNumber = data.meta.total
+  studentStore.students = data.data
+}
+const query = ref<Pagination>({
+  page: 1,
+  limit: 10,
+  search: '',
+  sortBy: 'code',
+  order: 'asc',
+  major: [],
+  studentYear: [],
+  statusStudent: [],
+})
+const pagination = ref({
+  sortBy: query.value.sortBy,
+  descending: query.value.order === 'desc',
+  page: query.value.page,
+  rowsPerPage: query.value.limit,
+  rowsNumber: 0,
+})
 const manageDialogRef = ref<InstanceType<typeof ManageStudentDialog> | null>(null)
 
 // ฟังก์ชันเปิด ManageStudentDialog
@@ -155,8 +174,30 @@ const openManageDialog = async () => {
   }
 }
 
-const search1 = ref('')
+const getStatusClass = (status: string) => {
+  if (status === 'ชั่วโมงมาก') return 'status-high'
+  if (status === 'ชั่วโมงน้อย') return 'status-medium'
+  if (status === 'ชั่วโมงครบแล้ว') return 'status-complete'
+  if (status === 'ชั่วโมงน้อยมาก') return 'status-low'
+  return ''
+}
 
+const calculateStatus = (softskill: number, hardskill: number) => {
+  if (softskill >= 30 && hardskill >= 12) {
+    return 'ชั่วโมงครบแล้ว'
+  } else if (softskill >= 20 && hardskill >= 8) {
+    return 'ชั่วโมงมาก'
+  } else if (softskill >= 10 && hardskill >= 4) {
+    return 'ชั่วโมงน้อย'
+  } else {
+    return 'ชั่วโมงน้อยมาก'
+  }
+}
+
+async function getStudents(qeury: Pagination) {
+  const data = await StudentService.getAll(qeury)
+  return data
+}
 const columns = [
   { name: 'index', label: 'ลำดับ', field: 'index', align: 'left' as const },
   { name: 'code', label: 'รหัสนิสิต', field: 'code', align: 'left' as const },
@@ -182,26 +223,6 @@ const columns = [
   { name: 'status', label: 'สถานะ', field: 'status', align: 'center' as const },
   { name: 'action', label: '', field: 'action', align: 'center' as const },
 ]
-
-const getStatusClass = (status: string) => {
-  if (status === 'ชั่วโมงมาก') return 'status-high'
-  if (status === 'ชั่วโมงน้อย') return 'status-medium'
-  if (status === 'ชั่วโมงครบแล้ว') return 'status-complete'
-  if (status === 'ชั่วโมงน้อยมาก') return 'status-low'
-  return ''
-}
-
-const calculateStatus = (softskill: number, hardskill: number) => {
-  if (softskill >= 30 && hardskill >= 12) {
-    return 'ชั่วโมงครบแล้ว'
-  } else if (softskill >= 20 && hardskill >= 8) {
-    return 'ชั่วโมงมาก'
-  } else if (softskill >= 10 && hardskill >= 4) {
-    return 'ชั่วโมงน้อย'
-  } else {
-    return 'ชั่วโมงน้อยมาก'
-  }
-}
 </script>
 
 <style scoped>
