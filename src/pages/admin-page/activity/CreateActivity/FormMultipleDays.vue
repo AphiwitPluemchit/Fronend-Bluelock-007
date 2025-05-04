@@ -72,7 +72,7 @@
 </template>
 
 <script setup lang="ts">
-import { nextTick, onMounted, ref, watch } from 'vue'
+import { nextTick, onMounted, ref } from 'vue'
 import YearSelector from 'src/pages/admin-page/activity/CreateActivity/Form/YearSelector.vue'
 import DepartmentSelector from 'src/pages/admin-page/activity/CreateActivity/Form/DepartmentSelector.vue'
 import MutiDate from 'src/pages/admin-page/activity/CreateActivity/Form/MutiDate.vue'
@@ -88,7 +88,6 @@ import type { Food } from 'src/types/food'
 
 const router = useRouter()
 
-onMounted(() => { })
 
 const goToActivitiesManagement = async () => {
   await router.push('/admin/ActivitiesManagement')
@@ -119,11 +118,6 @@ const activityDateRangeInternal = ref<string[]>([])
 const foodMenu = ref<Food[]>([])
 const foodMenuDisplay = ref<string>('')
 
-watch(sameTimeForAll, (newValue) => {
-  if (newValue) {
-    void applySameTime() // ✅ ใช้ void ป้องกัน ESLint ฟ้อง
-  }
-})
 const applySameTime = async () => {
   if (selectedDays.value.length === 0) return
 
@@ -153,22 +147,18 @@ const updateDayTime = (index: number, type: 'start' | 'end', value: string) => {
     } else {
       selectedDays.value[index].endTime = value
     }
-
     if (sameTimeForAll.value) {
       void applySameTime()
     }
   }
 }
 onMounted(() => {
-
-  // สร้างวันที่ปัจจุบันในรูปแบบ YYYY-MM-DD
+ 
   const today = new Date()
   const year = today.getFullYear()
   const month = String(today.getMonth() + 1).padStart(2, '0')
   const day = String(today.getDate()).padStart(2, '0')
   const dateString = `${year}-${month}-${day}`
-
-  // กำหนดค่าเริ่มต้นให้กับตัวแปร (เปลี่ยนจาก object เป็น array)
   activityDateRangeInternal.value = [dateString]
 
   generateDaysInRange(activityDateRangeInternal.value)
@@ -238,17 +228,7 @@ const thaiLocale = {
     'ธ.ค.',
   ],
 }
-onMounted(() => {
-  const today = new Date()
-  const year = today.getFullYear()
-  const month = String(today.getMonth() + 1).padStart(2, '0')
-  const day = String(today.getDate()).padStart(2, '0')
-  const dateString = `${year}-${month}-${day}`
 
-  activityDateRangeInternal.value = [dateString]
-
-  generateDaysInRange(activityDateRangeInternal.value)
-})
 
 const props = defineProps<{
   imageFile: File | null
