@@ -33,7 +33,7 @@
               ? 'width: 5%'
               : '' + col.name === 'name'
                 ? 'width: 32%'
-                : '' + col.name === 'date'
+                : '' + col.name === 'dates'
                   ? 'width: 10%'
                   : '' + col.name === 'time'
                     ? 'width: 10%'
@@ -41,9 +41,9 @@
                       ? 'width: 6%'
                       : '' + col.name === 'participants'
                         ? 'width: 12%'
-                        : '' + col.name === 'type'
+                        : '' + col.name === 'skill'
                           ? 'width: 10%'
-                          : '' + col.name === 'status'
+                          : '' + col.name === 'activityState'
                             ? 'width: 10%'
                             : '' + col.name === 'action'
                               ? 'width: 5%'
@@ -59,16 +59,17 @@
             <q-td key="no" style="width: 5%">{{ props.rowIndex + 1 }}</q-td>
             <q-td key="name" style="width: 32%; overflow: hidden; text-overflow: ellipsis">{{
               props.row.name
-              }}</q-td>
-            <q-td key="date" style="width: 10%">{{ props.row.date }}</q-td>
+            }}</q-td>
+            <q-td key="dates" style="width: 10%">{{ props.row.dates }}</q-td>
             <q-td key="time" style="width: 10%">{{ props.row.time }}</q-td>
             <q-td key="location" style="width: 6%">{{ props.row.location }}</q-td>
             <q-td key="participants" style="width: 12%; text-align: center">{{
               props.row.participants
-              }}</q-td>
-            <q-td key="type" style="width: 10%">{{ props.row.type }}</q-td>
-            <q-td key="status" style="width: 10%">
-              <q-btn :label="props.row.status" :class="getStatusClass(props.row.status)" rounded unelevated /></q-td>
+            }}</q-td>
+            <q-td key="skill" style="width: 10%">{{ props.row.skill }}</q-td>
+            <q-td key="activityState" style="width: 10%">
+              <q-btn :label="props.row.activityState" :class="getStatusClass(props.row.activityState)" rounded
+                unelevated /></q-td>
             <q-td class="q-gutter-x-sm" key="action" style="width: 5%">
               <q-btn icon="info" padding="none" flat color="grey-8"></q-btn>
 
@@ -120,7 +121,7 @@
               ? 'width: 5%'
               : '' + col.name === 'name'
                 ? 'width: 32%'
-                : '' + col.name === 'date'
+                : '' + col.name === 'dates'
                   ? 'width: 10%'
                   : '' + col.name === 'time'
                     ? 'width: 10%'
@@ -128,9 +129,9 @@
                       ? 'width: 6%'
                       : '' + col.name === 'participants'
                         ? 'width: 12%'
-                        : '' + col.name === 'type'
+                        : '' + col.name === 'skill'
                           ? 'width: 10%'
-                          : '' + col.name === 'status'
+                          : '' + col.name === 'activityState'
                             ? 'width: 10%'
                             : '' + col.name === 'action'
                               ? 'width: 5%'
@@ -146,16 +147,17 @@
             <q-td key="no" style="width: 5%">{{ props.rowIndex + 1 }}</q-td>
             <q-td key="name" style="width: 32%; overflow: hidden; text-overflow: ellipsis">{{
               props.row.name
-              }}</q-td>
-            <q-td key="date" style="width: 10%">{{ props.row.date }}</q-td>
+            }}</q-td>
+            <q-td key="dates" style="width: 10%">{{ props.row.dates }}</q-td>
             <q-td key="time" style="width: 10%">{{ props.row.time }}</q-td>
             <q-td key="location" style="width: 6%">{{ props.row.location }}</q-td>
             <q-td key="participants" style="width: 12%; text-align: center">{{
               props.row.participants
-              }}</q-td>
-            <q-td key="type" style="width: 10%">{{ props.row.type }}</q-td>
-            <q-td key="status" style="width: 10%">
-              <q-btn :label="props.row.status" :class="getStatusClass(props.row.status)" rounded unelevated /></q-td>
+            }}</q-td>
+            <q-td key="skill" style="width: 10%">{{ props.row.skill }}</q-td>
+            <q-td key="activityState" style="width: 10%">
+              <q-btn :label="props.row.activityState" :class="getStatusClass(props.row.activityState)" rounded
+                unelevated /></q-td>
             <q-td class="q-gutter-x-sm" key="action" style="width: 5%">
               <q-btn icon="info" padding="none" flat color="grey-8"></q-btn>
               <q-menu>
@@ -204,7 +206,7 @@
               ? 'width: 5%'
               : '' + col.name === 'name'
                 ? 'width: 32%'
-                : '' + col.name === 'date'
+                : '' + col.name === 'dates'
                   ? 'width: 10%'
                   : '' + col.name === 'time'
                     ? 'width: 10%'
@@ -212,9 +214,9 @@
                       ? 'width: 6%'
                       : '' + col.name === 'participants'
                         ? 'width: 12%'
-                        : '' + col.name === 'type'
+                        : '' + col.name === 'skill'
                           ? 'width: 10%'
-                          : '' + col.name === 'status'
+                          : '' + col.name === 'activityState'
                             ? 'width: 10%'
                             : '' + col.name === 'action'
                               ? 'width: 5%'
@@ -230,16 +232,17 @@
             <q-td key="no" style="width: 5%">{{ props.rowIndex + 1 }}</q-td>
             <q-td key="name" style="width: 32%; overflow: hidden; text-overflow: ellipsis">{{
               props.row.name
-              }}</q-td>
-            <q-td key="date" style="width: 10%">{{ props.row.date }}</q-td>
+            }}</q-td>
+            <q-td key="dates" style="width: 10%">{{ props.row.dates }}</q-td>
             <q-td key="time" style="width: 10%">{{ props.row.time }}</q-td>
             <q-td key="location" style="width: 6%">{{ props.row.location }}</q-td>
             <q-td key="participants" style="width: 12%; text-align: center">{{
               props.row.participants
-              }}</q-td>
-            <q-td key="type" style="width: 10%">{{ props.row.type }}</q-td>
-            <q-td key="status" style="width: 10%">
-              <q-btn :label="props.row.status" :class="getStatusClass(props.row.status)" rounded unelevated /></q-td>
+            }}</q-td>
+            <q-td key="skill" style="width: 10%">{{ props.row.skill }}</q-td>
+            <q-td key="activityState" style="width: 10%">
+              <q-btn :label="props.row.activityState" :class="getStatusClass(props.row.activityState)" rounded
+                unelevated /></q-td>
             <q-td class="q-gutter-x-sm" key="action" style="width: 5%">
               <q-btn icon="info" padding="none" flat color="grey-8"></q-btn>
               <q-menu>
@@ -328,6 +331,7 @@ const data1 = async () => {
   pagination1.value.rowsPerPage = query1.value.limit
   pagination1.value.sortBy = query1.value.sortBy
   pagination1.value.rowsNumber = data.meta.total
+  pagination1.value.descending = query1.value.order === 'desc'
 
   activitys1.value = data.data
 }
@@ -337,6 +341,7 @@ const data2 = async () => {
   pagination2.value.rowsPerPage = query2.value.limit
   pagination2.value.sortBy = query2.value.sortBy
   pagination2.value.rowsNumber = data.meta.total
+  pagination2.value.descending = query2.value.order === 'desc'
 
   activitys2.value = data.data
 }
@@ -346,6 +351,7 @@ const data3 = async () => {
   pagination3.value.rowsPerPage = query3.value.limit
   pagination3.value.sortBy = query3.value.sortBy
   pagination3.value.rowsNumber = data.meta.total
+  pagination3.value.descending = query3.value.order === 'desc'
 
   activitys3.value = data.data
 }
@@ -418,9 +424,9 @@ const columns = [
   },
   { name: 'skill', label: 'ประเภท', field: 'skill', sortable: true, align: 'left' as const },
   {
-    name: 'status',
+    name: 'activityState',
     label: 'สถานะ',
-    field: 'status',
+    field: 'activityState',
     sortable: true,
     align: 'left' as const,
   },
@@ -501,12 +507,12 @@ function mapActivitiesToTableRows(activitys: Activity[]) {
       no: index + 1,
       id: activity.id,
       name: activity.name || '-',
-      date: formatDateToThai(firstDate.date), // ✅ ใช้ format ตรงนี้
+      dates: formatDateToThai(firstDate.date), // ✅ ใช้ format ตรงนี้
       time: firstDate.stime && firstDate.etime ? `${firstDate.stime}-${firstDate.etime}` : '-', // เวลาแรก
       location: firstItem.rooms?.[0] || '-', // สถานที่แรก
       participants: enrollmentSummary(activity.activityItems), // ไว้ก่อน ยังไม่แน่ใจข้อมูล
-      type: activity.skill ? (activity.skill === 'hard' ? 'ทักษะวิชาการ' : 'เตรียมความพร้อม') : '-', // hard / soft
-      status: activityStatusLebel(activity.activityState || '-'),
+      skill: activity.skill ? (activity.skill === 'hard' ? 'ทักษะวิชาการ' : 'เตรียมความพร้อม') : '-', // hard / soft
+      activityState: activityStatusLebel(activity.activityState || '-'),
       action: '', // ปุ่ม action ภายหลัง
     }
   })
@@ -574,7 +580,9 @@ const pagination3 = ref({
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 async function onRequest1(props: any) {
+  console.log('onRequest1 ' + props.pagination.sortBy + " order " + props.pagination.descending);
   const { page, rowsPerPage, sortBy, descending } = props.pagination
+
   query1.value.page = page
   query1.value.limit = rowsPerPage
   query1.value.sortBy = sortBy
