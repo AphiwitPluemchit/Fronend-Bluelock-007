@@ -22,6 +22,16 @@ export type ActivityPagination = {
   major: string[]
   studentYear: number[]
 }
+export type ActivityEnrollmentPagination = {
+  page: number
+  limit: number
+  search: string
+  sortBy: string
+  order: string
+  major?: string[]
+  status?: string[]
+  studentYears?: string[]
+}
 
 export type PaginationResponse<T> = {
   data: T[]

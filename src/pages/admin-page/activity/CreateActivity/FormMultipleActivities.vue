@@ -84,6 +84,7 @@
         <p class="label">
           <q-icon name="add" size="20px" />
           เพิ่มกิจกรรม
+          เพิ่มกิจกรรม
         </p>
       </q-btn>
     </div>
@@ -341,6 +342,7 @@ const submitActivity = async () => {
       }
     }
 
+    await goToPageTable()
     await goToPageTable()
   } catch (err) {
     console.error('Create activity failed:', err)

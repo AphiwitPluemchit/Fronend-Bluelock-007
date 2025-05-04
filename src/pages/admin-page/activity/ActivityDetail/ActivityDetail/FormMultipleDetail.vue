@@ -9,6 +9,8 @@
     </div>
     <ChangeStatusDialog v-model="showChangeStatusDialog" :currentStatus="activityStatus"
       @confirm="handleStatusChange" />
+    <ChangeStatusDialog v-model="showChangeStatusDialog" :currentStatus="activityStatus"
+      @confirm="handleStatusChange" />
 
     <!-- Activity Name -->
     <div class="input-group">
@@ -25,83 +27,93 @@
       <!-- Cancel (X) Icon -->
       <div class="remove-icon" :class="{ 'icon-disabled': !isEditing }" @click="isEditing && removeSubActivity(index)">
         <q-icon name="close" size="35px" :color="isEditing ? 'red' : 'grey-5'" class="cursor-pointer" />
-      </div>
+        <div class="remove-icon" :class="{ 'icon-disabled': !isEditing }"
+          @click="isEditing && removeSubActivity(index)">
+          <q-icon name="close" size="35px" :color="isEditing ? 'red' : 'grey-5'" class="cursor-pointer" />
+        </div>
 
-      <!-- SubActivity Name -->
-      <div class="input-group">
-        <p class="label label_minWidth">ชื่อกิจกรรม :</p>
-        <q-input outlined v-model="subActivity.subActivityName" style="width: 600px" :disable="!isEditing" />
-      </div>
+        <!-- SubActivity Name -->
+        <div class="input-group">
+          <p class="label label_minWidth">ชื่อกิจกรรม :</p>
+          <q-input outlined v-model="subActivity.subActivityName" style="width: 600px" :disable="!isEditing" />
+        </div>
 
-      <!-- Date -->
-      <MutiDate v-model="subActivity.activityDateInternal"
-        @update:modelValue="(dates: string[]) => generateDaysInRange(dates, index)" :disable="!isEditing" v />
+        <!-- Date -->
+        <MutiDate v-model="subActivity.activityDateInternal"
+          @update:modelValue="(dates: string[]) => generateDaysInRange(dates, index)" :disable="!isEditing" v />
 
-      <!-- Time -->
-      <div class="input-group">
-        <p class="label label_minWidth" style="align-self: flex-start">เวลาที่จัดกิจกรรม:</p>
-        <div class="day-time-container">
-          <q-checkbox class="checkbox-left" v-model="sameTimeForAll" label="เวลาเดิมทุกวัน"
-            @update:model-value="() => applySameTime(index)" :disable="!isEditing" />
+        <!-- Time -->
+        <div class="input-group">
+          <p class="label label_minWidth" style="align-self: flex-start">เวลาที่จัดกิจกรรม:</p>
           <div class="day-time-container">
-            <div v-for="(day, dIndex) in subActivity.selectedDays" :key="day.date">
-              <TimeSelector v-model:startTime="day.startTime" v-model:endTime="day.endTime"
-                :formattedDate="day.formattedDate" @update:startTime="v => updateDayTime(index, dIndex, 'start', v)"
-                @update:endTime="v => updateDayTime(index, dIndex, 'end', v)" :disable="!isEditing" />
+            <q-checkbox class="checkbox-left" v-model="sameTimeForAll" label="เวลาเดิมทุกวัน"
+              @update:model-value="() => applySameTime(index)" :disable="!isEditing" />
+            <div class="day-time-container">
+              <div v-for="(day, dIndex) in subActivity.selectedDays" :key="day.date">
+                <TimeSelector v-model:startTime="day.startTime" v-model:endTime="day.endTime"
+                  :formattedDate="day.formattedDate" @update:startTime="v => updateDayTime(index, dIndex, 'start', v)"
+                  @update:endTime="v => updateDayTime(index, dIndex, 'end', v)" :disable="!isEditing" />
+              </div>
             </div>
           </div>
         </div>
+
+        <HoursSelector v-model="subActivity.totalHours" class="input-group" :disable="!isEditing" />
+        <RoomSelector v-model="subActivity.roomName" class="input-group" :disable="!isEditing" />
+
+        <!-- Room and Seats -->
+        <div class="input-group">
+          <p class="label label_minWidth">จำนวนที่รับ :</p>
+          <q-input outlined style="width: 225px" v-model="subActivity.seats" type="number" @keypress="isNumber($event)"
+            @blur="validatePositive('seats', index)" :disable="!isEditing" />
+          <q-input outlined style="width: 225px" v-model="subActivity.seats" type="number" @keypress="isNumber($event)"
+            @blur="validatePositive('seats', index)" :disable="!isEditing" />
+        </div>
+
+        <!-- Department -->
+        <DepartmentSelector v-model="subActivity.departments" class="input-group" :disable="!isEditing" />
+        <DepartmentSelector v-model="subActivity.departments" class="input-group" :disable="!isEditing" />
+        <!-- Year -->
+        <YearSelector v-model="subActivity.years" class="input-group" :disable="!isEditing" />
+
+        <!-- Lecturer -->
+        <div class="input-group">
+          <p class="label label_minWidth">วิทยากร :</p>
+          <q-input outlined v-model="subActivity.lecturer" style="width: 100%" :disable="!isEditing" />
+          <q-input outlined v-model="subActivity.lecturer" style="width: 100%" :disable="!isEditing" />
+        </div>
+
+        <!-- Detail Activity -->
+        <div class="input-group">
+          <p style="align-self: flex-start" class="label label_minWidth">รายละเอียดอื่นๆ :</p>
+          <q-input type="textarea" rows="10" outlined v-model="subActivity.detailActivity" style="width: 100%"
+            :disable="!isEditing" />
+          <q-input type="textarea" rows="10" outlined v-model="subActivity.detailActivity" style="width: 100%"
+            :disable="!isEditing" />
+        </div>
+
+        <!-- Add Activity Button -->
       </div>
-
-      <HoursSelector v-model="subActivity.totalHours" class="input-group" :disable="!isEditing" />
-      <RoomSelector v-model="subActivity.roomName" class="input-group" :disable="!isEditing" />
-
-      <!-- Room and Seats -->
-      <div class="input-group">
-        <p class="label label_minWidth">จำนวนที่รับ :</p>
-        <q-input outlined style="width: 225px" v-model="subActivity.seats" type="number" @keypress="isNumber($event)"
-          @blur="validatePositive('seats', index)" :disable="!isEditing" />
+      <div class="btn-container">
+        <q-btn class="btnAddActivity" @click="addSubActivity" :disable="!isEditing">
+          <p class="label">
+            <q-icon name="add" size="20px" />
+            เพิ่มกิจกรรม
+            เพิ่มกิจกรรม
+          </p>
+        </q-btn>
       </div>
-
-      <!-- Department -->
-      <DepartmentSelector v-model="subActivity.departments" class="input-group" :disable="!isEditing" />
-      <!-- Year -->
-      <YearSelector v-model="subActivity.years" class="input-group" :disable="!isEditing" />
-
-      <!-- Lecturer -->
-      <div class="input-group">
-        <p class="label label_minWidth">วิทยากร :</p>
-        <q-input outlined v-model="subActivity.lecturer" style="width: 100%" :disable="!isEditing" />
+      <div class="button-group" v-if="props.isEditing">
+        <q-btn class="btnreject" @click="
+          () => {
+            resetFormToOriginal()
+            emit('update:isEditing', false)
+          }
+        ">
+          ยกเลิก
+        </q-btn>
+        <q-btn class="btnsecces" @click="saveChanges">บันทึก</q-btn>
       </div>
-
-      <!-- Detail Activity -->
-      <div class="input-group">
-        <p style="align-self: flex-start" class="label label_minWidth">รายละเอียดอื่นๆ :</p>
-        <q-input type="textarea" rows="10" outlined v-model="subActivity.detailActivity" style="width: 100%"
-          :disable="!isEditing" />
-      </div>
-
-      <!-- Add Activity Button -->
-    </div>
-    <div class="btn-container">
-      <q-btn class="btnAddActivity" @click="addSubActivity" :disable="!isEditing">
-        <p class="label">
-          <q-icon name="add" size="20px" />
-          เพิ่มกิจกรรม
-        </p>
-      </q-btn>
-    </div>
-    <div class="button-group" v-if="props.isEditing">
-      <q-btn class="btnreject" @click="
-        () => {
-          resetFormToOriginal()
-          emit('update:isEditing', false)
-        }
-      ">
-        ยกเลิก
-      </q-btn>
-      <q-btn class="btnsecces" @click="saveChanges">บันทึก</q-btn>
-    </div>
   </q-page>
   <q-dialog v-model="showSuccessDialog" persistent>
     <div class="q-pa-md text-h6 text-center successDialog">
@@ -556,6 +568,7 @@ const statusClass = computed(() => {
   font-size: 18px;
 }
 
+
 .input-group p {
   align-self: center;
   margin: 0;
@@ -584,6 +597,7 @@ const statusClass = computed(() => {
   min-width: 200px;
 }
 
+
 .btnAddActivity {
   background-color: #ffffff;
   border-radius: 20px;
@@ -594,6 +608,7 @@ const statusClass = computed(() => {
   align-items: center;
 }
 
+
 .status-btn {
   color: #ff6f00;
   background-color: #ffe7ba;
@@ -603,6 +618,7 @@ const statusClass = computed(() => {
   width: 200px;
   font-size: 20px;
 }
+
 
 .time-container {
   display: flex;
@@ -617,9 +633,11 @@ const statusClass = computed(() => {
   margin-bottom: 20px;
 }
 
+
 .q-icon {
   cursor: pointer;
 }
+
 
 .btn-container {
   display: flex;
@@ -628,6 +646,7 @@ const statusClass = computed(() => {
   gap: 20px;
   margin-left: 200px;
 }
+
 
 .department-btn {
   width: 80px;
@@ -638,9 +657,11 @@ const statusClass = computed(() => {
   margin-right: 10px;
 }
 
+
 .active-btn {
   background-color: #d0e4ff !important;
 }
+
 
 .button-group {
   display: flex;
@@ -650,6 +671,7 @@ const statusClass = computed(() => {
   margin-bottom: 100px;
   width: 100%;
 }
+
 
 .status-btn {
   border-radius: 50px;
@@ -676,6 +698,7 @@ const statusClass = computed(() => {
   border: 2px solid #002dff;
 }
 
+
 .status-completed {
   color: #000000;
   background-color: #dadada;
@@ -687,6 +710,7 @@ const statusClass = computed(() => {
   background-color: #ffc5c5;
   border: 2px solid #ff0000;
 }
+
 
 .icon-disabled {
   pointer-events: none;

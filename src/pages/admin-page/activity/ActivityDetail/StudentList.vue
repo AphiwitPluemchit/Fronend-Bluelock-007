@@ -2,45 +2,50 @@
 import { ref, computed, onMounted } from 'vue'
 import RemoveStudent from './RemoveStudent.vue'
 import FilterDialog from 'src/components/Dialog/FilterDialog.vue'
+import type { ActivityEnrollmentPagination } from 'src/types/pagination'
+import type { Activity } from 'src/types/activity'
 import { useEnrollmentStore } from 'src/stores/enrollment'
 import { useRoute } from 'vue-router'
+import { EnrollmentService } from 'src/services/enrollment'
+import { ActivityService } from 'src/services/activity'
 
 const enrollmentStore = useEnrollmentStore()
 const route = useRoute()
 const activityId = route.params.id as string
-
+const allTab = ref<Activity | null>(null)
+const indexTab = ref(0)
+const query = ref<ActivityEnrollmentPagination>({
+  page: 1,
+  limit: 5,
+  search: '',
+  sortBy: '_id',
+  order: 'desc',
+  major: [],
+  status: [],
+  studentYears: []
+})
 const filterCategories1 = ref([
   'year',
   'major',
   'statusStudent',
 ])
 
-const pagination = computed({
-  get: () => ({
-    sortBy: enrollmentStore.query.sortBy,
-    descending: enrollmentStore.query.order === 'desc',
-    page: enrollmentStore.query.page,
-    rowsPerPage: enrollmentStore.query.limit,
-    rowsNumber: enrollmentStore.total,
-  }),
-
-  set: (val) => {
-    enrollmentStore.query.page = val.page
-    enrollmentStore.query.limit = val.rowsPerPage
-    enrollmentStore.query.sortBy = val.sortBy
-    enrollmentStore.query.order = val.descending ? 'desc' : 'asc'
-  },
+const pagination = ref({
+  sortBy: query.value.sortBy,
+  descending: query.value.order === 'desc',
+  page: query.value.page,
+  rowsPerPage: query.value.limit,
+  rowsNumber: 0,
 })
-
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const onRequest = async (props: any) => {
   const { page, rowsPerPage, sortBy, descending } = props.pagination
-  enrollmentStore.query.page = page
-  enrollmentStore.query.limit = rowsPerPage
-  enrollmentStore.query.sortBy = sortBy
-  enrollmentStore.query.order = descending ? 'desc' : 'asc'
-
-  await enrollmentStore.fetchEnrollmentsByActivityID(activityId)
+  pagination.value.page = page
+  pagination.value.rowsPerPage = rowsPerPage
+  pagination.value.sortBy = sortBy
+  pagination.value.sortBy = descending ? 'desc' : 'asc'
+  await fetchStudents()
+  // await enrollmentStore.fetchEnrollmentsByActivityID(activityId)
 }
 
 const getStatusText = (status: string) => {
@@ -68,6 +73,7 @@ const getStatusClass = (status: string) => {
   return ''
 }
 
+
 interface SelectedFilters {
   year: string[]
   major: string[]
@@ -75,12 +81,12 @@ interface SelectedFilters {
 }
 
 const applyStudentFilters = async (selectedFilters: SelectedFilters) => {
-  enrollmentStore.query.studentYears = selectedFilters.year
-  enrollmentStore.query.major = selectedFilters.major
-  enrollmentStore.query.status = selectedFilters.statusStudent
+  console.log(selectedFilters);
 
-  enrollmentStore.query.page = 1
-
+  query.value.studentYears = selectedFilters.year
+  query.value.major = selectedFilters.major
+  query.value.status = selectedFilters.statusStudent
+  // enrollmentStore.query.page = 1
   await fetchStudents()
 }
 
@@ -90,20 +96,36 @@ const search1 = computed({
 })
 
 const students = computed(() => {
-  return enrollmentStore.enrollments.map((enrollment) => ({
-    id: enrollment.id,
-    studentId: enrollment.student.code,
-    name: enrollment.student.name,
-    major: enrollment.student.major,
-    checkIn: '-',
-    checkOut: '-',
-    status: enrollment.student.status, // ใส่ฟังก์ชันแปลง
-  }))
+  return enrollmentStore.studentEnrollments
 })
 
 const fetchStudents = async () => {
-  await onRequest({ pagination: pagination.value })
+  const res = await ActivityService.getOne(activityId)
+  allTab.value = res.data
+  console.log(allTab.value);
+  if (allTab.value && allTab.value.activityItems && allTab.value.activityItems.length > 0) {
+    const activityItemId = allTab.value.activityItems[indexTab.value]!.id!
+    console.log(query.value);
+    const data = await EnrollmentService.getEnrollmentsByActivityID(activityItemId, query.value)
+    pagination.value.page = query.value.page
+    pagination.value.rowsPerPage = query.value.limit
+    pagination.value.sortBy = query.value.sortBy
+    pagination.value.rowsNumber = data.meta.total
+    console.log(pagination.value);
+    enrollmentStore.studentEnrollments = data.data
+    // ...
+  } else {
+    console.error('activityItems is null or undefined');
+  }
+
 }
+
+// const activityItemOptions = computed(() => {
+//   return allTab.value?.activityItems?.map(item => ({
+//     label: item.name,
+//     value: item.id
+//   })) || []
+// })
 
 const columns = [
   {
@@ -115,9 +137,9 @@ const columns = [
     headerStyle: 'width: 7%;',
   },
   {
-    name: 'studentId',
+    name: 'code',
     label: 'รหัสนิสิต',
-    field: 'studentId',
+    field: 'code',
     align: 'left' as const,
     style: 'width: 12%;',
     headerStyle: 'width: 12%;',
@@ -135,6 +157,14 @@ const columns = [
     name: 'major',
     label: 'สาขา',
     field: 'major',
+    align: 'left' as const,
+    style: 'width: 7%;',
+    headerStyle: 'width: 7.5%;',
+  },
+  {
+    name: 'food',
+    label: 'อาหาร',
+    field: 'food',
     align: 'left' as const,
     style: 'width: 7%;',
     headerStyle: 'width: 7.5%;',
@@ -177,7 +207,12 @@ const removeStudentFromActivity = async (studentId: string) => {
 }
 
 onMounted(async () => {
-  await enrollmentStore.fetchEnrollmentsByActivityID(activityId)
+  await fetchStudents()
+  // console.log(enrollmentStore.enrollments.students)
+  console.log(students.value);
+
+
+  // await enrollmentStore.fetchEnrollmentsByActivityID(activityId)
 })
 
 </script>
@@ -186,17 +221,16 @@ onMounted(async () => {
   <div class="q-mb-sm student-container">
     <div class="student-table-wrapper">
       <div class="row justify-end items-center">
-
+        <div v-for="(activityItems, index) in allTab?.activityItems" :key="index">
+          <div @click="indexTab = index, fetchStudents()"
+            style="cursor: pointer; margin-right: 10px; font-weight: bold; background-color: coral;">
+            {{ activityItems.name }}
+            <!-- do something with activity.activityItems -->
+          </div>
+        </div>
         <!-- ช่องค้นหา -->
-        <q-input 
-          dense 
-          outlined 
-          v-model="search1" 
-          @keyup.enter="fetchStudents"
-          placeholder="ค้นหาชื่อ-นามสกุล/ รหัสนิสิต" 
-          class="q-mr-sm searchbox" 
-          :style="{ boxShadow: 'none' }"
-        >
+        <q-input dense outlined v-model="search1" @keyup.enter="fetchStudents"
+          placeholder="ค้นหาชื่อ-นามสกุล/ รหัสนิสิต" class="q-mr-sm searchbox" :style="{ boxShadow: 'none' }">
 
           <template v-slot:append>
             <q-icon name="search" />
@@ -206,17 +240,15 @@ onMounted(async () => {
         <FilterDialog :categories="filterCategories1" @apply="applyStudentFilters" />
       </div>
 
-      <q-table 
-        flat bordered 
-        :rows="students" 
-        :columns="columns" 
-        row-key="id" 
-        class="q-mt-md new-sticky-header"
-        @request="onRequest" 
-        v-model:pagination="pagination" 
-        :rows-per-page-options="[10, 20, 30, 40, 50]"
-        :rows-number="enrollmentStore.total"
-      >
+      <!-- <div class="q-pa-md">
+        <q-select filled v-model="indexTab" :options="activityItemOptions" option-label="label" option-value="value"
+          label="เลือกกิจกรรมย่อย" emit-value map-options @update:model-value="fetchStudents" />
+      </div> -->
+
+
+      <q-table flat bordered :rows="students" :columns="columns" row-key="id" class="q-mt-md new-sticky-header"
+        @request="onRequest" v-model:pagination="pagination" :rows-per-page-options="[10, 20, 30, 40, 50]"
+        :rows-number="enrollmentStore.total">
 
         <!-- หัวตาราง Sticky -->
         <template v-slot:header="props">
@@ -267,7 +299,7 @@ onMounted(async () => {
 // }
 
 // .my-sticky-header-table {
-//   min-height: 450px; 
+//   min-height: 450px;
 //   overflow: auto;
 // }
 

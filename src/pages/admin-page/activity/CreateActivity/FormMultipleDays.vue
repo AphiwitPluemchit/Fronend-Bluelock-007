@@ -88,6 +88,7 @@ import type { Food } from 'src/types/food'
 
 const router = useRouter()
 
+onMounted(() => { })
 
 const goToActivitiesManagement = async () => {
   await router.push('/admin/ActivitiesManagement')
@@ -118,6 +119,11 @@ const activityDateRangeInternal = ref<string[]>([])
 const foodMenu = ref<Food[]>([])
 const foodMenuDisplay = ref<string>('')
 
+watch(sameTimeForAll, (newValue) => {
+  if (newValue) {
+    void applySameTime() // ✅ ใช้ void ป้องกัน ESLint ฟ้อง
+  }
+})
 const applySameTime = async () => {
   if (selectedDays.value.length === 0) return
 
@@ -153,7 +159,8 @@ const updateDayTime = (index: number, type: 'start' | 'end', value: string) => {
   }
 }
 onMounted(() => {
- 
+
+  // สร้างวันที่ปัจจุบันในรูปแบบ YYYY-MM-DD
   const today = new Date()
   const year = today.getFullYear()
   const month = String(today.getMonth() + 1).padStart(2, '0')

@@ -9,6 +9,8 @@
     </div>
     <ChangeStatusDialog v-model="showChangeStatusDialog" :currentStatus="activityStatus"
       @confirm="handleStatusChange" />
+    <ChangeStatusDialog v-model="showChangeStatusDialog" :currentStatus="activityStatus"
+      @confirm="handleStatusChange" />
     <!-- Activity Name -->
     <div class="input-group">
       <p class="label label_minWidth">ชื่อกิจกรรม :</p>
@@ -17,6 +19,7 @@
 
     <!-- Date -->
     <MutiDate v-model="activityDateRange" @update:modelValue="generateDaysInRange" :disable="!isEditing" />
+    <MutiDate v-model="activityDateRange" @update:modelValue="generateDaysInRange" :disable="!isEditing" />
 
     <!-- Time -->
     <div class="input-group">
@@ -24,8 +27,13 @@
       <div class="day-time-container">
         <q-checkbox class="checkbox-left" v-model="sameTimeForAll" label="เวลาเดิมทุกวัน"
           @update:model-value="applySameTime" :disable="!isEditing" />
+        <q-checkbox class="checkbox-left" v-model="sameTimeForAll" label="เวลาเดิมทุกวัน"
+          @update:model-value="applySameTime" :disable="!isEditing" />
         <div class="day-time-container">
           <div v-for="(day, index) in selectedDays" :key="day.date" class="day-block">
+            <TimeSelector v-model:startTime="day.startTime" v-model:endTime="day.endTime"
+              :formattedDate="day.formattedDate" @update:startTime="updateDayTime(index, 'start', $event)"
+              @update:endTime="updateDayTime(index, 'end', $event)" :disable="!isEditing" />
             <TimeSelector v-model:startTime="day.startTime" v-model:endTime="day.endTime"
               :formattedDate="day.formattedDate" @update:startTime="updateDayTime(index, 'start', $event)"
               @update:endTime="updateDayTime(index, 'end', $event)" :disable="!isEditing" />
@@ -60,10 +68,13 @@
     <!-- Food Menu -->
     <FoodSelector v-model:foodMenu="foodMenu" v-model:foodMenuDisplay="foodMenuDisplay" class="input-group"
       :disable="!isEditing" />
+    <FoodSelector v-model:foodMenu="foodMenu" v-model:foodMenuDisplay="foodMenuDisplay" class="input-group"
+      :disable="!isEditing" />
 
     <!-- Detail Activity -->
     <div class="input-group">
       <p style="align-self: flex-start" class="label label_minWidth">รายละเอียดอื่นๆ :</p>
+      <q-input type="textarea" rows="10" outlined v-model="detailActivity" style="width: 600px" :disable="!isEditing" />
       <q-input type="textarea" rows="10" outlined v-model="detailActivity" style="width: 600px" :disable="!isEditing" />
     </div>
 
@@ -117,6 +128,7 @@ const props = defineProps<{
 const emit = defineEmits<{
   (e: 'update:isEditing', value: boolean): void
   (e: 'saved', fileName?: string): void
+  (e: 'saved', fileName?: string): void
 }>()
 
 interface DayTimeSelection {
@@ -152,6 +164,7 @@ const foodMenuDisplay = ref('')
 const handleStatusChange = (newStatus: string) => {
   activityStatus.value = newStatus
 }
+const menuItems = ref([])
 const menuItems = ref([])
 watch(sameTimeForAll, (newValue) => {
   if (newValue) {
@@ -391,6 +404,7 @@ const saveChanges = async () => {
     return {
       foodName: f.name,
       vote: existingVote ? existingVote.vote : 0
+      vote: existingVote ? existingVote.vote : 0
     };
   });
 
@@ -507,12 +521,14 @@ onMounted(() => {
   align-items: center;
 }
 
+
 .input-group p {
   align-self: center;
   margin: 0;
   line-height: normal;
   text-align: right;
 }
+
 
 .input-group {
   display: flex;
@@ -533,6 +549,7 @@ onMounted(() => {
 .label_minWidth {
   min-width: 200px;
 }
+
 
 .status-btn {
   border-radius: 50px;
@@ -559,6 +576,7 @@ onMounted(() => {
   border: 2px solid #002dff;
 }
 
+
 .status-completed {
   color: #000000;
   background-color: #dadada;
@@ -571,11 +589,13 @@ onMounted(() => {
   border: 2px solid #ff0000;
 }
 
+
 .flex-container {
   display: flex;
   align-items: center;
   gap: 10px;
 }
+
 
 .button-group {
   display: flex;
