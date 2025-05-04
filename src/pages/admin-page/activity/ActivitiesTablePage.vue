@@ -111,8 +111,8 @@
             @apply="applyFilters2" />
         </div>
       </div>
-      <q-table :rows="mapActivitiesToTableRows(activitys2)" :columns="columns" v-model:pagination="pagination2"
-        :rows-per-page-options="[5, 7, 10, 15, 20]" @request="onRequest2" row-key="id"
+      <q-table bordered flat :rows="mapActivitiesToTableRows(activitys2)" :columns="columns"
+        v-model:pagination="pagination2" :rows-per-page-options="[5, 7, 10, 15, 20]" @request="onRequest2" row-key="id"
         class="q-mt-md my-sticky-header-table">
         <!-- หัวตาราง Sticky -->
         <template v-slot:header="props">
@@ -196,8 +196,8 @@
             @apply="applyFilters3" />
         </div>
       </div>
-      <q-table :rows="mapActivitiesToTableRows(activitys3)" :columns="columns" v-model:pagination="pagination3"
-        :rows-per-page-options="[5, 7, 10, 15, 20]" @request="onRequest3" row-key="id"
+      <q-table bordered flat :rows="mapActivitiesToTableRows(activitys3)" :columns="columns"
+        v-model:pagination="pagination3" :rows-per-page-options="[5, 7, 10, 15, 20]" @request="onRequest3" row-key="id"
         class="q-mt-md my-sticky-header-table">
         <!-- หัวตาราง Sticky -->
         <template v-slot:header="props">
