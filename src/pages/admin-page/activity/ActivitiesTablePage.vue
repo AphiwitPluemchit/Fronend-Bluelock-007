@@ -59,13 +59,13 @@
             <q-td key="no" style="width: 5%">{{ props.rowIndex + 1 }}</q-td>
             <q-td key="name" style="width: 32%; overflow: hidden; text-overflow: ellipsis">{{
               props.row.name
-            }}</q-td>
+              }}</q-td>
             <q-td key="date" style="width: 10%">{{ props.row.date }}</q-td>
             <q-td key="time" style="width: 10%">{{ props.row.time }}</q-td>
             <q-td key="location" style="width: 6%">{{ props.row.location }}</q-td>
             <q-td key="participants" style="width: 12%; text-align: center">{{
               props.row.participants
-            }}</q-td>
+              }}</q-td>
             <q-td key="type" style="width: 10%">{{ props.row.type }}</q-td>
             <q-td key="status" style="width: 10%">
               <q-btn :label="props.row.status" :class="getStatusClass(props.row.status)" rounded unelevated /></q-td>
@@ -74,13 +74,13 @@
 
               <q-menu>
                 <q-list style="min-width: 200px">
-                  <q-item clickable  @click="goToPageDetail(props.row.id, true)">
+                  <q-item clickable @click="goToPageDetail(props.row.id, true)">
                     <q-item-section avatar>
                       <q-icon name="visibility" />
                     </q-item-section>
                     <q-item-section>ดูรายละเอียด</q-item-section>
                   </q-item>
-                  <q-item clickable  @click="goToPageDetail(props.row.id, false)">
+                  <q-item clickable @click="goToPageDetail(props.row.id, false)">
                     <q-item-section avatar>
                       <q-icon name="edit" />
                     </q-item-section>
@@ -146,28 +146,27 @@
             <q-td key="no" style="width: 5%">{{ props.rowIndex + 1 }}</q-td>
             <q-td key="name" style="width: 32%; overflow: hidden; text-overflow: ellipsis">{{
               props.row.name
-            }}</q-td>
+              }}</q-td>
             <q-td key="date" style="width: 10%">{{ props.row.date }}</q-td>
             <q-td key="time" style="width: 10%">{{ props.row.time }}</q-td>
             <q-td key="location" style="width: 6%">{{ props.row.location }}</q-td>
             <q-td key="participants" style="width: 12%; text-align: center">{{
               props.row.participants
-            }}</q-td>
+              }}</q-td>
             <q-td key="type" style="width: 10%">{{ props.row.type }}</q-td>
             <q-td key="status" style="width: 10%">
               <q-btn :label="props.row.status" :class="getStatusClass(props.row.status)" rounded unelevated /></q-td>
             <q-td class="q-gutter-x-sm" key="action" style="width: 5%">
-              <q-btn icon="info" padding="none" flat color="grey-8"
-              ></q-btn>
+              <q-btn icon="info" padding="none" flat color="grey-8"></q-btn>
               <q-menu>
                 <q-list style="min-width: 200px">
-                  <q-item clickable  @click="goToPageDetail(props.row.id, true)">
+                  <q-item clickable @click="goToPageDetail(props.row.id, true)">
                     <q-item-section avatar>
                       <q-icon name="visibility" />
                     </q-item-section>
                     <q-item-section>ดูรายละเอียด</q-item-section>
                   </q-item>
-                  <q-item clickable  @click="goToPageDetail(props.row.id, false)">
+                  <q-item clickable @click="goToPageDetail(props.row.id, false)">
                     <q-item-section avatar>
                       <q-icon name="edit" />
                     </q-item-section>
@@ -231,13 +230,13 @@
             <q-td key="no" style="width: 5%">{{ props.rowIndex + 1 }}</q-td>
             <q-td key="name" style="width: 32%; overflow: hidden; text-overflow: ellipsis">{{
               props.row.name
-            }}</q-td>
+              }}</q-td>
             <q-td key="date" style="width: 10%">{{ props.row.date }}</q-td>
             <q-td key="time" style="width: 10%">{{ props.row.time }}</q-td>
             <q-td key="location" style="width: 6%">{{ props.row.location }}</q-td>
             <q-td key="participants" style="width: 12%; text-align: center">{{
               props.row.participants
-            }}</q-td>
+              }}</q-td>
             <q-td key="type" style="width: 10%">{{ props.row.type }}</q-td>
             <q-td key="status" style="width: 10%">
               <q-btn :label="props.row.status" :class="getStatusClass(props.row.status)" rounded unelevated /></q-td>
@@ -245,7 +244,7 @@
               <q-btn icon="info" padding="none" flat color="grey-8"></q-btn>
               <q-menu>
                 <q-list style="min-width: 200px">
-                  <q-item clickable  @click="goToPageDetail(props.row.id, true)">
+                  <q-item clickable @click="goToPageDetail(props.row.id, true)">
                     <q-item-section avatar>
                       <q-icon name="visibility" />
                     </q-item-section>
@@ -284,17 +283,17 @@ const router = useRouter()
 const goToPage = async () => {
   await router.push('/Admin/ActivitiesManagement/CreateActivity')
 }
-const goToPageDetail = async (id: string,disable:boolean) => {
+const goToPageDetail = async (id: string, disable: boolean) => {
   console.log(id)
   console.log('Disable:', disable)
   // await fetchOneData(id)
   // :to="`/Student/Activity/ActivityDetail/${activity.id}`"
   await router.push({
-  path: `/Admin/ActivitiesManagement/ActivityDetail/${id}`,
-  query: {
-    disable: String(disable)
-  }
-})
+    path: `/Admin/ActivitiesManagement/ActivityDetail/${id}`,
+    query: {
+      disable: String(disable)
+    }
+  })
 }
 
 const getStatusClass = (status: string) => {
@@ -381,24 +380,28 @@ const columns = [
     name: 'no',
     label: 'ลำดับ',
     field: 'no',
+    sortable: true,
     align: 'left' as const,
   },
   {
     name: 'name',
     label: 'ชื่อกิจกรรม',
     field: 'name',
+    sortable: true,
     align: 'left' as const,
   },
   {
-    name: 'date',
+    name: 'dates',
     label: 'วันที่',
-    field: 'name',
+    field: 'dates',
+    sortable: true,
     align: 'left' as const,
   },
   {
     name: 'time',
     label: 'เวลา',
-    field: 'name',
+    field: 'time',
+
     align: 'left' as const,
   },
   {
@@ -413,11 +416,12 @@ const columns = [
     field: 'participants',
     align: 'left' as const,
   },
-  { name: 'type', label: 'ประเภท', field: 'type', align: 'left' as const },
+  { name: 'skill', label: 'ประเภท', field: 'skill', sortable: true, align: 'left' as const },
   {
     name: 'status',
     label: 'สถานะ',
     field: 'status',
+    sortable: true,
     align: 'left' as const,
   },
   {
@@ -436,7 +440,7 @@ const query1 = ref<ActivityPagination>({
   page: 1,
   limit: 5,
   search: '',
-  sortBy: '_id',
+  sortBy: 'dates',
   order: 'desc',
   skill: [],
   activityState: ['open', 'close'],
@@ -447,7 +451,7 @@ const query2 = ref<ActivityPagination>({
   page: 1,
   limit: 5,
   search: '',
-  sortBy: '_id',
+  sortBy: 'dates',
   order: 'desc',
   skill: [],
   activityState: ['planning'],
@@ -459,7 +463,7 @@ const query3 = ref<ActivityPagination>({
   page: 1,
   limit: 5,
   search: '',
-  sortBy: '_id',
+  sortBy: 'dates',
   order: 'desc',
   skill: [],
   activityState: ['success', 'cancel'],
