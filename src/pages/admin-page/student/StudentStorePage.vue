@@ -3,7 +3,7 @@
         <div class="q-mb-md">
             <div class="text-subtitle1 text-grey-8 flex items-center">
                 <q-icon name="people" class="q-mr-sm" />
-                <span>จัดการข้อมูลนิสิต &gt; <u>จัดเก็บข้อมูลนิสิต</u></span>
+                <span>จัดการข้อมูลนิสิต1 &gt; <u>จัดเก็บข้อมูลนิสิต</u></span>
             </div>
             <div class="text-h4">จัดเก็บข้อมูลนิสิต</div>
         </div>
