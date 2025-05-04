@@ -157,14 +157,12 @@ const years = ref<string[]>([])
 const activityDateRangeInternal = ref<string[]>([])
 const roomName = ref<string[]>([])
 const activityStatus = ref('กำลังวางแผน')
-const activityStatus = ref('กำลังวางแผน')
 const foodMenu = ref<Food[]>([])
 const foodMenuDisplay = ref('')
 
 const handleStatusChange = (newStatus: string) => {
   activityStatus.value = newStatus
 }
-const menuItems = ref([])
 const menuItems = ref([])
 watch(sameTimeForAll, (newValue) => {
   if (newValue) {
@@ -403,7 +401,6 @@ const saveChanges = async () => {
     const existingVote = updated.foodVotes?.find(vote => vote.foodName === f.name);
     return {
       foodName: f.name,
-      vote: existingVote ? existingVote.vote : 0
       vote: existingVote ? existingVote.vote : 0
     };
   });

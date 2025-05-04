@@ -72,7 +72,7 @@
 </template>
 
 <script setup lang="ts">
-import { nextTick, onMounted, ref } from 'vue'
+import { nextTick, onMounted, ref, watch } from 'vue'
 import YearSelector from 'src/pages/admin-page/activity/CreateActivity/Form/YearSelector.vue'
 import DepartmentSelector from 'src/pages/admin-page/activity/CreateActivity/Form/DepartmentSelector.vue'
 import MutiDate from 'src/pages/admin-page/activity/CreateActivity/Form/MutiDate.vue'
