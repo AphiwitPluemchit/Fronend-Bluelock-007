@@ -3,21 +3,10 @@
     <!-- Food Menu Input -->
     <div class="input-group">
       <p class="label label_minWidth">รายการอาหาร :</p>
-      <q-input
-        outlined
-        v-model="foodMenuDisplay"
-        class="food-input"
-        readonly
-        :disable="disable"
-      >
+      <q-input outlined v-model="foodMenuDisplay" class="food-input"  :disable="disable">
         <template v-slot:prepend>
-          <q-icon
-            name="restaurant_menu"
-            style="color: black"
-            class="cursor-pointer"
-            @click="openFoodDialog"
-            :class="{ 'disabled-icon': disable }"
-          />
+          <q-icon name="restaurant_menu" style="color: black" class="cursor-pointer" @click="openFoodDialog"
+            :class="{ 'disabled-icon': disable }" />
         </template>
       </q-input>
     </div>
@@ -26,68 +15,35 @@
     <q-dialog v-model="showFoodDialog" persistent>
       <div class="q-pa-md food-dialog">
         <h3 class="label" style="justify-content: flex-start; margin-left: 20px">
-          เลือกเมนูอาหาร
+          เมนูอาหาร
         </h3>
 
         <div class="food-container" style="margin-left: 20px">
           <div class="food-list">
-            <q-btn
-              v-for="(item, index) in menuItems"
-              :key="index"
-              rounded
-              outlined
-              unelevated
-              flat
-              class="FoodChip"
-              :class="{ 'active-btn': selectedFoods.some(f => f.name === item) }"
-              color="white"
-              text-color="black"
-              :label="item"
-              @click="toggleSelection(item)"
-              :disable="disable"
-            />
+            <q-btn v-for="(item, index) in menuItems" :key="index" rounded outlined unelevated flat class="FoodChip"
+              :class="{ 'active-btn': selectedFoods.some(f => f.name === item) }" color="white" text-color="black"
+              :label="item" @click="toggleSelection(item)" :disable="disable">
+              <template v-slot:default>
+             
+                <q-icon name="close" class="delete-icon" @click.stop="removeMenuItem(item)" v-if="!disable" />
+              </template>
+            </q-btn>
+
 
             <!-- ปุ่มเพิ่มเมนู -->
-            <q-btn
-              v-if="!disable"
-              ref="editableBtn"
-              rounded
-              outlined
-              unelevated
-              flat
-              class="FoodChip add-food-btn"
-              color="grey-4"
-              text-color="black"
-              @click="startEditing"
-            >
+            <q-btn v-if="!disable" ref="editableBtn" rounded outlined unelevated flat class="FoodChip add-food-btn"
+              color="grey-4" text-color="black" @click="startEditing">
               <span v-if="!addingNewFood">+</span>
-              <input
-                v-else
-                v-model="newFoodName"
-                type="text"
-                class="editable-input"
-                @blur="addFood"
-                @keyup.enter="addFood"
-                ref="inputField"
-              />
+              <input v-else v-model="newFoodName" type="text" class="editable-input" @blur="addFood"
+                @keyup.enter="addFood" ref="inputField" />
             </q-btn>
           </div>
         </div>
 
         <div class="button-container">
           <q-btn class="btnreject" label="ยกเลิก" @click="cancelSelection" :disable="disable" />
-          <q-btn
-            class="btnsecces"
-            label="บันทึกและยืนยัน"
-            @click="confirmSelection(true)"
-            :disable="disable"
-          />
-          <q-btn
-            class="btnconfirm"
-            label="ยืนยัน"
-            @click="confirmSelection(false)"
-            :disable="disable"
-          />
+          <q-btn class="btnsecces" label="บันทึกและยืนยัน" @click="confirmSelection(true)" :disable="disable" />
+          <q-btn class="btnconfirm" label="ยืนยัน" @click="confirmSelection(false)" :disable="disable" />
         </div>
       </div>
     </q-dialog>
@@ -118,7 +74,7 @@ const inputField = ref<HTMLInputElement | null>(null)
 
 const menuItems = ref<string[]>([]) // รายชื่ออาหารทั้งหมด
 const menuItemsIdMap = ref<Record<string, string>>({}) // map: name → id
-  watch(
+watch(
   () => props.foodMenu,
   (newVal) => {
     if (newVal) {
@@ -214,6 +170,16 @@ onMounted(async () => {
     console.error('❌ โหลดรายการอาหารล้มเหลว', error)
   }
 })
+const removeMenuItem = (name: string) => {
+  if (props.disable) return
+  menuItems.value = menuItems.value.filter(item => item !== name)
+
+  // หากลบเมนูที่ถูกเลือกอยู่ด้วย ให้ลบจาก selectedFoods ด้วย
+  selectedFoods.value = selectedFoods.value.filter(f => f.name !== name)
+
+  // อัปเดตใน localStorage ด้วย
+  localStorage.setItem('menuItems', JSON.stringify(menuItems.value))
+}
 </script>
 
 <style scoped>
@@ -235,6 +201,7 @@ onMounted(async () => {
   width: 600px;
   flex-grow: 1;
 }
+
 .label {
   font-size: 20px;
   font-weight: normal;
@@ -243,9 +210,11 @@ onMounted(async () => {
   align-items: center;
   height: 40px;
 }
+
 .label_minWidth {
   min-width: 200px;
 }
+
 .input-group p {
   align-self: center;
   margin: 0;
@@ -257,6 +226,7 @@ onMounted(async () => {
   height: 40px !important;
   align-items: center;
 }
+
 .q-field__prepend {
   display: flex;
   align-items: center;
@@ -291,7 +261,9 @@ onMounted(async () => {
   font-size: 14px;
   border: 1px solid #ccc;
   cursor: pointer;
+  position: relative; 
 }
+
 .active-btn {
   background-color: #d0e4ff !important;
 }
@@ -313,6 +285,7 @@ onMounted(async () => {
 }
 
 .food-list {
+  margin-top: 10px;
   display: flex;
   flex-wrap: wrap;
   justify-content: flex-start;
@@ -324,6 +297,17 @@ onMounted(async () => {
 .disabled-icon {
   pointer-events: none;
   opacity: 0.5;
+}
+.delete-icon {
+  position: absolute;
+  top: -2px;
+  right: -3px;
+  background: red;
+  border-radius: 50%;
+  font-size: 10px;
+  padding: 2px;
+  color: white;
+  cursor: pointer;
 }
 
 ::v-deep(.q-field__control) {
@@ -338,4 +322,26 @@ onMounted(async () => {
   display: flex;
   align-items: center;
 }
+
+.food-input.q-field--readonly .q-field__control:focus-within {
+  outline: none !important;
+  box-shadow: none !important;
+}
+.food-input input[readonly] {
+  pointer-events: none;
+  user-select: none;
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+.food-input .q-field__control {
+  box-shadow: none !important;
+  outline: none !important;
+}
+.food-input.q-field--readonly .q-field__native {
+  outline: none !important;
+  box-shadow: none !important;
+  pointer-events: none;
+}
+
 </style>

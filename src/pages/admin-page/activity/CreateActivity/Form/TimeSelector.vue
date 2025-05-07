@@ -16,6 +16,7 @@
             <q-icon
               name="access_time"
               class="cursor-pointer"
+              style="color: black;"
               :class="{ 'disabled-icon': disable }"
             >
               <q-menu ref="menuStart" class="time-picker-card" v-if="!disable">
@@ -52,6 +53,7 @@
               name="access_time"
               class="cursor-pointer"
               :class="{ 'disabled-icon': disable }"
+               style="color: black;"
             >
               <q-menu ref="menuEnd" class="time-picker-card" v-if="!disable">
                 <div class="time-container">

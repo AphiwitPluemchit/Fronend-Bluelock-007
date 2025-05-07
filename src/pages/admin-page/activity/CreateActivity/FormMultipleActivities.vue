@@ -35,7 +35,7 @@
 
       <!-- Time -->
       <div class="input-group">
-        <p class="label label_minWidth" style="align-self: flex-start">เวลาที่จัดกิจกรรม:</p>
+        <p class="label label_minWidth" style="align-self: flex-start">เวลาที่จัดกิจกรรม :</p>
         <div class="day-time-container">
           <q-checkbox class="checkbox-left" v-model="sameTimeForAll" label="เวลาเดิมทุกวัน"
             @update:model-value="() => applySameTime(index)" />

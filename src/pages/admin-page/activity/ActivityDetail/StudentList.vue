@@ -230,7 +230,7 @@ onMounted(async () => {
         </div>
         <!-- ช่องค้นหา -->
         <q-input dense outlined v-model="search1" @keyup.enter="fetchStudents"
-          placeholder="ค้นหาชื่อ-นามสกุล/ รหัสนิสิต" class="q-mr-sm searchbox" :style="{ boxShadow: 'none' }">
+          label="ค้นหาชื่อ-นามสกุล/ รหัสนิสิต" class="q-mr-sm searchbox" :style="{ boxShadow: 'none' }">
 
           <template v-slot:append>
             <q-icon name="search" />

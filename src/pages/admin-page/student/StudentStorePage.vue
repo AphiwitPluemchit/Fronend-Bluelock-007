@@ -12,7 +12,7 @@
             <!--  ช่องค้นหา + ฟิลเตอร์ + ปุ่มเพิ่ม -->
             <div class="row justify-end items-center">
                 <div class="row">
-                    <q-input dense outlined v-model="search1" placeholder="ค้นหา ชื่อนิสิต" class="q-mr-sm searchbox"
+                    <q-input dense outlined v-model="search1" label="ค้นหา ชื่อนิสิต" class="q-mr-sm searchbox"
                         :style="{ boxShadow: 'none' }">
                         <template v-slot:append>
                             <q-icon name="search" />

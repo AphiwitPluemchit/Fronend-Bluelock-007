@@ -3,7 +3,7 @@
     <p class="label label_minWidth">วันที่จัดกิจกรรม :</p>
     <q-input outlined v-model="formattedDateRange" style="width: 600px" readonly :disable="disable">
       <template v-slot:prepend>
-        <q-icon name="event" class="cursor-pointer" :class="{ 'disabled-icon': disable }">
+        <q-icon name="event" class="cursor-pointer" :class="{ 'disabled-icon': disable }"  style="color: black;">
           <q-menu ref="datePopupRef" style="overflow: visible" v-if="!disable">
             <q-date
               v-model="internalDateRange"

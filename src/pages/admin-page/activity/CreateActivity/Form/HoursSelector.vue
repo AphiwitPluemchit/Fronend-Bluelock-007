@@ -19,7 +19,7 @@ import { defineProps, defineEmits, ref, watch } from 'vue';
 
 const props = defineProps<{ 
   modelValue: number;
-  disable?: boolean; // เพิ่ม prop disable
+  disable?: boolean; 
 }>();
 
 const emit = defineEmits<{ (event: 'update:modelValue', value: number): void }>();
