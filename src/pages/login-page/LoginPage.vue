@@ -18,9 +18,9 @@
         <q-form @submit.prevent="handleLogin">
           <q-input
             v-model="auth.form.email"
-            outlined
+            label="ชื่อผู้ใช้งาน"
             dense
-            placeholder="ชื่อผู้ใช้งาน"
+            outlined
             class="q-mb-md"
           >
             <template #prepend><q-icon name="person" /></template>
@@ -31,7 +31,7 @@
             outlined
             dense
             type="password"
-            placeholder="รหัสผ่าน"
+            label="รหัสผ่าน"
             class="q-mb-sm"
           >
             <template #prepend><q-icon name="lock" /></template>

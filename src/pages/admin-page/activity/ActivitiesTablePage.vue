@@ -12,7 +12,7 @@
       <div class="row justify-between items-center">
         <div class="text-h6">กิจกรรมที่กำลังเปิดและปิดลงทะเบียนแล้ว</div>
         <div class="row">
-          <q-input dense outlined v-model="query1.search" placeholder="ค้นหา ชื่อกิจกรรม" @keyup.enter="data1"
+          <q-input dense outlined v-model="query1.search" label="ค้นหา ชื่อกิจกรรม" @keyup.enter="data1"
             class="q-mr-sm searchbox" :style="{ boxShadow: 'none' }">
             <template v-slot:append>
               <q-icon name="search" />
@@ -99,7 +99,7 @@
       <div class="row justify-between items-center">
         <div class="text-h6">กิจกรรมที่กำลังวางแผน</div>
         <div class="row">
-          <q-input dense outlined v-model="query2.search" placeholder="ค้นหา ชื่อกิจกรรม" class="q-mr-sm searchbox"
+          <q-input dense outlined v-model="query2.search" label="ค้นหา ชื่อกิจกรรม" class="q-mr-sm searchbox"
             @keyup.enter="data2" :style="{ boxShadow: 'none' }">
             <template v-slot:append>
               <q-icon name="search" />
@@ -183,7 +183,7 @@
       <div class="row justify-between items-center">
         <div class="text-h6">อื่น ๆ</div>
         <div class="row">
-          <q-input dense outlined v-model="query3.search" placeholder="ค้นหา ชื่อกิจกรรม" @keyup.enter="data3"
+          <q-input dense outlined v-model="query3.search" label="ค้นหา ชื่อกิจกรรม" @keyup.enter="data3"
             class="q-mr-sm searchbox" :style="{ boxShadow: 'none' }">
             <template v-slot:append>
               <q-icon name="search" />
