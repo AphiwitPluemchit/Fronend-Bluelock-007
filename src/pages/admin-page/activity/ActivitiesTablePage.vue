@@ -69,9 +69,9 @@
             }}</q-td>
             <q-td key="type" style="width: 10%">{{ props.row.type }}</q-td>
             <q-td key="status" style="width: 10%;">
-              <q-banner :class="getStatusClass(props.row.status)" class="status-banner" unelevated>
+              <q-badge :class="getStatusClass(props.row.status)" class="status-badge" unelevated>
                 <div class="text-center full-width">{{ props.row.status }}</div>
-              </q-banner>
+              </q-badge>
             </q-td>
             <q-td class="q-gutter-x-sm" key="action" style="width: 8%">
               <q-icon name="visibility" class="cursor-pointer" size="20px" @click="goToPageDetail(props.row.id, true)">
@@ -151,9 +151,9 @@
             }}</q-td>
             <q-td key="type" style="width: 10%">{{ props.row.type }}</q-td>
             <q-td key="status" style="width: 10%">
-              <q-banner :class="getStatusClass(props.row.status)" class="status-banner" unelevated>
+              <q-badge :class="getStatusClass(props.row.status)" class="status-badge" unelevated>
                 <div class="text-center full-width">{{ props.row.status }}</div>
-              </q-banner></q-td>
+              </q-badge></q-td>
             <q-td class="q-gutter-x-sm" key="action" style="width: 8%">
               <q-icon name="visibility" class="cursor-pointer" size="20px" @click="goToPageDetail(props.row.id, true)">
                 <q-tooltip>
@@ -230,9 +230,9 @@
             }}</q-td>
             <q-td key="type" style="width: 10%">{{ props.row.type }}</q-td>
             <q-td key="status" style="width: 10%">
-              <q-banner :class="getStatusClass(props.row.status)" class="status-banner" unelevated>
+              <q-badge :class="getStatusClass(props.row.status)" class="status-badge" unelevated>
                 <div class="text-center full-width">{{ props.row.status }}</div>
-              </q-banner></q-td>
+              </q-badge></q-td>
             <q-td class="q-gutter-x-sm" key="action" style="width: 8%">
               <q-icon name="visibility" class="cursor-pointer" size="20px" @click="goToPageDetail(props.row.id, true)">
                 <q-tooltip>
@@ -666,11 +666,14 @@ async function onRequest3(props: any) {
   width: 130px;
 }
 
-.status-banner {
-  height: 20px;
-  font-size: 13px;
-  padding: 0 10px;
-  display: flex;
+.status-badge {
+  height: 32px;
+  line-height: 28px;
+  padding: 0 12px;
   border-radius: 999px;
+  text-align: center;
+  display: inline-block;
+  font-size: 15px;
 }
+
 </style>

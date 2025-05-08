@@ -3,9 +3,9 @@
     <!-- Status -->
     <div class="input-group">
       <p class="label label_minWidth">สถานะ:</p>
-      <q-banner :class="statusClass" class="status-btn" >
+      <q-badge :class="statusClass" class="status-btn" >
         <div align="center" style="font-size: 20px;" >{{ activityStatus }}</div>
-        </q-banner>
+        </q-badge>
       <q-btn v-if="props.isEditing" class="btnchange" label="เปลี่ยน" @click="showChangeStatusDialog = true"
         :disable="!isEditing" />
     </div>
@@ -25,7 +25,7 @@
     <FoodSelector v-model:foodMenu="foodMenu" v-model:foodMenuDisplay="foodMenuDisplay" :disable="!isEditing" />
 
     <!-- Sub Activities List -->
-    <div v-for="(subActivity, index) in subActivities" :key="index" class="sub-activity">
+    <div v-for="(subActivity, index) in subActivities" :key="index" class="sub-activity" style="margin-top: 15px;">
 
       <!-- Remove Icon -->
       <div class="remove-icon" :class="{ 'icon-disabled': !isEditing }" @click="isEditing && removeSubActivity(index)">
@@ -610,6 +610,11 @@ const statusClass = computed(() => {
   height: 40px;
   width: 200px;
   font-size: 20px;
+
+  display: flex;
+  align-items: center;       
+  justify-content: center; 
+  text-align: center;
 }
 
 .time-container {

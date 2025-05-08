@@ -3,9 +3,9 @@
     <!-- Status -->
     <div class="input-group">
       <p class="label label_minWidth">สถานะ:</p>
-      <q-banner class="status-btn">
-        <div style="font-size: 20px;" align="center">กำลังวางแผน</div>
-      </q-banner>
+      <q-badge class="status-btn">
+        กำลังวางแผน
+      </q-badge>
     </div>
 
     <!-- Activity Name -->
@@ -418,7 +418,12 @@ onMounted(() => {
   border-radius: 50px;
   height: 40px;
   width: 200px;
-  font-size: 50px;
+  font-size: 20px;
+
+  display: flex;
+  align-items: center;       
+  justify-content: center; 
+  text-align: center;
 }
 
 .time-container {
