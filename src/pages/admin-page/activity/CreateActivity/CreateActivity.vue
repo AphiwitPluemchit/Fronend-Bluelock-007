@@ -9,17 +9,10 @@
             ref="imageComponentRef"
             @file-selected="handleFileSelected"
           />
-
         </div>
 
         <div class="form-section">
-          <!-- ✅ เปลี่ยนตรงนี้ -->
-          <FormMultipleDays
-            v-if="selectedActivityType === 'กิจกรรมเดียว'"
-            :image-file="selectedImageFile"
-          />
           <FormMultipleActivities
-            v-else
             :image-file="selectedImageFile"
           />
         </div>
@@ -31,7 +24,6 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import CreateActivity_Image from './CreateActivity_Image.vue'
-import FormMultipleDays from './FormMultipleDays.vue'
 import FormMultipleActivities from './FormMultipleActivities.vue'
 import AppBreadcrumbs from 'src/components/AppBreadcrumbs.vue'
 
@@ -41,8 +33,6 @@ const selectedImageFile = ref<File | null>(null)
 const handleFileSelected = (file: File) => {
   selectedImageFile.value = file
 }
-
-const selectedActivityType = ref('หลายกิจกรรม')
 
 const breadcrumbs = ref({
   previousPage: { title: 'จัดการกิจกรรม', path: '/Admin/ActivitiesManagement' },
@@ -94,11 +84,5 @@ const breadcrumbs = ref({
   font-size: 15px;
   font-weight: bold;
   font-family: 'Noto Serif Thai', serif;
-}
-.dropdown {
-  border-radius: 5px;
-  width: 200px;
-  height: 55px;
-  margin-top: 10px;
 }
 </style>

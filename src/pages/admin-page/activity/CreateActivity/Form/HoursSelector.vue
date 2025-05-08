@@ -7,7 +7,6 @@
       v-model="localHours"
       type="number"
       @keypress="isNumber($event)"
-      @blur="validatePositive"
       :disable="disable" 
       :rules="[val => val >= 0 || 'กรุณากรอกชั่วโมงให้ถูกต้อง']"
     />
@@ -43,11 +42,6 @@ const isNumber = (event: KeyboardEvent) => {
   }
 };
 
-const validatePositive = () => {
-  if (isNaN(localHours.value) || localHours.value < 0) {
-    localHours.value = 0
-  }
-}
 </script>
 
 <style scoped>

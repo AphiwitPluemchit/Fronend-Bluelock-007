@@ -5,7 +5,8 @@
       <div class="text-h4">จัดการกิจกรรม</div>
     </div>
     <div class="row justify-end items-center">
-      <q-btn dense outlined icon="add" label="เพิ่มข้อมูล" class="btnadd" @click="goToPage()" />
+      <q-btn dense outlined icon="add" label="เพิ่มกิจกรรม" class="btnadd"
+        style=" background-color: #14279B ;color: white" @click="goToPage()" />
     </div>
     <!-- ตาราง 1 -->
     <section class="q-mt-lg">
@@ -59,35 +60,30 @@
             <q-td key="no" style="width: 5%">{{ props.rowIndex + 1 }}</q-td>
             <q-td key="name" style="width: 32%; overflow: hidden; text-overflow: ellipsis">{{
               props.row.name
-              }}</q-td>
+            }}</q-td>
             <q-td key="date" style="width: 10%">{{ props.row.date }}</q-td>
             <q-td key="time" style="width: 10%">{{ props.row.time }}</q-td>
             <q-td key="location" style="width: 6%">{{ props.row.location }}</q-td>
             <q-td key="participants" style="width: 12%; text-align: center">{{
               props.row.participants
-              }}</q-td>
+            }}</q-td>
             <q-td key="type" style="width: 10%">{{ props.row.type }}</q-td>
-            <q-td key="status" style="width: 10%">
-              <q-btn :label="props.row.status" :class="getStatusClass(props.row.status)" rounded unelevated /></q-td>
-            <q-td class="q-gutter-x-sm" key="action" style="width: 5%">
-              <q-btn icon="info" padding="none" flat color="grey-8"></q-btn>
-
-              <q-menu>
-                <q-list style="min-width: 200px">
-                  <q-item clickable @click="goToPageDetail(props.row.id, true)">
-                    <q-item-section avatar>
-                      <q-icon name="visibility" />
-                    </q-item-section>
-                    <q-item-section>ดูรายละเอียด</q-item-section>
-                  </q-item>
-                  <q-item clickable @click="goToPageDetail(props.row.id, false)">
-                    <q-item-section avatar>
-                      <q-icon name="edit" />
-                    </q-item-section>
-                    <q-item-section>แก้ไข</q-item-section>
-                  </q-item>
-                </q-list>
-              </q-menu>
+            <q-td key="status" style="width: 10%;">
+              <q-banner :class="getStatusClass(props.row.status)" class="status-banner" unelevated>
+                <div class="text-center full-width">{{ props.row.status }}</div>
+              </q-banner>
+            </q-td>
+            <q-td class="q-gutter-x-sm" key="action" style="width: 8%">
+              <q-icon name="visibility" class="cursor-pointer" size="20px" @click="goToPageDetail(props.row.id, true)">
+                <q-tooltip>
+                  ดูรายละเอียด
+                </q-tooltip>
+              </q-icon>
+              <q-icon name="edit" class="cursor-pointer" size="20px" @click="goToPageDetail(props.row.id, false)">
+                <q-tooltip>
+                  แก้ไข
+                </q-tooltip>
+              </q-icon>
             </q-td>
           </q-tr>
         </template>
@@ -146,34 +142,29 @@
             <q-td key="no" style="width: 5%">{{ props.rowIndex + 1 }}</q-td>
             <q-td key="name" style="width: 32%; overflow: hidden; text-overflow: ellipsis">{{
               props.row.name
-              }}</q-td>
+            }}</q-td>
             <q-td key="date" style="width: 10%">{{ props.row.date }}</q-td>
             <q-td key="time" style="width: 10%">{{ props.row.time }}</q-td>
             <q-td key="location" style="width: 6%">{{ props.row.location }}</q-td>
             <q-td key="participants" style="width: 12%; text-align: center">{{
               props.row.participants
-              }}</q-td>
+            }}</q-td>
             <q-td key="type" style="width: 10%">{{ props.row.type }}</q-td>
             <q-td key="status" style="width: 10%">
-              <q-btn :label="props.row.status" :class="getStatusClass(props.row.status)" rounded unelevated /></q-td>
-            <q-td class="q-gutter-x-sm" key="action" style="width: 5%">
-              <q-btn icon="info" padding="none" flat color="grey-8"></q-btn>
-              <q-menu>
-                <q-list style="min-width: 200px">
-                  <q-item clickable @click="goToPageDetail(props.row.id, true)">
-                    <q-item-section avatar>
-                      <q-icon name="visibility" />
-                    </q-item-section>
-                    <q-item-section>ดูรายละเอียด</q-item-section>
-                  </q-item>
-                  <q-item clickable @click="goToPageDetail(props.row.id, false)">
-                    <q-item-section avatar>
-                      <q-icon name="edit" />
-                    </q-item-section>
-                    <q-item-section>แก้ไข</q-item-section>
-                  </q-item>
-                </q-list>
-              </q-menu>
+              <q-banner :class="getStatusClass(props.row.status)" class="status-banner" unelevated>
+                <div class="text-center full-width">{{ props.row.status }}</div>
+              </q-banner></q-td>
+            <q-td class="q-gutter-x-sm" key="action" style="width: 8%">
+              <q-icon name="visibility" class="cursor-pointer" size="20px" @click="goToPageDetail(props.row.id, true)">
+                <q-tooltip>
+                  ดูรายละเอียด
+                </q-tooltip>
+              </q-icon>
+              <q-icon name="edit" class="cursor-pointer" size="20px" @click="goToPageDetail(props.row.id, false)">
+                <q-tooltip>
+                  แก้ไข
+                </q-tooltip>
+              </q-icon>
             </q-td>
           </q-tr> </template></q-table>
     </section>
@@ -230,34 +221,29 @@
             <q-td key="no" style="width: 5%">{{ props.rowIndex + 1 }}</q-td>
             <q-td key="name" style="width: 32%; overflow: hidden; text-overflow: ellipsis">{{
               props.row.name
-              }}</q-td>
+            }}</q-td>
             <q-td key="date" style="width: 10%">{{ props.row.date }}</q-td>
             <q-td key="time" style="width: 10%">{{ props.row.time }}</q-td>
             <q-td key="location" style="width: 6%">{{ props.row.location }}</q-td>
             <q-td key="participants" style="width: 12%; text-align: center">{{
               props.row.participants
-              }}</q-td>
+            }}</q-td>
             <q-td key="type" style="width: 10%">{{ props.row.type }}</q-td>
             <q-td key="status" style="width: 10%">
-              <q-btn :label="props.row.status" :class="getStatusClass(props.row.status)" rounded unelevated /></q-td>
-            <q-td class="q-gutter-x-sm" key="action" style="width: 5%">
-              <q-btn icon="info" padding="none" flat color="grey-8"></q-btn>
-              <q-menu>
-                <q-list style="min-width: 200px">
-                  <q-item clickable @click="goToPageDetail(props.row.id, true)">
-                    <q-item-section avatar>
-                      <q-icon name="visibility" />
-                    </q-item-section>
-                    <q-item-section>ดูรายละเอียด</q-item-section>
-                  </q-item>
-                  <q-item clickable @click="goToPageDetail(props.row.id, false)">
-                    <q-item-section avatar>
-                      <q-icon name="edit" />
-                    </q-item-section>
-                    <q-item-section>แก้ไข</q-item-section>
-                  </q-item>
-                </q-list>
-              </q-menu>
+              <q-banner :class="getStatusClass(props.row.status)" class="status-banner" unelevated>
+                <div class="text-center full-width">{{ props.row.status }}</div>
+              </q-banner></q-td>
+            <q-td class="q-gutter-x-sm" key="action" style="width: 8%">
+              <q-icon name="visibility" class="cursor-pointer" size="20px" @click="goToPageDetail(props.row.id, true)">
+                <q-tooltip>
+                  ดูรายละเอียด
+                </q-tooltip>
+              </q-icon>
+              <q-icon name="edit" class="cursor-pointer" size="20px" @click="goToPageDetail(props.row.id, false)">
+                <q-tooltip>
+                  แก้ไข
+                </q-tooltip>
+              </q-icon>
             </q-td>
           </q-tr> </template></q-table>
     </section>
@@ -678,5 +664,13 @@ async function onRequest3(props: any) {
   border: 2px solid #575656;
 
   width: 130px;
+}
+
+.status-banner {
+  height: 20px;
+  font-size: 13px;
+  padding: 0 10px;
+  display: flex;
+  border-radius: 999px;
 }
 </style>

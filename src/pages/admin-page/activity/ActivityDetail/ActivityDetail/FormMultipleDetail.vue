@@ -1,10 +1,11 @@
 <template>
   <q-page>
-
     <!-- Status -->
     <div class="input-group">
       <p class="label label_minWidth">สถานะ:</p>
-      <q-btn :label="activityStatus" :class="statusClass" class="status-btn" />
+      <q-banner :class="statusClass" class="status-btn" >
+        <div align="center" style="font-size: 20px;" >{{ activityStatus }}</div>
+        </q-banner>
       <q-btn v-if="props.isEditing" class="btnchange" label="เปลี่ยน" @click="showChangeStatusDialog = true"
         :disable="!isEditing" />
     </div>

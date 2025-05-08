@@ -3,12 +3,12 @@
     <p class="label label_minWidth">จำนวนที่รับ :</p>
     <q-input
       outlined
-      style="width: 240px"
+      style="width: 220px"
       v-model.number="localSeats"
       type="number"
       @keypress="isNumber($event)"
-      @blur="validatePositive"
       :disable="disable"
+      :rules="[val => val >= 0 || 'กรุณากรอกจำนวนที่รับให้ถูกต้อง']"
     />
   </div>
 </template>
@@ -31,17 +31,16 @@ const localSeats = ref<number>(props.modelValue)
 watch(localSeats, (newVal) => {
   emit('update:modelValue', newVal)
 })
-
+watch(
+  () => props.modelValue,
+  (newVal) => {
+    localSeats.value = newVal
+  }
+)
 const isNumber = (event: KeyboardEvent) => {
   const charCode = event.which ? event.which : event.keyCode
   if (charCode < 48 || charCode > 57) {
     event.preventDefault()
-  }
-}
-
-const validatePositive = () => {
-  if (isNaN(localSeats.value) || localSeats.value < 0) {
-    localSeats.value = 0
   }
 }
 </script>
@@ -55,7 +54,9 @@ const validatePositive = () => {
   align-items: center;
   height: 40px;
 }
-
+.label_minWidth {
+  min-width: 200px;
+}
 .input-group p {
   align-self: center;
   margin: 0;

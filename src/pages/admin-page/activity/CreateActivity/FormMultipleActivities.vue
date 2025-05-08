@@ -3,7 +3,9 @@
     <!-- Status -->
     <div class="input-group">
       <p class="label label_minWidth">สถานะ:</p>
-      <q-btn label="กำลังวางแผน" class="status-btn" />
+      <q-banner class="status-btn">
+        <div style="font-size: 20px;" align="center">กำลังวางแผน</div>
+      </q-banner>
     </div>
 
     <!-- Activity Name -->
@@ -32,48 +34,36 @@
       <!-- Date -->
       <MutiDate v-model="subActivity.activityDateInternal"
         @update:modelValue="(dates) => generateDaysInRange(dates, index)" />
-        
+
       <!-- Time -->
-     <!-- Time -->
-<div class="input-group">
-  <p class="label label_minWidth" style="align-self: flex-start">เวลาที่จัดกิจกรรม :</p>
-  <div class="day-time-container">
-    <q-checkbox class="checkbox-left" v-model="sameTimeForAll" label="เวลาเดิมทุกวัน"
-      @update:model-value="() => applySameTime(index)" />
+      <!-- Time -->
+      <div class="input-group">
+        <p class="label label_minWidth" style="align-self: flex-start">เวลาที่จัดกิจกรรม :</p>
+        <div class="day-time-container">
+          <q-checkbox class="checkbox-left" v-model="sameTimeForAll" label="เวลาเดิมทุกวัน"
+            @update:model-value="() => applySameTime(index)" />
 
-    <!-- ❗ให้แสดงกล่องเวลาเสมอ -->
-    <div v-if="subActivity.selectedDays.length > 0">
-      <div v-for="(day, dIndex) in subActivity.selectedDays" :key="day.date">
-        <TimeSelector
-          v-model:startTime="day.startTime"
-          v-model:endTime="day.endTime"
-          :formattedDate="day.formattedDate"
-          @update:startTime="v => updateDayTime(index, dIndex, 'start', v)"
-          @update:endTime="v => updateDayTime(index, dIndex, 'end', v)" />
+          <div v-if="subActivity.selectedDays.length > 0">
+            <div v-for="(day, dIndex) in subActivity.selectedDays" :key="day.date">
+              <TimeSelector v-model:startTime="day.startTime" v-model:endTime="day.endTime"
+                :formattedDate="day.formattedDate" @update:startTime="v => updateDayTime(index, dIndex, 'start', v)"
+                @update:endTime="v => updateDayTime(index, dIndex, 'end', v)" />
+            </div>
+          </div>
+
+          <div v-else>
+            <TimeSelector v-model:startTime="defaultTime.startTime" v-model:endTime="defaultTime.endTime"
+              formattedDate="" />
+          </div>
+        </div>
       </div>
-    </div>
-
-    <!-- ✅ ถ้ายังไม่มีวัน ให้แสดง TimeSelector เปล่า 1 ช่อง -->
-    <div v-else>
-      <TimeSelector
-        v-model:startTime="defaultTime.startTime"
-        v-model:endTime="defaultTime.endTime"
-        formattedDate=""
-      />
-    </div>
-  </div>
-</div>
 
 
       <HoursSelector v-model="subActivity.totalHours" class="input-group" />
       <!-- Room and Seats -->
       <Room v-model="subActivity.roomName" class="input-group" />
 
-      <div class="input-group">
-        <p class="label label_minWidth">จำนวนที่รับ :</p>
-        <q-input outlined style="width: 225px" v-model="subActivity.seats" type="number" @keypress="isNumber($event)"
-          @blur="validatePositive('seats', index)" />
-      </div>
+      <SeatsSelector v-model="subActivity.seats" class="input-group" />
 
       <!-- Department -->
       <DepartmentSelector v-model="subActivity.departments" class="input-group" />
@@ -95,12 +85,13 @@
       <!-- Add Activity Button -->
     </div>
     <div class="btn-container">
-      <q-btn class="btnAddActivity" @click="addSubActivity">
-        <p class="label">
+      <q-btn class="btnAddActivity" @click="addSubActivity" style="background-color: #3676F9">
+        <p class="label text-white">
           <q-icon name="add" size="20px" />
           เพิ่มกิจกรรม
         </p>
       </q-btn>
+
     </div>
     <div class="button-group">
       <q-btn class="btnreject" @click="goToActivitiesManagement">ยกเลิก</q-btn>
@@ -118,6 +109,7 @@ import TimeSelector from 'src/pages/admin-page/activity/CreateActivity/Form/Time
 import Room from 'src/pages/admin-page/activity/CreateActivity/Form/RoomSelector.vue'
 import YearSelector from 'src/pages/admin-page/activity/CreateActivity/Form/YearSelector.vue'
 import DepartmentSelector from 'src/pages/admin-page/activity/CreateActivity/Form/DepartmentSelector.vue'
+import SeatsSelector from 'src/pages/admin-page/activity/CreateActivity/Form/SeatsSelector.vue'
 import ActivityType from 'src/pages/admin-page/activity/CreateActivity/Form/ActivityType.vue'
 import { useRouter } from 'vue-router'
 import type { Food } from 'src/types/food'
@@ -165,7 +157,7 @@ const generateDaysInRange = (selectedDates: string[], subActivityIndex: number) 
   if (!sub) return
 
   if (!selectedDates || selectedDates.length === 0) {
-    sub.selectedDays = [] 
+    sub.selectedDays = []
     return
   }
 
@@ -215,7 +207,7 @@ const updateDayTime = (
 }
 const addSubActivity = () => {
 
-  const index = subActivities.value.length 
+  const index = subActivities.value.length
 
   subActivities.value.push({
     subActivityName: '',
@@ -237,13 +229,6 @@ const addSubActivity = () => {
     },
     { deep: true }
   )
-}
-const isNumber = (event: KeyboardEvent) => {
-  const charCode = event.which ? event.which : event.keyCode
-
-  if (charCode < 48 || charCode > 57) {
-    event.preventDefault()
-  }
 }
 const formatThaiDate = (dateStr: string): string => {
   if (!dateStr) return ''
@@ -279,14 +264,6 @@ const thaiLocale = {
     'พฤศจิกายน',
     'ธันวาคม',
   ],
-}
-
-const validatePositive = (field: 'seats', index?: number) => {
-  if (field === 'seats' && typeof index === 'number' && subActivities.value[index]) {
-    if (!subActivities.value[index].seats || subActivities.value[index].seats < 0) {
-      subActivities.value[index].seats = 0
-    }
-  }
 }
 
 const removeSubActivity = (index: number) => {
@@ -441,7 +418,7 @@ onMounted(() => {
   border-radius: 50px;
   height: 40px;
   width: 200px;
-  font-size: 20px;
+  font-size: 50px;
 }
 
 .time-container {
@@ -457,10 +434,6 @@ onMounted(() => {
   margin-bottom: 20px;
 }
 
-.q-icon {
-  cursor: pointer;
-}
-
 .btn-container {
   display: flex;
   align-items: center;
@@ -474,5 +447,9 @@ onMounted(() => {
   justify-content: flex-end;
   gap: 25px;
   margin-top: 30px;
+}
+
+.large-font {
+  font-size: 100px;
 }
 </style>

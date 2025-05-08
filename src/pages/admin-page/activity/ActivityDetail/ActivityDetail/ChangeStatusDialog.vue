@@ -188,7 +188,7 @@ const confirmStatusChange = () => {
 }
 
 .status-cancelled.active-status {
-  background-color: #ffc5c5;
+  background-color: #ffa7a7;
 }
 
 .cancel-btn {
