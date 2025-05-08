@@ -32,23 +32,38 @@
       <!-- Date -->
       <MutiDate v-model="subActivity.activityDateInternal"
         @update:modelValue="(dates) => generateDaysInRange(dates, index)" />
-
+        
       <!-- Time -->
-      <div class="input-group">
-        <p class="label label_minWidth" style="align-self: flex-start">เวลาที่จัดกิจกรรม :</p>
-        <div class="day-time-container">
-          <q-checkbox class="checkbox-left" v-model="sameTimeForAll" label="เวลาเดิมทุกวัน"
-            @update:model-value="() => applySameTime(index)" />
-          <div class="day-time-container">
-            <div v-for="(day, dIndex) in subActivity.selectedDays" :key="day.date">
-              <TimeSelector v-model:startTime="day.startTime" v-model:endTime="day.endTime"
-                :formattedDate="day.formattedDate" @update:startTime="v => updateDayTime(index, dIndex, 'start', v)"
-                @update:endTime="v => updateDayTime(index, dIndex, 'end', v)" />
-            </div>
+     <!-- Time -->
+<div class="input-group">
+  <p class="label label_minWidth" style="align-self: flex-start">เวลาที่จัดกิจกรรม :</p>
+  <div class="day-time-container">
+    <q-checkbox class="checkbox-left" v-model="sameTimeForAll" label="เวลาเดิมทุกวัน"
+      @update:model-value="() => applySameTime(index)" />
 
-          </div>
-        </div>
+    <!-- ❗ให้แสดงกล่องเวลาเสมอ -->
+    <div v-if="subActivity.selectedDays.length > 0">
+      <div v-for="(day, dIndex) in subActivity.selectedDays" :key="day.date">
+        <TimeSelector
+          v-model:startTime="day.startTime"
+          v-model:endTime="day.endTime"
+          :formattedDate="day.formattedDate"
+          @update:startTime="v => updateDayTime(index, dIndex, 'start', v)"
+          @update:endTime="v => updateDayTime(index, dIndex, 'end', v)" />
       </div>
+    </div>
+
+    <!-- ✅ ถ้ายังไม่มีวัน ให้แสดง TimeSelector เปล่า 1 ช่อง -->
+    <div v-else>
+      <TimeSelector
+        v-model:startTime="defaultTime.startTime"
+        v-model:endTime="defaultTime.endTime"
+        formattedDate=""
+      />
+    </div>
+  </div>
+</div>
+
 
       <HoursSelector v-model="subActivity.totalHours" class="input-group" />
       <!-- Room and Seats -->
@@ -140,10 +155,19 @@ const activityName = ref('')
 const foodMenu = ref<Food[]>([])
 const subActivities = ref<SubActivity[]>([])
 const sameTimeForAll = ref(false)
+const defaultTime = ref({
+  startTime: '00:00',
+  endTime: '00:00',
+})
 
 const generateDaysInRange = (selectedDates: string[], subActivityIndex: number) => {
   const sub = subActivities.value[subActivityIndex]
   if (!sub) return
+
+  if (!selectedDates || selectedDates.length === 0) {
+    sub.selectedDays = [] 
+    return
+  }
 
   sub.selectedDays = selectedDates.map((dateString) => ({
     date: dateString,
@@ -156,6 +180,7 @@ const generateDaysInRange = (selectedDates: string[], subActivityIndex: number) 
     endTime: '12:00',
   }))
 }
+
 const applySameTime = (subActivityIndex: number) => {
   const sub = subActivities.value[subActivityIndex]
   if (!sub) return
@@ -189,8 +214,6 @@ const updateDayTime = (
   }
 }
 const addSubActivity = () => {
-  const today = new Date()
-  const formattedToday = today.toISOString().split('T')[0] as string
 
   const index = subActivities.value.length 
 
@@ -202,12 +225,10 @@ const addSubActivity = () => {
     detailActivity: '',
     departments: ['CS', 'SE', 'ITDI', 'AAI'],
     years: ['1', '2', '3', '4'],
-    activityDateInternal: [formattedToday],
+    activityDateInternal: [],
     selectedDays: [],
     totalHours: 0,
   })
-
-  generateDaysInRange([formattedToday], index)
 
   watch(
     () => subActivities.value[index]?.selectedDays,
@@ -354,20 +375,7 @@ watch(sameTimeForAll, (newValue) => {
   }
 })
 onMounted(() => {
-  const today = new Date()
-  const year = today.getFullYear()
-  const month = String(today.getMonth() + 1).padStart(2, '0')
-  const day = String(today.getDate()).padStart(2, '0')
-  const dateString = `${year}-${month}-${day}`
   addSubActivity()
-  subActivities.value.forEach((sub, index) => {
-    sub.activityDateInternal = [dateString]
-    generateDaysInRange(sub.activityDateInternal, index)
-
-    if (sameTimeForAll.value) {
-      applySameTime(index)
-    }
-  })
 })
 
 </script>

@@ -58,12 +58,20 @@ const formattedDateRange = computed(() => {
 })
 
 const onDateRangeChange = () => {
-  if (props.disable) return; // ถ้า disable ห้ามเปลี่ยนค่า
+  if (props.disable) return;
+
+  if (!internalDateRange.value || internalDateRange.value.length === 0) {
+    emit('update:modelValue', [])
+    return
+  }
+
+  // ✅ ถ้ายังมีวันอยู่ ให้ sort และ emit ตามปกติ
   internalDateRange.value = [...internalDateRange.value].sort(
     (a, b) => new Date(a).getTime() - new Date(b).getTime(),
   )
   emit('update:modelValue', internalDateRange.value)
 }
+
 
 const formatThaiDate = (dateStr: string): string => {
   if (!dateStr) return ''

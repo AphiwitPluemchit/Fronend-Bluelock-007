@@ -26,8 +26,8 @@
 
       <!-- ปุ่มยืนยัน & ยกเลิก -->
       <q-card-actions align="right">
-        <q-btn class="cancel-btn" label="ยกเลิก" @click="closeDialog" />
-        <q-btn class="confirm-btn" label="ยืนยัน" @click="confirmStatusChange" />
+        <q-btn class="btnreject" label="ยกเลิก" @click="closeDialog" />
+        <q-btn class="btnconfirm" label="ยืนยัน" @click="confirmStatusChange" />
       </q-card-actions>
     </q-card>
   </q-dialog>

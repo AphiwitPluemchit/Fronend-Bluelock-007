@@ -5,9 +5,11 @@
     <div class="input-group">
       <p class="label label_minWidth">สถานะ:</p>
       <q-btn :label="activityStatus" :class="statusClass" class="status-btn" />
-      <q-btn v-if="props.isEditing" class="btnchange" label="เปลี่ยน" @click="showChangeStatusDialog = true" :disable="!isEditing" />
+      <q-btn v-if="props.isEditing" class="btnchange" label="เปลี่ยน" @click="showChangeStatusDialog = true"
+        :disable="!isEditing" />
     </div>
-    <ChangeStatusDialog v-model="showChangeStatusDialog" :currentStatus="activityStatus" @confirm="handleStatusChange" />
+    <ChangeStatusDialog v-model="showChangeStatusDialog" :currentStatus="activityStatus"
+      @confirm="handleStatusChange" />
 
     <!-- Activity Name -->
     <div class="input-group">
@@ -36,23 +38,20 @@
       </div>
 
       <!-- Date -->
-      <MutiDate v-model="subActivity.activityDateInternal" @update:modelValue="(dates) => generateDaysInRange(dates, index)" :disable="!isEditing" />
+      <MutiDate v-model="subActivity.activityDateInternal"
+        @update:modelValue="(dates) => generateDaysInRange(dates, index)" :disable="!isEditing" />
 
       <!-- Time -->
       <div class="input-group">
         <p class="label label_minWidth" style="align-self: flex-start">เวลาที่จัดกิจกรรม:</p>
         <div class="day-time-container">
-          <q-checkbox class="checkbox-left" v-model="sameTimeForAll" label="เวลาเดิมทุกวัน" @update:model-value="() => applySameTime(index)" :disable="!isEditing" />
+          <q-checkbox class="checkbox-left" v-model="sameTimeForAll" label="เวลาเดิมทุกวัน"
+            @update:model-value="() => applySameTime(index)" :disable="!isEditing" />
           <div class="day-time-container">
             <div v-for="(day, dIndex) in subActivity.selectedDays" :key="day.date">
-              <TimeSelector
-                v-model:startTime="day.startTime"
-                v-model:endTime="day.endTime"
-                :formattedDate="day.formattedDate"
-                @update:startTime="v => updateDayTime(index, dIndex, 'start', v)"
-                @update:endTime="v => updateDayTime(index, dIndex, 'end', v)"
-                :disable="!isEditing"
-              />
+              <TimeSelector v-model:startTime="day.startTime" v-model:endTime="day.endTime"
+                :formattedDate="day.formattedDate" @update:startTime="v => updateDayTime(index, dIndex, 'start', v)"
+                @update:endTime="v => updateDayTime(index, dIndex, 'end', v)" :disable="!isEditing" />
             </div>
           </div>
         </div>
@@ -67,15 +66,8 @@
       <!-- Seats -->
       <div class="input-group">
         <p class="label label_minWidth">จำนวนที่รับ :</p>
-        <q-input
-          outlined
-          style="width: 225px"
-          v-model="subActivity.seats"
-          type="number"
-          @keypress="isNumber($event)"
-          @blur="validatePositive('seats', index)"
-          :disable="!isEditing"
-        />
+        <q-input outlined style="width: 225px" v-model="subActivity.seats" type="number" @keypress="isNumber($event)"
+          @blur="validatePositive('seats', index)" :disable="!isEditing" />
       </div>
 
       <!-- Department -->
@@ -93,14 +85,8 @@
       <!-- Detail Activity -->
       <div class="input-group">
         <p style="align-self: flex-start" class="label label_minWidth">รายละเอียดอื่นๆ :</p>
-        <q-input
-          type="textarea"
-          rows="10"
-          outlined
-          v-model="subActivity.detailActivity"
-          style="width: 100%"
-          :disable="!isEditing"
-        />
+        <q-input type="textarea" rows="10" outlined v-model="subActivity.detailActivity" style="width: 100%"
+          :disable="!isEditing" />
       </div>
     </div>
 
@@ -576,7 +562,6 @@ const statusClass = computed(() => {
   font-size: 18px;
 }
 
-
 .input-group p {
   align-self: center;
   margin: 0;
@@ -605,7 +590,6 @@ const statusClass = computed(() => {
   min-width: 200px;
 }
 
-
 .btnAddActivity {
   background-color: #ffffff;
   border-radius: 20px;
@@ -617,7 +601,6 @@ const statusClass = computed(() => {
   margin-bottom: 20px;
 }
 
-
 .status-btn {
   color: #ff6f00;
   background-color: #ffe7ba;
@@ -627,7 +610,6 @@ const statusClass = computed(() => {
   width: 200px;
   font-size: 20px;
 }
-
 
 .time-container {
   display: flex;
@@ -642,12 +624,6 @@ const statusClass = computed(() => {
   margin-bottom: 20px;
 }
 
-
-.q-icon {
-  cursor: pointer;
-}
-
-
 .btn-container {
   display: flex;
   align-items: center;
@@ -656,21 +632,9 @@ const statusClass = computed(() => {
   margin-left: 200px;
 }
 
-
-.department-btn {
-  width: 80px;
-  height: 40px;
-  border-radius: 50px;
-  box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.2);
-  background-color: #ffffff;
-  margin-right: 10px;
-}
-
-
 .active-btn {
   background-color: #d0e4ff !important;
 }
-
 
 .button-group {
   display: flex;
@@ -706,7 +670,6 @@ const statusClass = computed(() => {
   border: 2px solid #002dff;
 }
 
-
 .status-completed {
   color: #000000;
   background-color: #dadada;
@@ -717,12 +680,6 @@ const statusClass = computed(() => {
   color: #f32323;
   background-color: #ffc5c5;
   border: 2px solid #ff0000;
-}
-
-
-.icon-disabled {
-  pointer-events: none;
-  opacity: 0.6;
 }
 
 .successDialog {

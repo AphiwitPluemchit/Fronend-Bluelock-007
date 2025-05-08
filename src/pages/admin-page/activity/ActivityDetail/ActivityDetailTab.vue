@@ -166,10 +166,4 @@ watch(isEditing, (newVal) => {
   font-weight: bold;
   font-family: 'Noto Serif Thai', serif;
 }
-.dropdown {
-  border-radius: 5px;
-  width: 200px;
-  height: 55px;
-  margin-top: 10px;
-}
 </style>

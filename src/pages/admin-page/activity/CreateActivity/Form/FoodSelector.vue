@@ -42,8 +42,7 @@
 
         <div class="button-container">
           <q-btn class="btnreject" label="ยกเลิก" @click="cancelSelection" :disable="disable" />
-          <q-btn class="btnsecces" label="บันทึกและยืนยัน" @click="confirmSelection(true)" :disable="disable" />
-          <q-btn class="btnconfirm" label="ยืนยัน" @click="confirmSelection(false)" :disable="disable" />
+          <q-btn class="btnconfirm" label="ยืนยัน" @click="confirmSelection(true)" :disable="disable" />
         </div>
       </div>
     </q-dialog>
