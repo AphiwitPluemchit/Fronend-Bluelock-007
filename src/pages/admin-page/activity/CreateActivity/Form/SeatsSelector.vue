@@ -1,15 +1,10 @@
 <template>
   <div class="input-group">
     <p class="label label_minWidth">จำนวนที่รับ :</p>
-    <q-input
-      outlined
-      style="width: 220px"
-      v-model.number="localSeats"
-      type="number"
-      @keypress="isNumber($event)"
+    <q-input outlined style="width: 220px" v-model="localSeats" type="number" @keypress="isNumber($event)"
       :disable="disable"
-      :rules="[val => val >= 0 || 'กรุณากรอกจำนวนที่รับให้ถูกต้อง']"
-    />
+      />
+
   </div>
 </template>
 
@@ -17,7 +12,7 @@
 import { defineProps, defineEmits, ref, watch } from 'vue'
 
 const props = defineProps<{
-  modelValue: number
+  modelValue: number |null
   disable?: boolean
 }>()
 
@@ -25,18 +20,17 @@ const emit = defineEmits<{
   (event: 'update:modelValue', value: number): void
 }>()
 
-// ✅ ใช้ number type
-const localSeats = ref<number>(props.modelValue)
+const localSeats = ref<number | null>(props.modelValue ?? null)
 
 watch(localSeats, (newVal) => {
-  emit('update:modelValue', newVal)
+  emit('update:modelValue', newVal ?? 0)  
 })
-watch(
-  () => props.modelValue,
-  (newVal) => {
-    localSeats.value = newVal
-  }
-)
+
+watch(() => props.modelValue, (newVal) => {
+  localSeats.value = newVal ?? null
+})
+
+
 const isNumber = (event: KeyboardEvent) => {
   const charCode = event.which ? event.which : event.keyCode
   if (charCode < 48 || charCode > 57) {
@@ -54,9 +48,11 @@ const isNumber = (event: KeyboardEvent) => {
   align-items: center;
   height: 40px;
 }
+
 .label_minWidth {
   min-width: 200px;
 }
+
 .input-group p {
   align-self: center;
   margin: 0;

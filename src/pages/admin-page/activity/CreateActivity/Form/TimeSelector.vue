@@ -36,7 +36,8 @@
         <p class="time-separator">ถึง</p>
 
         <!-- End Time -->
-        <q-input outlined v-model="localEndTime" class="time-box" :disable="disable" @blur="onManualTimeInput('end')" input-mode="numeric" @keypress="isNumberOrColon">
+        <q-input outlined v-model="localEndTime" class="time-box" :disable="disable" @blur="onManualTimeInput('end')"
+          input-mode="numeric" @keypress="isNumberOrColon">
           <template v-slot:prepend>
             <q-icon name="access_time" class="cursor-pointer" :class="{ 'disabled-icon': disable }"
               style="color: black;">

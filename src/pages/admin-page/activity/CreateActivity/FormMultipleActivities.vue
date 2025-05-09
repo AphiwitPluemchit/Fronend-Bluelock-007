@@ -60,10 +60,10 @@
 
 
       <HoursSelector v-model="subActivity.totalHours" class="input-group" />
-      <!-- Room and Seats -->
       <Room v-model="subActivity.roomName" class="input-group" />
 
-      <SeatsSelector v-model="subActivity.seats" class="input-group" />
+
+      <SeatsSelector v-model.number="subActivity.seats" class="input-group" />
 
       <!-- Department -->
       <DepartmentSelector v-model="subActivity.departments" class="input-group" />
@@ -119,17 +119,18 @@ const goToActivitiesManagement = async () => {
   await router.push('/admin/ActivitiesManagement')
 }
 interface SubActivity {
-  subActivityName: string
-  roomName: string[]
-  seats: number
-  lecturer: string
-  detailActivity: string
-  departments: string[]
-  years: string[]
-  activityDateInternal: string[]
-  selectedDays: DayTimeSelection[]
-  totalHours: number
+  subActivityName: string;
+  roomName: string[];
+  seats: number | null;
+  lecturer: string;
+  detailActivity: string;
+  departments: string[];
+  years: string[];
+  activityDateInternal: string[];
+  selectedDays: DayTimeSelection[];
+  totalHours: number | null;
 }
+
 interface DayTimeSelection {
   date: string
   formattedDate: string
@@ -224,14 +225,14 @@ const addSubActivity = () => {
   subActivities.value.push({
     subActivityName: '',
     roomName: [],
-    seats: 0,
+    seats: null,
     lecturer: '',
     detailActivity: '',
     departments: ['CS', 'SE', 'ITDI', 'AAI'],
     years: ['1', '2', '3', '4'],
     activityDateInternal: [],
     selectedDays: [],
-    totalHours: 0,
+    totalHours: null,
   })
 
   watch(
