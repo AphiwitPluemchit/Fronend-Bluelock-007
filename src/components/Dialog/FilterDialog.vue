@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import { ref, defineEmits, defineProps, computed } from 'vue'
+import { ref, defineEmits, defineProps, computed, watch } from 'vue'
+import cloneDeep from 'lodash/cloneDeep'
 
 // Props
 const props = defineProps<{
@@ -66,13 +67,30 @@ const getStatusText = (status: string) => {
 
 // ฟิลเตอร์ที่เลือก
 const filters = ref({
-  year: props.years ? props.years?.map((year) => year.toString()) : ([] as string[]),
-  major: props.majors ? props.majors : ([] as string[]),
-  statusActivity: props.statusActivities ? props.statusActivities : ([] as string[]),
-  categoryActivity: props.categoryActivities ? props.categoryActivities : ([] as string[]),
-  statusStudent: props.statusStudent ? props.statusStudent : ([] as string[]),
+  year: props.years ? props.years.map((year) => year.toString()) : ([] as string[]),
+  major: props.majors ?? ([] as string[]),
+  statusActivity: props.statusActivities ?? ([] as string[]),
+  categoryActivity: props.categoryActivities ?? ([] as string[]),
+  statusStudent: props.statusStudent ?? ([] as string[]),
 })
 
+const initialFilters = ref<typeof filters.value>(cloneDeep(filters.value))
+
+watch(showFilterDialog, (val) => {
+  if (val) {
+    initialFilters.value = cloneDeep(filters.value)
+  }
+})
+
+const closeMenu = () => {
+  filters.value = cloneDeep(initialFilters.value)
+  showFilterDialog.value = false
+  emit('update:modelValue', false)
+}
+const applyFilters = () => {
+  emit('apply', filters.value)
+  showFilterDialog.value = false
+}
 // ตรวจสอบหมวดที่ต้องแสดง
 const availableCategories = computed(() => props.categories)
 
@@ -86,15 +104,6 @@ const toggleFilter = (category: keyof typeof filters.value, value: string) => {
   }
 }
 
-const closeMenu = () => {
-  showFilterDialog.value = false
-  emit('update:modelValue', false)
-}
-
-const applyFilters = () => {
-  emit('apply', filters.value)
-  closeMenu()
-}
 </script>
 
 <template>

@@ -233,8 +233,20 @@ const applySameTime = (subActivityIndex: number) => {
   const firstDay = days[0]
   if (!firstDay) return
 
+  const { startTime, endTime, startHour, startMinute, endHour, endMinute } = firstDay
+
   sub.selectedDays = days.map((day, index) =>
-    index === 0 ? day : { ...day, ...firstDay }
+    index === 0
+      ? day
+      : {
+        ...day,
+        startTime,
+        endTime,
+        startHour,
+        startMinute,
+        endHour,
+        endMinute,
+      }
   )
 }
 const updateDayTime = (
