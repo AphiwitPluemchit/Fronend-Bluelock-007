@@ -80,10 +80,10 @@
             <q-td class="text-center" key="hardskill">{{ props.row.hardSkill }}/12</q-td>
             <!-- แสดงสถานะพร้อมสี -->
             <q-td class="text-center">
-              <q-btn
+              <q-badge
                 :label="calculateStatus(props.row.softSkill, props.row.hardSkill)"
                 :class="getStatusClass(calculateStatus(props.row.softSkill, props.row.hardSkill))"
-                rounded
+                class="status-badge"
                 unelevated
               />
             </q-td>
@@ -274,5 +274,15 @@ const columns = [
 .info-icon {
   cursor: pointer;
   width: 60px;
+}
+
+.status-badge {
+  height: 32px;
+  line-height: 28px;
+  padding: 0 12px;
+  border-radius: 999px;
+  text-align: center;
+  display: inline-block;
+  font-size: 15px;
 }
 </style>

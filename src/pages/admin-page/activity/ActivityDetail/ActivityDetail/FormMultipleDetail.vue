@@ -6,7 +6,7 @@
       <q-badge :class="statusClass" class="status-btn" >
         <div align="center" style="font-size: 20px;" >{{ activityStatus }}</div>
         </q-badge>
-      <q-btn v-if="props.isEditing" class="btnchange" label="เปลี่ยน" @click="showChangeStatusDialog = true"
+      <q-btn v-if="props.isEditing && activityStatus != 'เสร็จสิ้น'"  class="btnchange" label="เปลี่ยน" @click="showChangeStatusDialog = true"
         :disable="!isEditing" />
     </div>
     <ChangeStatusDialog v-model="showChangeStatusDialog" :currentStatus="activityStatus"
@@ -93,8 +93,8 @@
 
     <!-- Add SubActivity Button -->
     <div class="btn-container">
-      <q-btn class="btnAddActivity" style="  margin-bottom: 100px;" @click="addSubActivity" :disable="!isEditing">
-        <p class="label">
+      <q-btn class="btnAddActivity" style="  margin-bottom: 100px; background-color: #3676F9" @click="addSubActivity" :disable="!isEditing" >
+        <p class="label text-white">
           <q-icon name="add" size="20px" />
           เพิ่มกิจกรรม
         </p>

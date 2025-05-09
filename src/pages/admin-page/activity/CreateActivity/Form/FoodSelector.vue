@@ -3,7 +3,7 @@
     <!-- Food Menu Input -->
     <div class="input-group">
       <p class="label label_minWidth">รายการอาหาร :</p>
-      <q-input outlined v-model="foodMenuDisplay" class="food-input"  :disable="disable">
+      <q-input outlined v-model="foodMenuDisplay" class="food-input"  :disable="disable" readonly>
         <template v-slot:prepend>
           <q-icon name="restaurant_menu" style="color: black" class="cursor-pointer" @click="openFoodDialog"
             :class="{ 'disabled-icon': disable }" />

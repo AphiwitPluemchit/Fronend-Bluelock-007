@@ -12,12 +12,10 @@
         </div>
 
         <div class="form-section">
-          <component
+          <FormMultipleDetail
             :key="selectedActivityType"
-            :is="getFormComponent || 'div'"
             :activity="activity"
             :imageFile="selectedImageFile"
-            :imageRef="imageRef"
             :isEditing="route.query.disable !== 'true'"
             @saved="handleSave"
           />
@@ -30,7 +28,6 @@
 <script setup lang="ts">
 import { ref, computed, watch } from 'vue'
 import ImageDetail from './ActivityDetail/ImageDetail.vue'
-import FormDetail from './ActivityDetail/FormDetail.vue'
 import FormMultipleDetail from './ActivityDetail/FormMultipleDetail.vue'
 import type { Activity } from 'src/types/activity'
 import { ActivityService } from 'src/services/activity'
@@ -95,29 +92,6 @@ const uploadImageIfChanged = async () => {
   }
 }
 
-watch(
-  () => props.activity?.type,
-  (newType) => {
-    if (newType === 'one') {
-      selectedActivityType.value = 'กิจกรรมเดียว'
-    } else if (newType === 'many') {
-      selectedActivityType.value = 'หลายกิจกรรม'
-    } else {
-      selectedActivityType.value = ''
-    }
-  },
-  { immediate: true },
-)
-const getFormComponent = computed(() => {
-  switch (selectedActivityType.value) {
-    case 'กิจกรรมเดียว':
-      return FormDetail
-    case 'หลายกิจกรรม':
-      return FormMultipleDetail
-    default:
-      return null
-  }
-})
 watch(isEditing, (newVal) => {
   if (!newVal) {
     selectedImageFile.value = null
