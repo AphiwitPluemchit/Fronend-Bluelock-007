@@ -58,4 +58,13 @@ const isNumber = (event: KeyboardEvent) => {
   line-height: normal;
   text-align: right;
 }
+::v-deep(input[type='number'])::-webkit-inner-spin-button,
+::v-deep(input[type='number'])::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+::v-deep(input[type='number']) {
+  -moz-appearance: textfield;
+}
 </style>

@@ -15,7 +15,9 @@
                   <div class="time-column">
                     <q-btn flat dense icon="arrow_drop_up" @click="adjustHour('start', 'increase')"
                       :disable="disable" />
-                    <div class="time-display">{{ formatHour(startHour) }}</div>
+                    <q-input dense outlined v-model="formattedStartHour" type="text" input-class="text-center"
+                      style="width: 40px" :disable="disable" @blur="onBlurHour('start')" @keypress="isNumber"
+                      @input="limitLength($event, 'hour', 'start')" />
                     <q-btn flat dense icon="arrow_drop_down" @click="adjustHour('start', 'decrease')"
                       :disable="disable" />
                   </div>
@@ -23,7 +25,9 @@
                   <div class="time-column">
                     <q-btn flat dense icon="arrow_drop_up" @click="adjustMinute('start', 'increase')"
                       :disable="disable" />
-                    <div class="time-display">{{ formatMinute(startMinute) }}</div>
+                    <q-input dense outlined v-model="formattedStartMinute" type="text" input-class="text-center"
+                      style="width: 40px" :disable="disable" @blur="onBlurMinute('start')" @keypress="isNumber"
+                      @input="limitLength($event, 'minute', 'start')" />
                     <q-btn flat dense icon="arrow_drop_down" @click="adjustMinute('start', 'decrease')"
                       :disable="disable" />
                   </div>
@@ -45,7 +49,9 @@
                 <div class="time-container">
                   <div class="time-column">
                     <q-btn flat dense icon="arrow_drop_up" @click="adjustHour('end', 'increase')" :disable="disable" />
-                    <div class="time-display">{{ formatHour(endHour) }}</div>
+                    <q-input dense outlined v-model="formattedEndHour" type="text" input-class="text-center"
+                      style="width: 40px" :disable="disable" @blur="onBlurHour('end')" @keypress="isNumber"
+                      @input="limitLength($event, 'hour', 'end')" />
                     <q-btn flat dense icon="arrow_drop_down" @click="adjustHour('end', 'decrease')"
                       :disable="disable" />
                   </div>
@@ -53,7 +59,9 @@
                   <div class="time-column">
                     <q-btn flat dense icon="arrow_drop_up" @click="adjustMinute('end', 'increase')"
                       :disable="disable" />
-                    <div class="time-display">{{ formatMinute(endMinute) }}</div>
+                    <q-input dense outlined v-model="formattedEndMinute" type="text" input-class="text-center"
+                      style="width: 40px" :disable="disable" @blur="onBlurMinute('end')" @keypress="isNumber"
+                      @input="limitLength($event, 'minute', 'end')" />
                     <q-btn flat dense icon="arrow_drop_down" @click="adjustMinute('end', 'decrease')"
                       :disable="disable" />
                   </div>
@@ -109,20 +117,6 @@ const endMinute = ref(endM);
 const localStartTime = ref(props.startTime);
 const localEndTime = ref(props.endTime);
 
-// ✅ Watch ค่า startTime และ endTime จาก props เพื่อให้ UI อัปเดตตาม
-watch(() => props.startTime, (newVal) => {
-  const { h, m } = extractTime(newVal);
-  startHour.value = h;
-  startMinute.value = m;
-  localStartTime.value = formatTime(h, m);
-});
-
-watch(() => props.endTime, (newVal) => {
-  const { h, m } = extractTime(newVal);
-  endHour.value = h;
-  endMinute.value = m;
-  localEndTime.value = formatTime(h, m);
-});
 
 // ✅ อัปเดต localStartTime และส่งค่ากลับไปยัง parent
 watch([startHour, startMinute], () => {
@@ -136,14 +130,12 @@ watch([endHour, endMinute], () => {
 });
 
 // ✅ ฟังก์ชันสำหรับจัดรูปแบบเวลา
-const formatTime = (h: number, m: number): string => {
-  return `${formatHour(h)}:${formatMinute(m)}`;
-};
+const formatTime = (h: number, m: number): string =>
+  `${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}`
 
 const formatHour = (hour: number): string => hour.toString().padStart(2, '0');
 const formatMinute = (minute: number): string => minute.toString().padStart(2, '0');
 
-// ✅ ปรับค่าเวลาเมื่อกดปุ่มเพิ่ม/ลด
 const adjustHour = (timeType: 'start' | 'end', direction: 'increase' | 'decrease'): void => {
   if (props.disable) return;
   if (timeType === 'start') {
@@ -187,8 +179,113 @@ const onManualTimeInput = (type: 'start' | 'end') => {
     }
   }
 };
+const formattedStartHour = ref(formatHour(startHour.value))
+const formattedStartMinute = ref(formatMinute(startMinute.value))
+const formattedEndHour = ref(formatHour(endHour.value))
+const formattedEndMinute = ref(formatMinute(endMinute.value))
 
+// ✅ Watch ต้นฉบับ → อัปเดตฟอร์แมต
+watch(startHour, val => formattedStartHour.value = formatHour(val))
+watch(startMinute, val => formattedStartMinute.value = formatMinute(val))
+watch(endHour, val => formattedEndHour.value = formatHour(val))
+watch(endMinute, val => formattedEndMinute.value = formatMinute(val))
 
+const onBlurHour = (type: 'start' | 'end') => {
+  const input = type === 'start' ? formattedStartHour.value : formattedEndHour.value
+  const num = parseInt(input)
+  if (!isNaN(num)) {
+    if (type === 'start') startHour.value = num
+    else endHour.value = num
+  }
+
+  if (type === 'start') {
+    formattedStartHour.value = startHour.value.toString().padStart(2, '0')
+  } else {
+    formattedStartHour.value = endHour.value.toString().padStart(2, '0')
+  }
+}
+
+const onBlurMinute = (type: 'start' | 'end') => {
+  const input = type === 'start' ? formattedStartMinute.value : formattedEndMinute.value
+  const num = parseInt(input)
+  if (!isNaN(num)) {
+    if (type === 'start') startMinute.value = num
+    else endMinute.value = num
+  }
+
+  if (type === 'start') {
+    formattedStartMinute.value = startMinute.value.toString().padStart(2, '0')
+  } else {
+    formattedEndMinute.value = endMinute.value.toString().padStart(2, '0')
+  }
+}
+
+const isNumber = (event: KeyboardEvent) => {
+  const key = event.key
+  if (!/^[0-9]$/.test(key)) {
+    event.preventDefault()
+  }
+}
+const padClamp = (str: string, min: number, max: number): number => {
+  const num = parseInt(str)
+  if (isNaN(num)) return min
+  return Math.max(min, Math.min(max, num))
+}
+
+watch([formattedStartHour, formattedStartMinute], ([h, m]) => {
+  const hour = padClamp(h, 0, 23)
+  const minute = padClamp(m, 0, 59)
+  startHour.value = hour
+  startMinute.value = minute
+  localStartTime.value = formatTime(hour, minute)
+  emit('update:startTime', localStartTime.value)
+})
+
+watch([formattedEndHour, formattedEndMinute], ([h, m]) => {
+  const hour = padClamp(h, 0, 23)
+  const minute = padClamp(m, 0, 59)
+  endHour.value = hour
+  endMinute.value = minute
+  localEndTime.value = formatTime(hour, minute)
+  emit('update:endTime', localEndTime.value)
+})
+watch(formattedStartHour, (val) => {
+  if (!/^\d{2}$/.test(val)) {
+    const padded = padClamp(val, 0, 23).toString().padStart(2, '0')
+    formattedStartHour.value = padded
+  }
+})
+watch(formattedStartMinute, (val) => {
+  if (!/^\d{2}$/.test(val)) {
+    const padded = padClamp(val, 0, 59).toString().padStart(2, '0')
+    formattedStartMinute.value = padded
+  }
+})
+
+watch(formattedEndHour, (val) => {
+  if (!/^\d{2}$/.test(val)) {
+    const padded = padClamp(val, 0, 23).toString().padStart(2, '0')
+    formattedEndHour.value = padded
+  }
+})
+watch(formattedEndMinute, (val) => {
+  if (!/^\d{2}$/.test(val)) {
+    const padded = padClamp(val, 0, 59).toString().padStart(2, '0')
+    formattedEndMinute.value = padded
+  }
+})
+
+const limitLength = (val: string, type: 'hour' | 'minute', side: 'start' | 'end') => {
+  const limited = val.slice(0, 2)
+
+  if (type === 'hour') {
+    if (side === 'start') formattedStartHour.value = limited
+    else formattedEndHour.value = limited
+  } else if(type==='minute') {
+    if (side === 'start') formattedStartMinute.value = limited
+    else formattedEndMinute.value = limited
+  }
+}
 
 
 </script>
@@ -239,9 +336,11 @@ const onManualTimeInput = (type: 'start' | 'end') => {
 }
 
 .time-picker-card {
-  width: 400px;
-  max-width: 100%;
+  max-width: 200px;
+  min-height: 150px;
+  padding: 10px;
 }
+
 
 .separator {
   font-weight: bold;
@@ -304,6 +403,15 @@ const onManualTimeInput = (type: 'start' | 'end') => {
 
 ::v-deep(.q-icon) {
   font-size: 18px;
-  /* ปรับขนาดไอคอนให้เล็กลง */
+}
+
+::v-deep(input[type='number'])::-webkit-inner-spin-button,
+::v-deep(input[type='number'])::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+::v-deep(input[type='number']) {
+  -moz-appearance: textfield;
 }
 </style>
