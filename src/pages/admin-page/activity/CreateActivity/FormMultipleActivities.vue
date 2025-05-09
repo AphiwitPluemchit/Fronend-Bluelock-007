@@ -1,5 +1,5 @@
 <template>
-  <q-page  class="q-pa-md form-activity-page">
+  <q-page  class="q-pa-md">
     <!-- Status -->
     <div class="input-group">
       <p class="label label_minWidth">สถานะ:</p>
@@ -11,7 +11,7 @@
     <!-- Activity Name -->
     <div class="input-group">
       <p class="label label_minWidth">ชื่อกิจกรรมหลัก :</p>
-      <q-input outlined v-model="activityName" style="width: 600px" />
+      <q-input outlined v-model="activityName"  class="input-max-600" />
     </div>
 
     <!-- Activity Type -->
@@ -28,7 +28,7 @@
       <!-- SubActivity Name -->
       <div class="input-group">
         <p class="label label_minWidth">ชื่อกิจกรรม :</p>
-        <q-input outlined v-model="subActivity.subActivityName" style="width: 600px" />
+        <q-input outlined v-model="subActivity.subActivityName"  class="input-max-600"/>
       </div>
 
       <!-- Date -->
@@ -73,13 +73,13 @@
       <!-- Lecturer -->
       <div class="input-group">
         <p class="label label_minWidth">วิทยากร :</p>
-        <q-input outlined v-model="subActivity.lecturer" style="width: 100%" />
+        <q-input outlined v-model="subActivity.lecturer" class="input-max-600"/>
       </div>
 
       <!-- Detail Activity -->
       <div class="input-group">
         <p style="align-self: flex-start" class="label label_minWidth">รายละเอียดอื่นๆ :</p>
-        <q-input type="textarea" rows="10" outlined v-model="subActivity.detailActivity" style="width: 100%" />
+        <q-input type="textarea" rows="10" outlined v-model="subActivity.detailActivity" class="input-max-600" />
       </div>
 
       <!-- Add Activity Button -->
@@ -87,7 +87,6 @@
     <div class="btn-container">
       <q-btn class="btnAddActivity" @click="addSubActivity" style="background-color: #3676F9">
         <p class="label text-white">
-          <q-icon name="add" size="20px" />
           เพิ่มกิจกรรม
         </p>
       </q-btn>
@@ -180,10 +179,23 @@ const applySameTime = (subActivityIndex: number) => {
   const firstDay = days[0]
   if (!firstDay) return
 
+  const { startTime, endTime, startHour, startMinute, endHour, endMinute } = firstDay
+
   sub.selectedDays = days.map((day, index) =>
-    index === 0 ? day : { ...day, ...firstDay }
+    index === 0
+      ? day
+      : {
+          ...day, 
+          startTime,
+          endTime,
+          startHour,
+          startMinute,
+          endHour,
+          endMinute,
+        }
   )
 }
+
 const updateDayTime = (
   subActivityIndex: number,
   index: number,
@@ -358,27 +370,27 @@ onMounted(() => {
 </script>
 
 <style scoped>
+.input-max-600 {
+  max-width: 600px;
+  width: 100%;
+}
 
 ::v-deep(.q-field__control) {
   height: auto;
   background-color: white;
-  align-items: center;
-}
-
-::v-deep(.q-field__prepend) {
-  display: flex;
-  align-items: center;
 }
 
 ::v-deep(.q-icon) {
   font-size: 18px;
 }
-
+.responsive-input {
+  width: 100%;
+  max-width: 600px;
+}
 .input-group p {
-  align-self: center;
   margin: 0;
   line-height: normal;
-  text-align: right;
+  text-align: left;
 }
 
 .input-group {
@@ -387,6 +399,7 @@ onMounted(() => {
   gap: 25px;
   margin-bottom: 20px;
   width: 100%;
+  flex-wrap: wrap;
 }
 
 .label {
@@ -459,5 +472,20 @@ onMounted(() => {
   font-size: 100px;
 }
 
+/* Responsive behavior when screen ≤ 830px */
+@media (max-width: 900px) {
+  .input-group {
+    flex-direction: column;
+    align-items: flex-start;
+  }
 
+  .label_minWidth {
+    min-width: unset;
+    width: 100%;
+  }
+
+  .input-max-600 {
+    width: 100%;
+  }
+}
 </style>

@@ -3,8 +3,7 @@
     <!-- ชื่อหน้า -->
     <div class="row justify-between items-center q-mb-md" style="margin-top: 20px;">
       <div class="text-h4">จัดการกิจกรรม</div>
-      <q-btn dense outlined  label="เพิ่มกิจกรรม" class="btnadd" bo
-        style="background-color: #14279B; color: white; border: none; font-weight: bold; font-size: medium;" @click="goToPage()" />
+      <q-btn dense outlined label="เพิ่มกิจกรรม" class="btnadd" bo @click="goToPage()" />
     </div>
 
     <!-- ตาราง 1 -->
@@ -673,5 +672,13 @@ async function onRequest3(props: any) {
   text-align: center;
   display: inline-block;
   font-size: 15px;
+}
+
+.btnadd {
+  background-color: #14279B;
+  color: white;
+  border: none;
+  font-weight: bold;
+  font-size: medium;
 }
 </style>
