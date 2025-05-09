@@ -106,7 +106,6 @@
       <q-btn class="btnreject" @click="() => { resetFormToOriginal(); emit('update:isEditing', false); }">ยกเลิก</q-btn>
       <q-btn class="btnsecces" @click="saveChanges">บันทึก</q-btn>
     </div>
-
     <!-- Success Dialog -->
     <q-dialog v-model="showSuccessDialog" persistent>
       <div class="q-pa-md text-h6 text-center successDialog">

@@ -85,4 +85,33 @@ const breadcrumbs = ref({
   font-weight: bold;
   font-family: 'Noto Serif Thai', serif;
 }
+
+@media (max-width: 1520px) {
+  .wrapper {
+    flex-direction: column;
+    gap: 30px;
+    padding: 20px;
+  }
+
+  .container {
+    flex-direction: column;
+    align-items: center; 
+  }
+
+  .image-section {
+    margin-left: 0;
+    width: 100%;
+    max-width: 430px; 
+  }
+
+  .form-section {
+    margin-right: 0;
+    max-height: unset;
+    width: 100%;
+    max-width: 800px; 
+  }
+}
+
+
+
 </style>

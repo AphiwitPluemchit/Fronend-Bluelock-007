@@ -1,13 +1,12 @@
 <template>
   <q-page class="q-pa-md">
     <!-- ชื่อหน้า -->
-    <div class="row justify-start items-center">
+    <div class="row justify-between items-center q-mb-md" style="margin-top: 40px;">
       <div class="text-h4">จัดการกิจกรรม</div>
-    </div>
-    <div class="row justify-end items-center">
       <q-btn dense outlined icon="add" label="เพิ่มกิจกรรม" class="btnadd"
-        style=" background-color: #14279B ;color: white" @click="goToPage()" />
+        style="background-color: #14279B; color: white" @click="goToPage()" />
     </div>
+
     <!-- ตาราง 1 -->
     <section class="q-mt-lg">
       <div class="row justify-between items-center">
@@ -675,5 +674,4 @@ async function onRequest3(props: any) {
   display: inline-block;
   font-size: 15px;
 }
-
 </style>

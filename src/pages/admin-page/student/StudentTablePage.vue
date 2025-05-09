@@ -89,14 +89,16 @@
             </q-td>
 
             <q-td class="q-gutter-x-sm">
-              <q-btn
-                icon="info"
-                padding="none"
-                flat
-                color="grey-8"
+              <q-icon
+                name="visibility"
+               
                 @click="goToDetail(props.row.code)"
-                class="clickable-row"
-              ></q-btn
+                class="cursor-pointer" size="20px"
+              >
+              <q-tooltip>
+              ดูรายละเอียด
+              </q-tooltip>
+              </q-icon
             ></q-td>
           </q-tr>
         </template>
@@ -261,11 +263,6 @@ const columns = [
   border: 2px solid #575656;
   padding: 3px 30px;
   width: 130px;
-}
-
-.clickable-row {
-  cursor: pointer;
-  transition: background-color 0.2s;
 }
 
 .clickable-row:hover {

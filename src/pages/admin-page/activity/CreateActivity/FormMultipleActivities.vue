@@ -1,5 +1,5 @@
 <template>
-  <q-page>
+  <q-page  class="q-pa-md form-activity-page">
     <!-- Status -->
     <div class="input-group">
       <p class="label label_minWidth">สถานะ:</p>
@@ -358,6 +358,7 @@ onMounted(() => {
 </script>
 
 <style scoped>
+
 ::v-deep(.q-field__control) {
   height: auto;
   background-color: white;
@@ -457,4 +458,6 @@ onMounted(() => {
 .large-font {
   font-size: 100px;
 }
+
+
 </style>

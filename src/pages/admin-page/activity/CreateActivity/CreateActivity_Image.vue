@@ -18,7 +18,6 @@
       />
       <q-icon v-else name="image" size="50px" />
     </q-card>
-    <p class="image-size-text">*ขนาดรูป 430x330 px</p>
   </div>
 </template>
 
@@ -69,6 +68,30 @@ defineExpose({ selectedFile })
   border-radius: 8px;
 }
 
+.upload-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+@media (max-width: 490px) {
+.upload-box {
+  width: 330px;
+  height: 230px;
+  border-radius: 10px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: #e2e2e2;
+  cursor: pointer;
+  transition: border-color 0.3s;
+}
+
+.preview-img {
+  width: 100%;
+  height: 100%;
+  border-radius: 8px;
+}
+
 .image-size-text {
   margin-top: 10px;
   font-size: 14px;
@@ -82,5 +105,38 @@ defineExpose({ selectedFile })
   display: flex;
   flex-direction: column;
   align-items: center;
+}}
+@media (max-width: 350px) {
+.upload-box {
+  width: 300px;
+  height: 200px;
+  border-radius: 10px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: #e2e2e2;
+  cursor: pointer;
+  transition: border-color 0.3s;
 }
+
+.preview-img {
+  width: 100%;
+  height: 100%;
+  border-radius: 8px;
+}
+
+.image-size-text {
+  margin-top: 10px;
+  font-size: 14px;
+  color: #f03b2d;
+  font-weight: bold;
+  font-family: 'Noto Serif Thai', serif;
+  align-self: flex-start;
+}
+
+.upload-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}}
 </style>
