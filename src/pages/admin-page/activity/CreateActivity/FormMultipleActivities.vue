@@ -1,5 +1,5 @@
 <template>
-  <q-page  class="q-pa-md">
+  <q-page class="q-pa-md">
     <!-- Status -->
     <div class="input-group">
       <p class="label label_minWidth">สถานะ:</p>
@@ -11,7 +11,7 @@
     <!-- Activity Name -->
     <div class="input-group">
       <p class="label label_minWidth">ชื่อกิจกรรมหลัก :</p>
-      <q-input outlined v-model="activityName"  class="input-max-600" />
+      <q-input outlined v-model="activityName" class="input-max-600" />
     </div>
 
     <!-- Activity Type -->
@@ -28,7 +28,7 @@
       <!-- SubActivity Name -->
       <div class="input-group">
         <p class="label label_minWidth">ชื่อกิจกรรม :</p>
-        <q-input outlined v-model="subActivity.subActivityName"  class="input-max-600"/>
+        <q-input outlined v-model="subActivity.subActivityName" class="input-max-600" />
       </div>
 
       <!-- Date -->
@@ -73,7 +73,7 @@
       <!-- Lecturer -->
       <div class="input-group">
         <p class="label label_minWidth">วิทยากร :</p>
-        <q-input outlined v-model="subActivity.lecturer" class="input-max-600"/>
+        <q-input outlined v-model="subActivity.lecturer" class="input-max-600" />
       </div>
 
       <!-- Detail Activity -->
@@ -185,14 +185,14 @@ const applySameTime = (subActivityIndex: number) => {
     index === 0
       ? day
       : {
-          ...day, 
-          startTime,
-          endTime,
-          startHour,
-          startMinute,
-          endHour,
-          endMinute,
-        }
+        ...day,
+        startTime,
+        endTime,
+        startHour,
+        startMinute,
+        endHour,
+        endMinute,
+      }
   )
 }
 
@@ -288,7 +288,11 @@ const props = defineProps<{
 const goToPageTable = async () => {
   await router.push(`/Admin/ActivitiesManagement`)
 }
+const formRef = ref()
+
 const submitActivity = async () => {
+  const isValid = await formRef.value?.validate()
+  if (!isValid) return
   const skillMap: Record<string, 'hard' | 'soft' | null> = {
     prep: 'hard',
     academic: 'soft',
@@ -383,10 +387,12 @@ onMounted(() => {
 ::v-deep(.q-icon) {
   font-size: 18px;
 }
+
 .responsive-input {
   width: 100%;
   max-width: 600px;
 }
+
 .input-group p {
   margin: 0;
   line-height: normal;
@@ -435,8 +441,8 @@ onMounted(() => {
   font-size: 20px;
 
   display: flex;
-  align-items: center;       
-  justify-content: center; 
+  align-items: center;
+  justify-content: center;
   text-align: center;
 }
 
