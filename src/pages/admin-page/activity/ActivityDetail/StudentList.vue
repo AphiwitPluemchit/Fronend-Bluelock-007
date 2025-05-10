@@ -22,13 +22,9 @@ const query = ref<ActivityEnrollmentPagination>({
   order: 'desc',
   major: [],
   status: [],
-  studentYears: []
+  studentYears: [],
 })
-const filterCategories1 = ref([
-  'year',
-  'major',
-  'statusStudent',
-])
+const filterCategories1 = ref(['year', 'major', 'statusStudent'])
 
 const pagination = ref({
   sortBy: query.value.sortBy,
@@ -73,7 +69,6 @@ const getStatusClass = (status: string) => {
   return ''
 }
 
-
 interface SelectedFilters {
   year: string[]
   major: string[]
@@ -81,7 +76,7 @@ interface SelectedFilters {
 }
 
 const applyStudentFilters = async (selectedFilters: SelectedFilters) => {
-  console.log(selectedFilters);
+  console.log(selectedFilters)
 
   query.value.studentYears = selectedFilters.year
   query.value.major = selectedFilters.major
@@ -92,7 +87,7 @@ const applyStudentFilters = async (selectedFilters: SelectedFilters) => {
 
 const search1 = computed({
   get: () => enrollmentStore.query.search,
-  set: (val) => enrollmentStore.query.search = val,
+  set: (val) => (enrollmentStore.query.search = val),
 })
 
 const students = computed(() => {
@@ -102,22 +97,21 @@ const students = computed(() => {
 const fetchStudents = async () => {
   const res = await ActivityService.getOne(activityId)
   allTab.value = res.data
-  console.log(allTab.value);
+  console.log(allTab.value)
   if (allTab.value && allTab.value.activityItems && allTab.value.activityItems.length > 0) {
     const activityItemId = allTab.value.activityItems[indexTab.value]!.id!
-    console.log(query.value);
+    console.log(query.value)
     const data = await EnrollmentService.getEnrollmentsByActivityID(activityItemId, query.value)
     pagination.value.page = query.value.page
     pagination.value.rowsPerPage = query.value.limit
     pagination.value.sortBy = query.value.sortBy
     pagination.value.rowsNumber = data.meta.total
-    console.log(pagination.value);
+    console.log(pagination.value)
     enrollmentStore.studentEnrollments = data.data
     // ...
   } else {
-    console.error('activityItems is null or undefined');
+    console.error('activityItems is null or undefined')
   }
-
 }
 
 // const activityItemOptions = computed(() => {
@@ -205,38 +199,60 @@ const removeStudentFromActivity = async (studentId: string) => {
     console.error('Failed to delete student:', error)
   }
 }
-
+const activityItemOptions = computed(() => {
+  return (
+    allTab.value?.activityItems?.map((item, index) => ({
+      label: item.name,
+      value: index,
+    })) || []
+  )
+})
 onMounted(async () => {
   await fetchStudents()
   // console.log(enrollmentStore.enrollments.students)
-  console.log(students.value);
-
+  console.log(students.value)
 
   // await enrollmentStore.fetchEnrollmentsByActivityID(activityId)
 })
-
 </script>
 
 <template>
   <div class="q-mb-sm student-container">
     <div class="student-table-wrapper">
       <div class="row justify-end items-center">
-        <div v-for="(activityItems, index) in allTab?.activityItems" :key="index">
+        <!-- <div v-for="(activityItems, index) in allTab?.activityItems" :key="index">
           <div @click="indexTab = index, fetchStudents()"
             style="cursor: pointer; margin-right: 10px; font-weight: bold; background-color: coral;">
             {{ activityItems.name }}
-            <!-- do something with activity.activityItems -->
           </div>
-        </div>
-        <!-- ช่องค้นหา -->
-        <q-input dense outlined v-model="search1" @keyup.enter="fetchStudents"
-          label="ค้นหาชื่อ-นามสกุล/ รหัสนิสิต" class="q-mr-sm searchbox" :style="{ boxShadow: 'none' }">
+        </div> -->
 
+        <!-- ช่องค้นหา -->
+        <q-input
+          dense
+          outlined
+          v-model="search1"
+          @keyup.enter="fetchStudents"
+          label="ค้นหาชื่อ-นามสกุล/ รหัสนิสิต"
+          class="q-mr-sm searchbox"
+        >
           <template v-slot:append>
             <q-icon name="search" />
           </template>
         </q-input>
-
+        <q-select
+          dense
+          outlined
+          v-model="indexTab"
+          :options="activityItemOptions"
+          label="เลือกกิจกรรม"
+          option-label="label"
+          option-value="value"
+          emit-value
+          map-options
+          @update:model-value="fetchStudents"
+          class="q-mr-sm dropdown"
+        />
         <FilterDialog :categories="filterCategories1" @apply="applyStudentFilters" />
       </div>
 
@@ -245,11 +261,18 @@ onMounted(async () => {
           label="เลือกกิจกรรมย่อย" emit-value map-options @update:model-value="fetchStudents" />
       </div> -->
 
-
-      <q-table flat bordered :rows="students" :columns="columns" row-key="id" class="q-mt-md new-sticky-header"
-        @request="onRequest" v-model:pagination="pagination" :rows-per-page-options="[10, 20, 30, 40, 50]"
-        :rows-number="enrollmentStore.total">
-
+      <q-table
+        flat
+        bordered
+        :rows="students"
+        :columns="columns"
+        row-key="id"
+        class="q-mt-md new-sticky-header"
+        @request="onRequest"
+        v-model:pagination="pagination"
+        :rows-per-page-options="[10, 20, 30, 40, 50]"
+        :rows-number="enrollmentStore.total"
+      >
         <!-- หัวตาราง Sticky -->
         <template v-slot:header="props">
           <q-tr :props="props">
@@ -267,15 +290,23 @@ onMounted(async () => {
 
         <template v-slot:body-cell-status="props">
           <q-td :props="props">
-            <q-btn :label="getStatusText(props.row.status)" rounded unelevated class="status-btn"
-              :class="getStatusClass(props.row.status)" />
+            <q-btn
+              :label="getStatusText(props.row.status)"
+              rounded
+              unelevated
+              class="status-btn"
+              :class="getStatusClass(props.row.status)"
+            />
           </q-td>
         </template>
 
         <!-- ปุ่มลบ -->
         <template v-slot:body-cell-actions="props">
           <q-td :props="props">
-            <RemoveStudent :id="props.row.id" @removeStudent="() => removeStudentFromActivity(props.row.id)" />
+            <RemoveStudent
+              :id="props.row.id"
+              @removeStudent="() => removeStudentFromActivity(props.row.id)"
+            />
           </q-td>
         </template>
       </q-table>
@@ -285,7 +316,7 @@ onMounted(async () => {
 
 <style lang="scss" scoped>
 .student-container {
-  background-color: #EDF0F5;
+  background-color: #edf0f5;
   height: 680px;
   width: 100%;
 }
@@ -316,7 +347,6 @@ onMounted(async () => {
 
 .new-sticky-header {
   .my-sticky-header-table {
-
     /* Fix header */
     thead tr:first-child th {
       background-color: #f5f5f5;

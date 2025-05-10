@@ -16,135 +16,151 @@ $primary: #14279b;
 $secondary: #26a69a;
 $accent: #9c27b0;
 
-$sky: #D0E3FF;
+$sky: #d0e3ff;
 
 $dark: #1d1d1d;
 $dark-page: #121212;
 
-
-
-
 .btnconfirm {
-    background-color: #3676F4 ;
-    color: white ;
-    height: 40px;
-    min-width: 70px;
-    border-radius: 10px
-  }
+  background-color: #3676f4;
+  color: white;
+  height: 40px;
+  min-width: 70px;
+  border-radius: 10px;
+}
 .btnreject {
-    background-color: #F03B2D ;
-    color: white ;
-    height: 40px; 
-    min-width: 70px;
-    border-radius: 10px
-  }
+  background-color: #f03b2d;
+  color: white;
+  height: 40px;
+  min-width: 70px;
+  border-radius: 10px;
+}
 .btnchange {
-    background-color: #000000  ;
-    color: white ;
-    height: 40px;
-    min-width: 70px;
-    border-radius: 10px
-  }
+  background-color: #000000;
+  color: white;
+  height: 40px;
+  min-width: 70px;
+  border-radius: 10px;
+}
 .btnsecces {
-    background-color: #2FA54D ;
-    color: white ;
-    height: 40px;
-    min-width: 70px;
-    border-radius: 10px
-  }
+  background-color: #2fa54d;
+  color: white;
+  height: 40px;
+  min-width: 70px;
+  border-radius: 10px;
+}
 .btnedit {
-    background-color: #F3A71D ;
-    color: white ;
-    height: 40px;
-    min-width: 70px;
-    border-radius: 10px
-  }
+  background-color: #f3a71d;
+  color: white;
+  height: 40px;
+  min-width: 70px;
+  border-radius: 10px;
+}
 .btngrey {
-    background-color: #DDDDDD ;
-    color: rgb(0, 0, 0) ;
-    height: 40px;
-    min-width: 70px;
-    border-radius: 10px
-  }
+  background-color: #dddddd;
+  color: rgb(0, 0, 0);
+  height: 40px;
+  min-width: 70px;
+  border-radius: 10px;
+}
 
+.searchbox {
+  width: 350px;
+  height: 40px;
+  border-radius: 15px; /* ทำให้ขอบโค้งมน */
+  border: 1px solid #000000; /* สีขอบ */
+  background-color: white;
+  transition: border-color 0.3s ease-in-out;
+}
+.searchbox .q-field__control {
+  border-radius: 15px !important;
+}
+/* ปรับขอบของกล่องตอน hover */
+.searchbox .q-field__control:hover {
+  background-color: #f0f0f0;
+  border-radius: 15px;
+}
+.dropdown {
+  width: 200px;
+  height: 40px;
+  border-radius: 15px;
+  background-color: white;
+  border: 1px solid #000000;
+  transition: border-color 0.3s ease-in-out;
 
-  .searchbox {
-    width: 350px;
-    height: 40px;
-    border-radius: 15px; /* ทำให้ขอบโค้งมน */
-    border: 1px solid #000000; /* สีขอบ */
-    background-color: white;
-    transition: border-color 0.3s ease-in-out;
-  }
-  .searchbox .q-field__control {
+  /* ใช้กับ q-field ที่อยู่ภายใน q-select */
+  ::v-deep(.q-field__control) {
     border-radius: 15px !important;
   }
-  /* ปรับขอบของกล่องตอน hover */
-  .searchbox .q-field__control:hover {
+
+  ::v-deep(.q-field__control:hover) {
     background-color: #f0f0f0;
-    border-radius: 15px;
+    border-color: #000000;
+    border-radius: 15px !important;
   }
-  
-  .btnfilter {
-    background-color: #ffffff ;
-    height: 40px;
-    width: 50px;
-    border-radius: 15px;
-    border: 1px solid #000000; /* สีขอบ */
-  }.btnfilter:hover {
-    background-color: #f0f0f0; /* เปลี่ยนสีเมื่อ Hover */
+}
+
+.btnfilter {
+  background-color: #ffffff;
+  height: 40px;
+  width: 50px;
+  border-radius: 15px;
+  border: 1px solid #000000; /* สีขอบ */
+}
+.btnfilter:hover {
+  background-color: #f0f0f0; /* เปลี่ยนสีเมื่อ Hover */
+}
+
+.btnadd {
+  background-color: #ffffff;
+  border-radius: 15px;
+  height: 40px;
+  border: 1px solid #000000; /* สีขอบ */
+  min-width: 150px;
+}
+.q-chip {
+  background-color: white; // สีเริ่มต้นเป็นสีขาว
+  color: black; // สีตัวอักษรดำให้มองเห็นชัด
+  box-shadow: 1px 1px 1px rgba(0, 0, 0, 0.2);
+
+  &.selected {
+    background-color: $sky; // เมื่อเลือก เปลี่ยนเป็นสีฟ้าอ่อนที่ตั้งไว้
+    color: black;
+  }
+}
+
+.q-table__container {
+  border: 1px solid #000000; /* สีขอบ */
+  border-radius: 15px; // ทำให้ตัวตารางมีความโค้งโดยรวม
+  thead tr:first-child th {
+    font-weight: bold;
+  }
+  thead tr th {
+    border-bottom: 1px solid #000000; /* สีขอบ */
+    position: sticky;
+    z-index: 1;
+    font-size: 15px;
+  }
+  td {
+    font-size: 14px;
   }
 
-  .btnadd {
-    background-color: #ffffff ;
-    border-radius: 15px; 
-    height: 40px;
-    border: 1px solid #000000; /* สีขอบ */
-    min-width: 150px;
+  // tr:nth-child(odd) {
+  //   background-color: rgb(82, 26, 26);
+  // }
+  // tr:nth-child(even) {
+  //   background-color: #ffffff;
+  // }
+  // tr:hover {
+  //   background-color: #e3eafb;
+  // }
+  .q-table__bottom {
+    border-top: 1px solid #000000; /* สีขอบ */
   }
-  .q-chip {
-    background-color: white ; // สีเริ่มต้นเป็นสีขาว
-    color: black ; // สีตัวอักษรดำให้มองเห็นชัด
-    box-shadow: 1px 1px 1px rgba(0, 0, 0, 0.2);
-  
-    &.selected {
-      background-color: $sky ; // เมื่อเลือก เปลี่ยนเป็นสีฟ้าอ่อนที่ตั้งไว้
-      color: black ;
-    }
-  }
+}
 
-  .q-table__container {
-    border: 1px solid #000000; /* สีขอบ */
-    border-radius: 15px ; // ทำให้ตัวตารางมีความโค้งโดยรวม
-    thead tr:first-child th {
-      font-weight: bold;
-    }
-    thead tr th {
-      border-bottom: 1px solid #000000; /* สีขอบ */
-      position: sticky;
-      z-index: 1;
-      font-size: 15px;
-    }
-    td {
-      font-size: 14px;
-    }
-
-    // tr:nth-child(odd) {
-    //   background-color: rgb(82, 26, 26);
-    // }
-    // tr:nth-child(even) {
-    //   background-color: #ffffff;
-    // }
-    // tr:hover {
-    //   background-color: #e3eafb;
-    // }
-    .q-table__bottom {
-      border-top: 1px solid #000000; /* สีขอบ */
-    }
-  }
-
-  .q-input{
-    height: 40px
-  }
+.q-input {
+  height: 40px;
+}
 // นำเข้าฟอนต์
 @import '@fontsource-variable/noto-serif-thai'; // Defaults to wght axis
