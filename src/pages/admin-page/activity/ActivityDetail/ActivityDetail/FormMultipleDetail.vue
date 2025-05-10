@@ -3,11 +3,11 @@
     <!-- Status -->
     <div class="input-group">
       <p class="label label_minWidth">สถานะ:</p>
-      <q-badge :class="statusClass" class="status-btn" >
-        <div align="center" style="font-size: 20px;" >{{ activityStatus }}</div>
-        </q-badge>
-      <q-btn v-if="props.isEditing && activityStatus != 'เสร็จสิ้น'"  class="btnchange" label="เปลี่ยน" @click="showChangeStatusDialog = true"
-        :disable="!isEditing" />
+      <q-badge :class="statusClass" class="status-btn">
+        <div align="center" style="font-size: 20px;">{{ activityStatus }}</div>
+      </q-badge>
+      <q-btn v-if="props.isEditing && activityStatus != 'เสร็จสิ้น'" class="btnchange" label="เปลี่ยน"
+        @click="showChangeStatusDialog = true" :disable="!isEditing" />
     </div>
     <ChangeStatusDialog v-model="showChangeStatusDialog" :currentStatus="activityStatus"
       @confirm="handleStatusChange" />
@@ -84,7 +84,7 @@
       </div>
 
       <!-- Detail Activity -->
-      <div class="input-group">
+      <div class="input-group" >
         <p style="align-self: flex-start" class="label label_minWidth">รายละเอียดอื่นๆ :</p>
         <q-input type="textarea" rows="10" outlined v-model="subActivity.detailActivity" style="width: 100%"
           :disable="!isEditing" />
@@ -92,8 +92,9 @@
     </div>
 
     <!-- Add SubActivity Button -->
-    <div class="btn-container">
-      <q-btn class="btnAddActivity" style="  margin-bottom: 100px; background-color: #3676F9" @click="addSubActivity" :disable="!isEditing" >
+    <div class="btn-container" v-if="props.isEditing">
+      <q-btn class="btnAddActivity" style="  margin-bottom: 100px; background-color: #3676F9" @click="addSubActivity"
+        :disable="!isEditing">
         <p class="label text-white">
           <q-icon name="add" size="20px" />
           เพิ่มกิจกรรม
@@ -105,6 +106,9 @@
     <div class="button-group" v-if="props.isEditing">
       <q-btn class="btnreject" @click="() => { resetFormToOriginal(); emit('update:isEditing', false); }">ยกเลิก</q-btn>
       <q-btn class="btnsecces" @click="saveChanges">บันทึก</q-btn>
+    </div>
+    <div class="button-group" v-if="!props.isEditing">
+      <q-btn class="btnedit" @click="() => emit('update:isEditing', false)">แก้ไข</q-btn>
     </div>
     <!-- Success Dialog -->
     <q-dialog v-model="showSuccessDialog" persistent>
@@ -623,8 +627,8 @@ const statusClass = computed(() => {
   font-size: 20px;
 
   display: flex;
-  align-items: center;       
-  justify-content: center; 
+  align-items: center;
+  justify-content: center;
   text-align: center;
 }
 

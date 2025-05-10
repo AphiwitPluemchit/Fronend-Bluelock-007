@@ -18,6 +18,7 @@
       />
       <q-icon v-else name="image" size="50px" />
     </q-card>
+     <p class="image-size-text">*ขนาดรูป 430x330 px</p>
   </div>
 </template>
 
@@ -72,6 +73,14 @@ defineExpose({ selectedFile })
   display: flex;
   flex-direction: column;
   align-items: center;
+}
+.image-size-text {
+  margin-top: 10px;
+  font-size: 14px;
+  color: #f03b2d;
+  font-weight: bold;
+  font-family: 'Noto Serif Thai', serif;
+  align-self: flex-start;
 }
 @media (max-width: 490px) {
 .upload-box {

@@ -143,6 +143,15 @@ const padClamp = (str: string, min: number, max: number): number => {
 const formatTime = (h: number, m: number): string =>
   `${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}`;
 
+watch([startHour, startMinute], () => {
+  localStartTime.value = formatTime(startHour.value, startMinute.value);
+  emit('update:startTime', localStartTime.value);
+});
+
+watch([endHour, endMinute], () => {
+  localEndTime.value = formatTime(endHour.value, endMinute.value);
+  emit('update:endTime', localEndTime.value);
+});
 
 watch([formattedStartHour, formattedStartMinute], ([h, m]) => {
   const hour = padClamp(h, 0, 23)
@@ -151,7 +160,7 @@ watch([formattedStartHour, formattedStartMinute], ([h, m]) => {
   startMinute.value = minute
   localStartTime.value = formatTime(hour, minute)
   emit('update:startTime', localStartTime.value)
-})
+});
 
 watch([formattedEndHour, formattedEndMinute], ([h, m]) => {
   const hour = padClamp(h, 0, 23)
@@ -160,7 +169,8 @@ watch([formattedEndHour, formattedEndMinute], ([h, m]) => {
   endMinute.value = minute
   localEndTime.value = formatTime(hour, minute)
   emit('update:endTime', localEndTime.value)
-})
+});
+
 watch(formattedStartHour, (val) => {
   if (!/^\d{2}$/.test(val)) {
     const padded = padClamp(val, 0, 23).toString().padStart(2, '0')
@@ -215,48 +225,63 @@ const onTimeTyping = (val: string | number | null) => {
   if (typeof val !== 'string') return;
 
   let raw = val.replace(/[^\d]/g, '').slice(0, 4);
-  if (raw.length >= 3) {
-    raw = raw.slice(0, 2) + ':' + raw.slice(2);
+  if (raw.length < 4) {
+    localStartTime.value = raw;
+    return; // ⛔ ยังไม่ emit
   }
+
+  raw = raw.slice(0, 2) + ':' + raw.slice(2);
 
   const match = raw.match(/^(\d{2}):(\d{2})$/);
-  if (match) {
-    const [, hStr, mStr] = match;
-    if (hStr && mStr) {
-      const hour = padClamp(hStr, 0, 23);
-      const minute = padClamp(mStr, 0, 59);
-      raw = formatTime(hour, minute);
-      startHour.value = hour;
-      startMinute.value = minute;
-      emit('update:startTime', raw);
-    }
+  if (!match) {
+    localStartTime.value = raw;
+    return; 
   }
 
-  localStartTime.value = raw;
+  const [, hStr, mStr] = match;
+  if (!hStr || !mStr) return;
+
+  const hour = padClamp(hStr, 0, 23);
+  const minute = padClamp(mStr, 0, 59);
+  const formatted = formatTime(hour, minute);
+
+  startHour.value = hour;
+  startMinute.value = minute;
+  localStartTime.value = formatted;
+  emit('update:startTime', formatted); // ✅ ชัวร์ว่าเป็น string ถูกต้อง
 };
+
+
 
 const onTimeTypingEnd = (val: string | number | null) => {
   if (typeof val !== 'string') return;
 
   let raw = val.replace(/[^\d]/g, '').slice(0, 4);
-  if (raw.length >= 3) {
-    raw = raw.slice(0, 2) + ':' + raw.slice(2);
+
+  if (raw.length < 4) {
+    localEndTime.value = raw;
+    return; 
   }
+
+  raw = raw.slice(0, 2) + ':' + raw.slice(2);
 
   const match = raw.match(/^(\d{2}):(\d{2})$/);
-  if (match) {
-    const [, hStr, mStr] = match;
-    if (hStr && mStr) {
-      const hour = padClamp(hStr, 0, 23);
-      const minute = padClamp(mStr, 0, 59);
-      raw = formatTime(hour, minute);
-      endHour.value = hour;
-      endMinute.value = minute;
-      emit('update:endTime', raw);
-    }
+  if (!match) {
+    localEndTime.value = raw;
+    return; 
   }
 
-  localEndTime.value = raw;
+  const [, hStr, mStr] = match;
+  if (!hStr || !mStr) return;
+
+  const hour = padClamp(hStr, 0, 23);
+  const minute = padClamp(mStr, 0, 59);
+  const formatted = formatTime(hour, minute);
+
+  endHour.value = hour;
+  endMinute.value = minute;
+  localEndTime.value = formatted;
+  emit('update:endTime', formatted); // ✅ ปลอดภัย
 };
 
 
@@ -271,6 +296,13 @@ watch(localEndTime, (val) => {
   if (!/^(\d{2}):(\d{2})$/.test(val ?? '')) {
     localEndTime.value = formatTime(endHour.value, endMinute.value);
   }
+});
+watch(() => props.startTime, (newVal) => {
+  localStartTime.value = newVal;
+});
+
+watch(() => props.endTime, (newVal) => {
+  localEndTime.value = newVal;
 });
 
 </script>

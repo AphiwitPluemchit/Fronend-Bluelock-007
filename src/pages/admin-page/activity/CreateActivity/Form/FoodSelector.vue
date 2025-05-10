@@ -3,7 +3,7 @@
     <!-- Food Menu Input -->
     <div class="input-group">
       <p class="label label_minWidth">รายการอาหาร :</p>
-      <q-input outlined v-model="foodMenuDisplay" class="food-input"  :disable="disable" readonly>
+      <q-input outlined v-model="foodMenuDisplay" class="food-input" :disable="disable" readonly>
         <template v-slot:prepend>
           <q-icon name="restaurant_menu" style="color: black" class="cursor-pointer" @click="openFoodDialog"
             :class="{ 'disabled-icon': disable }" />
@@ -24,7 +24,7 @@
               :class="{ 'active-btn': selectedFoods.some(f => f.name === item) }" color="white" text-color="black"
               :label="item" @click="toggleSelection(item)" :disable="disable">
               <template v-slot:default>
-             
+
                 <q-icon name="close" class="delete-icon" @click.stop="removeMenuItem(item)" v-if="!disable" />
               </template>
             </q-btn>
@@ -260,7 +260,7 @@ const removeMenuItem = (name: string) => {
   font-size: 14px;
   border: 1px solid #ccc;
   cursor: pointer;
-  position: relative; 
+  position: relative;
 }
 
 .active-btn {
@@ -297,6 +297,7 @@ const removeMenuItem = (name: string) => {
   pointer-events: none;
   opacity: 0.5;
 }
+
 .delete-icon {
   position: absolute;
   top: -2px;
@@ -309,23 +310,19 @@ const removeMenuItem = (name: string) => {
   cursor: pointer;
 }
 
-::v-deep(.q-field__control) {
+ ::v-deep(.q-field__control) {
   height: 40px !important;
   align-items: center;
   padding: 5px 10px;
 }
 
-::v-deep(.q-field__prepend) {
-  min-height: 40px !important;
-  padding: 5px 10px;
-  display: flex;
-  align-items: center;
-}
+
 
 .food-input.q-field--readonly .q-field__control:focus-within {
   outline: none !important;
   box-shadow: none !important;
 }
+
 .food-input input[readonly] {
   pointer-events: none;
   user-select: none;
@@ -337,10 +334,10 @@ const removeMenuItem = (name: string) => {
   box-shadow: none !important;
   outline: none !important;
 }
+
 .food-input.q-field--readonly .q-field__native {
   outline: none !important;
   box-shadow: none !important;
   pointer-events: none;
 }
-
 </style>

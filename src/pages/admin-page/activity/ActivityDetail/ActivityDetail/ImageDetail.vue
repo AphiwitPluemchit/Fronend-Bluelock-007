@@ -23,10 +23,8 @@
         :ratio="430 / 330"
         contain
       />
-
       <q-icon v-else name="image" size="50px" />
     </q-card>
-
     <p class="image-size-text">*ขนาดรูป 430x330 px</p>
   </div>
 </template>
