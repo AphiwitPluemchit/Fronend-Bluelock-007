@@ -60,13 +60,16 @@
             <q-td key="status" class="text-center">
               <q-badge
                 :label="props.row.status"
+                class="status-badge cursor-pointer"
                 :class="getStatusClass(props.row.status)"
-                class="status-badge"
+                @click="props.row.status === 'รออนุมัติ' && openManageCer(props.row)"
+                unelevated
               />
             </q-td>
           </q-tr>
         </template>
       </q-table>
+      <ManageCerDialog v-model="showDialog" :data="selectedCert" @confirm="handleConfirm" />
     </section>
   </q-page>
 </template>
@@ -75,10 +78,50 @@
 import { ref, computed } from 'vue'
 import type { QTableProps } from 'quasar'
 import FilterDialog from 'src/components/Dialog/FilterDialog.vue'
+import ManageCerDialog from './ManageCerDialog.vue'
 
 const search1 = ref('')
 const showFilterDialog1 = ref(false)
 const filterCategories1 = ref(['major', 'year', 'status'])
+
+const showDialog = ref(false)
+const selectedCert = ref({
+  code: '',
+  name: '',
+  certName: '',
+  imageUrl: '',
+})
+
+const certList = ref([
+  {
+    id: 1,
+    code: '65160332',
+    name: 'กรรณา สีประสงค์',
+    certName: 'ประกาศนียบัตร 2022',
+    status: 'รออนุมัติ',
+    imageUrl: '/images/sample_cert.png',
+  },
+  {
+    id: 2,
+    code: '65160301',
+    name: 'ศิวะ รัตนวงศ์',
+    certName: 'ประกาศนียบัตร 2022',
+    status: 'อนุมัติ',
+    imageUrl: '/images/sample_cert.png',
+  },
+])
+
+const openManageCer = (row: typeof selectedCert.value) => {
+  selectedCert.value = { ...row }
+  showDialog.value = true
+}
+
+const handleConfirm = (updated: typeof selectedCert.value & { status: string }) => {
+  const found = certList.value.find((c) => c.code === updated.code)
+  if (found) {
+    found.status = updated.status
+  }
+}
 
 interface CertificateRow {
   id: number
