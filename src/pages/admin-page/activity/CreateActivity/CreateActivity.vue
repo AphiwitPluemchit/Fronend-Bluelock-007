@@ -1,6 +1,7 @@
 <template>
   <q-page class="q-pa-md">
-    <AppBreadcrumbs :breadcrumbs="breadcrumbs" />
+    <div style="margin-top: 20px;">
+    <AppBreadcrumbs :breadcrumbs="breadcrumbs"/>
 
     <div class="wrapper">
       <div class="container">
@@ -17,6 +18,7 @@
           />
         </div>
       </div>
+    </div>
     </div>
   </q-page>
 </template>

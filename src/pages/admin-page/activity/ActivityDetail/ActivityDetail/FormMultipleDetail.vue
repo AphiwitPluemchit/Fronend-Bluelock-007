@@ -1,7 +1,8 @@
 <template>
   <q-page>
+    
     <!-- Status -->
-    <div class="input-group">
+    <div class="input-group" ref="formTop">
       <p class="label label_minWidth">สถานะ:</p>
       <q-badge :class="statusClass" class="status-btn">
         <div align="center" style="font-size: 20px;">{{ activityStatus }}</div>
@@ -20,7 +21,7 @@
 
     <!-- Activity Type -->
     <ActivityType v-model="activityType" class="input-group" :disable="!isEditing" />
-
+     <CloseRegisDate v-model="CloseRegisDates" class="input-group" :disable="!isEditing" />
     <!-- Food Selector -->
     <FoodSelector v-model:foodMenu="foodMenu" v-model:foodMenuDisplay="foodMenuDisplay" :disable="!isEditing" />
 
@@ -44,16 +45,21 @@
 
       <!-- Time -->
       <div class="input-group">
-        <p class="label label_minWidth" style="align-self: flex-start">เวลาที่จัดกิจกรรม:</p>
+        <p class="label label_minWidth" style="align-self: flex-start">เวลาที่จัดกิจกรรม :</p>
         <div class="day-time-container">
-          <q-checkbox class="checkbox-left" v-model="sameTimeForAll" label="เวลาเดิมทุกวัน"
-            @update:model-value="() => applySameTime(index)" :disable="!isEditing" />
-          <div class="day-time-container">
+          <q-checkbox class="checkbox-left" v-model="sameTimeForAll" label="เวลาเดิมทุกวัน" :disable="!isEditing" />
+          <div v-if="subActivity.selectedDays.length > 0">
             <div v-for="(day, dIndex) in subActivity.selectedDays" :key="day.date">
-              <TimeSelector v-model:startTime="day.startTime" v-model:endTime="day.endTime"
-                :formattedDate="day.formattedDate" @update:startTime="v => updateDayTime(index, dIndex, 'start', v)"
-                @update:endTime="v => updateDayTime(index, dIndex, 'end', v)" :disable="!isEditing" />
+              <TimeSelector v-model:startTime="day.startTime" v-model:endTime="day.endTime" :disable="!isEditing"
+                :formattedDate="day.formattedDate"
+                @update:startTime="(v: string) => updateDayTime(index, dIndex, 'start', v)"
+                @update:endTime="(v: string) => updateDayTime(index, dIndex, 'end', v)" />
             </div>
+          </div>
+
+          <div v-else>
+            <TimeSelector v-model:startTime="defaultTime.startTime" v-model:endTime="defaultTime.endTime"
+              formattedDate="" :disable="!isEditing" />
           </div>
         </div>
       </div>
@@ -84,7 +90,7 @@
       </div>
 
       <!-- Detail Activity -->
-      <div class="input-group" >
+      <div class="input-group">
         <p style="align-self: flex-start" class="label label_minWidth">รายละเอียดอื่นๆ :</p>
         <q-input type="textarea" rows="10" outlined v-model="subActivity.detailActivity" style="width: 100%"
           :disable="!isEditing" />
@@ -103,13 +109,15 @@
     </div>
 
     <!-- Save / Cancel Button -->
-    <div class="button-group" v-if="props.isEditing">
-      <q-btn class="btnreject" @click="() => { resetFormToOriginal(); emit('update:isEditing', false); }">ยกเลิก</q-btn>
-      <q-btn class="btnsecces" @click="saveChanges">บันทึก</q-btn>
+    <div class="button-group">
+      <q-btn v-if="!props.isEditing" class="btnedit" label="แก้ไข" @click="enterEditMode" />
+      <template v-else>
+        <q-btn class="btnreject" label="ยกเลิก"
+          @click="() => { resetFormToOriginal(); emit('update:isEditing', false) }" />
+        <q-btn class="btnsecces" label="บันทึก" @click="saveChanges" />
+      </template>
     </div>
-    <div class="button-group" v-if="!props.isEditing">
-      <q-btn class="btnedit" @click="() => emit('update:isEditing', false)">แก้ไข</q-btn>
-    </div>
+
     <!-- Success Dialog -->
     <q-dialog v-model="showSuccessDialog" persistent>
       <div class="q-pa-md text-h6 text-center successDialog">
@@ -122,7 +130,7 @@
 
 
 <script setup lang="ts">
-import { computed, onMounted, ref, watch } from 'vue'
+import { computed, nextTick, onMounted, ref, watch } from 'vue'
 import FoodSelector from 'src/pages/admin-page/activity/CreateActivity/Form/FoodSelector.vue'
 import HoursSelector from 'src/pages/admin-page/activity/CreateActivity/Form/HoursSelector.vue'
 import MutiDate from 'src/pages/admin-page/activity/CreateActivity/Form/MutiDate.vue'
@@ -130,6 +138,7 @@ import TimeSelector from 'src/pages/admin-page/activity/CreateActivity/Form/Time
 import ChangeStatusDialog from 'src/pages/admin-page/activity/ActivityDetail/ActivityDetail/ChangeStatusDialog.vue'
 import RoomSelector from 'src/pages/admin-page/activity/CreateActivity/Form/RoomSelector.vue'
 import DepartmentSelector from 'src/pages/admin-page/activity/CreateActivity/Form/DepartmentSelector.vue'
+import CloseRegisDate from 'src/pages/admin-page/activity/CreateActivity/Form/CloseRegisDate.vue'
 import YearSelector from 'src/pages/admin-page/activity/CreateActivity/Form/YearSelector.vue'
 import ActivityType from 'src/pages/admin-page/activity/CreateActivity/Form/ActivityType.vue'
 import type { Activity } from 'src/types/activity'
@@ -139,6 +148,7 @@ import cloneDeep from 'lodash/cloneDeep'
 import type ImageDetail from './ImageDetail.vue'
 
 const originalActivity = ref<Activity | null>(null)
+const CloseRegisDates = ref('')
 const activityLoaded = ref(false)
 const activityType = ref('')
 const showChangeStatusDialog = ref(false)
@@ -149,8 +159,15 @@ const foodMenu = ref<Food[]>([])
 const activityStatus = ref('')
 const sameTimeForAll = ref(false)
 const showSuccessDialog = ref(false)
+const defaultTime = ref({
+  startTime: '00:00',
+  endTime: '00:00',
+})
+const enterEditMode = async () => {
+  emit('update:isEditing', true)
+  await nextTick()
 
-
+}
 const props = defineProps<{
   activity: Activity | null
   isEditing: boolean
@@ -162,17 +179,18 @@ const emit = defineEmits<{
   (e: 'saved', fileName?: string): void
 }>()
 
+
 interface SubActivity {
   subActivityName: string
   roomName: string[]
-  seats: number
+  seats: number | null
   lecturer: string
   detailActivity: string
   departments: string[]
   years: string[]
   activityDateInternal: string[]
   selectedDays: DayTimeSelection[]
-  totalHours: number
+  totalHours: number | null
 }
 
 interface DayTimeSelection {
@@ -186,25 +204,20 @@ interface DayTimeSelection {
   endTime: string
 }
 const addSubActivity = () => {
-  const today = new Date()
-  const formattedToday = today.toISOString().split('T')[0] as string
-
-  const index = subActivities.value.length // index ใหม่ของ subActivity
+  const index = subActivities.value.length
 
   subActivities.value.push({
     subActivityName: '',
     roomName: [],
-    seats: 0,
+    seats: null,
     lecturer: '',
     detailActivity: '',
     departments: ['CS', 'SE', 'ITDI', 'AAI'],
     years: ['1', '2', '3', '4'],
-    activityDateInternal: [formattedToday],
+    activityDateInternal: [],
     selectedDays: [],
-    totalHours: 0,
+    totalHours: null,
   })
-
-  generateDaysInRange([formattedToday], index)
 
   watch(
     () => subActivities.value[index]?.selectedDays,
@@ -332,7 +345,6 @@ const removeSubActivity = (index: number) => {
 }
 
 const saveChanges = async () => {
-  emit('update:isEditing', false)
 
   if (!props.activity?.id) {
     console.error('ไม่พบ activity id')
@@ -343,6 +355,7 @@ const saveChanges = async () => {
 
   updated.name = activityName.value
   updated.skill = activityType.value === 'prep' ? 'hard' : 'soft'
+  updated.endDateEnroll =  CloseRegisDates.value
   updated.activityState = statusReverseMap[activityStatus.value] || 'planning'
   updated.foodVotes = foodMenu.value.map((f) => {
     const existingVote = updated.foodVotes?.find(vote => vote.foodName === f.name);
@@ -402,6 +415,7 @@ const saveChanges = async () => {
 
     emit('saved')
     showSuccessDialog.value = true
+    emit('update:isEditing', false)
     setTimeout(() => {
       showSuccessDialog.value = false
     }, 1000)
@@ -418,6 +432,7 @@ onMounted(() => {
   originalActivity.value = cloneDeep(a)
   activityName.value = a.name ?? ''
   activityType.value = a.skill === 'hard' ? 'prep' : a.skill === 'soft' ? 'academic' : ''
+  CloseRegisDates.value = a.endDateEnroll ?? ''
 
   if (a.activityState) {
     activityStatus.value = statusMap[a.activityState] || 'กำลังวางแผน'
@@ -478,7 +493,7 @@ const resetFormToOriginal = () => {
   activityName.value = a.name ?? ''
   activityType.value = a.skill === 'hard' ? 'prep' : a.skill === 'soft' ? 'academic' : ''
   activityStatus.value = statusMap[a.activityState ?? 'planning'] ?? 'กำลังวางแผน'
-
+  
   foodMenu.value = a.foodVotes?.map((f) => ({
     id: '',
     name: f.foodName,

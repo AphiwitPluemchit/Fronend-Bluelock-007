@@ -11,12 +11,13 @@
           />
         </div>
 
-        <div class="form-section">
+      <div>
           <FormMultipleDetail
+            
             :key="selectedActivityType"
             :activity="activity"
             :imageFile="selectedImageFile"
-            :isEditing="route.query.disable !== 'true'"
+            v-model:isEditing="isEditing"
             @saved="handleSave"
           />
         </div>
@@ -26,7 +27,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, watch } from 'vue'
+import {  ref, watch } from 'vue'
 import ImageDetail from './ActivityDetail/ImageDetail.vue'
 import FormMultipleDetail from './ActivityDetail/FormMultipleDetail.vue'
 import type { Activity } from 'src/types/activity'
@@ -39,7 +40,7 @@ const emit = defineEmits<{
 const imageRef = ref<InstanceType<typeof ImageDetail> | null>(null)
 const selectedImageFile = ref<File | null>(null)
 const route = useRoute()
-const isEditing = computed(() => route.query.disable !== 'true')
+const isEditing = ref(route.query.disable !== 'true')
 
 const handleFileSelected = (file: File) => {
   selectedImageFile.value = file
@@ -98,6 +99,7 @@ watch(isEditing, (newVal) => {
     imageRef.value?.resetPreview()
   }
 })
+
 </script>
 
 <style scoped>
