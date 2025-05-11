@@ -12,23 +12,18 @@
       </q-card-section>
       <q-card-actions align="right">
         <q-btn flat label="ยกเลิก" class="btnreject" v-close-popup />
-        <q-btn flat label="ยืนยัน" class="btnconfirm" @click="goToPageTable" />
+        <q-btn flat label="ยืนยัน" class="btnconfirm" @click="emit('confirm')" />
       </q-card-actions>
     </q-card>
   </q-dialog>
 </template>
 
 <script setup lang="ts">
-import { useRouter } from 'vue-router'
-
-const router = useRouter()
+const emit = defineEmits(['update:modelValue', 'confirm']) // ✅ เพิ่ม confirm
 defineProps<{
   modelValue: boolean;
 }>();
-const goToPageTable = async () => {
-  await router.push(`/Admin/ActivitiesManagement`)
-}
-const emit = defineEmits(['update:modelValue']);
+
 </script>
 
 <style scoped>

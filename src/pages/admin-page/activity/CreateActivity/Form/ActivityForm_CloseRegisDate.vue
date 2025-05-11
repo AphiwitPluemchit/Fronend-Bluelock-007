@@ -1,42 +1,14 @@
-<template>
-  <div class="input-group">
-    <p class="label label_minWidth">วันที่จัดกิจกรรม :</p>
-    <q-input outlined v-model="formattedDateRange" style="width: 600px" readonly :disable="disable">
-      <template v-slot:prepend>
-        <q-icon name="event" class="cursor-pointer" :class="{ 'disabled-icon': disable }"  style="color: black;">
-          <q-menu ref="datePopupRef" style="overflow: visible" v-if="!disable">
-            <q-date
-              v-model="internalDateRange"
-              mask="YYYY-MM-DD"
-              today-btn
-              :locale="thaiLocale"
-              color="blue-8"
-              text-color="white"
-              minimal
-              first-day-of-week="1"
-              class="my-custom-calendar"
-              multiple
-              @update:model-value="onDateRangeChange"
-            />
-          </q-menu>
-        </q-icon>
-      </template>
-    </q-input>
-  </div>
-</template>
-
 <script setup lang="ts">
 import { defineProps, defineEmits, computed, ref, watch } from 'vue'
 
+
 const props = defineProps<{ 
-  modelValue: string[];
-  disable?: boolean; // เพิ่ม prop disable
-}>();
-
-const emit = defineEmits<{ (event: 'update:modelValue', value: string[]): void }>();
-
-const internalDateRange = ref<string[]>([...props.modelValue])
+  modelValue: string;
+  disable?: boolean; 
+}>()
+const CloseRegisDates = ref<string>(props.modelValue)
 const datePopupRef = ref(null)
+const emit = defineEmits<{ (event: 'update:modelValue', value: string): void }>()
 
 const thaiLocale = {
   days: ['อาทิตย์', 'จันทร์', 'อังคาร', 'พุธ', 'พฤหัสบดี', 'ศุกร์', 'เสาร์'],
@@ -50,29 +22,13 @@ const thaiLocale = {
     'ก.ค.', 'ส.ค.', 'ก.ย.', 'ต.ค.', 'พ.ย.', 'ธ.ค.'
   ],
 }
-
-const formattedDateRange = computed(() => {
-  return internalDateRange.value.length > 0
-    ? internalDateRange.value.map((date) => formatThaiDate(date)).join(', ')
-    : ''
+const formattedCloseRegisDate = computed(() => {
+  return CloseRegisDates.value ? formatThaiDate(CloseRegisDates.value) : ''
 })
-
-const onDateRangeChange = () => {
-  if (props.disable) return;
-
-  if (!internalDateRange.value || internalDateRange.value.length === 0) {
-    emit('update:modelValue', [])
-    return
-  }
-
-  // ✅ ถ้ายังมีวันอยู่ ให้ sort และ emit ตามปกติ
-  internalDateRange.value = [...internalDateRange.value].sort(
-    (a, b) => new Date(a).getTime() - new Date(b).getTime(),
-  )
-  emit('update:modelValue', internalDateRange.value)
+const onDateChange = () => {
+  if (props.disable) return
+  emit('update:modelValue', CloseRegisDates.value)
 }
-
-
 const formatThaiDate = (dateStr: string): string => {
   if (!dateStr) return ''
 
@@ -92,14 +48,47 @@ const formatThaiDate = (dateStr: string): string => {
 
   return `${day} ${thaiMonth} ${thaiYear}`
 }
-
-watch(
-  () => props.modelValue,
-  (newVal) => {
-    internalDateRange.value = [...newVal]
-  },
-)
+watch(() => props.modelValue, (newVal) => {
+  CloseRegisDates.value = newVal
+})
 </script>
+
+<template>
+  <div class="input-group">
+    <p class="label label_minWidth">วันที่ปิดลงทะเบียน :</p>
+    <q-input
+      outlined
+      :model-value="formattedCloseRegisDate"
+      style="width: 600px"
+      readonly
+      :disable="disable"
+    >
+      <template v-slot:prepend>
+        <q-icon
+          name="event"
+          class="cursor-pointer"
+          :class="{ 'disabled-icon': disable }"
+          style="color: black;"
+        >
+          <q-menu ref="datePopupRef" style="overflow: visible" v-if="!disable">
+            <q-date
+              v-model="CloseRegisDates"
+              mask="YYYY-MM-DD"
+              today-btn
+              :locale="thaiLocale"
+              color="blue-8"
+              text-color="white"
+              minimal
+              first-day-of-week="1"
+              class="my-custom-calendar"
+              @update:model-value="onDateChange"
+            />
+          </q-menu>
+        </q-icon>
+      </template>
+    </q-input>
+  </div>
+</template>
 
 <style scoped>
 .input-group {

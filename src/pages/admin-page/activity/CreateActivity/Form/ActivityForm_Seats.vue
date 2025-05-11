@@ -1,3 +1,28 @@
+<script setup lang="ts">
+import { defineProps, defineEmits, ref, watch } from 'vue'
+
+const props = defineProps<{
+  modelValue: number |null
+  disable?: boolean
+}>()
+const emit = defineEmits<{
+  (event: 'update:modelValue', value: number): void
+}>()
+const localSeats = ref<number | null>(props.modelValue ?? null)
+watch(localSeats, (newVal) => {
+  emit('update:modelValue', newVal ?? 0)  
+})
+watch(() => props.modelValue, (newVal) => {
+  localSeats.value = newVal ?? null
+})
+const isNumber = (event: KeyboardEvent) => {
+  const charCode = event.which ? event.which : event.keyCode
+  if (charCode < 48 || charCode > 57) {
+    event.preventDefault()
+  }
+}
+</script>
+
 <template>
   <div class="input-group">
     <p class="label label_minWidth">จำนวนที่รับ :</p>
@@ -7,37 +32,6 @@
 
   </div>
 </template>
-
-<script setup lang="ts">
-import { defineProps, defineEmits, ref, watch } from 'vue'
-
-const props = defineProps<{
-  modelValue: number |null
-  disable?: boolean
-}>()
-
-const emit = defineEmits<{
-  (event: 'update:modelValue', value: number): void
-}>()
-
-const localSeats = ref<number | null>(props.modelValue ?? null)
-
-watch(localSeats, (newVal) => {
-  emit('update:modelValue', newVal ?? 0)  
-})
-
-watch(() => props.modelValue, (newVal) => {
-  localSeats.value = newVal ?? null
-})
-
-
-const isNumber = (event: KeyboardEvent) => {
-  const charCode = event.which ? event.which : event.keyCode
-  if (charCode < 48 || charCode > 57) {
-    event.preventDefault()
-  }
-}
-</script>
 
 <style scoped>
 .label {

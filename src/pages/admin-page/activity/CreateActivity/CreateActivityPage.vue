@@ -1,32 +1,7 @@
-<template>
-  <q-page class="q-pa-md">
-    <div style="margin-top: 20px;">
-    <AppBreadcrumbs :breadcrumbs="breadcrumbs"/>
-
-    <div class="wrapper">
-      <div class="container">
-        <div class="image-section">
-          <CreateActivity_Image
-            ref="imageComponentRef"
-            @file-selected="handleFileSelected"
-          />
-        </div>
-
-        <div class="form-section">
-          <FormMultipleActivities
-            :image-file="selectedImageFile"
-          />
-        </div>
-      </div>
-    </div>
-    </div>
-  </q-page>
-</template>
-
 <script setup lang="ts">
 import { ref } from 'vue'
-import CreateActivity_Image from './CreateActivity_Image.vue'
-import FormMultipleActivities from './FormMultipleActivities.vue'
+import CreateActivity_Form from './CreateActivity_Form.vue'
+import CreateActivity_Image from './CreateActivity_Image.vue' 
 import AppBreadcrumbs from 'src/components/AppBreadcrumbs.vue'
 
 const imageComponentRef = ref<InstanceType<typeof CreateActivity_Image> | null>(null)
@@ -35,7 +10,6 @@ const selectedImageFile = ref<File | null>(null)
 const handleFileSelected = (file: File) => {
   selectedImageFile.value = file
 }
-
 const breadcrumbs = ref({
   previousPage: { title: 'จัดการกิจกรรม', path: '/Admin/ActivitiesManagement' },
   currentPage: { title: 'สร้างกิจกรรม', path: '/Admin/ActivitiesManagement/CreateActivity' },
@@ -43,6 +17,28 @@ const breadcrumbs = ref({
 })
 </script>
 
+<template>
+  <q-page class="q-pa-md">
+    <div style="margin-top: 20px;">
+    <AppBreadcrumbs :breadcrumbs="breadcrumbs"/>
+    <div class="wrapper">
+      <div class="container">
+        <div class="image-section">
+          <CreateActivity_Image
+            ref="imageComponentRef"
+            @file-selected="handleFileSelected"
+          />
+        </div>
+        <div class="form-section">
+          <CreateActivity_Form
+            :image-file="selectedImageFile"
+          />
+        </div>
+      </div>
+    </div>
+    </div>
+  </q-page>
+</template>
 
 <style scoped>
 .wrapper {

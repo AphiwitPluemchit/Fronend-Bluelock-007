@@ -1,46 +1,18 @@
-<template>
-  <q-page class="q-pa-md">
-    <div class="wrapper">
-      <div class="container">
-        <div class="image-section">
-          <ImageDetail
-            ref="imageRef"
-            :imageFileName="props.activity?.file"
-            :disable="!isEditing"
-            @file-selected="handleFileSelected"
-          />
-        </div>
-
-      <div>
-          <FormMultipleDetail
-            
-            :key="selectedActivityType"
-            :activity="activity"
-            :imageFile="selectedImageFile"
-            v-model:isEditing="isEditing"
-            @saved="handleSave"
-          />
-        </div>
-      </div>
-    </div>
-  </q-page>
-</template>
-
 <script setup lang="ts">
 import {  ref, watch } from 'vue'
-import ImageDetail from './ActivityDetail/ImageDetail.vue'
-import FormMultipleDetail from './ActivityDetail/FormMultipleDetail.vue'
+import { useRoute } from 'vue-router'
 import type { Activity } from 'src/types/activity'
 import { ActivityService } from 'src/services/activity'
-import { useRoute } from 'vue-router'
+import ImageDetail from './ImageDetail.vue'
+import FormMultipleDetail from './FormMultipleDetail.vue'
+
+const route = useRoute()
+const selectedImageFile = ref<File | null>(null)
+const isEditing = ref(route.query.disable !== 'true')
+const imageRef = ref<InstanceType<typeof ImageDetail> | null>(null)
 const emit = defineEmits<{
   (e: 'update-activity', updated: Activity): void
 }>()
-
-const imageRef = ref<InstanceType<typeof ImageDetail> | null>(null)
-const selectedImageFile = ref<File | null>(null)
-const route = useRoute()
-const isEditing = ref(route.query.disable !== 'true')
 
 const handleFileSelected = (file: File) => {
   selectedImageFile.value = file
@@ -101,6 +73,33 @@ watch(isEditing, (newVal) => {
 })
 
 </script>
+
+<template>
+  <q-page class="q-pa-md">
+    <div class="wrapper">
+      <div class="container">
+        <div class="image-section">
+          <ImageDetail
+            ref="imageRef"
+            :imageFileName="props.activity?.file"
+            :disable="!isEditing"
+            @file-selected="handleFileSelected"
+          />
+        </div>
+
+      <div class="form-section">
+          <FormMultipleDetail
+            :key="selectedActivityType"
+            :activity="activity"
+            :imageFile="selectedImageFile"
+            v-model:isEditing="isEditing"
+            @saved="handleSave"
+          />
+        </div>
+      </div>
+    </div>
+  </q-page>
+</template>
 
 <style scoped>
 .wrapper {

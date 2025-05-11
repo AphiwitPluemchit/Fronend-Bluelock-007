@@ -1,3 +1,54 @@
+<script setup lang="ts">
+import { ref, computed } from 'vue'
+
+const fileInput = ref<HTMLInputElement | null>(null)
+const previewUrl = ref<string | null>(null)
+const selectedFileName = ref<string | null>(null)
+const props = defineProps<{
+  imageFileName?: string | null | undefined
+  disable?: boolean
+}>()
+
+const emit = defineEmits<{
+  (e: 'file-selected', file: File): void
+}>()
+
+const serverImageUrl = computed(() =>
+  props.imageFileName
+    ? `${import.meta.env.VITE_API_URL}/uploads/activity/images/${props.imageFileName}`
+    : null,
+)
+const imageSrc = computed(() => {
+  return previewUrl.value ?? serverImageUrl.value ?? undefined
+})
+const triggerFileInput = () => {
+  fileInput.value?.click()
+}
+
+const resetPreview = () => {
+  previewUrl.value = null
+}
+
+const getSelectedFileName = () => selectedFileName.value
+const selectedFile = ref<File | null>(null)
+defineExpose({
+  resetPreview,
+  getSelectedFileName,
+  getSelectedFile: () => selectedFile.value
+})
+
+const onFileChange = (event: Event) => {
+  const target = event.target as HTMLInputElement
+  const file = target.files?.[0]
+  if (file) {
+    selectedFile.value = file
+    selectedFileName.value = file.name
+    previewUrl.value = URL.createObjectURL(file)
+    emit('file-selected', file)
+  }
+}
+</script>
+
 <template>
   <div class="upload-container">
     <q-card
@@ -29,57 +80,6 @@
   </div>
 </template>
 
-<script setup lang="ts">
-import { ref, computed } from 'vue'
-
-const props = defineProps<{
-  imageFileName?: string | null | undefined
-  disable?: boolean
-}>()
-
-const emit = defineEmits<{
-  (e: 'file-selected', file: File): void
-}>()
-
-const fileInput = ref<HTMLInputElement | null>(null)
-const previewUrl = ref<string | null>(null)
-const selectedFileName = ref<string | null>(null)
-
-const serverImageUrl = computed(() =>
-  props.imageFileName
-    ? `${import.meta.env.VITE_API_URL}/uploads/activity/images/${props.imageFileName}`
-    : null,
-)
-const triggerFileInput = () => {
-  fileInput.value?.click()
-}
-
-const resetPreview = () => {
-  previewUrl.value = null
-}
-
-const getSelectedFileName = () => selectedFileName.value
-const selectedFile = ref<File | null>(null)
-defineExpose({
-  resetPreview,
-  getSelectedFileName,
-  getSelectedFile: () => selectedFile.value
-})
-const imageSrc = computed(() => {
-  return previewUrl.value ?? serverImageUrl.value ?? undefined
-})
-
-const onFileChange = (event: Event) => {
-  const target = event.target as HTMLInputElement
-  const file = target.files?.[0]
-  if (file) {
-    selectedFile.value = file
-    selectedFileName.value = file.name
-    previewUrl.value = URL.createObjectURL(file)
-    emit('file-selected', file)
-  }
-}
-</script>
 
 <style scoped>
 .upload-box {
