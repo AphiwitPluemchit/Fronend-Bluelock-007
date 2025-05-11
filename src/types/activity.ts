@@ -5,6 +5,7 @@ export type Activity = {
   name: string
   type?: string
   activityState?: string
+  endDateEnroll?: string
   skill?: string
   file?: string
   activityItems?: ActivityItem[] | null

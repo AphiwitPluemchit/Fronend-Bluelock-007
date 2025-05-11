@@ -53,6 +53,7 @@ watch([tab, isPlanning], () => {
 
 <template>
   <q-page class="q-pa-md">
+    <div style="margin-top: 20px;">
     <AppBreadcrumbs :breadcrumbs="breadcrumbs" />
 
     <!-- Tabs -->
@@ -85,6 +86,7 @@ watch([tab, isPlanning], () => {
         <SummaryResult :activity="activity" />
       </q-tab-panel>
     </q-tab-panels>
+    </div>
   </q-page>
 </template>
 
