@@ -1,53 +1,16 @@
-<template>
-  <q-dialog v-model="showDialog" persistent>
-    <q-card class="dialog-box">
-      <q-card-section>
-        <div class="label">เปลี่ยนสถานะกิจกรรม</div>
-      </q-card-section>
-
-      <q-card-section class="status-section">
-        <q-btn v-for="option in availableStatuses" :key="option.value" :label="option.label" class="status-btn" :class="[
-          {
-            'active-status': selectedStatus === option.value,
-          },
-          option.value === 'กำลังวางแผน'
-            ? 'status-plannings'
-            : option.value === 'เปิดลงทะเบียน'
-              ? 'status-opens'
-              : option.value === 'ปิดลงทะเบียน'
-                ? 'status-closed'
-                : option.value === 'เสร็จสิ้น'
-                  ? 'status-completed'
-                  : option.value === 'ยกเลิก'
-                    ? 'status-cancelled'
-                    : '',
-        ]" @click="selectedStatus = option.value" :outline="false" />
-      </q-card-section>
-
-      <!-- ปุ่มยืนยัน & ยกเลิก -->
-      <q-card-actions align="right">
-        <q-btn class="btnreject" label="ยกเลิก" @click="closeDialog" />
-        <q-btn class="btnconfirm" label="ยืนยัน" @click="confirmStatusChange" />
-      </q-card-actions>
-    </q-card>
-  </q-dialog>
-</template>
-
 <script setup lang="ts">
 import { defineProps, defineEmits, ref, computed, watch } from 'vue'
 
+const selectedStatus = ref<string>('')
 const props = defineProps({
   modelValue: Boolean, // รับค่าจาก v-model
   currentStatus: String, // รับสถานะปัจจุบัน
 })
-
 const emit = defineEmits(['update:modelValue', 'confirm'])
-const selectedStatus = ref<string>('')
 const showDialog = computed({
   get: () => props.modelValue,
   set: (val) => emit('update:modelValue', val),
 })
-
 watch(
   () => props.modelValue,
   (val) => {
@@ -102,7 +65,6 @@ const availableStatuses = computed(() => {
 const closeDialog = () => {
   emit('update:modelValue', false)
 }
-
 const confirmStatusChange = () => {
   if (selectedStatus.value) {
     emit('confirm', selectedStatus.value)
@@ -110,6 +72,41 @@ const confirmStatusChange = () => {
   }
 }
 </script>
+
+<template>
+  <q-dialog v-model="showDialog" persistent>
+    <q-card class="dialog-box">
+      <q-card-section>
+        <div class="label">เปลี่ยนสถานะกิจกรรม</div>
+      </q-card-section>
+
+      <q-card-section class="status-section">
+        <q-btn v-for="option in availableStatuses" :key="option.value" :label="option.label" class="status-btn" :class="[
+          {
+            'active-status': selectedStatus === option.value,
+          },
+          option.value === 'กำลังวางแผน'
+            ? 'status-plannings'
+            : option.value === 'เปิดลงทะเบียน'
+              ? 'status-opens'
+              : option.value === 'ปิดลงทะเบียน'
+                ? 'status-closed'
+                : option.value === 'เสร็จสิ้น'
+                  ? 'status-completed'
+                  : option.value === 'ยกเลิก'
+                    ? 'status-cancelled'
+                    : '',
+        ]" @click="selectedStatus = option.value" :outline="false" />
+      </q-card-section>
+
+      <!-- ปุ่มยืนยัน & ยกเลิก -->
+      <q-card-actions align="right">
+        <q-btn class="btnreject" label="ยกเลิก" @click="closeDialog" />
+        <q-btn class="btnconfirm" label="ยืนยัน" @click="confirmStatusChange" />
+      </q-card-actions>
+    </q-card>
+  </q-dialog>
+</template>
 
 <style scoped>
 .label {

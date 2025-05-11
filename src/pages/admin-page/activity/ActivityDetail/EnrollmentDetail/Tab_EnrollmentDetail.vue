@@ -1,8 +1,8 @@
 <script setup lang="ts">
-import { ActivityService } from 'src/services/activity'
-import type { Activity, EnrollmentSummary } from 'src/types/activity'
 import { onMounted, ref } from 'vue'
 import { useRoute } from 'vue-router';
+import { ActivityService } from 'src/services/activity'
+import type { Activity, EnrollmentSummary } from 'src/types/activity'
 
 const route = useRoute();
 const activityId = route.params.id as string;

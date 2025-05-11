@@ -1,27 +1,20 @@
 <script setup lang="ts">
 import { computed, ref, onMounted, watch } from 'vue'
-import ActivityDetailTab from './ActivityDetailTab.vue'
-import StudentList from './StudentList.vue'
-import RegistrationDetails from './RegistrationDetails.vue'
-import SummaryResult from './SummaryResult.vue'
-import AppBreadcrumbs from 'src/components/AppBreadcrumbs.vue'
 import { useRoute } from 'vue-router'
-import { ActivityService } from 'src/services/activity'
 import type { Activity } from 'src/types/activity'
-// import { route } from 'quasar/wrappers';
+import { ActivityService } from 'src/services/activity'
+import Tab_Summary from './Summary/Tab_Summary.vue'
+import Tab_StudentList from './StudentList/Tab_StudentList.vue'
+import Tab_ActivityDetail from './ActivityDetail/Tab_ActivityDetail.vue'
+import Tab_EnrollmentDetail from './EnrollmentDetail/Tab_EnrollmentDetail.vue'
+import AppBreadcrumbs from 'src/components/AppBreadcrumbs.vue'
+
 const route = useRoute()
 const activity = ref<Activity | null>(null)
 const tab = ref<string>('activity')
 const search = ref<string>('')
 const isPlanning = computed(() => activity.value?.activityState === 'planning')
 
-// const router = useRouter()
-
-// const goToActivitiesManagement = async () => {
-//   await router.push('/ActivitiesManagement')
-// }
-
-// Breadcrumb ตามแท็บที่เลือก
 const currentBreadcrumb = computed(() => {
   if (tab.value === 'activity') return 'รายละเอียดกิจกรรม'
   if (tab.value === 'registration') return 'รายละเอียดการลงทะเบียน'
@@ -66,8 +59,9 @@ watch([tab, isPlanning], () => {
 
     <!-- Tab Panels -->
     <q-tab-panels v-model="tab" animated class="custom-panels">
+
       <q-tab-panel name="activity" class="q-my-md">
-        <ActivityDetailTab
+        <Tab_ActivityDetail
           v-if="activity"
           :activity="activity"
           @update-activity="(updated) => (activity = updated)"
@@ -75,15 +69,15 @@ watch([tab, isPlanning], () => {
       </q-tab-panel>
 
       <q-tab-panel name="registration" class="q-my-md">
-        <RegistrationDetails :activity="activity" />
+        <Tab_EnrollmentDetail :activity="activity" />
       </q-tab-panel>
 
       <q-tab-panel name="students" class="q-my-md">
-        <StudentList :search="search" :activity="activity" />
+        <Tab_StudentList :search="search" :activity="activity" />
       </q-tab-panel>
 
       <q-tab-panel name="summary" class="q-my-md">
-        <SummaryResult :activity="activity" />
+        <Tab_Summary :activity="activity" />
       </q-tab-panel>
     </q-tab-panels>
     </div>
