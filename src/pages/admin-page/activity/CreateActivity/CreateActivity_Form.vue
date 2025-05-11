@@ -50,6 +50,7 @@ const defaultTime = ref({
   startTime: '00:00',
   endTime: '00:00',
 })
+
 const props = defineProps<{
   imageFile: File | null
   activity?: { file?: string | null }
@@ -398,7 +399,8 @@ onMounted(() => {
     </div>
 
     <!-- Dialog -->
-    <CancelDialog v-model="showCancelDialog" />
+    <CancelDialog v-model="showCancelDialog"
+     @confirm="goToPageTable"  />
   </q-page>
 </template>
 

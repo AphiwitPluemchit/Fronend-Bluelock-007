@@ -22,7 +22,7 @@ const thaiLocale = {
     'ก.ค.', 'ส.ค.', 'ก.ย.', 'ต.ค.', 'พ.ย.', 'ธ.ค.'
   ],
 }
-const displayValue = computed(() => {
+const formattedCloseRegisDate = computed(() => {
   return CloseRegisDates.value ? formatThaiDate(CloseRegisDates.value) : ''
 })
 const onDateChange = () => {
@@ -58,7 +58,7 @@ watch(() => props.modelValue, (newVal) => {
     <p class="label label_minWidth">วันที่ปิดลงทะเบียน :</p>
     <q-input
       outlined
-      :model-value="displayValue"
+      :model-value="formattedCloseRegisDate"
       style="width: 600px"
       readonly
       :disable="disable"

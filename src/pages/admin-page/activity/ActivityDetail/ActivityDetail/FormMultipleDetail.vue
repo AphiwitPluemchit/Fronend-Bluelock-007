@@ -15,9 +15,8 @@ import ActivityForm_ActivityDate from 'src/pages/admin-page/activity/CreateActiv
 import ActivityForm_ActivityTime from 'src/pages/admin-page/activity/CreateActivity/Form/ActivityForm_ActivityTime.vue'
 import ActivityForm_StudentYears from 'src/pages/admin-page/activity/CreateActivity/Form/ActivityForm_StudentYears.vue'
 import ActivityForm_CloseRegisDate from 'src/pages/admin-page/activity/CreateActivity/Form/ActivityForm_CloseRegisDate.vue'
-
 import ChangeStatusDialog from 'src/pages/admin-page/activity/ActivityDetail/ActivityDetail/ChangeStatusDialog.vue'
-
+import CancelDialog from 'src/components/Dialog/CancelDialog.vue'
 interface SubActivity {
   subActivityName: string
   roomName: string[]
@@ -45,7 +44,7 @@ interface DayTimeSelection {
 const activityStatus = ref('')
 const activityName = ref('')
 const activityType = ref('')
-const CloseRegisDates = ref('')
+const formattedCloseRegisDate = ref('')
 const foodMenu = ref<Food[]>([])
 const foodMenuDisplay = ref('')
 const originalActivity = ref<Activity | null>(null)
@@ -53,6 +52,7 @@ const activityLoaded = ref(false)
 const showChangeStatusDialog = ref(false)
 const subActivities = ref<SubActivity[]>([])
 const sameTimeForAll = ref(false)
+const showCancelDialog = ref(false)
 const showSuccessDialog = ref(false)
 const defaultTime = ref({
   startTime: '00:00',
@@ -71,7 +71,9 @@ const enterEditMode = async () => {
   emit('update:isEditing', true)
   await nextTick()
 }
-
+const openCancelDialog = () => {
+  showCancelDialog.value = true
+}
 //ใช้ในการเปลี่ยนสถานะ
 const handleStatusChange = (newStatus: string) => {
   activityStatus.value = newStatus
@@ -247,7 +249,7 @@ const saveChanges = async () => {
 
   updated.name = activityName.value
   updated.skill = activityType.value === 'prep' ? 'hard' : 'soft'
-  updated.endDateEnroll = CloseRegisDates.value
+  updated.endDateEnroll = formattedCloseRegisDate.value
   updated.activityState = statusReverseMap[activityStatus.value] || 'planning'
   updated.foodVotes = foodMenu.value.map((f) => {
     const existingVote = updated.foodVotes?.find((vote) => vote.foodName === f.name)
@@ -323,8 +325,7 @@ onMounted(() => {
   originalActivity.value = cloneDeep(a)
   activityName.value = a.name ?? ''
   activityType.value = a.skill === 'hard' ? 'prep' : a.skill === 'soft' ? 'academic' : ''
-  CloseRegisDates.value = a.endDateEnroll ?? ''
-
+  formattedCloseRegisDate.value = a.endDateEnroll ?? ''
   if (a.activityState) {
     activityStatus.value = statusMap[a.activityState] || 'กำลังวางแผน'
   }
@@ -385,6 +386,7 @@ const resetFormToOriginal = () => {
   activityName.value = a.name ?? ''
   activityType.value = a.skill === 'hard' ? 'prep' : a.skill === 'soft' ? 'academic' : ''
   activityStatus.value = statusMap[a.activityState ?? 'planning'] ?? 'กำลังวางแผน'
+  formattedCloseRegisDate.value = a.endDateEnroll ?? ''
 
   foodMenu.value =
     a.foodVotes?.map((f) => ({
@@ -463,8 +465,16 @@ const resetFormToOriginal = () => {
 
     <!-- Activity Type -->
     <ActivityForm_Type v-model="activityType" class="input-group" :disable="!isEditing" />
-    <ActivityForm_CloseRegisDate v-model="CloseRegisDates" class="input-group" :disable="!isEditing" />
-    <ActivityForm_Food v-model:foodMenu="foodMenu" v-model:foodMenuDisplay="foodMenuDisplay" :disable="!isEditing"/>
+    <ActivityForm_CloseRegisDate
+      v-model="formattedCloseRegisDate"
+      class="input-group"
+      :disable="!isEditing"
+    />
+    <ActivityForm_Food
+      v-model:foodMenu="foodMenu"
+      v-model:foodMenuDisplay="foodMenuDisplay"
+      :disable="!isEditing"
+    />
 
     <!-- Sub Activities List -->
     <div
@@ -539,11 +549,27 @@ const resetFormToOriginal = () => {
         </div>
       </div>
 
-      <ActivityForm_Hour v-model="subActivity.totalHours" class="input-group" :disable="!isEditing" />
+      <ActivityForm_Hour
+        v-model="subActivity.totalHours"
+        class="input-group"
+        :disable="!isEditing"
+      />
       <ActivityForm_Room v-model="subActivity.roomName" class="input-group" :disable="!isEditing" />
-      <ActivityForm_Seats v-model.number="subActivity.seats" class="input-group" :disable="!isEditing" />
-      <ActivityForm_Major v-model="subActivity.departments" class="input-group" :disable="!isEditing" />
-      <ActivityForm_StudentYears v-model="subActivity.years" class="input-group" :disable="!isEditing" />
+      <ActivityForm_Seats
+        v-model.number="subActivity.seats"
+        class="input-group"
+        :disable="!isEditing"
+      />
+      <ActivityForm_Major
+        v-model="subActivity.departments"
+        class="input-group"
+        :disable="!isEditing"
+      />
+      <ActivityForm_StudentYears
+        v-model="subActivity.years"
+        class="input-group"
+        :disable="!isEditing"
+      />
 
       <!-- Lecturer -->
       <div class="input-group">
@@ -592,12 +618,7 @@ const resetFormToOriginal = () => {
         <q-btn
           class="btnreject"
           label="ยกเลิก"
-          @click="
-            () => {
-              resetFormToOriginal()
-              emit('update:isEditing', false)
-            }
-          "
+          @click=openCancelDialog
         />
         <q-btn class="btnsecces" label="บันทึก" @click="saveChanges" />
       </template>
@@ -607,9 +628,19 @@ const resetFormToOriginal = () => {
     <q-dialog v-model="showSuccessDialog" persistent>
       <div class="q-pa-md text-h6 text-center successDialog">บันทึกสำเร็จ</div>
     </q-dialog>
+
+    <CancelDialog
+      v-model="showCancelDialog"
+      @confirm="
+        () => {
+          resetFormToOriginal()
+          emit('update:isEditing', false)
+          showCancelDialog = false
+        }
+      "
+    />
   </q-page>
 </template>
-
 
 <style scoped>
 ::v-deep(.q-field__control) {
