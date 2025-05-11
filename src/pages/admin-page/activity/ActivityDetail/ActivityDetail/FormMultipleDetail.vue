@@ -1,17 +1,24 @@
 <template>
   <q-page>
-    
     <!-- Status -->
     <div class="input-group" ref="formTop">
       <p class="label label_minWidth">สถานะ:</p>
       <q-badge :class="statusClass" class="status-btn">
-        <div align="center" style="font-size: 20px;">{{ activityStatus }}</div>
+        <div align="center" style="font-size: 20px">{{ activityStatus }}</div>
       </q-badge>
-      <q-btn v-if="props.isEditing && activityStatus != 'เสร็จสิ้น'" class="btnchange" label="เปลี่ยน"
-        @click="showChangeStatusDialog = true" :disable="!isEditing" />
+      <q-btn
+        v-if="props.isEditing && activityStatus != 'เสร็จสิ้น'"
+        class="btnchange"
+        label="เปลี่ยน"
+        @click="showChangeStatusDialog = true"
+        :disable="!isEditing"
+      />
     </div>
-    <ChangeStatusDialog v-model="showChangeStatusDialog" :currentStatus="activityStatus"
-      @confirm="handleStatusChange" />
+    <ChangeStatusDialog
+      v-model="showChangeStatusDialog"
+      :currentStatus="activityStatus"
+      @confirm="handleStatusChange"
+    />
 
     <!-- Activity Name -->
     <div class="input-group">
@@ -21,45 +28,83 @@
 
     <!-- Activity Type -->
     <ActivityType v-model="activityType" class="input-group" :disable="!isEditing" />
-     <CloseRegisDate v-model="CloseRegisDates" class="input-group" :disable="!isEditing" />
+    <CloseRegisDate v-model="CloseRegisDates" class="input-group" :disable="!isEditing" />
     <!-- Food Selector -->
-    <FoodSelector v-model:foodMenu="foodMenu" v-model:foodMenuDisplay="foodMenuDisplay" :disable="!isEditing" />
+    <FoodSelector
+      v-model:foodMenu="foodMenu"
+      v-model:foodMenuDisplay="foodMenuDisplay"
+      :disable="!isEditing"
+    />
 
     <!-- Sub Activities List -->
-    <div v-for="(subActivity, index) in subActivities" :key="index" class="sub-activity" style="margin-top: 15px;">
-
+    <div
+      v-for="(subActivity, index) in subActivities"
+      :key="index"
+      class="sub-activity"
+      style="margin-top: 15px"
+    >
       <!-- Remove Icon -->
-      <div class="remove-icon" :class="{ 'icon-disabled': !isEditing }" @click="isEditing && removeSubActivity(index)">
-        <q-icon name="close" size="35px" :color="isEditing ? 'red' : 'grey-5'" class="cursor-pointer" />
+      <div
+        class="remove-icon"
+        :class="{ 'icon-disabled': !isEditing }"
+        @click="isEditing && removeSubActivity(index)"
+      >
+        <q-icon
+          name="close"
+          size="35px"
+          :color="isEditing ? 'red' : 'grey-5'"
+          class="cursor-pointer"
+        />
       </div>
 
       <!-- SubActivity Name -->
       <div class="input-group">
         <p class="label label_minWidth">ชื่อกิจกรรม :</p>
-        <q-input outlined v-model="subActivity.subActivityName" style="width: 600px" :disable="!isEditing" />
+        <q-input
+          outlined
+          v-model="subActivity.subActivityName"
+          style="width: 600px"
+          :disable="!isEditing"
+        />
       </div>
 
       <!-- Date -->
-      <MutiDate v-model="subActivity.activityDateInternal"
-        @update:modelValue="(dates) => generateDaysInRange(dates, index)" :disable="!isEditing" />
+      <MutiDate
+        v-model="subActivity.activityDateInternal"
+        @update:modelValue="(dates) => generateDaysInRange(dates, index)"
+        :disable="!isEditing"
+      />
 
       <!-- Time -->
       <div class="input-group">
         <p class="label label_minWidth" style="align-self: flex-start">เวลาที่จัดกิจกรรม :</p>
         <div class="day-time-container">
-          <q-checkbox class="checkbox-left" v-model="sameTimeForAll" label="เวลาเดิมทุกวัน" :disable="!isEditing" />
+          <q-checkbox
+            class="checkbox-left"
+            v-model="sameTimeForAll"
+            label="เวลาเดิมทุกวัน"
+            :disable="!isEditing"
+          />
           <div v-if="subActivity.selectedDays.length > 0">
             <div v-for="(day, dIndex) in subActivity.selectedDays" :key="day.date">
-              <TimeSelector v-model:startTime="day.startTime" v-model:endTime="day.endTime" :disable="!isEditing"
+              <TimeSelector
+                v-model:startTime="day.startTime"
+                v-model:endTime="day.endTime"
+                :disable="!isEditing"
                 :formattedDate="day.formattedDate"
                 @update:startTime="(v: string) => updateDayTime(index, dIndex, 'start', v)"
-                @update:endTime="(v: string) => updateDayTime(index, dIndex, 'end', v)" />
+                @update:endTime="(v: string) => updateDayTime(index, dIndex, 'end', v)"
+              />
             </div>
           </div>
 
           <div v-else>
-            <TimeSelector v-model:startTime="defaultTime.startTime" v-model:endTime="defaultTime.endTime"
-              formattedDate="" :disable="!isEditing" />
+            <TimeSelector
+              v-model:startTime="defaultTime.startTime"
+              v-model:endTime="defaultTime.endTime"
+              formattedDate=""
+              :disable="!isEditing"
+            />
           </div>
         </div>
       </div>
@@ -73,12 +118,23 @@
       <!-- Seats -->
       <div class="input-group">
         <p class="label label_minWidth">จำนวนที่รับ :</p>
-        <q-input outlined style="width: 225px" v-model="subActivity.seats" type="number" @keypress="isNumber($event)"
-          @blur="validatePositive('seats', index)" :disable="!isEditing" />
+        <q-input
+          outlined
+          style="width: 225px"
+          v-model="subActivity.seats"
+          type="number"
+          @keypress="isNumber($event)"
+          @blur="validatePositive('seats', index)"
+          :disable="!isEditing"
+        />
       </div>
 
       <!-- Department -->
-      <DepartmentSelector v-model="subActivity.departments" class="input-group" :disable="!isEditing" />
+      <DepartmentSelector
+        v-model="subActivity.departments"
+        class="input-group"
+        :disable="!isEditing"
+      />
 
       <!-- Year -->
       <YearSelector v-model="subActivity.years" class="input-group" :disable="!isEditing" />
@@ -86,21 +142,36 @@
       <!-- Lecturer -->
       <div class="input-group">
         <p class="label label_minWidth">วิทยากร :</p>
-        <q-input outlined v-model="subActivity.lecturer" style="width: 100%" :disable="!isEditing" />
+        <q-input
+          outlined
+          v-model="subActivity.lecturer"
+          style="width: 100%"
+          :disable="!isEditing"
+        />
       </div>
 
       <!-- Detail Activity -->
       <div class="input-group">
         <p style="align-self: flex-start" class="label label_minWidth">รายละเอียดอื่นๆ :</p>
-        <q-input type="textarea" rows="10" outlined v-model="subActivity.detailActivity" style="width: 100%"
-          :disable="!isEditing" />
+        <q-input
+          type="textarea"
+          rows="10"
+          outlined
+          v-model="subActivity.detailActivity"
+          style="width: 100%"
+          :disable="!isEditing"
+        />
       </div>
     </div>
 
     <!-- Add SubActivity Button -->
     <div class="btn-container" v-if="props.isEditing">
-      <q-btn class="btnAddActivity" style="  margin-bottom: 100px; background-color: #3676F9" @click="addSubActivity"
-        :disable="!isEditing">
+      <q-btn
+        class="btnAddActivity"
+        style="margin-bottom: 100px; background-color: #3676f9"
+        @click="addSubActivity"
+        :disable="!isEditing"
+      >
         <p class="label text-white">
           <q-icon name="add" size="20px" />
           เพิ่มกิจกรรม
@@ -112,35 +183,39 @@
     <div class="button-group">
       <q-btn v-if="!props.isEditing" class="btnedit" label="แก้ไข" @click="enterEditMode" />
       <template v-else>
-        <q-btn class="btnreject" label="ยกเลิก"
-          @click="() => { resetFormToOriginal(); emit('update:isEditing', false) }" />
+        <q-btn
+          class="btnreject"
+          label="ยกเลิก"
+          @click="
+            () => {
+              resetFormToOriginal()
+              emit('update:isEditing', false)
+            }
+          "
+        />
         <q-btn class="btnsecces" label="บันทึก" @click="saveChanges" />
       </template>
     </div>
 
     <!-- Success Dialog -->
     <q-dialog v-model="showSuccessDialog" persistent>
-      <div class="q-pa-md text-h6 text-center successDialog">
-        บันทึกสำเร็จ
-      </div>
+      <div class="q-pa-md text-h6 text-center successDialog">บันทึกสำเร็จ</div>
     </q-dialog>
-
   </q-page>
 </template>
 
-
 <script setup lang="ts">
 import { computed, nextTick, onMounted, ref, watch } from 'vue'
-import FoodSelector from 'src/pages/admin-page/activity/CreateActivity/Form/FoodSelector.vue'
-import HoursSelector from 'src/pages/admin-page/activity/CreateActivity/Form/HoursSelector.vue'
-import MutiDate from 'src/pages/admin-page/activity/CreateActivity/Form/MutiDate.vue'
-import TimeSelector from 'src/pages/admin-page/activity/CreateActivity/Form/TimeSelector.vue'
+import FoodSelector from 'src/pages/admin-page/activity/CreateActivity/Form/ActivityForm_Food.vue'
+import HoursSelector from 'src/pages/admin-page/activity/CreateActivity/Form/ActivityForm_Hour.vue'
+import MutiDate from 'src/pages/admin-page/activity/CreateActivity/Form/ActivityForm_ActivityDate.vue'
+import TimeSelector from 'src/pages/admin-page/activity/CreateActivity/Form/ActivityForm_ActivityTime.vue'
 import ChangeStatusDialog from 'src/pages/admin-page/activity/ActivityDetail/ActivityDetail/ChangeStatusDialog.vue'
 import RoomSelector from 'src/pages/admin-page/activity/CreateActivity/Form/RoomSelector.vue'
-import DepartmentSelector from 'src/pages/admin-page/activity/CreateActivity/Form/DepartmentSelector.vue'
-import CloseRegisDate from 'src/pages/admin-page/activity/CreateActivity/Form/CloseRegisDate.vue'
-import YearSelector from 'src/pages/admin-page/activity/CreateActivity/Form/YearSelector.vue'
-import ActivityType from 'src/pages/admin-page/activity/CreateActivity/Form/ActivityType.vue'
+import DepartmentSelector from 'src/pages/admin-page/activity/CreateActivity/Form/ActivityForm_Major.vue'
+import CloseRegisDate from 'src/pages/admin-page/activity/CreateActivity/Form/ActivityForm_CloseRegisDate.vue'
+import YearSelector from 'src/pages/admin-page/activity/CreateActivity/Form/ActivityForm_StudentYears.vue'
+import ActivityType from 'src/pages/admin-page/activity/CreateActivity/Form/ActivityForm_Type.vue'
 import type { Activity } from 'src/types/activity'
 import type { Food } from 'src/types/food'
 import { ActivityService } from 'src/services/activity'
@@ -166,7 +241,6 @@ const defaultTime = ref({
 const enterEditMode = async () => {
   emit('update:isEditing', true)
   await nextTick()
-
 }
 const props = defineProps<{
   activity: Activity | null
@@ -178,7 +252,6 @@ const emit = defineEmits<{
   (e: 'update:isEditing', value: boolean): void
   (e: 'saved', fileName?: string): void
 }>()
-
 
 interface SubActivity {
   subActivityName: string
@@ -224,7 +297,7 @@ const addSubActivity = () => {
     (newVal) => {
       console.log('⏱️ selectedDays changed for subActivity', index, newVal)
     },
-    { deep: true }
+    { deep: true },
   )
 }
 
@@ -256,21 +329,21 @@ const applySameTime = (subActivityIndex: number) => {
     index === 0
       ? day
       : {
-        ...day,
-        startTime,
-        endTime,
-        startHour,
-        startMinute,
-        endHour,
-        endMinute,
-      }
+          ...day,
+          startTime,
+          endTime,
+          startHour,
+          startMinute,
+          endHour,
+          endMinute,
+        },
   )
 }
 const updateDayTime = (
   subActivityIndex: number,
   index: number,
   type: 'start' | 'end',
-  value: string
+  value: string,
 ) => {
   const sub = subActivities.value[subActivityIndex]
   if (!sub) return
@@ -345,7 +418,6 @@ const removeSubActivity = (index: number) => {
 }
 
 const saveChanges = async () => {
-
   if (!props.activity?.id) {
     console.error('ไม่พบ activity id')
     return
@@ -355,13 +427,13 @@ const saveChanges = async () => {
 
   updated.name = activityName.value
   updated.skill = activityType.value === 'prep' ? 'hard' : 'soft'
-  updated.endDateEnroll =  CloseRegisDates.value
+  updated.endDateEnroll = CloseRegisDates.value
   updated.activityState = statusReverseMap[activityStatus.value] || 'planning'
   updated.foodVotes = foodMenu.value.map((f) => {
-    const existingVote = updated.foodVotes?.find(vote => vote.foodName === f.name);
+    const existingVote = updated.foodVotes?.find((vote) => vote.foodName === f.name)
     return {
       foodName: f.name,
-      vote: existingVote ? existingVote.vote : 0
+      vote: existingVote ? existingVote.vote : 0,
     }
   })
 
@@ -374,11 +446,11 @@ const saveChanges = async () => {
     operator: sub.lecturer,
     majors: sub.departments.map(String),
     studentYears: sub.years.map((y) => Number(y)),
-    dates: sub.selectedDays.map(day => ({
+    dates: sub.selectedDays.map((day) => ({
       date: day.date,
       stime: day.startTime,
       etime: day.endTime,
-    }))
+    })),
   }))
 
   try {
@@ -419,7 +491,6 @@ const saveChanges = async () => {
     setTimeout(() => {
       showSuccessDialog.value = false
     }, 1000)
-
   } catch (err) {
     console.error('❌ ไม่สามารถอัปเดตกิจกรรมได้:', err)
   }
@@ -438,10 +509,11 @@ onMounted(() => {
     activityStatus.value = statusMap[a.activityState] || 'กำลังวางแผน'
   }
 
-  foodMenu.value = a.foodVotes?.map((f) => ({
-    id: '',
-    name: f.foodName,
-  })) ?? []
+  foodMenu.value =
+    a.foodVotes?.map((f) => ({
+      id: '',
+      name: f.foodName,
+    })) ?? []
 
   foodMenuDisplay.value = foodMenu.value.map((f) => f.name).join(', ')
 
@@ -457,8 +529,8 @@ onMounted(() => {
         detailActivity: item.description ?? '',
         departments: item.majors?.map(String) ?? [],
         years: item.studentYears?.map(String) ?? [],
-        activityDateInternal: dates.map(d => d.date),
-        selectedDays: dates.map(d => {
+        activityDateInternal: dates.map((d) => d.date),
+        selectedDays: dates.map((d) => {
           const [startHourStr, startMinuteStr] = (d.stime ?? '00:00').split(':')
           const [endHourStr, endMinuteStr] = (d.etime ?? '00:00').split(':')
 
@@ -493,51 +565,52 @@ const resetFormToOriginal = () => {
   activityName.value = a.name ?? ''
   activityType.value = a.skill === 'hard' ? 'prep' : a.skill === 'soft' ? 'academic' : ''
   activityStatus.value = statusMap[a.activityState ?? 'planning'] ?? 'กำลังวางแผน'
-  
-  foodMenu.value = a.foodVotes?.map((f) => ({
-    id: '',
-    name: f.foodName,
-  })) ?? []
+
+  foodMenu.value =
+    a.foodVotes?.map((f) => ({
+      id: '',
+      name: f.foodName,
+    })) ?? []
 
   foodMenuDisplay.value = foodMenu.value.map((f) => f.name).join(', ')
 
-  subActivities.value = a.activityItems?.map((item) => {
-    const dates = item.dates ?? []
+  subActivities.value =
+    a.activityItems?.map((item) => {
+      const dates = item.dates ?? []
 
-    return {
-      subActivityName: item.name ?? '',
-      roomName: Array.isArray(item.rooms) ? item.rooms : [],
-      seats: item.maxParticipants ?? 0,
-      lecturer: item.operator ?? '',
-      detailActivity: item.description ?? '',
-      totalHours: item.hour ?? 0,
-      departments: item.majors?.map(String) ?? [],
-      years: item.studentYears?.map(String) ?? [],
-      activityDateInternal: dates.map(d => d.date),
-      selectedDays: dates.map(d => {
-        const [startHourStr, startMinuteStr] = (d.stime ?? '09:00').split(':')
-        const [endHourStr, endMinuteStr] = (d.etime ?? '16:00').split(':')
+      return {
+        subActivityName: item.name ?? '',
+        roomName: Array.isArray(item.rooms) ? item.rooms : [],
+        seats: item.maxParticipants ?? 0,
+        lecturer: item.operator ?? '',
+        detailActivity: item.description ?? '',
+        totalHours: item.hour ?? 0,
+        departments: item.majors?.map(String) ?? [],
+        years: item.studentYears?.map(String) ?? [],
+        activityDateInternal: dates.map((d) => d.date),
+        selectedDays: dates.map((d) => {
+          const [startHourStr, startMinuteStr] = (d.stime ?? '09:00').split(':')
+          const [endHourStr, endMinuteStr] = (d.etime ?? '16:00').split(':')
 
-        const startHour = Number(startHourStr ?? '0')
-        const startMinute = Number(startMinuteStr ?? '0')
-        const endHour = Number(endHourStr ?? '0')
-        const endMinute = Number(endMinuteStr ?? '0')
+          const startHour = Number(startHourStr ?? '0')
+          const startMinute = Number(startMinuteStr ?? '0')
+          const endHour = Number(endHourStr ?? '0')
+          const endMinute = Number(endMinuteStr ?? '0')
 
-        return {
-          date: d.date,
-          formattedDate: formatThaiDate(d.date),
-          startTime: d.stime ?? '09:00',
-          endTime: d.etime ?? '16:00',
-          startHour,
-          startMinute,
-          endHour,
-          endMinute,
-        }
-      }),
-    }
-  }) ?? []
+          return {
+            date: d.date,
+            formattedDate: formatThaiDate(d.date),
+            startTime: d.stime ?? '09:00',
+            endTime: d.etime ?? '16:00',
+            startHour,
+            startMinute,
+            endHour,
+            endMinute,
+          }
+        }),
+      }
+    }) ?? []
 }
-
 
 const handleStatusChange = (newStatus: string) => {
   activityStatus.value = newStatus
@@ -679,7 +752,6 @@ const statusClass = computed(() => {
   margin-bottom: 100px;
   width: 100%;
 }
-
 
 .status-btn {
   border-radius: 50px;

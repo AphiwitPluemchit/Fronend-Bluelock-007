@@ -11,9 +11,9 @@
           />
         </div>
 
-      <div>
+      <div class="form-section">
           <FormMultipleDetail
-            
+
             :key="selectedActivityType"
             :activity="activity"
             :imageFile="selectedImageFile"

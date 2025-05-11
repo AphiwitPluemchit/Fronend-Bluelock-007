@@ -1,3 +1,27 @@
+<script setup lang="ts">
+import { ref } from 'vue'
+
+const selectedFile = ref<File | null>(null)
+const fileInput = ref<HTMLInputElement | null>(null)
+const previewUrl = ref<string | null>(null)
+const emit = defineEmits<{
+  (e: 'file-selected', file: File): void
+}>()
+const triggerFileInput = () => {
+  fileInput.value?.click()
+}
+const onFileChange = (event: Event) => {
+  const target = event.target as HTMLInputElement
+  const file = target.files?.[0]
+  if (file) {
+    selectedFile.value = file
+    previewUrl.value = URL.createObjectURL(file)
+    emit('file-selected', file)
+  }
+}
+defineExpose({ selectedFile })
+</script>
+
 <template>
   <div class="upload-container">
     <q-card flat bordered class="upload-box" @click="triggerFileInput">
@@ -21,34 +45,6 @@
      <p class="image-size-text">*ขนาดรูป 430x330 px</p>
   </div>
 </template>
-
-<script setup lang="ts">
-import { ref } from 'vue'
-
-const emit = defineEmits<{
-  (e: 'file-selected', file: File): void
-}>()
-
-const selectedFile = ref<File | null>(null)
-const fileInput = ref<HTMLInputElement | null>(null)
-const previewUrl = ref<string | null>(null)
-
-const triggerFileInput = () => {
-  fileInput.value?.click()
-}
-
-const onFileChange = (event: Event) => {
-  const target = event.target as HTMLInputElement
-  const file = target.files?.[0]
-  if (file) {
-    selectedFile.value = file
-    previewUrl.value = URL.createObjectURL(file)
-    emit('file-selected', file)
-  }
-}
-
-defineExpose({ selectedFile })
-</script>
 
 <style scoped>
 .upload-box {

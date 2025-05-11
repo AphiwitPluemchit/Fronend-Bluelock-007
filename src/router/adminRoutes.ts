@@ -12,8 +12,8 @@ const adminChildren: RouteRecordRaw[] = [
     component: () => import('pages/admin-page/activity/ActivitiesTablePage.vue'),
   },
   {
-    path: 'ActivitiesManagement/CreateActivity',
-    component: () => import('pages/admin-page/activity/CreateActivity/CreateActivity.vue'),
+    path: 'ActivitiesManagement/CreateActivityPage',
+    component: () => import('pages/admin-page/activity/CreateActivity/CreateActivityPage.vue'),
   },
   {
     path: 'ActivitiesManagement/ActivityDetail/:id',

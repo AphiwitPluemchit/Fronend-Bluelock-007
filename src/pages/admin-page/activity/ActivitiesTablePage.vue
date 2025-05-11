@@ -93,10 +93,12 @@
               props.row.participants
             }}</q-td>
             <q-td key="skill" style="width: 10%">{{ props.row.skill }}</q-td>
-            <q-td key="activityState" style="width: 10%">
-              <q-btn
+            <q-td key="activityState"  style="width: 10%" class="text-center">
+            
+              <q-badge 
                 :label="props.row.activityState"
                 :class="getStatusClass(props.row.activityState)"
+                class="status-badge"
                 rounded
                 unelevated
             /></q-td>
@@ -201,9 +203,10 @@
             }}</q-td>
             <q-td key="skill" style="width: 10%">{{ props.row.skill }}</q-td>
             <q-td key="activityState" style="width: 10%">
-              <q-btn
+              <q-badge
                 :label="props.row.activityState"
                 :class="getStatusClass(props.row.activityState)"
+                class="status-badge"
                 rounded
                 unelevated
             /></q-td>
@@ -307,11 +310,11 @@
               props.row.participants
             }}</q-td>
             <q-td key="skill" style="width: 10%">{{ props.row.skill }}</q-td>
-            <q-td key="activityState" style="width: 10%">
-              <q-btn
+            <q-td key="activityState" style="width: 10%;">
+              <q-badge
                 :label="props.row.activityState"
                 :class="getStatusClass(props.row.activityState)"
-                rounded
+                class="status-badge"
                 unelevated
             /></q-td>
             <q-td class="q-gutter-x-sm" key="action" style="width: 8%">
@@ -346,13 +349,11 @@ dayjs.extend(buddhistEra)
 const router = useRouter()
 
 const goToPage = async () => {
-  await router.push('/Admin/ActivitiesManagement/CreateActivity')
+  await router.push('/Admin/ActivitiesManagement/CreateActivityPage')
 }
 const goToPageDetail = async (id: string, disable: boolean) => {
   console.log(id)
   console.log('Disable:', disable)
-  // await fetchOneData(id)
-  // :to="`/Student/Activity/ActivityDetail/${activity.id}`"
   await router.push({
     path: `/Admin/ActivitiesManagement/ActivityDetail/${id}`,
     query: {
@@ -756,13 +757,18 @@ async function onRequest3(props: any) {
 
 .status-badge {
   height: 32px;
-  line-height: 28px;
   padding: 0 12px;
   border-radius: 999px;
-  text-align: center;
-  display: inline-block;
   font-size: 15px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  /* ป้องกันการขยายแนวนอนเกินไป */
+  white-space: nowrap;
 }
+
 
 .btnadd {
   background-color: #14279b;

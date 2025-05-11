@@ -1,3 +1,31 @@
+<script setup lang="ts">
+import { defineProps, defineEmits, computed } from 'vue';
+interface YearOption {
+  label: string;
+  value: string;
+}
+const props = defineProps<{ 
+  modelValue: string[];
+  disable?: boolean; // เพิ่ม prop disable
+}>();
+const emit = defineEmits<{ (event: "update:modelValue", value: string[]): void }>();
+const selectedYears = computed(() => props.modelValue);
+const yearOptions: YearOption[] = [
+  { label: '1', value: '1' },
+  { label: '2', value: '2' },
+  { label: '3', value: '3' },
+  { label: '4', value: '4' },
+];
+const toggleYear = (value: string) => {
+  if (props.disable) return; // ถ้า disable ห้ามกด
+  const newYears = selectedYears.value.includes(value)
+    ? selectedYears.value.filter((item) => item !== value)
+    : [...selectedYears.value, value];
+
+  emit("update:modelValue", newYears);
+};
+</script>
+
 <template>
   <div class="input-group">
     <p class="label label_minWidth">ชั้นปี :</p>
@@ -12,40 +40,6 @@
     />
   </div>
 </template>
-
-<script setup lang="ts">
-import { defineProps, defineEmits, computed } from 'vue';
-
-interface YearOption {
-  label: string;
-  value: string;
-}
-
-const props = defineProps<{ 
-  modelValue: string[];
-  disable?: boolean; // เพิ่ม prop disable
-}>();
-
-const emit = defineEmits<{ (event: "update:modelValue", value: string[]): void }>();
-
-const yearOptions: YearOption[] = [
-  { label: '1', value: '1' },
-  { label: '2', value: '2' },
-  { label: '3', value: '3' },
-  { label: '4', value: '4' },
-];
-
-const selectedYears = computed(() => props.modelValue);
-
-const toggleYear = (value: string) => {
-  if (props.disable) return; // ถ้า disable ห้ามกด
-  const newYears = selectedYears.value.includes(value)
-    ? selectedYears.value.filter((item) => item !== value)
-    : [...selectedYears.value, value];
-
-  emit("update:modelValue", newYears);
-};
-</script>
 
 <style scoped>
 .year-btn {

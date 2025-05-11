@@ -1,12 +1,3 @@
-<template>
-  <div class="input-group">
-    <p class="label label_minWidth">จำนวนชั่วโมง :</p>
-    <q-input outlined style="width: 220px" v-model="localHours" type="number" :disable="disable"
-      @keypress="isNumber"
-      />
-  </div>
-</template>
-
 <script setup lang="ts">
 import { defineProps, defineEmits, ref, watch } from 'vue';
 
@@ -14,11 +5,8 @@ const props = defineProps<{
   modelValue: number | null;
   disable?: boolean;
 }>();
-
-const emit = defineEmits<{ (event: 'update:modelValue', value: number): void }>();
-
 const localHours = ref<number | null>(props.modelValue ?? null)
-
+const emit = defineEmits<{ (event: 'update:modelValue', value: number): void }>();
 watch(localHours, (newVal) => {
   emit('update:modelValue', newVal ?? 0)
 });
@@ -28,15 +16,22 @@ watch(
     localHours.value = newVal
   }
 )
-
 const isNumber = (event: KeyboardEvent) => {
   const charCode = event.which ? event.which : event.keyCode;
   if (charCode < 48 || charCode > 57) {
     event.preventDefault();
   }
 };
-
 </script>
+
+<template>
+  <div class="input-group">
+    <p class="label label_minWidth">จำนวนชั่วโมง :</p>
+    <q-input outlined style="width: 220px" v-model="localHours" type="number" :disable="disable"
+      @keypress="isNumber"
+      />
+  </div>
+</template>
 
 <style scoped>
 .label {

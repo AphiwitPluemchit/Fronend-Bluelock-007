@@ -1,3 +1,17 @@
+<script setup lang="ts">
+import { defineProps, defineEmits } from 'vue'
+
+const props = defineProps<{
+  modelValue: string
+  disable?: boolean // เพิ่ม prop disable
+}>()
+const emit = defineEmits<{ (event: 'update:modelValue', value: string): void }>()
+const updateActivityType = (type: string) => {
+  if (props.disable) return // ถ้า disable ห้ามกด
+  emit('update:modelValue', type)
+}
+</script>
+
 <template>
   <div class="input-group">
     <p class="label label_minWidth">ประเภทกิจกรรม :</p>
@@ -17,22 +31,6 @@
     />
   </div>
 </template>
-
-<script setup lang="ts">
-import { defineProps, defineEmits } from 'vue';
-
-const props = defineProps<{ 
-  modelValue: string;
-  disable?: boolean; // เพิ่ม prop disable
-}>();
-
-const emit = defineEmits<{ (event: 'update:modelValue', value: string): void }>();
-
-const updateActivityType = (type: string) => {
-  if (props.disable) return; // ถ้า disable ห้ามกด
-  emit('update:modelValue', type);
-};
-</script>
 
 <style scoped>
 .activityType-btn {
