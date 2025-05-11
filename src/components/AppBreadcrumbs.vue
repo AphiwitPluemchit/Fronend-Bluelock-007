@@ -1,47 +1,67 @@
 <template>
-  <q-breadcrumbs>
-    <!-- แสดงรายการ breadcrumbs ที่มี previousPage -->
+  <q-breadcrumbs separator=" ">
     <q-breadcrumbs-el>
-      <!-- ตรวจสอบว่า icon เป็นรูปภาพหรือไอคอนจาก Quasar -->
-      <template v-if="isImageIcon(filteredBreadcrumbs.icon)">
-        <img :src="filteredBreadcrumbs.icon" alt="icon" class="icon-image q-mr-sm" />
+      <!-- ตรวจว่าเป็นรูปภาพหรือ icon -->
+      <template v-if="isImageIcon(breadcrumbs.icon)">
+        <img :src="breadcrumbs.icon" alt="icon" class="icon-image q-mr-sm" />
       </template>
       <template v-else>
-        <q-icon :name="filteredBreadcrumbs.icon" size="md" class="q-mr-sm" />
+        <!-- กำหนดสีไอคอนเป็นสีดำ -->
+        <q-icon :name="breadcrumbs.icon" size="md" class="q-mr-sm" style="color: black" />
       </template>
-      <router-link :to="filteredBreadcrumbs.previousPage?.path ?? '/'" class="text-bold text-h6">
-        {{ filteredBreadcrumbs.previousPage?.title }} >
+
+      <!-- previousPage -->
+      <router-link
+        :to="breadcrumbs.previousPage?.path ?? '/'"
+        class="text-bold text-h6 text-black"
+        style="text-decoration: none"
+      >
+        {{ breadcrumbs.previousPage?.title }}
+      </router-link>
+      <span v-if="breadcrumbs.currentPage" class="q-mx-sm"> > </span>
+    </q-breadcrumbs-el>
+
+    <!-- currentPage -->
+    <q-breadcrumbs-el>
+      <router-link
+        :to="breadcrumbs.currentPage.path"
+        class="text-bold text-h6 text-black"
+        :style="{ 'text-decoration-line': breadcrumbs.nextPage ? 'none' : 'underline' }"
+      >
+        {{ breadcrumbs.currentPage.title }}
+      </router-link>
+      <span v-if="breadcrumbs.nextPage" class="q-mx-sm"> > </span>
+    </q-breadcrumbs-el>
+
+    <!-- nextPage -->
+    <q-breadcrumbs-el v-if="breadcrumbs.nextPage">
+      <router-link
+        :to="breadcrumbs.nextPage.path"
+        class="text-bold text-h6 text-black"
+        style="text-decoration-line: underline"
+      >
+        {{ breadcrumbs.nextPage.title }}
       </router-link>
     </q-breadcrumbs-el>
-    <!-- แสดง currentPage จาก breadcrumb ล่าสุด -->
-    <div class="text-h6" style="text-decoration-line: underline">
-      {{ filteredBreadcrumbs.currentPage.title }}
-    </div>
   </q-breadcrumbs>
+
+  <!-- หัวข้อหลักของหน้า -->
   <div class="text-h6 q-mt-sm">
-    {{ filteredBreadcrumbs.currentPage.title }}
+    {{ breadcrumbs.nextPage?.title ?? breadcrumbs.currentPage.title }}
   </div>
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue'
-
-// รับ props เป็น array ของ object ที่ประกอบด้วย previousPage, currentPage และ icon
-const props = defineProps<{
+defineProps<{
   breadcrumbs: {
     previousPage: { title: string; path: string } | null
     currentPage: { title: string; path: string }
+    nextPage?: { title: string; path: string } | null
     icon: string
   }
 }>()
 
-// คำนวณ filteredBreadcrumbs ที่กรองข้อมูล breadcrumb ที่ previousPage ไม่เป็น null
-const filteredBreadcrumbs = computed(() => {
-  return props.breadcrumbs
-})
-
-// ฟังก์ชันตรวจสอบว่า icon เป็นรูปภาพหรือไม่
-const isImageIcon = (icon: string) => {
+function isImageIcon(icon: string) {
   return (
     icon.startsWith('http') ||
     icon.startsWith('/') ||

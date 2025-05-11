@@ -1,73 +1,7 @@
-<template>
-  <q-page class="q-pa-md">
-    <div class="q-mb-md">
-      <div class="text-subtitle1 text-grey-8 flex items-center">
-        <q-icon name="people" class="q-mr-sm" />
-        <span>จัดการข้อมูลนิสิต &gt; <u>ยืนยันการจัดเก็บข้อมูลนิสิต</u></span>
-      </div>
-      <div class="text-h4">ยืนยันการจัดเก็บข้อมูลนิสิต</div>
-    </div>
-
-    <section class="q-mt-lg">
-      <div class="col-12 row items-center q-pa-sm">
-        <div class="col-auto text-right q-pr-md">
-          <p class="q-my-none">ปีการศึกษาที่ต้องการจัดเก็บ :</p>
-        </div>
-        <q-select dense outlined v-model="selectedYear" :options="yearOptions" label="ปีการศึกษาที่ต้องการจัดเก็บ"
-          style="width: 150px; margin-right: 40px;" />
-
-        <div class="col-auto text-right q-pr-md">
-          <p class="q-my-none">สาขาที่ต้องการจัดเก็บ :</p>
-        </div>
-        <q-input dense outlined v-model="selectedMajors" label="สาขาที่ต้องการจัดเก็บ" readonly
-          style="width: 250px; margin-right: 40px;" />
-
-        <q-btn color="primary" label="ยืนยัน" style="margin-left: 20px;" @click="confirmSelection" />
-      </div>
-
-      <div class="col-12 row justify-center items-center q-pr-md">
-        <div class="text-h6 q-mt-lg">ตารางรายชื่อนิสิต</div>
-      </div>
-
-
-      <q-table bordered flat :rows="filteredStudents" :columns="columns" row-key="code" class="q-mt-md"
-        :pagination="{ rowsPerPage: 10 }">
-        <template v-slot:header="props">
-          <q-tr :props="props" class="sticky-header">
-            <q-th v-for="col in props.cols" :key="col.name" :props="props">
-              {{ col.label }}
-            </q-th>
-          </q-tr>
-        </template>
-
-        <template v-slot:body="props">
-          <q-tr :props="props">
-            <q-td key="index">{{ props.rowIndex + 1 }}</q-td>
-            <q-td key="code">{{ props.row.code }}</q-td>
-            <q-td key="name" style="max-width: 200px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
-              {{ props.row.name }}
-            </q-td>
-            <q-td key="major">{{ props.row.major }}</q-td>
-            <q-td class="text-center" key="softskill">{{ props.row.softSkill }}/30</q-td>
-            <q-td class="text-center" key="hardskill">{{ props.row.hardSkill }}/12</q-td>
-            <q-td class="text-center">
-              <q-btn :label="getStatusLabel(props.row)" :class="getStatusClass(getStatusLabel(props.row))" rounded
-                unelevated />
-            </q-td>
-          </q-tr>
-        </template>
-      </q-table>
-
-      <div class="row justify-end q-mt-md">
-        <q-btn color="primary" label="จัดเก็บนิสิต" @click="saveStudents" />
-      </div>
-    </section>
-  </q-page>
-</template>
-
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
 import { useStudentStore } from 'src/stores/student'
+import AppBreadcrumbs from 'src/components/AppBreadcrumbs.vue'
 
 interface Student {
   id?: string
@@ -80,12 +14,23 @@ interface Student {
   hardSkill: number
   major: string
 }
+const breadcrumbs = ref({
+  previousPage: { title: 'จัดการข้อมูลนิสิต', path: '/Admin/StudentManagement' },
+  currentPage: { title: 'จัดเก็บข้อมูลนิสิต', path: '/Admin/StudentManagement/StudentStorePage' },
+  nextPage: {
+    title: 'ยืนยันการจัดเก็บข้อมูลนิสิต',
+    path: '/Admin/StudentManagement/StudentStorePage/ConfirmStudentDataPage',
+  },
+  icon: 'people',
+})
 
 const studentStore = useStudentStore()
 
 const selectedYear = ref(62)
 const yearOptions = [62, 63, 64, 65]
-const selectedMajors = ref('CS, AI, SE, ITDI')
+
+const selectedMajors = ref<string[]>([]) // << ใช้แค่บรรทัดนี้
+const majorOptions = ['CS', 'AI', 'SE', 'ITDI']
 
 onMounted(async () => {
   try {
@@ -104,9 +49,19 @@ const columns = [
   { name: 'code', label: 'รหัสนิสิต', field: 'code', align: 'left' as const },
   { name: 'name', label: 'ชื่อ-สกุล', field: 'name', align: 'left' as const },
   { name: 'major', label: 'สาขา', field: 'major', align: 'left' as const },
-  { name: 'softskill', label: 'ชั่วโมงเตรียมความพร้อม', field: 'softSkill', align: 'center' as const },
-  { name: 'hardskill', label: 'ชั่วโมงทักษะทางวิชาการ', field: 'hardSkill', align: 'center' as const },
-  { name: 'status', label: 'สถานะ', field: 'status', align: 'center' as const }
+  {
+    name: 'softskill',
+    label: 'ชั่วโมงเตรียมความพร้อม',
+    field: 'softSkill',
+    align: 'center' as const,
+  },
+  {
+    name: 'hardskill',
+    label: 'ชั่วโมงทักษะทางวิชาการ',
+    field: 'hardSkill',
+    align: 'center' as const,
+  },
+  { name: 'status', label: 'สถานะ', field: 'status', align: 'center' as const },
 ]
 
 const getStatusLabel = (student: Student): string => {
@@ -175,4 +130,108 @@ const saveStudents = () => {
   padding: 3px 30px;
   width: 130px;
 }
+.status-badge {
+  height: 32px;
+  line-height: 28px;
+  padding: 0 12px;
+  border-radius: 999px;
+  text-align: center;
+  display: inline-block;
+  font-size: 15px;
+}
 </style>
+
+<template>
+  <q-page class="q-pa-md">
+    <!-- ส่วนหัวของหน้า -->
+    <div style="margin-top: 20px">
+      <AppBreadcrumbs :breadcrumbs="breadcrumbs" />
+    </div>
+
+    <section class="q-mt-lg">
+      <div class="col-12 row items-center q-pa-sm">
+        <div class="col-auto text-right q-pr-md">
+          <p class="q-my-none">ปีการศึกษาที่ต้องการจัดเก็บ :</p>
+        </div>
+        <q-select
+          dense
+          outlined
+          v-model="selectedYear"
+          :options="yearOptions"
+          label="รหัสปีนิสิต"
+          style="width: 150px; margin-right: 40px"
+        />
+
+        <div class="col-auto text-right q-pr-md">
+          <p class="q-my-none">สาขาที่ต้องการจัดเก็บ :</p>
+        </div>
+        <q-select
+          dense
+          outlined
+          v-model="selectedMajors"
+          :options="majorOptions"
+          label="สาขาที่ต้องการจัดเก็บ"
+          style="width: 250px; margin-right: 40px"
+        />
+
+        <q-btn color="primary" label="ยืนยัน" style="margin-left: 20px" @click="confirmSelection" />
+      </div>
+
+      <div class="col-12 row justify-center items-center q-pr-md">
+        <div class="text-h6 q-mt-lg">ตารางรายชื่อนิสิต</div>
+      </div>
+
+      <q-table
+        bordered
+        flat
+        :rows="filteredStudents"
+        :columns="columns"
+        row-key="code"
+        class="q-mt-md"
+        :pagination="{ rowsPerPage: 10 }"
+      >
+        <template v-slot:header="props">
+          <q-tr :props="props" class="sticky-header">
+            <q-th v-for="col in props.cols" :key="col.name" :props="props">
+              {{ col.label }}
+            </q-th>
+          </q-tr>
+        </template>
+
+        <template v-slot:body="props">
+          <q-tr :props="props">
+            <q-td key="index">{{ props.rowIndex + 1 }}</q-td>
+            <q-td key="code">{{ props.row.code }}</q-td>
+            <q-td
+              key="name"
+              style="
+                max-width: 200px;
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
+              "
+            >
+              {{ props.row.name }}
+            </q-td>
+            <q-td key="major">{{ props.row.major }}</q-td>
+            <q-td class="text-center" key="softskill">{{ props.row.softSkill }}/30</q-td>
+            <q-td class="text-center" key="hardskill">{{ props.row.hardSkill }}/12</q-td>
+            <q-td class="text-center">
+              <q-badge
+                :label="getStatusLabel(props.row)"
+                :class="getStatusClass(getStatusLabel(props.row))"
+                class="status-badge"
+                rounded
+                unelevated
+              />
+            </q-td>
+          </q-tr>
+        </template>
+      </q-table>
+
+      <div class="row justify-end q-mt-md">
+        <q-btn color="primary" label="จัดเก็บนิสิต" @click="saveStudents" />
+      </div>
+    </section>
+  </q-page>
+</template>
