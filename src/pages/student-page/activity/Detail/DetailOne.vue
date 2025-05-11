@@ -16,9 +16,7 @@
         <div class="q-mb-lg q-ml-md">วันที่จัดกิจกรรม :</div>
       </div>
       <div class="col-9">
-        <div class="q-mb-lg q-ml-md">
-          {{ getActivitydates(activity?.activityItems) ?? 'ไม่ระบุ' }}
-        </div>
+        <div class="q-mb-lg q-ml-md">{{ getActivitydates(activity?.activityItems) }}</div>
       </div>
     </div>
 
@@ -28,28 +26,16 @@
         <div class="q-mb-lg q-ml-md">เวลาที่จัดกิจกรรม :</div>
       </div>
       <div class="col-9">
-        <div class="q-mb-lg q-ml-md">
-          {{ getActivityTime(activity?.activityItems) ?? 'ไม่ระบุ' }}
-        </div>
+        <div class="q-mb-lg q-ml-md">{{ getActivityTime(activity?.activityItems) }}</div>
       </div>
     </div>
 
-    <!-- แถว: จำนวนชั่วโมง, สถานที่, ประเภท, วิทยากร, รายละเอียด -->
+    <!-- แถว: ประเภทกิจกรรม -->
     <div class="row">
       <div class="col-3 text-right">
-        <div class="q-mb-lg q-ml-md">จำนวนชั่วโมงที่ได้รับ :</div>
-        <div class="q-mb-lg q-ml-md">สถานที่จัดกิจกรรม :</div>
         <div class="q-mb-lg q-ml-md">ประเภทกิจกรรม :</div>
-        <div class="q-mb-lg q-ml-md">วิทยากร :</div>
-        <div class="q-mb-lg q-ml-md">รายละเอียดอื่นๆ :</div>
       </div>
       <div class="col-9">
-        <div class="q-mb-lg q-ml-md">
-          {{ getActivityHours(activity?.activityItems) ?? 'ไม่ระบุ' }} ชั่วโมง
-        </div>
-        <div class="q-mb-lg q-ml-md">
-          {{ getActivityRooms(activity?.activityItems) ?? 'ไม่ระบุ' }}
-        </div>
         <div class="q-mb-lg q-ml-md">
           {{
             activity?.skill === 'hard'
@@ -59,7 +45,58 @@
                 : 'ไม่ระบุประเภท'
           }}
         </div>
+      </div>
+    </div>
+
+    <!-- แถว: สถานที่จัดกิจกรรม -->
+    <div class="row">
+      <div class="col-3 text-right">
+        <div class="q-mb-lg q-ml-md">สถานที่จัดกิจกรรม :</div>
+      </div>
+      <div class="col-9">
+        <div class="q-mb-lg q-ml-md">{{ getActivityRooms(activity?.activityItems) }}</div>
+      </div>
+    </div>
+
+    <!-- แถว: จำนวนชั่วโมง -->
+    <div class="row">
+      <div class="col-3 text-right">
+        <div class="q-mb-lg q-ml-md">จำนวนชั่วโมงที่ได้รับ :</div>
+      </div>
+      <div class="col-9">
+        <div class="q-mb-lg q-ml-md">{{ getActivityHours(activity?.activityItems) }} ชั่วโมง</div>
+      </div>
+    </div>
+
+    <!-- แถว: จำนวนที่ลงทะเบียน -->
+    <div class="row">
+      <div class="col-3 text-right">
+        <div class="q-mb-lg q-ml-md">จำนวนที่ลงทะเบียน :</div>
+      </div>
+      <div class="col-9">
+        <div class="q-mb-lg q-ml-md">
+          <!-- ถ้าจะรวมจากหลายรอบ ควรเปลี่ยน logic -->
+          {{ getActivityEnrollments(activity?.activityItems) }}
+        </div>
+      </div>
+    </div>
+
+    <!-- แถว: วิทยากร -->
+    <div class="row">
+      <div class="col-3 text-right">
+        <div class="q-mb-lg q-ml-md">วิทยากร :</div>
+      </div>
+      <div class="col-9">
         <div class="q-mb-lg q-ml-md">{{ getActivityOperator(activity?.activityItems) }}</div>
+      </div>
+    </div>
+
+    <!-- แถว: รายละเอียด -->
+    <div class="row">
+      <div class="col-3 text-right">
+        <div class="q-mb-lg q-ml-md">รายละเอียดอื่น ๆ :</div>
+      </div>
+      <div class="col-9">
         <div class="q-mb-lg q-ml-md">{{ getActivityDetail(activity?.activityItems) }}</div>
       </div>
     </div>
@@ -113,6 +150,13 @@ const getActivityRooms = (activityItems: ActivityItem[] | null | undefined): str
   const rooms = activityItems[0]?.rooms
   return Array.isArray(rooms) && rooms.length > 0 ? rooms.join(', ') : 'ไม่ระบุ'
 }
+const getActivityEnrollments = (activityItems: ActivityItem[] | null | undefined): string => {
+  if (!activityItems) return 'ไม่ระบุ'
+  const total = activityItems.reduce((sum, item) => sum + (item.enrollmentCount ?? 0), 0)
+  const max = activityItems.reduce((sum, item) => sum + (item.maxParticipants ?? 0), 0)
+  return `${total} / ${max}`
+}
+
 const getActivityOperator = (activityItems: ActivityItem[] | null | undefined): string => {
   const firstItem = activityItems?.[0]
   return firstItem?.operator || 'ไม่ระบุ'

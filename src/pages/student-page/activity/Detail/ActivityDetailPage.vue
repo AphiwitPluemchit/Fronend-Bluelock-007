@@ -13,11 +13,11 @@
         </div>
 
         <div class="col-12 col-md-8" v-if="activity">
-          <div v-if="activity?.type == 'one'">
-            <DetailOne :activity="activity ?? {}"></DetailOne>
-          </div>
-          <div v-if="activity?.type == 'many'">
+          <div v-if="Array.isArray(activity?.activityItems) && activity.activityItems.length > 1">
             <DetailMany :activity="activity ?? {}"></DetailMany>
+          </div>
+          <div v-else>
+            <DetailOne :activity="activity ?? {}"></DetailOne>
           </div>
         </div>
       </q-card-section>

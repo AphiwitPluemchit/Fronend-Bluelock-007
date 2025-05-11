@@ -88,7 +88,9 @@
           <div class="q-mb-lg q-ml-md">จำนวนที่ลง :</div>
         </div>
         <div class="col-9">
-          <div class="q-mb-lg q-ml-md">{{ item.maxParticipants ?? 'ไม่ระบุ' }}</div>
+          <div class="q-mb-lg q-ml-md">
+            {{ item.enrollmentCount ?? 'ไม่ระบุ' }}/{{ item.maxParticipants ?? 'ไม่ระบุ' }}
+          </div>
         </div>
       </div>
 
