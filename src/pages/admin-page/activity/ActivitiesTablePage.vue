@@ -100,25 +100,13 @@
                 rounded
                 unelevated
             /></q-td>
-            <q-td class="q-gutter-x-sm" key="action" style="width: 5%">
-              <q-btn icon="info" padding="none" flat color="grey-8"></q-btn>
-
-              <q-menu>
-                <q-list style="min-width: 200px">
-                  <q-item clickable @click="goToPageDetail(props.row.id, true)">
-                    <q-item-section avatar>
-                      <q-icon name="visibility" />
-                    </q-item-section>
-                    <q-item-section>ดูรายละเอียด</q-item-section>
-                  </q-item>
-                  <q-item clickable @click="goToPageDetail(props.row.id, false)">
-                    <q-item-section avatar>
-                      <q-icon name="edit" />
-                    </q-item-section>
-                    <q-item-section>แก้ไข</q-item-section>
-                  </q-item>
-                </q-list>
-              </q-menu>
+            <q-td class="q-gutter-x-sm" key="action" style="width: 8%">
+                  <q-icon clickable name="visibility" @click="goToPageDetail(props.row.id, true)">
+                    <q-tooltip>ดูรายละเอียด</q-tooltip>
+                  </q-icon>
+                  <q-icon clickable name="edit"  @click="goToPageDetail(props.row.id, false)">
+                    <q-tooltip>แก้ไข</q-tooltip>
+                  </q-icon>
             </q-td>
           </q-tr>
         </template>
@@ -219,24 +207,13 @@
                 rounded
                 unelevated
             /></q-td>
-            <q-td class="q-gutter-x-sm" key="action" style="width: 5%">
-              <q-btn icon="info" padding="none" flat color="grey-8"></q-btn>
-              <q-menu>
-                <q-list style="min-width: 200px">
-                  <q-item clickable @click="goToPageDetail(props.row.id, true)">
-                    <q-item-section avatar>
-                      <q-icon name="visibility" />
-                    </q-item-section>
-                    <q-item-section>ดูรายละเอียด</q-item-section>
-                  </q-item>
-                  <q-item clickable @click="goToPageDetail(props.row.id, false)">
-                    <q-item-section avatar>
-                      <q-icon name="edit" />
-                    </q-item-section>
-                    <q-item-section>แก้ไข</q-item-section>
-                  </q-item>
-                </q-list>
-              </q-menu>
+            <q-td class="q-gutter-x-sm" key="action" style="width: 8%">
+               <q-icon clickable name="visibility" @click="goToPageDetail(props.row.id, true)">
+                <q-tooltip>ดูรายละเอียด</q-tooltip>
+                  </q-icon>
+                  <q-icon clickable name="edit"  @click="goToPageDetail(props.row.id, false)">
+                    <q-tooltip>แก้ไข</q-tooltip>
+                  </q-icon>
             </q-td>
           </q-tr>
         </template></q-table
@@ -337,24 +314,13 @@
                 rounded
                 unelevated
             /></q-td>
-            <q-td class="q-gutter-x-sm" key="action" style="width: 5%">
-              <q-btn icon="info" padding="none" flat color="grey-8"></q-btn>
-              <q-menu>
-                <q-list style="min-width: 200px">
-                  <q-item clickable @click="goToPageDetail(props.row.id, true)">
-                    <q-item-section avatar>
-                      <q-icon name="visibility" />
-                    </q-item-section>
-                    <q-item-section>ดูรายละเอียด</q-item-section>
-                  </q-item>
-                  <q-item clickable @click="goToPageDetail(props.row.id, false)">
-                    <q-item-section avatar>
-                      <q-icon name="edit" />
-                    </q-item-section>
-                    <q-item-section>แก้ไข</q-item-section>
-                  </q-item>
-                </q-list>
-              </q-menu>
+            <q-td class="q-gutter-x-sm" key="action" style="width: 8%">
+              <q-icon clickable name="visibility" @click="goToPageDetail(props.row.id, true)">
+                <q-tooltip>ดูรายละเอียด</q-tooltip>
+                  </q-icon>
+                  <q-icon clickable name="edit"  @click="goToPageDetail(props.row.id, false)">
+                    <q-tooltip>แก้ไข</q-tooltip>
+                  </q-icon>
             </q-td>
           </q-tr>
         </template></q-table

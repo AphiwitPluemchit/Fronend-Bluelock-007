@@ -1,0 +1,42 @@
+<template>
+  <q-dialog
+    :model-value="modelValue"
+    @update:model-value="(val) => emit('update:modelValue', val)"
+  >
+    <q-card class="cancel-card">
+      <q-card-section>
+        <div class="text-h6">ยกเลิกการบันทึกข้อมูล</div>
+      </q-card-section>
+      <q-card-section>
+        หากคุณกดยืนยัน การเปลี่ยนแปลงทั้งหมดจะไม่ถูกบันทึก
+      </q-card-section>
+      <q-card-actions align="right">
+        <q-btn flat label="ยกเลิก" class="btnreject" v-close-popup />
+        <q-btn flat label="ยืนยัน" class="btnconfirm" @click="goToPageTable" />
+      </q-card-actions>
+    </q-card>
+  </q-dialog>
+</template>
+
+<script setup lang="ts">
+import { useRouter } from 'vue-router'
+
+const router = useRouter()
+defineProps<{
+  modelValue: boolean;
+}>();
+const goToPageTable = async () => {
+  await router.push(`/Admin/ActivitiesManagement`)
+}
+const emit = defineEmits(['update:modelValue']);
+</script>
+
+<style scoped>
+.cancel-card {
+  background-color: white;
+  width: 600px;
+  border-radius: 10px;
+  padding: 20px;
+  box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.2);
+}
+</style>
