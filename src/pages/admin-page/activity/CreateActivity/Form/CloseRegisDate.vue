@@ -1,6 +1,6 @@
 <template>
   <div class="input-group">
-    <p class="label label_minWidth">วันที่จัดกิจกรรม :</p>
+    <p class="label label_minWidth">วันที่ปิดลงทะเบียน :</p>
     <q-input
       outlined
       :model-value="displayValue"
