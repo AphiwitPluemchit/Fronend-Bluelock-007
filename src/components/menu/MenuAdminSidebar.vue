@@ -6,7 +6,7 @@
     side="left"
     bordered
     :width="260"
-    style="font-size: 18px; font-weight: 500; margin-right: 10px"
+    style="font-size: 18px; font-weight: 500; margin-right: 10px; background-color: #EDF0F5;;"
   >
     <!-- ให้ q-list เต็มความสูง และแบ่งพื้นที่ระหว่างเมนู กับ Logout -->
     <q-list padding class="menu-list flex column justify-between full-height">

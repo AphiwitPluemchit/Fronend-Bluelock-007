@@ -48,5 +48,6 @@ const toggleLeftDrawer = () => {
   left: 0;
   right: 0;
   width: 100%;
+
 }
 </style>
