@@ -2,8 +2,8 @@
 import { computed, ref } from 'vue'
 import AppBreadcrumbs from 'src/components/AppBreadcrumbs.vue'
 
-import DetailSum from './DetailSum.vue'
-import CheckInCheckOut from './CheckInCheckOut.vue'
+import ActivityDetailTab from './ActivityDetailTab/ActivityDetailTab.vue'
+import CheckInCheckOutTab from './CheckInCheckOutTab/CheckInCheckOutTab.vue'
 // import { route } from 'quasar/wrappers';
 
 const currentBreadcrumb = computed(() => {
@@ -21,12 +21,6 @@ const breadcrumbs = computed(() => ({
   },
   icon: 'description',
 }))
-// onMounted(async () => {
-//   const id = route.params.id as string
-//   const res = await ActivityService.getOne(id)
-//   console.log('📦 ได้ activity:', res)
-//   activity.value = res.data
-// })
 </script>
 
 <template>
@@ -41,11 +35,11 @@ const breadcrumbs = computed(() => ({
     <!-- Tab Panels -->
     <q-tab-panels v-model="tab" animated class="custom-panels">
       <q-tab-panel name="activity" class="q-my-md">
-        <DetailSum />
+        <ActivityDetailTab />
       </q-tab-panel>
 
       <q-tab-panel name="checkInOut" class="q-my-md">
-        <CheckInCheckOut />
+        <CheckInCheckOutTab />
       </q-tab-panel>
     </q-tab-panels>
   </q-page>
@@ -63,6 +57,6 @@ const breadcrumbs = computed(() => ({
   padding: 20px;
   font-size: 20px;
   height: 700px;
-  overflow-y: auto;
+  overflow: hidden;
 }
 </style>

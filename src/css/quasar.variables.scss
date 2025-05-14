@@ -99,7 +99,20 @@ $dark-page: #121212;
     border-radius: 15px !important;
   }
 }
+// .scroll {
+//   overflow: visible;
+// }
+// .q-panel {
+//   overflow: hidden;
+// }
+.scroll::-webkit-scrollbar {
+  display: none;
+}
 
+/* Firefox */
+.scroll {
+  scrollbar-width: none;
+}
 .btnfilter {
   background-color: #ffffff;
   height: 40px;

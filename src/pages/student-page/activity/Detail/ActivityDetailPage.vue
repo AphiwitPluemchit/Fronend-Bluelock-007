@@ -1,56 +1,3 @@
-<template>
-  <q-page class="q-pa-md" v-if="screen">
-    <!-- Breadcrumbs -->
-    <AppBreadcrumbs :breadcrumbs="breadcrumbs" />
-    <div class="activity-detail-card">
-      <q-card-section class="row">
-        <div class="col-12 col-md-4 text-center">
-          <q-img
-            :src="baseurl + '/uploads/activity/images/' + activity?.file"
-            class="image"
-            error-src="/default-placeholder.jpg"
-          />
-        </div>
-
-        <div class="col-12 col-md-8" v-if="activity">
-          <div v-if="Array.isArray(activity?.activityItems) && activity.activityItems.length > 1">
-            <DetailMany :activity="activity ?? {}"></DetailMany>
-          </div>
-          <div v-else>
-            <DetailOne :activity="activity ?? {}"></DetailOne>
-          </div>
-        </div>
-      </q-card-section>
-
-      <div class="row justify-center">
-        <q-btn
-          v-if="enrollment?.isEnrolled && !isRegistrationNotAllowed"
-          label="ยกเลิกลงทะเบียน"
-          class="btnreject"
-          @click="handleUnRegisterClick"
-        />
-        <q-btn
-          v-else-if="!enrollment?.isEnrolled && !isRegistrationNotAllowed"
-          label="ลงทะเบียน"
-          class="btnsecces"
-          @click="handleRegisterClick"
-        />
-        <q-btn v-else label="ปิดลงทะเบียน" class="btngrey" :disabled="true" />
-      </div>
-    </div>
-
-    <!-- Confirm Dialog-->
-    <RegisterConfirmDialog
-      v-model="showRegisterDialog"
-      :activityItems="activity?.activityItems ?? []"
-      :food="activity?.foodVotes ?? []"
-      @confirm="register"
-    />
-    <RegisterFailDialog v-model="showFailDialog" />
-    <UnRegisterDialog v-model="showUnRegisterDialog" @confirm="unRegister" />
-  </q-page>
-</template>
-
 <script setup lang="ts">
 import { ref, onMounted, computed } from 'vue'
 import { useRoute } from 'vue-router'
@@ -58,8 +5,8 @@ import AppBreadcrumbs from 'src/components/AppBreadcrumbs.vue'
 import RegisterConfirmDialog from '../Dialog/RegisterConfirmDialog.vue'
 import RegisterFailDialog from '../Dialog/RegisterFailDialog.vue'
 import UnRegisterDialog from '../Dialog/UnRegisterDialog.vue'
-import DetailOne from './DetailOne.vue'
-import DetailMany from './DetailMany.vue'
+import DetailOne from './Detail/DetailOne.vue'
+import DetailMany from './Detail/DetailMany.vue'
 import { useStudentActivitystore } from 'src/stores/student-activity'
 import { EnrollmentService } from 'src/services/enrollment'
 import { useAuthStore } from 'src/stores/auth'
@@ -157,6 +104,58 @@ onMounted(async () => {
   screen.value = true
 })
 </script>
+<template>
+  <q-page class="q-pa-md" v-if="screen">
+    <!-- Breadcrumbs -->
+    <AppBreadcrumbs :breadcrumbs="breadcrumbs" />
+    <div class="activity-detail-card">
+      <q-card-section class="row">
+        <div class="col-12 col-md-4 text-center">
+          <q-img
+            :src="baseurl + '/uploads/activity/images/' + activity?.file"
+            class="image"
+            error-src="/default-placeholder.jpg"
+          />
+        </div>
+
+        <div class="col-12 col-md-8" v-if="activity">
+          <div v-if="Array.isArray(activity?.activityItems) && activity.activityItems.length > 1">
+            <DetailMany :activity="activity ?? {}"></DetailMany>
+          </div>
+          <div v-else>
+            <DetailOne :activity="activity ?? {}"></DetailOne>
+          </div>
+        </div>
+      </q-card-section>
+
+      <div class="row justify-center">
+        <q-btn
+          v-if="enrollment?.isEnrolled && !isRegistrationNotAllowed"
+          label="ยกเลิกลงทะเบียน"
+          class="btnreject"
+          @click="handleUnRegisterClick"
+        />
+        <q-btn
+          v-else-if="!enrollment?.isEnrolled && !isRegistrationNotAllowed"
+          label="ลงทะเบียน"
+          class="btnsecces"
+          @click="handleRegisterClick"
+        />
+        <q-btn v-else label="ปิดลงทะเบียน" class="btngrey" :disabled="true" />
+      </div>
+    </div>
+
+    <!-- Confirm Dialog-->
+    <RegisterConfirmDialog
+      v-model="showRegisterDialog"
+      :activityItems="activity?.activityItems ?? []"
+      :food="activity?.foodVotes ?? []"
+      @confirm="register"
+    />
+    <RegisterFailDialog v-model="showFailDialog" />
+    <UnRegisterDialog v-model="showUnRegisterDialog" @confirm="unRegister" />
+  </q-page>
+</template>
 
 <style scoped>
 .activity-detail-card {

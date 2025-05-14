@@ -46,7 +46,7 @@
 <script setup lang="ts">
 import { useRouter } from 'vue-router'
 import { api } from 'boot/axios'
-import ActivityType from '../myactivity/ActivityType.vue'
+import ActivityType from './ActivityType.vue'
 import type { Activity, ActivityItem } from 'src/types/activity'
 import dayjs from 'dayjs'
 import 'dayjs/locale/th'
@@ -82,12 +82,6 @@ const baseurl = api.defaults.baseURL
 const onClick = async (id: string) => {
   await router.push(`/Student/Activity/MyActivityDetail/${id}`)
 }
-// const getActivitydates = (activityItems: ActivityItem[] | null | undefined): string => {
-//   const firstItem = activityItems?.find((item) => item.dates && item.dates.length > 0)
-//   return firstItem?.dates
-//     ? firstItem.dates.map((d) => `${d.date} (${d.stime} - ${d.etime})`).join(', ')
-//     : 'ไม่ระบุ'
-// }
 
 const getActivityRooms = (activityItems: ActivityItem[] | null | undefined): string => {
   if (!activityItems || activityItems.length === 0) return 'ไม่ระบุ'

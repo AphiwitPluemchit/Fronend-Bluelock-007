@@ -1,77 +1,14 @@
-<template>
-  <q-page class="q-pa-md" v-if="screen">
-    <!-- Breadcrumbs -->
-
-    <div>
-      <q-card-section class="row">
-        <div class="col-12 col-md-4 text-center">
-          <q-img
-            :src="baseurl + '/uploads/activity/images/' + activity?.file"
-            class="image"
-            error-src="/default-placeholder.jpg"
-          />
-        </div>
-
-        <div class="col-12 col-md-8" v-if="activity">
-          <div v-if="activity?.type == 'one'">
-            <DetailOne :activity="activity ?? {}"></DetailOne>
-          </div>
-          <div v-if="activity?.type == 'many'">
-            <DetailMany :activity="activity ?? {}"></DetailMany>
-          </div>
-        </div>
-      </q-card-section>
-      <div class="row justify-center">
-        <q-btn
-          v-if="enrollment?.isEnrolled && !isRegistrationNotAllowed"
-          label="ยกเลิกลงทะเบียน"
-          class="btnreject"
-          @click="handleUnRegisterClick"
-        />
-        <q-btn
-          v-else-if="!enrollment?.isEnrolled && !isRegistrationNotAllowed"
-          label="ลงทะเบียน"
-          class="btnsecces"
-          @click="handleRegisterClick"
-        />
-        <!-- ปุ่มที่ไม่สามารถกดได้ -->
-        <q-btn
-          v-else
-          label="ไม่สามารถยกเลิกการลงทะเบียนได้"
-          class="btn-disabled"
-          :disabled="true"
-        />
-      </div>
-      <!-- หมายเหตุ -->
-      <div v-if="isRegistrationNotAllowed">
-        <q-item-label class="text-negative q-mt-md text-center">
-          หมายเหตุ: กรุณาติดต่อเจ้าหน้าที่หากต้องการยกเลิกการลงทะเบียน
-        </q-item-label>
-      </div>
-    </div>
-  </q-page>
-  <!-- Confirm Dialog-->
-  <RegisterConfirmDialog
-    v-model="showRegisterDialog"
-    :activityItems="activity?.activityItems ?? []"
-    :food="activity?.foodVotes ?? []"
-    @confirm="register"
-  />
-  <RegisterFailDialog v-model="showFailDialog" />
-  <UnRegisterDialog v-model="showUnRegisterDialog" @confirm="unRegister" />
-</template>
-
 <script setup lang="ts">
 import { ref, onMounted, computed } from 'vue'
 import { useRoute } from 'vue-router'
 import { useStudentActivitystore } from 'src/stores/student-activity'
 import { EnrollmentService } from 'src/services/enrollment'
-import RegisterConfirmDialog from '../Dialog/RegisterConfirmDialog.vue'
-import RegisterFailDialog from '../Dialog/RegisterFailDialog.vue'
-import UnRegisterDialog from '../Dialog/UnRegisterDialog.vue'
+import RegisterConfirmDialog from '../../Dialog/RegisterConfirmDialog.vue'
+import RegisterFailDialog from '../../Dialog/RegisterFailDialog.vue'
+import UnRegisterDialog from '../../Dialog/UnRegisterDialog.vue'
 import type { Activity } from 'src/types/activity'
-import DetailOne from './DetailOne.vue'
-import DetailMany from './DetailMany.vue'
+import DetailOne from 'src/pages/student-page/activity/Detail/Detail/DetailOne.vue'
+import DetailMany from 'src/pages/student-page/activity/Detail/Detail/DetailMany.vue'
 import { useAuthStore } from 'src/stores/auth'
 import { api } from 'boot/axios'
 const baseurl = api.defaults.baseURL
@@ -162,6 +99,59 @@ onMounted(async () => {
   screen.value = true
 })
 </script>
+<template>
+  <q-page class="q-pa-md" v-if="screen">
+    <!-- Breadcrumbs -->
+
+    <q-card-section class="row">
+      <div class="col-12 col-md-4 text-center">
+        <q-img
+          :src="baseurl + '/uploads/activity/images/' + activity?.file"
+          class="image"
+          error-src="/default-placeholder.jpg"
+        />
+      </div>
+
+      <div class="col-12 col-md-8" v-if="activity">
+        <div v-if="activity?.type == 'one'">
+          <DetailOne :activity="activity ?? {}"></DetailOne>
+        </div>
+        <div v-if="activity?.type == 'many'">
+          <DetailMany :activity="activity ?? {}"></DetailMany>
+        </div>
+      </div>
+    </q-card-section>
+    <div class="row justify-center">
+      <q-btn
+        v-if="enrollment?.isEnrolled && !isRegistrationNotAllowed"
+        label="ยกเลิกลงทะเบียน"
+        class="btnreject"
+        @click="handleUnRegisterClick"
+      />
+      <q-btn
+        v-else-if="!enrollment?.isEnrolled && !isRegistrationNotAllowed"
+        label="ลงทะเบียน"
+        class="btnsecces"
+        @click="handleRegisterClick"
+      />
+      <q-btn v-else label="ไม่สามารถยกเลิกการลงทะเบียนได้" class="btn-disabled" :disabled="true" />
+    </div>
+    <div v-if="isRegistrationNotAllowed">
+      <q-item-label class="text-negative q-mt-md text-center">
+        หมายเหตุ: กรุณาติดต่อเจ้าหน้าที่หากต้องการยกเลิกการลงทะเบียน
+      </q-item-label>
+    </div>
+  </q-page>
+  <!-- Confirm Dialog-->
+  <RegisterConfirmDialog
+    v-model="showRegisterDialog"
+    :activityItems="activity?.activityItems ?? []"
+    :food="activity?.foodVotes ?? []"
+    @confirm="register"
+  />
+  <RegisterFailDialog v-model="showFailDialog" />
+  <UnRegisterDialog v-model="showUnRegisterDialog" @confirm="unRegister" />
+</template>
 
 <style scoped>
 .activity-img {

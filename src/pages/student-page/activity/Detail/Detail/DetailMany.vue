@@ -1,3 +1,35 @@
+<script setup lang="ts">
+import type { Activity, ActivityItem } from 'src/types/activity'
+import dayjs from 'dayjs'
+import 'dayjs/locale/th'
+import buddhistEra from 'dayjs/plugin/buddhistEra'
+dayjs.locale('th')
+dayjs.extend(buddhistEra)
+
+function formatDateToThai(dateString: string): string {
+  if (!dateString) return '-'
+  return dayjs(dateString).format('D MMMM BBBB') // D = วัน, MMM = เดือน, BBBB = ปี พ.ศ.
+}
+
+defineProps<{ activity: Activity }>()
+
+// ฟังก์ชันดึงวันที่จาก `activityItems`
+const getActivitydates = (activityItems: ActivityItem[] | null | undefined): string => {
+  const firstItem = activityItems?.find((item) => item.dates && item.dates.length > 0)
+  return firstItem?.dates
+    ? firstItem.dates.map((d) => formatDateToThai(d.date)).join(', ')
+    : 'ไม่ระบุ'
+}
+
+// ฟังก์ชันดึงเวลา
+const getActivityTime = (activityItems: ActivityItem[] | null | undefined): string => {
+  const firstItem = activityItems?.find((item) => item.dates && item.dates.length > 0)
+  return firstItem?.dates
+    ? firstItem.dates.map((d) => `${d.stime} - ${d.etime}`).join(', ')
+    : 'ไม่ระบุ'
+}
+</script>
+
 <template>
   <!-- รายละเอียดกิจกรรม -->
   <div class="q-pa-sm">
@@ -116,45 +148,6 @@
     </div>
   </div>
 </template>
-
-<script setup lang="ts">
-import type { Activity, ActivityItem } from 'src/types/activity'
-import dayjs from 'dayjs'
-import 'dayjs/locale/th'
-import buddhistEra from 'dayjs/plugin/buddhistEra'
-dayjs.locale('th')
-dayjs.extend(buddhistEra)
-
-function formatDateToThai(dateString: string): string {
-  if (!dateString) return '-'
-  return dayjs(dateString).format('D MMMM BBBB') // D = วัน, MMM = เดือน, BBBB = ปี พ.ศ.
-}
-
-defineProps<{ activity: Activity }>()
-
-// const getActivitydates = (activityItems: ActivityItem[] | null | undefined): string => {
-//   const firstItem = activityItems?.find((item) => item.dates && item.dates.length > 0)
-//   return firstItem?.dates
-//     ? firstItem.dates.map((d) => `${d.date} (${d.stime} - ${d.etime})`).join(', ')
-//     : 'ไม่ระบุ'
-// }
-
-// ฟังก์ชันดึงวันที่จาก `activityItems`
-const getActivitydates = (activityItems: ActivityItem[] | null | undefined): string => {
-  const firstItem = activityItems?.find((item) => item.dates && item.dates.length > 0)
-  return firstItem?.dates
-    ? firstItem.dates.map((d) => formatDateToThai(d.date)).join(', ')
-    : 'ไม่ระบุ'
-}
-
-// ฟังก์ชันดึงเวลา
-const getActivityTime = (activityItems: ActivityItem[] | null | undefined): string => {
-  const firstItem = activityItems?.find((item) => item.dates && item.dates.length > 0)
-  return firstItem?.dates
-    ? firstItem.dates.map((d) => `${d.stime} - ${d.etime}`).join(', ')
-    : 'ไม่ระบุ'
-}
-</script>
 
 <style scoped>
 .activity-detail-card {
