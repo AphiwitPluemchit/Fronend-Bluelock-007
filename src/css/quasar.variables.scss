@@ -86,9 +86,11 @@ $dark-page: #121212;
   border-radius: 15px;
   background-color: white;
   border: 1px solid #000000;
+  white-space: nowrap;
+  text-overflow: unset;
   transition: border-color 0.3s ease-in-out;
 
-  /* ใช้กับ q-field ที่อยู่ภายใน q-select */
+  /* ปรับ style ของ q-field ภายใน */
   ::v-deep(.q-field__control) {
     border-radius: 15px !important;
   }
@@ -98,13 +100,50 @@ $dark-page: #121212;
     border-color: #000000;
     border-radius: 15px !important;
   }
+
+  /* ✅ ตัดข้อความในช่อง selected */
+  ::v-deep(.q-field__native span) {
+    display: block;
+    max-width: 100%;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  /* ✅ ตัด label ด้านบน */
+  ::v-deep(.q-field__label) {
+    max-width: 100%;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  /* ✅ ตัดข้อความใน dropdown list */
+  ::v-deep(.q-item__label) {
+    max-width: 100%;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+  }
+  ::v-deep(.ellipsis-option) {
+    max-width: 100%;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+  }
+
+  /* เผื่อบาง theme มี padding */
+  ::v-deep(.q-item__section--main) {
+    width: 100%;
+  }
+  ::v-deep(.ellipsis-option) {
+    max-width: 100%;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+  }
 }
-// .scroll {
-//   overflow: visible;
-// }
-// .q-panel {
-//   overflow: hidden;
-// }
+
 .scroll::-webkit-scrollbar {
   display: none;
 }
