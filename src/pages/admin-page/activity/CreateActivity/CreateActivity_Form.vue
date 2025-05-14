@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import { onMounted, ref, watch } from 'vue'
+import { nextTick, onMounted, ref, watch } from 'vue'
+import type { QInput } from 'quasar'
 import { useRouter } from 'vue-router'
 import type { Food } from 'src/types/food'
 import { ActivityService } from 'src/services/activity'
@@ -46,6 +47,8 @@ const foodMenu = ref<Food[]>([])
 const subActivities = ref<SubActivity[]>([])
 const sameTimeForAll = ref(false)
 const showCancelDialog = ref(false)
+const activityNameError = ref('')
+const activityNameInput = ref<InstanceType<typeof QInput> | null>(null)
 const defaultTime = ref({
   startTime: '00:00',
   endTime: '00:00',
@@ -221,6 +224,14 @@ const thaiLocale = {
 
 // ใช้กับปุ่มยืนยันส่งไปหลังบ้าน
 const submitActivity = async () => {
+  activityNameError.value = ''
+  if (!activityName.value.trim()) {
+    activityNameError.value = 'กรุณากรอกชื่อกิจกรรมหลัก'
+
+    await nextTick()
+    activityNameInput.value?.$el?.scrollIntoView({ behavior: 'smooth', block: 'center' })
+    return
+  }
   const skillMap: Record<string, 'hard' | 'soft' | null> = {
     prep: 'hard',
     academic: 'soft',
@@ -304,10 +315,30 @@ onMounted(() => {
     </div>
 
     <!-- Activity Name -->
-    <div class="input-group">
-      <p class="label label_minWidth">ชื่อกิจกรรมหลัก :</p>
-      <q-input outlined v-model="activityName" class="input-max-600" />
+  <div class="input-group">
+  <p
+    class="label label_minWidth"
+    :class="{ 'label-error-shift': activityNameError !== '' }"
+  >
+    ชื่อกิจกรรมหลัก :
+  </p>
+  <div class="input-container">
+    <q-input
+      ref="activityNameInput"
+      outlined
+      v-model="activityName"
+      class="input-max-600 fix-q-input-height"
+      :error="activityNameError !== ''"
+      hide-bottom
+    />
+    <div v-if="activityNameError" class="text-negative text-subtitle2 q-mt-xs">
+      {{ activityNameError }}
     </div>
+  </div>
+</div>
+
+
+
 
     <ActivityForm_Type v-model="activityType" class="input-group" />
     <ActivityForm_CloseRegisDate v-model="CloseRegisDates" class="input-group" />
@@ -399,15 +430,13 @@ onMounted(() => {
     </div>
 
     <!-- Dialog -->
-    <CancelDialog v-model="showCancelDialog"
-     @confirm="goToPageTable"  />
+    <CancelDialog v-model="showCancelDialog" @confirm="goToPageTable" />
   </q-page>
 </template>
 
 <style scoped>
 .input-max-600 {
-  max-width: 600px;
-  width: 100%;
+  width: 600px;
 }
 
 ::v-deep(.q-field__control) {
@@ -418,6 +447,23 @@ onMounted(() => {
 ::v-deep(.q-icon) {
   font-size: 18px;
 }
+.fix-q-input-height ::v-deep(.q-icon) {
+  font-size: 16px;
+}
+.fix-q-input-height ::v-deep(.q-field__control) {
+  height: 40px !important;
+  min-height: 40px !important;
+  padding-top: 0 !important;
+  padding-bottom: 0 !important;
+  display: flex;
+  align-items: center;
+}
+
+.fix-q-input-height ::v-deep(.q-field__append) {
+  align-items: center; 
+  display: flex;
+}
+
 
 .responsive-input {
   width: 100%;
@@ -428,11 +474,15 @@ onMounted(() => {
   margin: 0;
   line-height: normal;
   text-align: left;
+ 
+}
+.label-error-shift {
+  transform: translateY(-12px);
 }
 
 .input-group {
   display: flex;
-  align-items: center;
+  align-items: center;  /* ✅ ทำให้ label กับ input อยู่กลางแนวเดียวกัน */
   gap: 25px;
   margin-bottom: 20px;
   width: 100%;
@@ -441,12 +491,14 @@ onMounted(() => {
 
 .label {
   font-size: 20px;
-  font-weight: normal;
-  display: flex;
-  justify-content: flex-end;
-  align-items: center;
   height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  line-height: 40px; /* ใช้ line-height เท่ากับความสูง */
+  margin: 0;
 }
+
 
 .label_minWidth {
   min-width: 200px;
@@ -475,13 +527,6 @@ onMounted(() => {
   align-items: center;
   justify-content: center;
   text-align: center;
-}
-
-.time-container {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  gap: 10px;
 }
 
 .remove-icon {

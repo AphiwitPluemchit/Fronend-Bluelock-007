@@ -217,6 +217,13 @@ const formatThaiDate = (dateStr: string): string => {
 
   return `${day} ${thaiMonth} ${thaiYear}`
 }
+watch(sameTimeForAll, (newValue) => {
+  if (newValue) {
+    subActivities.value.forEach((_, index) => {
+      applySameTime(index)
+    })
+  }
+})
 
 const thaiLocale = {
   months: [
@@ -259,21 +266,21 @@ const saveChanges = async () => {
     }
   })
 
-  updated.activityItems = subActivities.value.map((sub) => ({
-    name: sub.subActivityName,
+   updated.activityItems = subActivities.value.map((sub) => ({
+   name: sub.subActivityName,
     hour: Number(sub.totalHours),
     maxParticipants: Number(sub.seats),
     rooms: sub.roomName,
     description: sub.detailActivity,
     operator: sub.lecturer,
-    majors: sub.departments.map(String),
+   majors: sub.departments.map(String),
     studentYears: sub.years.map((y) => Number(y)),
     dates: sub.selectedDays.map((day) => ({
       date: day.date,
       stime: day.startTime,
       etime: day.endTime,
     })),
-  }))
+   }))
 
   try {
     const result = await ActivityService.updateOne(updated)
