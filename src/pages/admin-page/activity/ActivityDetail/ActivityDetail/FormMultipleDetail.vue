@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed, nextTick, onMounted, ref, watch } from 'vue'
+import type { QInput } from 'quasar'
 import cloneDeep from 'lodash/cloneDeep'
 import type { Food } from 'src/types/food'
 import type ImageDetail from './ImageDetail.vue'
@@ -54,6 +55,9 @@ const subActivities = ref<SubActivity[]>([])
 const sameTimeForAll = ref(false)
 const showCancelDialog = ref(false)
 const showSuccessDialog = ref(false)
+const activityNameError = ref('')
+const activityNameInput = ref<InstanceType<typeof QInput> | null>(null)
+const formTop = ref<HTMLElement | null>(null)
 const defaultTime = ref({
   startTime: '00:00',
   endTime: '00:00',
@@ -66,10 +70,12 @@ const props = defineProps<{
 const emit = defineEmits<{
   (e: 'update:isEditing', value: boolean): void
   (e: 'saved', fileName?: string): void
+  (e: 'scroll-to-top'): void
 }>()
 const enterEditMode = async () => {
   emit('update:isEditing', true)
   await nextTick()
+  emit('scroll-to-top')
 }
 const openCancelDialog = () => {
   showCancelDialog.value = true
@@ -253,7 +259,14 @@ const saveChanges = async () => {
     return
   }
   const updated: Partial<Activity> = cloneDeep(props.activity)
+  activityNameError.value = ''
+  if (!activityName.value.trim()) {
+    activityNameError.value = 'กรุณากรอกชื่อกิจกรรมหลัก'
 
+    await nextTick()
+    activityNameInput.value?.$el?.scrollIntoView({ behavior: 'smooth', block: 'center' })
+    return
+  }
   updated.name = activityName.value
   updated.skill = activityType.value === 'prep' ? 'hard' : 'soft'
   updated.endDateEnroll = formattedCloseRegisDate.value
@@ -266,21 +279,21 @@ const saveChanges = async () => {
     }
   })
 
-   updated.activityItems = subActivities.value.map((sub) => ({
-   name: sub.subActivityName,
+  updated.activityItems = subActivities.value.map((sub) => ({
+    name: sub.subActivityName,
     hour: Number(sub.totalHours),
     maxParticipants: Number(sub.seats),
     rooms: sub.roomName,
     description: sub.detailActivity,
     operator: sub.lecturer,
-   majors: sub.departments.map(String),
+    majors: sub.departments.map(String),
     studentYears: sub.years.map((y) => Number(y)),
     dates: sub.selectedDays.map((day) => ({
       date: day.date,
       stime: day.startTime,
       etime: day.endTime,
     })),
-   }))
+  }))
 
   try {
     const result = await ActivityService.updateOne(updated)
@@ -466,8 +479,22 @@ const resetFormToOriginal = () => {
 
     <!-- Activity Name -->
     <div class="input-group">
-      <p class="label label_minWidth">ชื่อกิจกรรมหลัก :</p>
-      <q-input outlined v-model="activityName" style="width: 600px" :disable="!isEditing" />
+      <p class="label label_minWidth" :class="{ 'label-error-shift': activityNameError !== '' }">
+        ชื่อกิจกรรมหลัก :
+      </p>
+      <div class="input-container">
+        <q-input
+          ref="activityNameInput"
+          outlined
+          v-model="activityName"
+          class="input-max-600 fix-q-input-height"
+          :error="activityNameError !== ''"
+          hide-bottom
+        />
+        <div v-if="activityNameError" class="text-negative text-subtitle2 q-mt-xs">
+          {{ activityNameError }}
+        </div>
+      </div>
     </div>
 
     <!-- Activity Type -->
@@ -581,12 +608,7 @@ const resetFormToOriginal = () => {
       <!-- Lecturer -->
       <div class="input-group">
         <p class="label label_minWidth">วิทยากร :</p>
-        <q-input
-          outlined
-          v-model="subActivity.lecturer"
-          style="width: 100%"
-          :disable="!isEditing"
-        />
+        <q-input outlined v-model="subActivity.lecturer" class="input-max-600" />
       </div>
 
       <!-- Detail Activity -->
@@ -597,8 +619,7 @@ const resetFormToOriginal = () => {
           rows="10"
           outlined
           v-model="subActivity.detailActivity"
-          style="width: 100%"
-          :disable="!isEditing"
+          class="input-max-600"
         />
       </div>
     </div>
@@ -622,11 +643,7 @@ const resetFormToOriginal = () => {
     <div class="button-group">
       <q-btn v-if="!props.isEditing" class="btnedit" label="แก้ไข" @click="enterEditMode" />
       <template v-else>
-        <q-btn
-          class="btnreject"
-          label="ยกเลิก"
-          @click=openCancelDialog
-        />
+        <q-btn class="btnreject" label="ยกเลิก" @click="openCancelDialog" />
         <q-btn class="btnsecces" label="บันทึก" @click="saveChanges" />
       </template>
     </div>
@@ -664,7 +681,25 @@ const resetFormToOriginal = () => {
 ::v-deep(.q-icon) {
   font-size: 18px;
 }
+.fix-q-input-height ::v-deep(.q-icon) {
+  font-size: 16px;
+}
+.input-max-600 {
+  width: 600px;
+}
+.fix-q-input-height ::v-deep(.q-field__control) {
+  height: 40px !important;
+  min-height: 40px !important;
+  padding-top: 0 !important;
+  padding-bottom: 0 !important;
+  display: flex;
+  align-items: center;
+}
 
+.fix-q-input-height ::v-deep(.q-field__append) {
+  align-items: center;
+  display: flex;
+}
 .input-group p {
   align-self: center;
   margin: 0;
@@ -674,21 +709,22 @@ const resetFormToOriginal = () => {
 
 .input-group {
   display: flex;
-  align-items: center;
+  align-items: center; /* ✅ ทำให้ label กับ input อยู่กลางแนวเดียวกัน */
   gap: 25px;
   margin-bottom: 20px;
   width: 100%;
+  flex-wrap: wrap;
 }
 
 .label {
   font-size: 20px;
-  font-weight: normal;
-  display: flex;
-  justify-content: flex-end;
-  align-items: center;
   height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  line-height: 40px; /* ใช้ line-height เท่ากับความสูง */
+  margin: 0;
 }
-
 .label_minWidth {
   min-width: 200px;
 }
