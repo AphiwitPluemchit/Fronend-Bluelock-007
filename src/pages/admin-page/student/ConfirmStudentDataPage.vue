@@ -14,6 +14,7 @@ interface Student {
   hardSkill: number
   major: string
 }
+
 const breadcrumbs = ref({
   previousPage: { title: 'จัดการข้อมูลนิสิต', path: '/Admin/StudentManagement' },
   currentPage: { title: 'จัดเก็บข้อมูลนิสิต', path: '/Admin/StudentManagement/StudentStorePage' },
@@ -27,9 +28,9 @@ const breadcrumbs = ref({
 const studentStore = useStudentStore()
 
 const selectedYear = ref(62)
-const yearOptions = [62, 63, 64, 65]
+const yearOptions = [60, 61, 62, 63, 64, 65, 66]
 
-const selectedMajors = ref<string[]>([]) // << ใช้แค่บรรทัดนี้
+const selectedMajors = ref<string[]>([]) // ใช้ให้เลือกหลายสาขา
 const majorOptions = ['CS', 'AI', 'SE', 'ITDI']
 
 onMounted(async () => {
@@ -41,7 +42,14 @@ onMounted(async () => {
 })
 
 const filteredStudents = computed(() => {
-  return studentStore.students || []
+  // กรองตามปีและสาขาที่เลือก
+  return studentStore.students.filter((student) => {
+    const isYearMatch = student.code.startsWith(selectedYear.value.toString())
+    const isMajorMatch =
+      selectedMajors.value.length === 0 || selectedMajors.value.includes(student.major)
+    const isNotTerminated = student.status !== 0
+    return isYearMatch && isMajorMatch && isNotTerminated
+  })
 })
 
 const columns = [
@@ -89,57 +97,6 @@ const saveStudents = () => {
   console.log('จัดเก็บข้อมูลนิสิต...')
 }
 </script>
-
-<style scoped>
-.status-complete {
-  background-color: #cfd7ff;
-  color: #001780;
-  border: 2px solid #002dff;
-  padding: 3px 30px;
-  width: 130px;
-}
-
-.status-high {
-  background-color: #d0ffc5;
-  color: #009812;
-  border: 2px solid #00bb16;
-  padding: 3px 30px;
-  width: 130px;
-}
-
-.status-medium {
-  background-color: #ffe7ba;
-  color: #ff6f00;
-  border: 2px solid #ffa500;
-  padding: 3px 30px;
-  width: 130px;
-}
-
-.status-low {
-  background-color: #ffc5c5;
-  color: #ff0000;
-  border: 2px solid #f32323;
-  padding: 3px 30px;
-  width: 130px;
-}
-
-.status-terminated {
-  background-color: #e0e0e0;
-  color: #5f5f5f;
-  border: 2px solid #b0b0b0;
-  padding: 3px 30px;
-  width: 130px;
-}
-.status-badge {
-  height: 32px;
-  line-height: 28px;
-  padding: 0 12px;
-  border-radius: 999px;
-  text-align: center;
-  display: inline-block;
-  font-size: 15px;
-}
-</style>
 
 <template>
   <q-page class="q-pa-md">
@@ -235,3 +192,54 @@ const saveStudents = () => {
     </section>
   </q-page>
 </template>
+
+<style scoped>
+.status-complete {
+  background-color: #cfd7ff;
+  color: #001780;
+  border: 2px solid #002dff;
+  padding: 3px 30px;
+  width: 130px;
+}
+
+.status-high {
+  background-color: #d0ffc5;
+  color: #009812;
+  border: 2px solid #00bb16;
+  padding: 3px 30px;
+  width: 130px;
+}
+
+.status-medium {
+  background-color: #ffe7ba;
+  color: #ff6f00;
+  border: 2px solid #ffa500;
+  padding: 3px 30px;
+  width: 130px;
+}
+
+.status-low {
+  background-color: #ffc5c5;
+  color: #ff0000;
+  border: 2px solid #f32323;
+  padding: 3px 30px;
+  width: 130px;
+}
+
+.status-terminated {
+  background-color: #e0e0e0;
+  color: #5f5f5f;
+  border: 2px solid #b0b0b0;
+  padding: 3px 30px;
+  width: 130px;
+}
+.status-badge {
+  height: 32px;
+  line-height: 28px;
+  padding: 0 12px;
+  border-radius: 999px;
+  text-align: center;
+  display: inline-block;
+  font-size: 15px;
+}
+</style>
