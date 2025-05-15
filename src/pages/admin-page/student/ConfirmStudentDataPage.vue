@@ -116,19 +116,24 @@ const saveStudents = () => {
           v-model="selectedYear"
           :options="yearOptions"
           label="รหัสปีนิสิต"
-          style="width: 150px; margin-right: 40px"
+          option-label="label"
+          option-value="value"
+          emit-value
+          map-options
+          class="q-mr-sm dropdown"
         />
 
-        <div class="col-auto text-right q-pr-md">
-          <p class="q-my-none">สาขาที่ต้องการจัดเก็บ :</p>
-        </div>
         <q-select
           dense
           outlined
           v-model="selectedMajors"
           :options="majorOptions"
           label="สาขาที่ต้องการจัดเก็บ"
-          style="width: 250px; margin-right: 40px"
+          option-label="label"
+          option-value="value"
+          emit-value
+          map-options
+          class="q-mr-sm dropdown"
         />
 
         <q-btn color="primary" label="ยืนยัน" style="margin-left: 20px" @click="confirmSelection" />
@@ -241,5 +246,112 @@ const saveStudents = () => {
   text-align: center;
   display: inline-block;
   font-size: 15px;
+}
+.dropdown {
+  min-width: 200px;
+}
+</style>
+
+<style lang="scss" scoped>
+.student-container {
+  background-color: #edf0f5;
+  height: 680px;
+  width: 100%;
+}
+
+// .student-table-wrapper {
+//   display: flex;
+//   width: 100%;
+//   max-width: 100%;
+//   display: flex;
+//   flex-direction: column;
+// }
+
+// .my-sticky-header-table {
+//   min-height: 450px;
+//   overflow: auto;
+// }
+
+.q-table table {
+  table-layout: fixed;
+}
+
+.my-sticky-header-table thead th {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  background-color: #f5f5f5;
+}
+
+.new-sticky-header {
+  .my-sticky-header-table {
+    /* Fix header */
+    thead tr:first-child th {
+      background-color: #f5f5f5;
+    }
+
+    /* Make tbody scrollable */
+    tbody {
+      display: block;
+      overflow-y: auto;
+    }
+
+    /* Ensure header and body columns align */
+    thead,
+    tbody tr {
+      display: table;
+      width: 100%;
+      table-layout: fixed;
+    }
+
+    /* Optional: ปรับ scrollbar ไม่ทับ */
+    tbody::-webkit-scrollbar {
+      width: 12px;
+    }
+
+    tbody::-webkit-scrollbar-thumb {
+      background: #a7a7a7;
+      border-radius: 10px;
+      cursor: pointer;
+    }
+  }
+}
+
+.ellipsis-cell {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.status-complete {
+  background-color: #cfd7ff;
+  color: #001780;
+  border: 2px solid #002dff;
+  padding: 3px 30px;
+  width: 130px;
+}
+
+.status-medium {
+  background-color: #ffe7ba;
+  color: #ff6f00;
+  border: 2px solid #ffa500;
+  padding: 3px 30px;
+  width: 130px;
+}
+
+.status-low {
+  background-color: #ffc5c5;
+  color: #ff0000;
+  border: 2px solid #f32323;
+  padding: 3px 30px;
+  width: 130px;
+}
+
+.status-out {
+  background-color: #dadada;
+  color: #000000;
+  border: 2px solid #575656;
+  padding: 3px 30px;
+  width: 130px;
 }
 </style>
