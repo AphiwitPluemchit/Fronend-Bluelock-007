@@ -230,7 +230,7 @@ watch(() => props.endTime, (newVal) => {
     <div class="time-row">
       <div class="time-inputs">
         <!-- Start Time -->
-        <q-input outlined :model-value="localStartTime" class="time-box" :disable="disable" input-mode="numeric"
+        <q-input outlined :model-value="localStartTime" class="input-container" :disable="disable" input-mode="numeric"
           @keypress="(e: KeyboardEvent) => onTimeKeypressLimit(e, 'start')" @update:model-value="onTimeTyping">
 
           <template v-slot:prepend>
@@ -264,7 +264,7 @@ watch(() => props.endTime, (newVal) => {
         <p class="time-separator">ถึง</p>
 
         <!-- End Time -->
-        <q-input outlined :model-value="localEndTime" class="time-box" :disable="disable" input-mode="numeric"
+        <q-input outlined :model-value="localEndTime" class="input-container " :disable="disable" input-mode="numeric"
           @keypress="(e: KeyboardEvent) => onTimeKeypressLimit(e, 'end')" @update:model-value="onTimeTypingEnd">
 
           <template v-slot:prepend>
@@ -333,14 +333,9 @@ watch(() => props.endTime, (newVal) => {
   gap: 15px;
 }
 
-.time-inputs {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
-.time-box {
-  width: 220px !important;
+.input-container {
+  width: 220px;
+  max-width: 100%;
 }
 
 .time-picker-card {
@@ -394,10 +389,6 @@ watch(() => props.endTime, (newVal) => {
   gap: 10px;
 }
 
-.time-box {
-  width: 200px;
-}
-
 ::v-deep(.q-field__control) {
   height: 40px !important;
   align-items: center;
@@ -422,4 +413,30 @@ watch(() => props.endTime, (newVal) => {
 ::v-deep(input[type='number']) {
   -moz-appearance: textfield;
 }
+
+@media (max-width: 500px) {
+  .input-group {
+    flex-direction: column;
+    align-items: flex-start;
+     margin-bottom: 10px !important;
+    gap: 5px !important; 
+  }
+
+   .label {
+    justify-content: flex-start; 
+  }
+
+  .label_minWidth {
+    min-width: unset;
+    width: 100%;
+    text-align: left;
+    padding-left: 0;
+    margin-left: 0;
+  }
+  .input-container {
+  width: 100%;
+  max-width: 100%;
+}
+}
+
 </style>

@@ -519,17 +519,16 @@ const resetFormToOriginal = () => {
       style="margin-top: 15px"
     >
       <!-- Remove Icon -->
-      <div
-        class="remove-icon"
-        :class="{ 'icon-disabled': !isEditing }"
-        @click="isEditing && removeSubActivity(index)"
-      >
-        <q-icon
-          name="close"
-          size="35px"
-          :color="isEditing ? 'red' : 'grey-5'"
-          class="cursor-pointer"
-        />
+      <div class="input-group">
+        <div class="input-container" style="display: flex; justify-content: flex-end">
+          <q-icon
+            name="close"
+            size="35px"
+            color="red"
+            class="cursor-pointer"
+            @click="removeSubActivity(index)"
+          />
+        </div>
       </div>
 
       <!-- SubActivity Name -->
@@ -609,7 +608,12 @@ const resetFormToOriginal = () => {
       <!-- Lecturer -->
       <div class="input-group">
         <p class="label label_minWidth">วิทยากร :</p>
-        <q-input outlined v-model="subActivity.lecturer" class="input-max-600"  :disable="!isEditing"/>
+        <q-input
+          outlined
+          v-model="subActivity.lecturer"
+          class="input-max-600"
+          :disable="!isEditing"
+        />
       </div>
 
       <!-- Detail Activity -->

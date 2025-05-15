@@ -89,15 +89,11 @@ const generateDaysInRange = (selectedDates: string[], subActivityIndex: number) 
 
 // ใช้กับปุ่มเวลาเดิมทุกวัน
 const applySameTime = (subActivityIndex: number) => {
-  console.log('🔁 applySameTime ถูกเรียก')
-
   const sub = subActivities.value[subActivityIndex]
   if (!sub) return
 
   const firstDay = sub.selectedDays[0]
   if (!firstDay) return
-
-  console.log('📌 เวลาต้นแบบ:', firstDay.startTime, firstDay.endTime)
 
   for (let i = 1; i < sub.selectedDays.length; i++) {
     const day = sub.selectedDays[i]
@@ -110,8 +106,6 @@ const applySameTime = (subActivityIndex: number) => {
     day.endTime = firstDay.endTime
     day.endHour = firstDay.endHour
     day.endMinute = firstDay.endMinute
-
-    console.log(`✅ sync ไปยังวันที่ ${i + 1}:`, day.startTime, day.endTime)
   }
 }
 const delay = (ms = 0) => new Promise((resolve) => setTimeout(resolve, ms))
@@ -309,36 +303,30 @@ onMounted(() => {
 <template>
   <q-page class="q-pa-md">
     <!-- Status -->
-    <div class="input-group">
-      <p class="label label_minWidth">สถานะ:</p>
-      <q-badge class="status-btn"> กำลังวางแผน </q-badge>
-    </div>
-
-    <!-- Activity Name -->
-  <div class="input-group">
-  <p
-    class="label label_minWidth"
-    :class="{ 'label-error-shift': activityNameError !== '' }"
-  >
-    ชื่อกิจกรรมหลัก :
-  </p>
-  <div class="input-container">
-    <q-input
-      ref="activityNameInput"
-      outlined
-      v-model="activityName"
-      class="input-max-600 fix-q-input-height"
-      :error="activityNameError !== ''"
-      hide-bottom
-    />
-    <div v-if="activityNameError" class="text-negative text-subtitle2 q-mt-xs">
-      {{ activityNameError }}
-    </div>
-  </div>
+    <div class="input-group no-wrap">
+  <p class="label label_minWidth">สถานะ:</p>
+  <q-badge class="status-btn">กำลังวางแผน</q-badge>
 </div>
 
-
-
+    <!-- Activity Name -->
+    <div class="input-group">
+      <p class="label label_minWidth" :class="{ 'label-error-shift': activityNameError !== '' }">
+        ชื่อกิจกรรมหลัก :
+      </p>
+      <div class="input-container">
+        <q-input
+          ref="activityNameInput"
+          outlined
+          v-model="activityName"
+          class="fix-q-input-height"
+          :error="activityNameError !== ''"
+          hide-bottom
+        />
+        <div v-if="activityNameError" class="text-negative text-subtitle2 q-mt-xs">
+          {{ activityNameError }}
+        </div>
+      </div>
+    </div>
 
     <ActivityForm_Type v-model="activityType" class="input-group" />
     <ActivityForm_CloseRegisDate v-model="CloseRegisDates" class="input-group" />
@@ -347,7 +335,7 @@ onMounted(() => {
     <!-- Sub Activities List -->
     <div v-for="(subActivity, index) in subActivities" :key="index" class="sub-activity">
       <!-- Cancel (X) Icon -->
-      <div class="remove-icon">
+      <div class="remove-icon" style="display: flex; justify-content: flex-end">
         <q-icon
           name="close"
           size="35px"
@@ -360,7 +348,7 @@ onMounted(() => {
       <!-- SubActivity Name -->
       <div class="input-group">
         <p class="label label_minWidth">ชื่อกิจกรรม :</p>
-        <q-input outlined v-model="subActivity.subActivityName" class="input-max-600" />
+        <q-input outlined v-model="subActivity.subActivityName" class="input-container" />
       </div>
 
       <!-- Date -->
@@ -372,8 +360,8 @@ onMounted(() => {
       <!-- Time -->
       <div class="input-group">
         <p class="label label_minWidth" style="align-self: flex-start">เวลาที่จัดกิจกรรม :</p>
-        <div class="day-time-container">
-          <q-checkbox class="checkbox-left" v-model="sameTimeForAll" label="เวลาเดิมทุกวัน" />
+        <div >
+          <q-checkbox v-model="sameTimeForAll" label="เวลาเดิมทุกวัน"  class="tight-checkbox" />
 
           <div v-if="subActivity.selectedDays.length > 0">
             <div v-for="(day, dIndex) in subActivity.selectedDays" :key="day.date">
@@ -405,7 +393,7 @@ onMounted(() => {
 
       <div class="input-group">
         <p class="label label_minWidth">วิทยากร :</p>
-        <q-input outlined v-model="subActivity.lecturer" class="input-max-600" />
+        <q-input outlined v-model="subActivity.lecturer" class="input-container" />
       </div>
 
       <div class="input-group">
@@ -415,7 +403,7 @@ onMounted(() => {
           rows="10"
           outlined
           v-model="subActivity.detailActivity"
-          class="input-max-600"
+          class="input-container"
         />
       </div>
     </div>
@@ -435,9 +423,6 @@ onMounted(() => {
 </template>
 
 <style scoped>
-.input-max-600 {
-  width: 600px;
-}
 
 ::v-deep(.q-field__control) {
   height: auto;
@@ -460,29 +445,38 @@ onMounted(() => {
 }
 
 .fix-q-input-height ::v-deep(.q-field__append) {
-  align-items: center; 
+  align-items: center;
   display: flex;
 }
-
-
+.tight-checkbox ::v-deep(.q-checkbox__label) {
+  margin-left: 4px !important; /* ลดจากค่าปกติ 8px หรือมากกว่า */
+}
 .responsive-input {
   width: 100%;
   max-width: 600px;
+}
+.remove-icon {
+  display: flex;
+  justify-content: flex-end;
+  width: 600px;
+  margin-left: auto; /* ดันขวา */
 }
 
 .input-group p {
   margin: 0;
   line-height: normal;
   text-align: left;
- 
 }
 .label-error-shift {
   transform: translateY(-12px);
 }
-
+.no-wrap {
+  flex-wrap: nowrap !important;
+  white-space: nowrap;
+}
 .input-group {
   display: flex;
-  align-items: center;  /* ✅ ทำให้ label กับ input อยู่กลางแนวเดียวกัน */
+  align-items: center;
   gap: 25px;
   margin-bottom: 20px;
   width: 100%;
@@ -499,11 +493,13 @@ onMounted(() => {
   margin: 0;
 }
 
-
 .label_minWidth {
   min-width: 200px;
 }
-
+.input-container {
+  width: 600px;
+  max-width: 100%;
+}
 .btnAddActivity {
   background-color: #ffffff;
   border-radius: 20px;
@@ -513,7 +509,6 @@ onMounted(() => {
   display: flex;
   align-items: center;
 }
-
 .status-btn {
   color: #ff6f00;
   background-color: #ffe7ba;
@@ -528,13 +523,6 @@ onMounted(() => {
   justify-content: center;
   text-align: center;
 }
-
-.remove-icon {
-  display: flex;
-  justify-content: flex-end;
-  margin-bottom: 20px;
-}
-
 .btn-container {
   display: flex;
   align-items: center;
@@ -542,32 +530,68 @@ onMounted(() => {
   gap: 20px;
   margin-left: 200px;
 }
-
 .button-group {
   display: flex;
   justify-content: flex-end;
   gap: 25px;
-  margin-top: 30px;
+  width: 600px;
+  margin-left: auto;
 }
-
-.large-font {
-  font-size: 100px;
-}
-
-/* Responsive behavior when screen ≤ 830px */
-@media (max-width: 900px) {
-  .input-group {
+@media (max-width: 500px) {
+   .input-group:not(.no-wrap) {
     flex-direction: column;
     align-items: flex-start;
+    margin-bottom: 10px !important;
+    gap: 5px !important;
   }
-
+  .label {
+    justify-content: flex-start;
+  }
+  .label-error-shift {
+    transform: translateY(0px);
+  }
   .label_minWidth {
     min-width: unset;
     width: 100%;
+    text-align: left;
+    padding-left: 0;
+    margin-left: 0;
+  }
+  
+  .btn-container {
+    justify-content: center !important;
+    margin-left: 0 !important;
+    width: 100%;
+  }
+  .button-group {
+    flex-direction: column;
+    justify-content: center;
+    align-items: stretch;
+    width: 100%;
+    gap: 10px;
+    margin-top: 40px;
   }
 
-  .input-max-600 {
+  .button-group .btnreject,
+  .button-group .btnsecces {
     width: 100%;
+  }
+  .remove-icon {
+    display: flex;
+    justify-content: flex-end;
+    width: 100%;
+    margin-left: auto;
+    margin-top: 20px;
+    padding-right: 5px;
+  }
+  .remove-icon > .q-icon {
+    font-size: 30px;
+  }
+ 
+   .no-wrap .label_minWidth {
+    min-width: unset !important;
+    width: auto !important;
+    flex-shrink: 0;
   }
 }
 </style>

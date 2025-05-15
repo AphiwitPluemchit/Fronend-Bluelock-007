@@ -29,17 +29,20 @@ const toggleYear = (value: string) => {
 <template>
   <div class="input-group">
     <p class="label label_minWidth">ชั้นปี :</p>
-    <q-btn
-      v-for="option in yearOptions"
-      :key="option.value"
-      :class="{ 'active-btn': modelValue.includes(option.value) }"
-      @click="toggleYear(option.value)"
-      :label="option.label"
-      class="year-btn"
-      :disable="disable" 
-    />
+    <div class="year-btn-group">
+      <q-btn
+        v-for="option in yearOptions"
+        :key="option.value"
+        :class="{ 'active-btn': modelValue.includes(option.value) }"
+        @click="toggleYear(option.value)"
+        :label="option.label"
+        class="year-btn"
+        :disable="disable"
+      />
+    </div>
   </div>
 </template>
+
 
 <style scoped>
 .year-btn {
@@ -48,7 +51,6 @@ const toggleYear = (value: string) => {
   border-radius: 50px;
   box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.2);
   background-color: #ffffff;
-  margin-right: 10px;
 }
 .year-btn:last-child {
   margin-right: 0;
@@ -67,10 +69,56 @@ const toggleYear = (value: string) => {
 .label_minWidth {
   min-width: 200px;
 }
+.year-btn-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 25px;
+}
+
 .input-group p {
   align-self: center;
   margin: 0;
   line-height: normal;
   text-align: right;
 }
+@media (max-width: 500px) {
+  .input-group {
+    flex-direction: column;
+    align-items: flex-start;
+    margin-bottom: 10px !important;
+    gap: 5px !important; 
+  }
+
+   .label {
+    justify-content: flex-start; 
+  }
+
+  .label_minWidth {
+    min-width: unset;
+    width: 100%;
+    text-align: left;
+    padding-left: 0;
+    margin-left: 0;
+  }
+  .input-container {
+    width: 100%;
+    max-width: 100%;
+  }
+  .year-btn-group {
+    gap: 10px;
+}
+}
+@media (max-width: 445px) {
+  .year-btn-group {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px 20px;
+    width: 100%;
+  }
+  .year-btn {
+    width: 100%;
+  }
+}
+
+
 </style>

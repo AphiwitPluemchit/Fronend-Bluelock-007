@@ -9,7 +9,7 @@
     <!-- ตาราง 1 -->
     <section class="q-mt-lg">
       <div class="row justify-between items-center">
-        <div class="text-h6">กิจกรรมที่กำลังเปิดและปิดลงทะเบียนแล้ว</div>
+        <div class="text-h6">กิจกรรมที่กำลังเปิดและปิดลงทะเบียน</div>
         <div class="row">
           <q-input
             dense
@@ -18,7 +18,7 @@
             label="ค้นหา ชื่อกิจกรรม"
             @keyup.enter="data1"
             class="q-mr-sm searchbox"
-            :style="{ boxShadow: 'none' }"
+            :style="{ border: 'none' }"
           >
             <template v-slot:append>
               <q-icon name="search" />
@@ -226,7 +226,7 @@
     <!-- ตาราง 3 -->
     <section class="q-mt-lg">
       <div class="row justify-between items-center">
-        <div class="text-h6">อื่น ๆ</div>
+        <div class="text-h6">กิจกรรมที่เสร็จสิ้น</div>
         <div class="row">
           <q-input
             dense
@@ -329,19 +329,126 @@
         </template></q-table
       >
     </section>
+
+    <!-- ตางราง 4 -->  
+     <section class="q-mt-lg">
+      <div class="row justify-between items-center">
+        <div class="text-h6">กิจกรรมที่ถูกยกเลิก</div>
+        <div class="row">
+          <q-input
+            dense
+            outlined
+            v-model="query4.search"
+            label="ค้นหา ชื่อกิจกรรม"
+            @keyup.enter="data4"
+            class="q-mr-sm searchbox"
+            :style="{ boxShadow: 'none' }"
+          >
+            <template v-slot:append>
+              <q-icon name="search" />
+            </template>
+          </q-input>
+          <FilterDialog
+            :model-value="showFilterDialog4"
+            :categories="filterCategories"
+            :years="query4.studentYear"
+            :majors="query4.major"
+            :status-activities="query4.activityState"
+            :category-activities="query4.skill"
+            @apply="applyFilters4"
+          />
+        </div>
+      </div>
+      <q-table
+        bordered
+        flat
+        :rows="mapActivitiesToTableRows(activitys4)"
+        :columns="columns"
+        v-model:pagination="pagination4"
+        :rows-per-page-options="[5, 7, 10, 15, 20]"
+      
+        row-key="id"
+        class="q-mt-md my-sticky-header-table"
+      >
+        <!-- หัวตาราง Sticky -->
+        <template v-slot:header="props">
+          <q-tr :props="props">
+            <q-th
+              v-for="col in props.cols"
+              :key="col.name"
+              :props="props"
+              :style="
+                col.name === 'no'
+                  ? 'width: 5%'
+                  : '' + col.name === 'name'
+                    ? 'width: 32%'
+                    : '' + col.name === 'dates'
+                      ? 'width: 10%'
+                      : '' + col.name === 'time'
+                        ? 'width: 10%'
+                        : '' + col.name === 'location'
+                          ? 'width: 6%'
+                          : '' + col.name === 'participants'
+                            ? 'width: 12%'
+                            : '' + col.name === 'skill'
+                              ? 'width: 10%'
+                              : '' + col.name === 'activityState'
+                                ? 'width: 10%'
+                                : '' + col.name === 'action'
+                                  ? 'width: 5%'
+                                  : ''
+              "
+            >
+              {{ col.label }}
+            </q-th>
+          </q-tr>
+        </template>
+        <!-- เนื้อหาตาราง -->
+        <template v-slot:body="props">
+          <q-tr :props="props">
+            <q-td key="no" style="width: 5%">{{ props.rowIndex + 1 }}</q-td>
+            <q-td key="name" style="width: 32%; overflow: hidden; text-overflow: ellipsis">{{
+              props.row.name
+            }}</q-td>
+            <q-td key="dates" style="width: 10%">{{ props.row.dates }}</q-td>
+            <q-td key="time" style="width: 10%">{{ props.row.time }}</q-td>
+            <q-td key="location" style="width: 6%">{{ props.row.location }}</q-td>
+            <q-td key="participants" style="width: 12%; text-align: center">{{
+              props.row.participants
+            }}</q-td>
+            <q-td key="skill" style="width: 10%">{{ props.row.skill }}</q-td>
+            <q-td key="activityState" style="width: 10%;">
+              <q-badge
+                :label="props.row.activityState"
+                :class="getStatusClass(props.row.activityState)"
+                class="status-badge"
+                unelevated
+            /></q-td>
+            <q-td class="q-gutter-x-sm" key="action" style="width: 8%">
+              <q-icon clickable name="visibility" @click="goToPageDetail(props.row.id, true)">
+                <q-tooltip>ดูรายละเอียด</q-tooltip>
+                  </q-icon>
+                  <q-icon clickable name="edit"  @click="goToPageDetail(props.row.id, false)">
+                    <q-tooltip>แก้ไข</q-tooltip>
+                  </q-icon>
+            </q-td>
+          </q-tr>
+        </template></q-table
+      >
+    </section>
   </q-page>
 </template>
 
 <script setup lang="ts">
-import { nextTick, onMounted, ref } from 'vue'
-import { useRouter } from 'vue-router'
-import FilterDialog from 'src/components/Dialog/FilterDialog.vue'
-import type { Activity, ActivityItem } from 'src/types/activity'
-import dayjs from 'dayjs'
 import 'dayjs/locale/th'
+import dayjs from 'dayjs'
+import { useRouter } from 'vue-router'
+import { nextTick, onMounted, ref } from 'vue'
 import buddhistEra from 'dayjs/plugin/buddhistEra'
-import type { ActivityPagination } from 'src/types/pagination'
 import { ActivityService } from 'src/services/activity'
+import type { ActivityPagination } from 'src/types/pagination'
+import type { Activity, ActivityItem } from 'src/types/activity'
+import FilterDialog from 'src/components/Dialog/FilterDialog.vue'
 
 dayjs.locale('th')
 dayjs.extend(buddhistEra)
@@ -361,7 +468,6 @@ const goToPageDetail = async (id: string, disable: boolean) => {
     },
   })
 }
-
 const getStatusClass = (status: string) => {
   if (status === 'กำลังวางแผน') return 'status-planning'
   if (status === 'เปิดลงทะเบียน') return 'status-open'
@@ -375,6 +481,7 @@ const showFilterDialog1 = ref(false)
 const filterCategories = ref(['year', 'major', 'statusActivity', 'categoryActivity'])
 const showFilterDialog2 = ref(false)
 const showFilterDialog3 = ref(false)
+const showFilterDialog4 = ref(false)
 
 interface SelectedFilters {
   year: string[]
@@ -419,6 +526,18 @@ const data3 = async () => {
   activitys3.value = data.data
 }
 
+const data4 = async () => {
+  const data = await getActivityData(query4.value)
+  pagination4.value.page = query4.value.page
+  pagination4.value.rowsPerPage = query4.value.limit
+  pagination4.value.sortBy = query4.value.sortBy
+  pagination4.value.rowsNumber = data.meta.total
+  pagination4.value.descending = query4.value.order === 'desc'
+
+  activitys4.value = data.data
+}
+
+
 const applyFilters1 = async (selectedFilters: SelectedFilters) => {
   query1.value.studentYear = selectedFilters.year.map(Number)
   query1.value.major = selectedFilters.major
@@ -441,6 +560,14 @@ const applyFilters3 = async (selectedFilters: SelectedFilters) => {
   query3.value.activityState = selectedFilters.statusActivity
   query3.value.skill = selectedFilters.categoryActivity
   await data3()
+}
+
+const applyFilters4 = async (selectedFilters: SelectedFilters) => {
+  query4.value.studentYear = selectedFilters.year.map(Number)
+  query4.value.major = selectedFilters.major
+  query4.value.activityState = selectedFilters.statusActivity
+  query4.value.skill = selectedFilters.categoryActivity
+  await data4()
 }
 
 // กำหนดโครงสร้างของคอลัมน์ในตาราง
@@ -504,6 +631,7 @@ const columns = [
 const activitys1 = ref<Activity[]>([]) // Open and Close Enrollment Table
 const activitys2 = ref<Activity[]>([]) // Planning Table
 const activitys3 = ref<Activity[]>([]) // Success Table
+const activitys4 = ref<Activity[]>([]) // Cancel Table
 
 const query1 = ref<ActivityPagination>({
   page: 1,
@@ -535,7 +663,18 @@ const query3 = ref<ActivityPagination>({
   sortBy: 'dates',
   order: 'desc',
   skill: [],
-  activityState: ['success', 'cancel'],
+  activityState: ['success'],
+  major: [],
+  studentYear: [],
+})
+const query4 = ref<ActivityPagination>({
+  page: 1,
+  limit: 5,
+  search: '',
+  sortBy: 'dates',
+  order: 'desc',
+  skill: [],
+  activityState: ['cancel'],
   major: [],
   studentYear: [],
 })
@@ -545,6 +684,7 @@ async function getActivities() {
   await data1()
   await data2()
   await data3()
+  await data4()
 }
 
 onMounted(async () => {
@@ -552,7 +692,8 @@ onMounted(async () => {
     if (
       activitys1.value.length === 0 ||
       activitys2.value.length === 0 ||
-      activitys3.value.length === 0
+      activitys3.value.length === 0 ||
+      activitys4.value.length === 0
     )
       await getActivities()
   })
@@ -644,6 +785,14 @@ const pagination3 = ref({
   rowsPerPage: query3.value.limit,
   rowsNumber: 0,
 })
+const pagination4 = ref({
+  sortBy: query4.value.sortBy,
+  descending: query4.value.order === 'desc',
+  page: query4.value.page,
+  rowsPerPage: query4.value.limit,
+  rowsNumber: 0,
+})
+
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 async function onRequest1(props: any) {
@@ -677,6 +826,15 @@ async function onRequest3(props: any) {
 
   await data3()
 }
+// async function onRequest4(props: any) {
+//   const { page, rowsPerPage, sortBy, descending } = props.pagination
+//   query4.value.page = page
+//   query4.value.limit = rowsPerPage
+//   query4.value.sortBy = sortBy
+//   query4.value.order = descending ? 'desc' : 'asc'
+
+//   await data4()
+// }
 </script>
 
 <style lang="scss">

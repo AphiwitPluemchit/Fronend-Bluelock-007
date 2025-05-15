@@ -76,72 +76,27 @@ defineExpose({ selectedFile })
   color: #f03b2d;
   font-weight: bold;
   font-family: 'Noto Serif Thai', serif;
-  align-self: flex-start;
+  text-align: left;
+  width: 100%;
+  max-width: 430px;
 }
-@media (max-width: 490px) {
+
+@media (max-width: 500px) {
 .upload-box {
   width: 330px;
   height: 230px;
-  border-radius: 10px;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  background-color: #e2e2e2;
-  cursor: pointer;
-  transition: border-color 0.3s;
 }
-
-.preview-img {
-  width: 100%;
-  height: 100%;
-  border-radius: 8px;
-}
-
 .image-size-text {
-  margin-top: 10px;
-  font-size: 14px;
-  color: #f03b2d;
-  font-weight: bold;
-  font-family: 'Noto Serif Thai', serif;
-  align-self: flex-start;
+    max-width: 330px;
+  }
 }
-
-.upload-container {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}}
-@media (max-width: 350px) {
+@media (max-width: 400px) {
 .upload-box {
   width: 300px;
   height: 200px;
-  border-radius: 10px;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  background-color: #e2e2e2;
-  cursor: pointer;
-  transition: border-color 0.3s;
 }
-
-.preview-img {
-  width: 100%;
-  height: 100%;
-  border-radius: 8px;
-}
-
 .image-size-text {
-  margin-top: 10px;
-  font-size: 14px;
-  color: #f03b2d;
-  font-weight: bold;
-  font-family: 'Noto Serif Thai', serif;
-  align-self: flex-start;
+    max-width: 300px;
 }
-
-.upload-container {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}}
+}
 </style>

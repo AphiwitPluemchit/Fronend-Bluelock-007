@@ -26,7 +26,7 @@ const isNumber = (event: KeyboardEvent) => {
 <template>
   <div class="input-group">
     <p class="label label_minWidth">จำนวนที่รับ :</p>
-    <q-input outlined style="width: 220px" v-model="localSeats" type="number" @keypress="isNumber($event)"
+    <q-input outlined class="input-container" v-model="localSeats" type="number" @keypress="isNumber($event)"
       :disable="disable"
       />
 
@@ -46,7 +46,10 @@ const isNumber = (event: KeyboardEvent) => {
 .label_minWidth {
   min-width: 200px;
 }
-
+.input-container {
+    max-width: 220px;
+    width: 100%;
+  }
 .input-group p {
   align-self: center;
   margin: 0;
@@ -62,4 +65,33 @@ const isNumber = (event: KeyboardEvent) => {
 ::v-deep(input[type='number']) {
   -moz-appearance: textfield;
 }
+
+@media (max-width: 500px) {
+  .input-group {
+    flex-direction: column;
+    align-items: flex-start;
+    margin-bottom: 10px !important;
+    gap: 5px !important; 
+  }
+
+   .label {
+    justify-content: flex-start; 
+  }
+
+  .label_minWidth {
+    min-width: unset;
+    width: 100%;
+    text-align: left;
+    padding-left: 0;
+    margin-left: 0;
+    
+  }
+   .input-container {
+    max-width: 100%;
+    width: 100%;
+  }
+}
+
+ 
+
 </style>

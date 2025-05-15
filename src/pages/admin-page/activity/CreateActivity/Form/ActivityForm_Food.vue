@@ -25,10 +25,10 @@ watch(
   (newVal) => {
     if (newVal) {
       selectedFoods.value = [...newVal]
-      foodMenuDisplay.value = newVal.map(f => f.name).join(', ')
+      foodMenuDisplay.value = newVal.map((f) => f.name).join(', ')
     }
   },
-  { immediate: true }
+  { immediate: true },
 )
 const openFoodDialog = () => {
   if (!props.disable) {
@@ -39,7 +39,7 @@ const toggleSelection = (name: string) => {
   if (props.disable) return
 
   const id = menuItemsIdMap.value[name] || ''
-  const index = selectedFoods.value.findIndex(f => f.name === name)
+  const index = selectedFoods.value.findIndex((f) => f.name === name)
 
   if (index >= 0) {
     selectedFoods.value.splice(index, 1)
@@ -50,14 +50,13 @@ const toggleSelection = (name: string) => {
 const confirmSelection = async (saveToBackend: boolean = false) => {
   if (props.disable) return
 
-  foodMenuDisplay.value = selectedFoods.value.map(f => f.name).join(', ')
+  foodMenuDisplay.value = selectedFoods.value.map((f) => f.name).join(', ')
   emit('update:foodMenu', selectedFoods.value)
   emit('update:foodMenuDisplay', foodMenuDisplay.value)
 
   if (saveToBackend) {
     try {
       await FoodService.createAll(menuItems.value.map((name) => ({ id: '', name })))
-      console.log('✅ บันทึกเมนูไปยัง backend แล้ว')
     } catch (error) {
       console.error('❌ บันทึกข้อมูลไม่สำเร็จ:', error)
     }
@@ -82,7 +81,7 @@ const addFood = () => {
   const newName = newFoodName.value.trim()
 
   const isDuplicate = menuItems.value.some(
-    existing => existing.toLowerCase() === newName.toLowerCase()
+    (existing) => existing.toLowerCase() === newName.toLowerCase(),
   )
 
   if (newName !== '' && !isDuplicate) {
@@ -95,10 +94,10 @@ const addFood = () => {
 }
 const removeMenuItem = (name: string) => {
   if (props.disable) return
-  menuItems.value = menuItems.value.filter(item => item !== name)
+  menuItems.value = menuItems.value.filter((item) => item !== name)
 
   // หากลบเมนูที่ถูกเลือกอยู่ด้วย ให้ลบจาก selectedFoods ด้วย
-  selectedFoods.value = selectedFoods.value.filter(f => f.name !== name)
+  selectedFoods.value = selectedFoods.value.filter((f) => f.name !== name)
 
   // อัปเดตใน localStorage ด้วย
   localStorage.setItem('menuItems', JSON.stringify(menuItems.value))
@@ -121,54 +120,94 @@ onMounted(async () => {
 </script>
 
 <template>
-  <div>
-    <!-- Food Menu Input -->
-    <div class="input-group">
-      <p class="label label_minWidth">รายการอาหาร :</p>
-      <q-input outlined v-model="foodMenuDisplay" class="food-input" :disable="disable" readonly>
+  <!-- Food Menu Input -->
+  <div class="input-group">
+    <p class="label label_minWidth">รายการอาหาร :</p>
+    <div class="input-container">
+      <q-input outlined v-model="foodMenuDisplay" :disable="disable" readonly>
         <template v-slot:prepend>
-          <q-icon name="restaurant_menu" style="color: black" class="cursor-pointer" @click="openFoodDialog"
-            :class="{ 'disabled-icon': disable }" />
+          <q-icon
+            name="restaurant_menu"
+            style="color: black"
+            class="cursor-pointer"
+            @click="openFoodDialog"
+            :class="{ 'disabled-icon': disable }"
+          />
         </template>
       </q-input>
     </div>
+  </div>
 
-    <!-- Food Selection Dialog -->
-    <q-dialog v-model="showFoodDialog" persistent>
-      <div class="q-pa-md food-dialog">
-        <h3 class="label" style="justify-content: flex-start; margin-left: 20px">
-          เมนูอาหาร
-        </h3>
+  <!-- Food Selection Dialog -->
+  <q-dialog v-model="showFoodDialog" persistent>
+    <div class="q-pa-md food-dialog">
+      <h3 class="label" style="justify-content: flex-start; margin-left: 20px">เมนูอาหาร</h3>
 
-        <div class="food-container" style="margin-left: 20px">
-          <div class="food-list">
-            <q-btn v-for="(item, index) in menuItems" :key="index" rounded outlined unelevated flat class="FoodChip"
-              :class="{ 'active-btn': selectedFoods.some(f => f.name === item) }" color="white" text-color="black"
-              :label="item" @click="toggleSelection(item)" :disable="disable">
-              <template v-slot:default>
+      <div class="food-container" style="margin-left: 20px">
+        <div class="food-list">
+          <q-btn
+            v-for="(item, index) in menuItems"
+            :key="index"
+            rounded
+            outlined
+            unelevated
+            flat
+            class="FoodChip"
+            :class="{ 'active-btn': selectedFoods.some((f) => f.name === item) }"
+            color="white"
+            text-color="black"
+            :label="item"
+            @click="toggleSelection(item)"
+            :disable="disable"
+          >
+            <template v-slot:default>
+              <q-icon
+                name="close"
+                class="delete-icon"
+                @click.stop="removeMenuItem(item)"
+                v-if="!disable"
+              />
+            </template>
+          </q-btn>
 
-                <q-icon name="close" class="delete-icon" @click.stop="removeMenuItem(item)" v-if="!disable" />
-              </template>
-            </q-btn>
-
-
-            <!-- ปุ่มเพิ่มเมนู -->
-            <q-btn v-if="!disable" ref="editableBtn" rounded outlined unelevated flat class="FoodChip add-food-btn"
-              color="grey-4" text-color="black" @click="startEditing">
-              <span v-if="!addingNewFood">+</span>
-              <input v-else v-model="newFoodName" type="text" class="editable-input" @blur="addFood"
-                @keyup.enter="addFood" ref="inputField" />
-            </q-btn>
-          </div>
-        </div>
-
-        <div class="button-container">
-          <q-btn class="btnreject" label="ยกเลิก" @click="cancelSelection" :disable="disable" />
-          <q-btn class="btnconfirm" label="ยืนยัน" @click="confirmSelection(true)" :disable="disable" />
+          <!-- ปุ่มเพิ่มเมนู -->
+          <q-btn
+            v-if="!disable"
+            ref="editableBtn"
+            rounded
+            outlined
+            unelevated
+            flat
+            class="FoodChip add-food-btn"
+            color="grey-4"
+            text-color="black"
+            @click="startEditing"
+          >
+            <span v-if="!addingNewFood">+</span>
+            <input
+              v-else
+              v-model="newFoodName"
+              type="text"
+              class="editable-input"
+              @blur="addFood"
+              @keyup.enter="addFood"
+              ref="inputField"
+            />
+          </q-btn>
         </div>
       </div>
-    </q-dialog>
-  </div>
+
+      <div class="button-container">
+        <q-btn class="btnreject" label="ยกเลิก" @click="cancelSelection" :disable="disable" />
+        <q-btn
+          class="btnconfirm"
+          label="ยืนยัน"
+          @click="confirmSelection(true)"
+          :disable="disable"
+        />
+      </div>
+    </div>
+  </q-dialog>
 </template>
 
 <style scoped>
@@ -184,11 +223,7 @@ onMounted(async () => {
   display: flex;
   align-items: center;
   gap: 25px;
-}
-
-.food-input {
-  width: 600px;
-  flex-grow: 1;
+  margin-bottom: 20px;
 }
 
 .label {
@@ -287,7 +322,6 @@ onMounted(async () => {
   pointer-events: none;
   opacity: 0.5;
 }
-
 .delete-icon {
   position: absolute;
   top: -2px;
@@ -300,13 +334,11 @@ onMounted(async () => {
   cursor: pointer;
 }
 
- ::v-deep(.q-field__control) {
+::v-deep(.q-field__control) {
   height: 40px !important;
   align-items: center;
   padding: 5px 10px;
 }
-
-
 
 .food-input.q-field--readonly .q-field__control:focus-within {
   outline: none !important;
@@ -329,5 +361,47 @@ onMounted(async () => {
   outline: none !important;
   box-shadow: none !important;
   pointer-events: none;
+}
+.input-container {
+  width: 600px;
+  max-width: 100%;
+}
+
+@media (max-width: 500px) {
+  .input-group {
+    flex-direction: column;
+    align-items: flex-start;
+    margin-bottom: 10px !important;
+    gap: 5px !important;
+  }
+  .label {
+    justify-content: flex-start;
+  }
+  .label_minWidth {
+    min-width: unset;
+    width: 100%;
+    text-align: left;
+    padding-left: 0;
+    margin-left: 0;
+  }
+  .input-container {
+    width: 100%;
+    max-width: 100%;
+  }
+  .food-dialog {
+    width: 420px;
+    height: 470px;
+  }
+}
+@media (max-width: 440px) {
+  .food-dialog {
+    width: 330px;
+    height: 470px;
+  }
+  .FoodChip {
+    width: 120px;
+    height: 45px;
+    font-size: 13px;
+  }
 }
 </style>

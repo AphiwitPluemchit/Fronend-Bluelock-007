@@ -29,6 +29,7 @@ const toggleDepartment = (value: string) => {
 <template>
   <div class="input-group">
     <p class="label label_minWidth">สาขา :</p>
+    <div class="department-btn-group">
     <q-btn
       v-for="option in departmentOptions"
       :key="option.value"
@@ -38,6 +39,7 @@ const toggleDepartment = (value: string) => {
       class="department-btn"
       :disable="disable"
     />
+    </div>
   </div>
 </template>
 
@@ -48,7 +50,7 @@ const toggleDepartment = (value: string) => {
   border-radius: 50px;
   box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.2);
   background-color: #ffffff;
-  margin-right: 10px;
+
 }
 .active-btn {
   background-color: #d0e4ff !important;
@@ -70,4 +72,45 @@ const toggleDepartment = (value: string) => {
   line-height: normal;
   text-align: right;
 }
+.department-btn-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 25px;
+}
+@media (max-width: 500px) {
+  .input-group {
+    flex-direction: column;
+    align-items: flex-start;
+    margin-bottom: 10px !important;
+    gap: 5px !important; 
+  }
+
+   .label {
+    justify-content: flex-start; 
+  }
+
+  .label_minWidth {
+    min-width: unset;
+    width: 100%;
+    text-align: left;
+    padding-left: 0;
+    margin-left: 0;
+  }
+  .department-btn-group{
+    gap: 10px;
+  }
+}
+@media (max-width: 445px) {
+  .department-btn-group {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px 20px;
+    width: 100%;
+  }
+  .department-btn {
+    width: 100%;
+  }
+}
+
+
 </style>

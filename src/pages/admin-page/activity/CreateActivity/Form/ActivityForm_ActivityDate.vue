@@ -75,7 +75,7 @@ watch(
 <template>
   <div class="input-group">
     <p class="label label_minWidth">วันที่จัดกิจกรรม :</p>
-    <q-input outlined v-model="formattedDateRange" style="width: 600px" readonly :disable="disable">
+    <q-input outlined v-model="formattedDateRange" class="input-container" readonly :disable="disable">
       <template v-slot:prepend>
         <q-icon name="event" class="cursor-pointer" :class="{ 'disabled-icon': disable }"  style="color: black;">
           <q-menu ref="datePopupRef" style="overflow: visible" v-if="!disable">
@@ -134,6 +134,11 @@ watch(
   opacity: 0.5;
 }
 
+.input-container {
+  width: 600px;
+  max-width: 100%;
+}
+
 ::v-deep(.q-field__control) {
   height: 40px !important; 
   align-items: center; 
@@ -148,4 +153,31 @@ watch(
 ::v-deep(.q-icon) {
   font-size: 18px;
 }
+
+@media (max-width: 500px) {
+  .input-group {
+    flex-direction: column;
+    align-items: flex-start;
+    margin-bottom: 10px !important;
+    gap: 5px !important;  
+  }
+
+   .label {
+    justify-content: flex-start; 
+  }
+
+  .label_minWidth {
+    min-width: unset;
+    width: 100%;
+    text-align: left;
+    padding-left: 0;
+    margin-left: 0;
+  }
+   .input-container {
+    width: 100%;
+  }
+}
+
+ 
+
 </style>
