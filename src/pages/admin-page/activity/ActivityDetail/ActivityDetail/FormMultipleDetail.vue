@@ -490,6 +490,7 @@ const resetFormToOriginal = () => {
           class="input-max-600 fix-q-input-height"
           :error="activityNameError !== ''"
           hide-bottom
+          :disable="!isEditing"
         />
         <div v-if="activityNameError" class="text-negative text-subtitle2 q-mt-xs">
           {{ activityNameError }}
@@ -608,7 +609,7 @@ const resetFormToOriginal = () => {
       <!-- Lecturer -->
       <div class="input-group">
         <p class="label label_minWidth">วิทยากร :</p>
-        <q-input outlined v-model="subActivity.lecturer" class="input-max-600" />
+        <q-input outlined v-model="subActivity.lecturer" class="input-max-600"  :disable="!isEditing"/>
       </div>
 
       <!-- Detail Activity -->
@@ -620,6 +621,7 @@ const resetFormToOriginal = () => {
           outlined
           v-model="subActivity.detailActivity"
           class="input-max-600"
+          :disable="!isEditing"
         />
       </div>
     </div>
