@@ -10,6 +10,10 @@ const route = useRoute()
 const selectedImageFile = ref<File | null>(null)
 const isEditing = ref(route.query.disable !== 'true')
 const imageRef = ref<InstanceType<typeof ImageDetail> | null>(null)
+const formSection = ref<HTMLElement | null>(null)
+const scrollToFormTop = () => {
+  formSection.value?.scrollTo({ top: 0, behavior: 'smooth' })
+}
 const emit = defineEmits<{
   (e: 'update-activity', updated: Activity): void
 }>()
@@ -87,11 +91,12 @@ watch(isEditing, (newVal) => {
           />
         </div>
 
-      <div class="form-section">
+      <div class="form-section"  ref="formSection">
           <FormMultipleDetail
             :key="selectedActivityType"
             :activity="activity"
             :imageFile="selectedImageFile"
+            @scroll-to-top="scrollToFormTop"
             v-model:isEditing="isEditing"
             @saved="handleSave"
           />
