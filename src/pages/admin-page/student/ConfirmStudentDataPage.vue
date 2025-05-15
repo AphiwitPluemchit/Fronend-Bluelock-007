@@ -14,6 +14,7 @@ interface Student {
   hardSkill: number
   major: string
 }
+
 const breadcrumbs = ref({
   previousPage: { title: 'จัดการข้อมูลนิสิต', path: '/Admin/StudentManagement' },
   currentPage: { title: 'จัดเก็บข้อมูลนิสิต', path: '/Admin/StudentManagement/StudentStorePage' },
@@ -27,9 +28,9 @@ const breadcrumbs = ref({
 const studentStore = useStudentStore()
 
 const selectedYear = ref(62)
-const yearOptions = [62, 63, 64, 65]
+const yearOptions = [60, 61, 62, 63, 64, 65, 66]
 
-const selectedMajors = ref<string[]>([]) // << ใช้แค่บรรทัดนี้
+const selectedMajors = ref<string[]>([]) // ใช้ให้เลือกหลายสาขา
 const majorOptions = ['CS', 'AI', 'SE', 'ITDI']
 
 onMounted(async () => {
@@ -41,7 +42,14 @@ onMounted(async () => {
 })
 
 const filteredStudents = computed(() => {
-  return studentStore.students || []
+  // กรองตามปีและสาขาที่เลือก
+  return studentStore.students.filter((student) => {
+    const isYearMatch = student.code.startsWith(selectedYear.value.toString())
+    const isMajorMatch =
+      selectedMajors.value.length === 0 || selectedMajors.value.includes(student.major)
+    const isNotTerminated = student.status !== 0
+    return isYearMatch && isMajorMatch && isNotTerminated
+  })
 })
 
 const columns = [
@@ -90,57 +98,6 @@ const saveStudents = () => {
 }
 </script>
 
-<style scoped>
-.status-complete {
-  background-color: #cfd7ff;
-  color: #001780;
-  border: 2px solid #002dff;
-  padding: 3px 30px;
-  width: 130px;
-}
-
-.status-high {
-  background-color: #d0ffc5;
-  color: #009812;
-  border: 2px solid #00bb16;
-  padding: 3px 30px;
-  width: 130px;
-}
-
-.status-medium {
-  background-color: #ffe7ba;
-  color: #ff6f00;
-  border: 2px solid #ffa500;
-  padding: 3px 30px;
-  width: 130px;
-}
-
-.status-low {
-  background-color: #ffc5c5;
-  color: #ff0000;
-  border: 2px solid #f32323;
-  padding: 3px 30px;
-  width: 130px;
-}
-
-.status-terminated {
-  background-color: #e0e0e0;
-  color: #5f5f5f;
-  border: 2px solid #b0b0b0;
-  padding: 3px 30px;
-  width: 130px;
-}
-.status-badge {
-  height: 32px;
-  line-height: 28px;
-  padding: 0 12px;
-  border-radius: 999px;
-  text-align: center;
-  display: inline-block;
-  font-size: 15px;
-}
-</style>
-
 <template>
   <q-page class="q-pa-md">
     <!-- ส่วนหัวของหน้า -->
@@ -159,19 +116,24 @@ const saveStudents = () => {
           v-model="selectedYear"
           :options="yearOptions"
           label="รหัสปีนิสิต"
-          style="width: 150px; margin-right: 40px"
+          option-label="label"
+          option-value="value"
+          emit-value
+          map-options
+          class="q-mr-sm dropdown"
         />
 
-        <div class="col-auto text-right q-pr-md">
-          <p class="q-my-none">สาขาที่ต้องการจัดเก็บ :</p>
-        </div>
         <q-select
           dense
           outlined
           v-model="selectedMajors"
           :options="majorOptions"
           label="สาขาที่ต้องการจัดเก็บ"
-          style="width: 250px; margin-right: 40px"
+          option-label="label"
+          option-value="value"
+          emit-value
+          map-options
+          class="q-mr-sm dropdown"
         />
 
         <q-btn color="primary" label="ยืนยัน" style="margin-left: 20px" @click="confirmSelection" />
@@ -235,3 +197,129 @@ const saveStudents = () => {
     </section>
   </q-page>
 </template>
+
+<style scoped>
+.status-complete {
+  background-color: #cfd7ff;
+  color: #001780;
+  border: 2px solid #002dff;
+  padding: 3px 30px;
+  width: 130px;
+}
+
+.status-high {
+  background-color: #d0ffc5;
+  color: #009812;
+  border: 2px solid #00bb16;
+  padding: 3px 30px;
+  width: 130px;
+}
+
+.status-medium {
+  background-color: #ffe7ba;
+  color: #ff6f00;
+  border: 2px solid #ffa500;
+  padding: 3px 30px;
+  width: 130px;
+}
+
+.status-low {
+  background-color: #ffc5c5;
+  color: #ff0000;
+  border: 2px solid #f32323;
+  padding: 3px 30px;
+  width: 130px;
+}
+
+.status-terminated {
+  background-color: #e0e0e0;
+  color: #5f5f5f;
+  border: 2px solid #b0b0b0;
+  padding: 3px 30px;
+  width: 130px;
+}
+.status-badge {
+  height: 32px;
+  line-height: 28px;
+  padding: 0 12px;
+  border-radius: 999px;
+  text-align: center;
+  display: inline-block;
+  font-size: 15px;
+}
+.dropdown {
+  min-width: 200px;
+}
+</style>
+
+<style lang="scss" scoped>
+.student-container {
+  background-color: #edf0f5;
+  height: 680px;
+  width: 100%;
+}
+
+// .student-table-wrapper {
+//   display: flex;
+//   width: 100%;
+//   max-width: 100%;
+//   display: flex;
+//   flex-direction: column;
+// }
+
+// .my-sticky-header-table {
+//   min-height: 450px;
+//   overflow: auto;
+// }
+
+.q-table table {
+  table-layout: fixed;
+}
+
+.my-sticky-header-table thead th {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  background-color: #f5f5f5;
+}
+
+.new-sticky-header {
+  .my-sticky-header-table {
+    /* Fix header */
+    thead tr:first-child th {
+      background-color: #f5f5f5;
+    }
+
+    /* Make tbody scrollable */
+    tbody {
+      display: block;
+      overflow-y: auto;
+    }
+
+    /* Ensure header and body columns align */
+    thead,
+    tbody tr {
+      display: table;
+      width: 100%;
+      table-layout: fixed;
+    }
+
+    /* Optional: ปรับ scrollbar ไม่ทับ */
+    tbody::-webkit-scrollbar {
+      width: 12px;
+    }
+
+    tbody::-webkit-scrollbar-thumb {
+      background: #a7a7a7;
+      border-radius: 10px;
+      cursor: pointer;
+    }
+  }
+}
+
+.ellipsis-cell {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+</style>

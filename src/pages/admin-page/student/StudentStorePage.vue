@@ -140,6 +140,78 @@ const goToConfirmPage = () => {
 }
 </style>
 
+<style lang="scss" scoped>
+.student-container {
+  background-color: #edf0f5;
+  height: 680px;
+  width: 100%;
+}
+
+// .student-table-wrapper {
+//   display: flex;
+//   width: 100%;
+//   max-width: 100%;
+//   display: flex;
+//   flex-direction: column;
+// }
+
+// .my-sticky-header-table {
+//   min-height: 450px;
+//   overflow: auto;
+// }
+
+.q-table table {
+  table-layout: fixed;
+}
+
+.my-sticky-header-table thead th {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  background-color: #f5f5f5;
+}
+
+.new-sticky-header {
+  .my-sticky-header-table {
+    /* Fix header */
+    thead tr:first-child th {
+      background-color: #f5f5f5;
+    }
+
+    /* Make tbody scrollable */
+    tbody {
+      display: block;
+      overflow-y: auto;
+    }
+
+    /* Ensure header and body columns align */
+    thead,
+    tbody tr {
+      display: table;
+      width: 100%;
+      table-layout: fixed;
+    }
+
+    /* Optional: ปรับ scrollbar ไม่ทับ */
+    tbody::-webkit-scrollbar {
+      width: 12px;
+    }
+
+    tbody::-webkit-scrollbar-thumb {
+      background: #a7a7a7;
+      border-radius: 10px;
+      cursor: pointer;
+    }
+  }
+}
+
+.ellipsis-cell {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+</style>
+
 <template>
   <q-page class="q-pa-md">
     <!-- ส่วนหัวของหน้า -->
