@@ -322,36 +322,4 @@ const saveStudents = () => {
   overflow: hidden;
   text-overflow: ellipsis;
 }
-
-.status-complete {
-  background-color: #cfd7ff;
-  color: #001780;
-  border: 2px solid #002dff;
-  padding: 3px 30px;
-  width: 130px;
-}
-
-.status-medium {
-  background-color: #ffe7ba;
-  color: #ff6f00;
-  border: 2px solid #ffa500;
-  padding: 3px 30px;
-  width: 130px;
-}
-
-.status-low {
-  background-color: #ffc5c5;
-  color: #ff0000;
-  border: 2px solid #f32323;
-  padding: 3px 30px;
-  width: 130px;
-}
-
-.status-out {
-  background-color: #dadada;
-  color: #000000;
-  border: 2px solid #575656;
-  padding: 3px 30px;
-  width: 130px;
-}
 </style>
