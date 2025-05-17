@@ -9,3 +9,10 @@ export interface Student {
   hardSkill: number
   major: string
 }
+export interface ExcelStudentRow {
+  name: string
+  engName: string
+  code: string | number
+  major: string
+  password: string
+}

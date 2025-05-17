@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref, onMounted, computed } from 'vue'
 import { useRoute } from 'vue-router'
-import { useStudentActivitystore } from 'src/stores/student-activity'
+import { useStudentActivitystore } from 'src/stores/activity'
 import { EnrollmentService } from 'src/services/enrollment'
 import RegisterConfirmDialog from '../../Dialog/RegisterConfirmDialog.vue'
 import RegisterFailDialog from '../../Dialog/RegisterFailDialog.vue'
