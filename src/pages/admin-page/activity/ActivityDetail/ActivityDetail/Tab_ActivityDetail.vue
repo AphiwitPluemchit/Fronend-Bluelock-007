@@ -131,7 +131,7 @@ watch(isEditing, (newVal) => {
   flex-grow: 1;
   overflow-x: hidden;
   overflow-y: auto;
-  max-height: 680px;
+  max-height: 610px;
   justify-items: flex-end;
   margin-right: 50px;
 }
@@ -145,5 +145,76 @@ watch(isEditing, (newVal) => {
   font-size: 15px;
   font-weight: bold;
   font-family: 'Noto Serif Thai', serif;
+}
+@media(max-width: 1625px) {
+  .wrapper {
+    gap: 30px;
+    padding: 20px;
+  }
+  .container {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .image-section {
+    margin-left: 0;
+    width: 100%;
+    max-width: 430px;
+  }
+
+  .form-section {
+    margin-right: 0;
+    max-height: unset;
+    width: 100%;
+    max-width: 770px;
+  }
+}
+@media(max-width: 850px) {
+  .wrapper {
+    gap: 30px;
+    padding: 20px;
+  }
+  .container {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .image-section {
+    margin-left: 0;
+    width: 100%;
+    max-width: 430px;
+  }
+
+  .form-section {
+    margin-right: 0;
+    max-height: unset;
+    width: 100%;
+    max-width: 500px;
+  }
+}
+@media (max-width: 500px) {
+  .wrapper {
+    flex-direction: column;
+    gap: 30px;
+    padding: 20px;
+  }
+
+  .container {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .image-section {
+    margin-left: 0;
+    width: 100%;
+    max-width: 430px;
+  }
+
+  .form-section {
+    margin-right: 0;
+    max-height: unset;
+    width: 100%;
+    max-width: 800px;
+  }
 }
 </style>

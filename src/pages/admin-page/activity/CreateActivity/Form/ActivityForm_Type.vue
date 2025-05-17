@@ -67,7 +67,33 @@ const updateActivityType = (type: string) => {
   flex-wrap: wrap;
   gap: 10px;
 }
-@media (max-width: 500px) {
+@media(max-width: 1625px){
+  .input-container {
+    width: 500px;
+    max-width: 100%;
+  }
+  .label_minWidth {
+    min-width: 180px !important;
+  }
+}
+@media (max-width: 850px) {
+  .input-container {
+    width: 470px;
+    max-width: 100%;
+  }
+  .label {
+    justify-content: flex-start;
+  }
+  .label_minWidth {
+    min-width: unset !important;
+    width: 100% !important;
+    text-align: left;
+    padding-left: 0;
+    margin-left: 0;
+  }
+
+}
+@media (max-width: 510px) {
   .input-group {
     flex-direction: column;
     align-items: flex-start;
@@ -95,7 +121,7 @@ const updateActivityType = (type: string) => {
   background-color: #ffffff;
 }
 }
-@media (max-width: 465px) {
+@media (max-width: 470px) {
   .activityType-btn-group{
     display: grid;
     grid-template-columns: repeat(1, 1fr);

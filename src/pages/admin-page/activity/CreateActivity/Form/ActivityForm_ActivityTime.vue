@@ -344,7 +344,6 @@ watch(() => props.endTime, (newVal) => {
   padding: 10px;
 }
 
-
 .separator {
   font-weight: bold;
 }
@@ -413,7 +412,41 @@ watch(() => props.endTime, (newVal) => {
 ::v-deep(input[type='number']) {
   -moz-appearance: textfield;
 }
+@media(max-width: 1625px){
+  .input-container {
+    width: 200px;
+    max-width: 100%;
+  }
+  .label_minWidth {
+    min-width: 180px !important;
+  }
+}
+@media (max-width: 850px) {
+   .input-group:not(.no-wrap) {
+    flex-direction: column;
+    align-items: flex-start;
+    margin-bottom: 10px !important;
+    gap: 5px !important;
+  }
+  .label {
+    justify-content: flex-start;
+  }
 
+  .label_minWidth {
+    min-width: unset !important;
+    width: 100% !important;
+    text-align: left;
+    padding-left: 0;
+    margin-left: 0;
+  }
+}
+@media (max-width: 550px) {
+  .input-container {
+    width: 170px;
+    max-width: 100%; 
+  }
+
+}
 @media (max-width: 500px) {
   .input-group {
     flex-direction: column;

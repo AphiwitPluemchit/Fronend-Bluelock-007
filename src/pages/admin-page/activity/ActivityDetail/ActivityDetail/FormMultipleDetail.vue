@@ -458,7 +458,7 @@ const resetFormToOriginal = () => {
 <template>
   <q-page>
     <!-- Status -->
-    <div class="input-group" ref="formTop">
+    <div class="input-group no-wrap" ref="formTop">
       <p class="label label_minWidth">สถานะ:</p>
       <q-badge :class="statusClass" class="status-btn">
         <div align="center" style="font-size: 20px">{{ activityStatus }}</div>
@@ -512,23 +512,16 @@ const resetFormToOriginal = () => {
     />
 
     <!-- Sub Activities List -->
-    <div
-      v-for="(subActivity, index) in subActivities"
-      :key="index"
-      class="sub-activity"
-      style="margin-top: 15px"
-    >
-      <!-- Remove Icon -->
-      <div class="input-group">
-        <div class="input-container" style="display: flex; justify-content: flex-end">
-          <q-icon
-            name="close"
-            size="35px"
-            color="red"
-            class="cursor-pointer"
-            @click="removeSubActivity(index)"
-          />
-        </div>
+    <div v-for="(subActivity, index) in subActivities" :key="index" class="sub-activity">
+      <!-- Cancel (X) Icon -->
+      <div class="remove-icon input-group" style="display: flex; justify-content: flex-end">
+        <q-icon
+          name="close"
+          size="35px"
+          color="red"
+          class="cursor-pointer"
+          @click="removeSubActivity(index)"
+        />
       </div>
 
       <!-- SubActivity Name -->
@@ -537,7 +530,7 @@ const resetFormToOriginal = () => {
         <q-input
           outlined
           v-model="subActivity.subActivityName"
-          style="width: 600px"
+            class="input-container"
           :disable="!isEditing"
         />
       </div>
@@ -611,7 +604,7 @@ const resetFormToOriginal = () => {
         <q-input
           outlined
           v-model="subActivity.lecturer"
-          class="input-max-600"
+            class="input-container"
           :disable="!isEditing"
         />
       </div>
@@ -624,7 +617,7 @@ const resetFormToOriginal = () => {
           rows="10"
           outlined
           v-model="subActivity.detailActivity"
-          class="input-max-600"
+            class="input-container"
           :disable="!isEditing"
         />
       </div>
@@ -632,16 +625,9 @@ const resetFormToOriginal = () => {
 
     <!-- Add SubActivity Button -->
     <div class="btn-container" v-if="props.isEditing">
-      <q-btn
-        class="btnAddActivity"
-        style="margin-bottom: 100px; background-color: #3676f9"
-        @click="addSubActivity"
-        :disable="!isEditing"
-      >
-        <p class="label text-white">
-          <q-icon name="add" size="20px" />
-          เพิ่มกิจกรรม
-        </p>
+      <p class="label label_minWidth btn-label-empty"></p>
+      <q-btn class="btnAddActivity" @click="addSubActivity" style="background-color: #3676f9">
+        <p class="label text-white">เพิ่มกิจกรรม</p>
       </q-btn>
     </div>
 
@@ -673,79 +659,6 @@ const resetFormToOriginal = () => {
 </template>
 
 <style scoped>
-::v-deep(.q-field__control) {
-  height: auto;
-  background-color: white;
-  align-items: center;
-}
-
-::v-deep(.q-field__prepend) {
-  display: flex;
-  align-items: center;
-}
-
-::v-deep(.q-icon) {
-  font-size: 18px;
-}
-.fix-q-input-height ::v-deep(.q-icon) {
-  font-size: 16px;
-}
-.input-max-600 {
-  width: 600px;
-}
-.fix-q-input-height ::v-deep(.q-field__control) {
-  height: 40px !important;
-  min-height: 40px !important;
-  padding-top: 0 !important;
-  padding-bottom: 0 !important;
-  display: flex;
-  align-items: center;
-}
-
-.fix-q-input-height ::v-deep(.q-field__append) {
-  align-items: center;
-  display: flex;
-}
-.input-group p {
-  align-self: center;
-  margin: 0;
-  line-height: normal;
-  text-align: right;
-}
-
-.input-group {
-  display: flex;
-  align-items: center; /* ✅ ทำให้ label กับ input อยู่กลางแนวเดียวกัน */
-  gap: 25px;
-  margin-bottom: 20px;
-  width: 100%;
-  flex-wrap: wrap;
-}
-
-.label {
-  font-size: 20px;
-  height: 40px;
-  display: flex;
-  align-items: center;
-  justify-content: flex-end;
-  line-height: 40px; /* ใช้ line-height เท่ากับความสูง */
-  margin: 0;
-}
-.label_minWidth {
-  min-width: 200px;
-}
-
-.btnAddActivity {
-  background-color: #ffffff;
-  border-radius: 20px;
-  height: 40px;
-  width: 200px;
-  font-size: 20px;
-  display: flex;
-  align-items: center;
-  margin-bottom: 20px;
-}
-
 .status-btn {
   color: #ff6f00;
   background-color: #ffe7ba;
@@ -761,37 +674,96 @@ const resetFormToOriginal = () => {
   text-align: center;
 }
 
-.time-container {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  gap: 10px;
+::v-deep(.q-field__control) {
+  height: auto;
+  background-color: white;
 }
 
+::v-deep(.q-icon) {
+  font-size: 18px;
+}
+.fix-q-input-height ::v-deep(.q-icon) {
+  font-size: 16px;
+}
+.fix-q-input-height ::v-deep(.q-field__control) {
+  height: 40px !important;
+  min-height: 40px !important;
+  padding-top: 0 !important;
+  padding-bottom: 0 !important;
+  display: flex;
+  align-items: center;
+}
+
+.fix-q-input-height ::v-deep(.q-field__append) {
+  align-items: center;
+  display: flex;
+}
+.tight-checkbox ::v-deep(.q-checkbox__label) {
+  margin-left: 4px !important; /* ลดจากค่าปกติ 8px หรือมากกว่า */
+}
+.label-error-shift {
+  transform: translateY(-12px);
+}
+.input-group p {
+  margin: 0;
+  line-height: normal;
+  text-align: left;
+}
+.no-wrap {
+  flex-wrap: nowrap !important;
+  white-space: nowrap;
+}
+.input-group {
+  display: flex;
+  align-items: center;
+  gap: 25px;
+  margin-bottom: 20px;
+  width: 100%;
+  flex-wrap: wrap;
+}
+
+.label {
+  font-size: 20px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  line-height: 40px;
+  margin: 0;
+}
+.label_minWidth {
+  min-width: 200px;
+}
+.btnAddActivity {
+  background-color: #ffffff;
+  border-radius: 20px;
+  height: 40px;
+  width: 200px;
+  font-size: 20px;
+  display: flex;
+  align-items: center;
+}
+.input-container {
+  width: 660px;
+  max-width: 100%;
+}
 .remove-icon {
+  max-width: 100%;
+  text-align: right;
+  cursor: pointer;
+}
+.button-group {
   display: flex;
   justify-content: flex-end;
+  gap: 25px;
   margin-bottom: 20px;
 }
-
 .btn-container {
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 20px;
-  margin-left: 200px;
-}
-
-.active-btn {
-  background-color: #d0e4ff !important;
-}
-
-.button-group {
-  display: flex;
-  justify-content: flex-end;
-  gap: 25px;
-  margin-bottom: 100px;
-  width: 100%;
+  margin-bottom: 30px;
 }
 
 .status-btn {
@@ -800,40 +772,160 @@ const resetFormToOriginal = () => {
   width: 200px;
   font-size: 20px;
 }
-
 .status-planning {
   color: #ff6f00;
   background-color: #ffe7ba;
   border: 2px solid #ffa500;
 }
-
 .status-open {
   color: #009812;
   background-color: #d0ffc5;
   border: 2px solid #00bb16;
 }
-
 .status-closed {
   color: #001780;
   background-color: #cfd7ff;
   border: 2px solid #002dff;
 }
-
 .status-completed {
   color: #000000;
   background-color: #dadada;
   border: 2px solid #575656;
 }
-
 .status-canceled {
   color: #f32323;
   background-color: #ffc5c5;
   border: 2px solid #ff0000;
 }
-
 .successDialog {
   background-color: white;
   max-width: 200px;
   max-height: 100px;
+}
+
+@media (max-width: 1625px) {
+  .input-container {
+    width: 530px;
+    max-width: 100%;
+  }
+  .btn-container {
+    justify-content: center !important;
+    margin-left: 0 !important;
+    width: 100%;
+  }
+  .label_minWidth {
+    min-width: 180px !important;
+  }
+
+}
+@media (max-width: 850px) {
+  .input-group.no-wrap {
+    flex-direction: row !important;     
+    align-items: center !important;         
+    gap: 20px !important;                 
+    margin-bottom: 10px !important;
+  }
+
+   .input-group:not(.no-wrap) {
+    flex-direction: column;
+    align-items: flex-start;
+    margin-bottom: 10px !important;
+    gap: 5px !important;
+  }
+  .input-container {
+    width: 470px;
+    max-width: 100%;
+  }
+   .label {
+    justify-content: flex-start;
+  }
+
+    .label_minWidth {
+    min-width: auto !important;        
+    width: auto !important;
+    flex-shrink: 0;
+  }
+  .btn-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    gap: 10px;
+  }
+  .btn-label-empty {
+    display: none !important;
+  }
+    .remove-icon {
+    display: flex;
+    flex-direction: row !important;  
+    justify-content: flex-end !important;
+    align-items: center;
+    margin-top: 10px;
+    width: 100%;
+  }
+
+  .remove-icon > .q-icon {
+    font-size: 30px;
+  }
+  .label-error-shift {
+  transform: translateY(0px);
+}
+}
+@media (max-width: 500px) {
+  .input-group:not(.no-wrap) {
+    flex-direction: column;
+    align-items: flex-start;
+    margin-bottom: 10px !important;
+    gap: 5px !important;
+  }
+  .label {
+    justify-content: flex-start;
+  }
+  .label-error-shift {
+    transform: translateY(0px);
+  }
+  .label_minWidth {
+    min-width: unset;
+    width: 100%;
+    text-align: left;
+    padding-left: 0;
+    margin-left: 0;
+  }
+
+  .btn-container {
+    justify-content: center !important;
+    margin-left: 0 !important;
+    width: 100%;
+  }
+  .button-group {
+    flex-direction: column;
+    justify-content: center;
+    align-items: stretch;
+    width: 100%;
+    gap: 10px;
+    margin-top: 40px;
+  }
+
+  .button-group .btnreject,
+  .button-group .btnsecces {
+    width: 100%;
+  }
+  .remove-icon {
+    display: flex;
+    justify-content: flex-end;
+    width: 100%;
+    margin-left: auto;
+    margin-top: 20px;
+    padding-right: 5px;
+  }
+  .remove-icon > .q-icon {
+    font-size: 30px;
+  }
+
+  .no-wrap .label_minWidth {
+    min-width: unset !important;
+    width: auto !important;
+    flex-shrink: 0;
+  }
 }
 </style>

@@ -116,4 +116,9 @@ watch([tab, isPlanning], () => {
   background-color: #edf0f5;
   max-height: 680px;
 }
+@media(max-width: 1650px) {
+  .custom-panels {
+  max-height: unset;
+}
+}
 </style>

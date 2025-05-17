@@ -130,10 +130,6 @@ watch(
 .label_minWidth {
   min-width: 200px;
 }
-.input-container {
-  width: 600px;
-  max-width: 100%;
-}
 .my-custom-calendar {
   background-color: white;
   border-radius: 10px;
@@ -165,7 +161,43 @@ watch(
 ::v-deep(.q-icon) {
   font-size: 18px;
 }
+.input-container {
+  width: 660px;
+  max-width: 100%;
+}
+@media(max-width: 1625px){
+  .input-container {
+    width: 530px;
+    max-width: 100%;
+  }
+  .label_minWidth {
+    min-width: 180px !important;
+  }
+}
+@media (max-width: 850px) {
+   .input-group:not(.no-wrap) {
+    flex-direction: column;
+    align-items: flex-start;
+    margin-bottom: 10px !important;
+    gap: 5px !important;
+  }
+  .input-container {
+    width: 470px;
+    max-width: 100%;
+  }
+  .label {
+    justify-content: flex-start;
+  }
 
+  .label_minWidth {
+    min-width: unset !important;
+    width: 100% !important;
+    text-align: left;
+    padding-left: 0;
+    margin-left: 0;
+  }
+
+}
 @media (max-width: 500px) {
   .input-group {
     flex-direction: column;

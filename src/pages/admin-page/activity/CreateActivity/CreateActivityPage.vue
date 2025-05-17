@@ -83,8 +83,53 @@ const breadcrumbs = ref({
   font-weight: bold;
   font-family: 'Noto Serif Thai', serif;
 }
+@media(max-width: 1625px) {
+  .wrapper {
+    gap: 30px;
+    padding: 20px;
+  }
+  .container {
+    flex-direction: column;
+    align-items: center;
+  }
 
-@media (max-width: 1520px) {
+  .image-section {
+    margin-left: 0;
+    width: 100%;
+    max-width: 430px;
+  }
+
+  .form-section {
+    margin-right: 0;
+    max-height: unset;
+    width: 100%;
+    max-width: 770px;
+  }
+}
+@media(max-width: 850px) {
+  .wrapper {
+    gap: 30px;
+    padding: 20px;
+  }
+  .container {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .image-section {
+    margin-left: 0;
+    width: 100%;
+    max-width: 430px;
+  }
+
+  .form-section {
+    margin-right: 0;
+    max-height: unset;
+    width: 100%;
+    max-width: 500px;
+  }
+}
+@media (max-width: 500px) {
   .wrapper {
     flex-direction: column;
     gap: 30px;
@@ -109,19 +154,4 @@ const breadcrumbs = ref({
     max-width: 800px;
   }
 }
-/* ✅ รองรับมือถือ */
-@media (max-width: 768px) {
-  .image-section,
-  .form-section {
-    width: 100%;
-    max-width: 100%;
-  }
-
-  .wrapper {
-    padding: 15px;
-    gap: 20px;
-  }
-}
-
-
 </style>

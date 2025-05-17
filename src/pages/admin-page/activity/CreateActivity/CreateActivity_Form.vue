@@ -220,7 +220,7 @@ const thaiLocale = {
 // ใช้กับปุ่มยืนยันส่งไปหลังบ้าน
 const submitActivity = async () => {
   activityNameError.value = ''
-    if (!activityName.value.trim()) {
+  if (!activityName.value.trim()) {
     activityNameError.value = 'กรุณากรอกชื่อกิจกรรมหลัก'
     await nextTick()
     activityNameInput.value?.$el?.scrollIntoView({ behavior: 'smooth', block: 'center' })
@@ -228,13 +228,10 @@ const submitActivity = async () => {
   }
 
   const validDates = await Promise.all(
-    subActivities.value.map((_, index) =>
-      dateRefs.value[index]?.validate?.() ?? true
-      
-    )
+    subActivities.value.map((_, index) => dateRefs.value[index]?.validate?.() ?? true),
   )
   if (validDates.includes(false)) {
-    return 
+    return
   }
   const skillMap: Record<string, 'hard' | 'soft' | null> = {
     prep: 'hard',
@@ -314,9 +311,9 @@ onMounted(() => {
   <q-page class="q-pa-md">
     <!-- Status -->
     <div class="input-group no-wrap">
-  <p class="label label_minWidth">สถานะ:</p>
-  <q-badge class="status-btn">กำลังวางแผน</q-badge>
-</div>
+      <p class="label label_minWidth">สถานะ:</p>
+      <q-badge class="status-btn">กำลังวางแผน</q-badge>
+    </div>
 
     <!-- Activity Name -->
     <div class="input-group">
@@ -345,7 +342,7 @@ onMounted(() => {
     <!-- Sub Activities List -->
     <div v-for="(subActivity, index) in subActivities" :key="index" class="sub-activity">
       <!-- Cancel (X) Icon -->
-      <div class="remove-icon" style="display: flex; justify-content: flex-end">
+      <div class="remove-icon input-group" style="display: flex; justify-content: flex-end">
         <q-icon
           name="close"
           size="35px"
@@ -363,7 +360,7 @@ onMounted(() => {
 
       <!-- Date -->
       <ActivityForm_ActivityDate
-        :ref="el => dateRefs[index] = el as InstanceType<typeof ActivityForm_ActivityDate>"
+        :ref="(el) => (dateRefs[index] = el as InstanceType<typeof ActivityForm_ActivityDate>)"
         v-model="subActivity.activityDateInternal"
         @update:modelValue="(dates) => generateDaysInRange(dates, index)"
       />
@@ -371,8 +368,8 @@ onMounted(() => {
       <!-- Time -->
       <div class="input-group">
         <p class="label label_minWidth" style="align-self: flex-start">เวลาที่จัดกิจกรรม :</p>
-        <div >
-          <q-checkbox v-model="sameTimeForAll" label="เวลาเดิมทุกวัน"  class="tight-checkbox" />
+        <div>
+          <q-checkbox v-model="sameTimeForAll" label="เวลาเดิมทุกวัน" class="tight-checkbox" />
 
           <div v-if="subActivity.selectedDays.length > 0">
             <div v-for="(day, dIndex) in subActivity.selectedDays" :key="day.date">
@@ -419,6 +416,7 @@ onMounted(() => {
       </div>
     </div>
     <div class="btn-container">
+      <p class="label label_minWidth btn-label-empty"></p>
       <q-btn class="btnAddActivity" @click="addSubActivity" style="background-color: #3676f9">
         <p class="label text-white">เพิ่มกิจกรรม</p>
       </q-btn>
@@ -434,7 +432,28 @@ onMounted(() => {
 </template>
 
 <style scoped>
-
+.status-btn {
+  color: #ff6f00;
+  background-color: #ffe7ba;
+  border: 2px solid #ffa500;
+  border-radius: 50px;
+  height: 40px;
+  width: 200px;
+  font-size: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+.btnAddActivity {
+  background-color: #ffffff;
+  border-radius: 20px;
+  height: 40px;
+  width: 200px;
+  font-size: 20px;
+  display: flex;
+  align-items: center;
+}
 ::v-deep(.q-field__control) {
   height: auto;
   background-color: white;
@@ -462,17 +481,6 @@ onMounted(() => {
 .tight-checkbox ::v-deep(.q-checkbox__label) {
   margin-left: 4px !important; /* ลดจากค่าปกติ 8px หรือมากกว่า */
 }
-.responsive-input {
-  width: 100%;
-  max-width: 600px;
-}
-.remove-icon {
-  display: flex;
-  justify-content: flex-end;
-  width: 600px;
-  margin-left: auto; /* ดันขวา */
-}
-
 .input-group p {
   margin: 0;
   line-height: normal;
@@ -493,63 +501,112 @@ onMounted(() => {
   width: 100%;
   flex-wrap: wrap;
 }
-
 .label {
   font-size: 20px;
   height: 40px;
   display: flex;
   align-items: center;
   justify-content: flex-end;
-  line-height: 40px; /* ใช้ line-height เท่ากับความสูง */
+  line-height: 40px;
   margin: 0;
 }
-
 .label_minWidth {
   min-width: 200px;
 }
 .input-container {
-  width: 600px;
+  width: 660px;
   max-width: 100%;
 }
-.btnAddActivity {
-  background-color: #ffffff;
-  border-radius: 20px;
-  height: 40px;
-  width: 200px;
-  font-size: 20px;
-  display: flex;
-  align-items: center;
+.remove-icon {
+  max-width: 100%;
+  text-align: right;
+  cursor: pointer;
 }
-.status-btn {
-  color: #ff6f00;
-  background-color: #ffe7ba;
-  border: 2px solid #ffa500;
-  border-radius: 50px;
-  height: 40px;
-  width: 200px;
-  font-size: 20px;
 
+.button-group {
   display: flex;
-  align-items: center;
-  justify-content: center;
-  text-align: center;
+  justify-content: flex-end;
+  gap: 25px;
 }
 .btn-container {
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 20px;
-  margin-left: 200px;
+  margin-bottom: 30px;
 }
-.button-group {
-  display: flex;
-  justify-content: flex-end;
-  gap: 25px;
-  width: 600px;
-  margin-left: auto;
+
+/* Media */
+@media (max-width: 1625px) {
+  .input-container {
+    width: 530px;
+    max-width: 100%;
+  }
+  .btn-container {
+    justify-content: center !important;
+    margin-left: 0 !important;
+    width: 100%;
+  }
+  .label_minWidth {
+    min-width: 180px !important;
+  }
+
+}
+@media (max-width: 850px) {
+  .input-group.no-wrap {
+    flex-direction: row !important;     
+    align-items: center !important;         
+    gap: 20px !important;                 
+    margin-bottom: 10px !important;
+  }
+
+   .input-group:not(.no-wrap) {
+    flex-direction: column;
+    align-items: flex-start;
+    margin-bottom: 10px !important;
+    gap: 5px !important;
+  }
+  .input-container {
+    width: 470px;
+    max-width: 100%;
+  }
+   .label {
+    justify-content: flex-start;
+  }
+
+    .label_minWidth {
+    min-width: auto !important;        
+    width: auto !important;
+    flex-shrink: 0;
+  }
+  .btn-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    gap: 10px;
+  }
+  .btn-label-empty {
+    display: none !important;
+  }
+    .remove-icon {
+    display: flex;
+    flex-direction: row !important;  
+    justify-content: flex-end !important;
+    align-items: center;
+    margin-top: 10px;
+    width: 100%;
+  }
+
+  .remove-icon > .q-icon {
+    font-size: 30px;
+  }
+  .label-error-shift {
+  transform: translateY(0px);
+}
 }
 @media (max-width: 500px) {
-   .input-group:not(.no-wrap) {
+  .input-group:not(.no-wrap) {
     flex-direction: column;
     align-items: flex-start;
     margin-bottom: 10px !important;
@@ -568,7 +625,7 @@ onMounted(() => {
     padding-left: 0;
     margin-left: 0;
   }
-  
+
   .btn-container {
     justify-content: center !important;
     margin-left: 0 !important;
@@ -598,8 +655,8 @@ onMounted(() => {
   .remove-icon > .q-icon {
     font-size: 30px;
   }
- 
-   .no-wrap .label_minWidth {
+
+  .no-wrap .label_minWidth {
     min-width: unset !important;
     width: auto !important;
     flex-shrink: 0;
