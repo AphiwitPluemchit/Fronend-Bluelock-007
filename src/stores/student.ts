@@ -32,20 +32,23 @@ export const useStudentStore = defineStore('student', () => {
     studentYear: [],
   })
 
+  // ฟังก์ชันสร้างนิสิตใหม่ (จากไฟล์ Excel)
   const createStudent = async (student: ExcelStudentRow[]) => {
     console.log('store', student)
-
     await StudentService.createStudent(student)
   }
+
+  // ฟังก์ชันดึงนิสิตทั้งหมด
   const getStudents = async () => {
     const data = await StudentService.getAll(query.value)
     students.value = data.data
     console.log(data.data)
   }
 
+  // ฟังก์ชันดึงนิสิตตามรหัส
   const getStudentByCode = async (code: string) => {
     const data = await StudentService.getOne(code)
-    console.log('API Response:', data) // Debugging API response
+    console.log('API Response:', data)
     student.value.id = data.id
     student.value.code = data.code
     student.value.name = data.name
@@ -57,16 +60,16 @@ export const useStudentStore = defineStore('student', () => {
     student.value.major = data.major
   }
 
-  const updateStudent = async () => {
+  // ฟังก์ชันอัปเดตนิสิต (รับ argument)
+  const updateStudent = async (updatedStudent: Student) => {
     try {
-      // แปลงค่าที่เป็นตัวเลขจาก String → Number ก่อนส่ง
       const payload = {
-        ...student.value,
-        softSkill: Number(student.value.softSkill),
-        hardSkill: Number(student.value.hardSkill),
-        status: Number(student.value.status),
+        ...updatedStudent,
+        softSkill: Number(updatedStudent.softSkill),
+        hardSkill: Number(updatedStudent.hardSkill),
+        status: Number(updatedStudent.status),
       }
-      console.log('Update Payload:', payload) // debug
+      console.log('Update Payload:', payload)
       const res = await StudentService.updateOne(payload)
       console.log('Update success:', res)
       return true
