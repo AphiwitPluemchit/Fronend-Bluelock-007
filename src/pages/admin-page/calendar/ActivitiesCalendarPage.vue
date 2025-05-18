@@ -15,7 +15,7 @@ const filterCategories = ref(['year', 'major', 'statusActivity', 'categoryActivi
 
 const query1 = ref<ActivityPagination>({
   page: 1,
-  limit: 1000,
+  limit: 100,
   search: '',
   sortBy: 'dates',
   order: 'desc',
@@ -196,7 +196,7 @@ function parseToCalendarEvents(activities: Activity[]) {
           date: d.date,
           time: `${d.stime} - ${d.etime}`,
           location: item.rooms?.[0] || '-',
-          count: `${item.enrollmentCount ?? 0}`,
+          count: `${item.enrollmentCount ?? 0}/${item.maxParticipants ?? '-'}`,
           duration: 1,
         })
       })
@@ -208,6 +208,14 @@ function parseToCalendarEvents(activities: Activity[]) {
 
 onMounted(async () => {
   await data1()
+
+  // หากวันนี้มี event ให้แสดงทางด้านขวาเลย
+  if (selectedDate.value === todayDate.value) {
+    const todayEvents = getEvents(todayDate.value)
+    if (todayEvents.length > 0) {
+      selectedEvents.value = todayEvents
+    }
+  }
 })
 </script>
 
@@ -297,22 +305,24 @@ onMounted(async () => {
       </div>
 
       <div class="col-4">
-        <div class="text-h6 q-mb-sm">{{ formatThaiDate(selectedDate) }}</div>
-        <template v-if="selectedEvents.length">
-          <div v-for="event in selectedEvents" :key="event.id" class="q-mb-md">
-            <div class="text-subname1 text-weight-bold">
-              {{ event.time }}
-              <span class="float-right text-grey-7">
-                {{ event.category === 'soft' ? 'Soft Skill' : 'Hard Skill' }}
-              </span>
+        <div class="event-panel">
+          <div class="text-h6 q-mb-sm">{{ formatThaiDate(selectedDate) }}</div>
+          <template v-if="selectedEvents.length">
+            <div v-for="event in selectedEvents" :key="event.id" class="q-mb-md">
+              <div class="text-subname1 text-weight-bold">
+                {{ event.time }}
+                <span class="float-right text-grey-7">
+                  {{ event.category === 'soft' ? 'Soft Skill' : 'Hard Skill' }}
+                </span>
+              </div>
+              <div>{{ event.name }}</div>
+              <div>จำนวนลงทะเบียน : {{ event.count }}</div>
+              <div>สถานที่ : {{ event.location }}</div>
+              <q-separator class="q-my-sm" />
             </div>
-            <div>{{ event.name }}</div>
-            <div>จำนวนลงทะเบียน: {{ event.count }}</div>
-            <div>สถานที่: {{ event.location }}</div>
-            <q-separator class="q-my-sm" />
-          </div>
-        </template>
-        <div v-else class="text-grey">ไม่มีข้อมูลกิจกรรมในวันนี้</div>
+          </template>
+          <div v-else class="text-grey">ไม่มีข้อมูลกิจกรรมในวันนี้</div>
+        </div>
       </div>
     </div>
   </q-page>
@@ -358,14 +368,16 @@ onMounted(async () => {
 }
 
 .day-number {
-  font-size: 13px;
+  font-size: 12px;
   font-weight: bold;
   width: 24px;
   height: 24px;
-  display: flex;
+  line-height: 24px;
+  display: inline-flex;
   align-items: center;
   justify-content: center;
   border-radius: 50%;
+  margin: auto;
 }
 
 :deep(button.q-calendar-month__day--label) {
@@ -382,8 +394,6 @@ onMounted(async () => {
 .event-row {
   position: absolute;
   top: 28px;
-  left: 0;
-  right: 0;
   display: flex;
   flex-wrap: wrap;
   pointer-events: none;
@@ -410,5 +420,17 @@ onMounted(async () => {
 .is-selected .day-number {
   background-color: #e37c41;
   color: white;
+}
+
+.event-panel {
+  max-height: 580px;
+  overflow-y: scroll;
+  padding-right: 8px;
+  scrollbar-width: none; /* สำหรับ Firefox */
+}
+
+/* สำหรับ Chrome, Edge, Safari */
+.event-panel::-webkit-scrollbar {
+  display: none;
 }
 </style>
