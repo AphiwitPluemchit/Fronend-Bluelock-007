@@ -91,15 +91,13 @@
             <q-td class="q-gutter-x-sm">
               <q-icon
                 name="visibility"
-               
                 @click="goToDetail(props.row.code)"
-                class="cursor-pointer" size="20px"
+                class="cursor-pointer"
+                size="20px"
               >
-              <q-tooltip>
-              ดูรายละเอียด
-              </q-tooltip>
-              </q-icon
-            ></q-td>
+                <q-tooltip> ดูรายละเอียด </q-tooltip>
+              </q-icon></q-td
+            >
           </q-tr>
         </template>
         ></q-table

@@ -15,6 +15,7 @@ const updateActivityType = (type: string) => {
 <template>
   <div class="input-group">
     <p class="label label_minWidth">ประเภทกิจกรรม :</p>
+    <div class="activityType-btn-group">
     <q-btn
       :class="{ 'active-btn': modelValue === 'prep' }"
       @click="updateActivityType('prep')"
@@ -29,6 +30,7 @@ const updateActivityType = (type: string) => {
       class="activityType-btn"
       :disable="disable"
     />
+  </div>
   </div>
 </template>
 
@@ -60,4 +62,75 @@ const updateActivityType = (type: string) => {
   line-height: normal;
   text-align: right;
 }
+.activityType-btn-group{
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+@media(max-width: 1625px){
+  .input-container {
+    width: 500px;
+    max-width: 100%;
+  }
+  .label_minWidth {
+    min-width: 180px !important;
+  }
+}
+@media (max-width: 850px) {
+  .input-container {
+    width: 470px;
+    max-width: 100%;
+  }
+  .label {
+    justify-content: flex-start;
+  }
+  .label_minWidth {
+    min-width: unset !important;
+    width: 100% !important;
+    text-align: left;
+    padding-left: 0;
+    margin-left: 0;
+  }
+
+}
+@media (max-width: 510px) {
+  .input-group {
+    flex-direction: column;
+    align-items: flex-start;
+    margin-bottom: 10px !important;
+    gap: 5px !important; 
+  }
+
+   .label {
+    justify-content: flex-start; 
+  }
+
+  .label_minWidth {
+    min-width: unset;
+    width: 100%;
+    text-align: left;
+    padding-left: 0;
+    margin-left: 0;
+  }
+
+  .activityType-btn {
+  width: 180px;
+  height: 40px;
+  border-radius: 50px;
+  box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.2);
+  background-color: #ffffff;
+}
+}
+@media (max-width: 470px) {
+  .activityType-btn-group{
+    display: grid;
+    grid-template-columns: repeat(1, 1fr);
+    gap: 10px 20px;
+    width: 100%;
+  }
+  .activityType-btn {
+     width: 100%;
+  }
+}
+
 </style>

@@ -70,7 +70,7 @@ const selectRoom = (room: string) => {
   } else {
     current.splice(index, 1)
   }
-  selectedRoom.value = current 
+  selectedRoom.value = current
 }
 </script>
 
@@ -78,38 +78,40 @@ const selectRoom = (room: string) => {
   <div class="input-group">
     <p class="label label_minWidth">ชื่อห้องที่จัดกิจกรรม :</p>
 
-    <q-input
-      outlined
-      v-model="displayText"
-      :disable="props.disable"
-      style="width: 600px"
-      @focus="onFocus"
-      @input="filterRooms"
-      ref="inputRef"
-    >
-      <q-menu
-        v-if="!props.disable"
-        v-model="showSuggestions"
-        anchor="bottom left"
-        self="top left"
-        :fit="false"
-        :cover="false"
+    <div class="input-container">
+      <q-input
+        outlined
+        v-model="displayText"
+        :disable="props.disable"
+        class="full-width"
+        @focus="onFocus"
+        @input="filterRooms"
+        ref="inputRef"
       >
-        <q-list style="min-width: 600px; max-height: 300px" class="scroll">
-          <q-item
-            v-for="(room, index) in filteredRooms"
-            :key="index"
-            clickable
-            @click="selectRoom(room)"
-            :class="{ 'selected-item': selectedRoom.includes(room) }"
-          >
-            <q-item-section>
-              {{ room }}
-            </q-item-section>
-          </q-item>
-        </q-list>
-      </q-menu>
-    </q-input>
+        <q-menu
+          v-if="!props.disable"
+          v-model="showSuggestions"
+          anchor="bottom left"
+          self="top left"
+          :fit="true"
+          :cover="false"
+        >
+          <q-list class="scroll dropdown-list">
+            <q-item
+              v-for="(room, index) in filteredRooms"
+              :key="index"
+              clickable
+              @click="selectRoom(room)"
+              :class="{ 'selected-item': selectedRoom.includes(room) }"
+            >
+              <q-item-section>
+                {{ room }}
+              </q-item-section>
+            </q-item>
+          </q-list>
+        </q-menu>
+      </q-input>
+    </div>
   </div>
 </template>
 
@@ -140,5 +142,77 @@ const selectRoom = (room: string) => {
 .selected-item {
   background-color: #d0e4ff !important;
   color: black;
+}
+
+.full-width,
+.full-width-menu {
+  width: 100%;
+}
+.input-container {
+  width: 660px;
+  max-width: 100%;
+}
+.dropdown-list {
+  width: 100%;
+  max-width: 100%;
+  height: 400px;
+}
+@media(max-width: 1625px){
+  .input-container {
+    width: 530px;
+    max-width: 100%;
+  }
+  .label_minWidth {
+  min-width: 180px !important;
+  }
+}
+@media (max-width: 850px) {
+   .input-group:not(.no-wrap) {
+    flex-direction: column;
+    align-items: flex-start;
+    margin-bottom: 10px !important;
+    gap: 5px !important;
+  }
+  .input-container {
+    width: 470px;
+    max-width: 100%; 
+  }
+  .label {
+    justify-content: flex-start;
+  }
+
+  .label_minWidth {
+    min-width: unset !important;
+    width: 100% !important;
+    text-align: left;
+    padding-left: 0;
+    margin-left: 0;
+  }
+}
+@media (max-width: 500px) {
+  .input-group {
+    flex-direction: column;
+    align-items: flex-start;
+    margin-bottom: 10px !important;
+    gap: 5px !important; 
+  }
+
+  .label {
+    justify-content: flex-start;
+  }
+
+  .label_minWidth {
+    min-width: unset;
+    width: 100%;
+    text-align: left;
+    padding-left: 0;
+    margin-left: 0;
+  }
+  .input-container {
+    width: 100%;
+  }
+  .dropdown-list {
+  height: 300px;
+}
 }
 </style>

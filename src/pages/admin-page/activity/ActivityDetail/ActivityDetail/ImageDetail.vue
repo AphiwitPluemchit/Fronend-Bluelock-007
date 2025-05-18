@@ -93,10 +93,17 @@ const onFileChange = (event: Event) => {
   cursor: pointer;
   transition: border-color 0.3s;
 }
+
 .preview-img {
   width: 100%;
   height: 100%;
   border-radius: 8px;
+}
+
+.upload-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 .image-size-text {
   margin-top: 10px;
@@ -104,15 +111,31 @@ const onFileChange = (event: Event) => {
   color: #f03b2d;
   font-weight: bold;
   font-family: 'Noto Serif Thai', serif;
-  align-self: flex-start;
-}
-.upload-container {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
+  text-align: left;
+  width: 100%;
+  max-width: 430px;
 }
 .disabled-box {
   pointer-events: none;
   opacity: 0.6;
 }
+@media (max-width: 500px) {
+.upload-box {
+  width: 330px;
+  height: 230px;
+}
+.image-size-text {
+    max-width: 330px;
+  }
+}
+@media (max-width: 400px) {
+.upload-box {
+  width: 300px;
+  height: 200px;
+}
+.image-size-text {
+    max-width: 300px;
+}
+}
+
 </style>

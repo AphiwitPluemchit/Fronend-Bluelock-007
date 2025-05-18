@@ -1,6 +1,6 @@
 import { api } from 'boot/axios'
 import type { Pagination, PaginationResponse } from 'src/types/pagination'
-import type { Student } from 'src/types/student'
+import type { ExcelStudentRow, Student } from 'src/types/student'
 
 export class StudentService {
   static path = '/students'
@@ -30,10 +30,13 @@ export class StudentService {
     }
   }
 
-  static async createOne(obj: Partial<Student>) {
+  static async createStudent(student: ExcelStudentRow[]) {
     try {
-      console.log('Creating student:', obj)
-      const res = await api.post(this.path, obj)
+      console.log('Creating student:', student)
+      console.log('📦 Data to send:', JSON.stringify(student, null, 2))
+
+      const res = await api.post(this.path, student)
+      console.log('res student:', res)
       return res.status
     } catch (error) {
       console.error('Error creating student:', error)

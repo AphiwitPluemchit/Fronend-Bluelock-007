@@ -49,27 +49,27 @@ const breadcrumbs = ref({
   padding: 30px;
   border-radius: 12px;
   margin-top: 20px;
+  flex-wrap: wrap; 
 }
 
 .container {
   display: flex;
   align-items: flex-start;
   width: 100%;
+  flex-wrap: wrap; 
 }
 
 .image-section {
-  align-items: flex-start;
   width: 100%;
   flex: 1;
   margin-left: 100px;
+  
 }
-
 .form-section {
   flex-grow: 1;
   overflow-x: hidden;
   overflow-y: auto;
   max-height: 660px;
-  justify-items: flex-end;
   margin-right: 50px;
 }
 
@@ -83,8 +83,53 @@ const breadcrumbs = ref({
   font-weight: bold;
   font-family: 'Noto Serif Thai', serif;
 }
+@media(max-width: 1625px) {
+  .wrapper {
+    gap: 30px;
+    padding: 20px;
+  }
+  .container {
+    flex-direction: column;
+    align-items: center;
+  }
 
-@media (max-width: 1520px) {
+  .image-section {
+    margin-left: 0;
+    width: 100%;
+    max-width: 430px;
+  }
+
+  .form-section {
+    margin-right: 0;
+    max-height: unset;
+    width: 100%;
+    max-width: 770px;
+  }
+}
+@media(max-width: 850px) {
+  .wrapper {
+    gap: 30px;
+    padding: 20px;
+  }
+  .container {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .image-section {
+    margin-left: 0;
+    width: 100%;
+    max-width: 430px;
+  }
+
+  .form-section {
+    margin-right: 0;
+    max-height: unset;
+    width: 100%;
+    max-width: 500px;
+  }
+}
+@media (max-width: 500px) {
   .wrapper {
     flex-direction: column;
     gap: 30px;
@@ -93,23 +138,20 @@ const breadcrumbs = ref({
 
   .container {
     flex-direction: column;
-    align-items: center; 
+    align-items: center;
   }
 
   .image-section {
     margin-left: 0;
     width: 100%;
-    max-width: 430px; 
+    max-width: 430px;
   }
 
   .form-section {
     margin-right: 0;
     max-height: unset;
     width: 100%;
-    max-width: 800px; 
+    max-width: 800px;
   }
 }
-
-
-
 </style>

@@ -1,10 +1,9 @@
 <script setup lang="ts">
 import { defineProps, defineEmits, computed, ref, watch } from 'vue'
 
-
-const props = defineProps<{ 
-  modelValue: string;
-  disable?: boolean; 
+const props = defineProps<{
+  modelValue: string
+  disable?: boolean
 }>()
 const CloseRegisDates = ref<string>(props.modelValue)
 const datePopupRef = ref(null)
@@ -14,12 +13,32 @@ const thaiLocale = {
   days: ['อาทิตย์', 'จันทร์', 'อังคาร', 'พุธ', 'พฤหัสบดี', 'ศุกร์', 'เสาร์'],
   daysShort: ['อา.', 'จ.', 'อ.', 'พ.', 'พฤ.', 'ศ.', 'ส.'],
   months: [
-    'มกราคม', 'กุมภาพันธ์', 'มีนาคม', 'เมษายน', 'พฤษภาคม', 'มิถุนายน',
-    'กรกฎาคม', 'สิงหาคม', 'กันยายน', 'ตุลาคม', 'พฤศจิกายน', 'ธันวาคม'
+    'มกราคม',
+    'กุมภาพันธ์',
+    'มีนาคม',
+    'เมษายน',
+    'พฤษภาคม',
+    'มิถุนายน',
+    'กรกฎาคม',
+    'สิงหาคม',
+    'กันยายน',
+    'ตุลาคม',
+    'พฤศจิกายน',
+    'ธันวาคม',
   ],
   monthsShort: [
-    'ม.ค.', 'ก.พ.', 'มี.ค.', 'เม.ย.', 'พ.ค.', 'มิ.ย.',
-    'ก.ค.', 'ส.ค.', 'ก.ย.', 'ต.ค.', 'พ.ย.', 'ธ.ค.'
+    'ม.ค.',
+    'ก.พ.',
+    'มี.ค.',
+    'เม.ย.',
+    'พ.ค.',
+    'มิ.ย.',
+    'ก.ค.',
+    'ส.ค.',
+    'ก.ย.',
+    'ต.ค.',
+    'พ.ย.',
+    'ธ.ค.',
   ],
 }
 const formattedCloseRegisDate = computed(() => {
@@ -48,9 +67,12 @@ const formatThaiDate = (dateStr: string): string => {
 
   return `${day} ${thaiMonth} ${thaiYear}`
 }
-watch(() => props.modelValue, (newVal) => {
-  CloseRegisDates.value = newVal
-})
+watch(
+  () => props.modelValue,
+  (newVal) => {
+    CloseRegisDates.value = newVal
+  },
+)
 </script>
 
 <template>
@@ -59,8 +81,8 @@ watch(() => props.modelValue, (newVal) => {
     <q-input
       outlined
       :model-value="formattedCloseRegisDate"
-      style="width: 600px"
       readonly
+      class="input-container"
       :disable="disable"
     >
       <template v-slot:prepend>
@@ -68,7 +90,7 @@ watch(() => props.modelValue, (newVal) => {
           name="event"
           class="cursor-pointer"
           :class="{ 'disabled-icon': disable }"
-          style="color: black;"
+          style="color: black"
         >
           <q-menu ref="datePopupRef" style="overflow: visible" v-if="!disable">
             <q-date
@@ -126,9 +148,9 @@ watch(() => props.modelValue, (newVal) => {
 }
 
 ::v-deep(.q-field__control) {
-  height: 40px !important; 
-  align-items: center; 
-  padding: 5px 10px; 
+  height: 40px !important;
+  align-items: center;
+  padding: 5px 10px;
 }
 
 ::v-deep(.q-field__prepend) {
@@ -138,5 +160,66 @@ watch(() => props.modelValue, (newVal) => {
 
 ::v-deep(.q-icon) {
   font-size: 18px;
+}
+.input-container {
+  width: 660px;
+  max-width: 100%;
+}
+@media(max-width: 1625px){
+  .input-container {
+    width: 530px;
+    max-width: 100%;
+  }
+  .label_minWidth {
+    min-width: 180px !important;
+  }
+}
+@media (max-width: 850px) {
+   .input-group:not(.no-wrap) {
+    flex-direction: column;
+    align-items: flex-start;
+    margin-bottom: 10px !important;
+    gap: 5px !important;
+  }
+  .input-container {
+    width: 470px;
+    max-width: 100%;
+  }
+  .label {
+    justify-content: flex-start;
+  }
+
+  .label_minWidth {
+    min-width: unset !important;
+    width: 100% !important;
+    text-align: left;
+    padding-left: 0;
+    margin-left: 0;
+  }
+
+}
+@media (max-width: 500px) {
+  .input-group {
+    flex-direction: column;
+    align-items: flex-start;
+    margin-bottom: 10px !important;
+    gap: 5px !important; 
+  }
+
+  .label {
+    justify-content: flex-start;
+  }
+
+  .label_minWidth {
+    min-width: unset;
+    width: 100%;
+    text-align: left;
+    padding-left: 0;
+    margin-left: 0;
+  }
+
+  .input-container {
+    width: 100%;
+  }
 }
 </style>

@@ -1,24 +1,46 @@
 <script setup lang="ts">
-import { defineProps, defineEmits, computed, ref, watch } from 'vue'
+import { defineProps, defineEmits, computed, ref, watch, nextTick } from 'vue'
 
-const props = defineProps<{ 
-  modelValue: string[];
-  disable?: boolean; // เพิ่ม prop disable
-}>();
-const emit = defineEmits<{ (event: 'update:modelValue', value: string[]): void }>();
+const props = defineProps<{
+  modelValue: string[]
+  disable?: boolean // เพิ่ม prop disable
+}>()
+const emit = defineEmits<{ (event: 'update:modelValue', value: string[]): void }>()
 const internalDateRange = ref<string[]>([...props.modelValue])
 const datePopupRef = ref(null)
+const dateError = ref('')
+const inputRef = ref<HTMLElement | null>(null)
 
 const thaiLocale = {
   days: ['อาทิตย์', 'จันทร์', 'อังคาร', 'พุธ', 'พฤหัสบดี', 'ศุกร์', 'เสาร์'],
   daysShort: ['อา.', 'จ.', 'อ.', 'พ.', 'พฤ.', 'ศ.', 'ส.'],
   months: [
-    'มกราคม', 'กุมภาพันธ์', 'มีนาคม', 'เมษายน', 'พฤษภาคม', 'มิถุนายน',
-    'กรกฎาคม', 'สิงหาคม', 'กันยายน', 'ตุลาคม', 'พฤศจิกายน', 'ธันวาคม'
+    'มกราคม',
+    'กุมภาพันธ์',
+    'มีนาคม',
+    'เมษายน',
+    'พฤษภาคม',
+    'มิถุนายน',
+    'กรกฎาคม',
+    'สิงหาคม',
+    'กันยายน',
+    'ตุลาคม',
+    'พฤศจิกายน',
+    'ธันวาคม',
   ],
   monthsShort: [
-    'ม.ค.', 'ก.พ.', 'มี.ค.', 'เม.ย.', 'พ.ค.', 'มิ.ย.',
-    'ก.ค.', 'ส.ค.', 'ก.ย.', 'ต.ค.', 'พ.ย.', 'ธ.ค.'
+    'ม.ค.',
+    'ก.พ.',
+    'มี.ค.',
+    'เม.ย.',
+    'พ.ค.',
+    'มิ.ย.',
+    'ก.ค.',
+    'ส.ค.',
+    'ก.ย.',
+    'ต.ค.',
+    'พ.ย.',
+    'ธ.ค.',
   ],
 }
 
@@ -27,22 +49,35 @@ const formattedDateRange = computed(() => {
     ? internalDateRange.value.map((date) => formatThaiDate(date)).join(', ')
     : ''
 })
+const validate = async () => {
+  if (!internalDateRange.value || internalDateRange.value.length === 0) {
+    dateError.value = 'กรุณาเลือกวันที่จัดกิจกรรม'
+    await nextTick()
+    inputRef.value?.scrollIntoView({ behavior: 'smooth', block: 'center' })
+    return false
+  }
+  dateError.value = ''
+  return true
+}
 
+defineExpose({ validate })
 const onDateRangeChange = () => {
-  if (props.disable) return;
+  if (props.disable) return
 
   if (!internalDateRange.value || internalDateRange.value.length === 0) {
     emit('update:modelValue', [])
     return
   }
 
-  // ✅ ถ้ายังมีวันอยู่ ให้ sort และ emit ตามปกติ
+  // ✅ เคลียร์ error ถ้ามีการเลือกวันแล้ว
+  dateError.value = ''
+
+  // ✅ sort วันใหม่ก่อน emit
   internalDateRange.value = [...internalDateRange.value].sort(
-    (a, b) => new Date(a).getTime() - new Date(b).getTime(),
+    (a, b) => new Date(a).getTime() - new Date(b).getTime()
   )
   emit('update:modelValue', internalDateRange.value)
 }
-
 
 const formatThaiDate = (dateStr: string): string => {
   if (!dateStr) return ''
@@ -73,11 +108,26 @@ watch(
 </script>
 
 <template>
-  <div class="input-group">
-    <p class="label label_minWidth">วันที่จัดกิจกรรม :</p>
-    <q-input outlined v-model="formattedDateRange" style="width: 600px" readonly :disable="disable">
+  <div class="input-group" ref="inputRef">
+    <p class="label label_minWidth"  :class="{ 'label-error-shift': dateError !== '' }">วันที่จัดกิจกรรม :</p>
+      <div class="input-container">
+    <q-input
+      outlined
+      v-model="formattedDateRange"
+      class="fix-q-input-height"
+      ref="inputRef"
+      readonly
+      :disable="disable"
+      :error="dateError !== ''"    
+    
+    >
       <template v-slot:prepend>
-        <q-icon name="event" class="cursor-pointer" :class="{ 'disabled-icon': disable }"  style="color: black;">
+        <q-icon
+          name="event"
+          class="cursor-pointer"
+          :class="{ 'disabled-icon': disable }"
+          style="color: black"
+        >
           <q-menu ref="datePopupRef" style="overflow: visible" v-if="!disable">
             <q-date
               v-model="internalDateRange"
@@ -96,10 +146,17 @@ watch(
         </q-icon>
       </template>
     </q-input>
+    <div v-if="dateError" class="text-negative text-subtitle2 q-mt-xs">
+      {{ dateError }}
+    </div>
+  </div>
   </div>
 </template>
 
 <style scoped>
+.label-error-shift {
+  transform: translateY(-12px);
+}
 .input-group {
   display: flex;
   align-items: center;
@@ -134,10 +191,15 @@ watch(
   opacity: 0.5;
 }
 
+.input-container {
+  width: 660px;
+  max-width: 100%;
+}
+
 ::v-deep(.q-field__control) {
-  height: 40px !important; 
-  align-items: center; 
-  padding: 5px 10px; 
+  height: 40px !important;
+  align-items: center;
+  padding: 5px 10px;
 }
 
 ::v-deep(.q-field__prepend) {
@@ -147,5 +209,63 @@ watch(
 
 ::v-deep(.q-icon) {
   font-size: 18px;
+}
+@media(max-width: 1625px){
+  .input-container {
+    width: 530px;
+    max-width: 100%;
+  }
+  .label_minWidth {
+    min-width: 180px !important;
+  }
+}
+@media (max-width: 850px) {
+   .input-group:not(.no-wrap) {
+    flex-direction: column;
+    align-items: flex-start;
+    margin-bottom: 10px !important;
+    gap: 5px !important;
+  }
+  .input-container {
+    width: 470px;
+    max-width: 100%; 
+  }
+  .label {
+    justify-content: flex-start;
+  }
+
+  .label_minWidth {
+    min-width: unset !important;
+    width: 100% !important;
+    text-align: left;
+    padding-left: 0;
+    margin-left: 0;
+  }
+  .label-error-shift {
+  transform: translateY(0px);
+}
+}
+@media (max-width: 500px) {
+  .input-group {
+    flex-direction: column;
+    align-items: flex-start;
+    margin-bottom: 10px !important;
+    gap: 5px !important;
+  }
+
+  .label {
+    justify-content: flex-start;
+  }
+
+  .label_minWidth {
+    min-width: unset;
+    width: 100%;
+    text-align: left;
+    padding-left: 0;
+    margin-left: 0;
+  }
+  .input-container {
+    width: 100%;
+  }
 }
 </style>

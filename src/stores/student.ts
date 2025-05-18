@@ -1,7 +1,7 @@
 import { defineStore } from 'pinia'
 import { StudentService } from 'src/services/student'
 import type { Pagination } from 'src/types/pagination'
-import type { Student } from 'src/types/student'
+import type { ExcelStudentRow, Student } from 'src/types/student'
 import { ref } from 'vue'
 
 export const useStudentStore = defineStore('student', () => {
@@ -32,6 +32,11 @@ export const useStudentStore = defineStore('student', () => {
     studentYear: [],
   })
 
+  const createStudent = async (student: ExcelStudentRow[]) => {
+    console.log('store', student)
+
+    await StudentService.createStudent(student)
+  }
   const getStudents = async () => {
     const data = await StudentService.getAll(query.value)
     students.value = data.data
@@ -72,6 +77,7 @@ export const useStudentStore = defineStore('student', () => {
   }
 
   return {
+    createStudent,
     getStudentByCode,
     getStudents,
     student,
