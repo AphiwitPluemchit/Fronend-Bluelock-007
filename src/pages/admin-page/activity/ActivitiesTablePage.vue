@@ -16,7 +16,6 @@
             outlined
             v-model="query1.search"
             label="ค้นหา ชื่อกิจกรรม"
-            @keyup.enter="data1"
             class="q-mr-sm searchbox"
             :style="{ border: 'none' }"
           >
@@ -93,9 +92,8 @@
               props.row.participants
             }}</q-td>
             <q-td key="skill" style="width: 10%">{{ props.row.skill }}</q-td>
-            <q-td key="activityState"  style="width: 10%" class="text-center">
-            
-              <q-badge 
+            <q-td key="activityState" style="width: 10%" class="text-center">
+              <q-badge
                 :label="props.row.activityState"
                 :class="getStatusClass(props.row.activityState)"
                 class="status-badge"
@@ -103,12 +101,12 @@
                 unelevated
             /></q-td>
             <q-td class="q-gutter-x-sm" key="action" style="width: 8%">
-                  <q-icon clickable name="visibility" @click="goToPageDetail(props.row.id, true)">
-                    <q-tooltip>ดูรายละเอียด</q-tooltip>
-                  </q-icon>
-                  <q-icon clickable name="edit"  @click="goToPageDetail(props.row.id, false)">
-                    <q-tooltip>แก้ไข</q-tooltip>
-                  </q-icon>
+              <q-icon clickable name="visibility" @click="goToPageDetail(props.row.id, true)">
+                <q-tooltip>ดูรายละเอียด</q-tooltip>
+              </q-icon>
+              <q-icon clickable name="edit" @click="goToPageDetail(props.row.id, false)">
+                <q-tooltip>แก้ไข</q-tooltip>
+              </q-icon>
             </q-td>
           </q-tr>
         </template>
@@ -126,7 +124,6 @@
             v-model="query2.search"
             label="ค้นหา ชื่อกิจกรรม"
             class="q-mr-sm searchbox"
-            @keyup.enter="data2"
             :style="{ boxShadow: 'none' }"
           >
             <template v-slot:append>
@@ -211,12 +208,12 @@
                 unelevated
             /></q-td>
             <q-td class="q-gutter-x-sm" key="action" style="width: 8%">
-               <q-icon clickable name="visibility" @click="goToPageDetail(props.row.id, true)">
+              <q-icon clickable name="visibility" @click="goToPageDetail(props.row.id, true)">
                 <q-tooltip>ดูรายละเอียด</q-tooltip>
-                  </q-icon>
-                  <q-icon clickable name="edit"  @click="goToPageDetail(props.row.id, false)">
-                    <q-tooltip>แก้ไข</q-tooltip>
-                  </q-icon>
+              </q-icon>
+              <q-icon clickable name="edit" @click="goToPageDetail(props.row.id, false)">
+                <q-tooltip>แก้ไข</q-tooltip>
+              </q-icon>
             </q-td>
           </q-tr>
         </template></q-table
@@ -233,7 +230,6 @@
             outlined
             v-model="query3.search"
             label="ค้นหา ชื่อกิจกรรม"
-            @keyup.enter="data3"
             class="q-mr-sm searchbox"
             :style="{ boxShadow: 'none' }"
           >
@@ -310,7 +306,7 @@
               props.row.participants
             }}</q-td>
             <q-td key="skill" style="width: 10%">{{ props.row.skill }}</q-td>
-            <q-td key="activityState" style="width: 10%;">
+            <q-td key="activityState" style="width: 10%">
               <q-badge
                 :label="props.row.activityState"
                 :class="getStatusClass(props.row.activityState)"
@@ -320,18 +316,18 @@
             <q-td class="q-gutter-x-sm" key="action" style="width: 8%">
               <q-icon clickable name="visibility" @click="goToPageDetail(props.row.id, true)">
                 <q-tooltip>ดูรายละเอียด</q-tooltip>
-                  </q-icon>
-                  <q-icon clickable name="edit"  @click="goToPageDetail(props.row.id, false)">
-                    <q-tooltip>แก้ไข</q-tooltip>
-                  </q-icon>
+              </q-icon>
+              <q-icon clickable name="edit" @click="goToPageDetail(props.row.id, false)">
+                <q-tooltip>แก้ไข</q-tooltip>
+              </q-icon>
             </q-td>
           </q-tr>
         </template></q-table
       >
     </section>
 
-    <!-- ตางราง 4 -->  
-     <section class="q-mt-lg">
+    <!-- ตางราง 4 -->
+    <section class="q-mt-lg">
       <div class="row justify-between items-center">
         <div class="text-h6">กิจกรรมที่ถูกยกเลิก</div>
         <div class="row">
@@ -340,7 +336,6 @@
             outlined
             v-model="query4.search"
             label="ค้นหา ชื่อกิจกรรม"
-            @keyup.enter="data4"
             class="q-mr-sm searchbox"
             :style="{ boxShadow: 'none' }"
           >
@@ -366,7 +361,6 @@
         :columns="columns"
         v-model:pagination="pagination4"
         :rows-per-page-options="[5, 7, 10, 15, 20]"
-      
         row-key="id"
         class="q-mt-md my-sticky-header-table"
       >
@@ -417,7 +411,7 @@
               props.row.participants
             }}</q-td>
             <q-td key="skill" style="width: 10%">{{ props.row.skill }}</q-td>
-            <q-td key="activityState" style="width: 10%;">
+            <q-td key="activityState" style="width: 10%">
               <q-badge
                 :label="props.row.activityState"
                 :class="getStatusClass(props.row.activityState)"
@@ -427,10 +421,10 @@
             <q-td class="q-gutter-x-sm" key="action" style="width: 8%">
               <q-icon clickable name="visibility" @click="goToPageDetail(props.row.id, true)">
                 <q-tooltip>ดูรายละเอียด</q-tooltip>
-                  </q-icon>
-                  <q-icon clickable name="edit"  @click="goToPageDetail(props.row.id, false)">
-                    <q-tooltip>แก้ไข</q-tooltip>
-                  </q-icon>
+              </q-icon>
+              <q-icon clickable name="edit" @click="goToPageDetail(props.row.id, false)">
+                <q-tooltip>แก้ไข</q-tooltip>
+              </q-icon>
             </q-td>
           </q-tr>
         </template></q-table
@@ -443,12 +437,13 @@
 import 'dayjs/locale/th'
 import dayjs from 'dayjs'
 import { useRouter } from 'vue-router'
-import { nextTick, onMounted, ref } from 'vue'
+import { nextTick, onMounted, ref, watch } from 'vue'
 import buddhistEra from 'dayjs/plugin/buddhistEra'
 import { ActivityService } from 'src/services/activity'
 import type { ActivityPagination } from 'src/types/pagination'
 import type { Activity, ActivityItem } from 'src/types/activity'
 import FilterDialog from 'src/components/Dialog/FilterDialog.vue'
+import debounce from 'lodash.debounce'
 
 dayjs.locale('th')
 dayjs.extend(buddhistEra)
@@ -536,7 +531,6 @@ const data4 = async () => {
 
   activitys4.value = data.data
 }
-
 
 const applyFilters1 = async (selectedFilters: SelectedFilters) => {
   query1.value.studentYear = selectedFilters.year.map(Number)
@@ -793,7 +787,6 @@ const pagination4 = ref({
   rowsNumber: 0,
 })
 
-
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 async function onRequest1(props: any) {
   console.log('onRequest1 ' + props.pagination.sortBy + ' order ' + props.pagination.descending)
@@ -835,6 +828,58 @@ async function onRequest3(props: any) {
 
 //   await data4()
 // }
+
+// Debounced Search Function 1
+const debouncedSearch = debounce(async () => {
+  query1.value.page = 1 // รีเซต page เมื่อ search
+  await data1()
+}, 500) // หน่วง 500ms
+
+watch(
+  () => query1.value.search,
+  async () => {
+    await debouncedSearch()
+  },
+)
+
+// Debounced Search Function 2
+const debouncedSearch2 = debounce(async () => {
+  query2.value.page = 1 // รีเซต page เมื่อ search
+  await data2()
+}, 500) // หน่วง 500ms
+
+watch(
+  () => query2.value.search,
+  async () => {
+    await debouncedSearch2()
+  },
+)
+
+// Debounced Search Function 3
+const debouncedSearch3 = debounce(async () => {
+  query3.value.page = 1 // รีเซต page เมื่อ search
+  await data3()
+}, 500) // หน่วง 500ms
+
+watch(
+  () => query3.value.search,
+  async () => {
+    await debouncedSearch3()
+  },
+)
+
+// Debounced Search Function 4
+const debouncedSearch4 = debounce(async () => {
+  query4.value.page = 1 // รีเซต page เมื่อ search
+  await data4()
+}, 500) // หน่วง 500ms
+
+watch(
+  () => query4.value.search,
+  async () => {
+    await debouncedSearch4()
+  },
+)
 </script>
 
 <style lang="scss">
@@ -926,7 +971,6 @@ async function onRequest3(props: any) {
   /* ป้องกันการขยายแนวนอนเกินไป */
   white-space: nowrap;
 }
-
 
 .btnadd {
   background-color: #14279b;
