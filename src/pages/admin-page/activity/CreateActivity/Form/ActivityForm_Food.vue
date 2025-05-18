@@ -366,7 +366,7 @@ onMounted(async () => {
   width: 660px;
   max-width: 100%;
 }
-@media(max-width: 1625px){
+@media(max-width: 1880px){
   .input-container {
     width: 530px;
     max-width: 100%;

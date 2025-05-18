@@ -412,7 +412,7 @@ watch(() => props.endTime, (newVal) => {
 ::v-deep(input[type='number']) {
   -moz-appearance: textfield;
 }
-@media(max-width: 1625px){
+@media(max-width: 1880px){
   .input-container {
     width: 200px;
     max-width: 100%;

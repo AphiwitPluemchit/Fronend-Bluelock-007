@@ -210,7 +210,7 @@ watch(
 ::v-deep(.q-icon) {
   font-size: 18px;
 }
-@media(max-width: 1625px){
+@media(max-width: 1880px){
   .input-container {
     width: 530px;
     max-width: 100%;
