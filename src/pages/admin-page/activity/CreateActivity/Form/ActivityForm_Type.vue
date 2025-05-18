@@ -67,7 +67,7 @@ const updateActivityType = (type: string) => {
   flex-wrap: wrap;
   gap: 10px;
 }
-@media(max-width: 1625px){
+@media(max-width: 1880px){
   .input-container {
     width: 500px;
     max-width: 100%;

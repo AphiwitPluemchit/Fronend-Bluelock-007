@@ -366,7 +366,7 @@
         :columns="columns"
         v-model:pagination="pagination4"
         :rows-per-page-options="[5, 7, 10, 15, 20]"
-      
+        @request="onRequest4"
         row-key="id"
         class="q-mt-md my-sticky-header-table"
       >
@@ -826,15 +826,16 @@ async function onRequest3(props: any) {
 
   await data3()
 }
-// async function onRequest4(props: any) {
-//   const { page, rowsPerPage, sortBy, descending } = props.pagination
-//   query4.value.page = page
-//   query4.value.limit = rowsPerPage
-//   query4.value.sortBy = sortBy
-//   query4.value.order = descending ? 'desc' : 'asc'
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+async function onRequest4(props: any) {
+  const { page, rowsPerPage, sortBy, descending } = props.pagination
+  query4.value.page = page
+  query4.value.limit = rowsPerPage
+  query4.value.sortBy = sortBy
+  query4.value.order = descending ? 'desc' : 'asc'
 
-//   await data4()
-// }
+  await data4()
+}
 </script>
 
 <style lang="scss">

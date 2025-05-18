@@ -77,7 +77,7 @@ const toggleDepartment = (value: string) => {
   flex-wrap: wrap;
   gap: 25px;
 }
-@media(max-width: 1625px){
+@media(max-width: 1880px){
   .input-container {
     width: 500px;
     max-width: 100%;

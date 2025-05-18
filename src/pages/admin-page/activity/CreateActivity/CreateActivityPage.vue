@@ -83,7 +83,7 @@ const breadcrumbs = ref({
   font-weight: bold;
   font-family: 'Noto Serif Thai', serif;
 }
-@media(max-width: 1625px) {
+@media(max-width: 1880px) {
   .wrapper {
     gap: 30px;
     padding: 20px;

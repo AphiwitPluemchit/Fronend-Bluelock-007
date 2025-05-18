@@ -157,7 +157,7 @@ const selectRoom = (room: string) => {
   max-width: 100%;
   height: 400px;
 }
-@media(max-width: 1625px){
+@media(max-width: 1880px){
   .input-container {
     width: 530px;
     max-width: 100%;
