@@ -1,5 +1,5 @@
 export type Food = {
-  id: string
+  id?: string
   name: string
 }
 
