@@ -57,6 +57,7 @@ const showCancelDialog = ref(false)
 const showSuccessDialog = ref(false)
 const activityNameError = ref('')
 const activityNameInput = ref<InstanceType<typeof QInput> | null>(null)
+const dateRefs = ref<Record<number, InstanceType<typeof ActivityForm_ActivityDate> | null>>({})
 const formTop = ref<HTMLElement | null>(null)
 const defaultTime = ref({
   startTime: '00:00',
@@ -262,9 +263,14 @@ const saveChanges = async () => {
   activityNameError.value = ''
   if (!activityName.value.trim()) {
     activityNameError.value = 'กรุณากรอกชื่อกิจกรรมหลัก'
-
     await nextTick()
     activityNameInput.value?.$el?.scrollIntoView({ behavior: 'smooth', block: 'center' })
+    return
+  }
+    const validDates = await Promise.all(
+    subActivities.value.map((_, index) => dateRefs.value[index]?.validate?.() ?? true),
+  )
+  if (validDates.includes(false)) {
     return
   }
   updated.name = activityName.value
@@ -537,6 +543,7 @@ const resetFormToOriginal = () => {
 
       <!-- Date -->
       <ActivityForm_ActivityDate
+       :ref="(el) => (dateRefs[index] = el as InstanceType<typeof ActivityForm_ActivityDate>)"
         v-model="subActivity.activityDateInternal"
         @update:modelValue="(dates) => generateDaysInRange(dates, index)"
         :disable="!isEditing"

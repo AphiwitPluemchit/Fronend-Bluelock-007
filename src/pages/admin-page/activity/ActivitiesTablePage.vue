@@ -124,7 +124,7 @@
             v-model="query2.search"
             label="ค้นหา ชื่อกิจกรรม"
             class="q-mr-sm searchbox"
-            :style="{ boxShadow: 'none' }"
+         :style="{ border: 'none' }"
           >
             <template v-slot:append>
               <q-icon name="search" />
@@ -231,7 +231,7 @@
             v-model="query3.search"
             label="ค้นหา ชื่อกิจกรรม"
             class="q-mr-sm searchbox"
-            :style="{ boxShadow: 'none' }"
+            :style="{ border: 'none' }"
           >
             <template v-slot:append>
               <q-icon name="search" />
@@ -337,7 +337,7 @@
             v-model="query4.search"
             label="ค้นหา ชื่อกิจกรรม"
             class="q-mr-sm searchbox"
-            :style="{ boxShadow: 'none' }"
+            :style="{ border: 'none' }"
           >
             <template v-slot:append>
               <q-icon name="search" />

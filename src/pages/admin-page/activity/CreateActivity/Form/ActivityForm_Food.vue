@@ -32,9 +32,14 @@ watch(
 )
 const openFoodDialog = () => {
   if (!props.disable) {
+    // sync ทุกครั้งก่อนเปิด
+    if (props.foodMenu) {
+      selectedFoods.value = [...props.foodMenu]
+    }
     showFoodDialog.value = true
   }
 }
+
 const toggleSelection = (name: string) => {
   if (props.disable) return
 
@@ -47,20 +52,15 @@ const toggleSelection = (name: string) => {
     selectedFoods.value.push({ id, name })
   }
 }
-const confirmSelection = async (saveToBackend: boolean = false) => {
+const confirmSelection = () => {
   if (props.disable) return
 
   foodMenuDisplay.value = selectedFoods.value.map((f) => f.name).join(', ')
   emit('update:foodMenu', selectedFoods.value)
   emit('update:foodMenuDisplay', foodMenuDisplay.value)
 
-  if (saveToBackend) {
-    try {
-      await FoodService.createAll(menuItems.value.map((name) => ({ id: '', name })))
-    } catch (error) {
-      console.error('❌ บันทึกข้อมูลไม่สำเร็จ:', error)
-    }
-  }
+  
+  
   showFoodDialog.value = false
   localStorage.clear()
 }
@@ -76,37 +76,61 @@ const startEditing = () => {
     inputField.value?.focus()
   })
 }
-const addFood = () => {
+const addFood = async () => {
   if (props.disable) return
   const newName = newFoodName.value.trim()
 
   const isDuplicate = menuItems.value.some(
-    (existing) => existing.toLowerCase() === newName.toLowerCase(),
+    (existing) => existing.toLowerCase() === newName.toLowerCase()
   )
 
   if (newName !== '' && !isDuplicate) {
-    menuItems.value.push(newName)
-    localStorage.setItem('menuItems', JSON.stringify(menuItems.value))
+    try {
+      const created = await FoodService.createFood({ name: newName })
+      if (created?.id && created.name) {
+        // เพิ่มรายการใหม่
+        menuItems.value.push(created.name)
+        menuItemsIdMap.value[created.name] = created.id
+      }
+    } catch (error) {
+      console.error('❌ เพิ่มอาหารไม่สำเร็จ:', error)
+    }
   }
 
   newFoodName.value = ''
   addingNewFood.value = false
 }
-const removeMenuItem = (name: string) => {
+const removeMenuItem = async (name: string) => {
   if (props.disable) return
-  menuItems.value = menuItems.value.filter((item) => item !== name)
 
-  // หากลบเมนูที่ถูกเลือกอยู่ด้วย ให้ลบจาก selectedFoods ด้วย
-  selectedFoods.value = selectedFoods.value.filter((f) => f.name !== name)
+  const id = menuItemsIdMap.value[name]
+  if (!id) {
+    console.warn('ไม่พบ ID ของเมนูนี้:', name)
+    return
+  }
 
-  // อัปเดตใน localStorage ด้วย
-  localStorage.setItem('menuItems', JSON.stringify(menuItems.value))
+  try {
+    await FoodService.deleteOne(id)
+
+    // ลบจาก local state
+    menuItems.value = menuItems.value.filter((item) => item !== name)
+    delete menuItemsIdMap.value[name]
+    selectedFoods.value = selectedFoods.value.filter((f) => f.name !== name)
+
+    localStorage.setItem('menuItems', JSON.stringify(menuItems.value))
+  } catch (error) {
+    console.error('❌ ลบอาหารไม่สำเร็จ:', error)
+  }
 }
+
 onMounted(async () => {
   try {
     const foods: Food[] = await FoodService.getAll()
     menuItems.value = foods.map((food) => food.name)
-    menuItemsIdMap.value = Object.fromEntries(foods.map((f) => [f.name, f.id]))
+
+    menuItemsIdMap.value = Object.fromEntries(
+      foods.filter(f => f.id).map(f => [f.name, f.id!])
+    )
 
     const storedMenuItems = localStorage.getItem('menuItems')
     if (storedMenuItems) {
@@ -117,6 +141,7 @@ onMounted(async () => {
     console.error('❌ โหลดรายการอาหารล้มเหลว', error)
   }
 })
+
 </script>
 
 <template>
@@ -202,7 +227,7 @@ onMounted(async () => {
         <q-btn
           class="btnconfirm"
           label="ยืนยัน"
-          @click="confirmSelection(true)"
+          @click="confirmSelection"
           :disable="disable"
         />
       </div>
