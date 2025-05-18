@@ -2,6 +2,7 @@
 import { ref, computed, onMounted } from 'vue'
 import { useStudentStore } from 'src/stores/student'
 import AppBreadcrumbs from 'src/components/AppBreadcrumbs.vue'
+import { watch } from 'vue'
 
 interface Student {
   id?: string
@@ -30,8 +31,10 @@ const studentStore = useStudentStore()
 const selectedYear = ref(62)
 const yearOptions = [60, 61, 62, 63, 64, 65, 66]
 
-const selectedMajors = ref<string[]>([]) // ใช้ให้เลือกหลายสาขา
+const selectedMajors = ref<string[]>([])
 const majorOptions = ['CS', 'AI', 'SE', 'ITDI']
+
+const selectedStudents = ref<string[]>([])
 
 onMounted(async () => {
   try {
@@ -42,7 +45,6 @@ onMounted(async () => {
 })
 
 const filteredStudents = computed(() => {
-  // กรองตามปีและสาขาที่เลือก
   return studentStore.students.filter((student) => {
     const isYearMatch = student.code.startsWith(selectedYear.value.toString())
     const isMajorMatch =
@@ -72,6 +74,9 @@ const columns = [
   { name: 'status', label: 'สถานะ', field: 'status', align: 'center' as const },
 ]
 
+// สร้าง computed สำหรับ columns ที่จะ render โดยตัด col ที่ชื่อ 'selected' ทิ้ง
+const visibleColumns = computed(() => columns.filter((col) => col.name !== 'selected'))
+
 const getStatusLabel = (student: Student): string => {
   if (student.status === 0) return 'พ้นสภาพ'
   if (student.softSkill >= 30 && student.hardSkill >= 12) return 'ชั่วโมงครบแล้ว'
@@ -89,18 +94,33 @@ const getStatusClass = (status: string): string => {
   return ''
 }
 
-const confirmSelection = () => {
-  console.log('ยืนยันการเลือกปี:', selectedYear.value, 'สาขา:', selectedMajors.value)
+const saveStudents = async () => {
+  try {
+    for (const code of selectedStudents.value) {
+      const student = studentStore.students.find((s) => s.code === code)
+      if (student) {
+        const updatedStudent = { ...student, status: 0 }
+        await studentStore.updateStudent(updatedStudent)
+      }
+    }
+    await studentStore.getStudents()
+    selectedStudents.value = []
+    console.log('จัดเก็บนิสิตเรียบร้อยแล้ว')
+  } catch (error) {
+    console.error('จัดเก็บนิสิตล้มเหลว:', error)
+  }
 }
-
-const saveStudents = () => {
-  console.log('จัดเก็บข้อมูลนิสิต...')
-}
+watch(
+  filteredStudents,
+  (newStudents) => {
+    selectedStudents.value = newStudents.map((s) => s.code)
+  },
+  { immediate: true },
+)
 </script>
 
 <template>
   <q-page class="q-pa-md">
-    <!-- ส่วนหัวของหน้า -->
     <div style="margin-top: 20px">
       <AppBreadcrumbs :breadcrumbs="breadcrumbs" />
     </div>
@@ -116,11 +136,10 @@ const saveStudents = () => {
           v-model="selectedYear"
           :options="yearOptions"
           label="รหัสปีนิสิต"
-          option-label="label"
-          option-value="value"
           emit-value
           map-options
           class="q-mr-sm dropdown"
+          :style="{ border: 'none' }"
         />
 
         <q-select
@@ -129,14 +148,12 @@ const saveStudents = () => {
           v-model="selectedMajors"
           :options="majorOptions"
           label="สาขาที่ต้องการจัดเก็บ"
-          option-label="label"
-          option-value="value"
+          multiple
           emit-value
           map-options
           class="q-mr-sm dropdown"
+          :style="{ border: 'none' }"
         />
-
-        <q-btn color="primary" label="ยืนยัน" style="margin-left: 20px" @click="confirmSelection" />
       </div>
 
       <div class="col-12 row justify-center items-center q-pr-md">
@@ -154,7 +171,9 @@ const saveStudents = () => {
       >
         <template v-slot:header="props">
           <q-tr :props="props" class="sticky-header">
-            <q-th v-for="col in props.cols" :key="col.name" :props="props">
+            <q-th style="width: 50px; text-align: center"> </q-th>
+            <!-- ใช้ visibleColumns แทน props.cols -->
+            <q-th v-for="col in visibleColumns" :key="col.name" :props="props">
               {{ col.label }}
             </q-th>
           </q-tr>
@@ -162,10 +181,18 @@ const saveStudents = () => {
 
         <template v-slot:body="props">
           <q-tr :props="props">
-            <q-td key="index">{{ props.rowIndex + 1 }}</q-td>
-            <q-td key="code">{{ props.row.code }}</q-td>
+            <q-td style="width: 50px; text-align: center">
+              <q-checkbox
+                v-model="selectedStudents"
+                :val="props.row.code"
+                color="primary"
+                dense
+                keep-focus
+              />
+            </q-td>
+            <q-td>{{ props.rowIndex + 1 }}</q-td>
+            <q-td>{{ props.row.code }}</q-td>
             <q-td
-              key="name"
               style="
                 max-width: 200px;
                 white-space: nowrap;
@@ -175,9 +202,9 @@ const saveStudents = () => {
             >
               {{ props.row.name }}
             </q-td>
-            <q-td key="major">{{ props.row.major }}</q-td>
-            <q-td class="text-center" key="softskill">{{ props.row.softSkill }}/30</q-td>
-            <q-td class="text-center" key="hardskill">{{ props.row.hardSkill }}/12</q-td>
+            <q-td>{{ props.row.major }}</q-td>
+            <q-td class="text-center">{{ props.row.softSkill }}/30</q-td>
+            <q-td class="text-center">{{ props.row.hardSkill }}/12</q-td>
             <q-td class="text-center">
               <q-badge
                 :label="getStatusLabel(props.row)"
@@ -192,7 +219,16 @@ const saveStudents = () => {
       </q-table>
 
       <div class="row justify-end q-mt-md">
-        <q-btn color="primary" label="จัดเก็บนิสิต" @click="saveStudents" />
+        <q-btn
+          dense
+          outlined
+          icon="save"
+          color="primary"
+          label="จัดเก็บนิสิต"
+          class="btnadd"
+          bo
+          @click="saveStudents"
+        />
       </div>
     </section>
   </q-page>
@@ -206,7 +242,6 @@ const saveStudents = () => {
   padding: 3px 30px;
   width: 130px;
 }
-
 .status-high {
   background-color: #d0ffc5;
   color: #009812;
@@ -214,7 +249,6 @@ const saveStudents = () => {
   padding: 3px 30px;
   width: 130px;
 }
-
 .status-medium {
   background-color: #ffe7ba;
   color: #ff6f00;
@@ -222,7 +256,6 @@ const saveStudents = () => {
   padding: 3px 30px;
   width: 130px;
 }
-
 .status-low {
   background-color: #ffc5c5;
   color: #ff0000;
@@ -230,7 +263,6 @@ const saveStudents = () => {
   padding: 3px 30px;
   width: 130px;
 }
-
 .status-terminated {
   background-color: #e0e0e0;
   color: #5f5f5f;
@@ -259,19 +291,6 @@ const saveStudents = () => {
   width: 100%;
 }
 
-// .student-table-wrapper {
-//   display: flex;
-//   width: 100%;
-//   max-width: 100%;
-//   display: flex;
-//   flex-direction: column;
-// }
-
-// .my-sticky-header-table {
-//   min-height: 450px;
-//   overflow: auto;
-// }
-
 .q-table table {
   table-layout: fixed;
 }
@@ -285,18 +304,15 @@ const saveStudents = () => {
 
 .new-sticky-header {
   .my-sticky-header-table {
-    /* Fix header */
     thead tr:first-child th {
       background-color: #f5f5f5;
     }
 
-    /* Make tbody scrollable */
     tbody {
       display: block;
       overflow-y: auto;
     }
 
-    /* Ensure header and body columns align */
     thead,
     tbody tr {
       display: table;
@@ -304,7 +320,6 @@ const saveStudents = () => {
       table-layout: fixed;
     }
 
-    /* Optional: ปรับ scrollbar ไม่ทับ */
     tbody::-webkit-scrollbar {
       width: 12px;
     }

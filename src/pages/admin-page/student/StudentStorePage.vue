@@ -229,7 +229,7 @@ const goToConfirmPage = () => {
             v-model="search1"
             label="ค้นหา ชื่อนิสิต"
             class="q-mr-sm searchbox"
-            :style="{ boxShadow: 'none' }"
+            :style="{ border: 'none' }"
           >
             <template v-slot:append>
               <q-icon name="search" />
@@ -250,6 +250,7 @@ const goToConfirmPage = () => {
               icon="add"
               label="เพิ่มข้อมูล"
               class="btnadd"
+              bo
               @click="goToConfirmPage"
             />
           </div>
