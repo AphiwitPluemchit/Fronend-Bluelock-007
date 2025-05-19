@@ -2,11 +2,12 @@
   <q-drawer
     v-model="leftDrawerOpen"
     show-if-above
-    behavior="desktop"
+    :behavior="drawerBehavior"
     side="left"
     bordered
+    class="admin-sidebar"
     :width="260"
-    style="font-size: 18px; font-weight: 500; margin-right: 10px; background-color: #EDF0F5;;"
+    style="font-size: 18px; font-weight: 500; margin-right: 10px; background-color: #edf0f5"
   >
     <!-- ให้ q-list เต็มความสูง และแบ่งพื้นที่ระหว่างเมนู กับ Logout -->
     <q-list padding class="menu-list flex column justify-between full-height">
@@ -44,9 +45,11 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, computed } from 'vue'
+import { useQuasar } from 'quasar'
 import { useRouter } from 'vue-router'
 
+const $q = useQuasar()
 const router = useRouter()
 const leftDrawerOpen = ref(false)
 
@@ -57,7 +60,9 @@ const linksList = [
   { title: 'รายงานข้อมูล', icon: 'assessment', link: '/Admin/Report' },
   { title: 'ใบประกาศนียบัตร', icon: 'school', link: '/Admin/CertificateManagement' },
 ]
-
+const drawerBehavior = computed(() => {
+   return $q.screen.width < 1100 ?  'mobile' : 'desktop' // ถ้าหน้าจอเล็กกว่า lg (<1100px) ใช้ mobile
+})
 async function logout() {
   await router.push('/')
 }
@@ -109,3 +114,24 @@ defineExpose({ toggleSidebar })
 .menu-list .q-item
   border-radius: 0 32px 32px 0
 </style>
+
+<style>
+@media (max-width: 1100px) {
+  .custom-drawer-wrapper .q-drawer {
+    top: 64px !important;
+    height: calc(100% - 64px) !important;
+  }
+
+  .q-header {
+    z-index: 3000 !important;
+  }
+  body.q-body--drawer-left-opened::after {
+    content: none !important;
+    background: transparent !important;
+    pointer-events: none !important; /* ✅ สำคัญมาก */
+  }
+}
+</style>
+
+
+

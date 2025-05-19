@@ -140,7 +140,7 @@ const toggleYear = (value: string) => {
     gap: 10px;
 }
 }
-@media (max-width: 450px) {
+@media (max-width: 455px) {
   .year-btn-group {
     display: grid;
     grid-template-columns: repeat(2, 1fr);

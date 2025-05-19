@@ -54,7 +54,7 @@ defineExpose({ selectedFile })
   display: flex;
   justify-content: center;
   align-items: center;
-  background-color: #e2e2e2;
+  background-color: #ececec;
   cursor: pointer;
   transition: border-color 0.3s;
 }

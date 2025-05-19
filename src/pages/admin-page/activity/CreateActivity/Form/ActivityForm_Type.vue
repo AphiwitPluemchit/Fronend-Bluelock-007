@@ -121,7 +121,7 @@ const updateActivityType = (type: string) => {
   background-color: #ffffff;
 }
 }
-@media (max-width: 470px) {
+@media (max-width: 475px) {
   .activityType-btn-group{
     display: grid;
     grid-template-columns: repeat(1, 1fr);

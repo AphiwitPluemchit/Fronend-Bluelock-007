@@ -46,7 +46,7 @@
   </q-breadcrumbs>
 
   <!-- หัวข้อหลักของหน้า -->
-  <div class="text-h6 q-mt-sm">
+  <div class="text-h4 q-mt-sm" style="margin-top: 30px;">
     {{ breadcrumbs.nextPage?.title ?? breadcrumbs.currentPage.title }}
   </div>
 </template>

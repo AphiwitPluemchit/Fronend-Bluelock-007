@@ -2,7 +2,9 @@
   <q-layout view="hHh Lpr lFf">
     <!-- ส่ง event จาก Navbar ไป Sidebar -->
     <MenuNavbar @toggleSidebar="adminSidebar?.toggleSidebar()" />
-    <MenuAdminSidebar ref="adminSidebar" />
+     <div class="custom-drawer-wrapper">
+      <MenuAdminSidebar ref="adminSidebar" />
+    </div>
     <q-page-container>
       <div class="q-mx-auto" style="max-width: 1600px"><router-view /></div>
     </q-page-container>

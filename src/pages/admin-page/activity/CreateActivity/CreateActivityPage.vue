@@ -12,7 +12,7 @@ const handleFileSelected = (file: File) => {
 }
 const breadcrumbs = ref({
   previousPage: { title: 'จัดการกิจกรรม', path: '/Admin/ActivitiesManagement' },
-  currentPage: { title: 'สร้างกิจกรรม', path: '/Admin/ActivitiesManagement/CreateActivity' },
+  currentPage: { title: 'สร้างกิจกรรม', path: '/Admin/ActivitiesManagement/CreateActivityPage' },
   icon: 'description',
 })
 </script>
@@ -45,7 +45,6 @@ const breadcrumbs = ref({
   display: flex;
   align-items: flex-start;
   gap: 150px;
-  background-color: #edf0f5;
   padding: 30px;
   border-radius: 12px;
   margin-top: 20px;
@@ -69,7 +68,7 @@ const breadcrumbs = ref({
   flex-grow: 1;
   overflow-x: hidden;
   overflow-y: auto;
-  max-height: 660px;
+  max-height: 640px;
   margin-right: 50px;
 }
 

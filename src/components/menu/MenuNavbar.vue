@@ -1,5 +1,5 @@
 <template>
-  <q-header position="fixed" style="height: 7cap" class="content-center shadow-2">
+  <q-header position="fixed" style="height: 64px;" class="content-center shadow-2">
     <q-toolbar>
       <!-- ปุ่มกดเปิด/ปิด Sidebar -->
       <q-btn flat dense round icon="menu" size="lg" aria-label="Menu" @click="toggleLeftDrawer" />
