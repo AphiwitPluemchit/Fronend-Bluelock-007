@@ -35,6 +35,7 @@ const updateActivityType = (type: string) => {
 </template>
 
 <style scoped>
+
 .activityType-btn {
   width: 200px;
   height: 40px;

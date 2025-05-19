@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { defineProps, defineEmits, computed, ref, watch } from 'vue'
+import { defineProps, defineEmits, computed, ref, watch, nextTick } from 'vue'
 
 const props = defineProps<{
   modelValue: string
@@ -8,6 +8,8 @@ const props = defineProps<{
 const CloseRegisDates = ref<string>(props.modelValue)
 const datePopupRef = ref(null)
 const emit = defineEmits<{ (event: 'update:modelValue', value: string): void }>()
+const closedateError = ref('')
+const inputRef = ref<HTMLElement | null>(null)
 
 const thaiLocale = {
   days: ['อาทิตย์', 'จันทร์', 'อังคาร', 'พุธ', 'พฤหัสบดี', 'ศุกร์', 'เสาร์'],
@@ -44,9 +46,24 @@ const thaiLocale = {
 const formattedCloseRegisDate = computed(() => {
   return CloseRegisDates.value ? formatThaiDate(CloseRegisDates.value) : ''
 })
+const validate = async () => {
+  if (!CloseRegisDates.value || CloseRegisDates.value.length === 0) {
+    closedateError.value = 'กรุณาเลือกวันที่ปิดลงทะเบียน'
+    await nextTick()
+    inputRef.value?.scrollIntoView({ behavior: 'smooth', block: 'center' })
+    return false
+  }
+  closedateError.value = ''
+  return true
+}
+defineExpose({ validate })
+
 const onDateChange = () => {
   if (props.disable) return
   emit('update:modelValue', CloseRegisDates.value)
+  if (CloseRegisDates.value) {
+    closedateError.value = ''
+  }
 }
 const formatThaiDate = (dateStr: string): string => {
   if (!dateStr) return ''
@@ -71,48 +88,66 @@ watch(
   () => props.modelValue,
   (newVal) => {
     CloseRegisDates.value = newVal
-  },
+    emit('update:modelValue', newVal)
+
+    // ถ้ามีค่าใหม่ → ล้าง error
+    if (newVal) {
+      closedateError.value = ''
+    }
+  }
 )
 </script>
 
 <template>
   <div class="input-group">
-    <p class="label label_minWidth">วันที่ปิดลงทะเบียน :</p>
-    <q-input
-      outlined
-      :model-value="formattedCloseRegisDate"
-      readonly
-      class="input-container"
-      :disable="disable"
-    >
-      <template v-slot:prepend>
-        <q-icon
-          name="event"
-          class="cursor-pointer"
-          :class="{ 'disabled-icon': disable }"
-          style="color: black"
-        >
-          <q-menu ref="datePopupRef" style="overflow: visible" v-if="!disable">
-            <q-date
-              v-model="CloseRegisDates"
-              mask="YYYY-MM-DD"
-              today-btn
-              :locale="thaiLocale"
-              color="blue-8"
-              text-color="white"
-              minimal
-              first-day-of-week="1"
-              class="my-custom-calendar"
-              @update:model-value="onDateChange"
-            />
-          </q-menu>
-        </q-icon>
-      </template>
-    </q-input>
+    <p class="label label_minWidth" :class="{ 'label-error-shift': closedateError !== '' }">
+      วันที่ปิดลงทะเบียน :
+    </p>
+    <div class="input-container">
+      <q-input
+        ref="inputRef"
+        outlined
+        :model-value="formattedCloseRegisDate"
+        readonly
+        class="fix-q-input-height"
+        :disable="disable"
+        :error="closedateError !== ''"
+      >
+        <template v-slot:prepend>
+          <q-icon
+            name="event"
+            class="cursor-pointer"
+            :class="{ 'disabled-icon': disable }"
+            style="color: black"
+          >
+            <q-menu ref="datePopupRef" style="overflow: visible" v-if="!disable">
+              <q-date
+                v-model="CloseRegisDates"
+                mask="YYYY-MM-DD"
+                today-btn
+                :locale="thaiLocale"
+                color="blue-8"
+                text-color="white"
+                minimal
+                first-day-of-week="1"
+                class="my-custom-calendar"
+                @update:model-value="onDateChange"
+              />
+            </q-menu>
+          </q-icon>
+        </template>
+      </q-input>
+      <div v-if="closedateError" class="text-negative text-subtitle2 q-mt-xs">
+        {{ closedateError }}
+      </div>
+    </div>
   </div>
 </template>
 
 <style scoped>
+.label-error-shift {
+  transform: translateY(-12px);
+}
 .input-group {
   display: flex;
   align-items: center;
@@ -165,7 +200,7 @@ watch(
   width: 660px;
   max-width: 100%;
 }
-@media(max-width: 1880px){
+@media (max-width: 1880px) {
   .input-container {
     width: 530px;
     max-width: 100%;
@@ -175,7 +210,7 @@ watch(
   }
 }
 @media (max-width: 850px) {
-   .input-group:not(.no-wrap) {
+  .input-group:not(.no-wrap) {
     flex-direction: column;
     align-items: flex-start;
     margin-bottom: 10px !important;
@@ -196,14 +231,13 @@ watch(
     padding-left: 0;
     margin-left: 0;
   }
-
 }
 @media (max-width: 500px) {
   .input-group {
     flex-direction: column;
     align-items: flex-start;
     margin-bottom: 10px !important;
-    gap: 5px !important; 
+    gap: 5px !important;
   }
 
   .label {

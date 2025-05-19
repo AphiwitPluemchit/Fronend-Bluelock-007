@@ -1,39 +1,97 @@
 <script setup lang="ts">
-import { defineProps, defineEmits, ref, watch } from 'vue';
+import { defineProps, defineEmits, ref, watch, nextTick } from 'vue'
 
 const props = defineProps<{
-  modelValue: number | null;
-  disable?: boolean;
-}>();
+  modelValue: number | null
+  disable?: boolean
+}>()
+
+const emit = defineEmits<{
+  (event: 'update:modelValue', value: number): void
+}>()
+
 const localHours = ref<number | null>(props.modelValue ?? null)
-const emit = defineEmits<{ (event: 'update:modelValue', value: number): void }>();
+const hoursError = ref('')
+const inputRef = ref<HTMLElement | null>(null)
+
 watch(localHours, (newVal) => {
   emit('update:modelValue', newVal ?? 0)
-});
+
+  if (newVal !== null && newVal >= 0) {
+    hoursError.value = ''
+  }
+})
+
 watch(
   () => props.modelValue,
   (newVal) => {
-    localHours.value = newVal
-  }
+    localHours.value = newVal ?? null
+  },
 )
+
 const isNumber = (event: KeyboardEvent) => {
-  const charCode = event.which ? event.which : event.keyCode;
+  const charCode = event.which ? event.which : event.keyCode
   if (charCode < 48 || charCode > 57) {
-    event.preventDefault();
+    event.preventDefault()
   }
-};
+}
+
+// ✅ เพิ่ม validate เหมือน seat.vue
+const validate = async () => {
+  if (!localHours.value || localHours.value < 0) {
+    hoursError.value = 'กรุณากรอกจำนวนชั่วโมง'
+    await nextTick()
+    inputRef.value?.scrollIntoView({ behavior: 'smooth', block: 'center' })
+    return false
+  }
+  hoursError.value = ''
+  return true
+}
+
+defineExpose({ validate })
 </script>
 
 <template>
   <div class="input-group">
-    <p class="label label_minWidth">จำนวนชั่วโมง :</p>
-    <q-input outlined class="input-container" v-model="localHours" type="number" :disable="disable"
-      @keypress="isNumber"
+    <p class="label label_minWidth" :class="{ 'label-error-shift': hoursError !== '' }">จำนวนชั่วโมง :</p>
+    <div class="input-container">
+      <q-input
+        ref="inputRef"
+        outlined
+        class="fix-q-input-height"
+        v-model="localHours"
+        type="number"
+        @keypress="isNumber"
+        :disable="disable"
+        :error="hoursError !== ''"
       />
+      <div v-if="hoursError" class="text-negative text-subtitle2 q-mt-xs">
+        {{ hoursError }}
+      </div>
+    </div>
   </div>
 </template>
 
 <style scoped>
+.fix-q-input-height ::v-deep(.q-icon) {
+  font-size: 16px;
+}
+.fix-q-input-height ::v-deep(.q-field__control) {
+  height: 40px !important;
+  min-height: 40px !important;
+  padding-top: 0 !important;
+  padding-bottom: 0 !important;
+  display: flex;
+  align-items: center;
+}
+
+.fix-q-input-height ::v-deep(.q-field__append) {
+  align-items: center;
+  display: flex;
+}
+.label-error-shift {
+  transform: translateY(-12px);
+}
 .label {
   font-size: 20px;
   font-weight: normal;

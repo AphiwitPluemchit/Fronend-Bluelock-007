@@ -1,12 +1,16 @@
 <script setup lang="ts">
-import { ref, watch, computed } from 'vue'
+import { ref, watch, computed, nextTick } from 'vue'
 
 const showSuggestions = ref(false)
 const filteredRooms = ref<string[]>([])
 const searchText = ref('')
+const roomError = ref('')
+const inputRef = ref<HTMLElement | null>(null)
+
 const props = defineProps<{
   modelValue: string[]
   disable?: boolean
+  rooms?: string[]
 }>()
 const emit = defineEmits<{
   (e: 'update:modelValue', value: string[]): void
@@ -20,30 +24,13 @@ watch(selectedRoom, (val) => {
   emit('update:modelValue', val)
 })
 
-const allRooms = [
-  '11M280',
-  '5M210',
-  '4M210',
-  '3M210',
-  '7T05',
-  '6T05',
-  '5T05',
-  '6T01',
-  '6T02',
-  '6T03',
-  '6T04',
-  '5T01',
-  '5T02',
-  '5T03',
-  '5T04',
-  'Lab 4C01',
-  'Lab 4C02',
-  'Lab 4C03',
-  'Lab 3C01',
-  'Lab 3C02',
-  'Lab 3C03',
-  'Lab 3C04',
-]
+// ✅ ใช้ค่าจาก props.rooms ถ้ามี ไม่งั้นใช้ allRooms
+const allRooms = computed(() => props.rooms ?? [
+  '11M280', '5M210', '4M210', '3M210', '7T05', '6T05',
+  '5T05', '6T01', '6T02', '6T03', '6T04', '5T01', '5T02',
+  '5T03', '5T04', 'Lab 4C01', 'Lab 4C02', 'Lab 4C03',
+  'Lab 3C01', 'Lab 3C02', 'Lab 3C03', 'Lab 3C04',
+])
 
 const displayText = computed({
   get: () => selectedRoom.value.join(', '),
@@ -51,15 +38,16 @@ const displayText = computed({
     searchText.value = val
   },
 })
+
 const onFocus = () => {
-  filteredRooms.value = allRooms
+  filteredRooms.value = allRooms.value
   showSuggestions.value = true
 }
 const filterRooms = () => {
   const query = searchText.value.trim().toLowerCase()
   filteredRooms.value = query
-    ? allRooms.filter((room) => room.toLowerCase().includes(query))
-    : allRooms
+    ? allRooms.value.filter((room) => room.toLowerCase().includes(query))
+    : allRooms.value
   showSuggestions.value = true
 }
 const selectRoom = (room: string) => {
@@ -71,22 +59,46 @@ const selectRoom = (room: string) => {
     current.splice(index, 1)
   }
   selectedRoom.value = current
+   if (current.length > 0) {
+    roomError.value = ''
+  }
 }
+
+// ✅ validate ฟิลด์
+const validate = async () => {
+  if (!selectedRoom.value.length) {
+    roomError.value = 'กรุณาเลือกห้องอย่างน้อย 1 ห้อง'
+    await nextTick()
+    inputRef.value?.scrollIntoView({ behavior: 'smooth', block: 'center' })
+    return false
+  }
+  roomError.value = ''
+  return true
+}
+defineExpose({ validate })
+watch(
+  () => selectedRoom.value,
+  (val) => {
+    if (val.length > 0) {
+      roomError.value = ''
+    }
+  },
+)
 </script>
 
 <template>
   <div class="input-group">
-    <p class="label label_minWidth">ชื่อห้องที่จัดกิจกรรม :</p>
-
+    <p class="label label_minWidth" :class="{ 'label-error-shift': roomError !== '' }">ชื่อห้องที่จัดกิจกรรม :</p>
     <div class="input-container">
       <q-input
         outlined
         v-model="displayText"
         :disable="props.disable"
-        class="full-width"
+        class="full-width fix-q-input-height"
         @focus="onFocus"
         @input="filterRooms"
         ref="inputRef"
+        :error="roomError !== ''"
       >
         <q-menu
           v-if="!props.disable"
@@ -111,11 +123,34 @@ const selectRoom = (room: string) => {
           </q-list>
         </q-menu>
       </q-input>
+      <div v-if="roomError" class="text-negative text-subtitle2 q-mt-xs">
+        {{ roomError }}
+      </div>
     </div>
   </div>
 </template>
 
+
 <style scoped>
+.fix-q-input-height ::v-deep(.q-icon) {
+  font-size: 16px;
+}
+.fix-q-input-height ::v-deep(.q-field__control) {
+  height: 40px !important;
+  min-height: 40px !important;
+  padding-top: 0 !important;
+  padding-bottom: 0 !important;
+  display: flex;
+  align-items: center;
+}
+
+.fix-q-input-height ::v-deep(.q-field__append) {
+  align-items: center;
+  display: flex;
+}
+.label-error-shift {
+  transform: translateY(-12px);
+}
 .input-group {
   display: flex;
   align-items: center;
@@ -157,17 +192,17 @@ const selectRoom = (room: string) => {
   max-width: 100%;
   height: 400px;
 }
-@media(max-width: 1880px){
+@media (max-width: 1880px) {
   .input-container {
     width: 530px;
     max-width: 100%;
   }
   .label_minWidth {
-  min-width: 180px !important;
+    min-width: 180px !important;
   }
 }
 @media (max-width: 850px) {
-   .input-group:not(.no-wrap) {
+  .input-group:not(.no-wrap) {
     flex-direction: column;
     align-items: flex-start;
     margin-bottom: 10px !important;
@@ -175,7 +210,7 @@ const selectRoom = (room: string) => {
   }
   .input-container {
     width: 470px;
-    max-width: 100%; 
+    max-width: 100%;
   }
   .label {
     justify-content: flex-start;
@@ -194,7 +229,7 @@ const selectRoom = (room: string) => {
     flex-direction: column;
     align-items: flex-start;
     margin-bottom: 10px !important;
-    gap: 5px !important; 
+    gap: 5px !important;
   }
 
   .label {
@@ -212,7 +247,7 @@ const selectRoom = (room: string) => {
     width: 100%;
   }
   .dropdown-list {
-  height: 300px;
-}
+    height: 300px;
+  }
 }
 </style>

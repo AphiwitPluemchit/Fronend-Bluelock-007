@@ -1,34 +1,65 @@
 <script setup lang="ts">
-import { defineProps, defineEmits, computed } from 'vue';
+import { defineProps, defineEmits, computed, ref, nextTick, watch } from 'vue'
+
 interface YearOption {
-  label: string;
-  value: string;
+  label: string
+  value: string
 }
+
 const props = defineProps<{ 
-  modelValue: string[];
-  disable?: boolean; // เพิ่ม prop disable
-}>();
-const emit = defineEmits<{ (event: "update:modelValue", value: string[]): void }>();
-const selectedYears = computed(() => props.modelValue);
+  modelValue: string[]
+  disable?: boolean
+}>()
+
+const emit = defineEmits<{ (event: 'update:modelValue', value: string[]): void }>()
+
+const selectedYears = computed(() => props.modelValue)
+
 const yearOptions: YearOption[] = [
   { label: '1', value: '1' },
   { label: '2', value: '2' },
   { label: '3', value: '3' },
   { label: '4', value: '4' },
-];
+]
+
+const inputRef = ref<HTMLElement | null>(null)
+const yearError = ref('')
+
+// ✅ toggle function
 const toggleYear = (value: string) => {
-  if (props.disable) return; // ถ้า disable ห้ามกด
+  if (props.disable) return
   const newYears = selectedYears.value.includes(value)
     ? selectedYears.value.filter((item) => item !== value)
-    : [...selectedYears.value, value];
+    : [...selectedYears.value, value]
+  emit('update:modelValue', newYears)
+}
 
-  emit("update:modelValue", newYears);
-};
+// ✅ validation logic
+const validate = async () => {
+  if (props.modelValue.length === 0) {
+    yearError.value = 'กรุณาเลือกชั้นปีอย่างน้อย 1 ชั้นปี'
+    await nextTick()
+    inputRef.value?.scrollIntoView({ behavior: 'smooth', block: 'center' })
+    return false
+  }
+  yearError.value = ''
+  return true
+}
+
+defineExpose({ validate })
+watch(
+  () => props.modelValue,
+  (newVal) => {
+    if (newVal.length > 0) {
+      yearError.value = ''
+    }
+  }
+)
 </script>
 
 <template>
-  <div class="input-group">
-    <p class="label label_minWidth">ชั้นปี :</p>
+  <div class="input-group" ref="inputRef">
+    <p class="label label_minWidth" :class="{ 'label-error-shift': yearError !== '' }">ชั้นปี :</p>
     <div class="year-btn-group">
       <q-btn
         v-for="option in yearOptions"
@@ -40,11 +71,14 @@ const toggleYear = (value: string) => {
         :disable="disable"
       />
     </div>
+    <div v-if="yearError" class="text-negative text-subtitle2 q-mt-xs">
+      {{ yearError }}
+    </div>
   </div>
 </template>
 
-
 <style scoped>
+
 .year-btn {
   width: 80px;
   height: 40px;

@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, nextTick, onMounted, ref, watch } from 'vue'
-import type { QInput } from 'quasar'
+import { QInput } from 'quasar'
 import cloneDeep from 'lodash/cloneDeep'
 import type { Food } from 'src/types/food'
 import type ImageDetail from './ImageDetail.vue'
@@ -55,9 +55,26 @@ const subActivities = ref<SubActivity[]>([])
 const sameTimeForAll = ref(false)
 const showCancelDialog = ref(false)
 const showSuccessDialog = ref(false)
+
+// check error
 const activityNameError = ref('')
-const activityNameInput = ref<InstanceType<typeof QInput> | null>(null)
+const activityNameRef = ref<InstanceType<typeof QInput> | null>(null)
+const lecturerErrors = ref<string[]>([])
+const lecturerRefs = ref<Record<number, InstanceType<typeof QInput> | null>>({})
+const subActivityNameErrors = ref<string[]>([])
+const subActivityNameRefs = ref<Record<number, InstanceType<typeof QInput> | null>>({})
+
+const hourErrors = ref<string[]>([])
+const seatErrors = ref<string[]>([])
+const roomErrors = ref<string[]>([])
 const dateRefs = ref<Record<number, InstanceType<typeof ActivityForm_ActivityDate> | null>>({})
+const closedateRef = ref<InstanceType<typeof ActivityForm_CloseRegisDate> | null>(null)
+const seatRefs = ref<Record<number, InstanceType<typeof ActivityForm_Seats> | null>>({})
+const majorRefs = ref<Record<number, InstanceType<typeof ActivityForm_Major> | null>>({})
+const yearRefs = ref<Record<number, InstanceType<typeof ActivityForm_StudentYears> | null>>({})
+const hourRefs = ref<Record<number, InstanceType<typeof ActivityForm_Hour> | null>>({})
+const roomRefs = ref<Record<number, InstanceType<typeof ActivityForm_Room> | null>>({})
+
 const formTop = ref<HTMLElement | null>(null)
 const defaultTime = ref({
   startTime: '00:00',
@@ -252,6 +269,101 @@ const thaiLocale = {
 const removeSubActivity = (index: number) => {
   subActivities.value.splice(index, 1)
 }
+const validateBeforeOpen = async () => {
+  let hasError = false
+
+  // ล้าง error
+  activityNameError.value = ''
+  lecturerErrors.value = []
+  subActivityNameErrors.value = []
+  hourErrors.value = []
+  seatErrors.value = []
+  roomErrors.value = []
+
+  // ✅ validate ชื่อกิจกรรมหลัก
+  if (!activityName.value.trim()) {
+    activityNameError.value = 'กรุณากรอกชื่อกิจกรรมหลัก'
+    hasError = true
+  }
+
+  // ✅ validate วันปิดลงทะเบียน
+  const validCloseDate = await closedateRef.value?.validate?.()
+  if (validCloseDate === false) hasError = true
+
+  // ✅ validate ทุกรายการย่อย
+  const validationResults = await Promise.all(
+    subActivities.value.map(async (_, index) => {
+      let subHasError = false
+
+      // validate ชื่อกิจกรรมย่อย (QInput ธรรมดา)
+      subActivityNameErrors.value[index] = !subActivities.value[index]?.subActivityName?.trim()
+        ? 'กรุณากรอกชื่อกิจกรรม'
+        : ''
+
+      lecturerErrors.value[index] = !subActivities.value[index]?.lecturer?.trim()
+        ? 'กรุณากรอกชื่อวิทยากร'
+        : ''
+      // validate Hour
+      const hourValid = await hourRefs.value[index]?.validate?.()
+      if (hourValid === false) subHasError = true
+
+      // validate Seats
+      const seatValid = await seatRefs.value[index]?.validate?.()
+      if (seatValid === false) subHasError = true
+
+      // validate Room
+      const roomValid = await roomRefs.value[index]?.validate?.()
+      if (roomValid === false) subHasError = true
+
+      // validate Major
+      const majorValid = await majorRefs.value[index]?.validate?.()
+      if (majorValid === false) subHasError = true
+
+      // validate Year
+      const yearValid = await yearRefs.value[index]?.validate?.()
+      if (yearValid === false) subHasError = true
+
+      if (subActivityNameErrors.value[index] || lecturerErrors.value[index]) {
+        subHasError = true
+      }
+
+      return subHasError
+    }),
+  )
+
+  if (validationResults.includes(true)) {
+    hasError = true
+  }
+
+  await nextTick()
+
+  // ✅ scroll ไปยัง error แรก
+  if (hasError) {
+    if (activityNameError.value) {
+      activityNameRef.value?.$el?.scrollIntoView({ behavior: 'smooth', block: 'center' })
+    } else {
+      const firstSubNameIndex = subActivityNameErrors.value.findIndex((e) => e)
+      if (firstSubNameIndex !== -1 && subActivityNameRefs.value[firstSubNameIndex]) {
+        subActivityNameRefs.value[firstSubNameIndex]?.$el?.scrollIntoView({
+          behavior: 'smooth',
+          block: 'center',
+        })
+        return false
+      }
+
+      const firstLecturerIndex = lecturerErrors.value.findIndex((e) => e)
+      if (firstLecturerIndex !== -1 && lecturerRefs.value[firstLecturerIndex]) {
+        lecturerRefs.value[firstLecturerIndex]?.$el?.scrollIntoView({
+          behavior: 'smooth',
+          block: 'center',
+        })
+        return false
+      }
+    }
+  }
+
+  return !hasError
+}
 
 //ใช้กับปุ่มบันทึก ส่งข้อมูลไปหลังบ้าน
 const saveChanges = async () => {
@@ -264,14 +376,18 @@ const saveChanges = async () => {
   if (!activityName.value.trim()) {
     activityNameError.value = 'กรุณากรอกชื่อกิจกรรมหลัก'
     await nextTick()
-    activityNameInput.value?.$el?.scrollIntoView({ behavior: 'smooth', block: 'center' })
+    activityNameRef.value?.$el?.scrollIntoView({ behavior: 'smooth', block: 'center' })
     return
   }
-    const validDates = await Promise.all(
+  const validDates = await Promise.all(
     subActivities.value.map((_, index) => dateRefs.value[index]?.validate?.() ?? true),
   )
   if (validDates.includes(false)) {
     return
+  }
+  if (activityStatus.value === 'เปิดลงทะเบียน') {
+    const valid = await validateBeforeOpen()
+    if (!valid) return
   }
   updated.name = activityName.value
   updated.skill = activityType.value === 'prep' ? 'hard' : 'soft'
@@ -459,6 +575,22 @@ const resetFormToOriginal = () => {
       }
     }) ?? []
 }
+onMounted(() => {
+    watch(
+    subActivities,
+    (newVal) => {
+      newVal.forEach((sub, i) => {
+        if (sub.subActivityName?.trim()) {
+          subActivityNameErrors.value[i] = ''
+        }
+        if (sub.lecturer?.trim()) {
+          lecturerErrors.value[i] = ''
+        }
+      })
+    },
+    { deep: true, immediate: true }
+  )
+})
 </script>
 
 <template>
@@ -484,16 +616,17 @@ const resetFormToOriginal = () => {
     />
 
     <!-- Activity Name -->
+    <!-- FINISH -->
     <div class="input-group">
       <p class="label label_minWidth" :class="{ 'label-error-shift': activityNameError !== '' }">
         ชื่อกิจกรรมหลัก :
       </p>
       <div class="input-container">
         <q-input
-          ref="activityNameInput"
+          ref="activityNameRef"
           outlined
           v-model="activityName"
-          class="input-max-600 fix-q-input-height"
+          class="fix-q-input-height"
           :error="activityNameError !== ''"
           hide-bottom
           :disable="!isEditing"
@@ -507,10 +640,12 @@ const resetFormToOriginal = () => {
     <!-- Activity Type -->
     <ActivityForm_Type v-model="activityType" class="input-group" :disable="!isEditing" />
     <ActivityForm_CloseRegisDate
+      :ref="(el) => (closedateRef = el as InstanceType<typeof ActivityForm_CloseRegisDate>)"
       v-model="formattedCloseRegisDate"
       class="input-group"
       :disable="!isEditing"
     />
+
     <ActivityForm_Food
       v-model:foodMenu="foodMenu"
       v-model:foodMenuDisplay="foodMenuDisplay"
@@ -531,25 +666,42 @@ const resetFormToOriginal = () => {
       </div>
 
       <!-- SubActivity Name -->
+      <!-- FINISH -->
       <div class="input-group">
-        <p class="label label_minWidth">ชื่อกิจกรรม :</p>
-        <q-input
-          outlined
-          v-model="subActivity.subActivityName"
-            class="input-container"
-          :disable="!isEditing"
-        />
+        <p
+          class="label label_minWidth"
+          :class="{ 'label-error-shift': subActivityNameErrors[index] !== undefined && subActivityNameErrors[index] !== '' }"
+        >
+          ชื่อกิจกรรม :
+        </p>
+        <div class="input-container">
+          <q-input
+            ref="el => subActivityNameRefs[index] = el"
+            outlined
+            v-model="subActivity.subActivityName"
+            class="fix-q-input-height"
+            :disable="!isEditing"
+            :error="
+              subActivityNameErrors[index] !== undefined && subActivityNameErrors[index] !== ''
+            "
+          />
+
+          <div v-if="subActivityNameErrors[index]" class="text-negative text-subtitle2 q-mt-xs">
+            {{ subActivityNameErrors[index] }}
+          </div>
+        </div>
       </div>
 
       <!-- Date -->
+      <!-- FINISH -->
       <ActivityForm_ActivityDate
-       :ref="(el) => (dateRefs[index] = el as InstanceType<typeof ActivityForm_ActivityDate>)"
+        :ref="(el) => (dateRefs[index] = el as InstanceType<typeof ActivityForm_ActivityDate>)"
         v-model="subActivity.activityDateInternal"
         @update:modelValue="(dates) => generateDaysInRange(dates, index)"
         :disable="!isEditing"
       />
-
       <!-- Time -->
+      <!-- FINISH -->
       <div class="input-group">
         <p class="label label_minWidth" style="align-self: flex-start">เวลาที่จัดกิจกรรม :</p>
         <div class="day-time-container">
@@ -582,41 +734,72 @@ const resetFormToOriginal = () => {
           </div>
         </div>
       </div>
-
+      <!-- Hour -->
+      <!-- FINISH -->
       <ActivityForm_Hour
+        :ref="(el) => (hourRefs[index] = el as InstanceType<typeof ActivityForm_Hour>)"
         v-model="subActivity.totalHours"
         class="input-group"
         :disable="!isEditing"
       />
-      <ActivityForm_Room v-model="subActivity.roomName" class="input-group" :disable="!isEditing" />
-      <ActivityForm_Seats
-        v-model.number="subActivity.seats"
+      <!-- Room --><!-- FINISH -->
+      <ActivityForm_Room
+        :ref="(el) => (roomRefs[index] = el as InstanceType<typeof ActivityForm_Room>)"
+        v-model="subActivity.roomName"
         class="input-group"
         :disable="!isEditing"
       />
+      <!-- Seats -->
+      <!-- FINISH -->
+      <ActivityForm_Seats
+        :ref="(el) => (seatRefs[index] = el as InstanceType<typeof ActivityForm_Seats>)"
+        v-model.number="subActivity.seats"
+        :disable="!isEditing"
+        class="input-group"
+      />
+      <!-- Major -->
+      <!-- FINISH -->
       <ActivityForm_Major
+        :ref="(el) => (majorRefs[index] = el as InstanceType<typeof ActivityForm_Major>)"
         v-model="subActivity.departments"
         class="input-group"
         :disable="!isEditing"
       />
+      <!-- Year -->
+      <!-- FINISH -->
       <ActivityForm_StudentYears
+        :ref="(el) => (yearRefs[index] = el as InstanceType<typeof ActivityForm_StudentYears>)"
         v-model="subActivity.years"
         class="input-group"
         :disable="!isEditing"
       />
 
       <!-- Lecturer -->
+      <!-- FINISH -->
       <div class="input-group">
-        <p class="label label_minWidth">วิทยากร :</p>
-        <q-input
-          outlined
-          v-model="subActivity.lecturer"
-            class="input-container"
-          :disable="!isEditing"
-        />
+        <p
+          class="label label_minWidth"
+           :class="{ 'label-error-shift': lecturerErrors[index] !== undefined && lecturerErrors[index] !== '' }"
+        >
+          วิทยากร :
+        </p>
+        <div class="input-container">
+          <q-input
+            ref="el => lecturerRefs[index] = el"
+            outlined
+            v-model="subActivity.lecturer"
+            class="fix-q-input-height"
+            :disable="!isEditing"
+            :error="lecturerErrors[index] !== undefined && lecturerErrors[index] !== ''"
+          />
+          <div v-if="lecturerErrors[index]" class="text-negative text-subtitle2 q-mt-xs">
+            {{ lecturerErrors[index] }}
+          </div>
+        </div>
       </div>
 
       <!-- Detail Activity -->
+      <!-- FINISH -->
       <div class="input-group">
         <p style="align-self: flex-start" class="label label_minWidth">รายละเอียดอื่นๆ :</p>
         <q-input
@@ -624,7 +807,7 @@ const resetFormToOriginal = () => {
           rows="10"
           outlined
           v-model="subActivity.detailActivity"
-            class="input-container"
+          class="input-container"
           :disable="!isEditing"
         />
       </div>
@@ -823,17 +1006,16 @@ const resetFormToOriginal = () => {
   .label_minWidth {
     min-width: 180px !important;
   }
-
 }
 @media (max-width: 850px) {
   .input-group.no-wrap {
-    flex-direction: row !important;     
-    align-items: center !important;         
-    gap: 20px !important;                 
+    flex-direction: row !important;
+    align-items: center !important;
+    gap: 20px !important;
     margin-bottom: 10px !important;
   }
 
-   .input-group:not(.no-wrap) {
+  .input-group:not(.no-wrap) {
     flex-direction: column;
     align-items: flex-start;
     margin-bottom: 10px !important;
@@ -843,12 +1025,12 @@ const resetFormToOriginal = () => {
     width: 470px;
     max-width: 100%;
   }
-   .label {
+  .label {
     justify-content: flex-start;
   }
 
-    .label_minWidth {
-    min-width: auto !important;        
+  .label_minWidth {
+    min-width: auto !important;
     width: auto !important;
     flex-shrink: 0;
   }
@@ -862,9 +1044,9 @@ const resetFormToOriginal = () => {
   .btn-label-empty {
     display: none !important;
   }
-    .remove-icon {
+  .remove-icon {
     display: flex;
-    flex-direction: row !important;  
+    flex-direction: row !important;
     justify-content: flex-end !important;
     align-items: center;
     margin-top: 10px;
@@ -875,8 +1057,8 @@ const resetFormToOriginal = () => {
     font-size: 30px;
   }
   .label-error-shift {
-  transform: translateY(0px);
-}
+    transform: translateY(0px);
+  }
 }
 @media (max-width: 500px) {
   .input-group:not(.no-wrap) {

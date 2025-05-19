@@ -304,6 +304,11 @@ const submitActivity = async () => {
 
 onMounted(() => {
   addSubActivity()
+  watch(activityName, (newVal) => {
+  if (newVal && newVal.trim() !== '') {
+    activityNameError.value = ''
+  }
+})
 })
 </script>
 

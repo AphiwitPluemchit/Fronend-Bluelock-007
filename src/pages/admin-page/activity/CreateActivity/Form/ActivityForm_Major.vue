@@ -1,49 +1,82 @@
 <script setup lang="ts">
-import { defineProps, defineEmits } from 'vue'
+import { defineProps, defineEmits, ref, nextTick, watch } from 'vue'
 
 interface DepartmentOption {
   label: string
   value: string
   id: string
 }
+
 const props = defineProps<{
   modelValue: string[]
-  disable?: boolean // เพิ่ม prop disable
+  disable?: boolean
 }>()
+
 const emit = defineEmits<{ (event: 'update:modelValue', value: string[]): void }>()
+
 const departmentOptions: DepartmentOption[] = [
   { label: 'CS', value: 'CS', id: '67bf0c358873e448798fed37' },
   { label: 'SE', value: 'SE', id: '67bf0bdf8873e448798fed36' },
   { label: 'ITDI', value: 'ITDI', id: '67bf0bda8873e448798fed35' },
   { label: 'AAI', value: 'AAI', id: '67bf0bd48873e448798fed34' },
 ]
+
+const inputRef = ref<HTMLElement | null>(null)
+const error = ref('')
+
 const toggleDepartment = (value: string) => {
-  if (props.disable) return // ถ้า disable ห้ามกด
+  if (props.disable) return
   const newDepartments = props.modelValue.includes(value)
     ? props.modelValue.filter((item) => item !== value)
     : [...props.modelValue, value]
   emit('update:modelValue', newDepartments)
 }
+
+// ✅ ฟังก์ชัน validate
+const validate = async () => {
+  if (props.modelValue.length === 0) {
+    error.value = 'กรุณาเลือกสาขาอย่างน้อย 1 สาขา'
+    await nextTick()
+    inputRef.value?.scrollIntoView({ behavior: 'smooth', block: 'center' })
+    return false
+  }
+  error.value = ''
+  return true
+}
+
+defineExpose({ validate })
+watch(
+  () => props.modelValue,
+  (newVal) => {
+    if (newVal.length > 0) {
+      error.value = ''
+    }
+  }
+)
 </script>
 
 <template>
-  <div class="input-group">
-    <p class="label label_minWidth">สาขา :</p>
+  <div class="input-group" ref="inputRef">
+    <p class="label label_minWidth" :class="{ 'label-error-shift': error !== '' }">สาขา :</p>
     <div class="department-btn-group">
-    <q-btn
-      v-for="option in departmentOptions"
-      :key="option.value"
-      :class="{ 'active-btn': modelValue.includes(option.value) }"
-      @click="toggleDepartment(option.value)"
-      :label="option.label"
-      class="department-btn"
-      :disable="disable"
-    />
+      <q-btn
+        v-for="option in departmentOptions"
+        :key="option.value"
+        :class="{ 'active-btn': modelValue.includes(option.value) }"
+        @click="toggleDepartment(option.value)"
+        :label="option.label"
+        class="department-btn"
+        :disable="disable"
+      />
+    </div>
+    <div v-if="error" class="text-negative text-subtitle2 q-mt-xs">
+      {{ error }}
     </div>
   </div>
 </template>
 
 <style scoped>
+
 .department-btn {
   width: 80px;
   height: 40px;

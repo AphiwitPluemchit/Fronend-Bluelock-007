@@ -1,39 +1,91 @@
 <script setup lang="ts">
-import { defineProps, defineEmits, ref, watch } from 'vue'
+import { defineProps, defineEmits, ref, watch, nextTick } from 'vue'
 
 const props = defineProps<{
-  modelValue: number |null
+  modelValue: number | null
   disable?: boolean
 }>()
 const emit = defineEmits<{
   (event: 'update:modelValue', value: number): void
 }>()
 const localSeats = ref<number | null>(props.modelValue ?? null)
+const seatsError = ref('')
+const inputRef = ref<HTMLElement | null>(null)
 watch(localSeats, (newVal) => {
-  emit('update:modelValue', newVal ?? 0)  
+  emit('update:modelValue', newVal ?? 0)
 })
-watch(() => props.modelValue, (newVal) => {
-  localSeats.value = newVal ?? null
-})
+watch(
+  () => props.modelValue,
+  (newVal) => {
+    localSeats.value = newVal ?? null
+  },
+)
 const isNumber = (event: KeyboardEvent) => {
   const charCode = event.which ? event.which : event.keyCode
   if (charCode < 48 || charCode > 57) {
     event.preventDefault()
   }
 }
+const validate = async () => {
+  if (!localSeats.value || localSeats.value < 0) {
+    seatsError.value = 'กรุณากรอกจำนวนที่รับ'
+    await nextTick()
+    inputRef.value?.scrollIntoView({ behavior: 'smooth', block: 'center' })
+    return false
+  }
+  seatsError.value = ''
+  return true
+}
+defineExpose({ validate })
+watch(localSeats, (newVal) => {
+  emit('update:modelValue', newVal ?? 0)
+  if (newVal && newVal > 0) {
+    seatsError.value = ''
+  }
+})
 </script>
 
 <template>
   <div class="input-group">
-    <p class="label label_minWidth">จำนวนที่รับ :</p>
-    <q-input outlined class="input-container" v-model="localSeats" type="number" @keypress="isNumber($event)"
+    <p class="label label_minWidth" :class="{ 'label-error-shift': seatsError !== '' }">จำนวนที่รับ :</p>
+    <div  class="input-container">
+    <q-input
+      ref="inputRef"
+      outlined
+      class="fix-q-input-height"
+      v-model="localSeats"
+      type="number"
+      @keypress="isNumber($event)"
       :disable="disable"
-      />
-
+      :error="seatsError !== ''" 
+    />
+     <div v-if="seatsError" class="text-negative text-subtitle2 q-mt-xs">
+      {{ seatsError }}
+    </div>
+    </div>
   </div>
 </template>
 
 <style scoped>
+.fix-q-input-height ::v-deep(.q-icon) {
+  font-size: 16px;
+}
+.fix-q-input-height ::v-deep(.q-field__control) {
+  height: 40px !important;
+  min-height: 40px !important;
+  padding-top: 0 !important;
+  padding-bottom: 0 !important;
+  display: flex;
+  align-items: center;
+}
+
+.fix-q-input-height ::v-deep(.q-field__append) {
+  align-items: center;
+  display: flex;
+}
+.label-error-shift {
+  transform: translateY(-12px);
+}
 .label {
   font-size: 20px;
   font-weight: normal;
@@ -47,9 +99,9 @@ const isNumber = (event: KeyboardEvent) => {
   min-width: 200px;
 }
 .input-container {
-    max-width: 220px;
-    width: 100%;
-  }
+  max-width: 220px;
+  width: 100%;
+}
 .input-group p {
   align-self: center;
   margin: 0;
@@ -65,17 +117,17 @@ const isNumber = (event: KeyboardEvent) => {
 ::v-deep(input[type='number']) {
   -moz-appearance: textfield;
 }
-@media(max-width: 1880px){
+@media (max-width: 1880px) {
   .input-container {
     width: 200px;
     max-width: 100%;
   }
   .label_minWidth {
-    min-width: 180px!important;
+    min-width: 180px !important;
   }
 }
 @media (max-width: 850px) {
-   .input-group:not(.no-wrap) {
+  .input-group:not(.no-wrap) {
     flex-direction: column;
     align-items: flex-start;
     margin-bottom: 10px !important;
@@ -96,20 +148,19 @@ const isNumber = (event: KeyboardEvent) => {
 @media (max-width: 550px) {
   .input-container {
     width: 170px;
-    max-width: 100%; 
+    max-width: 100%;
   }
-
 }
 @media (max-width: 500px) {
   .input-group {
     flex-direction: column;
     align-items: flex-start;
     margin-bottom: 10px !important;
-    gap: 5px !important; 
+    gap: 5px !important;
   }
 
-   .label {
-    justify-content: flex-start; 
+  .label {
+    justify-content: flex-start;
   }
 
   .label_minWidth {
@@ -118,14 +169,10 @@ const isNumber = (event: KeyboardEvent) => {
     text-align: left;
     padding-left: 0;
     margin-left: 0;
-    
   }
-   .input-container {
+  .input-container {
     max-width: 100%;
     width: 100%;
   }
 }
-
- 
-
 </style>
