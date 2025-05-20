@@ -5,54 +5,24 @@ const props = defineProps<{
   modelValue: string
   disable?: boolean
 }>()
-const CloseRegisDates = ref<string>(props.modelValue)
-const datePopupRef = ref(null)
-const emit = defineEmits<{ (event: 'update:modelValue', value: string): void }>()
-const closedateError = ref('')
-const inputRef = ref<HTMLElement | null>(null)
 
-const thaiLocale = {
-  days: ['อาทิตย์', 'จันทร์', 'อังคาร', 'พุธ', 'พฤหัสบดี', 'ศุกร์', 'เสาร์'],
-  daysShort: ['อา.', 'จ.', 'อ.', 'พ.', 'พฤ.', 'ศ.', 'ส.'],
-  months: [
-    'มกราคม',
-    'กุมภาพันธ์',
-    'มีนาคม',
-    'เมษายน',
-    'พฤษภาคม',
-    'มิถุนายน',
-    'กรกฎาคม',
-    'สิงหาคม',
-    'กันยายน',
-    'ตุลาคม',
-    'พฤศจิกายน',
-    'ธันวาคม',
-  ],
-  monthsShort: [
-    'ม.ค.',
-    'ก.พ.',
-    'มี.ค.',
-    'เม.ย.',
-    'พ.ค.',
-    'มิ.ย.',
-    'ก.ค.',
-    'ส.ค.',
-    'ก.ย.',
-    'ต.ค.',
-    'พ.ย.',
-    'ธ.ค.',
-  ],
-}
-const formattedCloseRegisDate = computed(() => {
-  return CloseRegisDates.value ? formatThaiDate(CloseRegisDates.value) : ''
-})
+const CloseRegisDates = ref<string>(props.modelValue)
+const emit = defineEmits<{ (event: 'update:modelValue', value: string): void }>()
+
+const closedateError = ref('')
+// eslint-disable-next-line @typescript-eslint/consistent-type-imports
+const inputRef = ref<InstanceType<typeof import('quasar')['QInput']> | null>(null)
+
 const validate = async () => {
   if (!CloseRegisDates.value || CloseRegisDates.value.length === 0) {
     closedateError.value = 'กรุณาเลือกวันที่ปิดลงทะเบียน'
     await nextTick()
-    inputRef.value?.scrollIntoView({ behavior: 'smooth', block: 'center' })
+
+    // ✅ ใช้ $el เพื่อ scroll ไปยัง DOM จริงของ q-input
+    inputRef.value?.$el?.scrollIntoView({ behavior: 'smooth', block: 'center' })
     return false
   }
+
   closedateError.value = ''
   return true
 }
@@ -65,9 +35,22 @@ const onDateChange = () => {
     closedateError.value = ''
   }
 }
-const formatThaiDate = (dateStr: string): string => {
-  if (!dateStr) return ''
 
+const thaiLocale = {
+  days: ['อาทิตย์', 'จันทร์', 'อังคาร', 'พุธ', 'พฤหัสบดี', 'ศุกร์', 'เสาร์'],
+  daysShort: ['อา.', 'จ.', 'อ.', 'พ.', 'พฤ.', 'ศ.', 'ส.'],
+  months: [
+    'มกราคม', 'กุมภาพันธ์', 'มีนาคม', 'เมษายน', 'พฤษภาคม', 'มิถุนายน',
+    'กรกฎาคม', 'สิงหาคม', 'กันยายน', 'ตุลาคม', 'พฤศจิกายน', 'ธันวาคม'
+  ],
+  monthsShort: ['ม.ค.', 'ก.พ.', 'มี.ค.', 'เม.ย.', 'พ.ค.', 'มิ.ย.', 'ก.ค.', 'ส.ค.', 'ก.ย.', 'ต.ค.', 'พ.ย.', 'ธ.ค.']
+}
+
+const formattedCloseRegisDate = computed(() => {
+  return CloseRegisDates.value ? formatThaiDate(CloseRegisDates.value) : ''
+})
+
+const formatThaiDate = (dateStr: string): string => {
   const parts = dateStr.split('-')
   if (parts.length !== 3) return ''
 
@@ -81,19 +64,15 @@ const formatThaiDate = (dateStr: string): string => {
 
   const thaiMonth = thaiLocale.months[monthIndex]
   const thaiYear = year + 543
-
   return `${day} ${thaiMonth} ${thaiYear}`
 }
+
 watch(
   () => props.modelValue,
   (newVal) => {
     CloseRegisDates.value = newVal
     emit('update:modelValue', newVal)
-
-    // ถ้ามีค่าใหม่ → ล้าง error
-    if (newVal) {
-      closedateError.value = ''
-    }
+    if (newVal) closedateError.value = ''
   }
 )
 </script>
@@ -105,7 +84,6 @@ watch(
     </p>
     <div class="input-container">
       <q-input
-        ref="inputRef"
         outlined
         :model-value="formattedCloseRegisDate"
         readonly
@@ -113,6 +91,8 @@ watch(
         :disable="disable"
         :error="closedateError !== ''"
       >
+       
+
         <template v-slot:prepend>
           <q-icon
             name="event"
@@ -120,7 +100,7 @@ watch(
             :class="{ 'disabled-icon': disable }"
             style="color: black"
           >
-            <q-menu ref="datePopupRef" style="overflow: visible" v-if="!disable">
+            <q-menu v-if="!disable" style="overflow: visible">
               <q-date
                 v-model="CloseRegisDates"
                 mask="YYYY-MM-DD"
@@ -137,6 +117,7 @@ watch(
           </q-icon>
         </template>
       </q-input>
+
       <div v-if="closedateError" class="text-negative text-subtitle2 q-mt-xs">
         {{ closedateError }}
       </div>

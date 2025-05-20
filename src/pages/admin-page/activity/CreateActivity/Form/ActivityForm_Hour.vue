@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { defineProps, defineEmits, ref, watch, nextTick } from 'vue'
+import { QInput } from 'quasar'
 
 const props = defineProps<{
   modelValue: number | null
@@ -12,7 +13,7 @@ const emit = defineEmits<{
 
 const localHours = ref<number | null>(props.modelValue ?? null)
 const hoursError = ref('')
-const inputRef = ref<HTMLElement | null>(null)
+const inputRef = ref<InstanceType<typeof QInput> | null>(null)
 
 watch(localHours, (newVal) => {
   emit('update:modelValue', newVal ?? 0)
@@ -36,14 +37,16 @@ const isNumber = (event: KeyboardEvent) => {
   }
 }
 
-// ✅ เพิ่ม validate เหมือน seat.vue
-const validate = async () => {
-  if (!localHours.value || localHours.value < 0) {
+const validate = async (): Promise<boolean> => {
+  if (localHours.value === null || localHours.value < 0) {
     hoursError.value = 'กรุณากรอกจำนวนชั่วโมง'
     await nextTick()
-    inputRef.value?.scrollIntoView({ behavior: 'smooth', block: 'center' })
+
+    inputRef.value?.$el?.scrollIntoView({ behavior: 'smooth', block: 'center' })
+
     return false
   }
+
   hoursError.value = ''
   return true
 }
@@ -53,13 +56,15 @@ defineExpose({ validate })
 
 <template>
   <div class="input-group">
-    <p class="label label_minWidth" :class="{ 'label-error-shift': hoursError !== '' }">จำนวนชั่วโมง :</p>
+    <p class="label label_minWidth" :class="{ 'label-error-shift': hoursError !== '' }">
+      จำนวนชั่วโมง :
+    </p>
     <div class="input-container">
       <q-input
         ref="inputRef"
         outlined
         class="fix-q-input-height"
-        v-model="localHours"
+        v-model.number="localHours"
         type="number"
         @keypress="isNumber"
         :disable="disable"

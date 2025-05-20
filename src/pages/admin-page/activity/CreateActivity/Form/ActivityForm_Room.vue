@@ -1,11 +1,12 @@
 <script setup lang="ts">
 import { ref, watch, computed, nextTick } from 'vue'
-
+import { QInput } from 'quasar'
+const inputRef = ref<InstanceType<typeof QInput> | null>(null)
 const showSuggestions = ref(false)
 const filteredRooms = ref<string[]>([])
 const searchText = ref('')
 const roomError = ref('')
-const inputRef = ref<HTMLElement | null>(null)
+
 
 const props = defineProps<{
   modelValue: string[]
@@ -69,7 +70,7 @@ const validate = async () => {
   if (!selectedRoom.value.length) {
     roomError.value = 'กรุณาเลือกห้องอย่างน้อย 1 ห้อง'
     await nextTick()
-    inputRef.value?.scrollIntoView({ behavior: 'smooth', block: 'center' })
+    inputRef.value?.$el?.scrollIntoView({ behavior: 'smooth', block: 'center' })
     return false
   }
   roomError.value = ''

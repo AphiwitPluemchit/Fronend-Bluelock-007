@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { defineProps, defineEmits, ref, watch, nextTick } from 'vue'
-
+import { QInput } from 'quasar'
+const inputRef = ref<InstanceType<typeof QInput> | null>(null)
 const props = defineProps<{
   modelValue: number | null
   disable?: boolean
@@ -10,7 +11,7 @@ const emit = defineEmits<{
 }>()
 const localSeats = ref<number | null>(props.modelValue ?? null)
 const seatsError = ref('')
-const inputRef = ref<HTMLElement | null>(null)
+
 watch(localSeats, (newVal) => {
   emit('update:modelValue', newVal ?? 0)
 })
@@ -30,7 +31,7 @@ const validate = async () => {
   if (!localSeats.value || localSeats.value < 0) {
     seatsError.value = 'กรุณากรอกจำนวนที่รับ'
     await nextTick()
-    inputRef.value?.scrollIntoView({ behavior: 'smooth', block: 'center' })
+    inputRef.value?.$el?.scrollIntoView({ behavior: 'smooth', block: 'center' })
     return false
   }
   seatsError.value = ''
