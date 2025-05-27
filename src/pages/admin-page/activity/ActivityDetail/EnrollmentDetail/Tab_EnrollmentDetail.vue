@@ -95,14 +95,14 @@ onMounted(async () => {
           <!-- Loop major -->
           <div class="row" v-for="(major, mIndex) in majorList" :key="mIndex">
 
-            <div class="activity-name-block">
+            <!-- <div class="activity-name-block">
               <span v-if="mIndex === 0" class="activity-name">{{ item.activityItemName }} :</span>
               <span v-else class="activity-name-placeholder"></span>
-            </div>
+            </div> -->
 
             <div class="student-major-block">
-              <span class="text">นิสิตสาขา &nbsp; {{ major.majorName }}</span>
-              <span class="number">จำนวน</span>
+              <!-- <span class="text">นิสิตสาขา &nbsp; {{ major.majorName }}</span>
+              <span class="number">จำนวน</span> -->
               <span class="quantity-number">
                 {{
                   item.registeredByMajor?.find(m => m.majorName === major.majorName)?.count || '0'

@@ -7,32 +7,22 @@ const props = defineProps<{
 }>()
 
 const CloseRegisDates = ref<string>(props.modelValue)
-const emit = defineEmits<{ (event: 'update:modelValue', value: string): void }>()
-
+const emit = defineEmits<{
+  (event: 'update:modelValue', value: string): void
+  (event: 'enter'): void
+}>()
+// eslint-disable-next-line @typescript-eslint/consistent-type-imports
+const menuRef = ref<InstanceType<(typeof import('quasar'))['QMenu']> | null>(null)
 const closedateError = ref('')
 // eslint-disable-next-line @typescript-eslint/consistent-type-imports
-const inputRef = ref<InstanceType<typeof import('quasar')['QInput']> | null>(null)
-
-const validate = async () => {
-  if (!CloseRegisDates.value || CloseRegisDates.value.length === 0) {
-    closedateError.value = 'กรุณาเลือกวันที่ปิดลงทะเบียน'
-    await nextTick()
-
-    // ✅ ใช้ $el เพื่อ scroll ไปยัง DOM จริงของ q-input
-    inputRef.value?.$el?.scrollIntoView({ behavior: 'smooth', block: 'center' })
-    return false
-  }
-
-  closedateError.value = ''
-  return true
-}
-defineExpose({ validate })
+const inputRef = ref<InstanceType<(typeof import('quasar'))['QInput']> | null>(null)
 
 const onDateChange = () => {
   if (props.disable) return
   emit('update:modelValue', CloseRegisDates.value)
   if (CloseRegisDates.value) {
     closedateError.value = ''
+
   }
 }
 
@@ -40,10 +30,33 @@ const thaiLocale = {
   days: ['อาทิตย์', 'จันทร์', 'อังคาร', 'พุธ', 'พฤหัสบดี', 'ศุกร์', 'เสาร์'],
   daysShort: ['อา.', 'จ.', 'อ.', 'พ.', 'พฤ.', 'ศ.', 'ส.'],
   months: [
-    'มกราคม', 'กุมภาพันธ์', 'มีนาคม', 'เมษายน', 'พฤษภาคม', 'มิถุนายน',
-    'กรกฎาคม', 'สิงหาคม', 'กันยายน', 'ตุลาคม', 'พฤศจิกายน', 'ธันวาคม'
+    'มกราคม',
+    'กุมภาพันธ์',
+    'มีนาคม',
+    'เมษายน',
+    'พฤษภาคม',
+    'มิถุนายน',
+    'กรกฎาคม',
+    'สิงหาคม',
+    'กันยายน',
+    'ตุลาคม',
+    'พฤศจิกายน',
+    'ธันวาคม',
   ],
-  monthsShort: ['ม.ค.', 'ก.พ.', 'มี.ค.', 'เม.ย.', 'พ.ค.', 'มิ.ย.', 'ก.ค.', 'ส.ค.', 'ก.ย.', 'ต.ค.', 'พ.ย.', 'ธ.ค.']
+  monthsShort: [
+    'ม.ค.',
+    'ก.พ.',
+    'มี.ค.',
+    'เม.ย.',
+    'พ.ค.',
+    'มิ.ย.',
+    'ก.ค.',
+    'ส.ค.',
+    'ก.ย.',
+    'ต.ค.',
+    'พ.ย.',
+    'ธ.ค.',
+  ],
 }
 
 const formattedCloseRegisDate = computed(() => {
@@ -73,8 +86,26 @@ watch(
     CloseRegisDates.value = newVal
     emit('update:modelValue', newVal)
     if (newVal) closedateError.value = ''
-  }
+  },
 )
+const validate = async () => {
+  if (!CloseRegisDates.value || CloseRegisDates.value.length === 0) {
+    closedateError.value = 'กรุณาเลือกวันที่ปิดลงทะเบียน'
+    await nextTick()
+    inputRef.value?.$el?.scrollIntoView({ behavior: 'smooth', block: 'center' })
+    return false
+  }
+
+  closedateError.value = ''
+  return true
+}
+
+const focus = async () => {
+  await nextTick()
+  inputRef.value?.focus?.()
+  menuRef.value?.show()
+}
+defineExpose({ validate, focus })
 </script>
 
 <template>
@@ -84,15 +115,14 @@ watch(
     </p>
     <div class="input-container">
       <q-input
+        ref="inputRef"
         outlined
-        :model-value="formattedCloseRegisDate"
+        v-model="formattedCloseRegisDate"
         readonly
-        class="fix-q-input-height"
         :disable="disable"
         :error="closedateError !== ''"
+         @keydown.enter.prevent="$emit('enter')"
       >
-       
-
         <template v-slot:prepend>
           <q-icon
             name="event"
@@ -100,7 +130,13 @@ watch(
             :class="{ 'disabled-icon': disable }"
             style="color: black"
           >
-            <q-menu v-if="!disable" style="overflow: visible">
+            <q-menu
+              ref="menuRef"
+              :target="inputRef?.$el"
+              anchor="bottom left"
+              self="top left"
+              :cover="false"
+            >
               <q-date
                 v-model="CloseRegisDates"
                 mask="YYYY-MM-DD"
@@ -111,13 +147,13 @@ watch(
                 minimal
                 first-day-of-week="1"
                 class="my-custom-calendar"
+                 @keyup.enter="$emit('enter')"
                 @update:model-value="onDateChange"
               />
             </q-menu>
           </q-icon>
         </template>
       </q-input>
-
       <div v-if="closedateError" class="text-negative text-subtitle2 q-mt-xs">
         {{ closedateError }}
       </div>

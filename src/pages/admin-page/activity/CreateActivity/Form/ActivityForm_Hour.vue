@@ -38,7 +38,7 @@ const isNumber = (event: KeyboardEvent) => {
 }
 
 const validate = async (): Promise<boolean> => {
-  if (localHours.value === null || localHours.value < 0) {
+   if (!localHours.value || localHours.value < 0) {
     hoursError.value = 'กรุณากรอกจำนวนชั่วโมง'
     await nextTick()
 
@@ -51,7 +51,10 @@ const validate = async (): Promise<boolean> => {
   return true
 }
 
-defineExpose({ validate })
+const focus = () => {
+  inputRef.value?.focus?.()
+}
+defineExpose({ validate, focus })
 </script>
 
 <template>

@@ -1,5 +1,6 @@
+<!-- eslint-disable @typescript-eslint/consistent-type-imports -->
 <script setup lang="ts">
-import { computed, nextTick, onMounted, ref, watch } from 'vue'
+import { computed, nextTick, onMounted, Ref, ref, watch } from 'vue'
 import { QInput } from 'quasar'
 import cloneDeep from 'lodash/cloneDeep'
 import type { Food } from 'src/types/food'
@@ -63,10 +64,11 @@ const lecturerErrors = ref<string[]>([])
 const lecturerRefs = ref<Record<number, InstanceType<typeof QInput> | null>>({})
 const subActivityNameErrors = ref<string[]>([])
 const subActivityNameRefs = ref<Record<number, InstanceType<typeof QInput> | null>>({})
-
+const closedateError = ref<string>('')
 const hourErrors = ref<string[]>([])
 const seatErrors = ref<string[]>([])
 const roomErrors = ref<string[]>([])
+const dateErrors = ref<string[]>([])
 const dateRefs = ref<Record<number, InstanceType<typeof ActivityForm_ActivityDate> | null>>({})
 const closedateRef = ref<InstanceType<typeof ActivityForm_CloseRegisDate> | null>(null)
 const seatRefs = ref<Record<number, InstanceType<typeof ActivityForm_Seats> | null>>({})
@@ -269,44 +271,36 @@ const thaiLocale = {
 const removeSubActivity = (index: number) => {
   subActivities.value.splice(index, 1)
 }
-
+const pendingScrollQueue = ref<HTMLElement[]>([])
 /**
  * ฟังก์ชันสำหรับ scroll ไปที่ element ที่อยู่บนสุดจากลิสต์ที่กำหนด
  * @param els - รายการของ elements ที่อาจมี null หรือ undefined
  */
 function scrollToTopMost(els: (HTMLElement | null | undefined)[]): void {
-  const validElements: HTMLElement[] = els.filter((el): el is HTMLElement => el != null)
-
-  // 🔍 Log เพื่อดูว่ามี element อะไรจะ scroll บ้าง
-  console.log('🧷 scrollTargets count:', validElements.length)
-  validElements.forEach((el, idx) => {
-    const rect = el.getBoundingClientRect()
-    console.log(`👉 [${idx}]`, el.tagName, el.className, rect.top, el.innerText?.slice(0, 30))
-  })
-
+  const validElements: HTMLElement[] = els.filter((el): el is HTMLElement => !!el)
   if (validElements.length === 0) return
 
-  const sortedElements = validElements.sort(
-    (a, b) => a.getBoundingClientRect().top - b.getBoundingClientRect().top,
+  const container = document.querySelector('.form-section')
+  if (!(container instanceof HTMLElement)) return
+
+  const sorted = validElements.sort(
+    (a, b) =>
+      a.getBoundingClientRect().top -
+      container.getBoundingClientRect().top -
+      (b.getBoundingClientRect().top - container.getBoundingClientRect().top),
   )
-  const topMostElement = sortedElements[0]
 
-  // ✅ log top-most element ที่จะ scroll ถึง
-  if (topMostElement) {
-    const rect = topMostElement.getBoundingClientRect()
-    console.log('📍 Scroll to:', {
-      tag: topMostElement.tagName,
-      class: topMostElement.className,
-      top: rect.top,
-      text: topMostElement.innerText?.slice(0, 100),
-    })
+  const topEl = sorted[0]
+  if (!(topEl instanceof HTMLElement)) return
 
-    requestAnimationFrame(() => {
-      topMostElement.scrollIntoView({
-        behavior: 'smooth',
-        block: validElements.length === 1 ? 'center' : 'start',
-      })
-    })
+  container.scrollTo({
+    top: topEl.offsetTop - container.offsetTop - 30,
+    behavior: 'smooth',
+  })
+
+  const input = topEl.querySelector('input')
+  if (input instanceof HTMLInputElement) {
+    input.focus()
   }
 }
 
@@ -314,12 +308,53 @@ function scrollToTopMost(els: (HTMLElement | null | undefined)[]): void {
  * ฟังก์ชันสำหรับตรวจสอบความถูกต้องของข้อมูลก่อนเปิดลงทะเบียน
  * @returns Promise<boolean> - true ถ้าข้อมูลถูกต้อง, false ถ้ามีข้อผิดพลาด
  */
+const validateComponent = async (
+  ref:
+    | {
+        validate?: () => Promise<boolean>
+        focus?: () => void
+        $el?: HTMLElement | null
+      }
+    | null
+    | undefined,
+  scrollTargets: (HTMLElement | null | undefined)[],
+  hasErrorRef: Ref<boolean>,
+  isFirstErrorHandledRef: Ref<boolean>
+): Promise<void> => {
+  if (ref?.validate) {
+    try {
+      const valid = await ref.validate()
+      if (!valid && ref.$el) {
+        hasErrorRef.value = true
+        scrollTargets.push(ref.$el)
+
+        // ✅ ถ้าเป็น field แรกที่ error → เรียก focus (เช่น ปฏิทิน)
+        if (!isFirstErrorHandledRef.value && ref.focus) {
+          ref.focus()
+          isFirstErrorHandledRef.value = true
+        }
+      }
+    } catch (err) {
+      console.error('Validation error:', err)
+      hasErrorRef.value = true
+      if (ref?.$el) {
+        scrollTargets.push(ref.$el)
+        if (!isFirstErrorHandledRef.value && ref.focus) {
+          ref.focus()
+          isFirstErrorHandledRef.value = true
+        }
+      }
+    }
+  }
+}
+
+
 const validateBeforeOpen = async (): Promise<boolean> => {
-  let hasError: boolean = false
-  // สร้าง array เก็บ elements ที่ต้อง scroll ไป
+  const hasError = ref(false)
+  const isFirstErrorHandled = ref(false)
   const scrollTargets: (HTMLElement | null | undefined)[] = []
 
-  // ล้าง errors ทั้งหมด
+  // ❌ ล้าง errors ทั้งหมด
   activityNameError.value = ''
   lecturerErrors.value = []
   subActivityNameErrors.value = []
@@ -327,102 +362,165 @@ const validateBeforeOpen = async (): Promise<boolean> => {
   seatErrors.value = []
   roomErrors.value = []
 
-  // เก็บ promises ของการ validate ต่างๆ
-  const validations: Promise<void>[] = []
-
-  // ตรวจสอบชื่อกิจกรรมหลัก
+  // ✅ 1. ชื่อกิจกรรมหลัก
   if (!activityName.value.trim()) {
     activityNameError.value = 'กรุณากรอกชื่อกิจกรรมหลัก'
-    hasError = true
-    // เก็บ element ที่มี error
+    hasError.value = true
     if (activityNameRef.value?.$el) {
       scrollTargets.push(activityNameRef.value.$el)
+      if (!isFirstErrorHandled.value) isFirstErrorHandled.value = true
     }
   }
+  // ✅ 2. วันที่ปิดลงทะเบียน (ให้ focus ปฏิทินเฉพาะถ้าเป็น error แรก)
+  await validateComponent(closedateRef.value, scrollTargets, hasError, isFirstErrorHandled)
 
-  // ตรวจสอบวันปิดลงทะเบียน
-  if (closedateRef.value?.validate) {
-    validations.push(
-      closedateRef.value.validate().then((valid: boolean) => {
-        if (!valid) {
-          hasError = true
-          if (closedateRef.value?.$el) {
-            scrollTargets.push(closedateRef.value.$el)
-          }
-        }
-      }),
-    )
-  }
+  // ✅ 3. SubActivities ตรวจทีละ field แบบเรียงลำดับ
+  for (let i = 0; i < subActivities.value.length; i++) {
+    const sub = subActivities.value[i]!
 
-  // ตรวจสอบกิจกรรมย่อยแต่ละรายการ
-  subActivities.value.forEach((sub, i) => {
-    // ตรวจสอบชื่อกิจกรรมย่อย
-    if (!sub?.subActivityName?.trim()) {
+    // 3.1 ชื่อกิจกรรม
+    if (!sub.subActivityName?.trim()) {
       subActivityNameErrors.value[i] = 'กรุณากรอกชื่อกิจกรรม'
-      hasError = true
+      hasError.value = true
       if (subActivityNameRefs.value[i]?.$el) {
         scrollTargets.push(subActivityNameRefs.value[i]?.$el)
+        if (!isFirstErrorHandled.value) isFirstErrorHandled.value = true
       }
     }
 
-    if (!sub?.lecturer?.trim()) {
+    // 3.2 วันที่จัดกิจกรรม
+    await validateComponent(dateRefs.value[i], scrollTargets, hasError, isFirstErrorHandled)
+
+    // 3.3 จำนวนชั่วโมง
+    await validateComponent(hourRefs.value[i], scrollTargets, hasError, isFirstErrorHandled)
+
+    // 3.4 ห้อง
+    await validateComponent(roomRefs.value[i], scrollTargets, hasError, isFirstErrorHandled)
+
+    // 3.5 จำนวนที่รับ
+    await validateComponent(seatRefs.value[i], scrollTargets, hasError, isFirstErrorHandled)
+
+    // 3.6 สาขา
+    await validateComponent(majorRefs.value[i], scrollTargets, hasError, isFirstErrorHandled)
+
+    // 3.7 ชั้นปี
+    await validateComponent(yearRefs.value[i], scrollTargets, hasError, isFirstErrorHandled)
+
+    // 3.8 วิทยากร
+    if (!sub.lecturer?.trim()) {
       lecturerErrors.value[i] = 'กรุณากรอกชื่อวิทยากร'
-      hasError = true
+      hasError.value = true
       if (lecturerRefs.value[i]?.$el) {
         scrollTargets.push(lecturerRefs.value[i]?.$el)
+        if (!isFirstErrorHandled.value) isFirstErrorHandled.value = true
       }
     }
+  }
 
-    // ฟังก์ชันสำหรับตรวจสอบ components ต่างๆ
-    const validateComponent = async (
-      ref:
-        | {
-            validate?: () => Promise<boolean>
-            $el?: HTMLElement | null
-          }
-        | null
-        | undefined,
-    ): Promise<void> => {
-      if (ref?.validate) {
-        try {
-          const valid = await ref.validate()
-          if (!valid && ref.$el) {
-            hasError = true
-            scrollTargets.push(ref.$el)
-          }
-        } catch (err) {
-          console.error('Validation error:', err)
-          hasError = true
-          if (ref.$el) {
-            scrollTargets.push(ref.$el)
-          }
-        }
-      }
-    }
-
-    // ตรวจสอบ components อื่นๆ
-    validations.push(validateComponent(dateRefs.value[i]))
-    validations.push(validateComponent(hourRefs.value[i]))
-    validations.push(validateComponent(seatRefs.value[i]))
-    validations.push(validateComponent(roomRefs.value[i]))
-    validations.push(validateComponent(majorRefs.value[i]))
-    validations.push(validateComponent(yearRefs.value[i]))
-  })
-
-  // รอให้การตรวจสอบทั้งหมดเสร็จสิ้น
-  await Promise.all(validations)
-
-  // รอให้ DOM update เสร็จก่อน scroll
   await nextTick()
 
-  // ถ้ามี errors ให้ scroll ไปที่ field บนสุดที่มี error
+  // ✅ Scroll + ตั้ง queue สำหรับ enter
   if (scrollTargets.length > 0) {
-    await nextTick() // รอให้ DOM update อีกรอบเพื่อความแน่นอน
     scrollToTopMost(scrollTargets)
+    pendingScrollQueue.value = scrollTargets.slice(1).filter((el): el is HTMLElement => el != null)
     return false
   }
 
-  return !hasError
+  return !hasError.value
+}
+
+function scrollToNextInQueue() {
+  const nextEl = pendingScrollQueue.value.shift()
+  if (nextEl) {
+    requestAnimationFrame(() => {
+      nextEl.scrollIntoView({ behavior: 'smooth', block: 'start' })
+      const input = nextEl.querySelector('input')
+      if (input) {
+        input.focus()
+      }
+      
+    })
+  }
+}
+const onEnterField = (
+  type: 'mainName' | 'subName' | 'lecturer' | 'seat' | 'hour' | 'closedate' | 'room' | 'major' | 'year'|'date',
+  index?: number,
+) => {
+  console.log('🔥 onEnterField triggered:', type, index)
+  console.log('📦 queue:', pendingScrollQueue.value)
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const isValid = (val: any) =>
+    typeof val === 'string'
+      ? val.trim() !== ''
+      : typeof val === 'number'
+        ? val > 0
+        : Array.isArray(val)
+          ? val.length > 0
+          : false
+
+  switch (type) {
+    case 'mainName':
+      if (isValid(activityName.value)) {
+        activityNameError.value = ''
+        void nextTick(() => scrollToNextInQueue())
+      }
+      break
+
+    case 'closedate':
+      if (isValid(formattedCloseRegisDate.value)) {
+        closedateError.value = ''
+        void nextTick(() => scrollToNextInQueue())
+      }
+      break
+
+    case 'subName':
+      if (index !== undefined && isValid(subActivities.value[index]?.subActivityName)) {
+        subActivityNameErrors.value[index] = ''
+        void nextTick(() => scrollToNextInQueue())
+      }
+      break
+    case 'date':
+      if (index !== undefined && isValid(subActivities.value[index]?.activityDateInternal)) {
+        dateErrors.value[index] = ''
+        void nextTick(() => scrollToNextInQueue())
+      }
+      break
+    case 'room':
+      if (index !== undefined && isValid(subActivities.value[index]?.roomName)) {
+        roomErrors.value[index] = ''
+        void nextTick(() => {
+          scrollToNextInQueue()
+          seatRefs.value[index]?.focus?.()
+        })
+      }
+      break
+
+    case 'seat':
+      if (index !== undefined && isValid(subActivities.value[index]?.seats)) {
+        seatErrors.value[index] = ''
+        void nextTick(() => {
+          scrollToNextInQueue()
+          seatRefs.value[index + 1]?.focus?.()
+        })
+      }
+      break
+
+    case 'hour':
+      if (index !== undefined && isValid(subActivities.value[index]?.totalHours)) {
+        seatErrors.value[index] = ''
+        void nextTick(() => {
+          scrollToNextInQueue()
+          seatRefs.value[index + 1]?.focus?.()
+        })
+      }
+      break
+    case 'lecturer':
+      if (index !== undefined && isValid(subActivities.value[index]?.lecturer)) {
+        lecturerErrors.value[index] = ''
+        void nextTick(() => scrollToNextInQueue())
+      }
+      break
+  }
 }
 
 //ใช้กับปุ่มบันทึก ส่งข้อมูลไปหลังบ้าน
@@ -436,6 +534,7 @@ const saveChanges = async () => {
     const valid = await validateBeforeOpen()
     if (!valid) return
   }
+  updated.id = props.activity.id
   updated.name = activityName.value
   updated.skill = activityType.value === 'prep' ? 'hard' : 'soft'
   updated.endDateEnroll = formattedCloseRegisDate.value
@@ -623,24 +722,24 @@ const resetFormToOriginal = () => {
     }) ?? []
 }
 onMounted(() => {
-  watch(activityName, (newVal) => {
-    if (newVal && newVal.trim() !== '') {
+  watch(activityName, (val) => {
+    if (val.trim() !== '') {
       activityNameError.value = ''
     }
   })
   watch(
     subActivities,
-    (newVal) => {
-      newVal.forEach((sub, i) => {
-        if (sub.subActivityName?.trim()) {
+    (subs) => {
+      subs.forEach((sub, i) => {
+        if (sub.subActivityName.trim()) {
           subActivityNameErrors.value[i] = ''
         }
-        if (sub.lecturer?.trim()) {
+        if (sub.lecturer.trim()) {
           lecturerErrors.value[i] = ''
         }
       })
     },
-    { deep: true, immediate: true },
+    { deep: true },
   )
 })
 </script>
@@ -682,6 +781,7 @@ onMounted(() => {
           :error="activityNameError !== ''"
           hide-bottom
           :disable="!isEditing"
+          @keyup.enter="onEnterField('mainName')"
         />
         <div v-if="activityNameError" class="text-negative text-subtitle2 q-mt-xs">
           {{ activityNameError }}
@@ -696,6 +796,7 @@ onMounted(() => {
       v-model="formattedCloseRegisDate"
       class="input-group"
       :disable="!isEditing"
+      @enter="onEnterField('closedate')"
     />
 
     <ActivityForm_Food
@@ -735,6 +836,7 @@ onMounted(() => {
             outlined
             v-model="subActivity.subActivityName"
             class="fix-q-input-height"
+            @keyup.enter="onEnterField('subName', index)"
             :disable="!isEditing"
             :error="
               subActivityNameErrors[index] !== undefined && subActivityNameErrors[index] !== ''
@@ -754,6 +856,7 @@ onMounted(() => {
         v-model="subActivity.activityDateInternal"
         @update:modelValue="(dates) => generateDaysInRange(dates, index)"
         :disable="!isEditing"
+        @enter="onEnterField('date', index)"
       />
       <!-- Time -->
       <!-- FINISH -->
@@ -796,21 +899,26 @@ onMounted(() => {
         v-model="subActivity.totalHours"
         class="input-group"
         :disable="!isEditing"
+        @keyup.enter="onEnterField('hour', index)"
       />
+
       <!-- Room --><!-- FINISH -->
       <ActivityForm_Room
         :ref="(el) => (roomRefs[index] = el as InstanceType<typeof ActivityForm_Room>)"
         v-model="subActivity.roomName"
         class="input-group"
         :disable="!isEditing"
+        @enter="onEnterField('room', index)"
       />
+
       <!-- Seats -->
       <!-- FINISH -->
       <ActivityForm_Seats
         :ref="(el) => (seatRefs[index] = el as InstanceType<typeof ActivityForm_Seats>)"
         v-model.number="subActivity.seats"
-        :disable="!isEditing"
         class="input-group"
+        :disable="!isEditing"
+        @keyup.enter="onEnterField('seat', index)"
       />
       <!-- Major -->
       <!-- FINISH -->
@@ -847,6 +955,7 @@ onMounted(() => {
             outlined
             v-model="subActivity.lecturer"
             class="fix-q-input-height"
+            @keyup.enter="onEnterField('lecturer', index)"
             :disable="!isEditing"
             :error="lecturerErrors[index] !== undefined && lecturerErrors[index] !== ''"
           />

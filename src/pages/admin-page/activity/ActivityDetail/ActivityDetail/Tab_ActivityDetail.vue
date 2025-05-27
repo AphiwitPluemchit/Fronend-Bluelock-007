@@ -108,12 +108,11 @@ watch(isEditing, (newVal) => {
 
 <style scoped>
 .wrapper {
+
   display: flex;
   align-items: flex-start;
-  background-color: #edf0f5;
   border-radius: 12px;
 }
-
 .container {
   display: flex;
   align-items: flex-start;

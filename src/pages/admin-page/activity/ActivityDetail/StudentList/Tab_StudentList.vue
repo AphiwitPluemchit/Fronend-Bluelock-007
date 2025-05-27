@@ -1,17 +1,15 @@
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue'
-import RemoveStudent from './RemoveStudent.vue'
-import FilterDialog from 'src/components/Dialog/FilterDialog.vue'
-import type { ActivityEnrollmentPagination } from 'src/types/pagination'
-import type { Activity } from 'src/types/activity'
-import { useEnrollmentStore } from 'src/stores/enrollment'
+//import
+import { computed, onMounted, ref } from 'vue'
 import { useRoute } from 'vue-router'
-import { EnrollmentService } from 'src/services/enrollment'
+import RemoveStudent from './RemoveStudent.vue'
 import { ActivityService } from 'src/services/activity'
+import { useEnrollmentStore } from 'src/stores/enrollment'
+import { EnrollmentService } from 'src/services/enrollment'
+import FilterDialog from 'src/components/Dialog/FilterDialog.vue'
+import type { Activity, EnrollmentSummary } from 'src/types/activity'
+import type { ActivityEnrollmentPagination } from 'src/types/pagination'
 
-const enrollmentStore = useEnrollmentStore()
-const route = useRoute()
-const activityId = route.params.id as string
 const allTab = ref<Activity | null>(null)
 const indexTab = ref(0)
 const query = ref<ActivityEnrollmentPagination>({
@@ -24,7 +22,6 @@ const query = ref<ActivityEnrollmentPagination>({
   status: [],
   studentYears: [],
 })
-const filterCategories1 = ref(['year', 'major', 'statusStudent'])
 
 const pagination = ref({
   sortBy: query.value.sortBy,
@@ -114,13 +111,38 @@ const fetchStudents = async () => {
   }
 }
 
-// const activityItemOptions = computed(() => {
-//   return allTab.value?.activityItems?.map(item => ({
-//     label: item.name,
-//     value: item.id
-//   })) || []
-// })
-
+const removeStudentFromActivity = async (studentId: string) => {
+  try {
+    await enrollmentStore.deleteEnrollmentById(studentId)
+    // ลบเสร็จ → Refresh ตาราง
+    await fetchStudents()
+  } catch (error) {
+    console.error('Failed to delete student:', error)
+  }
+}
+const activityItemOptions = computed(() => {
+  if (!allTab.value || !Array.isArray(allTab.value.activityItems)) return []
+  return allTab.value.activityItems.map((item, index) => ({
+    label: item.name,
+    value: index,
+  }))
+})
+onMounted(async () => {
+  await fetchStudents()
+  console.log(students.value)
+})
+const route = useRoute()
+const enrollmentStore = useEnrollmentStore()
+const activityId = route.params.id as string
+const activityDetail = ref<Activity | null>(null)
+const enrollmentSummary = ref<EnrollmentSummary | null>(null)
+const filterCategories1 = ref(['year', 'major', 'statusStudent'])
+const majorList = [
+  { majorName: 'CS' },
+  { majorName: 'SE' },
+  { majorName: 'AAI' },
+  { majorName: 'ITDI' },
+]
 const columns = [
   {
     name: 'index',
@@ -189,45 +211,60 @@ const columns = [
   },
   { name: 'actions', label: '', field: 'actions', align: 'center' as const },
 ]
-
-const removeStudentFromActivity = async (studentId: string) => {
+const fetchActivityDetail = async () => {
   try {
-    await enrollmentStore.deleteEnrollmentById(studentId)
-    // ลบเสร็จ → Refresh ตาราง
-    await fetchStudents()
+    const response = await ActivityService.getOne(activityId)
+    activityDetail.value = response.data
   } catch (error) {
-    console.error('Failed to delete student:', error)
+    console.error('Error fetching activity detail:', error)
   }
 }
-const activityItemOptions = computed(() => {
-  return (
-    allTab.value?.activityItems?.map((item, index) => ({
-      label: item.name,
-      value: index,
-    })) || []
-  )
-})
-onMounted(async () => {
-  await fetchStudents()
-  // console.log(enrollmentStore.enrollments.students)
-  console.log(students.value)
+const fetchEnrollmentSummary = async () => {
+  try {
+    const response = await ActivityService.getEnrollmentSummary(activityId)
+    enrollmentSummary.value = response
+  } catch (error) {
+    console.error('Error fetching enrollment summary:', error)
+  }
+}
 
-  // await enrollmentStore.fetchEnrollmentsByActivityID(activityId)
+onMounted(async () => {
+  await fetchEnrollmentSummary()
+  await fetchActivityDetail()
 })
 </script>
 
 <template>
   <div class="q-mb-sm student-container">
+    <div
+      class="custom-flex-row"
+      v-for="(item, index) in enrollmentSummary?.activityItemSums"
+      :key="index"
+    >
+      <q-badge class="EnrollBadge">
+        จำนวนที่รับ / จำนวนที่ลงทะเบียน / จำนวนที่ว่าง :
+        {{ enrollmentSummary?.maxParticipants || 0 }} /
+        {{ enrollmentSummary?.totalRegistered || 0 }} / {{ enrollmentSummary?.remainingSlots || 0 }}
+      </q-badge>
+      <q-badge v-for="(major, mIndex) in majorList" :key="mIndex" class="Majorbadge">
+        {{ major.majorName }} :
+        {{ item.registeredByMajor.find((m) => m.majorName === major.majorName)?.count || '0' }} คน
+      </q-badge>
+    </div>
+    <!-- <div v-if="activityDetail?.foodVotes?.length">
+      <div
+        class="custom-flex-row"
+        style="margin-top: 30px"
+        v-for="(item, index) in enrollmentSummary?.activityItemSums"
+        :key="index"
+      >
+        <q-badge v-for="food in activityDetail.foodVotes" :key="food.foodName" class="FoodBadge">
+          {{ food.foodName }} : {{ food.vote }}
+        </q-badge>
+      </div>
+    </div> -->
     <div class="student-table-wrapper">
       <div class="row justify-end items-center">
-        <!-- <div v-for="(activityItems, index) in allTab?.activityItems" :key="index">
-          <div @click="indexTab = index, fetchStudents()"
-            style="cursor: pointer; margin-right: 10px; font-weight: bold; background-color: coral;">
-            {{ activityItems.name }}
-          </div>
-        </div> -->
-
-        <!-- ช่องค้นหา -->
         <q-input
           dense
           outlined
@@ -255,11 +292,6 @@ onMounted(async () => {
         />
         <FilterDialog :categories="filterCategories1" @apply="applyStudentFilters" />
       </div>
-
-      <!-- <div class="q-pa-md">
-        <q-select filled v-model="indexTab" :options="activityItemOptions" option-label="label" option-value="value"
-          label="เลือกกิจกรรมย่อย" emit-value map-options @update:model-value="fetchStudents" />
-      </div> -->
 
       <q-table
         flat
@@ -315,105 +347,124 @@ onMounted(async () => {
 </template>
 
 <style lang="scss" scoped>
-.student-container {
-  background-color: #edf0f5;
-  height: 680px;
-  width: 100%;
-}
-
-// .student-table-wrapper {
-//   display: flex;
+// .student-container {
+//   height: 680px;
 //   width: 100%;
-//   max-width: 100%;
-//   display: flex;
-//   flex-direction: column;
+// }
+// .q-table table {
+//   table-layout: fixed;
 // }
 
-// .my-sticky-header-table {
-//   min-height: 450px;
-//   overflow: auto;
+// .my-sticky-header-table thead th {
+//   position: sticky;
+//   top: 0;
+//   z-index: 1;
+//   background-color: #f5f5f5;
 // }
 
-.q-table table {
-  table-layout: fixed;
+// .new-sticky-header {
+//   .my-sticky-header-table {
+//     /* Fix header */
+//     thead tr:first-child th {
+//       background-color: #f5f5f5;
+//     }
+
+//     /* Make tbody scrollable */
+//     tbody {
+//       display: block;
+//       overflow-y: auto;
+//     }
+
+//     /* Ensure header and body columns align */
+//     thead,
+//     tbody tr {
+//       display: table;
+//       width: 100%;
+//       table-layout: fixed;
+//     }
+
+//     /* Optional: ปรับ scrollbar ไม่ทับ */
+//     tbody::-webkit-scrollbar {
+//       width: 12px;
+//     }
+
+//     tbody::-webkit-scrollbar-thumb {
+//       background: #a7a7a7;
+//       border-radius: 10px;
+//       cursor: pointer;
+//     }
+//   }
+// }
+
+// .ellipsis-cell {
+//   white-space: nowrap;
+//   overflow: hidden;
+//   text-overflow: ellipsis;
+// }
+
+// .status-complete {
+//   background-color: #cfd7ff;
+//   color: #001780;
+//   border: 2px solid #002dff;
+//   padding: 3px 30px;
+//   width: 130px;
+// }
+
+// .status-medium {
+//   background-color: #ffe7ba;
+//   color: #ff6f00;
+//   border: 2px solid #ffa500;
+//   padding: 3px 30px;
+//   width: 130px;
+// }
+
+// .status-low {
+//   background-color: #ffc5c5;
+//   color: #ff0000;
+//   border: 2px solid #f32323;
+//   padding: 3px 30px;
+//   width: 130px;
+// }
+
+// .status-out {
+//   background-color: #dadada;
+//   color: #000000;
+//   border: 2px solid #575656;
+//   padding: 3px 30px;
+//   width: 130px;
+// }
+.Majorbadge {
+  background-color: #283593;
+  padding: 0 12px;
+  font-size: 16px;
+  max-width: 150px;
+  width: 100%;
+  height: 60px;
+  justify-content: center;
 }
-
-.my-sticky-header-table thead th {
-  position: sticky;
-  top: 0;
-  z-index: 1;
-  background-color: #f5f5f5;
+.EnrollBadge {
+  background-color: #283593;
+  padding: 0 12px;
+  font-size: 16px;
+  max-width: 500px;
+  width: 100%;
+  height: 60px;
+  justify-content: center;
 }
-
-.new-sticky-header {
-  .my-sticky-header-table {
-    /* Fix header */
-    thead tr:first-child th {
-      background-color: #f5f5f5;
-    }
-
-    /* Make tbody scrollable */
-    tbody {
-      display: block;
-      overflow-y: auto;
-    }
-
-    /* Ensure header and body columns align */
-    thead,
-    tbody tr {
-      display: table;
-      width: 100%;
-      table-layout: fixed;
-    }
-
-    /* Optional: ปรับ scrollbar ไม่ทับ */
-    tbody::-webkit-scrollbar {
-      width: 12px;
-    }
-
-    tbody::-webkit-scrollbar-thumb {
-      background: #a7a7a7;
-      border-radius: 10px;
-      cursor: pointer;
-    }
-  }
+.FoodBadge {
+  background-color: #283593;
+  padding: 0 12px;
+  font-size: 16px;
+  max-width: 150px;
+  width: 100%;
+  height: 60px;
+  justify-content: center;
 }
-
-.ellipsis-cell {
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.status-complete {
-  background-color: #cfd7ff;
-  color: #001780;
-  border: 2px solid #002dff;
-  padding: 3px 30px;
-  width: 130px;
-}
-
-.status-medium {
-  background-color: #ffe7ba;
-  color: #ff6f00;
-  border: 2px solid #ffa500;
-  padding: 3px 30px;
-  width: 130px;
-}
-
-.status-low {
-  background-color: #ffc5c5;
-  color: #ff0000;
-  border: 2px solid #f32323;
-  padding: 3px 30px;
-  width: 130px;
-}
-
-.status-out {
-  background-color: #dadada;
-  color: #000000;
-  border: 2px solid #575656;
-  padding: 3px 30px;
-  width: 130px;
+.custom-flex-row {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: nowrap;
 }
 </style>

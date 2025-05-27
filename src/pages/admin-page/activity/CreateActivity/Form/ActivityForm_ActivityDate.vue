@@ -5,11 +5,16 @@ const props = defineProps<{
   modelValue: string[]
   disable?: boolean // เพิ่ม prop disable
 }>()
-const emit = defineEmits<{ (event: 'update:modelValue', value: string[]): void }>()
+const emit = defineEmits<{
+  (event: 'update:modelValue', value: string[]): void
+  (event: 'enter'): void
+}>()
 const internalDateRange = ref<string[]>([...props.modelValue])
-const datePopupRef = ref(null)
+// eslint-disable-next-line @typescript-eslint/consistent-type-imports
+const datePopupRef = ref<InstanceType<typeof import('quasar')['QMenu']> | null>(null)
 const dateError = ref('')
-const inputRef = ref<HTMLElement | null>(null)
+// eslint-disable-next-line @typescript-eslint/consistent-type-imports
+const inputRef = ref<InstanceType<typeof import('quasar')['QInput']> | null>(null)
 
 const thaiLocale = {
   days: ['อาทิตย์', 'จันทร์', 'อังคาร', 'พุธ', 'พฤหัสบดี', 'ศุกร์', 'เสาร์'],
@@ -43,42 +48,6 @@ const thaiLocale = {
     'ธ.ค.',
   ],
 }
-
-const formattedDateRange = computed(() => {
-  return internalDateRange.value.length > 0
-    ? internalDateRange.value.map((date) => formatThaiDate(date)).join(', ')
-    : ''
-})
-const validate = async () => {
-  if (!internalDateRange.value || internalDateRange.value.length === 0) {
-    dateError.value = 'กรุณาเลือกวันที่จัดกิจกรรม'
-    await nextTick()
-    inputRef.value?.scrollIntoView({ behavior: 'smooth', block: 'center' })
-    return false
-  }
-  dateError.value = ''
-  return true
-}
-
-defineExpose({ validate })
-const onDateRangeChange = () => {
-  if (props.disable) return
-
-  if (!internalDateRange.value || internalDateRange.value.length === 0) {
-    emit('update:modelValue', [])
-    return
-  }
-
-  // ✅ เคลียร์ error ถ้ามีการเลือกวันแล้ว
-  dateError.value = ''
-
-  // ✅ sort วันใหม่ก่อน emit
-  internalDateRange.value = [...internalDateRange.value].sort(
-    (a, b) => new Date(a).getTime() - new Date(b).getTime()
-  )
-  emit('update:modelValue', internalDateRange.value)
-}
-
 const formatThaiDate = (dateStr: string): string => {
   if (!dateStr) return ''
 
@@ -99,6 +68,51 @@ const formatThaiDate = (dateStr: string): string => {
   return `${day} ${thaiMonth} ${thaiYear}`
 }
 
+const formattedDateRange = computed(() => {
+  return internalDateRange.value.length > 0
+    ? internalDateRange.value.map((date) => formatThaiDate(date)).join(', ')
+    : ''
+})
+const validate = async () => {
+  if (!internalDateRange.value.length) {
+    dateError.value = 'กรุณาเลือกวันที่จัดกิจกรรม'
+    await nextTick()
+    inputRef.value?.$el?.scrollIntoView({ behavior: 'smooth', block: 'center' })
+    return false
+  }
+  dateError.value = ''
+  return true
+}
+
+const onDateRangeChange = () => {
+  if (props.disable) return
+
+  if (!internalDateRange.value || internalDateRange.value.length === 0) {
+    emit('update:modelValue', [])
+    return
+  }
+
+  // ✅ เคลียร์ error ถ้ามีการเลือกวันแล้ว
+  dateError.value = ''
+
+  // ✅ sort วันใหม่ก่อน emit
+  internalDateRange.value = [...internalDateRange.value].sort(
+    (a, b) => new Date(a).getTime() - new Date(b).getTime(),
+  )
+  emit('update:modelValue', internalDateRange.value)
+}
+const focus = async () => {
+  await nextTick()
+  inputRef.value?.focus?.()
+  requestAnimationFrame(() => {
+    requestAnimationFrame(() => {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (datePopupRef.value as any)?.show?.()
+    })
+  })
+}
+
+defineExpose({ validate, focus })
 watch(
   () => props.modelValue,
   (newVal) => {
@@ -109,47 +123,50 @@ watch(
 
 <template>
   <div class="input-group" ref="inputRef">
-    <p class="label label_minWidth"  :class="{ 'label-error-shift': dateError !== '' }">วันที่จัดกิจกรรม :</p>
-      <div class="input-container">
-    <q-input
-      outlined
-      v-model="formattedDateRange"
-      class="fix-q-input-height"
-      ref="inputRef"
-      readonly
-      :disable="disable"
-      :error="dateError !== ''"    
-    
-    >
-      <template v-slot:prepend>
-        <q-icon
-          name="event"
-          class="cursor-pointer"
-          :class="{ 'disabled-icon': disable }"
-          style="color: black"
-        >
-          <q-menu ref="datePopupRef" style="overflow: visible" v-if="!disable">
-            <q-date
-              v-model="internalDateRange"
-              mask="YYYY-MM-DD"
-              today-btn
-              :locale="thaiLocale"
-              color="blue-8"
-              text-color="white"
-              minimal
-              first-day-of-week="1"
-              class="my-custom-calendar"
-              multiple
-              @update:model-value="onDateRangeChange"
-            />
-          </q-menu>
-        </q-icon>
-      </template>
-    </q-input>
-    <div v-if="dateError" class="text-negative text-subtitle2 q-mt-xs">
-      {{ dateError }}
+    <p class="label label_minWidth" :class="{ 'label-error-shift': dateError !== '' }">
+      วันที่จัดกิจกรรม :
+    </p>
+    <div class="input-container">
+      <q-input
+        outlined
+        v-model="formattedDateRange"
+        class="fix-q-input-height"
+        ref="inputRef"
+        readonly
+        :disable="disable"
+        :error="dateError !== ''"
+        @keydown.enter.prevent="$emit('enter')"
+      >
+        <template v-slot:prepend>
+          <q-icon
+            name="event"
+            class="cursor-pointer"
+            :class="{ 'disabled-icon': disable }"
+            style="color: black"
+          >
+            <q-menu ref="datePopupRef" style="overflow: visible" v-if="!disable">
+              <q-date
+                v-model="internalDateRange"
+                mask="YYYY-MM-DD"
+                today-btn
+                :locale="thaiLocale"
+                color="blue-8"
+                text-color="white"
+                minimal
+                first-day-of-week="1"
+                class="my-custom-calendar"
+                multiple
+                 @keyup.enter="$emit('enter')"
+                @update:model-value="onDateRangeChange"
+              />
+            </q-menu>
+          </q-icon>
+        </template>
+      </q-input>
+      <div v-if="dateError" class="text-negative text-subtitle2 q-mt-xs">
+        {{ dateError }}
+      </div>
     </div>
-  </div>
   </div>
 </template>
 
@@ -210,7 +227,7 @@ watch(
 ::v-deep(.q-icon) {
   font-size: 18px;
 }
-@media(max-width: 1880px){
+@media (max-width: 1880px) {
   .input-container {
     width: 530px;
     max-width: 100%;
@@ -220,7 +237,7 @@ watch(
   }
 }
 @media (max-width: 850px) {
-   .input-group:not(.no-wrap) {
+  .input-group:not(.no-wrap) {
     flex-direction: column;
     align-items: flex-start;
     margin-bottom: 10px !important;
@@ -228,7 +245,7 @@ watch(
   }
   .input-container {
     width: 470px;
-    max-width: 100%; 
+    max-width: 100%;
   }
   .label {
     justify-content: flex-start;
@@ -242,8 +259,8 @@ watch(
     margin-left: 0;
   }
   .label-error-shift {
-  transform: translateY(0px);
-}
+    transform: translateY(0px);
+  }
 }
 @media (max-width: 500px) {
   .input-group {

@@ -37,13 +37,17 @@ const validate = async () => {
   seatsError.value = ''
   return true
 }
-defineExpose({ validate })
 watch(localSeats, (newVal) => {
   emit('update:modelValue', newVal ?? 0)
   if (newVal && newVal > 0) {
     seatsError.value = ''
   }
 })
+
+const focus = () => {
+  inputRef.value?.focus?.()
+}
+defineExpose({ validate, focus })
 </script>
 
 <template>

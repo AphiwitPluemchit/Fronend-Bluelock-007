@@ -112,8 +112,6 @@ watch([tab, isPlanning], () => {
 
 .custom-panels {
   max-width: 1600px;
-  margin: auto;
-  background-color: #edf0f5;
   max-height: 680px;
 }
 @media(max-width: 1650px) {

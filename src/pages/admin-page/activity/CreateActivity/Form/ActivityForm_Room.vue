@@ -1,31 +1,29 @@
 <script setup lang="ts">
-import { ref, watch, computed, nextTick } from 'vue'
+import { ref, computed, nextTick} from 'vue'
 import { QInput } from 'quasar'
+
 const inputRef = ref<InstanceType<typeof QInput> | null>(null)
 const showSuggestions = ref(false)
 const filteredRooms = ref<string[]>([])
 const searchText = ref('')
 const roomError = ref('')
-
-
 const props = defineProps<{
   modelValue: string[]
   disable?: boolean
   rooms?: string[]
 }>()
+
 const emit = defineEmits<{
   (e: 'update:modelValue', value: string[]): void
+  (e: 'update:roomError', value: string): void
+  (e: 'enter'): void
 }>()
 
 const selectedRoom = computed({
   get: () => props.modelValue,
   set: (val: string[]) => emit('update:modelValue', val),
 })
-watch(selectedRoom, (val) => {
-  emit('update:modelValue', val)
-})
 
-// ✅ ใช้ค่าจาก props.rooms ถ้ามี ไม่งั้นใช้ allRooms
 const allRooms = computed(() => props.rooms ?? [
   '11M280', '5M210', '4M210', '3M210', '7T05', '6T05',
   '5T05', '6T01', '6T02', '6T03', '6T04', '5T01', '5T02',
@@ -44,6 +42,7 @@ const onFocus = () => {
   filteredRooms.value = allRooms.value
   showSuggestions.value = true
 }
+
 const filterRooms = () => {
   const query = searchText.value.trim().toLowerCase()
   filteredRooms.value = query
@@ -51,6 +50,7 @@ const filterRooms = () => {
     : allRooms.value
   showSuggestions.value = true
 }
+
 const selectRoom = (room: string) => {
   const current = [...selectedRoom.value]
   const index = current.indexOf(room)
@@ -60,12 +60,10 @@ const selectRoom = (room: string) => {
     current.splice(index, 1)
   }
   selectedRoom.value = current
-   if (current.length > 0) {
+  if (current.length > 0) {
     roomError.value = ''
   }
 }
-
-// ✅ validate ฟิลด์
 const validate = async () => {
   if (!selectedRoom.value.length) {
     roomError.value = 'กรุณาเลือกห้องอย่างน้อย 1 ห้อง'
@@ -77,53 +75,65 @@ const validate = async () => {
   return true
 }
 defineExpose({ validate })
-watch(
-  () => selectedRoom.value,
-  (val) => {
-    if (val.length > 0) {
-      roomError.value = ''
-    }
-  },
-)
+
+const handleEnter = async (e: KeyboardEvent) => {
+ 
+    console.log('✅ ENTER กดแล้ว blur input')
+
+    e.preventDefault()
+
+    // 👉 Blur ออกจาก input เพื่อให้ q-menu ปิดอัตโนมัติ
+    const input = inputRef.value?.$el?.querySelector('input') as HTMLInputElement | null
+    input?.blur()
+
+    await nextTick()
+
+    emit('enter')
+  
+}
 </script>
+
+
 
 <template>
   <div class="input-group">
     <p class="label label_minWidth" :class="{ 'label-error-shift': roomError !== '' }">ชื่อห้องที่จัดกิจกรรม :</p>
     <div class="input-container">
       <q-input
-        outlined
-        v-model="displayText"
-        :disable="props.disable"
-        class="full-width fix-q-input-height"
-        @focus="onFocus"
-        @input="filterRooms"
-        ref="inputRef"
-        :error="roomError !== ''"
+  outlined
+  ref="inputRef"
+  v-model="displayText"
+  :disable="props.disable"
+  class="full-width fix-q-input-height"
+  @focus="onFocus"
+  @input="filterRooms"
+  :error="roomError !== ''"
+>
+  <q-menu
+    v-if="!props.disable"
+    v-model="showSuggestions"
+    anchor="bottom left"
+    self="top left"
+    :fit="true"
+    @enter="handleEnter"
+    :cover="false"
+  >
+    <q-list class="scroll dropdown-list">
+      <q-item
+        v-for="(room, index) in filteredRooms"
+        :key="index"
+        clickable
+        @mousedown.prevent
+        @click="selectRoom(room)"
+        :class="{ 'selected-item': selectedRoom.includes(room) }"
       >
-        <q-menu
-          v-if="!props.disable"
-          v-model="showSuggestions"
-          anchor="bottom left"
-          self="top left"
-          :fit="true"
-          :cover="false"
-        >
-          <q-list class="scroll dropdown-list">
-            <q-item
-              v-for="(room, index) in filteredRooms"
-              :key="index"
-              clickable
-              @click="selectRoom(room)"
-              :class="{ 'selected-item': selectedRoom.includes(room) }"
-            >
-              <q-item-section>
-                {{ room }}
-              </q-item-section>
-            </q-item>
-          </q-list>
-        </q-menu>
-      </q-input>
+        <q-item-section>
+          {{ room }}
+        </q-item-section>
+      </q-item>
+    </q-list>
+  </q-menu>
+</q-input>
       <div v-if="roomError" class="text-negative text-subtitle2 q-mt-xs">
         {{ roomError }}
       </div>
