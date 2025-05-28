@@ -148,10 +148,65 @@ const goToConfirmPage = () => {
 </style>
 
 <style lang="scss" scoped>
+/* โครงสร้างหลัก */
 .student-container {
   background-color: #edf0f5;
   height: 680px;
   width: 100%;
+}
+
+/* ตารางให้เลื่อนแนวนอนบนมือถือ */
+.q-table {
+  overflow-x: auto;
+}
+
+/* ตารางจัดให้ column กว้างพออ่านได้ */
+.q-table table {
+  min-width: 700px; /* กำหนดความกว้างขั้นต่ำ */
+  table-layout: fixed;
+}
+
+@media (max-width: 600px) {
+  /* จัด search กับปุ่ม filter, add เป็นแนวตั้ง */
+  section > div.row.justify-end {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  /* input search กว้างเต็ม */
+  .searchbox {
+    width: 100% !important;
+    margin-bottom: 8px;
+  }
+
+  /* ปุ่มเพิ่มข้อมูล กว้างเต็ม */
+  .btnadd {
+    width: 100%;
+  }
+
+  /* ปุ่มฟิลเตอร์ dialog กว้างเต็ม */
+  .q-mr-sm {
+    width: 100% !important;
+    margin-bottom: 8px !important;
+  }
+
+  /* ตารางเลื่อนแนวนอน */
+  .q-table {
+    overflow-x: auto;
+  }
+
+  /* ตารางขนาด font เล็กลง */
+  .q-table table {
+    font-size: 14px;
+  }
+}
+
+/* กำหนดให้ชื่อไม่ตัดกลางๆ บนมือถือ */
+.q-td[style] {
+  white-space: normal !important;
+  max-width: 100% !important;
+  overflow: visible !important;
+  text-overflow: unset !important;
 }
 
 // .student-table-wrapper {
