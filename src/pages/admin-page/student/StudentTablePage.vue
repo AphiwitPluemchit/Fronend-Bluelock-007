@@ -128,7 +128,7 @@ const goToDetail = (code: string) => {
 interface SelectedFilters {
   year: string[]
   major: string[]
-  statusActivity: string[]
+  statusStudent: string[]
 }
 const showFilterDialog1 = ref(false)
 const filterCategories1 = ref(['major', 'year', 'statusStudent'])
@@ -136,7 +136,7 @@ const filterCategories1 = ref(['major', 'year', 'statusStudent'])
 const applyFilters = async (selectedFilters: SelectedFilters) => {
   query.value.studentYear = selectedFilters.year.map(Number)
   query.value.major = selectedFilters.major
-  query.value.activityState = selectedFilters.statusActivity
+  query.value.statusStudent = selectedFilters.statusStudent
   await data()
 }
 const data = async () => {

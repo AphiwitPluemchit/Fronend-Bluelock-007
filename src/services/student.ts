@@ -5,10 +5,17 @@ import type { ExcelStudentRow, Student } from 'src/types/student'
 export class StudentService {
   static path = '/students'
 
-  static async getAll(params: Pagination, status?: string) {
+  static async getAll(params: Pagination) {
     // ✅ รวม `status` เข้าไปใน Query
-    const queryParams = { ...params, status }
-    console.log(queryParams)
+    const { statusStudent, major, studentYear, ...rest } = params
+    const queryParams = {
+      ...rest,
+      ...(statusStudent && statusStudent.length > 0
+        ? { statusStudent: statusStudent.join(',') }
+        : {}),
+      ...(major && major.length > 0 ? { major: major.join(',') } : {}),
+      ...(studentYear && studentYear.length > 0 ? { studentYear: studentYear.join(',') } : {}),
+    }
 
     try {
       const res = await api.get<PaginationResponse<Student>>(this.path, { params: queryParams })
