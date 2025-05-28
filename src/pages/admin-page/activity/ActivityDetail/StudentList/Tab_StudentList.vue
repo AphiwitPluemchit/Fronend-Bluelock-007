@@ -8,19 +8,19 @@ import { useEnrollmentStore } from 'src/stores/enrollment'
 import { EnrollmentService } from 'src/services/enrollment'
 import FilterDialog from 'src/components/Dialog/FilterDialog.vue'
 import type { Activity, EnrollmentSummary } from 'src/types/activity'
-import type { ActivityEnrollmentPagination } from 'src/types/pagination'
+import type { Pagination } from 'src/types/pagination'
 
 const allTab = ref<Activity | null>(null)
 const indexTab = ref(0)
-const query = ref<ActivityEnrollmentPagination>({
+const query = ref<Pagination>({
   page: 1,
   limit: 5,
   search: '',
   sortBy: '_id',
   order: 'desc',
   major: [],
-  status: [],
-  studentYears: [],
+  statusStudent: [],
+  studentYear: [],
 })
 
 const pagination = ref({
@@ -74,11 +74,9 @@ interface SelectedFilters {
 
 const applyStudentFilters = async (selectedFilters: SelectedFilters) => {
   console.log(selectedFilters)
-
-  query.value.studentYears = selectedFilters.year
+  query.value.studentYear = selectedFilters.year.map(Number)
   query.value.major = selectedFilters.major
-  query.value.status = selectedFilters.statusStudent
-  // enrollmentStore.query.page = 1
+  query.value.statusStudent = selectedFilters.statusStudent
   await fetchStudents()
 }
 

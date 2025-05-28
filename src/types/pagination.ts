@@ -29,7 +29,7 @@ export type ActivityEnrollmentPagination = {
   sortBy: string
   order: string
   major?: string[]
-  status?: string[]
+  statusStudent?: string[]
   studentYears?: string[]
 }
 

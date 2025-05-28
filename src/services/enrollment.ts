@@ -1,6 +1,6 @@
 import { api } from 'boot/axios'
 import type { StudentEnrollment, EnrollmentQuery } from 'src/types/enrollment'
-import type { PaginationResponse } from 'src/types/pagination'
+import type { Pagination, PaginationResponse } from 'src/types/pagination'
 
 export class EnrollmentService {
   static path = 'enrollments'
@@ -26,12 +26,25 @@ export class EnrollmentService {
     }
   }
 
-  static async getEnrollmentsByActivityID(activityId: string, params: EnrollmentQuery) {
+  static async getEnrollmentsByActivityID(activityId: string, params: Pagination) {
+    console.log(params)
+
+    const { statusStudent, major, studentYear, ...rest } = params
+
+    const queryParams = {
+      ...rest,
+      ...(statusStudent && statusStudent.length > 0
+        ? { statusStudent: statusStudent.join(',') }
+        : {}),
+      ...(major && major.length > 0 ? { major: major.join(',') } : {}),
+      ...(studentYear && studentYear.length > 0 ? { studentYear: studentYear.join(',') } : {}),
+    }
+
     try {
-      console.log('Sending params:', params)
+      console.log('Sending queryParams:', queryParams)
       const res = await api.get<PaginationResponse<StudentEnrollment>>(
         `activitys/${activityId}/enrollments`,
-        { params },
+        { params: queryParams },
       )
       console.log('Fetched enrollments:', res.data)
       return res.data

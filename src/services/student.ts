@@ -6,6 +6,8 @@ export class StudentService {
   static path = '/students'
 
   static async getAll(params: Pagination) {
+    console.log(params)
+
     // ✅ รวม `status` เข้าไปใน Query
     const { statusStudent, major, studentYear, ...rest } = params
     const queryParams = {
@@ -18,6 +20,7 @@ export class StudentService {
     }
 
     try {
+      console.log('Sending queryParams:', queryParams)
       const res = await api.get<PaginationResponse<Student>>(this.path, { params: queryParams })
 
       return res.data

@@ -15,7 +15,7 @@ export const useEnrollmentStore = defineStore('enrollment', () => {
     sortBy: 'id',
     order: 'DESC',
     major: [],
-    status: [],
+    statusStudent: [],
     studentYears: [],
   })
 
@@ -25,34 +25,10 @@ export const useEnrollmentStore = defineStore('enrollment', () => {
   ) => {
     try {
       console.log('Query Params before API:', query)
-
-      // const paramsToSend = {
-      //   page: query.value.page,
-      //   limit: query.value.limit,
-      //   search: query.value.search,
-      //   sortBy: query.value.sortBy,
-      //   order: query.value.order,
-
-      //   // KEY สำคัญตรงนี้:
-      //   majors: query.value.major?.join(','), // backend รับเป็น comma-separated string
-      //   status: query.value.status?.join(','), // comma-separated string
-      //   years: query.value.studentYears?.join(','), // comma-separated string
-      // }
-
       const res = await EnrollmentService.getEnrollmentsByActivityID(activityId, query.value)
       studentEnrollments.value = res.data
       total.value = res.meta.total
       console.log('Fetched enrollments:', res)
-
-      // if (Array.isArray(res.data)) {
-      //   const PLACEHOLDER_ID = '000000000000000000000000'
-      //   const filteredData = res.data.filter((e) => e.id !== PLACEHOLDER_ID)
-      //   enrollments.value = filteredData
-      //   total.value = res.meta.total
-      // } else {
-      //   enrollments.value = []
-      //   total.value = 0
-      // }
     } catch (error) {
       console.error('Error fetching enrollments:', error)
     }
@@ -66,19 +42,6 @@ export const useEnrollmentStore = defineStore('enrollment', () => {
       throw error
     }
   }
-
-  // const resetQuery = () => {
-  //   query.value = {
-  //     page: 1,
-  //     limit: 10,
-  //     search: '',
-  //     sortBy: 'id',
-  //     order: 'DESC',
-  //     major: [],
-  //     status: [],
-  //     studentYears: [],
-  //   }
-  // }
 
   return {
     studentEnrollments,
