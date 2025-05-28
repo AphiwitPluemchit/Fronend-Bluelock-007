@@ -18,11 +18,9 @@ const breadcrumbs = ref({
   icon: 'people',
 })
 
-const filterCategories1 = ref(['major', 'year', 'status'])
+const filterCategories1 = ref(['major']) // <== แก้ตรงนี้
 const filters = ref({
   major: [] as string[],
-  year: [] as number[],
-  status: [] as string[],
 })
 
 onMounted(async () => {
@@ -55,7 +53,16 @@ const getStatusClass = (status: string): string => {
 }
 
 const filteredStudents = computed(() => {
-  return studentStore.students.filter((student) => student.status === 0)
+  return studentStore.students.filter((student) => {
+    const isTerminated = student.status === 0
+    const matchesSearch =
+      search1.value.trim() === '' ||
+      student.name.toLowerCase().includes(search1.value.trim().toLowerCase())
+    const matchesMajor =
+      filters.value.major.length === 0 || filters.value.major.includes(student.major)
+
+    return isTerminated && matchesSearch && matchesMajor
+  })
 })
 
 const columns = [
