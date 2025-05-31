@@ -1,14 +1,22 @@
 import { api } from 'boot/axios'
+import { Notify } from 'quasar'
 import type { Pagination, PaginationResponse } from 'src/types/pagination'
 import type { ExcelStudentRow, Student } from 'src/types/student'
+
+// 🔔 แสดงข้อความ error
+const showError = (message: string) => {
+  Notify.create({
+    message,
+    type: 'negative',
+    position: 'bottom',
+    timeout: 3000,
+  })
+}
 
 export class StudentService {
   static path = '/students'
 
   static async getAll(params: Pagination) {
-    console.log(params)
-
-    // ✅ รวม `status` เข้าไปใน Query
     const { statusStudent, major, studentYear, ...rest } = params
     const queryParams = {
       ...rest,
@@ -22,9 +30,9 @@ export class StudentService {
     try {
       console.log('Sending queryParams:', queryParams)
       const res = await api.get<PaginationResponse<Student>>(this.path, { params: queryParams })
-
       return res.data
     } catch (error) {
+      showError('ไม่สามารถโหลดรายชื่อนักศึกษาได้')
       console.error('Error fetching students:', error)
       throw error
     }
@@ -35,6 +43,7 @@ export class StudentService {
       const res = await api.get(`${this.path}/${code}`)
       return res.data
     } catch (error) {
+      showError('ไม่สามารถโหลดข้อมูลนักศึกษาได้')
       console.error(`Error fetching student ID: ${code}`, error)
       throw error
     }
@@ -49,6 +58,7 @@ export class StudentService {
       console.log('res student:', res)
       return res.status
     } catch (error) {
+      showError('ไม่สามารถเพิ่มข้อมูลนักศึกษาได้')
       console.error('Error creating student:', error)
       throw error
     }
@@ -64,9 +74,16 @@ export class StudentService {
       hardSkill: student.hardSkill,
       major: student.major,
     }
-    console.log('Update Payload:', payload)
 
-    return await api.put(`/students/${student.id}`, payload)
+    try {
+      console.log('Update Payload:', payload)
+      const res = await api.put(`${this.path}/${student.id}`, payload)
+      return res.data
+    } catch (error) {
+      showError('ไม่สามารถอัปเดตข้อมูลนักศึกษาได้')
+      console.error('Error updating student:', error)
+      throw error
+    }
   }
 
   static async removeOne(id: string) {
@@ -74,6 +91,7 @@ export class StudentService {
       const res = await api.delete(`${this.path}/${id}`)
       return res.status
     } catch (error) {
+      showError('ไม่สามารถลบนักศึกษาได้')
       console.error(`Error deleting student ID: ${id}`, error)
       throw error
     }

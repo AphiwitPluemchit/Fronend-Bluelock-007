@@ -1,18 +1,25 @@
 import { api } from 'boot/axios'
+import { Notify } from 'quasar'
 import type { ActivityPagination, PaginationResponse } from 'src/types/pagination'
 import type { EnrollmentSummary } from 'src/types/activity'
 import { type Activity } from 'src/types/activity'
 
+// ⛑️ Utility สำหรับแสดง Error
+const showError = (message: string) => {
+  Notify.create({
+    message,
+    type: 'negative',
+    position: 'bottom',
+    timeout: 3000,
+  })
+}
+
 export class ActivityService {
   static path = 'activitys'
 
-  // ✅ รองรับ Pagination และ Status Filter
   static async getAll(params: ActivityPagination) {
-    // ✅ รวม `status` เข้าไปใน Query
-
     const { skill, activityState, major, studentYear, ...rest } = params
 
-    // change array to string to query
     const skillQuery = skill.join(',')
     const activityStateQuery = activityState.join(',')
     const majorQuery = major.join(',')
@@ -28,9 +35,9 @@ export class ActivityService {
           studentYears: studentYearQuery,
         },
       })
-
       return res.data
     } catch (error) {
+      showError('ไม่สามารถโหลดกิจกรรมได้')
       console.error('Error fetching activities:', error)
       throw error
     }
@@ -41,6 +48,7 @@ export class ActivityService {
       const res = await api.get(`${this.path}/${id}`)
       return res.data
     } catch (error) {
+      showError('ไม่สามารถโหลดข้อมูลกิจกรรมได้')
       console.error(`Error fetching activity ID: ${id}`, error)
       throw error
     }
@@ -52,18 +60,20 @@ export class ActivityService {
       const res = await api.post(this.path, obj)
       return {
         status: res.status,
-        id: res.data.data.id
+        id: res.data.data.id,
       }
     } catch (error) {
+      showError('ไม่สามารถสร้างกิจกรรมได้')
       console.error('Error creating activity:', error)
       throw error
     }
   }
+
   static async uploadImage(id: string, file: File, oldFileName?: string) {
     try {
       const formData = new FormData()
       formData.append('file', file)
-  
+
       const query = oldFileName ? `?filename=${oldFileName}` : ''
       const res = await api.post(`${this.path}/${id}/image${query}`, formData, {
         headers: {
@@ -72,24 +82,26 @@ export class ActivityService {
       })
       return {
         status: res.status,
-        fileName: res.data.fileName, // 👈 backend ต้องส่งกลับมา
+        fileName: res.data.fileName,
       }
-      
     } catch (error) {
+      showError('ไม่สามารถอัปโหลดรูปกิจกรรมได้')
       console.error('Error uploading image:', error)
       throw error
     }
   }
+
   static async deleteImage(id: string, fileName: string) {
     try {
       const res = await api.delete(`${this.path}/${id}/image?filename=${fileName}`)
       return res.status
     } catch (error) {
+      showError('ไม่สามารถลบรูปกิจกรรมได้')
       console.error('Error deleting image:', error)
       throw error
     }
   }
-  
+
   static async updateOne(obj: Partial<Activity>) {
     try {
       if (!obj.id) {
@@ -99,6 +111,7 @@ export class ActivityService {
       const res = await api.put(`${this.path}/${obj.id}`, obj)
       return res.status
     } catch (error) {
+      showError('ไม่สามารถอัปเดตกิจกรรมได้')
       console.error('Error updating activity:', error)
       throw error
     }
@@ -109,6 +122,7 @@ export class ActivityService {
       const res = await api.delete(`${this.path}/${id}`)
       return res.status
     } catch (error) {
+      showError('ไม่สามารถลบกิจกรรมได้')
       console.error(`Error deleting activity ID: ${id}`, error)
       throw error
     }
@@ -120,6 +134,7 @@ export class ActivityService {
       console.log('data', res.data)
       return res.data
     } catch (error) {
+      showError('ไม่สามารถโหลดสรุปข้อมูลการลงทะเบียนได้')
       console.error(`Error fetching enrollment summary for activity ID: ${activityId}`, error)
       throw error
     }
