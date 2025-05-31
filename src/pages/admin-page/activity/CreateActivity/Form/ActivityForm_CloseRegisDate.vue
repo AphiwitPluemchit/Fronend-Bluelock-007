@@ -136,6 +136,7 @@ defineExpose({ validate, focus })
               anchor="bottom left"
               self="top left"
               :cover="false"
+                @keyup.enter="$emit('enter')"
             >
               <q-date
                 v-model="CloseRegisDates"
@@ -147,7 +148,6 @@ defineExpose({ validate, focus })
                 minimal
                 first-day-of-week="1"
                 class="my-custom-calendar"
-                 @keyup.enter="$emit('enter')"
                 @update:model-value="onDateChange"
               />
             </q-menu>

@@ -108,7 +108,6 @@ watch(isEditing, (newVal) => {
 
 <style scoped>
 .wrapper {
-
   display: flex;
   align-items: flex-start;
   border-radius: 12px;
@@ -130,7 +129,7 @@ watch(isEditing, (newVal) => {
   flex-grow: 1;
   overflow-x: hidden;
   overflow-y: auto;
-  max-height: 610px;
+  max-height: 590px;
   justify-items: flex-end;
   margin-right: 50px;
 }
