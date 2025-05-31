@@ -72,7 +72,7 @@ const handleLogin = async () => {
         await router.push(redirectPath)
         return
       }
-
+      localStorage.removeItem('redirectAfterLogin')
       // fallback กรณีไม่มี redirect
       const role = result.user?.role
       if (role === EnumUserRole.ADMIN) {
