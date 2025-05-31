@@ -26,10 +26,10 @@
           <FilterDialog
             :model-value="showFilterDialog1"
             :categories="filterCategories"
-            :years="query1.studentYear"
-            :majors="query1.major"
-            :status-activities="query1.activityState"
-            :category-activities="query1.skill"
+            :years="query1.studentYear || []"
+            :majors="query1.major || []"
+            :status-activities="query1.activityState || []"
+            :category-activities="query1.skill || []"
             @apply="applyFilters1"
           />
         </div>
@@ -124,7 +124,7 @@
             v-model="query2.search"
             label="ค้นหา ชื่อกิจกรรม"
             class="q-mr-sm searchbox"
-         :style="{ border: 'none' }"
+            :style="{ border: 'none' }"
           >
             <template v-slot:append>
               <q-icon name="search" />
@@ -132,11 +132,11 @@
           </q-input>
           <FilterDialog
             :model-value="showFilterDialog2"
-            :categories="filterCategories"
-            :years="query2.studentYear"
-            :majors="query2.major"
-            :status-activities="query2.activityState"
-            :category-activities="query2.skill"
+            :categories="filterCategories || []"
+            :years="query2.studentYear || []"
+            :majors="query2.major || []"
+            :status-activities="query2.activityState || []"
+            :category-activities="query2.skill || []"
             @apply="applyFilters2"
           />
         </div>
@@ -239,11 +239,11 @@
           </q-input>
           <FilterDialog
             :model-value="showFilterDialog3"
-            :categories="filterCategories"
-            :years="query3.studentYear"
-            :majors="query3.major"
-            :status-activities="query3.activityState"
-            :category-activities="query3.skill"
+            :categories="filterCategories || []"
+            :years="query3.studentYear || []"
+            :majors="query3.major || []"
+            :status-activities="query3.activityState || []"
+            :category-activities="query3.skill || []"
             @apply="applyFilters3"
           />
         </div>
@@ -345,11 +345,11 @@
           </q-input>
           <FilterDialog
             :model-value="showFilterDialog4"
-            :categories="filterCategories"
-            :years="query4.studentYear"
-            :majors="query4.major"
-            :status-activities="query4.activityState"
-            :category-activities="query4.skill"
+            :categories="filterCategories || []"
+            :years="query4.studentYear || []"
+            :majors="query4.major || []"
+            :status-activities="query4.activityState || []"
+            :category-activities="query4.skill || []"
             @apply="applyFilters4"
           />
         </div>
@@ -361,7 +361,6 @@
         :columns="columns"
         v-model:pagination="pagination4"
         :rows-per-page-options="[5, 7, 10, 15, 20]"
-
         @request="onRequest4"
         row-key="id"
         class="q-mt-md my-sticky-header-table"
@@ -442,7 +441,7 @@ import { useRouter } from 'vue-router'
 import { nextTick, onMounted, ref, watch } from 'vue'
 import buddhistEra from 'dayjs/plugin/buddhistEra'
 import { ActivityService } from 'src/services/activity'
-import type { ActivityPagination } from 'src/types/pagination'
+import type { Pagination } from 'src/types/pagination'
 import type { Activity, ActivityItem } from 'src/types/activity'
 import FilterDialog from 'src/components/Dialog/FilterDialog.vue'
 import debounce from 'lodash.debounce'
@@ -487,7 +486,7 @@ interface SelectedFilters {
   categoryActivity: string[]
 }
 
-async function getActivityData(qeury: ActivityPagination) {
+async function getActivityData(qeury: Pagination) {
   const data = await ActivityService.getAll(qeury)
   return data
 }
@@ -535,7 +534,7 @@ const data4 = async () => {
 }
 
 const applyFilters1 = async (selectedFilters: SelectedFilters) => {
-  query1.value.studentYear = selectedFilters.year.map(Number)
+  query1.value.studentYear = selectedFilters.year
   query1.value.major = selectedFilters.major
   query1.value.activityState = selectedFilters.statusActivity
   query1.value.skill = selectedFilters.categoryActivity
@@ -543,7 +542,7 @@ const applyFilters1 = async (selectedFilters: SelectedFilters) => {
 }
 
 const applyFilters2 = async (selectedFilters: SelectedFilters) => {
-  query2.value.studentYear = selectedFilters.year.map(Number)
+  query2.value.studentYear = selectedFilters.year
   query2.value.major = selectedFilters.major
   query2.value.activityState = selectedFilters.statusActivity
   query2.value.skill = selectedFilters.categoryActivity
@@ -551,7 +550,7 @@ const applyFilters2 = async (selectedFilters: SelectedFilters) => {
 }
 
 const applyFilters3 = async (selectedFilters: SelectedFilters) => {
-  query3.value.studentYear = selectedFilters.year.map(Number)
+  query3.value.studentYear = selectedFilters.year
   query3.value.major = selectedFilters.major
   query3.value.activityState = selectedFilters.statusActivity
   query3.value.skill = selectedFilters.categoryActivity
@@ -559,7 +558,7 @@ const applyFilters3 = async (selectedFilters: SelectedFilters) => {
 }
 
 const applyFilters4 = async (selectedFilters: SelectedFilters) => {
-  query4.value.studentYear = selectedFilters.year.map(Number)
+  query4.value.studentYear = selectedFilters.year
   query4.value.major = selectedFilters.major
   query4.value.activityState = selectedFilters.statusActivity
   query4.value.skill = selectedFilters.categoryActivity
@@ -629,7 +628,7 @@ const activitys2 = ref<Activity[]>([]) // Planning Table
 const activitys3 = ref<Activity[]>([]) // Success Table
 const activitys4 = ref<Activity[]>([]) // Cancel Table
 
-const query1 = ref<ActivityPagination>({
+const query1 = ref<Pagination>({
   page: 1,
   limit: 5,
   search: '',
@@ -640,7 +639,7 @@ const query1 = ref<ActivityPagination>({
   major: [],
   studentYear: [],
 })
-const query2 = ref<ActivityPagination>({
+const query2 = ref<Pagination>({
   page: 1,
   limit: 5,
   search: '',
@@ -652,7 +651,7 @@ const query2 = ref<ActivityPagination>({
   studentYear: [],
 })
 
-const query3 = ref<ActivityPagination>({
+const query3 = ref<Pagination>({
   page: 1,
   limit: 5,
   search: '',
@@ -663,7 +662,7 @@ const query3 = ref<ActivityPagination>({
   major: [],
   studentYear: [],
 })
-const query4 = ref<ActivityPagination>({
+const query4 = ref<Pagination>({
   page: 1,
   limit: 5,
   search: '',

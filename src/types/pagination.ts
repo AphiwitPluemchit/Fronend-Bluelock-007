@@ -7,8 +7,8 @@ export type Pagination = {
   skill?: string[]
   activityState?: string[]
   major?: string[]
-  studentYear?: number[]
-  statusStudent?: string[]
+  studentYear?: string[]
+  studentStatus?: string[]
 }
 
 export type ActivityPagination = {
@@ -29,7 +29,7 @@ export type ActivityEnrollmentPagination = {
   sortBy: string
   order: string
   major?: string[]
-  statusStudent?: string[]
+  studentStatus?: string[]
   studentYears?: string[]
 }
 

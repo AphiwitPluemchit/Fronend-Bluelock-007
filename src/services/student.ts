@@ -17,11 +17,11 @@ export class StudentService {
   static path = '/students'
 
   static async getAll(params: Pagination) {
-    const { statusStudent, major, studentYear, ...rest } = params
+    const { studentStatus, major, studentYear, ...rest } = params
     const queryParams = {
       ...rest,
-      ...(statusStudent && statusStudent.length > 0
-        ? { statusStudent: statusStudent.join(',') }
+      ...(studentStatus && studentStatus.length > 0
+        ? { studentStatus: studentStatus.join(',') }
         : {}),
       ...(major && major.length > 0 ? { major: major.join(',') } : {}),
       ...(studentYear && studentYear.length > 0 ? { studentYear: studentYear.join(',') } : {}),

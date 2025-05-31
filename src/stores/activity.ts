@@ -3,11 +3,11 @@ import { Notify } from 'quasar'
 import { ActivityService } from 'src/services/activity'
 import { EnrollmentService } from 'src/services/enrollment'
 import type { Activity } from 'src/types/activity'
-import type { ActivityPagination } from 'src/types/pagination'
+import type { Pagination } from 'src/types/pagination'
 import { ref } from 'vue'
 
 // import { ref } from 'vue'
-const query = ref<ActivityPagination>({
+const query = ref<Pagination>({
   page: 1,
   limit: 10,
   search: '',

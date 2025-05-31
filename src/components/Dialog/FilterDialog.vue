@@ -5,11 +5,11 @@ import cloneDeep from 'lodash/cloneDeep'
 // Props
 const props = defineProps<{
   categories: string[]
-  years?: number[]
+  years?: string[]
   majors?: string[]
   statusActivities?: string[]
   categoryActivities?: string[]
-  statusStudent?: string[]
+  studentStatus?: string[]
 }>()
 
 const emit = defineEmits(['update:modelValue', 'apply'])
@@ -19,7 +19,7 @@ const showFilterDialog = ref(false)
 const options = {
   year: ['1', '2', '3', '4'],
   major: ['CS', 'SE', 'ITDI', 'AAI'],
-  statusStudent: ['3', '2', '1', '0'],
+  studentStatus: ['3', '2', '1', '0'],
   statusActivity: ['planning', 'open', 'close', 'success', 'cancel'],
   categoryActivity: ['soft', 'hard'],
 }
@@ -71,7 +71,7 @@ const filters = ref({
   major: props.majors ?? ([] as string[]),
   statusActivity: props.statusActivities ?? ([] as string[]),
   categoryActivity: props.categoryActivities ?? ([] as string[]),
-  statusStudent: props.statusStudent ?? ([] as string[]),
+  studentStatus: props.studentStatus ?? ([] as string[]),
 })
 
 const initialFilters = ref<typeof filters.value>(cloneDeep(filters.value))
@@ -103,7 +103,6 @@ const toggleFilter = (category: keyof typeof filters.value, value: string) => {
     filters.value[category].splice(index, 1) // เอาค่าออก
   }
 }
-
 </script>
 
 <template>
@@ -174,19 +173,19 @@ const toggleFilter = (category: keyof typeof filters.value, value: string) => {
               <div style="margin: auto">{{ year }}</div>
             </q-chip>
           </div>
-          <!-- statusStudent -->
-          <div v-if="availableCategories.includes('statusStudent')" class="q-mt-md">
+          <!-- studentStatus -->
+          <div v-if="availableCategories.includes('studentStatus')" class="q-mt-md">
             <p class="q-mb-sm text-h6">สถานะนิสิต</p>
 
             <q-chip
-              v-for="statusStudent in options.statusStudent"
-              :key="statusStudent"
+              v-for="studentStatus in options.studentStatus"
+              :key="studentStatus"
               clickable
-              :class="{ selected: filters.statusStudent.includes(statusStudent) }"
-              @click="toggleFilter('statusStudent', statusStudent)"
+              :class="{ selected: filters.studentStatus.includes(studentStatus) }"
+              @click="toggleFilter('studentStatus', studentStatus)"
               style="height: 35px; width: 120px"
             >
-              <div style="margin: auto">{{ getStatusText(statusStudent) }}</div>
+              <div style="margin: auto">{{ getStatusText(studentStatus) }}</div>
             </q-chip>
           </div>
         </q-card-section>
@@ -199,5 +198,4 @@ const toggleFilter = (category: keyof typeof filters.value, value: string) => {
   ></q-btn>
 </template>
 
-<style scoped>
-</style>
+<style scoped></style>

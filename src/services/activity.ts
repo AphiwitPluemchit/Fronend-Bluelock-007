@@ -1,6 +1,6 @@
 import { api } from 'boot/axios'
 import { Notify } from 'quasar'
-import type { ActivityPagination, PaginationResponse } from 'src/types/pagination'
+import type { Pagination, PaginationResponse } from 'src/types/pagination'
 import type { EnrollmentSummary } from 'src/types/activity'
 import { type Activity } from 'src/types/activity'
 
@@ -17,23 +17,24 @@ const showError = (message: string) => {
 export class ActivityService {
   static path = 'activitys'
 
-  static async getAll(params: ActivityPagination) {
+  static async getAll(params: Pagination) {
     const { skill, activityState, major, studentYear, ...rest } = params
 
-    const skillQuery = skill.join(',')
-    const activityStateQuery = activityState.join(',')
-    const majorQuery = major.join(',')
-    const studentYearQuery = studentYear.join(',')
+    const queryParams = {
+      ...rest,
+      ...(Array.isArray(skill) && skill.length > 0 ? { skills: skill.join(',') } : {}),
+      ...(Array.isArray(activityState) && activityState.length > 0
+        ? { activityStates: activityState.join(',') }
+        : {}),
+      ...(Array.isArray(major) && major.length > 0 ? { majors: major.join(',') } : {}),
+      ...(Array.isArray(studentYear) && studentYear.length > 0
+        ? { studentYears: studentYear.join(',') }
+        : {}),
+    }
 
     try {
       const res = await api.get<PaginationResponse<Activity>>(this.path, {
-        params: {
-          ...rest,
-          skills: skillQuery,
-          activityStates: activityStateQuery,
-          majors: majorQuery,
-          studentYears: studentYearQuery,
-        },
+        params: queryParams,
       })
       return res.data
     } catch (error) {

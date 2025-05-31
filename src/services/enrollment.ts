@@ -1,6 +1,6 @@
 import { api } from 'boot/axios'
 import { Notify } from 'quasar'
-import type { StudentEnrollment, EnrollmentQuery } from 'src/types/enrollment'
+import type { StudentEnrollment } from 'src/types/enrollment'
 import type { Pagination, PaginationResponse } from 'src/types/pagination'
 
 // 🛠️ ฟังก์ชันแสดง error
@@ -40,12 +40,12 @@ export class EnrollmentService {
   }
 
   static async getEnrollmentsByActivityID(activityId: string, params: Pagination) {
-    const { statusStudent, major, studentYear, ...rest } = params
+    const { studentStatus, major, studentYear, ...rest } = params
 
     const queryParams = {
       ...rest,
-      ...(statusStudent && statusStudent.length > 0
-        ? { statusStudent: statusStudent.join(',') }
+      ...(studentStatus && studentStatus.length > 0
+        ? { studentStatus: studentStatus.join(',') }
         : {}),
       ...(major && major.length > 0 ? { major: major.join(',') } : {}),
       ...(studentYear && studentYear.length > 0 ? { studentYear: studentYear.join(',') } : {}),
@@ -66,7 +66,7 @@ export class EnrollmentService {
     }
   }
 
-  static async getEnrollmentsByStudentID(studentId: string, params: EnrollmentQuery) {
+  static async getEnrollmentsByStudentID(studentId: string, params: Pagination) {
     try {
       console.log('Sending params:', params)
       const res = await api.get(`${this.path}/student/${studentId}`, { params })

@@ -5,7 +5,7 @@ import type { Timestamp } from '@quasar/quasar-ui-qcalendar'
 import '@quasar/quasar-ui-qcalendar/dist/index.css'
 import { QCalendarMonth } from '@quasar/quasar-ui-qcalendar'
 import type { Activity } from 'src/types/activity'
-import type { ActivityPagination } from 'src/types/pagination'
+import type { Pagination } from 'src/types/pagination'
 import { ActivityService } from 'src/services/activity'
 import FilterDialog from 'src/components/Dialog/FilterDialog.vue'
 
@@ -13,7 +13,7 @@ const activitys1 = ref<Activity[]>([])
 const showFilterDialog1 = ref(false)
 const filterCategories = ref(['year', 'major', 'statusActivity', 'categoryActivity'])
 
-const query1 = ref<ActivityPagination>({
+const query1 = ref<Pagination>({
   page: 1,
   limit: 100,
   search: '',
@@ -40,7 +40,7 @@ const pagination1 = ref({
   rowsNumber: 0,
 })
 
-async function getActivityData(qeury: ActivityPagination) {
+async function getActivityData(qeury: Pagination) {
   const data = await ActivityService.getAll(qeury)
   return data
 }
@@ -59,7 +59,7 @@ const data1 = async () => {
 }
 
 const applyFilters1 = async (selectedFilters: SelectedFilters) => {
-  query1.value.studentYear = selectedFilters.year.map(Number)
+  query1.value.studentYear = selectedFilters.year
   query1.value.major = selectedFilters.major
   query1.value.activityState = selectedFilters.statusActivity
   query1.value.skill = selectedFilters.categoryActivity
@@ -243,11 +243,11 @@ onMounted(async () => {
 
         <FilterDialog
           :model-value="showFilterDialog1"
-          :categories="filterCategories"
-          :years="query1.studentYear"
-          :majors="query1.major"
-          :status-activities="query1.activityState"
-          :category-activities="query1.skill"
+          :categories="filterCategories || []"
+          :years="query1.studentYear || []"
+          :majors="query1.major || []"
+          :status-activities="query1.activityState || []"
+          :category-activities="query1.skill || []"
           @apply="applyFilters1"
         />
       </div>

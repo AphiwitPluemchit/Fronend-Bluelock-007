@@ -19,7 +19,7 @@ const query = ref<Pagination>({
   sortBy: '_id',
   order: 'desc',
   major: [],
-  statusStudent: [],
+  studentStatus: [],
   studentYear: [],
 })
 
@@ -69,14 +69,14 @@ const getStatusClass = (status: string) => {
 interface SelectedFilters {
   year: string[]
   major: string[]
-  statusStudent: string[]
+  studentStatus: string[]
 }
 
 const applyStudentFilters = async (selectedFilters: SelectedFilters) => {
   console.log(selectedFilters)
-  query.value.studentYear = selectedFilters.year.map(Number)
+  query.value.studentYear = selectedFilters.year
   query.value.major = selectedFilters.major
-  query.value.statusStudent = selectedFilters.statusStudent
+  query.value.studentStatus = selectedFilters.studentStatus
   await fetchStudents()
 }
 
@@ -134,7 +134,7 @@ const enrollmentStore = useEnrollmentStore()
 const activityId = route.params.id as string
 const activityDetail = ref<Activity | null>(null)
 const enrollmentSummary = ref<EnrollmentSummary | null>(null)
-const filterCategories1 = ref(['year', 'major', 'statusStudent'])
+const filterCategories1 = ref(['year', 'major', 'studentStatus'])
 const majorList = [
   { majorName: 'CS' },
   { majorName: 'SE' },

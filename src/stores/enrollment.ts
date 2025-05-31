@@ -15,24 +15,24 @@ export const useEnrollmentStore = defineStore('enrollment', () => {
     sortBy: 'id',
     order: 'DESC',
     major: [],
-    statusStudent: [],
+    studentStatus: [],
     studentYears: [],
   })
 
-  const fetchEnrollmentsByActivityID = async (
-    activityId: string,
-    // query: ActivityEnrollmentPagination,
-  ) => {
-    try {
-      console.log('Query Params before API:', query)
-      const res = await EnrollmentService.getEnrollmentsByActivityID(activityId, query.value)
-      studentEnrollments.value = res.data
-      total.value = res.meta.total
-      console.log('Fetched enrollments:', res)
-    } catch (error) {
-      console.error('Error fetching enrollments:', error)
-    }
-  }
+  // const fetchEnrollmentsByActivityID = async (
+  //   activityId: string,
+  //   // query: ActivityEnrollmentPagination,
+  // ) => {
+  //   try {
+  //     console.log('Query Params before API:', query)
+  //     const res = await EnrollmentService.getEnrollmentsByActivityID(activityId, query.value)
+  //     studentEnrollments.value = res.data
+  //     total.value = res.meta.total
+  //     console.log('Fetched enrollments:', res)
+  //   } catch (error) {
+  //     console.error('Error fetching enrollments:', error)
+  //   }
+  // }
 
   const deleteEnrollmentById = async (enrollmentId: string) => {
     try {
@@ -47,7 +47,7 @@ export const useEnrollmentStore = defineStore('enrollment', () => {
     studentEnrollments,
     total,
     query,
-    fetchEnrollmentsByActivityID,
+    // fetchEnrollmentsByActivityID,
     deleteEnrollmentById,
   }
 })

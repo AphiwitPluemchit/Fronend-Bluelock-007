@@ -24,12 +24,12 @@
             </q-input>
             <FilterDialog
               :model-value="showFilterDialog"
-              :categories="filterCategories"
+              :categories="filterCategories || []"
               @apply="applyFilters"
-              :years="query.studentYear"
-              :majors="query.major"
-              :status-activities="query.activityState"
-              :category-activities="query.skill"
+              :years="query.studentYear || []"
+              :majors="query.major || []"
+              :status-activities="query.activityState || []"
+              :category-activities="query.skill || []"
             />
           </div>
         </div>
@@ -54,7 +54,7 @@ import ActivityCard from '../activity/ActivityCard.vue'
 import FilterDialog from 'src/components/Dialog/FilterDialog.vue'
 // import { useStudentActivitystore } from 'src/stores/student-activity'
 import { ActivityService } from 'src/services/activity'
-import type { ActivityPagination } from 'src/types/pagination'
+import type { Pagination } from 'src/types/pagination'
 import type { Activity } from 'src/types/activity'
 // const StudentActivityStore = useStudentActivitystore()
 const activitys = ref<Activity[]>([])
@@ -79,7 +79,7 @@ const filterCategories = ref(['year', 'major', 'categoryActivity'])
 const applyFilters = async (selectedFilters: SelectedFilters) => {
   console.log(selectedFilters)
 
-  query.value.studentYear = selectedFilters.year.map(Number)
+  query.value.studentYear = selectedFilters.year
   query.value.major = selectedFilters.major
   query.value.skill = selectedFilters.categoryActivity
   await fetchData()
@@ -96,7 +96,7 @@ const applyFilters = async (selectedFilters: SelectedFilters) => {
 //   // pagination.value.rowsNumber = data.meta.total
 //   activitys.value = data.data
 // }
-const query = ref<ActivityPagination>({
+const query = ref<Pagination>({
   page: 1,
   limit: 99,
   search: '',

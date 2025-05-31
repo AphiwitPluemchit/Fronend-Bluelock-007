@@ -128,15 +128,15 @@ const goToDetail = (code: string) => {
 interface SelectedFilters {
   year: string[]
   major: string[]
-  statusStudent: string[]
+  studentStatus: string[]
 }
 const showFilterDialog1 = ref(false)
-const filterCategories1 = ref(['major', 'year', 'statusStudent'])
+const filterCategories1 = ref(['major', 'year', 'studentStatus'])
 
 const applyFilters = async (selectedFilters: SelectedFilters) => {
-  query.value.studentYear = selectedFilters.year.map(Number)
+  query.value.studentYear = selectedFilters.year
   query.value.major = selectedFilters.major
-  query.value.statusStudent = selectedFilters.statusStudent
+  query.value.studentStatus = selectedFilters.studentStatus
   await data()
 }
 const data = async () => {
@@ -155,7 +155,7 @@ const query = ref<Pagination>({
   order: 'asc',
   major: [],
   studentYear: [],
-  statusStudent: [],
+  studentStatus: [],
 })
 const pagination = ref({
   sortBy: query.value.sortBy,

@@ -3,9 +3,9 @@ import { onMounted, ref } from 'vue'
 import MyActivityCard from './Component/MyActivityCard.vue'
 import FilterDialog from 'src/components/Dialog/FilterDialog.vue'
 import type { Activity } from 'src/types/activity'
-import type { ActivityPagination } from 'src/types/pagination'
 import { EnrollmentService } from 'src/services/enrollment'
 import { useAuthStore } from 'src/stores/auth'
+import type { Pagination } from 'src/types/pagination'
 const auth = useAuthStore()
 const activitys = ref<Activity[]>([])
 const search = ref()
@@ -22,7 +22,7 @@ const applyFilters = async (selectedFilters: SelectedFilters) => {
   query.value.skill = selectedFilters.categoryActivity
   await fetchData()
 }
-const query = ref<ActivityPagination>({
+const query = ref<Pagination>({
   page: 1,
   limit: 99,
   search: '',
@@ -79,10 +79,10 @@ onMounted(async () => {
               :model-value="showFilterDialog"
               :categories="filterCategories"
               @apply="applyFilters"
-              :years="query.studentYear"
-              :majors="query.major"
-              :status-activities="query.activityState"
-              :category-activities="query.skill"
+              :years="query.studentYear || []"
+              :majors="query.major || []"
+              :status-activities="query.activityState || []"
+              :category-activities="query.skill || []"
             />
           </div>
         </div>
