@@ -16,13 +16,7 @@
         </div>
 
         <q-form @submit.prevent="handleLogin">
-          <q-input
-            v-model="auth.form.email"
-            label="ชื่อผู้ใช้งาน"
-            dense
-            outlined
-            class="q-mb-md"
-          >
+          <q-input v-model="auth.form.email" label="ชื่อผู้ใช้งาน" dense outlined class="q-mb-md">
             <template #prepend><q-icon name="person" /></template>
           </q-input>
 
@@ -72,6 +66,14 @@ const handleLogin = async () => {
   try {
     const result = await auth.login()
     if (result) {
+      const redirectPath = localStorage.getItem('redirectAfterLogin')
+      if (redirectPath) {
+        localStorage.removeItem('redirectAfterLogin')
+        await router.push(redirectPath)
+        return
+      }
+
+      // fallback กรณีไม่มี redirect
       const role = result.user?.role
       if (role === EnumUserRole.ADMIN) {
         await router.push(`/${EnumUserRole.ADMIN}/ActivitiesCalendar`)
@@ -85,6 +87,7 @@ const handleLogin = async () => {
     console.error(err)
   }
 }
+
 function handResetPassword() {
   console.log('ลืมรหัสผ่าน')
 }

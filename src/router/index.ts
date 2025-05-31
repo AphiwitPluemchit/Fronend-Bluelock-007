@@ -4,9 +4,26 @@ import {
   createRouter,
   createWebHashHistory,
   createWebHistory,
+  type RouteRecordRaw,
 } from 'vue-router'
-import routes from './routes'
 import { useAuthStore } from 'src/stores/auth'
+
+// 🧭 แยกกลุ่ม Route ตามสิทธิ์
+import { publicRoutes } from './publicRoutes'
+import { adminRoutes } from './adminRoutes'
+import { studentRoutes } from './studentRoutes'
+
+// 📌 รวมทั้งหมดเป็น Route เดียว
+const routes: RouteRecordRaw[] = [
+  ...publicRoutes,
+  ...adminRoutes,
+  ...studentRoutes,
+  // fallback route
+  {
+    path: '/:catchAll(.*)*',
+    component: () => import('pages/ErrorUnauthorized.vue'),
+  },
+]
 
 export default route(function () {
   const createHistory = process.env.SERVER
@@ -29,16 +46,22 @@ export default route(function () {
     const isPublic = to.meta.public || false
     const requiredRole = to.meta.role
 
+    // ✅ กรณีเป็นหน้า public → ผ่านได้เลย
     if (isPublic) {
       return next()
     }
 
-    if (!userRole && !isPublic) {
-      return next('/') // redirect to login
+    // ✅ ถ้า user ยังไม่ login → บันทึก path ที่จะไปไว้ก่อน แล้ว redirect ไป login
+    if (!userRole) {
+      if (!localStorage.getItem('redirectAfterLogin')) {
+        localStorage.setItem('redirectAfterLogin', to.fullPath)
+      }
+      return next({ name: 'login' }) // <-- เปลี่ยนจาก '/' เป็นชื่อ route login จริง
     }
 
+    // ✅ ถ้า role ไม่ตรงกับที่กำหนดไว้ → redirect ไป unauthorized
     if (requiredRole && requiredRole !== userRole) {
-      return next('/unauthorized') // redirect if role mismatch
+      return next('/unauthorized')
     }
 
     return next()
