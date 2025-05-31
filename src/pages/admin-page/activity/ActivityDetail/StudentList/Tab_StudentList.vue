@@ -33,12 +33,20 @@ const pagination = ref({
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const onRequest = async (props: any) => {
   const { page, rowsPerPage, sortBy, descending } = props.pagination
+
+  // แก้ตรงนี้: sync query กับ pagination จริง
+  query.value.page = page
+  query.value.limit = rowsPerPage
+  query.value.sortBy = sortBy
+  query.value.order = descending ? 'desc' : 'asc'
+
+  // sync pagination object (UI)
   pagination.value.page = page
   pagination.value.rowsPerPage = rowsPerPage
   pagination.value.sortBy = sortBy
-  pagination.value.sortBy = descending ? 'desc' : 'asc'
+  pagination.value.descending = descending
+
   await fetchStudents()
-  // await enrollmentStore.fetchEnrollmentsByActivityID(activityId)
 }
 
 const getStatusText = (status: string) => {
@@ -81,8 +89,8 @@ const applyStudentFilters = async (selectedFilters: SelectedFilters) => {
 }
 
 const search1 = computed({
-  get: () => enrollmentStore.query.search,
-  set: (val) => (enrollmentStore.query.search = val),
+  get: () => query.value.search,
+  set: (val) => (query.value.search = val),
 })
 
 const students = computed(() => {
@@ -90,6 +98,7 @@ const students = computed(() => {
 })
 
 const fetchStudents = async () => {
+  enrollmentStore.studentEnrollments = []
   const res = await ActivityService.getOne(activityId)
   allTab.value = res.data
   console.log(allTab.value)
@@ -103,8 +112,11 @@ const fetchStudents = async () => {
     pagination.value.rowsNumber = data.meta.total
     console.log(pagination.value)
     enrollmentStore.studentEnrollments = data.data
+    enrollmentStore.total = data.meta.total // ✅ update rowsNumber ให้ตรง
     // ...
   } else {
+    enrollmentStore.studentEnrollments = []
+    enrollmentStore.total = 0
     console.error('activityItems is null or undefined')
   }
 }
