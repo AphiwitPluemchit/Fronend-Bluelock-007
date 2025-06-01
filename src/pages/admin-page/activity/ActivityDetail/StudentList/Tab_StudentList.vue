@@ -81,7 +81,6 @@ interface SelectedFilters {
 }
 
 const applyStudentFilters = async (selectedFilters: SelectedFilters) => {
-  console.log(selectedFilters)
   query.value.studentYear = selectedFilters.year
   query.value.major = selectedFilters.major
   query.value.studentStatus = selectedFilters.studentStatus
@@ -101,16 +100,13 @@ const fetchStudents = async () => {
   enrollmentStore.studentEnrollments = []
   const res = await ActivityService.getOne(activityId)
   allTab.value = res.data
-  console.log(allTab.value)
   if (allTab.value && allTab.value.activityItems && allTab.value.activityItems.length > 0) {
     const activityItemId = allTab.value.activityItems[indexTab.value]!.id!
-    console.log(query.value)
     const data = await EnrollmentService.getEnrollmentsByActivityID(activityItemId, query.value)
     pagination.value.page = query.value.page
     pagination.value.rowsPerPage = query.value.limit
     pagination.value.sortBy = query.value.sortBy
     pagination.value.rowsNumber = data.meta.total
-    console.log(pagination.value)
     enrollmentStore.studentEnrollments = data.data
     enrollmentStore.total = data.meta.total // ✅ update rowsNumber ให้ตรง
     // ...
@@ -139,7 +135,6 @@ const activityItemOptions = computed(() => {
 })
 onMounted(async () => {
   await fetchStudents()
-  console.log(students.value)
 })
 const route = useRoute()
 const enrollmentStore = useEnrollmentStore()
@@ -147,12 +142,6 @@ const activityId = route.params.id as string
 const activityDetail = ref<Activity | null>(null)
 const enrollmentSummary = ref<EnrollmentSummary | null>(null)
 const filterCategories1 = ref(['year', 'major', 'studentStatus'])
-const majorList = [
-  { majorName: 'CS' },
-  { majorName: 'SE' },
-  { majorName: 'AAI' },
-  { majorName: 'ITDI' },
-]
 const columns = [
   {
     name: 'index',
@@ -246,33 +235,6 @@ onMounted(async () => {
 
 <template>
   <div class="q-mb-sm student-container">
-    <div
-      class="custom-flex-row"
-      v-for="(item, index) in enrollmentSummary?.activityItemSums"
-      :key="index"
-    >
-      <q-badge class="EnrollBadge">
-        จำนวนที่รับ / จำนวนที่ลงทะเบียน / จำนวนที่ว่าง :
-        {{ enrollmentSummary?.maxParticipants || 0 }} /
-        {{ enrollmentSummary?.totalRegistered || 0 }} / {{ enrollmentSummary?.remainingSlots || 0 }}
-      </q-badge>
-      <q-badge v-for="(major, mIndex) in majorList" :key="mIndex" class="Majorbadge">
-        {{ major.majorName }} :
-        {{ item.registeredByMajor.find((m) => m.majorName === major.majorName)?.count || '0' }} คน
-      </q-badge>
-    </div>
-    <!-- <div v-if="activityDetail?.foodVotes?.length">
-      <div
-        class="custom-flex-row"
-        style="margin-top: 30px"
-        v-for="(item, index) in enrollmentSummary?.activityItemSums"
-        :key="index"
-      >
-        <q-badge v-for="food in activityDetail.foodVotes" :key="food.foodName" class="FoodBadge">
-          {{ food.foodName }} : {{ food.vote }}
-        </q-badge>
-      </div>
-    </div> -->
     <div class="student-table-wrapper">
       <div class="row justify-end items-center">
         <q-input
@@ -280,8 +242,9 @@ onMounted(async () => {
           outlined
           v-model="search1"
           @keyup.enter="fetchStudents"
-          label="ค้นหาชื่อ-นามสกุล/ รหัสนิสิต"
+          label="ค้นหาชื่อ-สกุล/ รหัสนิสิต"
           class="q-mr-sm searchbox"
+          :style="{ border: 'none' }"
         >
           <template v-slot:append>
             <q-icon name="search" />
@@ -299,6 +262,7 @@ onMounted(async () => {
           map-options
           @update:model-value="fetchStudents"
           class="q-mr-sm dropdown"
+          :style="{ border: 'none' }"
         />
         <FilterDialog :categories="filterCategories1" @apply="applyStudentFilters" />
       </div>
@@ -332,11 +296,11 @@ onMounted(async () => {
 
         <template v-slot:body-cell-status="props">
           <q-td :props="props">
-            <q-btn
+            <q-badge
               :label="getStatusText(props.row.status)"
               rounded
               unelevated
-              class="status-btn"
+              class="status-badge"
               :class="getStatusClass(props.row.status)"
             />
           </q-td>
@@ -357,124 +321,100 @@ onMounted(async () => {
 </template>
 
 <style lang="scss" scoped>
-// .student-container {
-//   height: 680px;
-//   width: 100%;
-// }
-// .q-table table {
-//   table-layout: fixed;
-// }
-
-// .my-sticky-header-table thead th {
-//   position: sticky;
-//   top: 0;
-//   z-index: 1;
-//   background-color: #f5f5f5;
-// }
-
-// .new-sticky-header {
-//   .my-sticky-header-table {
-//     /* Fix header */
-//     thead tr:first-child th {
-//       background-color: #f5f5f5;
-//     }
-
-//     /* Make tbody scrollable */
-//     tbody {
-//       display: block;
-//       overflow-y: auto;
-//     }
-
-//     /* Ensure header and body columns align */
-//     thead,
-//     tbody tr {
-//       display: table;
-//       width: 100%;
-//       table-layout: fixed;
-//     }
-
-//     /* Optional: ปรับ scrollbar ไม่ทับ */
-//     tbody::-webkit-scrollbar {
-//       width: 12px;
-//     }
-
-//     tbody::-webkit-scrollbar-thumb {
-//       background: #a7a7a7;
-//       border-radius: 10px;
-//       cursor: pointer;
-//     }
-//   }
-// }
-
-// .ellipsis-cell {
-//   white-space: nowrap;
-//   overflow: hidden;
-//   text-overflow: ellipsis;
-// }
-
-// .status-complete {
-//   background-color: #cfd7ff;
-//   color: #001780;
-//   border: 2px solid #002dff;
-//   padding: 3px 30px;
-//   width: 130px;
-// }
-
-// .status-medium {
-//   background-color: #ffe7ba;
-//   color: #ff6f00;
-//   border: 2px solid #ffa500;
-//   padding: 3px 30px;
-//   width: 130px;
-// }
-
-// .status-low {
-//   background-color: #ffc5c5;
-//   color: #ff0000;
-//   border: 2px solid #f32323;
-//   padding: 3px 30px;
-//   width: 130px;
-// }
-
-// .status-out {
-//   background-color: #dadada;
-//   color: #000000;
-//   border: 2px solid #575656;
-//   padding: 3px 30px;
-//   width: 130px;
-// }
-.Majorbadge {
-  background-color: #283593;
-  padding: 0 12px;
-  font-size: 16px;
-  max-width: 150px;
+.student-container {
+  height: 680px;
   width: 100%;
-  height: 60px;
-  justify-content: center;
 }
-.EnrollBadge {
-  background-color: #283593;
+.q-table table {
+  table-layout: fixed;
+}
+
+.my-sticky-header-table thead th {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  background-color: #f5f5f5;
+}
+
+.new-sticky-header {
+  .my-sticky-header-table {
+    /* Fix header */
+    thead tr:first-child th {
+      background-color: #f5f5f5;
+    }
+
+     /* Make tbody scrollable */
+    tbody {
+      display: block;
+      overflow-y: auto;
+    }
+
+    /* Ensure header and body columns align */
+    thead,
+    tbody tr {
+      display: table;
+      width: 100%;
+      table-layout: fixed;
+    }
+
+   /* Optional: ปรับ scrollbar ไม่ทับ */
+    tbody::-webkit-scrollbar {
+      width: 12px;
+    }
+
+    tbody::-webkit-scrollbar-thumb {
+      background: #a7a7a7;
+      border-radius: 10px;
+      cursor: pointer;
+    }
+  }
+}
+
+.ellipsis-cell {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.status-complete {
+  background-color: #cfd7ff;
+  color: #001780;
+  border: 2px solid #002dff;
+  padding: 3px 30px;
+  width: 130px;
+}
+
+.status-medium {
+  background-color: #ffe7ba;
+  color: #ff6f00;
+  border: 2px solid #ffa500;
+  padding: 3px 30px;
+  width: 130px;
+}
+
+.status-low {
+   background-color: #ffc5c5;
+   color: #ff0000;
+  border: 2px solid #f32323;
+   padding: 3px 30px;
+ width: 130px;
+ }
+
+.status-out {
+   background-color: #dadada;
+   color: #000000;
+   border: 2px solid #575656;   padding: 3px 30px;
+  width: 130px;
+ }
+ .status-badge {
+  height: 32px;
   padding: 0 12px;
-  font-size: 16px;
-  max-width: 500px;
-  width: 100%;
-  height: 60px;
-  justify-content: center;
-}
-.FoodBadge {
-  background-color: #283593;
-  padding: 0 12px;
-  font-size: 16px;
-  max-width: 150px;
-  width: 100%;
-  height: 60px;
-  justify-content: center;
-}
-.custom-flex-row {
-  display: flex;
-  justify-content: center;
+  border-radius: 999px;
+  font-size: 15px;
   align-items: center;
-  gap: 8px;
-  flex-wrap: nowrap;
+  justify-content: center;
+
+  /* ป้องกันการขยายแนวนอนเกินไป */
+  white-space: nowrap;
 }
 </style>

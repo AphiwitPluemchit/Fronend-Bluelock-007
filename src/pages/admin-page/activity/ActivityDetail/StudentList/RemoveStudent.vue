@@ -10,7 +10,6 @@ const emit = defineEmits(['removeStudent']);
 const showDialog = ref(false);
 
 const removeStudentFromActivity = () => {
-    console.log(`ลบนิสิต ID: ${props.id} สำเร็จ`);
     emit('removeStudent', props.id);
     showDialog.value = false;
 };
