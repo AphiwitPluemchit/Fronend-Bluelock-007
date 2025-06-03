@@ -35,13 +35,14 @@ export const useEnrollmentStore = defineStore('enrollment', () => {
   // }
 
   const deleteEnrollmentById = async (enrollmentId: string) => {
-    try {
-      await EnrollmentService.removeOne(enrollmentId)
-    } catch (error) {
-      console.error('Error deleting enrollment:', error)
-      throw error
-    }
+  try {
+    await EnrollmentService.removeOne(enrollmentId)
+  } catch (error) {
+    console.error('Error deleting enrollment:', error)
+    throw error
   }
+}
+
 
   return {
     studentEnrollments,

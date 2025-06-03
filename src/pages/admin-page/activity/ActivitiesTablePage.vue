@@ -6,7 +6,7 @@
       <q-btn dense outlined label="เพิ่มกิจกรรม" class="btnadd" bo @click="goToPage()" />
     </div>
 
-    <!-- ตาราง 1 -->
+    <!-- ตาราง 1 เปิด/ปิด ลงทะเบียน -->
     <section class="q-mt-lg">
       <div class="row justify-between items-center">
         <div class="text-h6">กิจกรรมที่กำลังเปิดและปิดลงทะเบียน</div>
@@ -54,19 +54,19 @@
               :props="props"
               :style="
                 col.name === 'no'
-                  ? 'width: 5%'
+                  ? 'width: 4.5%'
                   : '' + col.name === 'name'
-                    ? 'width: 32%'
+                    ? 'width: 30%'
                     : '' + col.name === 'dates'
-                      ? 'width: 10%'
+                      ? 'width: 9.5%'
                       : '' + col.name === 'time'
-                        ? 'width: 10%'
+                        ? 'width: 9%'
                         : '' + col.name === 'location'
-                          ? 'width: 6%'
+                          ? 'width: 9%'
                           : '' + col.name === 'participants'
                             ? 'width: 12%'
                             : '' + col.name === 'skill'
-                              ? 'width: 10%'
+                              ? 'width: 12%'
                               : '' + col.name === 'activityState'
                                 ? 'width: 10%'
                                 : '' + col.name === 'action'
@@ -81,26 +81,36 @@
         <!-- เนื้อหาตาราง -->
         <template v-slot:body="props">
           <q-tr :props="props">
-            <q-td key="no" style="width: 5%">{{ props.rowIndex + 1 }}</q-td>
-            <q-td key="name" style="width: 32%; overflow: hidden; text-overflow: ellipsis">{{
-              props.row.name
+            <q-td key="no" class="text-left" style="width: 5%">{{ props.rowIndex + 1 }}</q-td>
+            <q-td
+              key="name"
+              class="text-left"
+              style="width: 32%; overflow: hidden; text-overflow: ellipsis"
+            >
+              {{ props.row.name }}
+            </q-td>
+            <q-td key="dates" class="text-left" style="width: 10%">{{ props.row.dates }}</q-td>
+            <q-td key="time" class="text-left" style="width: 10%">{{ props.row.time }}</q-td>
+            <q-td key="location" class="text-left" style="width: 10%">{{
+              props.row.location
             }}</q-td>
-            <q-td key="dates" style="width: 10%">{{ props.row.dates }}</q-td>
-            <q-td key="time" style="width: 10%">{{ props.row.time }}</q-td>
-            <q-td key="location" style="width: 6%">{{ props.row.location }}</q-td>
-            <q-td key="participants" style="width: 12%; text-align: center">{{
+            <q-td key="participants" class="text-left" style="width: 12%">{{
               props.row.participants
             }}</q-td>
-            <q-td key="skill" style="width: 10%">{{ props.row.skill }}</q-td>
-            <q-td key="activityState" style="width: 10%" class="text-center">
+            <q-td key="skill" class="text-left" style="width: 10%">{{ props.row.skill }}</q-td>
+
+            <!-- ✅ จัดกลางเฉพาะสถานะ -->
+            <q-td key="activityState" class="text-center" style="width: 10%">
               <q-badge
                 :label="props.row.activityState"
                 :class="getStatusClass(props.row.activityState)"
                 class="status-badge"
                 rounded
                 unelevated
-            /></q-td>
-            <q-td class="q-gutter-x-sm" key="action" style="width: 8%">
+              />
+            </q-td>
+
+            <q-td key="action" class="text-left q-gutter-x-sm" style="width: 8%">
               <q-icon clickable name="visibility" @click="goToPageDetail(props.row.id, true)">
                 <q-tooltip>ดูรายละเอียด</q-tooltip>
               </q-icon>
@@ -110,10 +120,15 @@
             </q-td>
           </q-tr>
         </template>
+        <template v-slot:no-data>
+          <div class="full-width text-center q-pa-md text-grey" style="font-size: 20px">
+            ไม่มีกิจกรรมที่เปิดลงทะเบียนและปิดลงทะเบียน
+          </div>
+        </template>
       </q-table>
     </section>
 
-    <!-- ตาราง 2 -->
+    <!-- ตาราง 2 กำลังวางแผน-->
     <section class="q-mt-lg">
       <div class="row justify-between items-center">
         <div class="text-h6">กิจกรรมที่กำลังวางแผน</div>
@@ -161,19 +176,19 @@
               :props="props"
               :style="
                 col.name === 'no'
-                  ? 'width: 5%'
+                  ? 'width: 4.5%'
                   : '' + col.name === 'name'
-                    ? 'width: 32%'
+                    ? 'width: 30%'
                     : '' + col.name === 'dates'
-                      ? 'width: 10%'
+                      ? 'width: 9.5%'
                       : '' + col.name === 'time'
-                        ? 'width: 10%'
+                        ? 'width: 9%'
                         : '' + col.name === 'location'
-                          ? 'width: 6%'
+                          ? 'width: 9%'
                           : '' + col.name === 'participants'
                             ? 'width: 12%'
                             : '' + col.name === 'skill'
-                              ? 'width: 10%'
+                              ? 'width: 12%'
                               : '' + col.name === 'activityState'
                                 ? 'width: 10%'
                                 : '' + col.name === 'action'
@@ -188,26 +203,36 @@
         <!-- เนื้อหาตาราง -->
         <template v-slot:body="props">
           <q-tr :props="props">
-            <q-td key="no" style="width: 5%">{{ props.rowIndex + 1 }}</q-td>
-            <q-td key="name" style="width: 32%; overflow: hidden; text-overflow: ellipsis">{{
-              props.row.name
+            <q-td key="no" class="text-left" style="width: 5%">{{ props.rowIndex + 1 }}</q-td>
+            <q-td
+              key="name"
+              class="text-left"
+              style="width: 32%; overflow: hidden; text-overflow: ellipsis"
+            >
+              {{ props.row.name }}
+            </q-td>
+            <q-td key="dates" class="text-left" style="width: 10%">{{ props.row.dates }}</q-td>
+            <q-td key="time" class="text-left" style="width: 10%">{{ props.row.time }}</q-td>
+            <q-td key="location" class="text-left" style="width: 10%">{{
+              props.row.location
             }}</q-td>
-            <q-td key="dates" style="width: 10%">{{ props.row.dates }}</q-td>
-            <q-td key="time" style="width: 10%">{{ props.row.time }}</q-td>
-            <q-td key="location" style="width: 6%">{{ props.row.location }}</q-td>
-            <q-td key="participants" style="width: 12%; text-align: center">{{
+            <q-td key="participants" class="text-left" style="width: 12%">{{
               props.row.participants
             }}</q-td>
-            <q-td key="skill" style="width: 10%">{{ props.row.skill }}</q-td>
-            <q-td key="activityState" style="width: 10%">
+            <q-td key="skill" class="text-left" style="width: 10%">{{ props.row.skill }}</q-td>
+
+            <!-- ✅ จัดกลางเฉพาะสถานะ -->
+            <q-td key="activityState" class="text-center" style="width: 10%">
               <q-badge
                 :label="props.row.activityState"
                 :class="getStatusClass(props.row.activityState)"
                 class="status-badge"
                 rounded
                 unelevated
-            /></q-td>
-            <q-td class="q-gutter-x-sm" key="action" style="width: 8%">
+              />
+            </q-td>
+
+            <q-td key="action" class="text-left q-gutter-x-sm" style="width: 8%">
               <q-icon clickable name="visibility" @click="goToPageDetail(props.row.id, true)">
                 <q-tooltip>ดูรายละเอียด</q-tooltip>
               </q-icon>
@@ -216,11 +241,16 @@
               </q-icon>
             </q-td>
           </q-tr>
-        </template></q-table
-      >
+        </template>
+        <template v-slot:no-data>
+          <div class="full-width text-center q-pa-md text-grey" style="font-size: 20px">
+            ไม่มีกิจกรรมที่กำลังวางแผน
+          </div>
+        </template>
+      </q-table>
     </section>
 
-    <!-- ตาราง 3 -->
+    <!-- ตาราง 3 เสร็จสิ้น-->
     <section class="q-mt-lg">
       <div class="row justify-between items-center">
         <div class="text-h6">กิจกรรมที่เสร็จสิ้น</div>
@@ -268,19 +298,19 @@
               :props="props"
               :style="
                 col.name === 'no'
-                  ? 'width: 5%'
+                  ? 'width: 4.5%'
                   : '' + col.name === 'name'
-                    ? 'width: 32%'
+                    ? 'width: 30%'
                     : '' + col.name === 'dates'
-                      ? 'width: 10%'
+                      ? 'width: 9.5%'
                       : '' + col.name === 'time'
-                        ? 'width: 10%'
+                        ? 'width: 9%'
                         : '' + col.name === 'location'
-                          ? 'width: 6%'
+                          ? 'width: 9%'
                           : '' + col.name === 'participants'
                             ? 'width: 12%'
                             : '' + col.name === 'skill'
-                              ? 'width: 10%'
+                              ? 'width: 12%'
                               : '' + col.name === 'activityState'
                                 ? 'width: 10%'
                                 : '' + col.name === 'action'
@@ -295,25 +325,36 @@
         <!-- เนื้อหาตาราง -->
         <template v-slot:body="props">
           <q-tr :props="props">
-            <q-td key="no" style="width: 5%">{{ props.rowIndex + 1 }}</q-td>
-            <q-td key="name" style="width: 32%; overflow: hidden; text-overflow: ellipsis">{{
-              props.row.name
+            <q-td key="no" class="text-left" style="width: 5%">{{ props.rowIndex + 1 }}</q-td>
+            <q-td
+              key="name"
+              class="text-left"
+              style="width: 32%; overflow: hidden; text-overflow: ellipsis"
+            >
+              {{ props.row.name }}
+            </q-td>
+            <q-td key="dates" class="text-left" style="width: 10%">{{ props.row.dates }}</q-td>
+            <q-td key="time" class="text-left" style="width: 10%">{{ props.row.time }}</q-td>
+            <q-td key="location" class="text-left" style="width: 10%">{{
+              props.row.location
             }}</q-td>
-            <q-td key="dates" style="width: 10%">{{ props.row.dates }}</q-td>
-            <q-td key="time" style="width: 10%">{{ props.row.time }}</q-td>
-            <q-td key="location" style="width: 6%">{{ props.row.location }}</q-td>
-            <q-td key="participants" style="width: 12%; text-align: center">{{
+            <q-td key="participants" class="text-left" style="width: 12%">{{
               props.row.participants
             }}</q-td>
-            <q-td key="skill" style="width: 10%">{{ props.row.skill }}</q-td>
-            <q-td key="activityState" style="width: 10%">
+            <q-td key="skill" class="text-left" style="width: 10%">{{ props.row.skill }}</q-td>
+
+            <!-- ✅ จัดกลางเฉพาะสถานะ -->
+            <q-td key="activityState" class="text-center" style="width: 10%">
               <q-badge
                 :label="props.row.activityState"
                 :class="getStatusClass(props.row.activityState)"
                 class="status-badge"
+                rounded
                 unelevated
-            /></q-td>
-            <q-td class="q-gutter-x-sm" key="action" style="width: 8%">
+              />
+            </q-td>
+
+            <q-td key="action" class="text-left q-gutter-x-sm" style="width: 8%">
               <q-icon clickable name="visibility" @click="goToPageDetail(props.row.id, true)">
                 <q-tooltip>ดูรายละเอียด</q-tooltip>
               </q-icon>
@@ -322,11 +363,16 @@
               </q-icon>
             </q-td>
           </q-tr>
-        </template></q-table
-      >
+        </template>
+        <template v-slot:no-data>
+          <div class="full-width text-center q-pa-md text-grey" style="font-size: 20px">
+            ไม่มีกิจกรรมที่เสร็จสิ้น
+          </div>
+        </template>
+      </q-table>
     </section>
 
-    <!-- ตางราง 4 -->
+    <!-- ตางราง 4 ยกเลิก -->
     <section class="q-mt-lg">
       <div class="row justify-between items-center">
         <div class="text-h6">กิจกรรมที่ถูกยกเลิก</div>
@@ -374,19 +420,19 @@
               :props="props"
               :style="
                 col.name === 'no'
-                  ? 'width: 5%'
+                  ? 'width: 4.5%'
                   : '' + col.name === 'name'
-                    ? 'width: 32%'
+                    ? 'width: 30%'
                     : '' + col.name === 'dates'
-                      ? 'width: 10%'
+                      ? 'width: 9.5%'
                       : '' + col.name === 'time'
-                        ? 'width: 10%'
+                        ? 'width: 9%'
                         : '' + col.name === 'location'
-                          ? 'width: 6%'
+                          ? 'width: 9%'
                           : '' + col.name === 'participants'
                             ? 'width: 12%'
                             : '' + col.name === 'skill'
-                              ? 'width: 10%'
+                              ? 'width: 12%'
                               : '' + col.name === 'activityState'
                                 ? 'width: 10%'
                                 : '' + col.name === 'action'
@@ -401,37 +447,57 @@
         <!-- เนื้อหาตาราง -->
         <template v-slot:body="props">
           <q-tr :props="props">
-            <q-td key="no" style="width: 5%">{{ props.rowIndex + 1 }}</q-td>
-            <q-td key="name" style="width: 32%; overflow: hidden; text-overflow: ellipsis">{{
-              props.row.name
+            <q-td key="no" class="text-left" style="width: 5%">{{ props.rowIndex + 1 }}</q-td>
+            <q-td
+              key="name"
+              class="text-left"
+              style="width: 32%; overflow: hidden; text-overflow: ellipsis"
+            >
+              {{ props.row.name }}
+            </q-td>
+            <q-td key="dates" class="text-left" style="width: 10%">{{ props.row.dates }}</q-td>
+            <q-td key="time" class="text-left" style="width: 10%">{{ props.row.time }}</q-td>
+            <q-td key="location" class="text-left" style="width: 10%">{{
+              props.row.location
             }}</q-td>
-            <q-td key="dates" style="width: 10%">{{ props.row.dates }}</q-td>
-            <q-td key="time" style="width: 10%">{{ props.row.time }}</q-td>
-            <q-td key="location" style="width: 6%">{{ props.row.location }}</q-td>
-            <q-td key="participants" style="width: 12%; text-align: center">{{
+            <q-td key="participants" class="text-left" style="width: 12%">{{
               props.row.participants
             }}</q-td>
-            <q-td key="skill" style="width: 10%">{{ props.row.skill }}</q-td>
-            <q-td key="activityState" style="width: 10%">
+            <q-td key="skill" class="text-left" style="width: 10%">{{ props.row.skill }}</q-td>
+
+            <!-- ✅ จัดกลางเฉพาะสถานะ -->
+            <q-td key="activityState" class="text-center" style="width: 10%">
               <q-badge
                 :label="props.row.activityState"
                 :class="getStatusClass(props.row.activityState)"
                 class="status-badge"
+                rounded
                 unelevated
-            /></q-td>
-            <q-td class="q-gutter-x-sm" key="action" style="width: 8%">
-              <q-icon clickable name="visibility" @click="goToPageDetail(props.row.id, true)">
+              />
+            </q-td>
+
+            <q-td key="action" class="text-left q-gutter-x-sm" style="width: 8%">
+              <!-- <q-icon clickable name="visibility" @click="goToPageDetail(props.row.id, true)">
                 <q-tooltip>ดูรายละเอียด</q-tooltip>
-              </q-icon>
+              </q-icon> -->
               <q-icon clickable name="edit" @click="goToPageDetail(props.row.id, false)">
                 <q-tooltip>แก้ไข</q-tooltip>
               </q-icon>
+              <q-icon clickable name="delete" @click="openRemoveDialog(props.row.id)">
+                <q-tooltip>ลบ</q-tooltip>
+              </q-icon>
             </q-td>
           </q-tr>
-        </template></q-table
-      >
+        </template>
+        <template v-slot:no-data>
+          <div class="full-width text-center q-pa-md text-grey" style="font-size: 20px">
+            ไม่มีกิจกรรมที่ยกเลิก
+          </div>
+        </template>
+      </q-table>
     </section>
   </q-page>
+  <RemoveDialog v-model="isRemoveDialogOpen" @confirm="handleConfirmRemove" />
 </template>
 
 <script setup lang="ts">
@@ -444,15 +510,32 @@ import { ActivityService } from 'src/services/activity'
 import type { Pagination } from 'src/types/pagination'
 import type { Activity, ActivityItem } from 'src/types/activity'
 import FilterDialog from 'src/components/Dialog/FilterDialog.vue'
+import RemoveDialog from 'src/components/Dialog/RemoveDialog.vue'
 import debounce from 'lodash.debounce'
 
 dayjs.locale('th')
 dayjs.extend(buddhistEra)
 
 const router = useRouter()
-
+const isRemoveDialogOpen = ref(false)
+const selectedId = ref<string | null>(null)
 const goToPage = async () => {
   await router.push('/Admin/ActivitiesManagement/CreateActivityPage')
+}
+const openRemoveDialog = (id: string) => {
+  selectedId.value = id
+  isRemoveDialogOpen.value = true
+}
+const handleConfirmRemove = async () => {
+  if (!selectedId.value) return
+  try {
+    await ActivityService.removeOne(selectedId.value)
+    isRemoveDialogOpen.value = false
+    selectedId.value = null
+    await data4() // 🔁 refresh table
+  } catch (err) {
+    console.error('Delete error:', err)
+  }
 }
 const goToPageDetail = async (id: string, disable: boolean) => {
   console.log(id)
@@ -711,7 +794,7 @@ function mapActivitiesToTableRows(activitys: Activity[]) {
       location: firstItem.rooms?.[0] || '-', // สถานที่แรก
       participants: enrollmentSummary(activity.activityItems), // ไว้ก่อน ยังไม่แน่ใจข้อมูล
       skill: activity.skill
-        ? activity.skill === 'hard'
+        ? activity.skill === 'prep'
           ? 'ทักษะวิชาการ'
           : 'เตรียมความพร้อม'
         : '-', // hard / soft
@@ -830,16 +913,6 @@ async function onRequest4(props: any) {
 
   await data4()
 }
-// async function onRequest4(props: any) {
-//   const { page, rowsPerPage, sortBy, descending } = props.pagination
-//   query4.value.page = page
-//   query4.value.limit = rowsPerPage
-//   query4.value.sortBy = sortBy
-//   query4.value.order = descending ? 'desc' : 'asc'
-
-//   await data4()
-// }
-
 // Debounced Search Function 1
 const debouncedSearch = debounce(async () => {
   query1.value.page = 1 // รีเซต page เมื่อ search
