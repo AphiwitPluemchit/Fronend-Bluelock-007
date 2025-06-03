@@ -357,6 +357,25 @@ onMounted(async () => {
       <div class="col-4">
         <div class="event-panel">
           <div class="text-h6 q-mb-sm">{{ formatThaiDate(selectedDate) }}</div>
+
+          <template v-if="selectedEvents.length">
+            <div
+              v-for="(events, activityName) in groupedEvents"
+              :key="activityName"
+              class="q-mb-md"
+            >
+              <div class="text-weight-bold" style="font-size: 18px">
+                {{ activityName }}
+              </div>
+              <div v-for="event in events" :key="event.id" class="q-mb-xs">
+                <div class="text-weight-bold">
+                  {{ event.activityItemName }}
+                </div>
+                <div class="q-mt-xs">{{ event.time }}</div>
+                <div>จำนวนลงทะเบียน : {{ event.count }}</div>
+                <div>สถานที่ : {{ event.location }}</div>
+                <q-separator class="q-my-sm" />
+              </div>
           <template v-if="Object.keys(searchResults).length">
             <div
               v-for="(events, activityName) in searchResults"
@@ -381,6 +400,7 @@ onMounted(async () => {
                 <div>สถานที่ : {{ event.location }}</div>
                 <q-separator class="q-my-sm" />
               </div>
+
             </div>
           </template>
 
