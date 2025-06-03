@@ -93,7 +93,7 @@ const search1 = computed({
 })
 
 const students = computed(() => {
-  return enrollmentStore.studentEnrollments
+  return enrollmentStore.studentEnrollments || []
 })
 
 const fetchStudents = async () => {
@@ -315,6 +315,11 @@ onMounted(async () => {
             />
           </q-td>
         </template>
+        <template v-slot:no-data>
+          <div class="full-width text-center q-pa-md text-grey" style="font-size: 20px ;">
+            ไม่มีนิสิตที่ลงทะเบียน
+          </div>
+        </template>
       </q-table>
     </div>
   </div>
@@ -343,7 +348,7 @@ onMounted(async () => {
       background-color: #f5f5f5;
     }
 
-     /* Make tbody scrollable */
+    /* Make tbody scrollable */
     tbody {
       display: block;
       overflow-y: auto;
@@ -357,7 +362,7 @@ onMounted(async () => {
       table-layout: fixed;
     }
 
-   /* Optional: ปรับ scrollbar ไม่ทับ */
+    /* Optional: ปรับ scrollbar ไม่ทับ */
     tbody::-webkit-scrollbar {
       width: 12px;
     }
@@ -393,20 +398,21 @@ onMounted(async () => {
 }
 
 .status-low {
-   background-color: #ffc5c5;
-   color: #ff0000;
+  background-color: #ffc5c5;
+  color: #ff0000;
   border: 2px solid #f32323;
-   padding: 3px 30px;
- width: 130px;
- }
+  padding: 3px 30px;
+  width: 130px;
+}
 
 .status-out {
-   background-color: #dadada;
-   color: #000000;
-   border: 2px solid #575656;   padding: 3px 30px;
+  background-color: #dadada;
+  color: #000000;
+  border: 2px solid #575656;
+  padding: 3px 30px;
   width: 130px;
- }
- .status-badge {
+}
+.status-badge {
   height: 32px;
   padding: 0 12px;
   border-radius: 999px;

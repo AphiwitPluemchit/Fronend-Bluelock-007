@@ -78,7 +78,13 @@ onMounted(async () => {
             :key="index"
           >
             <div class="activity-item-name text">
-              {{ activityDetail?.activityItems?.[index]?.name ?? '-' }}
+              {{ activityDetail?.activityItems?.[index]?.name ?? '-' }} (
+              {{ activityDetail?.activityItems?.[index]?.maxParticipants }} /
+              {{ activityDetail?.activityItems?.[index]?.enrollmentCount }} /
+              {{
+                (activityDetail?.activityItems?.[index]?.maxParticipants || 0) -
+                (activityDetail?.activityItems?.[index]?.enrollmentCount || 0)
+              }} )
             </div>
             <div class="row" v-for="(major, mIndex) in majorList" :key="mIndex">
               <div class="student-major-block">
@@ -99,8 +105,8 @@ onMounted(async () => {
 
       <!-- ฝั่งขวา -->
       <div class="registration-right">
-        <div class="info-row">
-          <span class="label" style="margin-bottom: 10px">ผลการลงทะเบียน</span>
+        <div class="registration-title-center">
+          <span class="registration-title-text" style="margin-bottom: 10px">ผลการเลือกอาหาร</span>
         </div>
         <div class="registration-info food-scroll">
           <div class="row" v-for="food in activityDetail.foodVotes" :key="food.foodName">
@@ -124,7 +130,13 @@ onMounted(async () => {
           :key="index"
         >
           <div class="activity-item-name text">
-            {{ activityDetail?.activityItems?.[index]?.name ?? '-' }}
+            {{ activityDetail?.activityItems?.[index]?.name ?? '-' }} (
+             {{ activityDetail?.activityItems?.[index]?.maxParticipants }} /
+              {{ activityDetail?.activityItems?.[index]?.enrollmentCount }} /
+              {{
+                (activityDetail?.activityItems?.[index]?.maxParticipants || 0) -
+                (activityDetail?.activityItems?.[index]?.enrollmentCount || 0)
+              }} )
           </div>
           <div class="row" v-for="(major, mIndex) in majorList" :key="mIndex">
             <div class="student-major-block">
@@ -342,13 +354,17 @@ onMounted(async () => {
 
 .registration-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-  gap: 20px;
+  grid-template-columns: repeat(3, 1fr); /* หรือ auto-fit */
+   gap: 50px 150px; 
+  justify-content: center; /* ✅ บังคับให้ block อยู่กลางหน้าจอ */
   overflow-y: auto;
+  overflow-x: hidden;
+  margin-bottom: 30px;
+    padding: 0 100px;
 }
 .registration-container {
   height: 680px;
-  overflow-y: hidden; /* เพื่อไม่ให้ซ้อน scrollbar */
+  overflow-y: hidden;
 }
 .registration-full {
   flex: 1;
