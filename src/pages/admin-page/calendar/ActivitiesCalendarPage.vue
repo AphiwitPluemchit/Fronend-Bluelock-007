@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { onMounted, ref } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import { today } from '@quasar/quasar-ui-qcalendar'
 import type { Timestamp } from '@quasar/quasar-ui-qcalendar'
 import '@quasar/quasar-ui-qcalendar/dist/index.css'
@@ -46,6 +46,7 @@ async function getActivityData(qeury: Pagination) {
 }
 
 const data1 = async () => {
+  // console.log('data fetched:', data)
   const data = await getActivityData(query1.value)
 
   pagination1.value.page = query1.value.page
@@ -56,6 +57,7 @@ const data1 = async () => {
 
   activitys1.value = data.data
   calendarEvents.value = parseToCalendarEvents(data.data)
+  console.log('Parsed calendarEvents:', calendarEvents.value)
 }
 
 const applyFilters1 = async (selectedFilters: SelectedFilters) => {
@@ -68,7 +70,8 @@ const applyFilters1 = async (selectedFilters: SelectedFilters) => {
 
 interface CalendarEvent {
   id: number
-  name: string
+  activityName?: string // ชื่อกิจกรรมหลัก
+  activityItemName: string // ชื่อกิจกรรมย่อย
   category: 'soft' | 'hard'
   date: string
   time: string
@@ -83,9 +86,53 @@ const selectedEvents = ref<CalendarEvent[]>([])
 const calendarEvents = ref<CalendarEvent[]>([])
 
 function selectEvent(event: CalendarEvent) {
+  
   selectedDate.value = event.date
   selectedEvents.value = getEvents(event.date)
 }
+
+// เพิ่ม computed property สำหรับ group กิจกรรมย่อยในวันเดียวกัน
+const groupedEvents = computed(() => {
+  const groups: Record<string, CalendarEvent[]> = {}
+
+  selectedEvents.value.forEach((event) => {
+    const key = event.activityName ?? '-'
+    if (!groups[key]) {
+      groups[key] = []
+    }
+    groups[key].push(event)
+  })
+
+  return groups
+})
+
+const searchResults = computed(() => {
+  if (!query1.value.search) {
+    // ถ้าไม่มีการค้นหา → แสดง selectedEvents ปกติ (ของวันเดียว)
+    return groupedEvents.value
+  }
+
+  // ถ้ามีการค้นหา → group ข้อมูลทั้งหมดใน calendarEvents ที่ match คำค้นหา
+  const groups: Record<string, CalendarEvent[]> = {}
+  const searchTerm = query1.value.search.toLowerCase()
+
+  calendarEvents.value.forEach((event) => {
+    // เช็คชื่อกิจกรรมหลัก/ย่อย
+    const nameMatch =
+      event.activityName?.toLowerCase().includes(searchTerm) ||
+      event.activityItemName.toLowerCase().includes(searchTerm)
+
+    if (nameMatch) {
+      const key = event.activityName ?? '-'
+      if (!groups[key]) {
+        groups[key] = []
+      }
+      groups[key].push(event)
+    }
+  })
+
+  return groups
+})
 
 function onClickDate(payload: { scope: { timestamp: { date: string } } }) {
   selectedDate.value = payload.scope.timestamp.date
@@ -177,21 +224,21 @@ function formatThaiDate(dateStr: string) {
   })
 }
 
-function parseToCalendarEvents(activities: Activity[]) {
+function parseToCalendarEvents(activities: Activity[]): CalendarEvent[] {
   const parsed: CalendarEvent[] = []
 
   activities.forEach((activity) => {
     const category = activity.skill === 'soft' ? 'soft' : 'hard'
 
     activity.activityItems?.forEach((item) => {
-      if (!item?.id) return
+      // เพิ่มเงื่อนไขตรวจสอบ item ไม่เป็น undefined
+      if (!item || !item.dates) return
 
-      const idStr = (item.id as { toString: () => string }).toString()
-
-      item.dates?.forEach((d) => {
+      item.dates.forEach((d) => {
         parsed.push({
-          id: parseInt(idStr.slice(-5), 16),
-          name: item.name || activity.name || '-',
+          id: parseInt(item.id?.toString().slice(-5) ?? '0', 16),
+          activityName: activity.name || '-', // ชื่อกิจกรรมหลัก
+          activityItemName: item.name || activity.name || '-', // fallback ถ้าไม่มีชื่อกิจกรรมย่อย
           category,
           date: d.date,
           time: `${d.stime} - ${d.etime}`,
@@ -232,12 +279,11 @@ onMounted(async () => {
           outlined
           v-model="query1.search"
           label="ค้นหา ชื่อกิจกรรม"
-          @keyup.enter="data1"
           class="q-mr-sm searchbox"
-          :style="{ boxShadow: 'none' }"
+          :style="{ border: 'none' }"
         >
           <template v-slot:append>
-            <q-icon name="search" />
+            <q-icon activityName="search" />
           </template>
         </q-input>
 
@@ -281,7 +327,9 @@ onMounted(async () => {
                   class="my-event"
                   @click.stop="selectEvent(eventData.event)"
                 >
-                  {{ eventData.event.name }}
+                  <div class="q-calendar__ellipsis">
+                    {{ eventData.event.activityName }}
+                  </div>
                 </div>
               </div>
             </div>
@@ -296,7 +344,9 @@ onMounted(async () => {
                   class="my-event week-bar"
                   @click.stop="selectEvent(eventData.event)"
                 >
-                  <div class="q-calendar__ellipsis">{{ eventData.event.name }}</div>
+                  <div class="q-calendar__ellipsis">
+                    {{ eventData.event.activityName }}
+                  </div>
                 </div>
               </template>
             </div>
@@ -307,20 +357,33 @@ onMounted(async () => {
       <div class="col-4">
         <div class="event-panel">
           <div class="text-h6 q-mb-sm">{{ formatThaiDate(selectedDate) }}</div>
-          <template v-if="selectedEvents.length">
-            <div v-for="event in selectedEvents" :key="event.id" class="q-mb-md">
+          <template v-if="Object.keys(searchResults).length">
+            <div
+              v-for="(events, activityName) in searchResults"
+              :key="activityName"
+              class="q-mb-md"
+            >
               <div class="text-subname1 text-weight-bold">
-                {{ event.time }}
                 <span class="float-right text-grey-7">
-                  {{ event.category === 'soft' ? 'Soft Skill' : 'Hard Skill' }}
+                  {{ events[0]?.category === 'soft' ? 'Soft Skill' : 'Hard Skill' }}
                 </span>
               </div>
-              <div>{{ event.name }}</div>
-              <div>จำนวนลงทะเบียน : {{ event.count }}</div>
-              <div>สถานที่ : {{ event.location }}</div>
-              <q-separator class="q-my-sm" />
+
+              <div class="text-weight-bold" style="font-size: 18px">
+                {{ activityName }}
+              </div>
+              <div v-for="event in events" :key="event.id" class="q-mb-xs">
+                <div class="text-weight-bold">
+                  {{ event.activityItemName }}
+                </div>
+                <div class="q-mt-xs">{{ event.time }}</div>
+                <div>จำนวนลงทะเบียน : {{ event.count }}</div>
+                <div>สถานที่ : {{ event.location }}</div>
+                <q-separator class="q-my-sm" />
+              </div>
             </div>
           </template>
+
           <div v-else class="text-grey">ไม่มีข้อมูลกิจกรรมในวันนี้</div>
         </div>
       </div>
