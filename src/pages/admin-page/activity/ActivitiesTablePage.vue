@@ -859,17 +859,16 @@ function mapActivitiesToTableRows(activitys: Activity[]) {
     const allDates =
       activity?.activityItems?.flatMap((item) => item.dates?.map((d) => ({ ...d, item })) || []) ||
       []
+
     const today = dayjs()
     const futureDates = allDates.filter(
       (d) => dayjs(d.date).isSame(today, 'day') || dayjs(d.date).isAfter(today),
     )
 
-    // หา nearestDate หรือ fallback เป็น undefined
     const nearestDate = (futureDates.length ? futureDates : allDates).sort((a, b) =>
       dayjs(a.date).diff(dayjs(b.date)),
     )[0]
 
-    // ป้องกัน nearestDate undefined
     if (!nearestDate) {
       return {
         no: index + 1,
@@ -882,9 +881,20 @@ function mapActivitiesToTableRows(activitys: Activity[]) {
         skill: '-',
         activityState: '-',
         action: '',
-        activityItems: activity.activityItems || [], // Include activityItems for expanded view
+        activityItems: activity.activityItems || [],
       }
     }
+
+    // ✅ หาเวลาต้นสุด-ท้ายสุดของทุก activityItem
+    const allStimes = activity.activityItems?.flatMap(
+      (item) => item.dates?.map((d) => d.stime).filter(Boolean) || [],
+    )
+    const allEtimes = activity.activityItems?.flatMap(
+      (item) => item.dates?.map((d) => d.etime).filter(Boolean) || [],
+    )
+
+    const earliestStime = allStimes?.length ? allStimes?.sort()[0] : '-'
+    const latestEtime = allEtimes?.length ? allEtimes?.sort().reverse()[0] : '-'
 
     return {
       no: index + 1,
@@ -892,13 +902,13 @@ function mapActivitiesToTableRows(activitys: Activity[]) {
       name: activity.name || '-',
       dates: formatDateToThai(nearestDate.date),
       time:
-        nearestDate.stime && nearestDate.etime ? `${nearestDate.stime}-${nearestDate.etime}` : '-',
+        earliestStime !== '-' && latestEtime !== '-' ? `${earliestStime} - ${latestEtime}` : '-',
       location: nearestDate.item?.rooms?.[0] || '-',
-      participants: enrollmentSummary(activity.activityItems || []), // ป้องกัน undefined
+      participants: enrollmentSummary(activity.activityItems || []),
       skill: activity.skill === 'hard' ? 'ทักษะวิชาการ' : 'เตรียมความพร้อม',
       activityState: activityStatusLebel(activity.activityState || '-'),
       action: '',
-      activityItems: activity.activityItems || [], // Include activityItems for expanded view
+      activityItems: activity.activityItems || [],
     }
   })
 }
@@ -1068,13 +1078,6 @@ watch(
 
 <style lang="scss">
 .my-sticky-header-table {
-  /* ตัด max-height ออกจาก q-table */
-
-  /* Fix header */
-  thead tr:first-child th {
-    // background-color: #f5f5f5;
-  }
-
   /* Make tbody scrollable */
   tbody {
     display: block;
