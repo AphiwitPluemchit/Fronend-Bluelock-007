@@ -779,30 +779,53 @@ onMounted(async () => {
 
 function mapActivitiesToTableRows(activitys: Activity[]) {
   if (!activitys) return []
+
   return activitys.map((activity, index) => {
-    if (!activity || !activity.activityItems) return []
-    const firstItem = activity.activityItems[0] || { dates: [] }
-    if (!firstItem.dates || firstItem.dates.length === 0) return []
-    const firstDate = firstItem.dates[0] || { date: '', stime: '', etime: '' }
+    const allDates =
+      activity?.activityItems?.flatMap((item) => item.dates?.map((d) => ({ ...d, item })) || []) ||
+      []
+    const today = dayjs()
+    const futureDates = allDates.filter(
+      (d) => dayjs(d.date).isSame(today, 'day') || dayjs(d.date).isAfter(today),
+    )
+
+    // หา nearestDate หรือ fallback เป็น undefined
+    const nearestDate = (futureDates.length ? futureDates : allDates).sort((a, b) =>
+      dayjs(a.date).diff(dayjs(b.date)),
+    )[0]
+
+    // ป้องกัน nearestDate undefined
+    if (!nearestDate) {
+      return {
+        no: index + 1,
+        id: activity.id,
+        name: activity.name || '-',
+        dates: '-',
+        time: '-',
+        location: '-',
+        participants: '-',
+        skill: '-',
+        activityState: '-',
+        action: '',
+      }
+    }
 
     return {
       no: index + 1,
       id: activity.id,
       name: activity.name || '-',
-      dates: formatDateToThai(firstDate.date), // ✅ ใช้ format ตรงนี้
-      time: firstDate.stime && firstDate.etime ? `${firstDate.stime}-${firstDate.etime}` : '-', // เวลาแรก
-      location: firstItem.rooms?.[0] || '-', // สถานที่แรก
-      participants: enrollmentSummary(activity.activityItems), // ไว้ก่อน ยังไม่แน่ใจข้อมูล
-      skill: activity.skill
-        ? activity.skill === 'prep'
-          ? 'ทักษะวิชาการ'
-          : 'เตรียมความพร้อม'
-        : '-', // hard / soft
+      dates: formatDateToThai(nearestDate.date),
+      time:
+        nearestDate.stime && nearestDate.etime ? `${nearestDate.stime}-${nearestDate.etime}` : '-',
+      location: nearestDate.item?.rooms?.[0] || '-',
+      participants: enrollmentSummary(activity.activityItems || []), // ป้องกัน undefined
+      skill: activity.skill === 'hard' ? 'ทักษะวิชาการ' : 'เตรียมความพร้อม',
       activityState: activityStatusLebel(activity.activityState || '-'),
-      action: '', // ปุ่ม action ภายหลัง
+      action: '',
     }
   })
 }
+
 function activityStatusLebel(status: string) {
   switch (status) {
     case 'planning':
