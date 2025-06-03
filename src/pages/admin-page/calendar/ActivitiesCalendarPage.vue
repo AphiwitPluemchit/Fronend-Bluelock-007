@@ -46,6 +46,7 @@ async function getActivityData(qeury: Pagination) {
 }
 
 const data1 = async () => {
+  // console.log('data fetched:', data)
   const data = await getActivityData(query1.value)
 
   pagination1.value.page = query1.value.page
@@ -56,6 +57,7 @@ const data1 = async () => {
 
   activitys1.value = data.data
   calendarEvents.value = parseToCalendarEvents(data.data)
+  console.log('Parsed calendarEvents:', calendarEvents.value)
 }
 
 const applyFilters1 = async (selectedFilters: SelectedFilters) => {
@@ -84,6 +86,7 @@ const selectedEvents = ref<CalendarEvent[]>([])
 const calendarEvents = ref<CalendarEvent[]>([])
 
 function selectEvent(event: CalendarEvent) {
+  
   selectedDate.value = event.date
   selectedEvents.value = getEvents(event.date)
 }
@@ -98,6 +101,34 @@ const groupedEvents = computed(() => {
       groups[key] = []
     }
     groups[key].push(event)
+  })
+
+  return groups
+})
+
+const searchResults = computed(() => {
+  if (!query1.value.search) {
+    // ถ้าไม่มีการค้นหา → แสดง selectedEvents ปกติ (ของวันเดียว)
+    return groupedEvents.value
+  }
+
+  // ถ้ามีการค้นหา → group ข้อมูลทั้งหมดใน calendarEvents ที่ match คำค้นหา
+  const groups: Record<string, CalendarEvent[]> = {}
+  const searchTerm = query1.value.search.toLowerCase()
+
+  calendarEvents.value.forEach((event) => {
+    // เช็คชื่อกิจกรรมหลัก/ย่อย
+    const nameMatch =
+      event.activityName?.toLowerCase().includes(searchTerm) ||
+      event.activityItemName.toLowerCase().includes(searchTerm)
+
+    if (nameMatch) {
+      const key = event.activityName ?? '-'
+      if (!groups[key]) {
+        groups[key] = []
+      }
+      groups[key].push(event)
+    }
   })
 
   return groups
@@ -326,6 +357,7 @@ onMounted(async () => {
       <div class="col-4">
         <div class="event-panel">
           <div class="text-h6 q-mb-sm">{{ formatThaiDate(selectedDate) }}</div>
+
           <template v-if="selectedEvents.length">
             <div
               v-for="(events, activityName) in groupedEvents"
@@ -344,6 +376,31 @@ onMounted(async () => {
                 <div>สถานที่ : {{ event.location }}</div>
                 <q-separator class="q-my-sm" />
               </div>
+          <template v-if="Object.keys(searchResults).length">
+            <div
+              v-for="(events, activityName) in searchResults"
+              :key="activityName"
+              class="q-mb-md"
+            >
+              <div class="text-subname1 text-weight-bold">
+                <span class="float-right text-grey-7">
+                  {{ events[0]?.category === 'soft' ? 'Soft Skill' : 'Hard Skill' }}
+                </span>
+              </div>
+
+              <div class="text-weight-bold" style="font-size: 18px">
+                {{ activityName }}
+              </div>
+              <div v-for="event in events" :key="event.id" class="q-mb-xs">
+                <div class="text-weight-bold">
+                  {{ event.activityItemName }}
+                </div>
+                <div class="q-mt-xs">{{ event.time }}</div>
+                <div>จำนวนลงทะเบียน : {{ event.count }}</div>
+                <div>สถานที่ : {{ event.location }}</div>
+                <q-separator class="q-my-sm" />
+              </div>
+
             </div>
           </template>
 

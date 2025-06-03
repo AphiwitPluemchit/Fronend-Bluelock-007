@@ -1,17 +1,8 @@
 import { api } from 'boot/axios'
-import { Notify } from 'quasar'
+
 import type { StudentEnrollment } from 'src/types/enrollment'
 import type { Pagination, PaginationResponse } from 'src/types/pagination'
 
-// 🛠️ ฟังก์ชันแสดง error
-const showError = (message: string) => {
-  Notify.create({
-    message,
-    type: 'negative',
-    position: 'bottom',
-    timeout: 3000,
-  })
-}
 
 export class EnrollmentService {
   static path = 'enrollments'
@@ -22,22 +13,23 @@ export class EnrollmentService {
       const res = await api.post(this.path, obj)
       return res.status
     } catch (error) {
-      showError('ไม่สามารถลงทะเบียนเข้าร่วมกิจกรรมได้')
+      
       console.error('Error creating enrollment:', error)
       throw error
     }
   }
 
-  static async removeOne(id: string) {
-    try {
-      const res = await api.delete(`${this.path}/${id}`)
-      return res.status
-    } catch (error) {
-      showError('ไม่สามารถลบการลงทะเบียนได้')
-      console.error(`Error deleting enrollment ID: ${id}`, error)
-      throw error
-    }
+ static async removeOne(id: string) {
+  try {
+    const res = await api.delete(`${this.path}/${id}`)
+    return res.status
+  } catch (error) {
+    
+    console.error(`Error deleting enrollment ID: ${id}`, error)
+    throw error
   }
+}
+
 
   static async getEnrollmentsByActivityID(activityId: string, params: Pagination) {
     const { studentStatus, major, studentYear, ...rest } = params
@@ -60,7 +52,6 @@ export class EnrollmentService {
       console.log('Fetched enrollments:', res.data)
       return res.data
     } catch (error) {
-      showError('ไม่สามารถโหลดรายชื่อนักศึกษาที่ลงทะเบียนได้')
       console.error(`Error fetching enrollments for activity ID: ${activityId}`, error)
       throw error
     }
@@ -73,7 +64,6 @@ export class EnrollmentService {
       console.log('Fetched enrollments:', res.data)
       return res.data
     } catch (error) {
-      showError('ไม่สามารถโหลดข้อมูลการลงทะเบียนของนิสิตได้')
       console.error(`Error fetching enrollments for student ID: ${studentId}`, error)
       throw error
     }
@@ -85,7 +75,6 @@ export class EnrollmentService {
       console.log('Fetched enrollments:', res.data)
       return res.data
     } catch (error) {
-      showError('ไม่สามารถตรวจสอบสถานะการลงทะเบียนได้')
       console.error(`Error fetching enrollment for student ID: ${studentId}`, error)
       throw error
     }
