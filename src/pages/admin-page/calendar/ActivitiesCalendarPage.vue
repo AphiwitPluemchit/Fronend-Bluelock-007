@@ -376,6 +376,7 @@ onMounted(async () => {
                 <div>สถานที่ : {{ event.location }}</div>
                 <q-separator class="q-my-sm" />
               </div>
+            </div></template>
           <template v-if="Object.keys(searchResults).length">
             <div
               v-for="(events, activityName) in searchResults"
