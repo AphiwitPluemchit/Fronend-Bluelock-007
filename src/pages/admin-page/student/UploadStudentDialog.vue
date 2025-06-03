@@ -14,6 +14,8 @@ const downloadTemplate = () => {
       code: '123456',
       major: 'SE',
       password: '123456',
+      softSkill: 0,
+      hardSkill: 0,
     },
     {
       name: 'สมหญิง',
@@ -21,8 +23,11 @@ const downloadTemplate = () => {
       code: '123457',
       major: 'CS',
       password: '123456',
+      softSkill: 0,
+      hardSkill: 0,
     },
   ]
+
   const worksheet = XLSX.utils.json_to_sheet(sampleData)
   const workbook = XLSX.utils.book_new()
   XLSX.utils.book_append_sheet(workbook, worksheet, 'Students')
@@ -61,6 +66,8 @@ const uploadFile = async () => {
       code: row.code?.toString() || '',
       major: row.major || '',
       password: row.password?.toString() || '123456',
+      softSkill: Number(row.softSkill) || 0,
+      hardSkill: Number(row.hardSkill) || 0,
     }))
 
     // ✅ เช็กรหัสนิสิตซ้ำ (จาก Excel)
