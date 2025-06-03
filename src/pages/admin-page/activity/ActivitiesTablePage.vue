@@ -80,8 +80,16 @@
         </template>
         <!-- เนื้อหาตาราง -->
         <template v-slot:body="props">
-          <q-tr :props="props">
-            <q-td key="no" class="text-left" style="width: 5%">{{ props.rowIndex + 1 }}</q-td>
+          <q-tr :props="props" @click="toggleRowExpansion1(props.row.id)" class="cursor-pointer">
+            <q-td key="no" class="text-left" style="width: 5%">
+              <div class="row items-center">
+                <q-icon
+                  :name="expandedRows1.has(props.row.id) ? 'expand_less' : 'expand_more'"
+                  class="q-mr-sm"
+                />
+                {{ props.rowIndex + 1 }}
+              </div>
+            </q-td>
             <q-td
               key="name"
               class="text-left"
@@ -107,16 +115,74 @@
                 class="status-badge"
                 rounded
                 unelevated
-              />
-            </q-td>
-
-            <q-td key="action" class="text-left q-gutter-x-sm" style="width: 8%">
+            /></q-td>
+            <q-td class="q-gutter-x-sm" key="action" style="width: 8%">
               <q-icon clickable name="visibility" @click="goToPageDetail(props.row.id, true)">
                 <q-tooltip>ดูรายละเอียด</q-tooltip>
               </q-icon>
-              <q-icon clickable name="edit" @click="goToPageDetail(props.row.id, false)">
+              <q-icon clickable name="edit" @click.stop="goToPageDetail(props.row.id, false)">
                 <q-tooltip>แก้ไข</q-tooltip>
               </q-icon>
+            </q-td>
+          </q-tr>
+          <!-- Expanded Row Content -->
+          <q-tr v-if="expandedRows1.has(props.row.id)" class="expanded-row">
+            <q-td colspan="9" class="expanded-content">
+              <div class="q-pa-sm">
+                <div class="text-subtitle2 q-mb-sm">รายละเอียดกิจกรรมย่อย</div>
+                <div v-if="props.row.activityItems && props.row.activityItems.length > 0">
+                  <div
+                    v-for="(item, index) in props.row.activityItems"
+                    :key="index"
+                    class="activity-item q-mb-sm q-pa-xs"
+                    style="border: 1px solid #e0e0e0; border-radius: 4px"
+                  >
+                    <div class="row items-center q-gutter-sm text-body2">
+                      <div class="col-auto">
+                        <span class="text-weight-bold">ชื่อ:</span> {{ item.name || '-' }}
+                      </div>
+
+                      <div class="col-auto">
+                        <span class="text-weight-bold">รับ:</span>
+                        {{ item.maxParticipants || '-' }} คน
+                      </div>
+                      <div class="col-auto">
+                        <span class="text-weight-bold">ลงทะเบียน:</span>
+                        {{ item.enrollmentCount || 0 }} คน
+                      </div>
+                      <div class="col-auto" v-if="item.dates && item.dates.length > 0">
+                        <span class="text-weight-bold">วันที่:</span>
+                        <span v-for="(date, dateIndex) in item.dates" :key="dateIndex">
+                          {{ formatDateToThai(date.date) }} {{ date.stime }}-{{ date.etime
+                          }}{{ dateIndex < item.dates.length - 1 ? ', ' : '' }}
+                        </span>
+                      </div>
+                      <div class="col-auto">
+                        <span class="text-weight-bold">ชั่วโมง:</span> {{ item.hour || '-' }} ชม.
+                      </div>
+                      <div class="col-auto">
+                        <span class="text-weight-bold">ผู้ดำเนินการ:</span>
+                        {{ item.operator || '-' }}
+                      </div>
+                      <div class="col-auto">
+                        <span class="text-weight-bold">ห้อง:</span>
+                        {{ item.rooms?.join(', ') || '-' }}
+                      </div>
+                      <div class="col-auto">
+                        <span class="text-weight-bold">สาขา:</span>
+                        {{ item.majors?.join(', ') || '-' }}
+                      </div>
+                    </div>
+                    <div
+                      v-if="item.description && item.description !== '-'"
+                      class="q-mt-xs text-body2"
+                    >
+                      <span class="text-weight-bold">คำอธิบาย:</span> {{ item.description }}
+                    </div>
+                  </div>
+                </div>
+                <div v-else class="text-grey-6">ไม่มีข้อมูลกิจกรรมย่อย</div>
+              </div>
             </q-td>
           </q-tr>
         </template>
@@ -203,18 +269,9 @@
         <!-- เนื้อหาตาราง -->
         <template v-slot:body="props">
           <q-tr :props="props">
-            <q-td key="no" class="text-left" style="width: 5%">{{ props.rowIndex + 1 }}</q-td>
-            <q-td
-              key="name"
-              class="text-left"
-              style="width: 32%; overflow: hidden; text-overflow: ellipsis"
-            >
-              {{ props.row.name }}
-            </q-td>
-            <q-td key="dates" class="text-left" style="width: 10%">{{ props.row.dates }}</q-td>
-            <q-td key="time" class="text-left" style="width: 10%">{{ props.row.time }}</q-td>
-            <q-td key="location" class="text-left" style="width: 10%">{{
-              props.row.location
+            <q-td key="no" style="width: 5%">{{ props.rowIndex + 1 }}</q-td>
+            <q-td key="name" style="width: 32%; overflow: hidden; text-overflow: ellipsis">{{
+              props.row.name
             }}</q-td>
             <q-td key="participants" class="text-left" style="width: 12%">{{
               props.row.participants
@@ -229,25 +286,18 @@
                 class="status-badge"
                 rounded
                 unelevated
-              />
-            </q-td>
-
-            <q-td key="action" class="text-left q-gutter-x-sm" style="width: 8%">
+            /></q-td>
+            <q-td class="q-gutter-x-sm" key="action" style="width: 8%">
               <q-icon clickable name="visibility" @click="goToPageDetail(props.row.id, true)">
                 <q-tooltip>ดูรายละเอียด</q-tooltip>
               </q-icon>
-              <q-icon clickable name="edit" @click="goToPageDetail(props.row.id, false)">
+              <q-icon clickable name="edit" @click.stop="goToPageDetail(props.row.id, false)">
                 <q-tooltip>แก้ไข</q-tooltip>
               </q-icon>
             </q-td>
           </q-tr>
-        </template>
-        <template v-slot:no-data>
-          <div class="full-width text-center q-pa-md text-grey" style="font-size: 20px">
-            ไม่มีกิจกรรมที่กำลังวางแผน
-          </div>
-        </template>
-      </q-table>
+        </template></q-table
+      >
     </section>
 
     <!-- ตาราง 3 เสร็จสิ้น-->
@@ -325,18 +375,9 @@
         <!-- เนื้อหาตาราง -->
         <template v-slot:body="props">
           <q-tr :props="props">
-            <q-td key="no" class="text-left" style="width: 5%">{{ props.rowIndex + 1 }}</q-td>
-            <q-td
-              key="name"
-              class="text-left"
-              style="width: 32%; overflow: hidden; text-overflow: ellipsis"
-            >
-              {{ props.row.name }}
-            </q-td>
-            <q-td key="dates" class="text-left" style="width: 10%">{{ props.row.dates }}</q-td>
-            <q-td key="time" class="text-left" style="width: 10%">{{ props.row.time }}</q-td>
-            <q-td key="location" class="text-left" style="width: 10%">{{
-              props.row.location
+            <q-td key="no" style="width: 5%">{{ props.rowIndex + 1 }}</q-td>
+            <q-td key="name" style="width: 32%; overflow: hidden; text-overflow: ellipsis">{{
+              props.row.name
             }}</q-td>
             <q-td key="participants" class="text-left" style="width: 12%">{{
               props.row.participants
@@ -351,25 +392,18 @@
                 class="status-badge"
                 rounded
                 unelevated
-              />
-            </q-td>
-
-            <q-td key="action" class="text-left q-gutter-x-sm" style="width: 8%">
+            /></q-td>
+            <q-td class="q-gutter-x-sm" key="action" style="width: 8%">
               <q-icon clickable name="visibility" @click="goToPageDetail(props.row.id, true)">
                 <q-tooltip>ดูรายละเอียด</q-tooltip>
               </q-icon>
-              <q-icon clickable name="edit" @click="goToPageDetail(props.row.id, false)">
+              <q-icon clickable name="edit" @click.stop="goToPageDetail(props.row.id, false)">
                 <q-tooltip>แก้ไข</q-tooltip>
               </q-icon>
             </q-td>
           </q-tr>
-        </template>
-        <template v-slot:no-data>
-          <div class="full-width text-center q-pa-md text-grey" style="font-size: 20px">
-            ไม่มีกิจกรรมที่เสร็จสิ้น
-          </div>
-        </template>
-      </q-table>
+        </template></q-table
+      >
     </section>
 
     <!-- ตางราง 4 ยกเลิก -->
@@ -711,6 +745,47 @@ const activitys2 = ref<Activity[]>([]) // Planning Table
 const activitys3 = ref<Activity[]>([]) // Success Table
 const activitys4 = ref<Activity[]>([]) // Cancel Table
 
+// Expanded rows state for each table
+const expandedRows1 = ref<Set<string>>(new Set())
+const expandedRows2 = ref<Set<string>>(new Set())
+const expandedRows3 = ref<Set<string>>(new Set())
+// const expandedRows4 = ref<Set<string>>(new Set())
+
+// Toggle functions for expanding/collapsing rows
+const toggleRowExpansion1 = (rowId: string) => {
+  if (expandedRows1.value.has(rowId)) {
+    expandedRows1.value.delete(rowId)
+  } else {
+    expandedRows1.value.add(rowId)
+  }
+}
+
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+const toggleRowExpansion2 = (rowId: string) => {
+  if (expandedRows2.value.has(rowId)) {
+    expandedRows2.value.delete(rowId)
+  } else {
+    expandedRows2.value.add(rowId)
+  }
+}
+
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+const toggleRowExpansion3 = (rowId: string) => {
+  if (expandedRows3.value.has(rowId)) {
+    expandedRows3.value.delete(rowId)
+  } else {
+    expandedRows3.value.add(rowId)
+  }
+}
+
+// const toggleRowExpansion4 = (rowId: string) => {
+//   if (expandedRows4.value.has(rowId)) {
+//     expandedRows4.value.delete(rowId)
+//   } else {
+//     expandedRows4.value.add(rowId)
+//   }
+// }
+
 const query1 = ref<Pagination>({
   page: 1,
   limit: 5,
@@ -807,6 +882,7 @@ function mapActivitiesToTableRows(activitys: Activity[]) {
         skill: '-',
         activityState: '-',
         action: '',
+        activityItems: activity.activityItems || [], // Include activityItems for expanded view
       }
     }
 
@@ -822,6 +898,7 @@ function mapActivitiesToTableRows(activitys: Activity[]) {
       skill: activity.skill === 'hard' ? 'ทักษะวิชาการ' : 'เตรียมความพร้อม',
       activityState: activityStatusLebel(activity.activityState || '-'),
       action: '',
+      activityItems: activity.activityItems || [], // Include activityItems for expanded view
     }
   })
 }
