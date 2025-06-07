@@ -1,39 +1,35 @@
 <script setup lang="ts">
-import { ref } from 'vue';
-import EvaluationTable from './EvaluationTable.vue';
+import { ref } from 'vue'
+import EvaluationTable from './EvaluationTable.vue'
+import checkInOutDialog from './CheckInOut/checkInOutDialog.vue'
 
+const isDialogOpen = ref(false)
 // ข้อมูลสรุปการลงทะเบียน
 const registrationSummary = ref({
   totalStudents: 165,
   checkIn: 150,
   late: 10,
   checkOut: 160,
-  absent: 5
-});
-
-const isDialogOpen = ref(false);
+  absent: 5,
+})
 
 // เปิด dialog → รีเซตค่า
 const showCreateQR_CodeDialog = () => {
-  selectedCheckType.value = '';
-  isDialogOpen.value = true;
-};
+  isDialogOpen.value = true
+  console.log(isDialogOpen.value)
+}
 
 // ยกเลิก → ปิด + รีเซตค่า
 const cancelCreateQR_Code = () => {
-  isDialogOpen.value = false;
-  selectedCheckType.value = '';
-};
+  isDialogOpen.value = false
+}
 
 // ยืนยัน
 const confirmCreateQR_Code = () => {
-  console.log("QR-Code เช็คชื่อถูกสร้างแล้ว!");
-  isDialogOpen.value = false;
-  selectedCheckType.value = '';
-};
-
-const selectedCheckType = ref('');
-
+  console.log('QR-Code เช็คชื่อถูกสร้างแล้ว!')
+  // isDialogOpen.value = false
+  // selectedCheckType.value = ''
+}
 </script>
 
 <template>
@@ -48,39 +44,6 @@ const selectedCheckType = ref('');
         <q-btn label="เช็คชื่อ" @click="showCreateQR_CodeDialog" class="check-in-btn" />
 
         <!-- ไดอะล็อกสำหรับสร้าง QR-Code เช็คชื่อ -->
-        <q-dialog v-model="isDialogOpen">
-          <q-card class="dialog-card">
-            <q-card-section class="dialog-title">
-              <span>สร้าง QR-Code เช็คชื่อ</span>
-            </q-card-section>
-
-            <q-card-section class="dialog-body">
-              <q-btn
-                flat
-                label="เช็คชื่อเข้า"
-                class="check-type-btn"
-                :style="selectedCheckType === 'check-in'
-                  ? 'background-color: #e0e0e0; color: black'
-                  : 'background-color: white; color: black'"
-                @click="selectedCheckType = 'check-in'"
-              />
-              <q-btn
-                flat
-                label="เช็คชื่อออก"
-                class="check-type-btn"
-                :style="selectedCheckType === 'check-out'
-                  ? 'background-color: #e0e0e0; color: black'
-                  : 'background-color: white; color: black'"
-                @click="selectedCheckType = 'check-out'"
-              />
-            </q-card-section>
-
-            <q-card-actions align="right" class="action-buttons">
-              <q-btn label="ยกเลิก" class="cancel-btn" @click="cancelCreateQR_Code" />
-              <q-btn label="ยืนยัน" class="confirm-btn" @click="confirmCreateQR_Code" />
-            </q-card-actions>
-          </q-card>
-        </q-dialog>
       </div>
 
       <!-- ฝั่งขวา: ข้อมูล + ตาราง -->
@@ -96,7 +59,6 @@ const selectedCheckType = ref('');
           <!-- ผลการเช็คชื่อ -->
           <div class="info-row">
             <div class="registration-info">
-
               <!-- แถวแรก -->
               <div class="row">
                 <span class="label">ผลการเช็คชื่อ :</span>
@@ -108,7 +70,8 @@ const selectedCheckType = ref('');
 
               <!-- แถวอื่น ให้เว้นช่อง label -->
               <div class="row">
-                <span class="label">&nbsp;</span> <!-- ช่องว่าง -->
+                <span class="label">&nbsp;</span>
+                <!-- ช่องว่าง -->
                 <span class="sub-label">เช็คชื่อสาย</span>
                 <span class="text">จำนวน</span>
                 <span class="number">{{ registrationSummary.late }}</span>
@@ -116,7 +79,8 @@ const selectedCheckType = ref('');
               </div>
 
               <div class="row">
-                <span class="label">&nbsp;</span> <!-- ช่องว่าง -->
+                <span class="label">&nbsp;</span>
+                <!-- ช่องว่าง -->
                 <span class="sub-label">เช็คชื่อออก</span>
                 <span class="text">จำนวน</span>
                 <span class="number">{{ registrationSummary.checkOut }}</span>
@@ -124,13 +88,13 @@ const selectedCheckType = ref('');
               </div>
 
               <div class="row">
-                <span class="label">&nbsp;</span> <!-- ช่องว่าง -->
+                <span class="label">&nbsp;</span>
+                <!-- ช่องว่าง -->
                 <span class="sub-label">ไม่มา</span>
                 <span class="text">จำนวน</span>
                 <span class="number">{{ registrationSummary.absent }}</span>
                 <span class="unit">คน</span>
               </div>
-
             </div>
           </div>
 
@@ -142,6 +106,11 @@ const selectedCheckType = ref('');
       </div>
     </div>
   </div>
+  <checkInOutDialog
+    v-model="isDialogOpen"
+    @cancel="cancelCreateQR_Code"
+    @confirm="confirmCreateQR_Code"
+  />
 </template>
 
 <style scoped>
@@ -150,7 +119,7 @@ const selectedCheckType = ref('');
   flex-direction: column;
   align-items: flex-start;
   gap: 50px;
-  background-color: #EDF0F5;
+  background-color: #edf0f5;
   padding: 30px;
   border-radius: 12px;
   height: 680px;
@@ -266,7 +235,7 @@ const selectedCheckType = ref('');
 .upload-box {
   width: 430px;
   height: 330px;
-  background-color: #D9D9D9;
+  background-color: #d9d9d9;
   border-radius: 10px;
   display: flex;
   align-items: center;
@@ -281,7 +250,7 @@ const selectedCheckType = ref('');
 
 /* ปุ่มเช็คชื่อ */
 .check-in-btn {
-  background-color: #D9D9D9;
+  background-color: #d9d9d9;
   color: black;
   border-radius: 8px;
   font-size: 16px;
@@ -328,18 +297,18 @@ const selectedCheckType = ref('');
 
 /* ปุ่มยกเลิกและยืนยัน */
 .cancel-btn {
-  background-color: #F03B2D;
+  background-color: #f03b2d;
   color: white;
   height: 40px;
   min-width: 70px;
-  border-radius: 10px
+  border-radius: 10px;
 }
 
 .confirm-btn {
-  background-color: #3676F4;
+  background-color: #3676f4;
   color: white;
   height: 40px;
   min-width: 70px;
-  border-radius: 10px
+  border-radius: 10px;
 }
 </style>
