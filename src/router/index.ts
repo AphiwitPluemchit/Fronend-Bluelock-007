@@ -1,24 +1,19 @@
 import { route } from 'quasar/wrappers'
-import {
-  createMemoryHistory,
-  createRouter,
-  createWebHashHistory,
-  createWebHistory,
-  type RouteRecordRaw,
-} from 'vue-router'
+import { createRouter, createWebHistory, type RouteRecordRaw } from 'vue-router'
 import { useAuthStore } from 'src/stores/auth'
 
-// 🧭 แยกกลุ่ม Route ตามสิทธิ์
+// แยกกลุ่ม Route ตามสิทธิ์
 import { publicRoutes } from './publicRoutes'
 import { adminRoutes } from './adminRoutes'
 import { studentRoutes } from './studentRoutes'
+import { checkinoutRoutes } from './checkinoutRoutes' // ถ้ามี
 
-// 📌 รวมทั้งหมดเป็น Route เดียว
+// รวมทั้งหมดเป็น Route เดียว
 const routes: RouteRecordRaw[] = [
   ...publicRoutes,
   ...adminRoutes,
   ...studentRoutes,
-  // fallback route
+  ...checkinoutRoutes,
   {
     path: '/:catchAll(.*)*',
     component: () => import('pages/ErrorUnauthorized.vue'),
@@ -26,16 +21,10 @@ const routes: RouteRecordRaw[] = [
 ]
 
 export default route(function () {
-  const createHistory = process.env.SERVER
-    ? createMemoryHistory
-    : process.env.VUE_ROUTER_MODE === 'history'
-      ? createWebHistory
-      : createWebHashHistory
-
   const Router = createRouter({
     scrollBehavior: () => ({ left: 0, top: 0 }),
     routes,
-    history: createHistory(process.env.VUE_ROUTER_BASE),
+    history: createWebHistory(), // ✅ ใช้ history mode โดยตรง
   })
 
   Router.beforeEach((to, from, next) => {
@@ -46,20 +35,14 @@ export default route(function () {
     const isPublic = to.meta.public || false
     const requiredRole = to.meta.role
 
-    // ✅ กรณีเป็นหน้า public → ผ่านได้เลย
-    if (isPublic) {
-      return next()
-    }
+    if (isPublic) return next()
 
-    // ✅ ถ้า user ยังไม่ login → บันทึก path ที่จะไปไว้ก่อน แล้ว redirect ไป login
     if (!userRole) {
-      if (!localStorage.getItem('redirectAfterLogin')) {
-        localStorage.setItem('redirectAfterLogin', to.fullPath)
-      }
-      return next({ name: 'login' }) // <-- เปลี่ยนจาก '/' เป็นชื่อ route login จริง
+      const redirectPath = to.fullPath
+      localStorage.setItem('redirectAfterLogin', redirectPath)
+      return next({ name: 'Login' })
     }
 
-    // ✅ ถ้า role ไม่ตรงกับที่กำหนดไว้ → redirect ไป unauthorized
     if (requiredRole && requiredRole !== userRole) {
       return next('/unauthorized')
     }
