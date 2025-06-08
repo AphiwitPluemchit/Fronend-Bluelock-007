@@ -1,11 +1,11 @@
 import { defineStore } from 'pinia'
 import AuthService from 'src/services/auth'
 import type { Auth } from 'src/types/auth'
+import type { User } from 'src/types/user'
 import { EnumUserRole } from 'src/data/roles'
 import { useRouter } from 'vue-router'
 
 export interface AuthState {
-  payload: Auth | null
   form: {
     email: string
     password: string
@@ -14,7 +14,6 @@ export interface AuthState {
 
 export const useAuthStore = defineStore('auth', {
   state: (): AuthState => ({
-    payload: null,
     form: {
       email: '',
       password: '',
@@ -22,21 +21,41 @@ export const useAuthStore = defineStore('auth', {
   }),
 
   getters: {
-    getRole: (s): EnumUserRole | undefined => s.payload?.user?.role,
-    isAdmin: (s): boolean => s.payload?.user?.role === EnumUserRole.ADMIN,
-    isStudent: (s): boolean => s.payload?.user?.role === EnumUserRole.STUDENT,
-    getAccessToken: (s): string | undefined => s.payload?.token,
-    getName: (s): string => s.payload?.user?.student?.name || s.payload?.user?.email || 'ไม่ระบุ',
+    // ✅ ดึง token จาก localStorage
+    getAccessToken: (): string | null => localStorage.getItem('access_token'),
+
+    // ✅ ดึง user จาก localStorage แล้ว parse
+    getUser: (): Partial<User> | null => {
+      const user = localStorage.getItem('user')
+      return user ? JSON.parse(user) : null
+    },
+
+    getRole(): EnumUserRole | undefined {
+      return this.getUser?.role
+    },
+
+    isAdmin(): boolean {
+      return this.getUser?.role === EnumUserRole.ADMIN
+    },
+
+    isStudent(): boolean {
+      return this.getUser?.role === EnumUserRole.STUDENT
+    },
+
+    getName(): string {
+      const user = this.getUser
+      return user?.student?.name || user?.email || 'ไม่ระบุ'
+    },
   },
 
   actions: {
-    // ✅ เข้าสู่ระบบ
+    // ✅ Login: แยกเก็บ token กับ user
     async login(): Promise<Auth | null> {
       try {
         const data = await AuthService.login(this.form.email, this.form.password)
-        if (data) {
-          this.payload = data
-          localStorage.setItem('userPayload', JSON.stringify(data))
+        if (data?.token && data?.user) {
+          localStorage.setItem('access_token', data.token)
+          localStorage.setItem('user', JSON.stringify(data.user))
           return data
         }
         return null
@@ -46,38 +65,26 @@ export const useAuthStore = defineStore('auth', {
       }
     },
 
-    // ✅ ออกจากระบบ
+    // ✅ Logout: ลบ token และ user
     async logout(): Promise<void> {
-      if (!this.payload?.user?.id) return
-
       try {
-        await AuthService.logout(this.payload.user.id)
+        const user = this.getUser
+        if (user?.id) await AuthService.logout(user.id)
       } catch (err) {
         console.warn('Logout failed silently:', err)
       }
 
-      this.payload = null
-      localStorage.removeItem('userPayload')
+      localStorage.removeItem('access_token')
+      localStorage.removeItem('user')
 
       const router = useRouter()
       await router.push('/')
     },
 
-    // ✅ โหลดผู้ใช้จาก localStorage
+    // ✅ โหลดใหม่หลังรีเฟรช (ไม่มี state แต่ไว้ใช้ใน future)
     loadUserFromLocalStorage() {
-      const storedPayload = localStorage.getItem('userPayload')
-      if (storedPayload) {
-        this.payload = JSON.parse(storedPayload)
-      }
-    },
-
-    // ✅ โหลดโปรไฟล์ล่าสุดจาก backend
-    async getProfile() {
-      const profile = await AuthService.fetchProfile()
-      if (profile) {
-        this.payload = profile
-        localStorage.setItem('userPayload', JSON.stringify(profile))
-      }
+      // ไม่ต้อง set state แล้ว เพราะใช้จาก localStorage ตรง ๆ
+      // ฟังก์ชันนี้เอาไว้ future ถ้าคุณอยากเก็บ user ใน state ชั่วคราว
     },
   },
 })

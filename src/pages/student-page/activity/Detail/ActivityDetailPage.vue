@@ -42,7 +42,7 @@ const handleUnRegisterClick = () => {
 const register = async (activityItemId: string, selectedFood: string | null) => {
   const payload = {
     activityItemId,
-    studentId: auth.payload?.user?.id,
+    studentId: auth.getUser?.id,
     food: selectedFood,
   }
   try {
@@ -89,7 +89,7 @@ async function fetchData() {
   activity.value = StudentActivityStore.form as Activity
   try {
     const response = await EnrollmentService.getEnrollmentsByStudentIDAndActivityID(
-      `${auth.payload?.user?.id}`,
+      `${auth.getUser?.id}`,
       `${activity.value.id}`,
     )
     enrollment.value = response

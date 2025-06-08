@@ -35,7 +35,7 @@ const query = ref<Pagination>({
 })
 const fetchData = async () => {
   try {
-    const studentId = `${auth.payload?.user?.id}`
+    const studentId = `${auth.getUser?.id}`
     const response = await EnrollmentService.getEnrollmentsByStudentID(studentId, query.value)
     activitys.value = response.data
     console.log(response)
@@ -45,7 +45,7 @@ const fetchData = async () => {
   }
 }
 onMounted(async () => {
-  console.log(auth.payload?.user?.id)
+  console.log(auth.getUser?.id)
   await fetchData()
 })
 </script>

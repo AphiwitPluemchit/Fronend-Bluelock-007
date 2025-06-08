@@ -13,14 +13,13 @@ const showError = (message: string) => {
 }
 
 class AuthService {
-  static async login(email: string, password: string): Promise<Auth | null> {
+  static async login(email: string, password: string) {
     try {
       const res = await api.post<Auth>('/auth/login', { email, password })
       return res.data
     } catch (error) {
       showError('เข้าสู่ระบบล้มเหลว กรุณาตรวจสอบอีเมลหรือรหัสผ่าน')
       console.error('Login failed:', error)
-      throw error
     }
   }
 

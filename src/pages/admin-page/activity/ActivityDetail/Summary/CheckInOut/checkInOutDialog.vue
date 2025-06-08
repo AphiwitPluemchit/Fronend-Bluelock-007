@@ -1,6 +1,7 @@
 <!-- CreateQRCodeDialog.vue -->
 <script setup lang="ts">
-import { defineProps, defineEmits, ref } from 'vue'
+import CheckinoutService from 'src/services/checkinout'
+import { defineProps, defineEmits, ref, onMounted } from 'vue'
 
 const props = defineProps({
   modelValue: Boolean,
@@ -26,6 +27,11 @@ const confirm = () => {
   link.value = selectedCheckType.value
   emit('confirm')
 }
+onMounted(async () => {
+  console.log('mounted')
+  const res = await CheckinoutService.getLink('683aaee145a98ac1ae968e6a', selectedCheckType.value)
+  console.log('res', res)
+})
 </script>
 
 <template>
