@@ -226,7 +226,6 @@ watch(
           color="primary"
           label="จัดเก็บนิสิต"
           class="btnadd"
-          bo
           @click="saveStudents"
         />
       </div>

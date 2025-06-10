@@ -312,7 +312,6 @@ const goToConfirmPage = () => {
               icon="add"
               label="เพิ่มข้อมูล"
               class="btnadd"
-              bo
               @click="goToConfirmPage"
             />
           </div>

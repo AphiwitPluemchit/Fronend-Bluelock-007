@@ -88,19 +88,23 @@ const closeMenu = () => {
   emit('update:modelValue', false)
 }
 const applyFilters = () => {
+  filters.value = cloneDeep(tempFilters.value) // อัพเดตตัวกรองจริงจาก tempFilters
   emit('apply', filters.value)
   showFilterDialog.value = false
 }
+
 // ตรวจสอบหมวดที่ต้องแสดง
 const availableCategories = computed(() => props.categories)
 
 // ฟังก์ชันสำหรับเลือก/ยกเลิกการเลือก
-const toggleFilter = (category: keyof typeof filters.value, value: string) => {
-  const index = filters.value[category].indexOf(value)
+const tempFilters = ref(cloneDeep(filters.value)) // สร้างตัวแปรชั่วคราว
+
+const toggleFilter = (category: keyof typeof tempFilters.value, value: string) => {
+  const index = tempFilters.value[category].indexOf(value)
   if (index === -1) {
-    filters.value[category].push(value) // เพิ่มค่า
+    tempFilters.value[category].push(value)
   } else {
-    filters.value[category].splice(index, 1) // เอาค่าออก
+    tempFilters.value[category].splice(index, 1)
   }
 }
 </script>
@@ -124,7 +128,7 @@ const toggleFilter = (category: keyof typeof filters.value, value: string) => {
               v-for="categoryActivity in options.categoryActivity"
               :key="categoryActivity"
               clickable
-              :class="{ selected: filters.categoryActivity.includes(categoryActivity) }"
+              :class="{ selected: tempFilters.categoryActivity.includes(categoryActivity) }"
               @click="toggleFilter('categoryActivity', categoryActivity)"
               style="height: 35px; width: 170px"
             >
@@ -138,7 +142,7 @@ const toggleFilter = (category: keyof typeof filters.value, value: string) => {
               v-for="statusActivity in options.statusActivity"
               :key="statusActivity"
               clickable
-              :class="{ selected: filters.statusActivity.includes(statusActivity) }"
+              :class="{ selected: tempFilters.statusActivity.includes(statusActivity) }"
               @click="toggleFilter('statusActivity', statusActivity)"
               style="height: 35px; width: 120px"
             >
@@ -152,7 +156,7 @@ const toggleFilter = (category: keyof typeof filters.value, value: string) => {
               v-for="major in options.major"
               :key="major"
               clickable
-              :class="{ selected: filters.major.includes(major) }"
+              :class="{ selected: tempFilters.major.includes(major) }"
               @click="toggleFilter('major', major)"
               style="height: 35px; width: 80px"
             >
@@ -166,7 +170,7 @@ const toggleFilter = (category: keyof typeof filters.value, value: string) => {
               v-for="year in options.year"
               :key="year"
               clickable
-              :class="{ selected: filters.year.includes(year) }"
+              :class="{ selected: tempFilters.year.includes(year) }"
               @click="toggleFilter('year', year)"
               style="height: 35px; width: 80px"
             >
@@ -181,7 +185,7 @@ const toggleFilter = (category: keyof typeof filters.value, value: string) => {
               v-for="studentStatus in options.studentStatus"
               :key="studentStatus"
               clickable
-              :class="{ selected: filters.studentStatus.includes(studentStatus) }"
+              :class="{ selected: tempFilters.studentStatus.includes(studentStatus) }"
               @click="toggleFilter('studentStatus', studentStatus)"
               style="height: 35px; width: 120px"
             >
