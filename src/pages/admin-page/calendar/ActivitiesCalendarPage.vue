@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { computed, onMounted, ref } from 'vue'
 import { today } from '@quasar/quasar-ui-qcalendar'
-import type { Timestamp } from '@quasar/quasar-ui-qcalendar'
 import '@quasar/quasar-ui-qcalendar/dist/index.css'
 import { QCalendarMonth } from '@quasar/quasar-ui-qcalendar'
 import type { Activity } from 'src/types/activity'
@@ -72,12 +71,13 @@ interface CalendarEvent {
   id: number
   activityName?: string // ชื่อกิจกรรมหลัก
   activityItemName: string // ชื่อกิจกรรมย่อย
+  activityState: string
   category: 'soft' | 'hard'
   date: string
   time: string
   location: string
   count: string
-  duration?: number
+  // duration?: number
 }
 
 const todayDate = ref<string>(today())
@@ -86,7 +86,6 @@ const selectedEvents = ref<CalendarEvent[]>([])
 const calendarEvents = ref<CalendarEvent[]>([])
 
 function selectEvent(event: CalendarEvent) {
-  
   selectedDate.value = event.date
   selectedEvents.value = getEvents(event.date)
 }
@@ -140,78 +139,44 @@ function onClickDate(payload: { scope: { timestamp: { date: string } } }) {
 }
 
 function getEvents(date: string) {
-  return calendarEvents.value.filter((e) => {
-    const start = new Date(e.date)
-    const end = new Date(e.date)
-    end.setDate(end.getDate() + (e.duration ?? 1) - 1)
-    const target = new Date(date)
-    return target >= start && target <= end
-  })
+  return calendarEvents.value.filter((e) => e.date === date)
 }
 
 function getEventsForDay(date: string) {
-  const result: { size: number; event: CalendarEvent }[] = []
-  for (const e of calendarEvents.value) {
-    const end = new Date(e.date)
-    const duration = e.duration ?? 1
-    end.setDate(end.getDate() + duration - 1)
-    const endStr = end.toISOString().split('T')[0] || ''
-
-    if (date >= e.date && date <= endStr) {
-      result.push({ size: duration, event: e })
-    }
-  }
-  return result
+  return calendarEvents.value
+    .filter((e) => e.date === date)
+    .map((e) => ({ size: 1, event: e }))
 }
 
-function getWeekEvents(week: Timestamp[]) {
-  const weekDates = week.map((d) => d.date)
-  const result: { start: number; size: number; event: CalendarEvent }[] = []
-  const weekStart = weekDates[0]
-  const weekEnd = weekDates[weekDates.length - 1]
-  if (!weekStart || !weekEnd) return result
-
-  for (const e of calendarEvents.value) {
-    const start = new Date(e.date)
-    const duration = e.duration ?? 1
-    const end = new Date(start)
-    end.setDate(end.getDate() + duration - 1)
-    const startStr = start.toISOString().slice(0, 10)
-    const endStr = end.toISOString().slice(0, 10)
-
-    if (endStr < weekStart || startStr > weekEnd) continue
-
-    const startIdx = Math.max(
-      0,
-      weekDates.findIndex((d) => d >= startStr),
-    )
-    const endIdx = Math.min(
-      weekDates.length - 1,
-      weekDates.findIndex((d) => d > endStr) === -1
-        ? weekDates.length - 1
-        : weekDates.findIndex((d) => d > endStr) - 1,
-    )
-
-    result.push({
-      start: startIdx,
-      size: Math.max(1, endIdx - startIdx + 1),
-      event: e,
-    })
+function activityStatusLabel(status: string): string {
+  switch (status) {
+    case 'planning':
+      return 'กำลังวางแผน'
+    case 'open':
+      return 'เปิดลงทะเบียน'
+    case 'close':
+      return 'ปิดลงทะเบียน'
+    case 'success':
+      return 'เสร็จสิ้น'
+    case 'cancel':
+      return 'ยกเลิก'
+    default:
+      return '-'
   }
+}
 
-  return result
+const getStatusClass = (status: string) => {
+  if (status === 'กำลังวางแผน') return 'status-planning'
+  if (status === 'เปิดลงทะเบียน') return 'status-open'
+  if (status === 'ปิดลงทะเบียน') return 'status-close'
+  if (status === 'เสร็จสิ้น') return 'status-success'
+  if (status === 'ยกเลิก') return 'status-cancel'
+  return ''
 }
 
 function badgeClasses(d: { event: CalendarEvent }) {
-  return ['my-event', d.event.category === 'soft' ? 'bg-soft' : 'bg-hard']
-}
-
-function badgeStyles(d: { start: number; size: number }, weekLen: number) {
-  const s: Record<string, string> = {}
-  s.marginLeft = `${(100 / weekLen) * d.start}%`
-  s.width = `${(100 / weekLen) * d.size}%`
-  s.pointerEvents = 'auto'
-  return s
+  console.log('badgeClasses status:', d.event.activityState)
+  return ['my-event', getStatusClass(d.event.activityState)]
 }
 
 function formatThaiDate(dateStr: string) {
@@ -229,22 +194,23 @@ function parseToCalendarEvents(activities: Activity[]): CalendarEvent[] {
 
   activities.forEach((activity) => {
     const category = activity.skill === 'soft' ? 'soft' : 'hard'
+    const activityStateLabel = activityStatusLabel(activity.activityState ?? '')
 
     activity.activityItems?.forEach((item) => {
-      // เพิ่มเงื่อนไขตรวจสอบ item ไม่เป็น undefined
       if (!item || !item.dates) return
 
       item.dates.forEach((d) => {
         parsed.push({
           id: parseInt(item.id?.toString().slice(-5) ?? '0', 16),
-          activityName: activity.name || '-', // ชื่อกิจกรรมหลัก
-          activityItemName: item.name || activity.name || '-', // fallback ถ้าไม่มีชื่อกิจกรรมย่อย
+          activityName: activity.name || '-',
+          activityItemName: item.name || activity.name || '-',
+          activityState: activityStateLabel,
           category,
           date: d.date,
           time: `${d.stime} - ${d.etime}`,
           location: item.rooms?.[0] || '-',
           count: `${item.enrollmentCount ?? 0}/${item.maxParticipants ?? '-'}`,
-          duration: 1,
+          // duration: 1,
         })
       })
     })
@@ -334,23 +300,6 @@ onMounted(async () => {
               </div>
             </div>
           </template>
-
-          <template #week="{ scope }">
-            <div class="event-row">
-              <template v-for="(eventData, index) in getWeekEvents(scope.week)" :key="index">
-                <div
-                  :class="badgeClasses(eventData)"
-                  :style="badgeStyles(eventData, scope.week.length)"
-                  class="my-event week-bar"
-                  @click.stop="selectEvent(eventData.event)"
-                >
-                  <div class="q-calendar__ellipsis">
-                    {{ eventData.event.activityName }}
-                  </div>
-                </div>
-              </template>
-            </div>
-          </template>
         </q-calendar-month>
       </div>
 
@@ -402,6 +351,7 @@ onMounted(async () => {
 }
 
 .my-event {
+  width: 100%;
   font-size: 12px;
   height: 20px;
   padding: 2px 4px;
@@ -410,16 +360,7 @@ onMounted(async () => {
   overflow: hidden;
   text-overflow: ellipsis;
   border-radius: 6px;
-  color: white;
   cursor: pointer;
-}
-
-.bg-soft {
-  background-color: #027be3;
-}
-
-.bg-hard {
-  background-color: #e53935;
 }
 
 .day-cell {
@@ -454,27 +395,6 @@ onMounted(async () => {
   gap: 2px;
 }
 
-.event-row {
-  position: absolute;
-  top: 28px;
-  display: flex;
-  flex-wrap: wrap;
-  pointer-events: none;
-}
-
-.week-bar {
-  height: 22px;
-  margin-top: 2px;
-  border-radius: 4px;
-  padding: 2px 6px;
-  font-size: 12px;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  pointer-events: auto;
-  z-index: 1;
-}
-
 .is-today .day-number {
   border: 2px solid #e37c41;
   color: #e37c41;
@@ -496,4 +416,48 @@ onMounted(async () => {
 .event-panel::-webkit-scrollbar {
   display: none;
 }
+
+.status-close {
+  background-color: #cfd7ff;
+  color: #001780;
+  border: 2px solid #002dff;
+}
+
+.status-open {
+  background-color: #d0ffc5;
+  color: #009812;
+  border: 2px solid #00bb16;
+}
+
+.status-planning {
+  background-color: #ffe7ba;
+  color: #ff6f00;
+  border: 2px solid #ffa500;
+}
+
+.status-cancel {
+  background-color: #ffc5c5;
+  color: #ff0000;
+  border: 2px solid #f32323;
+}
+
+.status-success {
+  background-color: #dadada;
+  color: #000000;
+  /* สีม่วง */
+  border: 2px solid #575656;
+}
+
+/* .status-badge {
+  height: 32px;
+  padding: 0 12px;
+  border-radius: 999px;
+  font-size: 15px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  white-space: nowrap;
+} */
 </style>
