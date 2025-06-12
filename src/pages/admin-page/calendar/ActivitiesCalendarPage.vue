@@ -44,6 +44,7 @@ async function getActivityData(qeury: Pagination) {
   return data
 }
 
+// โหลดข้อมูลกิจกรรมและแปลงเป็น CalendarEvent
 const data1 = async () => {
   // console.log('data fetched:', data)
   const data = await getActivityData(query1.value)
@@ -69,7 +70,7 @@ const applyFilters1 = async (selectedFilters: SelectedFilters) => {
 
 interface CalendarEvent {
   id: number
-  activityName?: string // ชื่อกิจกรรมหลัก
+  activityName: string // ชื่อกิจกรรมหลัก
   activityItemName: string // ชื่อกิจกรรมย่อย
   activityState: string
   category: 'soft' | 'hard'
@@ -90,7 +91,7 @@ function selectEvent(event: CalendarEvent) {
   selectedEvents.value = getEvents(event.date)
 }
 
-// เพิ่ม computed property สำหรับ group กิจกรรมย่อยในวันเดียวกัน
+// Group กิจกรรมที่แสดงในแต่ละวันตามชื่อกิจกรรมหลัก
 const groupedEvents = computed(() => {
   const groups: Record<string, CalendarEvent[]> = {}
 
@@ -111,14 +112,13 @@ const searchResults = computed(() => {
     return groupedEvents.value
   }
 
-  // ถ้ามีการค้นหา → group ข้อมูลทั้งหมดใน calendarEvents ที่ match คำค้นหา
+  // ถ้ามีการค้นหา → group ข้อมูลทั้งหมดใน calendarEvents
   const groups: Record<string, CalendarEvent[]> = {}
   const searchTerm = query1.value.search.toLowerCase()
 
   calendarEvents.value.forEach((event) => {
-    // เช็คชื่อกิจกรรมหลัก/ย่อย
     const nameMatch =
-      event.activityName?.toLowerCase().includes(searchTerm) ||
+      event.activityName.toLowerCase().includes(searchTerm) ||
       event.activityItemName.toLowerCase().includes(searchTerm)
 
     if (nameMatch) {
@@ -142,10 +142,9 @@ function getEvents(date: string) {
   return calendarEvents.value.filter((e) => e.date === date)
 }
 
+// event stack ในแต่ละช่องของ QCalendar
 function getEventsForDay(date: string) {
-  return calendarEvents.value
-    .filter((e) => e.date === date)
-    .map((e) => ({ size: 1, event: e }))
+  return calendarEvents.value.filter((e) => e.date === date).map((e) => ({ size: 1, event: e }))
 }
 
 function activityStatusLabel(status: string): string {
@@ -238,6 +237,7 @@ onMounted(async () => {
       <div class="text-h4 q-mb-md">ตารางกิจกรรม</div>
     </div>
 
+    <!-- searchbox + Filter -->
     <div class="row justify-end q-mb-md">
       <div class="row">
         <q-input
@@ -264,6 +264,8 @@ onMounted(async () => {
         />
       </div>
     </div>
+
+    <!-- Layout แบ่งปฏิทิน (ซ้าย) และรายละเอียดกิจกรรม (ขวา) -->
     <div class="row q-col-gutter-md calendar-wrapper">
       <div class="col-8">
         <q-calendar-month
@@ -275,6 +277,7 @@ onMounted(async () => {
           :day-class="() => 'bordered-day'"
           @click-date="onClickDate"
         >
+          <!-- Slot day -->
           <template #day="{ scope }">
             <div
               class="q-calendar__day-ellipsis day-cell"
@@ -303,9 +306,12 @@ onMounted(async () => {
         </q-calendar-month>
       </div>
 
+      <!-- แสดงรายละเอียดกิจกรรม -->
       <div class="col-4">
         <div class="event-panel">
           <div class="text-h6 q-mb-sm">{{ formatThaiDate(selectedDate) }}</div>
+
+          <!-- รายการกิจกรรมหลังจากค้นหา -->
           <template v-if="Object.keys(searchResults).length">
             <div
               v-for="(events, activityName) in searchResults"
