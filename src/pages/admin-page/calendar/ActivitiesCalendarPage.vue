@@ -138,14 +138,44 @@ function onClickDate(payload: { scope: { timestamp: { date: string } } }) {
   selectedEvents.value = getEvents(payload.scope.timestamp.date)
 }
 
+// function getEvents(date: string) {
+//   return calendarEvents.value.filter((e) => e.date === date)
+// }
+
+// for panel ด้านขวา และเรียงลำดับตามเวลาเริ่มต้น (stime)
 function getEvents(date: string) {
-  return calendarEvents.value.filter((e) => e.date === date)
+  return calendarEvents.value
+    .filter((e) => e.date === date)
+    .sort((a, b) => {
+      const timeA = a.time?.split(' - ')[0] ?? ''
+      const timeB = b.time?.split(' - ')[0] ?? ''
+
+      // ถ้าเวลาเริ่มเท่ากัน ให้เรียงตามตัวอักษรของชื่อกิจกรรมย่อย
+      if (timeA === timeB) {
+        return a.activityItemName.localeCompare(b.activityItemName)
+      }
+      return timeA.localeCompare(timeB)
+    })
 }
 
-// event stack ในแต่ละช่องของ QCalendar
+// for event stack ในแต่ละช่องของ QCalendar
 function getEventsForDay(date: string) {
-  return calendarEvents.value.filter((e) => e.date === date).map((e) => ({ size: 1, event: e }))
+  return calendarEvents.value
+    .filter((e) => e.date === date)
+    .sort((a, b) => {
+      const timeA = a.time?.split(' - ')[0] ?? ''
+      const timeB = b.time?.split(' - ')[0] ?? ''
+      if (timeA === timeB) {
+        return a.activityItemName.localeCompare(b.activityItemName)
+      }
+      return timeA.localeCompare(timeB)
+    })
+    .map((e) => ({ size: 1, event: e }))
 }
+
+// function getEventsForDay(date: string) {
+//   return calendarEvents.value.filter((e) => e.date === date).map((e) => ({ size: 1, event: e }))
+// }
 
 function activityStatusLabel(status: string): string {
   switch (status) {
@@ -306,10 +336,12 @@ onMounted(async () => {
         </q-calendar-month>
       </div>
 
-      <!-- แสดงรายละเอียดกิจกรรม -->
+      <!-- panel แสดงรายละเอียดกิจกรรม -->
       <div class="col-4">
         <div class="event-panel">
-          <div class="text-h6 q-mb-sm">{{ formatThaiDate(selectedDate) }}</div>
+          <div v-if="!query1.search" class="text-h6 q-mb-sm">
+            {{ formatThaiDate(selectedDate) }}
+          </div>
 
           <!-- รายการกิจกรรมหลังจากค้นหา -->
           <template v-if="Object.keys(searchResults).length">
@@ -331,6 +363,7 @@ onMounted(async () => {
                 <div class="text-weight-bold">
                   {{ event.activityItemName }}
                 </div>
+
                 <div class="q-mt-xs">{{ event.time }}</div>
                 <div>จำนวนลงทะเบียน : {{ event.count }}</div>
                 <div>สถานที่ : {{ event.location }}</div>
@@ -339,7 +372,10 @@ onMounted(async () => {
             </div>
           </template>
 
-          <div v-else class="text-grey">ไม่มีข้อมูลกิจกรรมในวันนี้</div>
+          <div v-else class="text-grey">
+            <span v-if="query1.search">ไม่พบกิจกรรมที่ตรงกับคำค้นหา</span>
+            <span v-else>ไม่มีข้อมูลกิจกรรมในวันนี้</span>
+          </div>
         </div>
       </div>
     </div>
