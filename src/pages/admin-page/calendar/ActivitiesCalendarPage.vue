@@ -11,6 +11,7 @@ import FilterDialog from 'src/components/Dialog/FilterDialog.vue'
 const activitys1 = ref<Activity[]>([])
 const showFilterDialog1 = ref(false)
 const filterCategories = ref(['year', 'major', 'statusActivity', 'categoryActivity'])
+const searchBoxFocused = ref<boolean>(false)
 
 const query1 = ref<Pagination>({
   page: 1,
@@ -86,33 +87,9 @@ const selectedDate = ref<string>(today())
 const selectedEvents = ref<CalendarEvent[]>([])
 const calendarEvents = ref<CalendarEvent[]>([])
 
-function selectEvent(event: CalendarEvent) {
-  selectedDate.value = event.date
-  selectedEvents.value = getEvents(event.date)
-}
+const searchResultsByDate = computed(() => {
+  if (!query1.value.search) return null
 
-// Group กิจกรรมที่แสดงในแต่ละวันตามชื่อกิจกรรมหลัก
-const groupedEvents = computed(() => {
-  const groups: Record<string, CalendarEvent[]> = {}
-
-  selectedEvents.value.forEach((event) => {
-    const key = event.activityName ?? '-'
-    if (!groups[key]) {
-      groups[key] = []
-    }
-    groups[key].push(event)
-  })
-
-  return groups
-})
-
-const searchResults = computed(() => {
-  if (!query1.value.search) {
-    // ถ้าไม่มีการค้นหา → แสดง selectedEvents ปกติ (ของวันเดียว)
-    return groupedEvents.value
-  }
-
-  // ถ้ามีการค้นหา → group ข้อมูลทั้งหมดใน calendarEvents
   const groups: Record<string, CalendarEvent[]> = {}
   const searchTerm = query1.value.search.toLowerCase()
 
@@ -122,27 +99,43 @@ const searchResults = computed(() => {
       event.activityItemName.toLowerCase().includes(searchTerm)
 
     if (nameMatch) {
-      const key = event.activityName ?? '-'
-      if (!groups[key]) {
-        groups[key] = []
+      if (!groups[event.date]) {
+        groups[event.date] = []
       }
-      groups[key].push(event)
+      ;(groups[event.date] ??= []).push(event)
     }
   })
 
-  return groups
+  // เพิ่มการ sort แต่ละกลุ่ม
+  for (const date in groups) {
+    if (groups[date]) {
+      groups[date].sort((a, b) => {
+        const timeA = a.time?.split(' - ')[0] ?? ''
+        const timeB = b.time?.split(' - ')[0] ?? ''
+        return timeA.localeCompare(timeB)
+      })
+    }
+  }
+
+  return Object.keys(groups).length > 0 ? groups : null
 })
 
 function onClickDate(payload: { scope: { timestamp: { date: string } } }) {
   selectedDate.value = payload.scope.timestamp.date
   selectedEvents.value = getEvents(payload.scope.timestamp.date)
+  query1.value.search = '' // reset การค้นหา
 }
 
-// function getEvents(date: string) {
-//   return calendarEvents.value.filter((e) => e.date === date)
-// }
+function onEventStackClick(date: string) {
+  selectedDate.value = date
+  selectedEvents.value = getEvents(date)
 
-// for panel ด้านขวา และเรียงลำดับตามเวลาเริ่มต้น (stime)
+  if (!searchBoxFocused.value) {
+    query1.value.search = ''
+  }
+}
+
+// for panel ด้านขวา และเรียงลำดับตามเวลาเริ่มต้น
 function getEvents(date: string) {
   return calendarEvents.value
     .filter((e) => e.date === date)
@@ -173,10 +166,6 @@ function getEventsForDay(date: string) {
     .map((e) => ({ size: 1, event: e }))
 }
 
-// function getEventsForDay(date: string) {
-//   return calendarEvents.value.filter((e) => e.date === date).map((e) => ({ size: 1, event: e }))
-// }
-
 function activityStatusLabel(status: string): string {
   switch (status) {
     case 'planning':
@@ -201,6 +190,24 @@ const getStatusClass = (status: string) => {
   if (status === 'เสร็จสิ้น') return 'status-success'
   if (status === 'ยกเลิก') return 'status-cancel'
   return ''
+}
+
+// สี ของ card activity
+function getStatusColor(status: string): string {
+  switch (status) {
+    case 'กำลังวางแผน':
+      return '#ffa500'
+    case 'เปิดลงทะเบียน':
+      return '#00bb16'
+    case 'ปิดลงทะเบียน':
+      return '#002dff'
+    case 'ยกเลิก':
+      return '#f32323'
+    case 'เสร็จสิ้น':
+      return '#575656'
+    default:
+      return '#e0e0e0'
+  }
 }
 
 function badgeClasses(d: { event: CalendarEvent }) {
@@ -277,6 +284,8 @@ onMounted(async () => {
           label="ค้นหา ชื่อกิจกรรม"
           class="q-mr-sm searchbox"
           :style="{ border: 'none' }"
+          @focus="searchBoxFocused = true"
+          @blur="searchBoxFocused = false"
         >
           <template v-slot:append>
             <q-icon activityName="search" />
@@ -324,7 +333,7 @@ onMounted(async () => {
                   :key="idx"
                   :class="badgeClasses(eventData)"
                   class="my-event"
-                  @click.stop="selectEvent(eventData.event)"
+                  @click.stop="onEventStackClick(scope.timestamp.date)"
                 >
                   <div class="q-calendar__ellipsis">
                     {{ eventData.event.activityName }}
@@ -339,42 +348,78 @@ onMounted(async () => {
       <!-- panel แสดงรายละเอียดกิจกรรม -->
       <div class="col-4">
         <div class="event-panel">
-          <div v-if="!query1.search" class="text-h6 q-mb-sm">
-            {{ formatThaiDate(selectedDate) }}
+          <!-- กรณีมี search -->
+          <div v-if="query1.search">
+            <template v-if="searchResultsByDate">
+              <div
+                v-for="date in Object.keys(searchResultsByDate).sort()"
+                :key="date"
+                class="q-mb-xl"
+              >
+                <!-- วันที่ -->
+                <div class="text-h6 q-mb-sm">{{ formatThaiDate(date) }}</div>
+
+                <!-- การ์ดกิจกรรม -->
+                <div v-for="event in searchResultsByDate[date]" :key="event.id" class="q-mb-sm">
+                  <q-card
+                    flat
+                    bordered
+                    class="q-pa-md q-mb-sm"
+                    :style="`border-left: 5px solid ${getStatusColor(event.activityState)}`"
+                  >
+                    <!-- <div class="row justify-between items-start">
+                      <div class="text-subname1 text-weight-bold"> -->
+                    <div class="event-header-row">
+                      <div class="event-title">
+                        {{ event.activityName }}
+                      </div>
+                      <!-- <div class="text-caption text-grey-7"> -->
+                      <div class="event-category">
+                        {{ event.category === 'soft' ? 'Soft Skill' : 'Hard Skill' }}
+                      </div>
+                    </div>
+                    <div class="q-mt-xs">{{ event.activityItemName }}</div>
+                    <div class="q-mt-xs">{{ event.time }}</div>
+                    <div>จำนวนลงทะเบียน : {{ event.count }}</div>
+                    <div>สถานที่ : {{ event.location }}</div>
+                  </q-card>
+                </div>
+              </div>
+            </template>
+
+            <div v-else class="text-grey">ไม่พบกิจกรรมที่ตรงกับคำค้นหา</div>
           </div>
 
-          <!-- รายการกิจกรรมหลังจากค้นหา -->
-          <template v-if="Object.keys(searchResults).length">
-            <div
-              v-for="(events, activityName) in searchResults"
-              :key="activityName"
-              class="q-mb-md"
-            >
-              <div class="text-subname1 text-weight-bold">
-                <span class="float-right text-grey-7">
-                  {{ events[0]?.category === 'soft' ? 'Soft Skill' : 'Hard Skill' }}
-                </span>
-              </div>
+          <!-- แสดง selectedDate (ไม่ได้ค้นหา) -->
+          <div v-else>
+            <div class="text-h6 q-mb-sm">{{ formatThaiDate(selectedDate) }}</div>
 
-              <div class="text-weight-bold" style="font-size: 18px">
-                {{ activityName }}
-              </div>
-              <div v-for="event in events" :key="event.id" class="q-mb-xs">
-                <div class="text-weight-bold">
-                  {{ event.activityItemName }}
-                </div>
+            <template v-if="selectedEvents.length">
+              <div v-for="event in selectedEvents" :key="event.id" class="q-mb-sm">
+                <q-card
+                  flat
+                  bordered
+                  class="q-pa-md q-mb-sm"
+                  :style="`border-left: 5px solid ${getStatusColor(event.activityState)}`"
+                >
+                  <div class="event-header-row">
+                    <div class="event-title">
+                      {{ event.activityName }}
+                    </div>
 
-                <div class="q-mt-xs">{{ event.time }}</div>
-                <div>จำนวนลงทะเบียน : {{ event.count }}</div>
-                <div>สถานที่ : {{ event.location }}</div>
-                <q-separator class="q-my-sm" />
+                    <div class="event-category">
+                      {{ event.category === 'soft' ? 'Soft Skill' : 'Hard Skill' }}
+                    </div>
+                  </div>
+                  <div class="q-mt-xs">{{ event.activityItemName }}</div>
+                  <div class="q-mt-xs">{{ event.time }}</div>
+                  <div>จำนวนลงทะเบียน : {{ event.count }}</div>
+                  <div>สถานที่ : {{ event.location }}</div>
+                </q-card>
               </div>
-            </div>
-          </template>
+            </template>
 
-          <div v-else class="text-grey">
-            <span v-if="query1.search">ไม่พบกิจกรรมที่ตรงกับคำค้นหา</span>
-            <span v-else>ไม่มีข้อมูลกิจกรรมในวันนี้</span>
+            <div v-else class="text-grey">ไม่มีข้อมูลกิจกรรมในวันนี้</div>
           </div>
         </div>
       </div>
@@ -403,6 +448,30 @@ onMounted(async () => {
   text-overflow: ellipsis;
   border-radius: 6px;
   cursor: pointer;
+}
+
+.event-header-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  flex-wrap: wrap; /* ทำให้ขึ้นบรรทัดใหม่ */
+  gap: 4px;
+}
+
+.event-title {
+  font-weight: bold;
+  font-size: 16px;
+  word-break: break-word; /* บังคับขึ้นบรรทัด */
+  flex-grow: 1;
+  min-width: 0;
+  max-width: calc(100% - 100px); /* ป้องกันชนกับหมวดด้านขวา */
+}
+
+.event-category {
+  font-size: 16px;
+  color: #666;
+  white-space: nowrap;
+  flex-shrink: 0;
 }
 
 .day-cell {
@@ -490,16 +559,8 @@ onMounted(async () => {
   border: 2px solid #575656;
 }
 
-/* .status-badge {
-  height: 32px;
-  padding: 0 12px;
-  border-radius: 999px;
-  font-size: 15px;
-
-  display: flex;
-  align-items: center;
-  justify-content: center;
-
-  white-space: nowrap;
-} */
+.q-card {
+  border-radius: 12px;
+  background-color: #fff;
+}
 </style>
