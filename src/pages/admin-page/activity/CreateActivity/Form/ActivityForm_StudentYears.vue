@@ -6,7 +6,7 @@ interface YearOption {
   value: string
 }
 
-const props = defineProps<{ 
+const props = defineProps<{
   modelValue: string[]
   disable?: boolean
 }>()
@@ -53,7 +53,7 @@ watch(
     if (newVal.length > 0) {
       yearError.value = ''
     }
-  }
+  },
 )
 </script>
 
@@ -78,7 +78,6 @@ watch(
 </template>
 
 <style scoped>
-
 .year-btn {
   width: 80px;
   height: 40px;
@@ -115,7 +114,7 @@ watch(
   line-height: normal;
   text-align: right;
 }
-@media(max-width: 1880px){
+@media (max-width: 1880px) {
   .input-container {
     width: 500px;
     max-width: 100%;
@@ -123,9 +122,12 @@ watch(
   .label_minWidth {
     min-width: 180px !important;
   }
+  .text-negative {
+    margin-left: 200px;
+  }
 }
-@media (max-width: 850px) {
-   .input-group:not(.no-wrap) {
+@media (max-width: 860px) {
+  .input-group:not(.no-wrap) {
     flex-direction: column;
     align-items: flex-start;
     margin-bottom: 10px !important;
@@ -133,12 +135,12 @@ watch(
   }
   .input-container {
     width: 470px;
-    max-width: 100%; 
+    max-width: 100%;
   }
   .label {
     justify-content: flex-start;
   }
-
+ 
   .label_minWidth {
     min-width: unset !important;
     width: 100% !important;
@@ -146,17 +148,21 @@ watch(
     padding-left: 0;
     margin-left: 0;
   }
+   .text-negative {
+    margin-left: 0px;
+  }
+
 }
-@media (max-width: 500px) {
+@media (max-width: 540px) {
   .input-group {
     flex-direction: column;
     align-items: flex-start;
     margin-bottom: 10px !important;
-    gap: 5px !important; 
+    gap: 5px !important;
   }
 
-   .label {
-    justify-content: flex-start; 
+  .label {
+    justify-content: flex-start;
   }
 
   .label_minWidth {
@@ -172,7 +178,7 @@ watch(
   }
   .year-btn-group {
     gap: 10px;
-}
+  }
 }
 @media (max-width: 455px) {
   .year-btn-group {
@@ -185,6 +191,4 @@ watch(
     width: 100%;
   }
 }
-
-
 </style>

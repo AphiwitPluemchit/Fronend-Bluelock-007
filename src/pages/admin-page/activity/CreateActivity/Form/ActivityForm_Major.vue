@@ -116,10 +116,13 @@ watch(
     max-width: 100%;
   }
   .label_minWidth {
-    min-width: 180px !important;
+   min-width: 180px !important;
+  }
+  .text-negative{
+    margin-left: 200px;
   }
 }
-@media (max-width: 850px) {
+@media (max-width: 860px) {
    .input-group:not(.no-wrap) {
     flex-direction: column;
     align-items: flex-start;
@@ -133,7 +136,9 @@ watch(
   .label {
     justify-content: flex-start;
   }
-
+ .text-negative{
+    margin-left: 0px;
+  }
   .label_minWidth {
     min-width: unset !important;
     width: 100% !important;
@@ -142,7 +147,7 @@ watch(
     margin-left: 0;
   }
 }
-@media (max-width: 500px) {
+@media (max-width: 540px) {
   .input-group {
     flex-direction: column;
     align-items: flex-start;

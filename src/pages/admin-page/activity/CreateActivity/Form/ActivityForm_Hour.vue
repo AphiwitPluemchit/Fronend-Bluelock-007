@@ -141,7 +141,7 @@ defineExpose({ validate, focus })
     min-width: 180px!important;
   }
 }
-@media (max-width: 850px) {
+@media (max-width: 860px) {
    .input-group:not(.no-wrap) {
     flex-direction: column;
     align-items: flex-start;
@@ -189,6 +189,9 @@ defineExpose({ validate, focus })
   .input-container {
     width: 100%;
     max-width: 100%;
+  }
+   .label-error-shift {
+    transform: translateY(0px);
   }
 }
 

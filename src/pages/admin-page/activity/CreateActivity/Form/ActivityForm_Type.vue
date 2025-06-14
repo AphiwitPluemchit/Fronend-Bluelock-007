@@ -77,7 +77,7 @@ const updateActivityType = (type: string) => {
     min-width: 180px !important;
   }
 }
-@media (max-width: 850px) {
+@media (max-width: 860px) {
   .input-container {
     width: 470px;
     max-width: 100%;
@@ -94,7 +94,7 @@ const updateActivityType = (type: string) => {
   }
 
 }
-@media (max-width: 510px) {
+@media (max-width: 540px) {
   .input-group {
     flex-direction: column;
     align-items: flex-start;

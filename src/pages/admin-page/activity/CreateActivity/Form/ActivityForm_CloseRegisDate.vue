@@ -22,7 +22,6 @@ const onDateChange = () => {
   emit('update:modelValue', CloseRegisDates.value)
   if (CloseRegisDates.value) {
     closedateError.value = ''
-
   }
 }
 
@@ -84,10 +83,10 @@ watch(
   () => props.modelValue,
   (newVal) => {
     CloseRegisDates.value = newVal
-    emit('update:modelValue', newVal)
     if (newVal) closedateError.value = ''
   },
 )
+
 const validate = async () => {
   if (!CloseRegisDates.value || CloseRegisDates.value.length === 0) {
     closedateError.value = 'กรุณาเลือกวันที่ปิดลงทะเบียน'
@@ -105,6 +104,26 @@ const focus = async () => {
   inputRef.value?.focus?.()
   menuRef.value?.show()
 }
+const handleKeydown = async (event: KeyboardEvent) => {
+  console.log('handleKeydown triggered. Key:', event.key) // <--- ADD THIS
+  if (event.key === 'Enter') {
+    event.preventDefault()
+    event.stopPropagation()
+    console.log('Enter pressed. CloseRegisDates.value:', CloseRegisDates.value) // <--- ADD THIS
+    if (CloseRegisDates.value) {
+      console.log('Date is selected, attempting to hide menu.') // <--- ADD THIS
+      emit('enter')
+      await nextTick()
+      menuRef.value?.hide()
+      // Optional: Check if menu is still showing after attempting to hide
+      // await nextTick(); // ensure DOM updates
+      // console.log('Is menu showing after hide attempt?', menuRef.value?.showing);
+    } else {
+      console.log('Enter pressed, but CloseRegisDates.value is falsy.') // <--- ADD THIS
+    }
+  }
+}
+
 defineExpose({ validate, focus })
 </script>
 
@@ -117,11 +136,10 @@ defineExpose({ validate, focus })
       <q-input
         ref="inputRef"
         outlined
-        v-model="formattedCloseRegisDate"
-        readonly
+        :model-value="formattedCloseRegisDate"
         :disable="disable"
         :error="closedateError !== ''"
-         @keydown.enter.prevent="$emit('enter')"
+        @focus="focus"
       >
         <template v-slot:prepend>
           <q-icon
@@ -129,31 +147,31 @@ defineExpose({ validate, focus })
             class="cursor-pointer"
             :class="{ 'disabled-icon': disable }"
             style="color: black"
-          >
-            <q-menu
-              ref="menuRef"
-              :target="inputRef?.$el"
-              anchor="bottom left"
-              self="top left"
-              :cover="false"
-                @keyup.enter="$emit('enter')"
-            >
-              <q-date
-                v-model="CloseRegisDates"
-                mask="YYYY-MM-DD"
-                today-btn
-                :locale="thaiLocale"
-                color="blue-8"
-                text-color="white"
-                minimal
-                first-day-of-week="1"
-                class="my-custom-calendar"
-                @update:model-value="onDateChange"
-              />
-            </q-menu>
-          </q-icon>
+          />
         </template>
       </q-input>
+
+      <q-menu
+        ref="menuRef"
+        :target="inputRef?.$el"
+        anchor="bottom left"
+        self="top left"
+        :cover="false"
+      >
+        <q-date
+          v-model="CloseRegisDates"
+          mask="YYYY-MM-DD"
+          :locale="thaiLocale"
+          color="blue-8"
+          text-color="white"
+          minimal
+          first-day-of-week="1"
+          class="my-custom-calendar"
+          @keydown.enter.stop.prevent="handleKeydown"
+          @update:model-value="onDateChange"
+        />
+      </q-menu>
+
       <div v-if="closedateError" class="text-negative text-subtitle2 q-mt-xs">
         {{ closedateError }}
       </div>
@@ -204,12 +222,17 @@ defineExpose({ validate, focus })
   align-items: center;
   padding: 5px 10px;
 }
-
+::v-deep(.q-field__native) {
+  caret-color: transparent !important;
+}
 ::v-deep(.q-field__prepend) {
   display: flex;
   align-items: center;
 }
-
+::v-deep(.q-field--focused .q-field__control) {
+  box-shadow: none !important;
+  border-color: transparent !important;
+}
 ::v-deep(.q-icon) {
   font-size: 18px;
 }
@@ -225,8 +248,11 @@ defineExpose({ validate, focus })
   .label_minWidth {
     min-width: 180px !important;
   }
+  .label-error-shift {
+    transform: translateY(-12px);
+  }
 }
-@media (max-width: 850px) {
+@media (max-width: 860px) {
   .input-group:not(.no-wrap) {
     flex-direction: column;
     align-items: flex-start;
@@ -260,7 +286,9 @@ defineExpose({ validate, focus })
   .label {
     justify-content: flex-start;
   }
-
+  .label-error-shift {
+    transform: translateY(0px);
+  }
   .label_minWidth {
     min-width: unset;
     width: 100%;

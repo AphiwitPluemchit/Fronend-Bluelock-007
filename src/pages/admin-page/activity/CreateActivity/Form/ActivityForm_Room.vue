@@ -25,7 +25,7 @@ const selectedRoom = computed({
 })
 
 const allRooms = computed(() => props.rooms ?? [
-  '11M280', '5M210', '4M210', '3M210', '7T05', '6T05',
+  'Online','11M280', '5M210', '4M210', '3M210', '7T05', '6T05',
   '5T05', '6T01', '6T02', '6T03', '6T04', '5T01', '5T02',
   '5T03', '5T04', 'Lab 4C01', 'Lab 4C02', 'Lab 4C03',
   'Lab 3C01', 'Lab 3C02', 'Lab 3C03', 'Lab 3C04',
@@ -97,7 +97,7 @@ const handleEnter = async (e: KeyboardEvent) => {
 
 <template>
   <div class="input-group">
-    <p class="label label_minWidth" :class="{ 'label-error-shift': roomError !== '' }">ชื่อห้องที่จัดกิจกรรม :</p>
+    <p class="label label_minWidth" :class="{ 'label-error-shift': roomError !== '' }">ห้องที่จัดกิจกรรม :</p>
     <div class="input-container">
       <q-input
   outlined
@@ -212,7 +212,7 @@ const handleEnter = async (e: KeyboardEvent) => {
     min-width: 180px !important;
   }
 }
-@media (max-width: 850px) {
+@media (max-width: 860px) {
   .input-group:not(.no-wrap) {
     flex-direction: column;
     align-items: flex-start;

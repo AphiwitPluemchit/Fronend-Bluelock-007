@@ -400,7 +400,7 @@ onMounted(async () => {
     min-width: 180px !important;
   }
 }
-@media (max-width: 850px) {
+@media (max-width: 860px) {
    .input-group:not(.no-wrap) {
     flex-direction: column;
     align-items: flex-start;

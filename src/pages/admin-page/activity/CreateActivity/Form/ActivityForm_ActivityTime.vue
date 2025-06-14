@@ -420,8 +420,11 @@ watch(() => props.endTime, (newVal) => {
   .label_minWidth {
     min-width: 180px !important;
   }
+  .label-error-shift {
+  transform: translateY(-12px);
 }
-@media (max-width: 850px) {
+}
+@media (max-width: 860px) {
    .input-group:not(.no-wrap) {
     flex-direction: column;
     align-items: flex-start;

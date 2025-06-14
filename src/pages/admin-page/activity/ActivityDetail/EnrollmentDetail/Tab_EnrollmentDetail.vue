@@ -1,11 +1,19 @@
 <script setup lang="ts">
-import { onMounted, ref } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import { useRoute } from 'vue-router'
 import { ActivityService } from 'src/services/activity'
 import type { Activity, EnrollmentSummary } from 'src/types/activity'
 
 const route = useRoute()
 const activityId = route.params.id as string
+const isMobile = ref(false)
+const checkMobile = () => {
+  isMobile.value = window.innerWidth <= 830
+}
+onMounted(() => {
+  checkMobile()
+  window.addEventListener('resize', checkMobile)
+})
 
 const enrollmentSummary = ref<EnrollmentSummary | null>(null)
 const majorList = [
@@ -14,7 +22,51 @@ const majorList = [
   { majorName: 'AAI' },
   { majorName: 'ITDI' },
 ]
+const registrationColumns = ref([
+  { name: 'activity', label: 'ชื่อกิจกรรม', field: 'activity', align: 'left' as const },
+  { name: 'max', label: 'จำนวนที่รับ', field: 'max', align: 'center' as const },
+  { name: 'enrolled', label: 'จำนวนที่ลงทะเบียน', field: 'enrolled', align: 'center' as const },
+  { name: 'remaining', label: 'จำนวนที่ว่าง', field: 'remaining', align: 'center' as const },
+  ...majorList.map((m) => ({
+    name: m.majorName,
+    label: m.majorName,
+    field: m.majorName,
+    align: 'center' as const,
+  })),
+])
+const registrationRows = computed(() => {
+  return (enrollmentSummary.value?.activityItemSums ?? []).map((item, index) => {
+    const activity = activityDetail.value?.activityItems?.[index]
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const baseRow: Record<string, any> = {
+      activity: activity?.name ?? '-',
+      max: activity?.maxParticipants ?? 0,
+      enrolled: activity?.enrollmentCount ?? 0,
+      remaining: (activity?.maxParticipants ?? 0) - (activity?.enrollmentCount ?? 0),
+    }
 
+    majorList.forEach((m) => {
+      baseRow[m.majorName] =
+        item.registeredByMajor?.find((x) => x.majorName === m.majorName)?.count || 0
+    })
+
+    return baseRow
+  })
+})
+
+const foodColumns = [
+  { name: 'foodName', label: 'ชื่ออาหาร', field: 'foodName', align: 'left' as const },
+  { name: 'vote', label: 'จำนวน', field: 'vote', align: 'center' as const },
+]
+
+// rows สำหรับ q-table
+const foodRows = computed(() => activityDetail.value?.foodVotes ?? [])
+const foodPagination = ref({
+  page: 1,
+  rowsPerPage: 5,
+  sortBy: 'foodName',
+  descending: false,
+})
 const fetchEnrollmentSummary = async () => {
   try {
     const response = await ActivityService.getEnrollmentSummary(activityId)
@@ -44,13 +96,13 @@ onMounted(async () => {
 </script>
 
 <template>
-  <div class="registration-container">
+  <div class="registration-content-scroll">
     <!-- Header ข้อมูลกิจกรรม -->
     <div class="info-group-header">
       <div class="activity-name-wrapper">
         <div class="ActivityName">{{ activityDetail?.name }}</div>
       </div>
-      <div class="info-row-header">
+      <div v-if="!isMobile" class="info-row-header">
         <span class="label">จำนวนที่รับ / จำนวนนิสิตที่ลงทะเบียน / จำนวนที่ว่าง :</span>
         <span class="value">
           {{ enrollmentSummary?.maxParticipants || 0 }} /
@@ -59,234 +111,145 @@ onMounted(async () => {
         </span>
         <span class="unit">คน</span>
       </div>
-    </div>
-
-    <!-- Layout แบ่งซ้ายขวา -->
-    <div v-if="activityDetail?.foodVotes?.length" class="registration-split">
-      <!-- ฝั่งซ้าย -->
-      <div class="registration-left">
-        <!-- ส่วนหัวที่ไม่ scroll -->
-        <div class="registration-title-center">
-          <span class="registration-title-text">ผลการลงทะเบียน</span>
+      <div v-else class="info-row-header-mobile">
+        <div class="row-line">
+          <div class="label-mobile">จำนวนที่รับ</div>
+          <div class="value-mobile">: {{ enrollmentSummary?.maxParticipants || 0 }}</div>
         </div>
-
-        <!-- ส่วนที่ scroll ได้ -->
-        <div class="registration-left-scroll">
-          <div
-            class="registration-info"
-            v-for="(item, index) in enrollmentSummary?.activityItemSums"
-            :key="index"
-          >
-            <div class="activity-item-name text">
-              {{ activityDetail?.activityItems?.[index]?.name ?? '-' }} (
-              {{ activityDetail?.activityItems?.[index]?.maxParticipants }} /
-              {{ activityDetail?.activityItems?.[index]?.enrollmentCount }} /
-              {{
-                (activityDetail?.activityItems?.[index]?.maxParticipants || 0) -
-                (activityDetail?.activityItems?.[index]?.enrollmentCount || 0)
-              }} )
-            </div>
-            <div class="row" v-for="(major, mIndex) in majorList" :key="mIndex">
-              <div class="student-major-block">
-                <span class="textEnroll">{{ major.majorName }} </span>
-                <span class="number">จำนวน</span>
-                <span class="quantity-number">
-                  {{
-                    item.registeredByMajor?.find((m) => m.majorName === major.majorName)?.count ||
-                    '0'
-                  }}
-                </span>
-                <span class="unit">คน</span>
-              </div>
-            </div>
-          </div>
+        <div class="row-line">
+          <div class="label-mobile">จำนวนนิสิตที่ลงทะเบียน</div>
+          <div class="value-mobile">: {{ enrollmentSummary?.totalRegistered || 0 }}</div>
         </div>
-      </div>
-
-      <!-- ฝั่งขวา -->
-      <div class="registration-right">
-        <div class="registration-title-center">
-          <span class="registration-title-text" style="margin-bottom: 10px">ผลการเลือกอาหาร</span>
-        </div>
-        <div class="registration-info food-scroll">
-          <div class="row" v-for="food in activityDetail.foodVotes" :key="food.foodName">
-            <span class="textFood">{{ food.foodName }} </span>
-            <span class="number">จำนวน</span>
-            <span class="quantity-number">{{ food.vote }}</span>
-            <span class="unit">คน</span>
-          </div>
+        <div class="row-line">
+          <div class="label-mobile">จำนวนที่ว่าง</div>
+          <div class="value-mobile">: {{ enrollmentSummary?.remainingSlots || 0 }}</div>
         </div>
       </div>
     </div>
 
-    <div v-else class="registration-full">
+    <!-- ตารางผลการลงทะเบียน หรือ Card Layout -->
+    <div class="registration-title-center">
+      <span class="registration-title-text">ผลการลงทะเบียน</span>
+    </div>
+
+    <div v-if="!isMobile" class="table-scroll-container">
+      <q-table
+        flat
+        bordered
+        :rows="registrationRows"
+        :columns="registrationColumns"
+        row-key="activity"
+        class="q-mt-sm rounded-borders"
+      />
+    </div>
+
+    <q-list v-else class="q-mt-sm">
+      <q-card v-for="(row, index) in registrationRows" :key="index" class="q-mb-sm">
+        <q-card-section>
+          <div class="text-subtitle1 q-mb-sm">
+            <b>{{ row.activity }}</b>
+          </div>
+          <div class="row-line">
+            <div class="label-mobiles">จำนวนที่รับ</div>
+            <div class="value-mobiles">: {{ row.max }}</div>
+          </div>
+          <div class="row-line">
+            <div class="label-mobiles">จำนวนที่ลงทะเบียน</div>
+            <div class="value-mobiles">: {{ row.enrolled }}</div>
+          </div>
+          <div class="row-line">
+            <div class="label-mobiles">จำนวนที่ว่าง</div>
+            <div class="value-mobiles">: {{ row.remaining }}</div>
+          </div>
+          <div v-for="major in majorList" :key="major.majorName" class="row-line">
+            <div class="label-mobiles">{{ major.majorName }}</div>
+            <div class="value-mobiles">: {{ row[major.majorName] }}</div>
+          </div>
+        </q-card-section>
+      </q-card>
+    </q-list>
+    <!-- ตารางอาหาร (เฉพาะกรณีมีข้อมูล) -->
+    <div v-if="activityDetail?.foodVotes?.length" class="registration-food-section">
       <div class="registration-title-center">
-        <span class="registration-title-text">ผลการลงทะเบียน</span>
+        <span class="registration-title-text">ผลการเลือกอาหาร</span>
       </div>
-      <div class="registration-grid">
-        <div
-          class="registration-info"
-          v-for="(item, index) in enrollmentSummary?.activityItemSums"
-          :key="index"
-        >
-          <div class="activity-item-name text">
-            {{ activityDetail?.activityItems?.[index]?.name ?? '-' }} (
-             {{ activityDetail?.activityItems?.[index]?.maxParticipants }} /
-              {{ activityDetail?.activityItems?.[index]?.enrollmentCount }} /
-              {{
-                (activityDetail?.activityItems?.[index]?.maxParticipants || 0) -
-                (activityDetail?.activityItems?.[index]?.enrollmentCount || 0)
-              }} )
-          </div>
-          <div class="row" v-for="(major, mIndex) in majorList" :key="mIndex">
-            <div class="student-major-block">
-              <span class="textEnroll">{{ major.majorName }} </span>
-              <span class="number">จำนวน</span>
-              <span class="quantity-number">
-                {{
-                  item.registeredByMajor?.find((m) => m.majorName === major.majorName)?.count || '0'
-                }}
-              </span>
-              <span class="unit">คน</span>
+
+      <div v-if="!isMobile" class="table-scroll-container food-table-wrapper">
+        <q-table
+          flat
+          bordered
+          :rows="foodRows"
+          :columns="foodColumns"
+          row-key="foodName"
+          v-model:pagination="foodPagination"
+          :rows-per-page-options="[5, 10, 20]"
+          class="q-mt-sm"
+        />
+      </div>
+
+      <q-list v-else class="q-mt-sm">
+        <q-card v-for="(food, index) in foodRows" :key="index" class="q-mb-sm">
+          <q-card-section>
+            <div class="text-subtitle1">
+              <b>{{ food.foodName }}</b>
             </div>
-          </div>
-        </div>
-      </div>
+            <div class="label-mobiles">จำนวน: {{ food.vote }}</div>
+          </q-card-section>
+        </q-card>
+      </q-list>
     </div>
   </div>
 </template>
 
 <style scoped>
-.registration-container {
-  display: flex;
-  flex-direction: column;
-  height: 680px;
-  border-radius: 12px;
-  overflow: hidden;
-}
-
-.registration-split {
-  display: flex;
-  flex: 1;
-  width: 100%;
-  gap: 20px;
-  overflow: hidden;
-}
-
-.registration-left,
-.registration-right {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  overflow-y: auto;
-  max-height: 100%;
-  box-sizing: border-box;
-  margin-bottom: 50px;
-}
-
-.registration-left {
-  border-right: 1px solid #ccc;
-  padding: 20px;
-  display: flex;
-  flex-direction: column;
-}
-
-.registration-left-scroll {
-  overflow-y: auto;
-  flex: 1;
-  /* ซ่อน scrollbar */
+.registration-content-scroll {
+  height: 600px; /* ใช้ height แทน min/max-height */
+  overflow-y: auto; /* ให้ scroll ตามแนวตั้ง */
+  padding-right: 8px;
+  border-radius: 8px;
+  padding: 12px;
+  background-color: #fff; /* เพื่อให้เห็น scrollbar ชัดเจน */
   scrollbar-width: none; /* Firefox */
   -ms-overflow-style: none; /* IE/Edge */
 }
-.registration-left-scroll::-webkit-scrollbar {
+.registration-content-scroll::-webkit-scrollbar {
   display: none; /* Chrome/Safari */
 }
-.registration-right {
-  padding: 20px;
-  align-items: flex-start;
+
+.registration-title-center {
+  display: flex;
+  justify-content: left;
+  align-items: center;
+  margin: 2px 0; /* 🔽 ลดจาก 20px เหลือ 8px */
+  width: 100%;
+}
+.registration-title-text {
+  font-size: 18px;
+  padding: 0 16px;
+  font-weight: 600;
 }
 
 .info-group-header {
   display: flex;
   flex-direction: column;
   gap: 10px;
-  margin-bottom: 20px;
+  margin-bottom: 40px;
 }
 
 .activity-name-wrapper {
   width: 100%;
   display: flex;
-  justify-content: center;
+  justify-content: left;
 }
 
 .ActivityName {
   font-size: 22px;
-  font-weight: semibold;
+  font-weight: 600;
 }
 
 .info-row-header {
   display: flex;
   align-items: center;
-  gap: 30px;
-}
-
-.info-row {
-  display: flex;
-  align-items: flex-start;
-  gap: 30px;
-  margin-top: 30px;
-  margin-bottom: 10px;
-}
-
-.registration-info {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  margin-bottom: 30px;
-}
-
-.food-scroll {
-  overflow-y: auto;
-  flex-grow: 1;
-
-  /* ซ่อน scrollbar */
-  scrollbar-width: none; /* Firefox */
-  -ms-overflow-style: none; /* IE/Edge */
-}
-.food-scroll::-webkit-scrollbar {
-  display: none; /* Chrome/Safari */
-}
-
-.food-header {
-  width: 100%;
-  display: flex;
-  justify-content: center; /* จัดให้ span อยู่กลางของกล่องฝั่งขวา */
-  margin-bottom: 10px;
-  margin-top: 30px;
-}
-
-.food-header-text {
-  white-space: nowrap;
-  text-align: right;
-  font-size: 20px;
-  color: #000;
-  text-align: center;
-}
-
-.activity-item-name {
-  margin-bottom: 8px;
-  text-align: left;
-}
-
-.student-major-block {
-  display: flex;
-  align-items: center;
-  gap: 30px;
-}
-
-.row {
-  display: flex;
-  align-items: flex-end;
   gap: 30px;
 }
 
@@ -299,88 +262,151 @@ onMounted(async () => {
 }
 
 .value,
-.unit,
-.text,
-.textFood,
+.unit {
+  font-size: 20px;
+  color: #000;
+  text-align: left;
+}
+
+.registration-title-center {
+  display: flex;
+  justify-content: left;
+  align-items: self-start;
+  margin: 20px 0;
+  width: 100%;
+}
+.table-center {
+  margin: 0 auto;
+  width: auto;
+  min-width: 300px;
+}
+
+.activity-item-name {
+  margin-bottom: 8px;
+  text-align: left;
+}
+
+.row {
+  display: flex;
+  align-items: flex-end;
+  gap: 30px;
+}
+
+.student-major-block {
+  display: flex;
+  align-items: center;
+  gap: 30px;
+}
+
 .textEnroll,
 .number,
 .quantity-number {
   font-size: 20px;
   color: #000;
-}
-
-.value {
-  min-width: 30px;
-  text-align: left;
-}
-
-.unit {
-  text-align: left;
-}
-
-.number {
-  min-width: 30px;
   text-align: left;
 }
 
 .textEnroll {
   min-width: 80px;
-  text-align: left;
 }
-
-.textFood {
-  max-width: 300px;
-  min-width: 160px;
-  text-align: left;
-  margin-left: 30px;
-}
-
-.text {
-  min-width: 80px;
-  text-align: left;
-}
-
+.number,
 .quantity-number {
   min-width: 30px;
-  text-align: left;
 }
-.registration-full {
-  padding: 20px;
-  overflow-y: auto;
-  height: 100%;
-  display: flex;
-  flex-direction: column;
-}
-
-.registration-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr); /* หรือ auto-fit */
-   gap: 50px 150px; 
-  justify-content: center; /* ✅ บังคับให้ block อยู่กลางหน้าจอ */
-  overflow-y: auto;
-  overflow-x: hidden;
-  margin-bottom: 30px;
-    padding: 0 100px;
-}
-.registration-container {
-  height: 680px;
-  overflow-y: hidden;
-}
-.registration-full {
-  flex: 1;
-  overflow-y: auto;
-}
-.registration-title-center {
+.table-wrapper-center {
+  width: 100%;
   display: flex;
   justify-content: center;
-  align-items: center;
-  margin: 20px 0;
+}
+.table-wrapper-center table {
+  max-width: 1000px;
   width: 100%;
 }
+.food-table-wrapper {
+  max-height: 240px; /* หรือกำหนดให้เล็กลง */
+  overflow-y: auto;
+  max-width: 400px;
+  width: 100%;
+}
+.table-scroll-container {
+  max-height: 300px; /* ปรับตามที่ต้องการ */
+  overflow-y: auto;
+  margin-bottom: 40px;
+}
+@media (max-width: 830px) {
+  .registration-content-scroll {
+    height: auto; /* ใช้ height แทน min/max-height */
+    overflow-y: auto; /* ให้ scroll ตามแนวตั้ง */
+  }
+  .registration-content-scroll {
+    padding: 8px;
+  }
 
-.registration-title-text {
-  font-size: 20px;
-  padding: 6px 16px;
-  border-radius: 4px;
+  .info-row-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 4px;
+  }
+
+  .label {
+    min-width: auto;
+    font-size: 20px;
+    text-align: left;
+  }
+  .info-row-header-mobile {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .row-line {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .label-mobile {
+    min-width: 200px;
+    font-size: 18px;
+    font-weight: 500;
+    color: #000;
+    text-align: left;
+  }
+
+  .value-mobile {
+    font-size: 18px;
+    color: #000;
+    text-align: right;
+  }
+  .value,
+  .unit {
+    font-size: 20px;
+  }
+
+  .registration-title-text {
+    font-size: 20px;
+    padding: 0 8px;
+  }
+
+  .ActivityName {
+    font-size: 20px;
+  }
+  .text-subtitle1 {
+    font-size: 18px;
+    font-weight: semibold;
+  }
+  .label-mobiles {
+    font-size: 16px;
+    font-weight: 500;
+    min-width: 140px;
+    color: #000;
+  }
+
+  .value-mobiles {
+    font-size: 16px;
+    font-weight: 400;
+    text-align: right;
+    color: #000;
+  }
 }
 </style>

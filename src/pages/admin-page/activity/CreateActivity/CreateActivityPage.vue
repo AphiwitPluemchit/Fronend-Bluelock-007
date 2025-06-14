@@ -46,7 +46,6 @@ const breadcrumbs = ref({
   align-items: flex-start;
   gap: 150px;
   padding: 30px;
-  border-radius: 12px;
   margin-top: 20px;
   flex-wrap: wrap; 
 }
@@ -57,13 +56,13 @@ const breadcrumbs = ref({
   width: 100%;
   flex-wrap: wrap; 
 }
-
 .image-section {
+  align-items: flex-start;
   width: 100%;
   flex: 1;
   margin-left: 100px;
-  
 }
+
 .form-section {
   flex-grow: 1;
   overflow-x: hidden;
@@ -105,7 +104,7 @@ const breadcrumbs = ref({
     max-width: 770px;
   }
 }
-@media(max-width: 850px) {
+@media(max-width: 860px) {
   .wrapper {
     gap: 30px;
     padding: 20px;

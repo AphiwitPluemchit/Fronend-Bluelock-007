@@ -532,6 +532,7 @@ onMounted(() => {
   display: flex;
   justify-content: flex-end;
   gap: 25px;
+  
 }
 .btn-container {
   display: flex;
@@ -557,15 +558,15 @@ onMounted(() => {
   }
 
 }
-@media (max-width: 850px) {
+@media (max-width: 860px) {
   .input-group.no-wrap {
-    flex-direction: row !important;     
-    align-items: center !important;         
-    gap: 20px !important;                 
+    flex-direction: row !important;
+    align-items: center !important;
+    gap: 20px !important;
     margin-bottom: 10px !important;
   }
 
-   .input-group:not(.no-wrap) {
+  .input-group:not(.no-wrap) {
     flex-direction: column;
     align-items: flex-start;
     margin-bottom: 10px !important;
@@ -575,12 +576,12 @@ onMounted(() => {
     width: 470px;
     max-width: 100%;
   }
-   .label {
+  .label {
     justify-content: flex-start;
   }
 
-    .label_minWidth {
-    min-width: auto !important;        
+  .label_minWidth {
+    min-width: auto !important;
     width: auto !important;
     flex-shrink: 0;
   }
@@ -594,9 +595,9 @@ onMounted(() => {
   .btn-label-empty {
     display: none !important;
   }
-    .remove-icon {
+  .remove-icon {
     display: flex;
-    flex-direction: row !important;  
+    flex-direction: row !important;
     justify-content: flex-end !important;
     align-items: center;
     margin-top: 10px;
@@ -607,8 +608,9 @@ onMounted(() => {
     font-size: 30px;
   }
   .label-error-shift {
-  transform: translateY(0px);
-}
+    transform: translateY(0px);
+  }
+
 }
 @media (max-width: 500px) {
   .input-group:not(.no-wrap) {

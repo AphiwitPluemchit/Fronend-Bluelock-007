@@ -319,7 +319,7 @@ const validateComponent = async (
     | undefined,
   scrollTargets: (HTMLElement | null | undefined)[],
   hasErrorRef: Ref<boolean>,
-  isFirstErrorHandledRef: Ref<boolean>
+  isFirstErrorHandledRef: Ref<boolean>,
 ): Promise<void> => {
   if (ref?.validate) {
     try {
@@ -347,7 +347,6 @@ const validateComponent = async (
     }
   }
 }
-
 
 const validateBeforeOpen = async (): Promise<boolean> => {
   const hasError = ref(false)
@@ -438,12 +437,21 @@ function scrollToNextInQueue() {
       if (input) {
         input.focus()
       }
-      
     })
   }
 }
 const onEnterField = (
-  type: 'mainName' | 'subName' | 'lecturer' | 'seat' | 'hour' | 'closedate' | 'room' | 'major' | 'year'|'date',
+  type:
+    | 'mainName'
+    | 'subName'
+    | 'lecturer'
+    | 'seat'
+    | 'hour'
+    | 'closedate'
+    | 'room'
+    | 'major'
+    | 'year'
+    | 'date',
   index?: number,
 ) => {
   console.log('🔥 onEnterField triggered:', type, index)
@@ -598,9 +606,6 @@ const saveChanges = async () => {
     emit('saved')
     showSuccessDialog.value = true
     emit('update:isEditing', false)
-    setTimeout(() => {
-      showSuccessDialog.value = false
-    }, 1000)
   } catch (err) {
     console.error('❌ ไม่สามารถอัปเดตกิจกรรมได้:', err)
   }
@@ -745,21 +750,28 @@ onMounted(() => {
 </script>
 
 <template>
-  <q-page>
+  <q-page class="q-pa-md">
     <!-- Status -->
-    <div class="input-group no-wrap" ref="formTop">
+    <!-- Status -->
+    <div class="input-group no-wrap status-group" ref="formTop">
       <p class="label label_minWidth">สถานะ:</p>
-      <q-badge :class="statusClass" class="status-btn">
-        <div align="center" style="font-size: 20px">{{ activityStatus }}</div>
-      </q-badge>
-      <q-btn
-        v-if="props.isEditing && activityStatus != 'เสร็จสิ้น'"
-        class="btnchange"
-        label="เปลี่ยน"
-        @click="showChangeStatusDialog = true"
-        :disable="!isEditing"
-      />
+      <div class="status-inline-group">
+        <q-badge :class="statusClass" class="status-btn">
+          <div align="center" class="status-text" style="font-size: 20px">{{ activityStatus }}</div>
+        </q-badge>
+        <q-btn
+          v-if="props.isEditing && activityStatus !== 'เสร็จสิ้น'"
+          class="btnchange"
+          label="เปลี่ยน"
+          :disable="!isEditing"
+          @click="showChangeStatusDialog = true"
+          flat
+          unelevated
+          style="min-width: unset; width: auto"
+        />
+      </div>
     </div>
+
     <ChangeStatusDialog
       v-model="showChangeStatusDialog"
       :currentStatus="activityStatus"
@@ -989,18 +1001,13 @@ onMounted(() => {
     </div>
 
     <!-- Save / Cancel Button -->
-    <div class="button-group">
+    <div class="button-group" style="margin-bottom: 30px">
       <q-btn v-if="!props.isEditing" class="btnedit" label="แก้ไข" @click="enterEditMode" />
       <template v-else>
         <q-btn class="btnreject" label="ยกเลิก" @click="openCancelDialog" />
         <q-btn class="btnsecces" label="บันทึก" @click="saveChanges" />
       </template>
     </div>
-
-    <!-- Success Dialog -->
-    <q-dialog v-model="showSuccessDialog" persistent>
-      <div class="q-pa-md text-h6 text-center successDialog">บันทึกสำเร็จ</div>
-    </q-dialog>
 
     <CancelDialog
       v-model="showCancelDialog"
@@ -1016,21 +1023,47 @@ onMounted(() => {
 </template>
 
 <style scoped>
+.status-group {
+  align-items: flex-start;
+}
 .status-btn {
-  color: #ff6f00;
-  background-color: #ffe7ba;
-  border: 2px solid #ffa500;
-  border-radius: 50px;
+  display: flex;
+  align-items: center;    /* จัดกลางแนวตั้ง */
+  justify-content: center; /* จัดกลางแนวนอน */
   height: 40px;
   width: 200px;
   font-size: 20px;
-
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  border-radius: 50px;
+  padding: 0 16px;
   text-align: center;
 }
+.status-inline-group {
+  display: flex;
+  flex-direction: row;
+  gap: 10px;
+  align-items: center;
+  flex-wrap: nowrap;
+}
 
+/* ปรับเฉพาะปุ่มไม่ให้ยืดเต็มบรรทัด */
+.btnchange {
+  min-width: auto !important;
+  width: auto !important;
+  padding: 4px 12px;
+  font-size: 14px;
+  background-color: #000;
+  color: white;
+  border-radius: 10px;
+}
+.btnAddActivity {
+  background-color: #ffffff;
+  border-radius: 20px;
+  height: 40px;
+  width: 200px;
+  font-size: 20px;
+  display: flex;
+  align-items: center;
+}
 ::v-deep(.q-field__control) {
   height: auto;
   background-color: white;
@@ -1039,6 +1072,7 @@ onMounted(() => {
 ::v-deep(.q-icon) {
   font-size: 18px;
 }
+
 .fix-q-input-height ::v-deep(.q-icon) {
   font-size: 16px;
 }
@@ -1058,13 +1092,13 @@ onMounted(() => {
 .tight-checkbox ::v-deep(.q-checkbox__label) {
   margin-left: 4px !important; /* ลดจากค่าปกติ 8px หรือมากกว่า */
 }
-.label-error-shift {
-  transform: translateY(-12px);
-}
 .input-group p {
   margin: 0;
   line-height: normal;
   text-align: left;
+}
+.label-error-shift {
+  transform: translateY(-12px);
 }
 .no-wrap {
   flex-wrap: nowrap !important;
@@ -1078,7 +1112,6 @@ onMounted(() => {
   width: 100%;
   flex-wrap: wrap;
 }
-
 .label {
   font-size: 20px;
   height: 40px;
@@ -1091,15 +1124,6 @@ onMounted(() => {
 .label_minWidth {
   min-width: 200px;
 }
-.btnAddActivity {
-  background-color: #ffffff;
-  border-radius: 20px;
-  height: 40px;
-  width: 200px;
-  font-size: 20px;
-  display: flex;
-  align-items: center;
-}
 .input-container {
   width: 660px;
   max-width: 100%;
@@ -1109,11 +1133,11 @@ onMounted(() => {
   text-align: right;
   cursor: pointer;
 }
+
 .button-group {
   display: flex;
   justify-content: flex-end;
   gap: 25px;
-  margin-bottom: 20px;
 }
 .btn-container {
   display: flex;
@@ -1122,7 +1146,6 @@ onMounted(() => {
   gap: 20px;
   margin-bottom: 30px;
 }
-
 .status-btn {
   border-radius: 50px;
   height: 40px;
@@ -1160,7 +1183,8 @@ onMounted(() => {
   max-height: 100px;
 }
 
-@media (max-width: 1625px) {
+/* Media */
+@media (max-width: 1880px) {
   .input-container {
     width: 530px;
     max-width: 100%;
@@ -1174,7 +1198,7 @@ onMounted(() => {
     min-width: 180px !important;
   }
 }
-@media (max-width: 850px) {
+@media (max-width: 860px) {
   .input-group.no-wrap {
     flex-direction: row !important;
     align-items: center !important;
@@ -1283,5 +1307,30 @@ onMounted(() => {
     width: auto !important;
     flex-shrink: 0;
   }
+}
+@media (max-width: 445px) {
+  .input-group.no-wrap.status-group {
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    gap: 8px !important;
+  }
+
+  .status-group .label_minWidth {
+    min-width: unset !important;
+    width: 100% !important;
+    text-align: left !important;
+  }
+
+  .status-group .status-btn,
+  .status-group .btnchange {
+    margin-left: 0 !important;
+  }
+  .btnchange {
+  padding: 2px 10px;
+  font-size: 12px;
+  background-color: #000;
+  color: white;
+  border-radius: 10px;
+}
 }
 </style>

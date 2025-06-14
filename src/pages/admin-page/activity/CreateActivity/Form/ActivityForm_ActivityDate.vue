@@ -11,10 +11,10 @@ const emit = defineEmits<{
 }>()
 const internalDateRange = ref<string[]>([...props.modelValue])
 // eslint-disable-next-line @typescript-eslint/consistent-type-imports
-const datePopupRef = ref<InstanceType<typeof import('quasar')['QMenu']> | null>(null)
+const datePopupRef = ref<InstanceType<(typeof import('quasar'))['QMenu']> | null>(null)
 const dateError = ref('')
 // eslint-disable-next-line @typescript-eslint/consistent-type-imports
-const inputRef = ref<InstanceType<typeof import('quasar')['QInput']> | null>(null)
+const inputRef = ref<InstanceType<(typeof import('quasar'))['QInput']> | null>(null)
 
 const thaiLocale = {
   days: ['อาทิตย์', 'จันทร์', 'อังคาร', 'พุธ', 'พฤหัสบดี', 'ศุกร์', 'เสาร์'],
@@ -107,7 +107,7 @@ const focus = async () => {
   requestAnimationFrame(() => {
     requestAnimationFrame(() => {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      (datePopupRef.value as any)?.show?.()
+      ;(datePopupRef.value as any)?.show?.()
     })
   })
 }
@@ -128,13 +128,13 @@ watch(
     </p>
     <div class="input-container">
       <q-input
+        ref="inputRef"
         outlined
         v-model="formattedDateRange"
         class="fix-q-input-height"
-        ref="inputRef"
-        readonly
         :disable="disable"
         :error="dateError !== ''"
+        @focus="focus"
         @keydown.enter.prevent="$emit('enter')"
       >
         <template v-slot:prepend>
@@ -143,26 +143,29 @@ watch(
             class="cursor-pointer"
             :class="{ 'disabled-icon': disable }"
             style="color: black"
-          >
-            <q-menu ref="datePopupRef" style="overflow: visible" v-if="!disable">
-              <q-date
-                v-model="internalDateRange"
-                mask="YYYY-MM-DD"
-                today-btn
-                :locale="thaiLocale"
-                color="blue-8"
-                text-color="white"
-                minimal
-                first-day-of-week="1"
-                class="my-custom-calendar"
-                multiple
-                 @keyup.enter="$emit('enter')"
-                @update:model-value="onDateRangeChange"
-              />
-            </q-menu>
-          </q-icon>
+            @click="datePopupRef?.show()"
+          />
         </template>
+
+        <!-- ✅ ย้าย QMenu มาที่นี่ เพื่อ anchor ถูกต้อง -->
+        <q-menu ref="datePopupRef" anchor="bottom left" self="top left" :cover="false">
+          <q-date
+            v-model="internalDateRange"
+            mask="YYYY-MM-DD"
+            today-btn
+            :locale="thaiLocale"
+            color="blue-8"
+            text-color="white"
+            minimal
+            first-day-of-week="1"
+            class="my-custom-calendar"
+            multiple
+            @keyup.enter="$emit('enter')"
+            @update:model-value="onDateRangeChange"
+          />
+        </q-menu>
       </q-input>
+
       <div v-if="dateError" class="text-negative text-subtitle2 q-mt-xs">
         {{ dateError }}
       </div>
@@ -212,7 +215,13 @@ watch(
   width: 660px;
   max-width: 100%;
 }
-
+::v-deep(.q-field--focused .q-field__control) {
+  box-shadow: none !important;
+  border-color: transparent !important;
+}
+::v-deep(.q-field__native) {
+  caret-color: transparent !important;
+}
 ::v-deep(.q-field__control) {
   height: 40px !important;
   align-items: center;
@@ -236,7 +245,7 @@ watch(
     min-width: 180px !important;
   }
 }
-@media (max-width: 850px) {
+@media (max-width: 860px) {
   .input-group:not(.no-wrap) {
     flex-direction: column;
     align-items: flex-start;
@@ -284,5 +293,8 @@ watch(
   .input-container {
     width: 100%;
   }
+  .label-error-shift {
+  transform: translateY(-12px);
+}
 }
 </style>

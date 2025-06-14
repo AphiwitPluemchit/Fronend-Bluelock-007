@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import {  ref, watch } from 'vue'
+import { ref, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import type { Activity } from 'src/types/activity'
 import { ActivityService } from 'src/services/activity'
@@ -75,11 +75,10 @@ watch(isEditing, (newVal) => {
     imageRef.value?.resetPreview()
   }
 })
-
 </script>
 
 <template>
-  <q-page class="q-pa-md">
+  <q-page >
     <div class="wrapper">
       <div class="container">
         <div class="image-section">
@@ -91,7 +90,7 @@ watch(isEditing, (newVal) => {
           />
         </div>
 
-      <div class="form-section"  ref="formSection">
+        <div class="form-section" ref="formSection">
           <FormMultipleDetail
             :key="selectedActivityType"
             :activity="activity"
@@ -110,19 +109,22 @@ watch(isEditing, (newVal) => {
 .wrapper {
   display: flex;
   align-items: flex-start;
-  border-radius: 12px;
+  column-gap: 150px;
+  padding: 45px;
+  flex-wrap: wrap; 
 }
+
 .container {
   display: flex;
   align-items: flex-start;
   width: 100%;
+  flex-wrap: wrap; 
 }
-
 .image-section {
   align-items: flex-start;
   width: 100%;
   flex: 1;
-  margin-left: 100px;
+  margin-left: 80px;
 }
 
 .form-section {
@@ -130,13 +132,10 @@ watch(isEditing, (newVal) => {
   overflow-x: hidden;
   overflow-y: auto;
   max-height: 590px;
-  justify-items: flex-end;
-  margin-right: 50px;
 }
 
 .form-section::-webkit-scrollbar {
   width: 8px;
-  margin-right: 50px;
 }
 .Font {
   color: #ffffff;
@@ -144,10 +143,10 @@ watch(isEditing, (newVal) => {
   font-weight: bold;
   font-family: 'Noto Serif Thai', serif;
 }
-@media(max-width: 1625px) {
+@media(max-width: 1880px) {
   .wrapper {
-    gap: 30px;
-    padding: 20px;
+    gap: 0px;
+    padding: 0px;
   }
   .container {
     flex-direction: column;
@@ -167,11 +166,7 @@ watch(isEditing, (newVal) => {
     max-width: 770px;
   }
 }
-@media(max-width: 850px) {
-  .wrapper {
-    gap: 30px;
-    padding: 20px;
-  }
+@media(max-width: 860px) {
   .container {
     flex-direction: column;
     align-items: center;
@@ -194,7 +189,7 @@ watch(isEditing, (newVal) => {
   .wrapper {
     flex-direction: column;
     gap: 30px;
-    padding: 20px;
+    padding: 5px;
   }
 
   .container {
