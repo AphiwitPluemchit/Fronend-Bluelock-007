@@ -46,10 +46,10 @@
       <q-table
         bordered
         flat
-        :rows="studentStore.students"
+        :rows="students"
         :columns="columns"
         row-key="id"
-        class="q-mt-md customtable"
+        class="q-mt-md"
         :pagination="{ rowsPerPage: 10 }"
       >
         <!-- หัวตาราง Sticky -->
@@ -81,8 +81,8 @@
             <!-- แสดงสถานะพร้อมสี -->
             <q-td class="text-center">
               <q-badge
-                :label="calculateStatus(props.row.softSkill, props.row.hardSkill)"
-                :class="getStatusClass(calculateStatus(props.row.softSkill, props.row.hardSkill))"
+                :label="getStatusText(props.row.status)"
+                :class="getStatusClass(props.row.status)"
                 class="status-badge"
                 unelevated
               />
@@ -107,17 +107,17 @@
 </template>
 
 <script setup lang="ts">
-import { nextTick, onMounted, ref } from 'vue'
+import { computed, nextTick, onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import FilterDialog from 'src/components/Dialog/FilterDialog.vue'
 import ManageStudentDialog from './ManageStudentDialog.vue'
 import { useStudentStore } from 'src/stores/student'
-import type { Pagination } from 'src/types/pagination'
-import { StudentService } from 'src/services/student'
 
 const studentStore = useStudentStore()
 const router = useRouter()
 const search1 = ref('')
+const students = computed(() => studentStore.students ?? [])
+
 onMounted(async () => {
   await data()
 })
@@ -134,29 +134,27 @@ const showFilterDialog1 = ref(false)
 const filterCategories1 = ref(['major', 'year', 'studentStatus'])
 
 const applyFilters = async (selectedFilters: SelectedFilters) => {
-  query.value.studentYear = selectedFilters.year
-  query.value.major = selectedFilters.major
-  query.value.studentStatus = selectedFilters.studentStatus
+  studentStore.query.studentYear = selectedFilters.year ?? []
+  studentStore.query.major = selectedFilters.major ?? []
+  studentStore.query.studentStatus = selectedFilters.studentStatus ?? []
+
   await data()
 }
+
 const data = async () => {
-  const data = await getStudents(query.value)
-  pagination.value.page = query.value.page
-  pagination.value.rowsPerPage = query.value.limit
-  pagination.value.sortBy = query.value.sortBy
-  pagination.value.rowsNumber = data.meta.total
-  studentStore.students = data.data
+  await studentStore.getStudents() // ✅ เรียกจาก store
+
+  // อัปเดต pagination ให้ sync
+  pagination.value.page = studentStore.query.page
+  pagination.value.rowsPerPage = studentStore.query.limit
+  pagination.value.sortBy = studentStore.query.sortBy
+  pagination.value.rowsNumber = Array.isArray(studentStore.students)
+    ? studentStore.students.length
+    : 0
 }
-const query = ref<Pagination>({
-  page: 1,
-  limit: 10,
-  search: '',
-  sortBy: 'code',
-  order: 'asc',
-  major: [],
-  studentYear: [],
-  studentStatus: [],
-})
+
+const query = computed(() => studentStore.query)
+
 const pagination = ref({
   sortBy: query.value.sortBy,
   descending: query.value.order === 'desc',
@@ -174,30 +172,29 @@ const openManageDialog = async () => {
   }
 }
 
-const getStatusClass = (status: string) => {
-  if (status === 'ชั่วโมงมาก') return 'status-high'
-  if (status === 'ชั่วโมงน้อย') return 'status-medium'
-  if (status === 'ชั่วโมงครบแล้ว') return 'status-complete'
-  if (status === 'ชั่วโมงน้อยมาก') return 'status-low'
+const getStatusClass = (status: number) => {
+  if (status === 3) return 'status-complete'
+  if (status === 2) return 'status-medium'
+  if (status === 1) return 'status-low'
+  if (status === 0) return 'status-out'
   return ''
 }
 
-const calculateStatus = (softskill: number, hardskill: number) => {
-  if (softskill >= 30 && hardskill >= 12) {
-    return 'ชั่วโมงครบแล้ว'
-  } else if (softskill >= 20 && hardskill >= 8) {
-    return 'ชั่วโมงมาก'
-  } else if (softskill >= 10 && hardskill >= 4) {
-    return 'ชั่วโมงน้อย'
-  } else {
-    return 'ชั่วโมงน้อยมาก'
+const getStatusText = (status: number) => {
+  switch (status) {
+    case 0:
+      return 'พ้นสภาพ'
+    case 1:
+      return 'ชั่วโมงน้อยมาก'
+    case 2:
+      return 'ชั่วโมงน้อย'
+    case 3:
+      return 'ชั่วโมงครบ'
+    default:
+      return 'ไม่ทราบสถานะ'
   }
 }
 
-async function getStudents(qeury: Pagination) {
-  const data = await StudentService.getAll(qeury)
-  return data
-}
 const columns = [
   { name: 'index', label: 'ลำดับ', field: 'index', align: 'left' as const },
   { name: 'code', label: 'รหัสนิสิต', field: 'code', align: 'left' as const },
