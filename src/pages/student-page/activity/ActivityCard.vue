@@ -1,45 +1,36 @@
 <template>
-  <q-card style="border-radius: 30px; height: 210px" class="q-pa-md q-ma-md activity-card">
-    <div class="row q-pa-md items-stretch">
+  <q-card class="activity-card q-pa-md q-my-sm">
+    <!-- ... -->
+    <div :class="isMobile ? 'column' : 'row items-center'">
       <!-- รูปกิจกรรม -->
-      <div class="col-md-4">
-        <!-- <q-img
-          :src="'http://localhost:8888/uploads/activity/images/' + activity.file"
+      <div :class="isMobile ? 'full-width q-mb-sm' : 'col-4 q-pr-md'">
+        <q-img
+          :src="baseurl + '/uploads/activity/images/' + activity.file"
           class="activity-img"
-        /> -->
-        <q-img :src="baseurl + '/uploads/activity/images/' + activity.file" class="activity-img" />
+          :ratio="4 / 3"
+        />
       </div>
 
       <!-- รายละเอียดกิจกรรม -->
-      <div class="col-md-8 column justify-between text-h6">
-        <div>
-          <div class="content-wrapper q-mb-md">
-            <q-item-label class="text-bold activity-name q-pt-sm">{{ activity.name }}</q-item-label>
-          </div>
-          <div class="positionText q-mb-md">
-            <!-- แสดงวันที่ -->
-            <q-item-label class="q-mb-md">
-              {{ getActivitydates(activity.activityItems) }}
-            </q-item-label>
-
-            <!-- แสดงจำนวนที่นั่ง -->
-            <q-item-label>
-              จำนวนที่รับ {{ enrollmentSummary(activity.activityItems ?? []) }}
-            </q-item-label>
-          </div>
+      <div class="col column justify-between">
+        <div class="text-h6 text-bold q-mb-sm activity-name">
+          {{ activity.name }}
         </div>
-
-        <!-- ปุ่มรายละเอียด -->
-        <div class="q-mt-auto text-right">
-          <q-btn
-            label="รายละเอียด"
-            dense
-            unelevated
-            class="detail-btn"
-            :to="`/Student/Activity/ActivityDetail/${activity.id}`"
-          />
+        <div class="text-subtitle2 q-mb-sm">
+          {{ getActivitydates(activity.activityItems) }}
         </div>
+        <div class="q-mb-md">จำนวนที่รับ {{ enrollmentSummary(activity.activityItems ?? []) }}</div>
       </div>
+    </div>
+    <!-- ปุ่มรายละเอียด -->
+    <div class="q-mt-auto text-right">
+      <q-btn
+        label="รายละเอียด"
+        dense
+        unelevated
+        class="btnconfirm"
+        :to="`/Student/Activity/ActivityDetail/${activity.id}`"
+      />
     </div>
   </q-card>
 </template>
@@ -50,8 +41,11 @@ import { api } from 'boot/axios'
 import dayjs from 'dayjs'
 import 'dayjs/locale/th'
 import buddhistEra from 'dayjs/plugin/buddhistEra'
+import { useQuasar } from 'quasar'
+import { computed } from 'vue'
 const baseurl = api.defaults.baseURL
-
+const $q = useQuasar()
+const isMobile = computed(() => $q.screen.lt.md)
 dayjs.locale('th')
 dayjs.extend(buddhistEra)
 // รับ props
@@ -68,18 +62,6 @@ function formatDateToThai(dateString: string, stime: string, etime: string): str
   // แปลงวันที่และเวลาเป็นรูปแบบ 'วัน เดือน ปี พ.ศ. (เวลาเริ่ม - เวลาสิ้นสุด)'
   return dayjs(dateString).format('D MMMM BBBB') + ` (${stime} - ${etime})`
 }
-
-// ฟังก์ชันดึงวันที่จาก `activityItems`
-// const getActivitydates = (activityItems: ActivityItem[] | null | undefined): string => {
-//   if (!activityItems || activityItems.length === 0 || !activityItems[0]?.dates) {
-//     return 'ไม่ระบุ'
-//   }
-
-//   return (
-//     activityItems[0].dates?.map((d) => `${d.date} (${d.stime} - ${d.etime})`).join(', ') ??
-//     'ไม่ระบุ'
-//   )
-// }
 
 // ฟังก์ชันดึงวันที่จาก `activityItems`
 const getActivitydates = (activityItems: ActivityItem[] | null | undefined): string => {
@@ -113,44 +95,36 @@ function enrollmentSummary(activityItems: ActivityItem[]) {
 </script>
 
 <style scoped>
-/* ปรับขนาดการ์ด */
 .activity-card {
   border-radius: 30px;
-  min-height: 120px;
-  display: flex;
-  align-items: center;
   font-size: 18px;
+  display: flex;
   flex-direction: column;
   justify-content: space-between;
-  align-items: stretch;
+  height: 100%; /* ทำให้ทุกใบสูงเท่ากัน */
+  min-height: 220px;
 }
 
 .activity-img {
-  width: 90%; /* Full width of the container */
-  height: auto; /* Maintain aspect ratio */
-  object-fit: cover; /* Cover the container, cropping as needed */
-  border-radius: 8px; /* Optional border radius for rounded corners */
-  aspect-ratio: 4 / 3; /* Maintain 4:3 aspect ratio */
+  width: 100%;
+  object-fit: cover;
+  border-radius: 12px;
 }
 
-.detail-btn {
-  border-radius: 15px;
-  font-weight: bold;
-  padding: 6px 12px;
-  font-size: 18px;
-  background-color: #3676f4;
-  color: white;
-  position: absolute;
-  bottom: 25px;
-  right: 30px;
-}
 .activity-name {
   display: -webkit-box;
-  -webkit-line-clamp: 2; /* แสดงแค่ 2 บรรทัด */
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-  text-overflow: ellipsis; /* ใช้ ... เมื่อข้อความยาวเกิน */
-  width: 100%; /* กำหนดความกว้างให้เต็มพื้นที่ */
+  -webkit-line-clamp: 2;
   line-clamp: 2;
+  -webkit-box-orient: vertical;
+  box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  width: 100%;
+}
+
+@media (max-width: 600px) {
+  .activity-card {
+    min-height: 260px;
+  }
 }
 </style>

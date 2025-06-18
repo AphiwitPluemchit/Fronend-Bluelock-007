@@ -1,48 +1,3 @@
-<template>
-  <q-card class="activity-card q-pa-md col-12" @click="onClick(myActivity.id!)">
-    <div class="row no-wrap items-center">
-      <!-- รูปกิจกรรม -->
-      <div class="col-2">
-        <!-- <img
-        v-if="previewUrl || serverImageUrl"
-        :src="(previewUrl || serverImageUrl) ?? ''"
-        alt="Image preview"
-        class="preview-img"
-      /> -->
-        <!-- <q-img
-          :src="'http://localhost:8888/uploads/activity/images/' + myActivity.file"
-          class="activity-img"
-        /> -->
-        <q-img
-          :src="baseurl + '/uploads/activity/images/' + myActivity.file"
-          class="activity-img"
-        />
-      </div>
-
-      <!-- ข้อมูลกิจกรรม -->
-      <div class="col-10 row items-center text-h7">
-        <div class="col-5">
-          <q-item-label class="activity-name text-bold">{{ myActivity.name }}</q-item-label>
-        </div>
-        <!-- ActivityType -->
-        <div class="col-2 justify-between">
-          <ActivityType
-            v-if="myActivity.skill === 'hard' || myActivity.skill === 'soft'"
-            :skill="myActivity.skill === 'hard' ? 'hardSkill' : 'softSkill'"
-          />
-        </div>
-        <div class="row q-mt-sm col-4">
-          <div class="q-mr-md col-4">{{ getActivitydates(myActivity.activityItems) }}</div>
-          <div class="q-mr-md col-4 text-right">
-            {{ getActivityTime(myActivity.activityItems) }}
-          </div>
-          <div class="col-3 text-right">{{ getActivityRooms(myActivity.activityItems) }}</div>
-        </div>
-      </div>
-    </div>
-  </q-card>
-</template>
-
 <script setup lang="ts">
 import { useRouter } from 'vue-router'
 import { api } from 'boot/axios'
@@ -88,56 +43,94 @@ const getActivityRooms = (activityItems: ActivityItem[] | null | undefined): str
   const rooms = activityItems[0]?.rooms
   return Array.isArray(rooms) && rooms.length > 0 ? rooms.join(' ') : 'ไม่ระบุ'
 }
+const getActivityDescription = (activityItems: ActivityItem[] | null | undefined): string => {
+  if (!activityItems || activityItems.length === 0) return 'ไม่ระบุ'
+  const rooms = activityItems[0]?.description
+  return Array.isArray(rooms) && rooms.length > 0 ? rooms.join(' ') : 'ไม่ระบุ'
+}
 </script>
 
+<template>
+  <q-card class="activity-card q-pa-md">
+    <div class="row q-col-gutter-md items-start">
+      <!-- รูปกิจกรรม -->
+      <div class="col-12 col-sm-4">
+        <q-img
+          :src="baseurl + '/uploads/activity/images/' + myActivity.file"
+          :ratio="4 / 3"
+          class="activity-img"
+        />
+      </div>
+
+      <!-- ข้อมูลกิจกรรม + ปุ่ม -->
+      <div class="col-12 col-sm-8 column justify-between">
+        <!-- ชื่อ + ประเภท -->
+        <div class="row justify-between items-start">
+          <div class="text-h6 text-bold ellipsis-2-lines">
+            {{ myActivity.name }}
+          </div>
+          <ActivityType
+            v-if="myActivity.skill === 'hard' || myActivity.skill === 'soft'"
+            :skill="myActivity.skill === 'hard' ? 'hardSkill' : 'softSkill'"
+          />
+        </div>
+
+        <!-- รายละเอียดกิจกรรม -->
+        <div class="text-body2 q-mt-sm">
+          วันที่ : {{ getActivitydates(myActivity.activityItems) }}
+        </div>
+        <div class="text-body2">เวลา : {{ getActivityTime(myActivity.activityItems) }}</div>
+        <div class="text-body2">ห้อง : {{ getActivityRooms(myActivity.activityItems) }}</div>
+        <div class="text-body2">
+          รายละเอียด : {{ getActivityDescription(myActivity.activityItems) }}
+        </div>
+
+        <!-- ปุ่ม -->
+        <div class="q-mt-sm self-end">
+          <q-btn
+            label="รายละเอียด"
+            dense
+            unelevated
+            class="btnconfirm"
+            @click="onClick(myActivity.id!)"
+          />
+        </div>
+      </div>
+    </div>
+  </q-card>
+</template>
+
 <style scoped>
-/* ปรับขนาดการ์ด */
 .activity-card {
   border-radius: 30px;
-  height: 210px;
-  display: flex;
-  align-items: center;
   font-size: 18px;
+  display: flex;
   flex-direction: column;
   justify-content: space-between;
-  align-items: stretch;
+  height: 100%; /* ทำให้ทุกใบสูงเท่ากัน */
 }
 
 .activity-img {
-  width: 90%; /* Full width of the container */
-  height: auto; /* Maintain aspect ratio */
-  object-fit: cover; /* Cover the container, cropping as needed */
-  border-radius: 8px; /* Optional border radius for rounded corners */
-  aspect-ratio: 4 / 3; /* Maintain 4:3 aspect ratio */
-  margin: 10px;
+  border-radius: 12px;
+  object-fit: cover;
+  width: 100%;
+  height: auto;
 }
 
-.detail-btn {
-  border-radius: 15px;
-  font-weight: bold;
-  padding: 6px 12px;
-  font-size: 18px;
-  background-color: #3676f4;
-  color: white;
-  position: absolute;
-  bottom: 25px;
-  right: 30px;
-}
-
-.details {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-}
-.activity-name {
+.ellipsis-2-lines {
   display: -webkit-box;
-  -webkit-line-clamp: 2; /* จำกัดให้แสดง 2 บรรทัด */
+  -webkit-line-clamp: 2;
   line-clamp: 2;
   -webkit-box-orient: vertical;
+  box-orient: vertical;
   overflow: hidden;
   text-overflow: ellipsis;
-  word-break: break-word;
-  width: 100%; /* ป้องกันไม่ให้เกินขอบเขต */
-  padding-top: 5px; /* ป้องกันตัวอักษรถูกตัดด้านบน */
+  width: 100%;
+}
+
+@media (max-width: 600px) {
+  .activity-img {
+    height: 200px;
+  }
 }
 </style>
