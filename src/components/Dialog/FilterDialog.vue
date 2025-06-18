@@ -111,7 +111,7 @@ const toggleFilter = (category: keyof typeof tempFilters.value, value: string) =
 
 <template>
   <q-btn class="btnfilter">
-    <img src="icons\sort.svg" alt="Sort Icon" width="30" height="30" />
+    <img src="/icons/sort.svg" alt="Sort Icon" width="30" height="30" />
     <q-menu
       v-model="showFilterDialog"
       :transition-show="'jump-down'"
