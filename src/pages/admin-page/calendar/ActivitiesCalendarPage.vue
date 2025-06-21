@@ -12,6 +12,28 @@ const activitys1 = ref<Activity[]>([])
 const showFilterDialog1 = ref(false)
 const filterCategories = ref(['year', 'major', 'statusActivity', 'categoryActivity'])
 const searchBoxFocused = ref<boolean>(false)
+const calendarRef = ref()
+
+const currentMonthDisplay = computed(() => {
+  const date = new Date(selectedDate.value)
+  const thMonths = [
+    'มกราคม',
+    'กุมภาพันธ์',
+    'มีนาคม',
+    'เมษายน',
+    'พฤษภาคม',
+    'มิถุนายน',
+    'กรกฎาคม',
+    'สิงหาคม',
+    'กันยายน',
+    'ตุลาคม',
+    'พฤศจิกายน',
+    'ธันวาคม',
+  ]
+  const month = thMonths[date.getMonth()]
+  const year = date.getFullYear() + 543
+  return `${month} ${year}`
+})
 
 const query1 = ref<Pagination>({
   page: 1,
@@ -78,7 +100,7 @@ interface CalendarEvent {
   date: string
   time: string
   location: string
-  count: string
+  participants: string
   // duration?: number
 }
 
@@ -245,7 +267,7 @@ function parseToCalendarEvents(activities: Activity[]): CalendarEvent[] {
           date: d.date,
           time: `${d.stime} - ${d.etime}`,
           location: item.rooms?.[0] || '-',
-          count: `${item.enrollmentCount ?? 0}/${item.maxParticipants ?? '-'}`,
+          participants: `${item.enrollmentCount ?? 0}/${item.maxParticipants ?? '-'}`,
           // duration: 1,
         })
       })
@@ -257,6 +279,7 @@ function parseToCalendarEvents(activities: Activity[]): CalendarEvent[] {
 
 onMounted(async () => {
   await data1()
+  console.log('calendarRef:', calendarRef.value)
 
   // หากวันนี้มี event ให้แสดงทางด้านขวาเลย
   if (selectedDate.value === todayDate.value) {
@@ -266,6 +289,25 @@ onMounted(async () => {
     }
   }
 })
+
+function onMonthChanged({ start }: { start: { date: string } }) {
+  const newMonth = new Date(start.date)
+  const selected = new Date(selectedDate.value)
+
+  // ตรวจสอบว่าเดือนใหม่ที่เปลี่ยนเข้ามา เป็นเดือนเดียวกับวันที่ที่เลือกอยู่หรือไม่
+  const sameMonth =
+    newMonth.getFullYear() === selected.getFullYear() && newMonth.getMonth() === selected.getMonth()
+
+  // ถ้าเป็นคนละเดือนกัน
+  if (!sameMonth) {
+    // ตรวจสอบว่าวันที่เลือกเดิมยังมี event อยู่หรือไม่
+    const stillHasEvents = getEvents(selectedDate.value).length > 0
+
+    // ถ้ายังมี event ในวันเดิม ให้แสดง event เหล่านั้นต่อไป
+    // ถ้าไม่มี ให้ล้าง selectedEvents
+    selectedEvents.value = stillHasEvents ? getEvents(selectedDate.value) : []
+  }
+}
 </script>
 
 <template>
@@ -274,21 +316,29 @@ onMounted(async () => {
       <div class="text-h4 q-mb-md">ตารางกิจกรรม</div>
     </div>
 
-    <!-- searchbox + Filter -->
-    <div class="row justify-end q-mb-md">
-      <div class="row">
+    <!-- แถวรวมซ้าย: เดือน + ปุ่ม , ขวา: ช่องค้นหา + ฟิลเตอร์ -->
+    <div class="row items-center justify-between q-mb-md">
+      <!-- ⬅ อยู่ฝั่ง col-8 แต่จัดด้านซ้าย -->
+      <div class="row items-center no-wrap">
+        <q-btn flat dense icon="chevron_left" @click="calendarRef?.prev()" />
+        <q-btn flat dense icon="chevron_right" @click="calendarRef?.next()" />
+        <div class="text-h5 q-mx-md">{{ currentMonthDisplay }}</div>
+      </div>
+
+      <!-- ฝั่งขวา: search + filter -->
+      <div class="row items-center no-wrap">
         <q-input
           dense
           outlined
           v-model="query1.search"
           label="ค้นหา ชื่อกิจกรรม"
           class="q-mr-sm searchbox"
-          :style="{ border: 'none' }"
+          :style="{ border: 'none', minWidth: '200px' }"
           @focus="searchBoxFocused = true"
           @blur="searchBoxFocused = false"
         >
           <template v-slot:append>
-            <q-icon activityName="search" />
+            <q-icon name="search" />
           </template>
         </q-input>
 
@@ -308,6 +358,7 @@ onMounted(async () => {
     <div class="row q-col-gutter-md calendar-wrapper">
       <div class="col-8">
         <q-calendar-month
+          ref="calendarRef"
           v-model="selectedDate"
           locale="th-TH"
           animated
@@ -315,6 +366,7 @@ onMounted(async () => {
           :day-min-height="110"
           :day-class="() => 'bordered-day'"
           @click-date="onClickDate"
+          @change="onMonthChanged"
         >
           <!-- Slot day -->
           <template #day="{ scope }">
@@ -380,7 +432,7 @@ onMounted(async () => {
                     </div>
                     <div class="q-mt-xs">{{ event.activityItemName }}</div>
                     <div class="q-mt-xs">{{ event.time }}</div>
-                    <div>จำนวนลงทะเบียน : {{ event.count }}</div>
+                    <div>จำนวนลงทะเบียน : {{ event.participants }}</div>
                     <div>สถานที่ : {{ event.location }}</div>
                   </q-card>
                 </div>
@@ -413,7 +465,7 @@ onMounted(async () => {
                   </div>
                   <div class="q-mt-xs">{{ event.activityItemName }}</div>
                   <div class="q-mt-xs">{{ event.time }}</div>
-                  <div>จำนวนลงทะเบียน : {{ event.count }}</div>
+                  <div>จำนวนลงทะเบียน : {{ event.participants }}</div>
                   <div>สถานที่ : {{ event.location }}</div>
                 </q-card>
               </div>
@@ -507,12 +559,12 @@ onMounted(async () => {
 }
 
 .is-today .day-number {
-  border: 2px solid #e37c41;
-  color: #e37c41;
+  border: 2px solid #3e98dc;
+  color: #3e98dc;
 }
 
 .is-selected .day-number {
-  background-color: #e37c41;
+  background-color: #3e98dc;
   color: white;
 }
 
