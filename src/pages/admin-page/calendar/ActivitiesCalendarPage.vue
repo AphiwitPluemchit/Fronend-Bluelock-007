@@ -280,6 +280,13 @@ function parseToCalendarEvents(activities: Activity[]): CalendarEvent[] {
   return parsed
 }
 
+function goToDate(dateStr: string) {
+  selectedDate.value = dateStr
+  selectedEvents.value = getEvents(dateStr)
+  calendarRef.value?.moveToDate(dateStr) // scroll ไปยังเดือน/ปี ที่มีกิจกรรม
+  query1.value.search = '' // reset ช่อง search
+}
+
 onMounted(async () => {
   await data1()
   console.log('calendarRef:', calendarRef.value)
@@ -419,8 +426,9 @@ function onMonthChanged({ start }: { start: { date: string } }) {
                   <q-card
                     flat
                     bordered
-                    class="q-pa-md q-mb-sm"
+                    class="q-pa-md q-mb-sm clickable-card"
                     :style="`border-left: 5px solid ${getStatusColor(event.activityState)}`"
+                    @click="goToDate(event.date)"
                   >
                     <div class="event-header-row">
                       <div class="event-title">{{ event.activityName }}</div>
@@ -613,5 +621,12 @@ function onMonthChanged({ start }: { start: { date: string } }) {
 .q-card {
   border-radius: 12px;
   background-color: #fff;
+}
+
+.clickable-card {
+  cursor: pointer;
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
 }
 </style>
