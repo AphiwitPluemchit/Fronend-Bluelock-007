@@ -1100,10 +1100,6 @@ watch(
 .searchbox {
   margin-right: 5px;
 }
-.texttitle {
-  font-size: 34px;
-  font-weight: 400;
-}
 .textheader {
   font-size: 20px;
   font-weight: 500;

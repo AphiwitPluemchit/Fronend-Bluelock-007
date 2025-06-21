@@ -1,111 +1,3 @@
-<template>
-  <q-page class="q-pa-md">
-    <!-- ชื่อหน้า -->
-    <div class="row justify-start items-center"  style="margin-top: 20px">
-      <div class="texttitle">จัดการข้อมูลนิสิต</div>
-    </div>
-    <!-- ตาราง 1 -->
-    <section class="q-mt-lg">
-      <div class="row justify-end items-center">
-        <div class="text-h6"></div>
-        <div class="row">
-          <q-input
-            dense
-            outlined
-            v-model="search1"
-            label="ค้นหา ชื่อนิสิต"
-            class="q-mr-sm searchbox"
-            :style="{ border: 'none' }"
-          >
-            <template v-slot:append>
-              <q-icon name="search" />
-            </template>
-          </q-input>
-          <FilterDialog
-            v-model="showFilterDialog1"
-            :categories="filterCategories1"
-            @apply="applyFilters"
-            class="q-mr-sm"
-          />
-          <div>
-            <q-btn
-              dense
-              outlined
-              icon="settings"
-              label="จัดการข้อมูล"
-              class="btnadd"
-              @click="openManageDialog"
-            >
-              <ManageStudentDialog ref="manageDialogRef"
-            /></q-btn>
-          </div>
-        </div>
-      </div>
-
-      <!-- ตาราง -->
-      <q-table
-        bordered
-        flat
-        :rows="students"
-        :columns="columns"
-        row-key="id"
-        class="q-mt-md"
-        :pagination="{ rowsPerPage: 10 }"
-      >
-        <!-- หัวตาราง Sticky -->
-        <template v-slot:header="props">
-          <q-tr :props="props" class="sticky-header">
-            <q-th v-for="col in props.cols" :key="col.name" :props="props">
-              {{ col.label }}
-            </q-th>
-          </q-tr>
-        </template>
-        <!-- เนื้อหาตาราง -->
-        <template v-slot:body="props">
-          <q-tr :props="props">
-            <q-td key="index">{{ props.rowIndex + 1 }}</q-td>
-            <q-td key="code">{{ props.row.code }}</q-td>
-            <q-td
-              key="name"
-              style="
-                max-width: 200px;
-                white-space: nowrap;
-                overflow: hidden;
-                text-overflow: ellipsis;
-              "
-              >{{ props.row.name }}</q-td
-            >
-            <q-td key="major">{{ props.row.major }}</q-td>
-            <q-td class="text-center" key="softskill">{{ props.row.softSkill }}/30</q-td>
-            <q-td class="text-center" key="hardskill">{{ props.row.hardSkill }}/12</q-td>
-            <!-- แสดงสถานะพร้อมสี -->
-            <q-td class="text-center">
-              <q-badge
-                :label="getStatusText(props.row.status)"
-                :class="getStatusClass(props.row.status)"
-                class="status-badge"
-                unelevated
-              />
-            </q-td>
-
-            <q-td class="q-gutter-x-sm">
-              <q-icon
-                name="visibility"
-                @click="goToDetail(props.row.code)"
-                class="cursor-pointer"
-                size="20px"
-              >
-                <q-tooltip> ดูรายละเอียด </q-tooltip>
-              </q-icon></q-td
-            >
-          </q-tr>
-        </template>
-        ></q-table
-      >
-    </section>
-  </q-page>
-</template>
-
 <script setup lang="ts">
 import { computed, nextTick, onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
@@ -222,6 +114,115 @@ const columns = [
 ]
 </script>
 
+<template>
+  <q-page class="q-pa-md">
+    <!-- ชื่อหน้า -->
+    <div class="row justify-start items-center" style="margin-top: 20px">
+      <div class="texttitle">จัดการข้อมูลนิสิต</div>
+    </div>
+    <!-- ตาราง 1 -->
+    <section class="q-mt-lg">
+      <div class="search-filter-wrapper row wrap justify-end items-start">
+        <!-- Search box -->
+        <q-input
+          dense
+          outlined
+          v-model="search1"
+          label="ค้นหา ชื่อนิสิต"
+          class="q-mr-sm searchbox"
+          :style="{ border: 'none' }"
+        >
+          <template v-slot:append>
+            <q-icon name="search" />
+          </template>
+        </q-input>
+
+        <!-- Buttons -->
+        <div class="btn-filter-wrapper row no-wrap">
+          <q-btn
+            dense
+            outlined
+            icon="settings"
+            label="จัดการข้อมูล"
+            @click="openManageDialog"
+            class="q-mr-sm btnadd"
+          >
+            <ManageStudentDialog ref="manageDialogRef" />
+          </q-btn>
+
+          <FilterDialog
+            v-model="showFilterDialog1"
+            :categories="filterCategories1"
+            @apply="applyFilters"
+            class="q-mr-sm"
+          />
+        </div>
+      </div>
+
+      <!-- ตาราง -->
+      <q-table
+        bordered
+        flat
+        :rows="students"
+        :columns="columns"
+        row-key="id"
+        class="q-mt-md"
+        :pagination="{ rowsPerPage: 10 }"
+      >
+        <!-- หัวตาราง Sticky -->
+        <template v-slot:header="props">
+          <q-tr :props="props" class="sticky-header">
+            <q-th v-for="col in props.cols" :key="col.name" :props="props">
+              {{ col.label }}
+            </q-th>
+          </q-tr>
+        </template>
+        <!-- เนื้อหาตาราง -->
+        <template v-slot:body="props">
+          <q-tr :props="props">
+            <q-td key="index">{{ props.rowIndex + 1 }}</q-td>
+            <q-td key="code">{{ props.row.code }}</q-td>
+            <q-td
+              key="name"
+              style="
+                max-width: 200px;
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
+              "
+              >{{ props.row.name }}</q-td
+            >
+            <q-td key="major">{{ props.row.major }}</q-td>
+            <q-td class="text-center" key="softskill">{{ props.row.softSkill }}/30</q-td>
+            <q-td class="text-center" key="hardskill">{{ props.row.hardSkill }}/12</q-td>
+            <!-- แสดงสถานะพร้อมสี -->
+            <q-td class="text-center">
+              <q-badge
+                :label="getStatusText(props.row.status)"
+                :class="getStatusClass(props.row.status)"
+                class="status-badge"
+                unelevated
+              />
+            </q-td>
+
+            <q-td class="q-gutter-x-sm">
+              <q-icon
+                name="visibility"
+                @click="goToDetail(props.row.code)"
+                class="cursor-pointer"
+                size="20px"
+              >
+                <q-tooltip> ดูรายละเอียด </q-tooltip>
+              </q-icon></q-td
+            >
+          </q-tr>
+        </template>
+        ></q-table
+      >
+    </section>
+  </q-page>
+</template>
+
 <style scoped>
 .status-complete {
   background-color: #cfd7ff;
@@ -277,10 +278,36 @@ const columns = [
   display: inline-block;
   font-size: 15px;
 }
-.texttitle {
-  font-size: 34px;
-  font-weight: 400;
+
+@media (max-width: 620px) {
+  .search-filter-wrapper {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 10px; /* เพิ่มระยะห่างระหว่างกล่อง search กับปุ่มทั้งชุด */
+  }
+   .searchbox {
+    width: 100% !important;
+    margin-bottom: 0 !important; /* ใช้ gap แทน */
+  }
+
+    .btn-filter-wrapper {
+    width: 100%;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    gap: 5px; 
+    flex-wrap: nowrap;
+  }
+
+  .btn-filter-wrapper .btnadd {
+    width: 90%;
+  }
+
+  .btn-filter-wrapper .q-mr-sm {
+    margin-right: 0 !important;
+  }
 }
+
 @media (max-width: 450px) {
   .texttitle {
     font-size: 28px;
