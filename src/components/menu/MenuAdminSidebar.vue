@@ -13,22 +13,46 @@
     <q-list padding class="menu-list flex column justify-between full-height">
       <!-- <q-item-label header>เมนูแอดมิน</q-item-label> -->
       <div>
-        <router-link v-for="link in linksList" :key="link.title" :to="link.link" class="no-link">
-          <!-- if router.currentRoute.value.path includes link.link -->
-          <q-item
-            v-ripple
-            clickable
-            class="q-pa-md q-my-md q-mr-sm"
-            :class="{ 'active-menu': router.currentRoute.value.path.includes(link.link) }"
+        <template v-for="link in linksList" :key="link.title">
+          <!-- กรณีมี children (เมนูย่อย dropdown) -->
+          <q-expansion-item
+            v-if="link.children"
+            :label="link.title"
+            :icon="link.icon"
+            :header-class="isActiveParent(link) ? 'active-menu' : ''"
+            class="menu-list flex column justify-between"
           >
-            <q-item-section avatar>
-              <q-icon :name="link.icon" />
-            </q-item-section>
-            <q-item-section>
-              {{ link.title }}
-            </q-item-section>
-          </q-item>
-        </router-link>
+            <router-link
+              v-for="sublink in link.children"
+              :key="sublink.title"
+              :to="sublink.link"
+              class="no-link"
+            >
+              <q-item clickable v-ripple  :class="['sub-menu-item', { 'active-menu': isActiveLink(sublink) }]">
+                <q-item-section>
+                  {{ sublink.title }}
+                </q-item-section>
+              </q-item>
+            </router-link>
+          </q-expansion-item>
+
+          <!-- กรณีไม่มี children -->
+          <router-link v-else :to="link.link" class="no-link">
+            <q-item
+              clickable
+              v-ripple
+              class="q-pa-md q-my-md q-mr-sm"
+              :class="{ 'active-menu': isActiveLink(link) }"
+            >
+              <q-item-section avatar>
+                <q-icon :name="link.icon" />
+              </q-item-section>
+              <q-item-section>
+                {{ link.title }}
+              </q-item-section>
+            </q-item>
+          </router-link>
+        </template>
       </div>
       <!-- q-space ดันปุ่ม Logout ไปด้านล่าง -->
       <q-space />
@@ -56,15 +80,32 @@ const leftDrawerOpen = ref(false)
 const linksList = [
   { title: 'ตารางกิจกรรม', icon: 'event', link: '/Admin/ActivitiesCalendar' },
   { title: 'จัดการกิจกรรม', icon: 'description', link: '/Admin/ActivitiesManagement' },
-  { title: 'จัดการข้อมูลนิสิต', icon: 'people', link: '/Admin/StudentManagement' },
+  {
+    title: 'จัดการนิสิต',
+    icon: 'people',
+    children: [
+      { title: 'จัดการข้อมูลนิสิต', link: '/Admin/StudentManagement' },
+      { title: 'จัดเก็บข้อมูลนิสิต', link: '/Admin/StudentStorePage' },
+    ],
+  },
   { title: 'รายงานข้อมูล', icon: 'assessment', link: '/Admin/Report' },
   { title: 'ใบประกาศนียบัตร', icon: 'school', link: '/Admin/CertificateManagement' },
 ]
+
 const drawerBehavior = computed(() => {
-   return $q.screen.width < 1100 ?  'mobile' : 'desktop' // ถ้าหน้าจอเล็กกว่า lg (<1100px) ใช้ mobile
+  return $q.screen.width < 1100 ? 'mobile' : 'desktop' // ถ้าหน้าจอเล็กกว่า lg (<1100px) ใช้ mobile
 })
 async function logout() {
   await router.push('/')
+}
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const isActiveLink = (link: any) => {
+  return router.currentRoute.value.path.includes(link.link)
+}
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const isActiveParent = (parent: any) => {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  return parent.children?.some((child: any) => isActiveLink(child))
 }
 
 // ฟังก์ชันเปิด/ปิด Sidebar
@@ -77,6 +118,10 @@ defineExpose({ toggleSidebar })
 </script>
 
 <style scoped>
+.sub-menu-item {
+  padding-left: 72px !important; 
+  margin-top: 10px !important;
+}
 .no-link {
   text-decoration: none;
   color: inherit;
@@ -132,6 +177,3 @@ defineExpose({ toggleSidebar })
   }
 }
 </style>
-
-
-

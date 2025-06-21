@@ -1,8 +1,8 @@
 <template>
   <q-page class="q-pa-md">
     <!-- ชื่อหน้า -->
-    <div class="row justify-start items-center">
-      <div class="text-h4">จัดการข้อมูลนิสิต</div>
+    <div class="row justify-start items-center"  style="margin-top: 20px">
+      <div class="texttitle">จัดการข้อมูลนิสิต</div>
     </div>
     <!-- ตาราง 1 -->
     <section class="q-mt-lg">
@@ -276,5 +276,15 @@ const columns = [
   text-align: center;
   display: inline-block;
   font-size: 15px;
+}
+.texttitle {
+  font-size: 34px;
+  font-weight: 400;
+}
+@media (max-width: 450px) {
+  .texttitle {
+    font-size: 28px;
+    font-weight: 400;
+  }
 }
 </style>

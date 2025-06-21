@@ -57,7 +57,6 @@ export class ActivityService {
 
   static async createOne(obj: Partial<Activity>) {
     try {
-      console.log('📤 ส่งข้อมูล activity:', obj)
       const res = await api.post(this.path, obj)
       return {
         status: res.status,
@@ -108,7 +107,6 @@ export class ActivityService {
       if (!obj.id) {
         throw new Error('Missing ID for update')
       }
-      console.log('Updating activity:', obj)
       const res = await api.put(`${this.path}/${obj.id}`, obj)
       return res.status
     } catch (error) {
@@ -132,7 +130,6 @@ export class ActivityService {
   static async getEnrollmentSummary(activityId: string) {
     try {
       const res = await api.get<EnrollmentSummary>(`${this.path}/${activityId}/enrollment-summary`)
-      console.log('data', res.data)
       return res.data
     } catch (error) {
       showError('ไม่สามารถโหลดสรุปข้อมูลการลงทะเบียนได้')

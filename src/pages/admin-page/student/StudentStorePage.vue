@@ -4,19 +4,12 @@ import { useRouter } from 'vue-router'
 import FilterDialog from 'src/components/Dialog/FilterDialog.vue'
 import { useStudentStore } from 'src/stores/student'
 import type { Student } from 'src/types/student'
-import AppBreadcrumbs from 'src/components/AppBreadcrumbs.vue'
 
 const router = useRouter()
 const studentStore = useStudentStore()
 
 const search1 = ref('')
 const showFilterDialog1 = ref(false)
-
-const breadcrumbs = ref({
-  previousPage: { title: 'จัดการข้อมูลนิสิต', path: '/Admin/StudentManagement' },
-  currentPage: { title: 'จัดเก็บข้อมูลนิสิต', path: '/Admin/StudentManagement/StudentStorePage' },
-  icon: 'people',
-})
 
 const filterCategories1 = ref(['major']) // <== แก้ตรงนี้
 const filters = ref({
@@ -86,7 +79,7 @@ const columns = [
 ]
 
 const goToConfirmPage = () => {
-  void router.push('/Admin/StudentManagement/StudentStorePage/ConfirmStudentDataPage')
+  void router.push('/Admin/StudentStorePage/ConfirmStudentDataPage')
 }
 </script>
 
@@ -276,11 +269,9 @@ const goToConfirmPage = () => {
 
 <template>
   <q-page class="q-pa-md">
-    <!-- ส่วนหัวของหน้า -->
-    <div style="margin-top: 20px">
-      <AppBreadcrumbs :breadcrumbs="breadcrumbs" />
+     <div class="row justify-start items-center"  style="margin-top: 20px">
+      <div class="text-h4">จัดเก็บข้อมูลนิสิต</div>
     </div>
-
     <!-- ส่วนค้นหา + ฟิลเตอร์ + ปุ่มเพิ่ม -->
     <section class="q-mt-lg">
       <div class="row justify-end items-center">

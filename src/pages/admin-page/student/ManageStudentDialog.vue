@@ -1,12 +1,10 @@
 <script setup lang="ts">
 import { nextTick, ref } from 'vue'
-import { useRouter } from 'vue-router'
 import UploadStudentDialog from './UploadStudentDialog.vue'
 
 // ตัวแปรควบคุม dialog
 const dialog = ref(false)
 const uploadDialogRef = ref<InstanceType<typeof UploadStudentDialog> | null>(null)
-const router = useRouter()
 
 // เปิด ManageStudentDialog
 const openDialog = () => {
@@ -27,13 +25,6 @@ const openUploadDialog = async () => {
   closeDialog()
 }
 
-// ปิด dialog และไปหน้า StudentStorePage
-const handleSaveData = () => {
-  console.log('ไปหน้า StudentStorePage...')
-  closeDialog()
-  void router.push('/Admin/StudentManagement/StudentStorePage')
-}
-
 // ให้ parent เรียก openDialog ได้
 defineExpose({ openDialog })
 </script>
@@ -46,9 +37,7 @@ defineExpose({ openDialog })
         <q-btn class="custom-btn cursor-pointer q-mb-sm" @click="openUploadDialog">
           อัพโหลดข้อมูลนิสิต
         </q-btn>
-        <q-btn class="custom-btn cursor-pointer" @click="handleSaveData">
-          จัดเก็บข้อมูลนิสิต
-        </q-btn>
+  
       </div>
     </q-card>
   </q-menu>

@@ -28,7 +28,6 @@ export class StudentService {
     }
 
     try {
-      console.log('Sending queryParams:', queryParams)
       const res = await api.get<PaginationResponse<Student>>(this.path, { params: queryParams })
       return res.data
     } catch (error) {
@@ -51,11 +50,7 @@ export class StudentService {
 
   static async createStudent(student: ExcelStudentRow[]) {
     try {
-      console.log('Creating student:', student)
-      console.log('📦 Data to send:', JSON.stringify(student, null, 2))
-
       const res = await api.post(this.path, student)
-      console.log('res student:', res)
       return res.status
     } catch (error) {
       showError('ไม่สามารถเพิ่มข้อมูลนักศึกษาได้')
@@ -76,7 +71,6 @@ export class StudentService {
     }
 
     try {
-      console.log('Update Payload:', payload)
       const res = await api.put(`${this.path}/${student.id}`, payload)
       return res.data
     } catch (error) {

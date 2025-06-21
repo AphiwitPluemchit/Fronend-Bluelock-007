@@ -500,8 +500,6 @@ const handleConfirmRemove = async () => {
   }
 }
 const goToPageDetail = async (id: string, disable: boolean) => {
-  console.log(id)
-  console.log('Disable:', disable)
   await router.push({
     path: `/Admin/ActivitiesManagement/ActivityDetail/${id}`,
     query: {
@@ -933,7 +931,6 @@ const pagination4 = ref({
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 async function onRequest1(props: any) {
-  console.log('onRequest1 ' + props.pagination.sortBy + ' order ' + props.pagination.descending)
   const { page, rowsPerPage, sortBy, descending } = props.pagination
 
   query1.value.page = page

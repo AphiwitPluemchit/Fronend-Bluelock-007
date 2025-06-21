@@ -87,8 +87,6 @@ const uploadFile = async () => {
       return
     }
 
-    // ✅ ส่งข้อมูล
-    console.log('📦 Sending:', formatted)
     await studentStore.createStudent(formatted)
     alert('✅ อัปโหลดสำเร็จ!')
     closeDialog()

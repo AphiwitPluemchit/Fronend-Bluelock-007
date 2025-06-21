@@ -28,7 +28,6 @@ export class FoodService {
 
   static async createFood(payload: Food) {
     try {
-      console.log('✅ payload:', payload)
       const res = await api.post(this.path, payload)
       return res.data
     } catch (error) {

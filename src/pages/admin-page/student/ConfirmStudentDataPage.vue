@@ -17,11 +17,8 @@ interface Student {
 }
 
 const breadcrumbs = ref({
-  previousPage: { title: 'จัดการข้อมูลนิสิต', path: '/Admin/StudentManagement' },
-  currentPage: { title: 'จัดเก็บข้อมูลนิสิต', path: '/Admin/StudentManagement/StudentStorePage' },
-  nextPage: {
-    title: 'ยืนยันการจัดเก็บข้อมูลนิสิต',
-    path: '/Admin/StudentManagement/StudentStorePage/ConfirmStudentDataPage',
+  previousPage: { title: 'จัดเก็บข้อมูลนิสิต', path: '/Admin/StudentStorePage' },
+  currentPage: { title: 'ยืนยันการจัดเก็บข้อมูลนิสิต',path: '/Admin/StudentStorePage/ConfirmStudentDataPage',
   },
   icon: 'people',
 })
@@ -105,7 +102,6 @@ const saveStudents = async () => {
     }
     await studentStore.getStudents()
     selectedStudents.value = []
-    console.log('จัดเก็บนิสิตเรียบร้อยแล้ว')
   } catch (error) {
     console.error('จัดเก็บนิสิตล้มเหลว:', error)
   }

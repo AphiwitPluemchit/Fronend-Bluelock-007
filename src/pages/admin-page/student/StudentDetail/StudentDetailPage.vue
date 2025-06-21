@@ -268,7 +268,6 @@ const filters = ref<{
 })
 const applyFilters = (selectedFilters: { categoryActivity: string[] }) => {
   filters.value = selectedFilters
-  console.log('Filters Applied:', filters.value)
 }
 
 const isEditMode = ref(false)
@@ -281,7 +280,6 @@ const enableEditMode = () => {
 // บันทึกแก้ไข
 const saveChanges = async () => {
   const result = await studentStore.updateStudent(studentStore.student)
-  console.log('Update result:', result)
   if (result) {
     // ปิด Edit Mode
     isEditMode.value = false

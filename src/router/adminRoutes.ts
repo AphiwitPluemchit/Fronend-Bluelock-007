@@ -24,11 +24,11 @@ const adminChildren: RouteRecordRaw[] = [
     component: () => import('pages/admin-page/student/StudentTablePage.vue'),
   },
   {
-    path: 'StudentManagement/StudentStorePage',
+    path: 'StudentStorePage',
     component: () => import('pages/admin-page/student/StudentStorePage.vue'),
   },
   {
-    path: 'StudentManagement/StudentStorePage/ConfirmStudentDataPage',
+    path: 'StudentStorePage/ConfirmStudentDataPage',
     component: () => import('pages/admin-page/student/ConfirmStudentDataPage.vue'),
   },
   {
