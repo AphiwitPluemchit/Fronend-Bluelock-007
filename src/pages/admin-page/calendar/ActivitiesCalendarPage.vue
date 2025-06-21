@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, onMounted, ref } from 'vue'
+import { computed, onMounted, ref, watch } from 'vue'
 import { today } from '@quasar/quasar-ui-qcalendar'
 import '@quasar/quasar-ui-qcalendar/dist/index.css'
 import { QCalendarMonth } from '@quasar/quasar-ui-qcalendar'
@@ -109,38 +109,40 @@ const selectedDate = ref<string>(today())
 const selectedEvents = ref<CalendarEvent[]>([])
 const calendarEvents = ref<CalendarEvent[]>([])
 
-const searchResultsByDate = computed(() => {
-  if (!query1.value.search) return null
+const groupedSearchResults = ref<Record<string, CalendarEvent[]> | null>(null)
 
-  const groups: Record<string, CalendarEvent[]> = {}
-  const searchTerm = query1.value.search.toLowerCase()
-
-  calendarEvents.value.forEach((event) => {
-    const nameMatch =
-      event.activityName.toLowerCase().includes(searchTerm) ||
-      event.activityItemName.toLowerCase().includes(searchTerm)
-
-    if (nameMatch) {
-      if (!groups[event.date]) {
-        groups[event.date] = []
-      }
-      ;(groups[event.date] ??= []).push(event)
+watch(
+  () => query1.value.search,
+  async (newSearch) => {
+    if (!newSearch) {
+      groupedSearchResults.value = null
+      return
     }
-  })
 
-  // เพิ่มการ sort แต่ละกลุ่ม
-  for (const date in groups) {
-    if (groups[date]) {
-      groups[date].sort((a, b) => {
+    const q = { ...query1.value, search: newSearch }
+    const data = await getActivityData(q)
+    const parsedEvents = parseToCalendarEvents(data.data)
+
+    // group by date
+    const grouped: Record<string, CalendarEvent[]> = {}
+    parsedEvents.forEach((e) => {
+      ;(grouped[e.date] ??= []).push(e)
+    })
+
+    // sort time + alphabet
+    for (const date in grouped) {
+      grouped[date]!.sort((a, b) => {
         const timeA = a.time?.split(' - ')[0] ?? ''
         const timeB = b.time?.split(' - ')[0] ?? ''
-        return timeA.localeCompare(timeB)
+        return timeA === timeB
+          ? a.activityName.toLowerCase().localeCompare(b.activityName.toLowerCase())
+          : timeA.localeCompare(timeB)
       })
     }
-  }
 
-  return Object.keys(groups).length > 0 ? groups : null
-})
+    groupedSearchResults.value = grouped
+  },
+)
 
 function onClickDate(payload: { scope: { timestamp: { date: string } } }) {
   selectedDate.value = payload.scope.timestamp.date
@@ -165,9 +167,9 @@ function getEvents(date: string) {
       const timeA = a.time?.split(' - ')[0] ?? ''
       const timeB = b.time?.split(' - ')[0] ?? ''
 
-      // ถ้าเวลาเริ่มเท่ากัน ให้เรียงตามตัวอักษรของชื่อกิจกรรมย่อย
+      // ถ้าเวลาเริ่มเท่ากัน ให้เรียงตามตัวอักษรของชื่อกิจกรรมย่อย (ไม่สนพิมพ์เล็ก-ใหญ่)
       if (timeA === timeB) {
-        return a.activityItemName.localeCompare(b.activityItemName)
+        return a.activityName.toLowerCase().localeCompare(b.activityName.toLowerCase())
       }
       return timeA.localeCompare(timeB)
     })
@@ -180,8 +182,9 @@ function getEventsForDay(date: string) {
     .sort((a, b) => {
       const timeA = a.time?.split(' - ')[0] ?? ''
       const timeB = b.time?.split(' - ')[0] ?? ''
+
       if (timeA === timeB) {
-        return a.activityItemName.localeCompare(b.activityItemName)
+        return a.activityName.toLowerCase().localeCompare(b.activityName.toLowerCase())
       }
       return timeA.localeCompare(timeB)
     })
@@ -402,9 +405,9 @@ function onMonthChanged({ start }: { start: { date: string } }) {
         <div class="event-panel">
           <!-- กรณีมี search -->
           <div v-if="query1.search">
-            <template v-if="searchResultsByDate">
+            <template v-if="groupedSearchResults && Object.keys(groupedSearchResults).length > 0">
               <div
-                v-for="date in Object.keys(searchResultsByDate).sort()"
+                v-for="date in Object.keys(groupedSearchResults).sort()"
                 :key="date"
                 class="q-mb-xl"
               >
@@ -412,20 +415,15 @@ function onMonthChanged({ start }: { start: { date: string } }) {
                 <div class="text-h6 q-mb-sm">{{ formatThaiDate(date) }}</div>
 
                 <!-- การ์ดกิจกรรม -->
-                <div v-for="event in searchResultsByDate[date]" :key="event.id" class="q-mb-sm">
+                <div v-for="event in groupedSearchResults[date]" :key="event.id" class="q-mb-sm">
                   <q-card
                     flat
                     bordered
                     class="q-pa-md q-mb-sm"
                     :style="`border-left: 5px solid ${getStatusColor(event.activityState)}`"
                   >
-                    <!-- <div class="row justify-between items-start">
-                      <div class="text-subname1 text-weight-bold"> -->
                     <div class="event-header-row">
-                      <div class="event-title">
-                        {{ event.activityName }}
-                      </div>
-                      <!-- <div class="text-caption text-grey-7"> -->
+                      <div class="event-title">{{ event.activityName }}</div>
                       <div class="event-category">
                         {{ event.category === 'soft' ? 'Soft Skill' : 'Hard Skill' }}
                       </div>
@@ -439,6 +437,7 @@ function onMonthChanged({ start }: { start: { date: string } }) {
               </div>
             </template>
 
+            <!-- กรณีไม่มีผลลัพธ์ -->
             <div v-else class="text-grey">ไม่พบกิจกรรมที่ตรงกับคำค้นหา</div>
           </div>
 
@@ -569,7 +568,7 @@ function onMonthChanged({ start }: { start: { date: string } }) {
 }
 
 .event-panel {
-  max-height: 580px;
+  max-height: 650px;
   overflow-y: scroll;
   padding-right: 8px;
   scrollbar-width: none; /* สำหรับ Firefox */
