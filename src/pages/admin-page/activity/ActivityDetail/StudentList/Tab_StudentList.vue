@@ -236,35 +236,44 @@ onMounted(async () => {
 <template>
   <div class="q-mb-sm student-container">
     <div class="student-table-wrapper">
-      <div class="row justify-end items-center">
-        <q-input
-          dense
-          outlined
-          v-model="search1"
-          @keyup.enter="fetchStudents"
-          label="ค้นหาชื่อ-สกุล/ รหัสนิสิต"
-          class="q-mr-sm searchbox"
-          :style="{ border: 'none' }"
-        >
-          <template v-slot:append>
-            <q-icon name="search" />
-          </template>
-        </q-input>
-        <q-select
-          dense
-          outlined
-          v-model="indexTab"
-          :options="activityItemOptions"
-          label="เลือกกิจกรรม"
-          option-label="label"
-          option-value="value"
-          emit-value
-          map-options
-          @update:model-value="fetchStudents"
-          class="q-mr-sm dropdown"
-          :style="{ border: 'none' }"
-        />
-        <FilterDialog :categories="filterCategories1" @apply="applyStudentFilters" />
+      <div class="row q-col-gutter-sm form-toolbar">
+        <!-- Row 1 -->
+        <div class="search-row">
+          <q-input
+            dense
+            outlined
+            v-model="search1"
+            @keyup.enter="fetchStudents"
+            label="ค้นหาชื่อ-สกุล/ รหัสนิสิต"
+            class="searchbox"
+            :style="{ border: 'none' }"
+          >
+            <template v-slot:append>
+              <q-icon name="search" />
+            </template>
+          </q-input>
+        </div>
+
+        <!-- Row 2 -->
+        <div class="select-filter-row">
+          <q-select
+            dense
+            outlined
+            v-model="indexTab"
+            :options="activityItemOptions"
+            label="เลือกกิจกรรม"
+            option-label="label"
+            option-value="value"
+            emit-value
+            map-options
+            @update:model-value="fetchStudents"
+            class="dropdown"
+            popup-content-class="dropdown-menu"
+            :style="{ border: 'none' }"
+            behavior="menu"
+          />
+          <FilterDialog :categories="filterCategories1" @apply="applyStudentFilters" />
+        </div>
       </div>
 
       <q-table
@@ -316,7 +325,7 @@ onMounted(async () => {
           </q-td>
         </template>
         <template v-slot:no-data>
-          <div class="full-width text-center q-pa-md text-grey" style="font-size: 20px ;">
+          <div class="full-width text-center q-pa-md text-grey" style="font-size: 20px">
             ไม่มีนิสิตที่ลงทะเบียน
           </div>
         </template>
@@ -419,8 +428,45 @@ onMounted(async () => {
   font-size: 15px;
   align-items: center;
   justify-content: center;
-
-  /* ป้องกันการขยายแนวนอนเกินไป */
   white-space: nowrap;
+}
+.form-toolbar {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: flex-end;
+  align-items: center;
+}
+
+.select-filter-row {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+.dropdown-menu {
+  max-width: 300px !important;
+  width: 100% !important;
+  box-sizing: border-box;
+}
+@media (max-width: 690px) {
+  .form-toolbar {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .searchbox {
+    width: 100% !important;
+  }
+
+  .select-filter-row {
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+  }
+
+  .dropdown {
+    width: 90% !important;
+  }
 }
 </style>

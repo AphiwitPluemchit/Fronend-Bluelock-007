@@ -233,9 +233,9 @@ const submitActivity = async () => {
   if (validDates.includes(false)) {
     return
   }
-  const skillMap: Record<string, 'hard' | 'soft' | null> = {
-    prep: 'hard',
-    academic: 'soft',
+  const skillMap: Record<string, 'soft' |'hard'   | null> = {
+    prep: 'soft',
+    academic: 'hard',
     '': null,
   }
   const skill = skillMap[activityType.value] ?? null

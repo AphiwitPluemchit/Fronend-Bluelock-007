@@ -70,7 +70,6 @@ const foodPagination = ref({
 const fetchEnrollmentSummary = async () => {
   try {
     const response = await ActivityService.getEnrollmentSummary(activityId)
-    console.log('API Response:', response) // ตรวจสอบข้อมูล API
     enrollmentSummary.value = response
   } catch (error) {
     console.error('Error fetching enrollment summary:', error)
@@ -82,7 +81,6 @@ const activityDetail = ref<Activity | null>(null)
 const fetchActivityDetail = async () => {
   try {
     const response = await ActivityService.getOne(activityId)
-    console.log('Activity Detail:', response)
     activityDetail.value = response.data
   } catch (error) {
     console.error('Error fetching activity detail:', error)

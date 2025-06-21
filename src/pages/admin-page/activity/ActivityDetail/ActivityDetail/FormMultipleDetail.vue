@@ -544,7 +544,7 @@ const saveChanges = async () => {
   }
   updated.id = props.activity.id
   updated.name = activityName.value
-  updated.skill = activityType.value === 'prep' ? 'hard' : 'soft'
+  updated.skill = activityType.value === 'prep' ? 'soft' :'hard' 
   updated.endDateEnroll = formattedCloseRegisDate.value
   updated.activityState = statusReverseMap[activityStatus.value] || 'planning'
   updated.foodVotes = foodMenu.value.map((f) => {
@@ -617,7 +617,7 @@ onMounted(() => {
 
   originalActivity.value = cloneDeep(a)
   activityName.value = a.name ?? ''
-  activityType.value = a.skill === 'hard' ? 'prep' : a.skill === 'soft' ? 'academic' : ''
+  activityType.value = a.skill === 'soft' ? 'prep' : a.skill === 'hard' ? 'academic' : ''
   formattedCloseRegisDate.value = a.endDateEnroll ?? ''
   if (a.activityState) {
     activityStatus.value = statusMap[a.activityState] || 'กำลังวางแผน'
@@ -1327,7 +1327,7 @@ onMounted(() => {
   }
   .btnchange {
   padding: 2px 10px;
-  font-size: 12px;
+  font-size: 14px;
   background-color: #000;
   color: white;
   border-radius: 10px;

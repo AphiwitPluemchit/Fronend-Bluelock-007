@@ -25,7 +25,6 @@ const currentBreadcrumb = computed(() => {
 onMounted(async () => {
   const id = route.params.id as string
   const res = await ActivityService.getOne(id)
-  console.log('📦 ได้ activity:', res)
   activity.value = res.data
 })
 
@@ -51,7 +50,7 @@ watch([tab, isPlanning], () => {
 
       <!-- Tabs -->
       <div class="tab-scroll-wrapper">
-        <q-tabs v-model="tab" align="left" dense class="no-arrow-tabs" >
+        <q-tabs v-model="tab" align="left" dense   class="tab-no-arrow" >
           <q-tab name="activity" label="รายละเอียดกิจกรรม" />
           <q-tab name="registration" label="รายละเอียดการลงทะเบียน" :disable="isPlanning" />
           <q-tab name="students" label="รายชื่อนิสิต" :disable="isPlanning" />
