@@ -4,6 +4,7 @@ import type { Student } from './student'
 
 export interface User {
   id: number
+  name: string
   email: string
   password?: string
   role: EnumUserRole

@@ -13,12 +13,21 @@ const showError = (message: string) => {
 }
 
 class CheckinoutService {
-  static async getLink(ActivityItemId: string, Type: string) {
+  static async getLink(activityId: string, Type: string) {
     try {
-      const res = await api.post<Checkinout>('/checkInOuts/generate-link', { ActivityItemId, Type })
+      const res = await api.post<Checkinout>('/checkInOuts/generate-link', { activityId, Type })
       return res.data
     } catch (error) {
       showError('สร้างลิงค์ล้มเหลว')
+      console.error('failed:', error)
+    }
+  }
+  static async checkin(userId: string, uuid: string) {
+    try {
+      const res = await api.post(`/checkInOuts/checkin/${uuid}`, { userId })
+      return res.data
+    } catch (error) {
+      showError('เช็คชื่อล้มเหลว')
       console.error('failed:', error)
     }
   }

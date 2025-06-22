@@ -1,7 +1,9 @@
 <script setup lang="ts">
 import { defineProps, defineEmits, ref, watch, computed } from 'vue'
 import CheckinoutService from 'src/services/checkinout'
-
+import { useRoute } from 'vue-router'
+const route = useRoute()
+const activityId = route.params.id as string
 // Props และ Emits
 const props = defineProps<{ modelValue: boolean }>()
 const emit = defineEmits(['update:modelValue', 'confirm', 'cancel'])
@@ -13,7 +15,7 @@ const dialogVisible = computed({
 })
 
 // State
-const selectedType = ref<'check-in' | 'check-out' | ''>('') // ประเภทที่เลือก
+const selectedType = ref<'checkin' | 'checkout' | ''>('') // ประเภทที่เลือก
 const confirmedType = ref('') // ประเภทที่ยืนยันแล้ว
 const qrLink = ref('') // ลิงก์ที่ใช้สร้าง QR
 
@@ -30,7 +32,7 @@ watch(
 )
 
 // เมื่อผู้ใช้เลือกประเภท → โหลดลิงก์ QR จาก backend
-const selectType = (type: 'check-in' | 'check-out') => {
+const selectType = (type: 'checkin' | 'checkout') => {
   selectedType.value = type
 }
 
@@ -43,7 +45,7 @@ const onCancel = () => {
 // ปุ่มยืนยัน
 const onConfirm = async () => {
   confirmedType.value = selectedType.value
-  const res = await CheckinoutService.getLink('683aaee145a98ac1ae968e6a', confirmedType.value)
+  const res = await CheckinoutService.getLink(activityId, confirmedType.value)
   qrLink.value = res?.url || ''
   emit('confirm')
 }
@@ -53,7 +55,7 @@ const onConfirm = async () => {
   <q-dialog v-model="dialogVisible">
     <q-card class="dialog-card">
       <q-card-section class="dialog-title">
-        <span>สร้าง QR-Code เช็คชื่อ{{ selectedType === 'check-in' ? 'เข้า' : 'ออก' }}</span>
+        <span>สร้าง QR-Code เช็คชื่อ{{ selectedType === 'checkin' ? 'เข้า' : 'ออก' }}</span>
       </q-card-section>
 
       <!-- ยังไม่เลือกประเภท -->
@@ -61,18 +63,18 @@ const onConfirm = async () => {
         <q-btn
           unelevated
           label="เช็คชื่อเข้า"
-          class="check-type-btn"
-          :color="selectedType === 'check-in' ? 'primary' : 'white'"
+          class="checktype-btn"
+          :color="selectedType === 'checkin' ? 'primary' : 'white'"
           text-color="black"
-          @click="selectType('check-in')"
+          @click="selectType('checkin')"
         />
         <q-btn
           unelevated
           label="เช็คชื่อออก"
-          class="check-type-btn"
-          :color="selectedType === 'check-out' ? 'primary' : 'white'"
+          class="checktype-btn"
+          :color="selectedType === 'checkout' ? 'primary' : 'white'"
           text-color="black"
-          @click="selectType('check-out')"
+          @click="selectType('checkout')"
         />
       </q-card-section>
 
@@ -116,7 +118,7 @@ const onConfirm = async () => {
   align-items: center;
   gap: 10px;
 }
-.check-type-btn {
+.checktype-btn {
   display: block;
   width: 100%;
   margin: 8px 0;

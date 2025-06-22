@@ -10,11 +10,11 @@ const api = axios.create({
 })
 api.interceptors.request.use((config) => {
   const userPayload = localStorage.getItem('access_token')
+
   if (userPayload) {
-    if (userPayload) {
-      config.headers.Authorization = `Bearer ${userPayload}`
-    }
+    config.headers.Authorization = `Bearer ${userPayload}`
   }
+
   return config
 })
 export default boot(({ app }) => {

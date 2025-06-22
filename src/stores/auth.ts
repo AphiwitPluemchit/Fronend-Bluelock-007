@@ -27,6 +27,8 @@ export const useAuthStore = defineStore('auth', {
     // ✅ ดึง user จาก localStorage แล้ว parse
     getUser: (): Partial<User> | null => {
       const user = localStorage.getItem('user')
+      console.log('user', user)
+
       return user ? JSON.parse(user) : null
     },
 
@@ -44,7 +46,7 @@ export const useAuthStore = defineStore('auth', {
 
     getName(): string {
       const user = this.getUser
-      return user?.student?.name || user?.email || 'ไม่ระบุ'
+      return user?.name || 'ไม่ระบุ'
     },
   },
 
