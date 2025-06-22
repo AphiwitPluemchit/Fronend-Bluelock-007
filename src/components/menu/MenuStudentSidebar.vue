@@ -2,11 +2,11 @@
   <q-drawer
     v-model="leftDrawerOpen"
     show-if-above
-    behavior="desktop"
+    :behavior="drawerBehavior"
     side="left"
     bordered
     :width="260"
-    style="font-size: 18px; font-weight: 500; margin-right: 10px"
+    style="font-size: 18px; font-weight: 500; margin-right: 10px; background-color: #edf0f5"
   >
     <!-- ให้ q-list เต็มความสูง และแบ่งพื้นที่ระหว่างเมนู กับ Logout -->
     <q-list padding style="" class="menu-list flex column justify-between full-height">
@@ -43,9 +43,11 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, computed } from 'vue'
 import { useRouter } from 'vue-router'
+import { useQuasar } from 'quasar'
 
+const $q = useQuasar()
 const router = useRouter()
 const leftDrawerOpen = ref(false)
 
@@ -56,7 +58,9 @@ const linksList = [
   { title: 'บันทึกชั่วโมงอบรม', icon: 'history', link: '/Student/RecordPage' },
   { title: 'ใบประกาศนียบัตร', icon: 'school', link: '/Student/CertificatePage' },
 ]
-
+const drawerBehavior = computed(() => {
+  return $q.screen.width < 1100 ? 'mobile' : 'desktop' // ถ้าหน้าจอเล็กกว่า lg (<1100px) ใช้ mobile
+})
 async function logout() {
   await router.push('/')
 }

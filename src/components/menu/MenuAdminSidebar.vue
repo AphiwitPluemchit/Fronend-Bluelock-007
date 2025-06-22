@@ -5,7 +5,6 @@
     :behavior="drawerBehavior"
     side="left"
     bordered
-    class="admin-sidebar"
     :width="260"
     style="font-size: 18px; font-weight: 500; margin-right: 10px; background-color: #edf0f5"
   >
@@ -28,7 +27,11 @@
               :to="sublink.link"
               class="no-link"
             >
-              <q-item clickable v-ripple  :class="['sub-menu-item', { 'active-menu': isActiveLink(sublink) }]">
+              <q-item
+                clickable
+                v-ripple
+                :class="['sub-menu-item', { 'active-menu': isActiveLink(sublink) }]"
+              >
                 <q-item-section>
                   {{ sublink.title }}
                 </q-item-section>
@@ -119,7 +122,7 @@ defineExpose({ toggleSidebar })
 
 <style scoped>
 .sub-menu-item {
-  padding-left: 72px !important; 
+  padding-left: 72px !important;
   margin-top: 10px !important;
 }
 .no-link {
@@ -160,20 +163,4 @@ defineExpose({ toggleSidebar })
   border-radius: 0 32px 32px 0
 </style>
 
-<style>
-@media (max-width: 1100px) {
-  .custom-drawer-wrapper .q-drawer {
-    top: 64px !important;
-    height: calc(100% - 64px) !important;
-  }
-
-  .q-header {
-    z-index: 3000 !important;
-  }
-  body.q-body--drawer-left-opened::after {
-    content: none !important;
-    background: transparent !important;
-    pointer-events: none !important; /* ✅ สำคัญมาก */
-  }
-}
-</style>
+<style></style>

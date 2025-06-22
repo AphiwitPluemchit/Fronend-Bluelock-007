@@ -218,5 +218,20 @@ $dark-page: #121212;
 .q-input {
   height: 40px;
 }
+@media (max-width: 1100px) {
+  .custom-drawer-wrapper .q-drawer {
+    top: 64px !important;
+    height: calc(100% - 64px) !important;
+  }
+
+  .q-header {
+    z-index: 3000 !important;
+  }
+  body.q-body--drawer-left-opened::after {
+    content: none !important;
+    background: transparent !important;
+    pointer-events: none !important; /* ✅ สำคัญมาก */
+  }
+}
 // นำเข้าฟอนต์
 @import '@fontsource-variable/noto-serif-thai'; // Defaults to wght axis
