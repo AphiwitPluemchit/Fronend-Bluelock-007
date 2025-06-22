@@ -13,6 +13,11 @@ const registrationSummary = ref({
   absent: 5,
 })
 
+// เปิด dialog → รีเซตค่า
+const showCreateQR_CodeDialog = () => {
+  isDialogOpen.value = true
+  console.log(isDialogOpen.value)
+}
 
 // ยกเลิก → ปิด + รีเซตค่า
 const cancelCreateQR_Code = () => {
@@ -31,7 +36,12 @@ const confirmCreateQR_Code = () => {
   <div class="summary-container">
     <div class="summary-content">
       <!-- ส่วนรูปภาพ (ซ้าย) -->
-  
+      <div class="image-section">
+        <div class="upload-box">
+          <q-icon name="image" size="80px" class="image-icon" />
+        </div>
+        <p class="image-note"></p>
+        <q-btn label="เช็คชื่อ" @click="showCreateQR_CodeDialog" class="check-in-btn" />
 
         <!-- ไดอะล็อกสำหรับสร้าง QR-Code เช็คชื่อ -->
       </div>
@@ -95,7 +105,7 @@ const confirmCreateQR_Code = () => {
         </div>
       </div>
     </div>
-  
+  </div>
   <checkInOutDialog
     v-model="isDialogOpen"
     @cancel="cancelCreateQR_Code"
