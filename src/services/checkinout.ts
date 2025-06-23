@@ -31,6 +31,29 @@ class CheckinoutService {
       console.error('failed:', error)
     }
   }
+  static async checkout(userId: string, uuid: string) {
+    try {
+      const res = await api.post(`/checkInOuts/checkout/${uuid}`, { userId })
+      return res.data
+    } catch (error) {
+      showError('เช็คชื่อล้มเหลว')
+      console.error('failed:', error)
+    }
+  }
+  static async getStatus(studentId: string, activityItemId: string) {
+    try {
+      const res = await api.get('/checkInOuts/status', {
+        params: {
+          studentId,
+          activityItemId,
+        },
+      })
+      return res.data
+    } catch (error) {
+      showError('ดึงข้อมูลล้มเหลว')
+      console.error('failed:', error)
+    }
+  }
 }
 
 export default CheckinoutService

@@ -31,15 +31,17 @@
           </div>
           <div class="row">
             <div class="col-6 text-right">
-              <div class="q-mb-lg q-ml-md">ชื่อ : นายศิวัช รัตนวงศ์</div>
+              <div class="q-mb-lg q-ml-md">ชื่อ : {{ auth.getUser?.name }}</div>
             </div>
             <div class="col-6">
-              <div class="q-mb-lg q-ml-md">รหัสนิสิต : 65160305</div>
+              <div class="q-mb-lg q-ml-md">รหัสนิสิต : {{ auth.getUser?.code }}</div>
             </div>
           </div>
           <div class="row">
             <div class="col-12 text-center">
-              <div class="q-mb-lg q-ml-md">วันที่ 15 มกราคม 2568</div>
+              <div class="q-mb-lg q-ml-md">
+                {{ formatDate(checkStatus.checkOut) || 'ยังไม่มีข้อมูล' }}
+              </div>
             </div>
           </div>
           <div class="row">
@@ -49,7 +51,9 @@
           </div>
           <div class="row">
             <div class="col-12 text-center">
-              <div class="q-mb-lg q-ml-md text-h3">10:00 น.</div>
+              <div class="q-mb-lg q-ml-md text-h3">
+                {{ formatTime(checkStatus.checkIn) || 'ยังไม่มีข้อมูล' }}
+              </div>
             </div>
           </div>
           <div class="row">
@@ -59,7 +63,9 @@
           </div>
           <div class="row">
             <div class="col-12 text-center">
-              <div class="q-mb-lg q-ml-md text-h3">16:30 น.</div>
+              <div class="q-mb-lg q-ml-md text-h3">
+                {{ formatTime(checkStatus.checkOut) || 'ยังไม่มีข้อมูล' }}
+              </div>
             </div>
           </div>
         </div>
@@ -67,14 +73,6 @@
     </div>
   </q-page>
   <!-- Confirm Dialog-->
-  <RegisterConfirmDialog
-    v-model="showRegisterDialog"
-    :activityItems="activity?.activityItems ?? []"
-    :food="activity?.foodVotes ?? []"
-    @confirm="register"
-  />
-  <RegisterFailDialog v-model="showFailDialog" />
-  <UnRegisterDialog v-model="showUnRegisterDialog" @confirm="unRegister" />
 </template>
 
 <script setup lang="ts">
@@ -82,54 +80,55 @@ import { ref, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
 import { useStudentActivitystore } from 'src/stores/activity'
 import { EnrollmentService } from 'src/services/enrollment'
-import RegisterConfirmDialog from '../../Dialog/RegisterConfirmDialog.vue'
-import RegisterFailDialog from '../../Dialog/RegisterFailDialog.vue'
-import UnRegisterDialog from '../../Dialog/UnRegisterDialog.vue'
+
 import type { Activity } from 'src/types/activity'
 
 import { useAuthStore } from 'src/stores/auth'
 import { api } from 'boot/axios'
+import { useCheckinoutStore } from 'src/stores/checkinout'
+import dayjs from 'dayjs'
+import 'dayjs/locale/th'
+dayjs.locale('th')
 const baseurl = api.defaults.baseURL
 type Enroll = {
   isEnrolled: boolean
   enrollmentId: string
+  activityItemId: string
 }
-const StudentActivityStore = useStudentActivitystore()
+type Status = {
+  checkIn: string
+  checkOut: string
+}
+const formatDate = (iso: string): string => {
+  if (!iso) return 'ยังไม่เช็คชื่อ'
+  return dayjs(iso).add(7, 'hour').format('D MMMM BBBB')
+}
+const formatTime = (iso: string): string => {
+  if (!iso) return 'ยังไม่เช็คชื่อ'
+  return dayjs(iso).add(7, 'hour').format('HH:mm น.')
+}
+const checkinoutStore = useCheckinoutStore()
+const studentActivityStore = useStudentActivitystore()
 const route = useRoute()
-const showRegisterDialog = ref(false)
-const showUnRegisterDialog = ref(false)
-const showFailDialog = ref(false)
+const checkStatus = ref<Status>({ checkIn: '', checkOut: '' })
 const activity = ref<Activity | null>(null)
-const enrollment = ref<Enroll>({ isEnrolled: false, enrollmentId: '' })
+const enrollment = ref<Enroll>({ isEnrolled: false, enrollmentId: '', activityItemId: '' })
 const screen = ref(false)
 const auth = useAuthStore()
 
 // ฟังก์ชันลงทะเบียน
+async function fetchStatus(studentId: string, activityItemId: string) {
+  console.log(studentId)
+  console.log(activityItemId)
+  const res = await checkinoutStore.getStatus(studentId, activityItemId)
+  console.log(res)
 
-const register = async (activityItemId: string, selectedFood: string | null) => {
-  const payload = {
-    activityItemId,
-    studentId: auth.getUser?.id,
-    food: selectedFood,
-  }
-  try {
-    console.log('ส่ง payload:', payload)
-    await StudentActivityStore.enrollment(payload)
-    await fetchData()
-  } catch (error) {
-    console.log('error:', error)
-    showFailDialog.value = true
-  }
-}
-const unRegister = async (modelValue: boolean) => {
-  console.log('ยกเลิกลงทะเบียน', modelValue)
-  await EnrollmentService.removeOne(enrollment.value.enrollmentId)
-  await fetchData()
+  checkStatus.value = res
 }
 
 async function fetchData() {
-  await StudentActivityStore.fetchOneData(route.params.id as string)
-  activity.value = StudentActivityStore.form as Activity
+  await studentActivityStore.fetchOneData(route.params.id as string)
+  activity.value = studentActivityStore.form as Activity
   try {
     const response = await EnrollmentService.getEnrollmentsByStudentIDAndActivityID(
       `${auth.getUser?.id}`,
@@ -137,9 +136,10 @@ async function fetchData() {
     )
     enrollment.value = response
     console.log(enrollment.value)
+    await fetchStatus(`${auth.getUser?.id}`, enrollment.value.activityItemId)
   } catch (error) {
     console.log(error)
-    enrollment.value = { isEnrolled: false, enrollmentId: '' }
+    enrollment.value = { isEnrolled: false, enrollmentId: '', activityItemId: '' }
   }
 }
 

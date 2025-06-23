@@ -56,6 +56,8 @@ export const useAuthStore = defineStore('auth', {
       try {
         const data = await AuthService.login(this.form.email, this.form.password)
         if (data?.token && data?.user) {
+          console.log(data.user)
+
           localStorage.setItem('access_token', data.token)
           localStorage.setItem('user', JSON.stringify(data.user))
           return data
