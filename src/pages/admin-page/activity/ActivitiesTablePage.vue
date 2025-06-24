@@ -1673,7 +1673,7 @@ watchEffect(() => {
   flex-wrap: wrap;
 }
 
-@media (max-width: 370px) {
+@media (max-width: 400px) {
   .info-row {
     flex-direction: column;
     align-items: flex-start; /* ชิดซ้าย */
