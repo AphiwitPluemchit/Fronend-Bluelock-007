@@ -1,472 +1,8 @@
-<template>
-  <q-page class="q-pa-md">
-    <!-- ชื่อหน้า -->
-    <div class="row justify-between items-center q-mb-md" style="margin-top: 20px">
-      <div class="texttitle">จัดการกิจกรรม</div>
-      <q-btn dense outlined label="เพิ่มกิจกรรม" class="btnadd" bo @click="goToPage()" />
-    </div>
-
-    <!-- ตาราง 1 เปิด/ปิด ลงทะเบียน -->
-    <section class="q-mt-lg">
-      <div class="row items-center justify-between activity-section-header">
-        <!-- หัวข้อ -->
-        <div class="textheader">กิจกรรมที่เปิดลงทะเบียนและปิดลงทะเบียน</div>
-        <div class="row filter-row no-wrap q-mt-sm">
-          <!-- 🔹 Search box -->
-          <q-input
-            dense
-            outlined
-            v-model="query1.search"
-            label="ค้นหา ชื่อกิจกรรม"
-            class="searchbox"
-            :style="{ border: 'none' }"
-          >
-            <template v-slot:append>
-              <q-icon name="search" />
-            </template>
-          </q-input>
-
-          <!-- 🔹 Filter Dialog -->
-          <FilterDialog
-            class="filter-btn"
-            :model-value="showFilterDialog1"
-            :categories="filterCategories || []"
-            :years="query1.studentYear || []"
-            :majors="query1.major || []"
-            :status-activities="query1.activityState || []"
-            :category-activities="query1.skill || []"
-            @apply="applyFilters1"
-          />
-        </div>
-      </div>
-      <q-table
-        bordered
-        flat
-        :rows="mapActivitiesToTableRows(activitys1)"
-        :columns="columns"
-        v-model:pagination="pagination1"
-        :rows-per-page-options="[5, 7, 10, 15, 20]"
-        @request="onRequest1"
-        row-key="id"
-        class="q-mt-md my-sticky-header-table"
-      >
-        <!-- หัวตาราง Sticky -->
-        <template v-slot:header="props">
-          <q-tr :props="props">
-            <q-th v-for="col in props.cols" :key="col.name" :props="props" :style="col.headerStyle">
-              {{ col.label }}
-            </q-th>
-          </q-tr>
-        </template>
-        <!-- เนื้อหาตาราง -->
-        <template v-slot:body="props">
-          <q-tr :props="props" @click="toggleRowExpansion1(props.row.id)" class="cursor-pointer">
-            <q-td key="no">
-              <div class="row items-center no-wrap">
-                <q-icon
-                  :name="expandedRows1.has(props.row.id) ? 'expand_less' : 'expand_more'"
-                  class="q-mr-sm"
-                />
-                {{ props.rowIndex + 1 }}
-              </div>
-            </q-td>
-            <q-td key="name">
-              {{ props.row.name }}
-            </q-td>
-            <q-td key="dates">{{ props.row.dates }}</q-td>
-            <q-td key="time">{{ props.row.time }}</q-td>
-            <q-td key="location">{{ props.row.location }}</q-td>
-            <q-td key="participants">{{ props.row.participants }}</q-td>
-            <q-td key="skill">{{ props.row.skill }}</q-td>
-
-            <!-- ✅ จัดกลางเฉพาะสถานะ -->
-            <q-td key="activityState">
-              <div class="row justify-center items-center full-width">
-                <q-badge
-                  :label="props.row.activityState"
-                  :class="getStatusClass(props.row.activityState)"
-                  class="status-badge"
-                  rounded
-                  unelevated
-                />
-              </div>
-            </q-td>
-            <q-td class="q-gutter-x-sm" key="action">
-              <q-icon clickable name="visibility" @click="goToPageDetail(props.row.id, true)">
-                <q-tooltip>ดูรายละเอียด</q-tooltip>
-              </q-icon>
-              <q-icon clickable name="edit" @click.stop="goToPageDetail(props.row.id, false)">
-                <q-tooltip>แก้ไข</q-tooltip>
-              </q-icon>
-            </q-td>
-          </q-tr>
-          <!-- Expanded Row Content -->
-          <q-tr v-if="expandedRows1.has(props.row.id)" class="expanded-row">
-            <q-td colspan="9" class="expanded-content">
-              <div class="q-pa-sm">
-                <div class="text-subtitle2 q-mb-sm">รายละเอียดกิจกรรมย่อย</div>
-                <div v-if="props.row.activityItems && props.row.activityItems.length > 0">
-                  <div
-                    v-for="(item, index) in props.row.activityItems"
-                    :key="index"
-                    class="activity-item q-mb-sm q-pa-xs"
-                    style="border: 1px solid #e0e0e0; border-radius: 4px"
-                  >
-                    <div class="row items-center q-gutter-sm text-body2">
-                      <div class="col-auto">
-                        <span class="text-weight-bold">ชื่อ:</span> {{ item.name || '-' }}
-                      </div>
-
-                      <div class="col-auto">
-                        <span class="text-weight-bold">รับ:</span>
-                        {{ item.maxParticipants || '-' }} คน
-                      </div>
-                      <div class="col-auto">
-                        <span class="text-weight-bold">ลงทะเบียน:</span>
-                        {{ item.enrollmentCount || 0 }} คน
-                      </div>
-                      <div class="col-auto" v-if="item.dates && item.dates.length > 0">
-                        <span class="text-weight-bold">วันที่:</span>
-                        <span v-for="(date, dateIndex) in item.dates" :key="dateIndex">
-                          {{ formatDateToThai(date.date) }} {{ date.stime }}-{{ date.etime
-                          }}{{ dateIndex < item.dates.length - 1 ? ', ' : '' }}
-                        </span>
-                      </div>
-                      <div class="col-auto">
-                        <span class="text-weight-bold">ชั่วโมง:</span> {{ item.hour || '-' }} ชม.
-                      </div>
-                      <div class="col-auto">
-                        <span class="text-weight-bold">ผู้ดำเนินการ:</span>
-                        {{ item.operator || '-' }}
-                      </div>
-                      <div class="col-auto">
-                        <span class="text-weight-bold">ห้อง:</span>
-                        {{ item.rooms?.join(', ') || '-' }}
-                      </div>
-                      <div class="col-auto">
-                        <span class="text-weight-bold">สาขา:</span>
-                        {{ item.majors?.join(', ') || '-' }}
-                      </div>
-                    </div>
-                    <div
-                      v-if="item.description && item.description !== '-'"
-                      class="q-mt-xs text-body2"
-                    >
-                      <span class="text-weight-bold">คำอธิบาย:</span> {{ item.description }}
-                    </div>
-                  </div>
-                </div>
-                <div v-else class="text-grey-6">ไม่มีข้อมูลกิจกรรมย่อย</div>
-              </div>
-            </q-td>
-          </q-tr>
-        </template>
-        <template v-slot:no-data>
-          <div class="full-width text-center q-pa-md text-grey" style="font-size: 20px">
-            ไม่มีกิจกรรมที่เปิดลงทะเบียนและปิดลงทะเบียน
-          </div>
-        </template>
-      </q-table>
-    </section>
-
-    <!-- ตาราง 2 กำลังวางแผน-->
-    <section class="q-mt-lg">
-      <div class="row items-center justify-between activity-section-header">
-        <!-- หัวข้อ -->
-        <div class="textheader">กิจกรรมที่กำลังวางแผน</div>
-        <div class="row filter-row no-wrap q-mt-sm">
-          <!-- 🔹 Search box -->
-          <q-input
-            dense
-            outlined
-            v-model="query2.search"
-            label="ค้นหา ชื่อกิจกรรม"
-            class="searchbox"
-            :style="{ border: 'none' }"
-          >
-            <template v-slot:append>
-              <q-icon name="search" />
-            </template>
-          </q-input>
-
-          <!-- 🔹 Filter Dialog -->
-          <FilterDialog
-            class="filter-btn"
-            :model-value="showFilterDialog2"
-            :categories="filterCategories || []"
-            :years="query2.studentYear || []"
-            :majors="query2.major || []"
-            :status-activities="query2.activityState || []"
-            :category-activities="query2.skill || []"
-            @apply="applyFilters2"
-          />
-        </div>
-      </div>
-
-      <q-table
-        bordered
-        flat
-        :rows="mapActivitiesToTableRows(activitys2)"
-        :columns="columns"
-        v-model:pagination="pagination2"
-        :rows-per-page-options="[5, 7, 10, 15, 20]"
-        @request="onRequest2"
-        row-key="id"
-        class="q-mt-md my-sticky-header-table"
-      >
-        <!-- หัวตาราง Sticky -->
-        <template v-slot:header="props">
-          <q-tr :props="props">
-            <q-th v-for="col in props.cols" :key="col.name" :props="props">
-              {{ col.label }}
-            </q-th>
-          </q-tr>
-        </template>
-        <!-- เนื้อหาตาราง -->
-        <template v-slot:body="props">
-          <q-tr :props="props">
-            <q-td key="no">{{ props.rowIndex + 1 }}</q-td>
-            <q-td key="name">
-              {{ props.row.name }}
-            </q-td>
-            <q-td key="dates">{{ props.row.dates }}</q-td>
-            <q-td key="time">{{ props.row.time }}</q-td>
-            <q-td key="location">{{ props.row.location }}</q-td>
-            <q-td key="participants">{{ props.row.participants }}</q-td>
-            <q-td key="skill">{{ props.row.skill }}</q-td>
-
-            <!-- ✅ จัดกลางเฉพาะสถานะ -->
-            <q-td key="activityState">
-              <q-badge
-                :label="props.row.activityState"
-                :class="getStatusClass(props.row.activityState)"
-                class="status-badge"
-                rounded
-                unelevated
-              />
-            </q-td>
-
-            <q-td key="action" class="text-left q-gutter-x-sm">
-              <q-icon clickable name="visibility" @click="goToPageDetail(props.row.id, true)">
-                <q-tooltip>ดูรายละเอียด</q-tooltip>
-              </q-icon>
-              <q-icon clickable name="edit" @click="goToPageDetail(props.row.id, false)">
-                <q-tooltip>แก้ไข</q-tooltip>
-              </q-icon>
-            </q-td>
-          </q-tr>
-        </template>
-        <template v-slot:no-data>
-          <div class="full-width text-center q-pa-md text-grey" style="font-size: 20px">
-            ไม่มีกิจกรรมที่เสร็จสิ้น
-          </div>
-        </template>
-      </q-table>
-    </section>
-
-    <!-- ตาราง 3 เสร็จสิ้น-->
-    <section class="q-mt-lg">
-      <div class="row items-center justify-between activity-section-header">
-        <!-- หัวข้อ -->
-        <div class="textheader">กิจกรรมที่เสร็จสิ้น</div>
-        <div class="row filter-row no-wrap q-mt-sm">
-          <!-- 🔹 Search box -->
-          <q-input
-            dense
-            outlined
-            v-model="query3.search"
-            label="ค้นหา ชื่อกิจกรรม"
-            class="searchbox"
-            :style="{ border: 'none' }"
-          >
-            <template v-slot:append>
-              <q-icon name="search" />
-            </template>
-          </q-input>
-
-          <!-- 🔹 Filter Dialog -->
-          <FilterDialog
-            class="filter-btn"
-            :model-value="showFilterDialog3"
-            :categories="filterCategories || []"
-            :years="query3.studentYear || []"
-            :majors="query3.major || []"
-            :status-activities="query3.activityState || []"
-            :category-activities="query3.skill || []"
-            @apply="applyFilters3"
-          />
-        </div>
-      </div>
-      <q-table
-        bordered
-        flat
-        :rows="mapActivitiesToTableRows(activitys3)"
-        :columns="columns"
-        v-model:pagination="pagination3"
-        :rows-per-page-options="[5, 7, 10, 15, 20]"
-        @request="onRequest3"
-        row-key="id"
-        class="q-mt-md my-sticky-header-table"
-      >
-        <!-- หัวตาราง Sticky -->
-        <template v-slot:header="props">
-          <q-tr :props="props">
-            <q-th v-for="col in props.cols" :key="col.name" :props="props">
-              {{ col.label }}
-            </q-th>
-          </q-tr>
-        </template>
-
-        <!-- เนื้อหาตาราง -->
-        <template v-slot:body="props">
-          <q-tr :props="props">
-            <q-td key="no">{{ props.rowIndex + 1 }}</q-td>
-            <q-td key="name" class="text-left">
-              {{ props.row.name }}
-            </q-td>
-            <q-td key="dates">{{ props.row.dates }}</q-td>
-            <q-td key="time">{{ props.row.time }}</q-td>
-            <q-td key="location">{{ props.row.location }}</q-td>
-            <q-td key="participants">{{ props.row.participants }}</q-td>
-            <q-td key="skill">{{ props.row.skill }}</q-td>
-
-            <!-- ✅ จัดกลางเฉพาะสถานะ -->
-            <q-td key="activityState">
-              <q-badge
-                :label="props.row.activityState"
-                :class="getStatusClass(props.row.activityState)"
-                class="status-badge"
-                rounded
-                unelevated
-              />
-            </q-td>
-
-            <q-td key="action" class="text-left q-gutter-x-sm">
-              <q-icon clickable name="visibility" @click="goToPageDetail(props.row.id, true)">
-                <q-tooltip>ดูรายละเอียด</q-tooltip>
-              </q-icon>
-              <q-icon clickable name="edit" @click="goToPageDetail(props.row.id, false)">
-                <q-tooltip>แก้ไข</q-tooltip>
-              </q-icon>
-              <!-- <q-icon clickable name="delete" @click="openRemoveDialog(props.row.id)">
-                <q-tooltip>ลบ</q-tooltip>
-              </q-icon> -->
-            </q-td>
-          </q-tr>
-        </template>
-        <template v-slot:no-data>
-          <div class="full-width text-center q-pa-md text-grey" style="font-size: 20px">
-            ไม่มีกิจกรรมที่เสร็จสิ้น
-          </div>
-        </template>
-      </q-table>
-    </section>
-
-    <!-- ตางราง 4 ยกเลิก -->
-    <section class="q-mt-lg">
-      <div class="row items-center justify-between activity-section-header">
-        <!-- หัวข้อ -->
-        <div class="textheader">กิจกรรมที่ยกเลิก</div>
-        <div class="row filter-row no-wrap q-mt-sm">
-          <!-- 🔹 Search box -->
-          <q-input
-            dense
-            outlined
-            v-model="query4.search"
-            label="ค้นหา ชื่อกิจกรรม"
-            class="searchbox"
-            :style="{ border: 'none' }"
-          >
-            <template v-slot:append>
-              <q-icon name="search" />
-            </template>
-          </q-input>
-
-          <!-- 🔹 Filter Dialog -->
-          <FilterDialog
-            class="filter-btn"
-            :model-value="showFilterDialog4"
-            :categories="filterCategories || []"
-            :years="query4.studentYear || []"
-            :majors="query4.major || []"
-            :status-activities="query4.activityState || []"
-            :category-activities="query4.skill || []"
-            @apply="applyFilters4"
-          />
-        </div>
-      </div>
-      <q-table
-        bordered
-        flat
-        :rows="mapActivitiesToTableRows(activitys4)"
-        :columns="columns"
-        v-model:pagination="pagination4"
-        :rows-per-page-options="[5, 7, 10, 15, 20]"
-        @request="onRequest4"
-        row-key="id"
-        class="q-mt-md my-sticky-header-table"
-      >
-        <!-- หัวตาราง Sticky -->
-        <template v-slot:header="props">
-          <q-tr :props="props">
-            <q-th v-for="col in props.cols" :key="col.name" :props="props">
-              {{ col.label }}
-            </q-th>
-          </q-tr>
-        </template>
-        <!-- เนื้อหาตาราง -->
-        <template v-slot:body="props">
-          <q-tr :props="props">
-            <q-td key="no" class="text-left">{{ props.rowIndex + 1 }}</q-td>
-            <q-td key="name">
-              {{ props.row.name }}
-            </q-td>
-            <q-td key="dates">{{ props.row.dates }}</q-td>
-            <q-td key="time">{{ props.row.time }}</q-td>
-            <q-td key="location">{{ props.row.location }}</q-td>
-            <q-td key="participants">{{ props.row.participants }}</q-td>
-            <q-td key="skill">{{ props.row.skill }}</q-td>
-
-            <!-- ✅ จัดกลางเฉพาะสถานะ -->
-            <q-td key="activityState">
-              <q-badge
-                :label="props.row.activityState"
-                :class="getStatusClass(props.row.activityState)"
-                class="status-badge"
-                rounded
-                unelevated
-              />
-            </q-td>
-
-            <q-td key="action" class="text-left q-gutter-x-sm">
-              <!-- <q-icon clickable name="visibility" @click="goToPageDetail(props.row.id, true)">
-                <q-tooltip>ดูรายละเอียด</q-tooltip>
-              </q-icon> -->
-              <q-icon clickable name="edit" @click="goToPageDetail(props.row.id, false)">
-                <q-tooltip>แก้ไข</q-tooltip>
-              </q-icon>
-              <q-icon clickable name="delete" @click="openRemoveDialog(props.row.id)">
-                <q-tooltip>ลบ</q-tooltip>
-              </q-icon>
-            </q-td>
-          </q-tr>
-        </template>
-        <template v-slot:no-data>
-          <div class="full-width text-center q-pa-md text-grey" style="font-size: 20px">
-            ไม่มีกิจกรรมที่ยกเลิก
-          </div>
-        </template>
-      </q-table>
-    </section>
-  </q-page>
-  <RemoveDialog v-model="isRemoveDialogOpen" @confirm="handleConfirmRemove" />
-</template>
-
 <script setup lang="ts">
 import 'dayjs/locale/th'
 import dayjs from 'dayjs'
 import { useRouter } from 'vue-router'
-import { nextTick, onMounted, ref, watch } from 'vue'
+import { nextTick, onBeforeUnmount, onMounted, ref, watch, watchEffect } from 'vue'
 import buddhistEra from 'dayjs/plugin/buddhistEra'
 import { ActivityService } from 'src/services/activity'
 import type { Pagination } from 'src/types/pagination'
@@ -913,7 +449,6 @@ const pagination2 = ref({
   rowsPerPage: query2.value.limit,
   rowsNumber: 0,
 })
-
 const pagination3 = ref({
   sortBy: query3.value.sortBy,
   descending: query3.value.order === 'desc',
@@ -1021,9 +556,1005 @@ watch(
     await debouncedSearch4()
   },
 )
+const tabIndex = ref(0)
+const isMediumScreen = ref(false)
+const isSmallScreen = ref(false)
+
+const checkScreen = () => {
+  const width = window.innerWidth
+  isSmallScreen.value = width <= 650
+  isMediumScreen.value = width <= 850
+}
+
+function truncateText(text: string, maxLength = 30): string {
+  if (!text) return '-'
+
+  // ใช้ค่าจาก ref ที่ reactive แล้ว
+  let dynamicMaxLength = maxLength
+  if (isSmallScreen.value) {
+    dynamicMaxLength = 45
+  } else if (isMediumScreen.value) {
+    dynamicMaxLength = 35
+  }
+
+  return text.length > dynamicMaxLength ? text.slice(0, dynamicMaxLength - 3) + '...' : text
+}
+onMounted(() => {
+  checkScreen()
+  window.addEventListener('resize', checkScreen)
+})
+onBeforeUnmount(() => {
+  window.removeEventListener('resize', checkScreen)
+})
+watchEffect(() => {
+  console.log('screen width changed →', {
+    isSmall: isSmallScreen.value,
+    isMedium: isMediumScreen.value,
+  })
+})
 </script>
 
+<template>
+  <q-page class="q-pa-md">
+    <!-- ชื่อหน้า -->
+    <div class="row justify-between items-center q-mb-md" style="margin-top: 20px">
+      <div class="texttitle">จัดการกิจกรรม</div>
+      <q-btn dense outlined label="เพิ่มกิจกรรม" class="btnadd" bo @click="goToPage()" />
+    </div>
+
+    <!-- FullScreen -->
+    <template v-if="!isMediumScreen">
+      <!-- ตาราง 1 เปิด/ปิด ลงทะเบียน -->
+      <section class="q-mt-lg">
+        <div class="row items-center justify-between activity-section-header">
+          <!-- หัวข้อ -->
+          <div class="textheader">กิจกรรมที่เปิดลงทะเบียนและปิดลงทะเบียน</div>
+          <div class="row filter-row no-wrap q-mt-sm">
+            <!-- 🔹 Search box -->
+            <q-input
+              dense
+              outlined
+              v-model="query1.search"
+              label="ค้นหา ชื่อกิจกรรม"
+              class="searchbox"
+              :style="{ border: 'none' }"
+            >
+              <template v-slot:append>
+                <q-icon name="search" />
+              </template>
+            </q-input>
+
+            <!-- 🔹 Filter Dialog -->
+            <FilterDialog
+              class="filter-btn"
+              :model-value="showFilterDialog1"
+              :categories="filterCategories || []"
+              :years="query1.studentYear || []"
+              :majors="query1.major || []"
+              :status-activities="query1.activityState || []"
+              :category-activities="query1.skill || []"
+              @apply="applyFilters1"
+            />
+          </div>
+        </div>
+        <q-table
+          bordered
+          flat
+          :rows="mapActivitiesToTableRows(activitys1)"
+          :columns="columns"
+          v-model:pagination="pagination1"
+          :rows-per-page-options="[5, 7, 10, 15, 20]"
+          @request="onRequest1"
+          row-key="id"
+          class="q-mt-md my-sticky-header-table"
+        >
+          <!-- หัวตาราง Sticky -->
+          <template v-slot:header="props">
+            <q-tr :props="props">
+              <q-th
+                v-for="col in props.cols"
+                :key="col.name"
+                :props="props"
+                :style="col.headerStyle"
+              >
+                {{ col.label }}
+              </q-th>
+            </q-tr>
+          </template>
+          <!-- เนื้อหาตาราง -->
+          <template v-slot:body="props">
+            <q-tr :props="props" @click="toggleRowExpansion1(props.row.id)" class="cursor-pointer">
+              <q-td key="no">
+                <div class="row items-center no-wrap">
+                  <q-icon
+                    :name="expandedRows1.has(props.row.id) ? 'expand_less' : 'expand_more'"
+                    class="q-mr-sm"
+                  />
+                  {{ props.rowIndex + 1 }}
+                </div>
+              </q-td>
+              <q-td key="name">
+                <div class="ellipsis">
+                  {{ truncateText(props.row.name) }}
+                  <q-tooltip>{{ props.row.name }}</q-tooltip>
+                </div>
+              </q-td>
+              <q-td key="dates">{{ props.row.dates }}</q-td>
+              <q-td key="time">{{ props.row.time }}</q-td>
+              <q-td key="location">{{ props.row.location }}</q-td>
+              <q-td key="participants">{{ props.row.participants }}</q-td>
+              <q-td key="skill">{{ props.row.skill }}</q-td>
+
+              <!-- ✅ จัดกลางเฉพาะสถานะ -->
+              <q-td key="activityState">
+                <div class="row justify-center items-center full-width">
+                  <q-badge
+                    :label="props.row.activityState"
+                    :class="getStatusClass(props.row.activityState)"
+                    class="status-badge"
+                    rounded
+                    unelevated
+                  />
+                </div>
+              </q-td>
+              <q-td class="q-gutter-x-sm" key="action">
+                <q-icon clickable name="visibility" @click="goToPageDetail(props.row.id, true)">
+                  <q-tooltip>ดูรายละเอียด</q-tooltip>
+                </q-icon>
+                <q-icon clickable name="edit" @click.stop="goToPageDetail(props.row.id, false)">
+                  <q-tooltip>แก้ไข</q-tooltip>
+                </q-icon>
+              </q-td>
+            </q-tr>
+            <!-- Expanded Row Content -->
+            <q-tr v-if="expandedRows1.has(props.row.id)" class="expanded-row">
+              <q-td colspan="9" class="expanded-content">
+                <div class="q-pa-sm">
+                  <div class="text-subtitle2 q-mb-sm">รายละเอียดกิจกรรมย่อย</div>
+                  <div v-if="props.row.activityItems && props.row.activityItems.length > 0">
+                    <div
+                      v-for="(item, index) in props.row.activityItems"
+                      :key="index"
+                      class="activity-item q-mb-sm q-pa-xs"
+                      style="border: 1px solid #e0e0e0; border-radius: 4px"
+                    >
+                      <div class="row items-center q-gutter-sm text-body2">
+                        <div class="col-auto">
+                          <span class="text-weight-bold">ชื่อ:</span> {{ item.name || '-' }}
+                        </div>
+
+                        <div class="col-auto">
+                          <span class="text-weight-bold">รับ:</span>
+                          {{ item.maxParticipants || '-' }} คน
+                        </div>
+                        <div class="col-auto">
+                          <span class="text-weight-bold">ลงทะเบียน:</span>
+                          {{ item.enrollmentCount || 0 }} คน
+                        </div>
+                        <div class="col-auto" v-if="item.dates && item.dates.length > 0">
+                          <span class="text-weight-bold">วันที่:</span>
+                          <span v-for="(date, dateIndex) in item.dates" :key="dateIndex">
+                            {{ formatDateToThai(date.date) }} {{ date.stime }}-{{ date.etime
+                            }}{{ dateIndex < item.dates.length - 1 ? ', ' : '' }}
+                          </span>
+                        </div>
+                        <div class="col-auto">
+                          <span class="text-weight-bold">ชั่วโมง:</span> {{ item.hour || '-' }} ชม.
+                        </div>
+                        <div class="col-auto">
+                          <span class="text-weight-bold">ผู้ดำเนินการ:</span>
+                          {{ item.operator || '-' }}
+                        </div>
+                        <div class="col-auto">
+                          <span class="text-weight-bold">ห้อง:</span>
+                          {{ item.rooms?.join(', ') || '-' }}
+                        </div>
+                        <div class="col-auto">
+                          <span class="text-weight-bold">สาขา:</span>
+                          {{ item.majors?.join(', ') || '-' }}
+                        </div>
+                      </div>
+                      <div
+                        v-if="item.description && item.description !== '-'"
+                        class="q-mt-xs text-body2"
+                      >
+                        <span class="text-weight-bold">คำอธิบาย:</span> {{ item.description }}
+                      </div>
+                    </div>
+                  </div>
+                  <div v-else class="text-grey-6">ไม่มีข้อมูลกิจกรรมย่อย</div>
+                </div>
+              </q-td>
+            </q-tr>
+          </template>
+          <template v-slot:no-data>
+            <div class="full-width text-center q-pa-md text-grey" style="font-size: 20px">
+              ไม่มีกิจกรรมที่เปิดลงทะเบียนและปิดลงทะเบียน
+            </div>
+          </template>
+        </q-table>
+      </section>
+
+      <!-- ตาราง 2 กำลังวางแผน-->
+      <section class="q-mt-lg">
+        <div class="row items-center justify-between activity-section-header">
+          <!-- หัวข้อ -->
+          <div class="textheader">กิจกรรมที่กำลังวางแผน</div>
+          <div class="row filter-row no-wrap q-mt-sm">
+            <!-- 🔹 Search box -->
+            <q-input
+              dense
+              outlined
+              v-model="query2.search"
+              label="ค้นหา ชื่อกิจกรรม"
+              class="searchbox"
+              :style="{ border: 'none' }"
+            >
+              <template v-slot:append>
+                <q-icon name="search" />
+              </template>
+            </q-input>
+
+            <!-- 🔹 Filter Dialog -->
+            <FilterDialog
+              class="filter-btn"
+              :model-value="showFilterDialog2"
+              :categories="filterCategories || []"
+              :years="query2.studentYear || []"
+              :majors="query2.major || []"
+              :status-activities="query2.activityState || []"
+              :category-activities="query2.skill || []"
+              @apply="applyFilters2"
+            />
+          </div>
+        </div>
+
+        <q-table
+          bordered
+          flat
+          :rows="mapActivitiesToTableRows(activitys2)"
+          :columns="columns"
+          v-model:pagination="pagination2"
+          :rows-per-page-options="[5, 7, 10, 15, 20]"
+          @request="onRequest2"
+          row-key="id"
+          class="q-mt-md my-sticky-header-table"
+        >
+          <!-- หัวตาราง Sticky -->
+          <template v-slot:header="props">
+            <q-tr :props="props">
+              <q-th v-for="col in props.cols" :key="col.name" :props="props">
+                {{ col.label }}
+              </q-th>
+            </q-tr>
+          </template>
+          <!-- เนื้อหาตาราง -->
+          <template v-slot:body="props">
+            <q-tr :props="props">
+              <q-td key="no">{{ props.rowIndex + 1 }}</q-td>
+              <q-td key="name">
+                <div class="ellipsis">
+                  {{ truncateText(props.row.name) }}
+                  <q-tooltip>{{ props.row.name }}</q-tooltip>
+                </div>
+              </q-td>
+              <q-td key="dates">{{ props.row.dates }}</q-td>
+              <q-td key="time">{{ props.row.time }}</q-td>
+              <q-td key="location">{{ props.row.location }}</q-td>
+              <q-td key="participants">{{ props.row.participants }}</q-td>
+              <q-td key="skill">{{ props.row.skill }}</q-td>
+
+              <!-- ✅ จัดกลางเฉพาะสถานะ -->
+              <q-td key="activityState">
+                <q-badge
+                  :label="props.row.activityState"
+                  :class="getStatusClass(props.row.activityState)"
+                  class="status-badge"
+                  rounded
+                  unelevated
+                />
+              </q-td>
+
+              <q-td key="action" class="text-left q-gutter-x-sm">
+                <q-icon clickable name="visibility" @click="goToPageDetail(props.row.id, true)">
+                  <q-tooltip>ดูรายละเอียด</q-tooltip>
+                </q-icon>
+                <q-icon clickable name="edit" @click="goToPageDetail(props.row.id, false)">
+                  <q-tooltip>แก้ไข</q-tooltip>
+                </q-icon>
+              </q-td>
+            </q-tr>
+          </template>
+          <template v-slot:no-data>
+            <div class="full-width text-center q-pa-md text-grey" style="font-size: 20px">
+              ไม่มีกิจกรรมที่เสร็จสิ้น
+            </div>
+          </template>
+        </q-table>
+      </section>
+
+      <!-- ตาราง 3 เสร็จสิ้น-->
+      <section class="q-mt-lg">
+        <div class="row items-center justify-between activity-section-header">
+          <!-- หัวข้อ -->
+          <div class="textheader">กิจกรรมที่เสร็จสิ้น</div>
+          <div class="row filter-row no-wrap q-mt-sm">
+            <!-- 🔹 Search box -->
+            <q-input
+              dense
+              outlined
+              v-model="query3.search"
+              label="ค้นหา ชื่อกิจกรรม"
+              class="searchbox"
+              :style="{ border: 'none' }"
+            >
+              <template v-slot:append>
+                <q-icon name="search" />
+              </template>
+            </q-input>
+
+            <!-- 🔹 Filter Dialog -->
+            <FilterDialog
+              class="filter-btn"
+              :model-value="showFilterDialog3"
+              :categories="filterCategories || []"
+              :years="query3.studentYear || []"
+              :majors="query3.major || []"
+              :status-activities="query3.activityState || []"
+              :category-activities="query3.skill || []"
+              @apply="applyFilters3"
+            />
+          </div>
+        </div>
+        <q-table
+          bordered
+          flat
+          :rows="mapActivitiesToTableRows(activitys3)"
+          :columns="columns"
+          v-model:pagination="pagination3"
+          :rows-per-page-options="[5, 7, 10, 15, 20]"
+          @request="onRequest3"
+          row-key="id"
+          class="q-mt-md my-sticky-header-table"
+        >
+          <!-- หัวตาราง Sticky -->
+          <template v-slot:header="props">
+            <q-tr :props="props">
+              <q-th v-for="col in props.cols" :key="col.name" :props="props">
+                {{ col.label }}
+              </q-th>
+            </q-tr>
+          </template>
+
+          <!-- เนื้อหาตาราง -->
+          <template v-slot:body="props">
+            <q-tr :props="props">
+              <q-td key="no">{{ props.rowIndex + 1 }}</q-td>
+              <q-td key="name">
+                <div class="ellipsis">
+                  {{ truncateText(props.row.name) }}
+                  <q-tooltip>{{ props.row.name }}</q-tooltip>
+                </div>
+              </q-td>
+              <q-td key="dates">{{ props.row.dates }}</q-td>
+              <q-td key="time">{{ props.row.time }}</q-td>
+              <q-td key="location">{{ props.row.location }}</q-td>
+              <q-td key="participants">{{ props.row.participants }}</q-td>
+              <q-td key="skill">{{ props.row.skill }}</q-td>
+
+              <!-- ✅ จัดกลางเฉพาะสถานะ -->
+              <q-td key="activityState">
+                <q-badge
+                  :label="props.row.activityState"
+                  :class="getStatusClass(props.row.activityState)"
+                  class="status-badge"
+                  rounded
+                  unelevated
+                />
+              </q-td>
+
+              <q-td key="action" class="text-left q-gutter-x-sm">
+                <q-icon clickable name="visibility" @click="goToPageDetail(props.row.id, true)">
+                  <q-tooltip>ดูรายละเอียด</q-tooltip>
+                </q-icon>
+                <q-icon clickable name="edit" @click="goToPageDetail(props.row.id, false)">
+                  <q-tooltip>แก้ไข</q-tooltip>
+                </q-icon>
+                <!-- <q-icon clickable name="delete" @click="openRemoveDialog(props.row.id)">
+                <q-tooltip>ลบ</q-tooltip>
+              </q-icon> -->
+              </q-td>
+            </q-tr>
+          </template>
+          <template v-slot:no-data>
+            <div class="full-width text-center q-pa-md text-grey" style="font-size: 20px">
+              ไม่มีกิจกรรมที่เสร็จสิ้น
+            </div>
+          </template>
+        </q-table>
+      </section>
+
+      <!-- ตางราง 4 ยกเลิก -->
+      <section class="q-mt-lg">
+        <div class="row items-center justify-between activity-section-header">
+          <!-- หัวข้อ -->
+          <div class="textheader">กิจกรรมที่ยกเลิก</div>
+          <div class="row filter-row no-wrap q-mt-sm">
+            <!-- 🔹 Search box -->
+            <q-input
+              dense
+              outlined
+              v-model="query4.search"
+              label="ค้นหา ชื่อกิจกรรม"
+              class="searchbox"
+              :style="{ border: 'none' }"
+            >
+              <template v-slot:append>
+                <q-icon name="search" />
+              </template>
+            </q-input>
+
+            <!-- 🔹 Filter Dialog -->
+            <FilterDialog
+              class="filter-btn"
+              :model-value="showFilterDialog4"
+              :categories="filterCategories || []"
+              :years="query4.studentYear || []"
+              :majors="query4.major || []"
+              :status-activities="query4.activityState || []"
+              :category-activities="query4.skill || []"
+              @apply="applyFilters4"
+            />
+          </div>
+        </div>
+        <q-table
+          bordered
+          flat
+          :rows="mapActivitiesToTableRows(activitys4)"
+          :columns="columns"
+          v-model:pagination="pagination4"
+          :rows-per-page-options="[5, 7, 10, 15, 20]"
+          @request="onRequest4"
+          row-key="id"
+          class="q-mt-md my-sticky-header-table"
+        >
+          <!-- หัวตาราง Sticky -->
+          <template v-slot:header="props">
+            <q-tr :props="props">
+              <q-th v-for="col in props.cols" :key="col.name" :props="props">
+                {{ col.label }}
+              </q-th>
+            </q-tr>
+          </template>
+          <!-- เนื้อหาตาราง -->
+          <template v-slot:body="props">
+            <q-tr :props="props">
+              <q-td key="no" class="text-left">{{ props.rowIndex + 1 }}</q-td>
+              <q-td key="name">
+                <div class="ellipsis">
+                  {{ truncateText(props.row.name) }}
+                  <q-tooltip>{{ props.row.name }}</q-tooltip>
+                </div>
+              </q-td>
+              <q-td key="dates">{{ props.row.dates }}</q-td>
+              <q-td key="time">{{ props.row.time }}</q-td>
+              <q-td key="location">{{ props.row.location }}</q-td>
+              <q-td key="participants">{{ props.row.participants }}</q-td>
+              <q-td key="skill">{{ props.row.skill }}</q-td>
+
+              <!-- ✅ จัดกลางเฉพาะสถานะ -->
+              <q-td key="activityState">
+                <q-badge
+                  :label="props.row.activityState"
+                  :class="getStatusClass(props.row.activityState)"
+                  class="status-badge"
+                  rounded
+                  unelevated
+                />
+              </q-td>
+
+              <q-td key="action" class="text-left q-gutter-x-sm">
+                <!-- <q-icon clickable name="visibility" @click="goToPageDetail(props.row.id, true)">
+                <q-tooltip>ดูรายละเอียด</q-tooltip>
+              </q-icon> -->
+                <q-icon clickable name="edit" @click="goToPageDetail(props.row.id, false)">
+                  <q-tooltip>แก้ไข</q-tooltip>
+                </q-icon>
+                <q-icon clickable name="delete" @click="openRemoveDialog(props.row.id)">
+                  <q-tooltip>ลบ</q-tooltip>
+                </q-icon>
+              </q-td>
+            </q-tr>
+          </template>
+          <template v-slot:no-data>
+            <div class="full-width text-center q-pa-md text-grey" style="font-size: 20px">
+              ไม่มีกิจกรรมที่ยกเลิก
+            </div>
+          </template>
+        </q-table>
+      </section>
+    </template>
+
+    <!-- Tabs สำหรับ mobile -->
+    <q-tabs
+      v-if="isMediumScreen"
+      v-model="tabIndex"
+      dense
+      style="margin-bottom: 30px;"
+      align="justify"
+      class="tab-scroll-wrapper q-mb-md"
+    >
+      <q-tab name="0" label="เปิด/ปิดลงทะเบียน" />
+      <q-tab name="1" label="กำลังวางแผน" />
+      <q-tab name="2" label="เสร็จสิ้น" />
+      <q-tab name="3" label="ยกเลิก" />
+    </q-tabs>
+
+    <!-- ตารางกิจกรรมใน mobile (แสดงเฉพาะ tab ที่เลือก) -->
+    <template v-if="isMediumScreen">
+      <section v-show="tabIndex == 0">
+        <!-- 🔹 Header: Search + Filter -->
+        <div class="column activity-section-header">
+          <!-- 🔹 บรรทัดแรก -->
+          <div class="textheader q-mb-sm">กิจกรรมที่เปิดลงทะเบียนและปิดลงทะเบียน</div>
+
+          <!-- 🔸 บรรทัดที่สอง: Search + Filter -->
+          <div class="row filter-row">
+            <q-input
+              dense
+              style="flex: 1"
+              outlined
+              v-model="query1.search"
+              label="ค้นหา ชื่อกิจกรรม"
+              class="searchbox q-mr-sm"
+              :style="{ border: 'none' }"
+            >
+              <template v-slot:append>
+                <q-icon name="search" />
+              </template>
+            </q-input>
+
+            <FilterDialog
+              class="filter-btn"
+              :model-value="showFilterDialog1"
+              :categories="filterCategories || []"
+              :years="query1.studentYear || []"
+              :majors="query1.major || []"
+              :status-activities="query1.activityState || []"
+              :category-activities="query1.skill || []"
+              @apply="applyFilters1"
+            />
+          </div>
+        </div>
+
+        <!-- 🔹 Card View -->
+        <q-card
+          v-for="(row, index) in mapActivitiesToTableRows(activitys1)"
+          :key="row.id ?? `row-${index}`"
+          bordered
+          flat
+          class="q-mb-md"
+        >
+          <!-- 🔷 HEADER -->
+          <q-card-section class="backgroundheader">
+            <div class="row justify-between header-row-responsive">
+              <!-- 🔹 ซ้าย: ชื่อกิจกรรม -->
+              <div class="ActivityNamelabel">
+                {{ truncateText(row.name) }}
+                <q-tooltip>{{ row.name }}</q-tooltip>
+              </div>
+
+              <!-- 🔸 ขวา: Badge + ปุ่ม -->
+              <div class="row q-gutter-sm action-section">
+                <q-badge :class="getStatusClass(row.activityState)" class="status-badge">
+                  {{ row.activityState }}
+                </q-badge>
+                <q-btn
+                  flat
+                  dense
+                  icon="visibility"
+                  class="bg-blue-10 text-blue-1"
+                  @click="goToPageDetail(row.id ?? '', true)"
+                >
+                  <q-tooltip>ดูรายละเอียด</q-tooltip>
+                </q-btn>
+                <q-btn
+                  flat
+                  dense
+                  icon="edit"
+                  class="bg-amber-5 text-yellow-1"
+                  @click="goToPageDetail(row.id ?? '', false)"
+                >
+                  <q-tooltip>แก้ไข</q-tooltip>
+                </q-btn>
+              </div>
+            </div>
+          </q-card-section>
+
+          <!-- 🔹 CONTENT -->
+          <q-card-section>
+            <div class="q-mb-xs info-row">
+              <div class="label">วันที่</div>
+              <div class="value">: {{ row.dates || '-' }}</div>
+            </div>
+            <div class="q-mb-xs info-row">
+              <div class="label">เวลา</div>
+              <div class="value">: {{ row.time || '-' }}</div>
+            </div>
+            <div class="q-mb-xs info-row">
+              <div class="label">สถานที่</div>
+              <div class="value">: {{ row.location || '-' }}</div>
+            </div>
+            <div class="q-mb-xs info-row">
+              <div class="label">จำนวน (รับ/ลง/เหลือ)</div>
+              <div class="value">: {{ row.participants || '-' }}</div>
+            </div>
+            <div class="info-row">
+              <div class="label">ประเภท</div>
+              <div class="value">: {{ row.skill || '-' }}</div>
+            </div>
+          </q-card-section>
+        </q-card>
+      </section>
+
+      <section v-show="tabIndex == 1">
+        <!-- 🔹 Header: Search + Filter -->
+        <div class="column activity-section-header">
+          <!-- 🔹 บรรทัดแรก -->
+          <div class="textheader q-mb-sm">กิจกรรมที่กำลังวางแผน</div>
+
+          <!-- 🔸 บรรทัดที่สอง: Search + Filter -->
+          <div class="row filter-row">
+            <q-input
+              dense
+              style="flex: 1"
+              outlined
+              v-model="query1.search"
+              label="ค้นหา ชื่อกิจกรรม"
+              class="searchbox q-mr-sm"
+              :style="{ border: 'none' }"
+            >
+              <template v-slot:append>
+                <q-icon name="search" />
+              </template>
+            </q-input>
+
+            <FilterDialog
+              class="filter-btn"
+              :model-value="showFilterDialog2"
+              :categories="filterCategories || []"
+              :years="query2.studentYear || []"
+              :majors="query2.major || []"
+              :status-activities="query2.activityState || []"
+              :category-activities="query2.skill || []"
+              @apply="applyFilters2"
+            />
+          </div>
+        </div>
+
+        <!-- 🔹 Card View -->
+        <q-card
+          v-for="(row, index) in mapActivitiesToTableRows(activitys2)"
+          :key="row.id ?? `row-${index}`"
+          bordered
+          flat
+          class="q-mb-md"
+        >
+          <!-- 🔷 HEADER -->
+          <q-card-section class="backgroundheader">
+            <div class="row justify-between header-row-responsive">
+              <!-- 🔹 ซ้าย: ชื่อกิจกรรม -->
+              <div class="ActivityNamelabel">
+                {{ truncateText(row.name) }}
+                <q-tooltip>{{ row.name }}</q-tooltip>
+              </div>
+
+              <!-- 🔸 ขวา: Badge + ปุ่ม -->
+              <div class="row q-gutter-sm action-section">
+                <q-badge :class="getStatusClass(row.activityState)" class="status-badge">
+                  {{ row.activityState }}
+                </q-badge>
+                <q-btn
+                  flat
+                  dense
+                  icon="visibility"
+                  class="bg-blue-10 text-blue-1"
+                  @click="goToPageDetail(row.id ?? '', true)"
+                >
+                  <q-tooltip>ดูรายละเอียด</q-tooltip>
+                </q-btn>
+                <q-btn
+                  flat
+                  dense
+                  icon="edit"
+                  class="bg-amber-5 text-yellow-1"
+                  @click="goToPageDetail(row.id ?? '', false)"
+                >
+                  <q-tooltip>แก้ไข</q-tooltip>
+                </q-btn>
+              </div>
+            </div>
+          </q-card-section>
+
+          <!-- 🔹 CONTENT -->
+           <q-card-section>
+            <div class="q-mb-xs info-row">
+              <div class="label">วันที่</div>
+              <div class="value">: {{ row.dates || '-' }}</div>
+            </div>
+            <div class="q-mb-xs info-row">
+              <div class="label">เวลา</div>
+              <div class="value">: {{ row.time || '-' }}</div>
+            </div>
+            <div class="q-mb-xs info-row">
+              <div class="label">สถานที่</div>
+              <div class="value">: {{ row.location || '-' }}</div>
+            </div>
+            <div class="q-mb-xs info-row">
+              <div class="label">จำนวน (รับ/ลง/เหลือ)</div>
+              <div class="value">: {{ row.participants || '-' }}</div>
+            </div>
+            <div class="info-row">
+              <div class="label">ประเภท</div>
+              <div class="value">: {{ row.skill || '-' }}</div>
+            </div>
+          </q-card-section>
+        </q-card>
+      </section>
+
+      <section v-show="tabIndex == 2">
+        <!-- 🔹 Header: Search + Filter -->
+        <div class="column activity-section-header">
+          <!-- 🔹 บรรทัดแรก -->
+          <div class="textheader q-mb-sm">กิจกรรมที่เสร็จสิ้น</div>
+
+          <!-- 🔸 บรรทัดที่สอง: Search + Filter -->
+          <div class="row filter-row">
+            <q-input
+              dense
+              style="flex: 1"
+              outlined
+              v-model="query3.search"
+              label="ค้นหา ชื่อกิจกรรม"
+              class="searchbox q-mr-sm"
+              :style="{ border: 'none' }"
+            >
+              <template v-slot:append>
+                <q-icon name="search" />
+              </template>
+            </q-input>
+
+            <FilterDialog
+              class="filter-btn"
+              :model-value="showFilterDialog3"
+              :categories="filterCategories || []"
+              :years="query3.studentYear || []"
+              :majors="query3.major || []"
+              :status-activities="query3.activityState || []"
+              :category-activities="query3.skill || []"
+              @apply="applyFilters3"
+            />
+          </div>
+        </div>
+
+        <!-- 🔹 Card View -->
+        <q-card
+          v-for="(row, index) in mapActivitiesToTableRows(activitys3)"
+          :key="row.id ?? `row-${index}`"
+          bordered
+          flat
+          class="q-mb-md"
+        >
+          <!-- 🔷 HEADER -->
+          <q-card-section class="backgroundheader">
+            <div class="row justify-between header-row-responsive">
+              <!-- 🔹 ซ้าย: ชื่อกิจกรรม -->
+              <div class="ActivityNamelabel">
+                {{ truncateText(row.name) }}
+                <q-tooltip>{{ row.name }}</q-tooltip>
+              </div>
+
+              <!-- 🔸 ขวา: Badge + ปุ่ม -->
+              <div class="row q-gutter-sm action-section">
+                <q-badge :class="getStatusClass(row.activityState)" class="status-badge">
+                  {{ row.activityState }}
+                </q-badge>
+                <q-btn
+                  flat
+                  dense
+                  icon="visibility"
+                  class="bg-blue-10 text-blue-1"
+                  @click="goToPageDetail(row.id ?? '', true)"
+                >
+                  <q-tooltip>ดูรายละเอียด</q-tooltip>
+                </q-btn>
+                <q-btn
+                  flat
+                  dense
+                  icon="edit"
+                  class="bg-amber-5 text-yellow-1"
+                  @click="goToPageDetail(row.id ?? '', false)"
+                >
+                  <q-tooltip>แก้ไข</q-tooltip>
+                </q-btn>
+              </div>
+            </div>
+          </q-card-section>
+
+          <!-- 🔹 CONTENT -->
+          <q-card-section>
+            <div class="q-mb-xs info-row">
+              <div class="label">วันที่</div>
+              <div class="value">: {{ row.dates || '-' }}</div>
+            </div>
+            <div class="q-mb-xs info-row">
+              <div class="label">เวลา</div>
+              <div class="value">: {{ row.time || '-' }}</div>
+            </div>
+            <div class="q-mb-xs info-row">
+              <div class="label">สถานที่</div>
+              <div class="value">: {{ row.location || '-' }}</div>
+            </div>
+            <div class="q-mb-xs info-row">
+              <div class="label">จำนวน (รับ/ลง/เหลือ)</div>
+              <div class="value">: {{ row.participants || '-' }}</div>
+            </div>
+            <div class="info-row">
+              <div class="label">ประเภท</div>
+              <div class="value">: {{ row.skill || '-' }}</div>
+            </div>
+          </q-card-section>
+        </q-card>
+      </section>
+
+      <section v-show="tabIndex == 3">
+        <!-- 🔹 Header: Search + Filter -->
+        <div class="column activity-section-header">
+          <!-- 🔹 บรรทัดแรก -->
+          <div class="textheader q-mb-sm">กิจกรรมที่เสร็จสิ้น</div>
+
+          <!-- 🔸 บรรทัดที่สอง: Search + Filter -->
+          <div class="row filter-row">
+            <q-input
+              dense
+              style="flex: 1"
+              outlined
+              v-model="query1.search"
+              label="ค้นหา ชื่อกิจกรรม"
+              class="searchbox q-mr-sm"
+              :style="{ border: 'none' }"
+            >
+              <template v-slot:append>
+                <q-icon name="search" />
+              </template>
+            </q-input>
+
+            <FilterDialog
+              class="filter-btn"
+              :model-value="showFilterDialog4"
+              :categories="filterCategories || []"
+              :years="query4.studentYear || []"
+              :majors="query4.major || []"
+              :status-activities="query4.activityState || []"
+              :category-activities="query4.skill || []"
+              @apply="applyFilters4"
+            />
+          </div>
+        </div>
+
+        <!-- 🔹 Card View -->
+        <q-card
+          v-for="(row, index) in mapActivitiesToTableRows(activitys4)"
+          :key="row.id ?? `row-${index}`"
+          bordered
+          flat
+          class="q-mb-md"
+        >
+          <!-- 🔷 HEADER -->
+          <q-card-section class="backgroundheader">
+            <div class="row justify-between header-row-responsive">
+              <!-- 🔹 ซ้าย: ชื่อกิจกรรม -->
+              <div class="ActivityNamelabel">
+                {{ truncateText(row.name) }}
+                <q-tooltip>{{ row.name }}</q-tooltip>
+              </div>
+
+              <!-- 🔸 ขวา: Badge + ปุ่ม -->
+              <div class="row q-gutter-sm action-section">
+                <q-badge :class="getStatusClass(row.activityState)" class="status-badge">
+                  {{ row.activityState }}
+                </q-badge>
+                <q-btn
+                  flat
+                  dense
+                  icon="visibility"
+                  class="bg-blue-10 text-blue-1"
+                  @click="goToPageDetail(row.id ?? '', true)"
+                >
+                  <q-tooltip>ดูรายละเอียด</q-tooltip>
+                </q-btn>
+                <q-btn
+                  flat
+                  dense
+                  icon="edit"
+                  class="bg-amber-5 text-yellow-1"
+                  @click="goToPageDetail(row.id ?? '', false)"
+                >
+                  <q-tooltip>แก้ไข</q-tooltip>
+                </q-btn>
+                 <q-btn
+                  flat
+                  dense
+                  icon="delete"
+                  class="bg-red-7 text-red-1"
+                  @click="openRemoveDialog(row.id ?? '')"
+                >
+                  <q-tooltip>ลบ</q-tooltip>
+                </q-btn>
+              </div>
+            </div>
+          </q-card-section>
+
+          <!-- 🔹 CONTENT -->
+           <q-card-section>
+            <div class="q-mb-xs info-row">
+              <div class="label">วันที่</div>
+              <div class="value">: {{ row.dates || '-' }}</div>
+            </div>
+            <div class="q-mb-xs info-row">
+              <div class="label">เวลา</div>
+              <div class="value">: {{ row.time || '-' }}</div>
+            </div>
+            <div class="q-mb-xs info-row">
+              <div class="label">สถานที่</div>
+              <div class="value">: {{ row.location || '-' }}</div>
+            </div>
+            <div class="q-mb-xs info-row">
+              <div class="label">จำนวน (รับ/ลง/เหลือ)</div>
+              <div class="value">: {{ row.participants || '-' }}</div>
+            </div>
+            <div class="info-row">
+              <div class="label">ประเภท</div>
+              <div class="value">: {{ row.skill || '-' }}</div>
+            </div>
+          </q-card-section>
+        </q-card>
+      </section>
+    </template>
+
+    <RemoveDialog v-model="isRemoveDialogOpen" @confirm="handleConfirmRemove" />
+  </q-page>
+</template>
+
 <style lang="scss" scoped>
+.ellipsis {
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  max-width: 100%;
+}
+
+.label {
+  font-weight: 600;
+  font-size: 16px;
+  min-width: 200px;
+  margin-top: 2px;
+}
+.value {
+  font-size: 16px;
+  margin-top: 2px;
+}
+.ActivityNamelabel {
+  font-size: 18px;
+  font-weight: 700;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.backgroundheader {
+  background-color: #edf0f5;
+}
 .my-sticky-header-table {
   min-height: 340px; /* หรือแล้วแต่ต้องการ */
   overflow-y: auto;
@@ -1082,7 +1613,6 @@ watch(
   border-radius: 999px;
   font-size: 15px;
 
-  display: flex;
   align-items: center;
   justify-content: center;
 
@@ -1104,40 +1634,26 @@ watch(
   font-size: 20px;
   font-weight: 500;
 }
+.activity-section-header {
+  margin-bottom: 20px;
+}
+
 @media (max-width: 1150px) {
   .searchbox {
     width: 280px !important;
   }
 }
-@media (max-width: 850px) {
-  .activity-section-header {
+@media (max-width: 650px) {
+  .header-row-responsive {
     flex-direction: column;
-    align-items: stretch;
-    margin-bottom: 0 !important;
+    align-items: flex-start;
   }
 
-  .filter-row {
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-    margin-top: 10px !important;
-    padding: 0 !important;
-    gap: 0 5px; /* ✅ ช่องว่างเฉพาะแนวนอน 5px */
-    height: auto !important;
-    flex-wrap: nowrap;
-  }
-
-  .filter-row .searchbox,
-  .filter-row .q-field,
-  .filter-row .q-input {
-    width: 90% !important;
-    margin: 0 !important;
-  }
-  .textheader {
-    font-size: 17px;
-    font-weight: 500;
+  .action-section {
+    margin-top: 8px;
   }
 }
+
 @media (max-width: 450px) {
   .btnadd {
     width: 120px !important;
@@ -1149,6 +1665,23 @@ watch(
   .texttitle {
     font-size: 28px;
     font-weight: 400;
+  }
+}
+.info-row {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+}
+
+@media (max-width: 370px) {
+  .info-row {
+    flex-direction: column;
+    align-items: flex-start; /* ชิดซ้าย */
+  }
+
+  .info-row .label,
+  .info-row .value {
+    width: 100%;
   }
 }
 </style>
