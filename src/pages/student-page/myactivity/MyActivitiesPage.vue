@@ -8,7 +8,7 @@ import { useAuthStore } from 'src/stores/auth'
 import type { Pagination } from 'src/types/pagination'
 const auth = useAuthStore()
 const activitys = ref<Activity[]>([])
-const search = ref()
+// const search = ref()
 const showFilterDialog = ref(false)
 
 interface SelectedFilters {
@@ -65,7 +65,7 @@ onMounted(async () => {
             <q-input
               dense
               outlined
-              v-model="search"
+              v-model="query.search"
               placeholder="ค้นหา ชื่อกิจกรรม"
               @keyup.enter="fetchData()"
               class="q-mr-sm searchbox"
