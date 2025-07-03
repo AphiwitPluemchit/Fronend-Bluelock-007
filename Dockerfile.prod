@@ -1,0 +1,30 @@
+# Stage 1: Build
+FROM node:20-alpine AS builder
+WORKDIR /app
+
+# 1. คัดลอกเฉพาะไฟล์ที่จำเป็นสำหรับการ install dependencies
+COPY package.json package-lock.json ./
+
+# 2. ติดตั้ง dependencies (โดยไม่รัน postinstall script)
+RUN npm install --ignore-scripts
+
+# 3. คัดลอกไฟล์ทั้งหมดที่เหลือ (รวมถึง quasar.config.js)
+COPY . .
+
+# 4. รัน quasar prepare แยกต่างหาก
+# RUN npx quasar prepare
+
+# 5. Build application
+RUN npm run build
+
+# Stage 2: Production
+FROM nginx:alpine
+
+# Copy built files
+COPY --from=builder /app/dist/spa /usr/share/nginx/html
+
+# Copy nginx config
+COPY nginx.conf /etc/nginx/conf.d/default.conf
+
+EXPOSE 80
+CMD ["nginx", "-g", "daemon off;"]
