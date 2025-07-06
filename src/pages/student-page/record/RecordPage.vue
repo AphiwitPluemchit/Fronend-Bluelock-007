@@ -1,33 +1,28 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
 
+type ActivityType = 'academic' | 'preparation'
+
+
 const studentData = ref({
   name: 'นายยอดชาย ต้นไม้โลก',
   major: 'วิทยาการคอมพิวเตอร์',
-  email: '65169999@go.buu.ac.th',
+  email: '65160099@go.buu.ac.th',
   year: 3,
-  studentId: '65169999',
+  studentId: '65160099',
 })
 
-const academicData = ref({
-  current: 11,
-  required: 12,
-})
+const academicData = ref({ current: 11, required: 12 })
+const prepData = ref({ current: 10, required: 30 })
 
-const prepData = ref({
-  current: 10,
-  required: 30,
-})
-
-const calculateMissingHours = (data: { current: number; required: number }) => {
-  return data.required > data.current ? data.required - data.current : 0
-}
+const calculateMissingHours = (data: { current: number; required: number }) =>
+  data.required > data.current ? data.required - data.current : 0
 
 const prepProgressRatio = computed(() =>
-  Math.min(prepData.value.current / prepData.value.required, 1),
+  Math.min(prepData.value.current / prepData.value.required, 1)
 )
 const academicProgressRatio = computed(() =>
-  Math.min(academicData.value.current / academicData.value.required, 1),
+  Math.min(academicData.value.current / academicData.value.required, 1)
 )
 
 const getProgressColor = (ratio: number) => {
@@ -38,56 +33,77 @@ const getProgressColor = (ratio: number) => {
 
 const showAllActivities = ref(false)
 
-const activities = ref([
+const activities = ref<Array<{
+  title: string
+  type: ActivityType
+  date: string
+  time: string
+  room: string
+  hours: number
+}>>([
   {
-    title: 'กิจกรรมเสริมสร้างความรู้และประสบการณ์ทางด้านวิชาการ กับ บริษัท My Oder',
+    title: 'กิจกรรมเตรียมความพร้อม',
     type: 'preparation',
-    date: '18 มกราคม 2568',
-    time: '08.30 - 16.30 น.',
+    date: '24 กรกฎาคม 2568',
+    time: '09:00 - 12:00',
+    room: 'Online',
     hours: 3,
-    icon: 'event',
   },
   {
-    title: 'กิจกรรมเสริมสร้างความรู้และประสบการณ์ทางด้านวิชาการ กับ บริษัท My Oder',
+    title: 'กิจกรรมเตรียมความพร้อม',
     type: 'academic',
-    date: '18 มกราคม 2568',
-    time: '08.30 - 16.30 น.',
+    date: '24 กรกฎาคม 2568',
+    time: '09:00 - 12:00',
+    room: 'Online',
     hours: 3,
-    icon: 'school',
-  },
-  {
-    title: 'กิจกรรมเสริมสร้างความรู้และประสบการณ์ทางด้านวิชาการ กับ บริษัท My Oder',
-    type: 'academic',
-    date: '18 มกราคม 2568',
-    time: '08.30 - 16.30 น.',
-    hours: 3,
-    icon: 'school',
-  },
-  {
-    title: 'กิจกรรมเสริมสร้างความรู้และประสบการณ์ทางด้านวิชาการ กับ บริษัท My Oder',
-    type: 'academic',
-    date: '18 มกราคม 2568',
-    time: '08.30 - 16.30 น.',
-    hours: 3,
-    icon: 'school',
-  },
-  {
-    title: 'กิจกรรมเสริมสร้างความรู้และประสบการณ์ทางด้านวิชาการ กับ บริษัท My Oder',
+  },{
+    title: 'กิจกรรมเตรียมความพร้อม',
     type: 'preparation',
-    date: '18 มกราคม 2568',
-    time: '08.30 - 16.30 น.',
+    date: '24 กรกฎาคม 2568',
+    time: '09:00 - 12:00',
+    room: 'Online',
     hours: 3,
-    icon: 'event',
-  },
-  {
-    title: 'กิจกรรมเสริมสร้างความรู้และประสบการณ์ทางด้านวิชาการ กับ บริษัท My Oder',
+  },{
+    title: 'กิจกรรมเตรียมความพร้อม',
     type: 'academic',
-    date: '18 มกราคม 2568',
-    time: '08.30 - 16.30 น.',
+    date: '24 กรกฎาคม 2568',
+    time: '09:00 - 12:00',
+    room: 'Online',
     hours: 3,
-    icon: 'school',
+  },{
+    title: 'กิจกรรมเตรียมความพร้อม',
+    type: 'preparation',
+    date: '24 กรกฎาคม 2568',
+    time: '09:00 - 12:00',
+    room: 'Online',
+    hours: 3,
+  },{
+    title: 'กิจกรรมเตรียมความพร้อม',
+    type: 'academic',
+    date: '24 กรกฎาคม 2568',
+    time: '09:00 - 12:00',
+    room: 'Online',
+    hours: 3,
   },
+  // ... อื่น ๆ
 ])
+
+
+const activityColors = {
+  academic: {
+    bgColor: '#D6E4FF',
+    textColor: '#001780',
+    label: 'ทักษะความรู้ทางวิชาการ',
+    icon: 'school',
+  },
+  preparation: {
+    bgColor: '#d2ffc7',
+    textColor: '#009812',
+    border: '#00bb16',
+    label: 'ทักษะเตรียมความพร้อม',
+    icon: 'book',
+  },
+}
 </script>
 
 <template>
@@ -132,8 +148,8 @@ const activities = ref([
           <q-card bordered class="rounded-borders shadow-2 full-height">
             <q-card-section class="bg-blue-1 q-pb-xs">
               <div class="text-h6 text-bold text-primary">
-                <q-icon name="school" class="q-mr-sm" />
-                ทักษะทางวิชาการ
+                <q-icon :name="activityColors.academic.icon" class="q-mr-sm" />
+                {{ activityColors.academic.label }}
               </div>
             </q-card-section>
 
@@ -172,7 +188,7 @@ const activities = ref([
                 />
                 <div class="flex justify-between text-caption">
                   <div>
-                    <q-badge :color="getProgressColor(academicProgressRatio)" outline class="flex items-center justify-center">
+                    <q-badge :color="getProgressColor(academicProgressRatio)" outline>
                       เหลืออีก {{ calculateMissingHours(academicData) }} ชั่วโมง
                     </q-badge>
                   </div>
@@ -187,8 +203,8 @@ const activities = ref([
           <q-card bordered class="rounded-borders shadow-2 full-height">
             <q-card-section class="bg-blue-1 q-pb-xs">
               <div class="text-h6 text-bold text-primary">
-                <q-icon name="assignment" class="q-mr-sm" />
-                ทักษะเตรียมความพร้อม
+                <q-icon :name="activityColors.preparation.icon" class="q-mr-sm" />
+                {{ activityColors.preparation.label }}
               </div>
             </q-card-section>
 
@@ -227,7 +243,7 @@ const activities = ref([
                 />
                 <div class="flex justify-between text-caption">
                   <div>
-                    <q-badge :color="getProgressColor(prepProgressRatio)" outline class="flex items-center justify-center">
+                    <q-badge :color="getProgressColor(prepProgressRatio)" outline>
                       เหลืออีก {{ calculateMissingHours(prepData) }} ชั่วโมง
                     </q-badge>
                   </div>
@@ -263,40 +279,45 @@ const activities = ref([
 
         <q-card-section class="q-pa-none">
           <q-list>
-            <q-item
-              v-for="(activity, index) in (showAllActivities ? activities : activities.slice(0, 5))"
-              :key="index"
-              class="q-py-md"
-            >
-              <q-item-section avatar>
-                <q-avatar color="primary" text-color="white">
-                  <q-icon :name="activity.icon" />
-                </q-avatar>
-              </q-item-section>
+  <q-item
+    v-for="(activity, index) in (showAllActivities ? activities : activities.slice(0, 5))"
+    :key="index"
+    class="q-py-md"
+  >
+    <q-item-section avatar>
+      <q-avatar color="primary" text-color="white">
+        <q-icon :name="activityColors[activity.type].icon" />
+      </q-avatar>
+    </q-item-section>
 
-              <q-item-section>
-                <q-item-label class="text-weight-medium">{{ activity.title }}</q-item-label>
-                <q-item-label caption>
-                  <div class="row items-center">
-                    <q-icon name="event" size="xs" class="q-mr-xs" />
-                    {{ activity.date }}
-                    <q-separator vertical spaced class="q-mx-sm" />
-                    <q-icon name="timer" size="xs" class="q-mr-xs" />
-                    {{ activity.hours }} ชั่วโมง
-                  </div>
-                </q-item-label>
-              </q-item-section>
+    <q-item-section>
+      <q-item-label class="text-weight-medium">{{ activity.title }}</q-item-label>
+      <q-item-label caption>
+        <div class="row items-center">
+          <q-icon name="event" size="xs" class="q-mr-xs" />
+          {{ activity.date }}
+          <q-separator vertical spaced class="q-mx-sm" />
+          <q-icon name="timer" size="xs" class="q-mr-xs" />
+          {{ activity.hours }} ชั่วโมง
+        </div>
+      </q-item-label>
+    </q-item-section>
 
-              <q-item-section side>
-                <q-badge
-                  outline
-                  rounded
-                  :color="activity.type === 'preparation' ? 'secondary' : 'primary'"
-                  :label="activity.type === 'preparation' ? 'เตรียมความพร้อม' : 'ทักษะทางวิชาการ'"
-                />
-              </q-item-section>
-            </q-item>
-          </q-list>
+    <q-item-section side>
+      <q-badge
+        rounded
+        class="q-px-sm q-py-xs text-weight-medium"
+        :style="`
+          background-color: ${activityColors[activity.type].bgColor};
+          color: ${activityColors[activity.type].textColor};
+          border: 2px solid ${activity.type === 'preparation' ? activityColors[activity.type].border : activityColors[activity.type].textColor};
+        `"
+        :label="activityColors[activity.type].label"
+      />
+    </q-item-section>
+  </q-item>
+</q-list>
+
         </q-card-section>
       </q-card>
     </div>
@@ -307,16 +328,8 @@ const activities = ref([
 .rounded-borders {
   border-radius: 12px;
 }
-
-.hover-card {
-  transition: transform 0.3s;
-
-  &:hover {
-    transform: translateY(-5px);
-  }
-}
-
 .container {
   width: 100%;
 }
 </style>
+
