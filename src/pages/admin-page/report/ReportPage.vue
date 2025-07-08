@@ -1,9 +1,44 @@
 <template>
   <q-page class="q-py-lg q-px-md" style="max-width: 1200px; margin: auto">
     <div class="text-h4 q-mb-md text-weight-medium">รายงานข้อมูลนิสิต</div>
+
+    <!-- Filters -->
+    <div class="q-mb-md row items-center q-gutter-sm">
+      <div class="text-subtitle1">ตรวจสอบตาม ชั้นปี:</div>
+      <q-select
+        v-model="selectedYear"
+        :options="yearOptions"
+        option-label="label"
+        option-value="value"
+        emit-value
+        map-options
+        outlined
+        dense
+        style="min-width: 150px"
+      />
+
+      <div class="text-subtitle1 q-ml-md">สาขา:</div>
+      <q-select
+        v-model="selectedMajor"
+        :options="majorOptions"
+        option-label="label"
+        option-value="value"
+        emit-value
+        map-options
+        outlined
+        dense
+        style="min-width: 150px"
+      />
+    </div>
+
     <!-- Summary Cards -->
     <div class="row q-col-gutter-md q-mb-lg justify-start">
-      <div v-for="item in summaryCards" :key="item.title" class="col-xs-12 col-sm-6 col-md-4">
+      <div
+  v-for="item in summaryCards"
+  :key="item.title"
+  class="col-12 col-sm-6 col-md-3"
+>
+
         <q-card flat bordered class="dashboard-card">
           <q-card-section :class="`bg-${item.bg} q-pa-md rounded-borders`">
             <div class="row items-center no-wrap">
@@ -23,9 +58,8 @@
     <!-- Progress Section -->
     <div class="q-mb-lg">
       <q-card class="progress-overview" flat bordered>
-        <q-card-section class="bg-blue-9 text-white">
+        <q-card-section class="custom-header-section">
           <div class="text-h6">ภาพรวมความคืบหน้า</div>
-          <div class="text-caption q-mt-xs">อัพเดทล่าสุด: 18 พฤษภาคม 2568</div>
         </q-card-section>
 
         <q-card-section>
@@ -108,8 +142,8 @@
     <div class="row q-col-gutter-md">
       <div class="col-xs-12">
         <q-card flat bordered class="chart-card">
-          <q-card-section class="bg-blue-9 text-white">
-            <div class="text-h6">สถิติแยกตามสาขา</div>
+          <q-card-section class="custom-header-section">
+            <div class="text-h6">แยกตามสาขา</div>
           </q-card-section>
           <q-card-section class="q-pa-lg">
             <BarChart />
@@ -121,60 +155,68 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, computed } from 'vue'
 import BarChart from './BarChart.vue'
 
-const academicSkillHours = ref(2400)
-const readinessHours = ref(2400)
-
-const summaryCards = [
-  {
-    title: 'จำนวนนิสิตทั้งหมด',
-    value: '3,000 คน',
-    icon: 'people',
-    color: 'primary',
-    bg: 'blue-1',
-  },
-  {
-    title: 'นิสิตที่ชั่วโมงครบแล้ว',
-    value: '2,500 คน',
-    icon: 'task_alt',
-    color: 'positive',
-    bg: 'green-1',
-  },
-  {
-    title: 'นิสิตที่ชั่วโมงยังไม่ครบ',
-    value: '500 คน',
-    icon: 'warning',
-    color: 'negative',
-    bg: 'red-1',
-  },
+const yearOptions = [
+  { label: 'ทั้งหมด', value: null },
+  { label: 'ปี 1', value: 1 },
+  { label: 'ปี 2', value: 2 },
+  { label: 'ปี 3', value: 3 },
+  { label: 'ปี 4', value: 4 },
 ]
+const selectedYear = ref<number | null>(null)
 
-// const columns = [
-//   {
-//     name: 'totalStudents',
-//     align: 'center',
-//     label: 'จำนวนนิสิต',
-//     field: 'totalStudents',
-//     sortable: true,
-//   },
-//   {
-//     name: 'completed',
-//     align: 'center',
-//     label: 'ครบชั่วโมงแล้ว',
-//     field: 'completed',
-//     sortable: true,
-//   },
-//   { name: 'incomplete', align: 'center', label: 'ยังไม่ครบ', field: 'incomplete', sortable: true },
-//   {
-//     name: 'completion',
-//     align: 'center',
-//     label: 'ความคืบหน้า',
-//     field: 'completion',
-//     sortable: true,
-//   },
-// ]
+const majorOptions = [
+  { label: 'ทั้งหมด', value: null },
+  { label: 'CS', value: 'CS' },
+  { label: 'SE', value: 'SE' },
+  { label: 'IT', value: 'IT' },
+  { label: 'AAI', value: 'AAI' },
+]
+const selectedMajor = ref<string | null>(null)
+
+const academicSkillHours = computed(() => {
+  return 2400 // mock data
+})
+const readinessHours = computed(() => {
+  return 2400 // mock data
+})
+
+const summaryCards = computed(() => {
+  const year = selectedYear.value
+  const major = selectedMajor.value
+
+  // mock example
+  if (year === 1 && major === 'CS') {
+    return [
+      { title: 'จำนวนนิสิตทั้งหมด', value: '200 คน', icon: 'people', color: 'primary', bg: 'blue-1' },
+      { title: 'นิสิตที่ชั่วโมงครบแล้ว', value: '180 คน', icon: 'task_alt', color: 'positive', bg: 'green-1' },
+      { title: 'นิสิตที่ชั่วโมงยังไม่ครบ', value: '20 คน', icon: 'warning', color: 'negative', bg: 'red-1' },
+      { 
+  title: 'เปอร์เซ็นต์ความสำเร็จ', 
+  value: '83%', 
+  icon: 'percent', 
+  color: 'amber', 
+  bg: 'amber' 
+}
+
+    ]
+  }
+  return [
+    { title: 'จำนวนนิสิตทั้งหมด', value: '3,000 คน', icon: 'people', color: 'primary', bg: 'blue-1' },
+    { title: 'นิสิตที่ชั่วโมงครบแล้ว', value: '2,500 คน', icon: 'task_alt', color: 'positive', bg: 'green-1' },
+    { title: 'นิสิตที่ชั่วโมงยังไม่ครบ', value: '500 คน', icon: 'warning', color: 'negative', bg: 'red-1' },
+    { 
+  title: 'เปอร์เซ็นต์ความสำเร็จ', 
+  value: '83%', 
+  icon: 'percent', 
+  color: 'amber', 
+  bg: 'amber-1' 
+}
+
+  ]
+})
 </script>
 
 <style scoped>
@@ -206,4 +248,12 @@ const summaryCards = [
 .q-circular-progress:hover {
   transform: scale(1.05);
 }
+
+.custom-header-section {
+  background-color: #162aae;
+  color: white;
+}
+
+
+
 </style>

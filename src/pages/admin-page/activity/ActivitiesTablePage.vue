@@ -647,6 +647,7 @@ watchEffect(() => {
           @request="onRequest1"
           row-key="id"
           class="q-mt-md my-sticky-header-table"
+    
         >
           <!-- หัวตาราง Sticky -->
           <template v-slot:header="props">
@@ -656,6 +657,7 @@ watchEffect(() => {
                 :key="col.name"
                 :props="props"
                 :style="col.headerStyle"
+                
               >
                 {{ col.label }}
               </q-th>
@@ -1558,15 +1560,42 @@ watchEffect(() => {
 .my-sticky-header-table {
   min-height: 340px; /* หรือแล้วแต่ต้องการ */
   overflow-y: auto;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  overflow: hidden;
 }
+
 
 /* Sticky thead (ใช้ภายใน q-table ได้เลย) */
 .my-sticky-header-table thead tr {
-  position: sticky;
-  top: 0;
-  background: white; /* จำเป็น */
-  z-index: 1;
+  background-color: #162aae; 
+  font-weight: bold;
+  font-size: 16px;
+  color: #ffffff;
+  border-bottom: 2px solid #d0d0d0;
+  transition: background-color 0.3s ease;
+
 }
+
+.my-sticky-header-table tbody tr {
+  transition: background-color 0.3s ease;
+}
+
+.my-sticky-header-table tbody tr:hover {
+  background-color: #f5f7ff; // Hover แบบนุ่มนวล
+}
+.my-sticky-header-table td, 
+.my-sticky-header-table th {
+  padding: 10px 12px;
+  font-size: 15px;
+}
+.my-sticky-header-table .q-icon {
+  color: #4a4a4a;
+}
+
+
+
+
 
 .status-close {
   background-color: #cfd7ff;
@@ -1621,7 +1650,7 @@ watchEffect(() => {
 }
 
 .btnadd {
-  background-color: #14279b;
+  background-color: #162aae;
   color: white;
   border: none;
   font-weight: bold;
@@ -1629,6 +1658,7 @@ watchEffect(() => {
 }
 .searchbox {
   margin-right: 5px;
+
 }
 .textheader {
   font-size: 20px;
@@ -1684,4 +1714,6 @@ watchEffect(() => {
     width: 100%;
   }
 }
+
+
 </style>
