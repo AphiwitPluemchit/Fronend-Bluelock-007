@@ -700,10 +700,10 @@ watchEffect(() => {
                 </div>
               </q-td>
               <q-td class="q-gutter-x-sm" key="action">
-                <q-icon clickable name="visibility" @click="goToPageDetail(props.row.id, true)">
+                <q-icon clickable name="visibility" @click="goToPageDetail(props.row.id, true)" class="bg-black text-white q-pa-xs rounded-borders q-mr-sm">
                   <q-tooltip>ดูรายละเอียด</q-tooltip>
                 </q-icon>
-                <q-icon clickable name="edit" @click.stop="goToPageDetail(props.row.id, false)">
+                <q-icon clickable name="edit" @click.stop="goToPageDetail(props.row.id, false)" class="bg-primary text-white q-pa-xs rounded-borders q-mr-sm">
                   <q-tooltip>แก้ไข</q-tooltip>
                 </q-icon>
               </q-td>
@@ -858,10 +858,10 @@ watchEffect(() => {
               </q-td>
 
               <q-td key="action" class="text-left q-gutter-x-sm">
-                <q-icon clickable name="visibility" @click="goToPageDetail(props.row.id, true)">
+                <q-icon clickable name="visibility" @click="goToPageDetail(props.row.id, true)" class="bg-black text-white q-pa-xs rounded-borders q-mr-sm">
                   <q-tooltip>ดูรายละเอียด</q-tooltip>
                 </q-icon>
-                <q-icon clickable name="edit" @click="goToPageDetail(props.row.id, false)">
+                <q-icon clickable name="edit" @click="goToPageDetail(props.row.id, false)" class="bg-primary text-white q-pa-xs rounded-borders q-mr-sm">
                   <q-tooltip>แก้ไข</q-tooltip>
                 </q-icon>
               </q-td>
@@ -956,10 +956,10 @@ watchEffect(() => {
               </q-td>
 
               <q-td key="action" class="text-left q-gutter-x-sm">
-                <q-icon clickable name="visibility" @click="goToPageDetail(props.row.id, true)">
+                <q-icon clickable name="visibility" @click="goToPageDetail(props.row.id, true)" class="bg-black text-white q-pa-xs rounded-borders q-mr-sm">
                   <q-tooltip>ดูรายละเอียด</q-tooltip>
                 </q-icon>
-                <q-icon clickable name="edit" @click="goToPageDetail(props.row.id, false)">
+                <q-icon clickable name="edit" @click="goToPageDetail(props.row.id, false)" class="bg-primary text-white q-pa-xs rounded-borders q-mr-sm">
                   <q-tooltip>แก้ไข</q-tooltip>
                 </q-icon>
                 <!-- <q-icon clickable name="delete" @click="openRemoveDialog(props.row.id)">
@@ -1059,10 +1059,10 @@ watchEffect(() => {
                 <!-- <q-icon clickable name="visibility" @click="goToPageDetail(props.row.id, true)">
                 <q-tooltip>ดูรายละเอียด</q-tooltip>
               </q-icon> -->
-                <q-icon clickable name="edit" @click="goToPageDetail(props.row.id, false)">
+                <q-icon clickable name="edit" @click="goToPageDetail(props.row.id, false)" class="bg-primary text-white q-pa-xs rounded-borders q-mr-sm">
                   <q-tooltip>แก้ไข</q-tooltip>
                 </q-icon>
-                <q-icon clickable name="delete" @click="openRemoveDialog(props.row.id)">
+                <q-icon clickable name="delete" @click="openRemoveDialog(props.row.id)" class="bg-red text-white q-pa-xs rounded-borders q-mr-sm">
                   <q-tooltip>ลบ</q-tooltip>
                 </q-icon>
               </q-td>
@@ -1600,21 +1600,21 @@ watchEffect(() => {
 .status-close {
   background-color: #cfd7ff;
   color: #001780;
-  border: 2px solid #002dff;
+  border: px solid #002dff;
   width: 130px;
 }
 
 .status-open {
   background-color: #d0ffc5;
   color: #009812;
-  border: 2px solid #00bb16;
+  border: 1px solid #00bb16;
   width: 130px;
 }
 
 .status-planning {
   background-color: #ffe7ba;
   color: #ff6f00;
-  border: 2px solid #ffa500;
+  border: 1px solid #ffa500;
 
   width: 130px;
 }
@@ -1622,7 +1622,7 @@ watchEffect(() => {
 .status-cancel {
   background-color: #ffc5c5;
   color: #ff0000;
-  border: 2px solid #f32323;
+  border: 1px solid #f32323;
 
   width: 130px;
 }
@@ -1631,7 +1631,7 @@ watchEffect(() => {
   background-color: #dadada;
   color: #000000;
   /* สีม่วง */
-  border: 2px solid #575656;
+  border: 1px solid #575656;
 
   width: 130px;
 }
