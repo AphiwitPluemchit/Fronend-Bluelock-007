@@ -137,4 +137,24 @@ export class ActivityService {
       throw error
     }
   }
+
+  static async getAllCalendar(params: {
+    year: string
+    month: string
+    skill?: string[]
+    activityState?: string[]
+    major?: string[]
+    studentYear?: string[]
+  }) {
+    const queryParams = {
+      ...(params.skill ? { skills: params.skill.join(',') } : {}),
+      ...(params.activityState ? { activityStates: params.activityState.join(',') } : {}),
+      ...(params.major ? { majors: params.major.join(',') } : {}),
+      ...(params.studentYear ? { studentYears: params.studentYear.join(',') } : {}),
+    }
+
+    return api.get(`/activitys/calendar/${params.month}/${params.year}`, {
+      params: queryParams,
+    })
+  }
 }

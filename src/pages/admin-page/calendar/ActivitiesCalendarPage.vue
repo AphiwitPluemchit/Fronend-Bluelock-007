@@ -37,7 +37,7 @@ const currentMonthDisplay = computed(() => {
 
 const query1 = ref<Pagination>({
   page: 1,
-  limit: 100,
+  limit: 20,
   search: '',
   sortBy: 'dates',
   order: 'desc',
@@ -67,7 +67,6 @@ async function getActivityData(qeury: Pagination) {
   return data
 }
 
-// โหลดข้อมูลกิจกรรมและแปลงเป็น CalendarEvent
 const data1 = async () => {
   // console.log('data fetched:', data)
   const data = await getActivityData(query1.value)
@@ -83,11 +82,35 @@ const data1 = async () => {
   console.log('Parsed calendarEvents:', calendarEvents.value)
 }
 
+const dataCalendar = async () => {
+  const date = new Date(selectedDate.value)
+  const year = date.getFullYear().toString()
+  const month = (date.getMonth() + 1).toString().padStart(2, '0')
+
+  console.log('filters used:', query1.value)
+
+  const res = await ActivityService.getAllCalendar({
+    year,
+    month,
+    skill: query1.value.skill ?? [],
+    activityState: query1.value.activityState ?? [],
+    major: query1.value.major ?? [],
+    studentYear: query1.value.studentYear ?? [],
+  })
+
+  // แสดงค่าผลลัพธ์จาก API
+  console.log('API response data:', res.data)
+
+  calendarEvents.value = parseToCalendarEvents(res.data)
+}
+
 const applyFilters1 = async (selectedFilters: SelectedFilters) => {
   query1.value.studentYear = selectedFilters.year
   query1.value.major = selectedFilters.major
   query1.value.activityState = selectedFilters.statusActivity
   query1.value.skill = selectedFilters.categoryActivity
+
+  selectedEvents.value = [] // ล้าง panel ขวาเมื่อใช้ filter
   await data1()
 }
 
@@ -121,7 +144,18 @@ watch(
 
     const q = { ...query1.value, search: newSearch }
     const data = await getActivityData(q)
-    const parsedEvents = parseToCalendarEvents(data.data)
+    const parsedEvents = Array.isArray(data.data)
+      ? parseToCalendarEvents(data.data).filter((e) => {
+          const keyword = newSearch.trim().toLowerCase()
+          const keywords = keyword.split(/\s+/)
+
+          // ตัดชื่อกิจกรรมออกเป็นคำ เช่น 'In house online' → ['in', 'house', 'online']
+          const tokens = `${e.activityName} ${e.activityItemName}`.toLowerCase().split(/\s+/)
+
+          // ต้องให้ทุกคำที่พิมพ์มา เจอในบางคำของ tokens (บางส่วนก็ได้)
+          return keywords.every((k) => tokens.some((t) => t.includes(k)))
+        })
+      : []
 
     // group by date
     const grouped: Record<string, CalendarEvent[]> = {}
@@ -161,6 +195,8 @@ function onEventStackClick(date: string) {
 
 // for panel ด้านขวา และเรียงลำดับตามเวลาเริ่มต้น
 function getEvents(date: string) {
+  const events = calendarEvents.value.filter((e) => e.date === date)
+  console.log('getEvents:', date, events)
   return calendarEvents.value
     .filter((e) => e.date === date)
     .sort((a, b) => {
@@ -269,7 +305,7 @@ function parseToCalendarEvents(activities: Activity[]): CalendarEvent[] {
           category,
           date: d.date,
           time: `${d.stime} - ${d.etime}`,
-          location: item.rooms?.[0] || '-',
+          location: item.rooms?.join(', ') || '-',
           participants: `${item.enrollmentCount ?? 0}/${item.maxParticipants ?? '-'}`,
           // duration: 1,
         })
@@ -282,13 +318,14 @@ function parseToCalendarEvents(activities: Activity[]): CalendarEvent[] {
 
 function goToDate(dateStr: string) {
   selectedDate.value = dateStr
+  console.log('goToDate: ', dateStr)
+  console.log('calendarEvents before set:', JSON.stringify(calendarEvents.value, null, 2))
   selectedEvents.value = getEvents(dateStr)
-  calendarRef.value?.moveToDate(dateStr) // scroll ไปยังเดือน/ปี ที่มีกิจกรรม
   query1.value.search = '' // reset ช่อง search
 }
 
 onMounted(async () => {
-  await data1()
+  await dataCalendar()
   console.log('calendarRef:', calendarRef.value)
 
   // หากวันนี้มี event ให้แสดงทางด้านขวาเลย
@@ -300,7 +337,10 @@ onMounted(async () => {
   }
 })
 
-function onMonthChanged({ start }: { start: { date: string } }) {
+async function onMonthChanged({ start }: { start: { date: string } }) {
+  // ถ้ากำลังค้นหาอยู่ → ไม่ต้องโหลดข้อมูลใหม่
+  if (query1.value.search) return
+
   const newMonth = new Date(start.date)
   const selected = new Date(selectedDate.value)
 
@@ -310,6 +350,8 @@ function onMonthChanged({ start }: { start: { date: string } }) {
 
   // ถ้าเป็นคนละเดือนกัน
   if (!sameMonth) {
+    await dataCalendar()
+
     // ตรวจสอบว่าวันที่เลือกเดิมยังมี event อยู่หรือไม่
     const stillHasEvents = getEvents(selectedDate.value).length > 0
 
