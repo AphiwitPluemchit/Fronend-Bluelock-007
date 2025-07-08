@@ -24,6 +24,10 @@ const adminChildren: RouteRecordRaw[] = [
     component: () => import('pages/admin-page/student/StudentTablePage.vue'),
   },
   {
+    path: 'StudentManagement/UploadStudentDialog',
+    component: () => import('pages/admin-page/student/UploadStudentDialog.vue'),
+  },
+  {
     path: 'StudentStorePage',
     component: () => import('pages/admin-page/student/StudentStorePage.vue'),
   },
@@ -57,3 +61,4 @@ export const adminRoutes: RouteRecordRaw[] = [
     children: adminChildren,
   },
 ]
+
