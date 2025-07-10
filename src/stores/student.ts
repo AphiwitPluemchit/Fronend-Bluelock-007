@@ -6,6 +6,7 @@ import { ref } from 'vue'
 
 export const useStudentStore = defineStore('student', () => {
   const students = ref<Student[]>([])
+  const totalStudentsCount = ref(0)
   const code = ref('')
 
   const student = ref<Student>({
@@ -25,7 +26,7 @@ export const useStudentStore = defineStore('student', () => {
     page: 1,
     limit: 10,
     search: '',
-    sortBy: '_id',
+    sortBy: 'code',
     order: 'desc',
     skill: [],
     major: [],
@@ -43,6 +44,7 @@ export const useStudentStore = defineStore('student', () => {
   const getStudents = async () => {
     const data = await StudentService.getAll(query.value)
     students.value = data.data
+    totalStudentsCount.value = data.meta.total
     console.log(data.data)
   }
 
@@ -50,15 +52,16 @@ export const useStudentStore = defineStore('student', () => {
   const getStudentByCode = async (code: string) => {
     const data = await StudentService.getOne(code)
     console.log('API Response:', data)
-    student.value.id = data.id
-    student.value.code = data.code
-    student.value.name = data.name
-    student.value.email = data.email
-    student.value.password = data.password
-    student.value.status = data.status
-    student.value.softSkill = data.softSkill
-    student.value.hardSkill = data.hardSkill
-    student.value.major = data.major
+    student.value = data.data
+    // student.value.id = data.id
+    // student.value.code = data.code
+    // student.value.name = data.name
+    // student.value.email = data.email
+    // student.value.password = data.password
+    // student.value.status = data.status
+    // student.value.softSkill = data.softSkill
+    // student.value.hardSkill = data.hardSkill
+    // student.value.major = data.major
   }
 
   // ฟังก์ชันอัปเดตนิสิต (รับ argument)
@@ -88,6 +91,7 @@ export const useStudentStore = defineStore('student', () => {
     query,
     students,
     code,
+    totalStudentsCount,
     updateStudent,
   }
 })

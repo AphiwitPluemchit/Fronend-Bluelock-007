@@ -2,13 +2,13 @@ import { defineStore } from 'pinia'
 import { EnrollmentService } from 'src/services/enrollment'
 import { ref } from 'vue'
 import type { StudentEnrollment } from 'src/types/enrollment'
-import type { ActivityEnrollmentPagination } from 'src/types/pagination'
+import type { Pagination } from 'src/types/pagination'
 
 export const useEnrollmentStore = defineStore('enrollment', () => {
   const studentEnrollments = ref<StudentEnrollment[]>([]) // ข้อมูลนิสิตที่ลงทะเบียน
   const total = ref(0)
 
-  const query = ref<ActivityEnrollmentPagination>({
+  const query = ref<Pagination>({
     page: 1,
     limit: 10,
     search: '',
@@ -16,7 +16,7 @@ export const useEnrollmentStore = defineStore('enrollment', () => {
     order: 'DESC',
     major: [],
     studentStatus: [],
-    studentYears: [],
+    studentYear: [],
   })
 
   // const fetchEnrollmentsByActivityID = async (
@@ -35,14 +35,13 @@ export const useEnrollmentStore = defineStore('enrollment', () => {
   // }
 
   const deleteEnrollmentById = async (enrollmentId: string) => {
-  try {
-    await EnrollmentService.removeOne(enrollmentId)
-  } catch (error) {
-    console.error('Error deleting enrollment:', error)
-    throw error
+    try {
+      await EnrollmentService.removeOne(enrollmentId)
+    } catch (error) {
+      console.error('Error deleting enrollment:', error)
+      throw error
+    }
   }
-}
-
 
   return {
     studentEnrollments,

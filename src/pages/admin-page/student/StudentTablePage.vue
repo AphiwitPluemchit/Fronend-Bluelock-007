@@ -7,7 +7,7 @@ import { useStudentStore } from 'src/stores/student'
 
 const studentStore = useStudentStore()
 const router = useRouter()
-const search1 = ref('')
+
 const students = computed(() => studentStore.students ?? [])
 
 onMounted(async () => {
@@ -25,6 +25,16 @@ interface SelectedFilters {
 const showFilterDialog1 = ref(false)
 const filterCategories1 = ref(['major', 'year', 'studentStatus'])
 
+async function onRequest(requestProp: {
+  pagination: { sortBy: string; descending: boolean; page: number; rowsPerPage: number }
+}) {
+  query.value.page = requestProp.pagination.page
+  query.value.limit = requestProp.pagination.rowsPerPage
+  query.value.sortBy = requestProp.pagination.sortBy
+  query.value.order = requestProp.pagination.descending ? 'desc' : 'asc'
+  await data()
+}
+
 const applyFilters = async (selectedFilters: SelectedFilters) => {
   studentStore.query.studentYear = selectedFilters.year ?? []
   studentStore.query.major = selectedFilters.major ?? []
@@ -40,9 +50,7 @@ const data = async () => {
   pagination.value.page = studentStore.query.page
   pagination.value.rowsPerPage = studentStore.query.limit
   pagination.value.sortBy = studentStore.query.sortBy
-  pagination.value.rowsNumber = Array.isArray(studentStore.students)
-    ? studentStore.students.length
-    : 0
+  pagination.value.rowsNumber = studentStore.totalStudentsCount
 }
 
 const query = computed(() => studentStore.query)
@@ -127,7 +135,7 @@ const columns = [
         <q-input
           dense
           outlined
-          v-model="search1"
+          v-model="query.search"
           label="ค้นหา ชื่อนิสิต"
           class="q-mr-sm searchbox"
           :style="{ border: 'none' }"
@@ -165,10 +173,13 @@ const columns = [
         flat
         :rows="students"
         :columns="columns"
+        v-model:pagination="pagination"
+        :rows-per-page-options="[5, 7, 10, 15, 20]"
+        @request="onRequest"
         row-key="id"
         class="q-mt-md"
-        :pagination="{ rowsPerPage: 10 }"
       >
+        <!-- <q-table bordered flat :rows="students" :columns="columns" @request="applyFilters" row-key="id" class="q-mt-md"> -->
         <!-- หัวตาราง Sticky -->
         <template v-slot:header="props">
           <q-tr :props="props" class="sticky-header">
@@ -217,8 +228,7 @@ const columns = [
             >
           </q-tr>
         </template>
-        ></q-table
-      >
+      </q-table>
     </section>
   </q-page>
 </template>
@@ -285,17 +295,17 @@ const columns = [
     align-items: stretch;
     gap: 10px; /* เพิ่มระยะห่างระหว่างกล่อง search กับปุ่มทั้งชุด */
   }
-   .searchbox {
+  .searchbox {
     width: 100% !important;
     margin-bottom: 0 !important; /* ใช้ gap แทน */
   }
 
-    .btn-filter-wrapper {
+  .btn-filter-wrapper {
     width: 100%;
     display: flex;
     flex-direction: row;
     justify-content: space-between;
-    gap: 5px; 
+    gap: 5px;
     flex-wrap: nowrap;
   }
 
