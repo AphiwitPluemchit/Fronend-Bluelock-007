@@ -16,14 +16,44 @@ const filters = ref({
   major: [] as string[],
 })
 
+// pagination state
+const pagination = ref({
+  page: 1,
+  rowsPerPage: 10,
+  rowsNumber: 0,
+})
+
+// โหลดข้อมูลนิสิตพร้อมอัพเดต pagination.rowsNumber
 onMounted(async () => {
   try {
     await studentStore.getStudents()
+    pagination.value.rowsNumber = studentStore.students.length
   } catch (err) {
     console.error('โหลดข้อมูลนิสิตล้มเหลว:', err)
   }
 })
 
+// ฟังก์ชันจัดการ event pagination request
+function onRequest(props: { pagination: { page: number; rowsPerPage: number } }) {
+  pagination.value.page = props.pagination.page
+  pagination.value.rowsPerPage = props.pagination.rowsPerPage
+}
+
+// ฟิลเตอร์ข้อมูลนิสิตพ้นสภาพ + กรองตาม search + major
+const filteredStudents = computed(() => {
+  return studentStore.students.filter((student) => {
+    const isTerminated = student.status === 0
+    const matchesSearch =
+      search1.value.trim() === '' ||
+      student.name.toLowerCase().includes(search1.value.trim().toLowerCase())
+    const matchesMajor =
+      filters.value.major.length === 0 || filters.value.major.includes(student.major)
+
+    return isTerminated && matchesSearch && matchesMajor
+  })
+})
+
+// ฟิลเตอร์ตาม major
 const applyFilters = (selectedFilters: typeof filters.value) => {
   filters.value = selectedFilters
 }
@@ -44,19 +74,6 @@ const getStatusClass = (status: string): string => {
   if (status === 'ชั่วโมงน้อยมาก') return 'status-low'
   return ''
 }
-
-const filteredStudents = computed(() => {
-  return studentStore.students.filter((student) => {
-    const isTerminated = student.status === 0
-    const matchesSearch =
-      search1.value.trim() === '' ||
-      student.name.toLowerCase().includes(search1.value.trim().toLowerCase())
-    const matchesMajor =
-      filters.value.major.length === 0 || filters.value.major.includes(student.major)
-
-    return isTerminated && matchesSearch && matchesMajor
-  })
-})
 
 const columns = [
   { name: 'index', label: 'ลำดับ', field: 'index', align: 'left' as const },
@@ -82,6 +99,101 @@ const goToConfirmPage = () => {
   void router.push('/Admin/StudentStorePage/ConfirmStudentDataPage')
 }
 </script>
+
+<template>
+  <q-page class="q-pa-md">
+    <div class="row justify-start items-center" style="margin-top: 20px">
+      <div class="text-h4">จัดเก็บข้อมูลนิสิต</div>
+    </div>
+    <!-- ส่วนค้นหา + ฟิลเตอร์ + ปุ่มเพิ่ม -->
+    <section class="q-mt-lg">
+      <div class="row justify-end items-center">
+        <div class="row">
+          <q-input
+            dense
+            outlined
+            v-model="search1"
+            label="ค้นหา ชื่อนิสิต"
+            class="q-mr-sm searchbox"
+            :style="{ border: 'none' }"
+          >
+            <template v-slot:append>
+              <q-icon name="search" />
+            </template>
+          </q-input>
+
+          <FilterDialog
+            v-model="showFilterDialog1"
+            :categories="filterCategories1"
+            @apply="applyFilters"
+            class="q-mr-sm"
+          />
+
+          <div>
+            <q-btn
+              dense
+              outlined
+              icon="add"
+              label="เพิ่มข้อมูล"
+              class="btnadd"
+              @click="goToConfirmPage"
+            />
+          </div>
+        </div>
+      </div>
+
+      <q-table
+        bordered
+        flat
+        :rows="filteredStudents"
+        :columns="columns"
+        row-key="code"
+        class="q-mt-md"
+        v-model:pagination="pagination"
+        :rows-per-page-options="[5, 7, 10, 15, 20]"
+        @request="onRequest"
+      >
+        <template v-slot:header="props">
+          <q-tr :props="props" class="sticky-header">
+            <q-th v-for="col in props.cols" :key="col.name" :props="props">
+              {{ col.label }}
+            </q-th>
+          </q-tr>
+        </template>
+
+        <template v-slot:body="props">
+          <q-tr :props="props">
+            <q-td key="index">{{ props.rowIndex + 1 }}</q-td>
+            <q-td key="code">{{ props.row.code }}</q-td>
+            <q-td
+              key="name"
+              style="
+                max-width: 200px;
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
+              "
+            >
+              {{ props.row.name }}
+            </q-td>
+            <q-td key="major">{{ props.row.major }}</q-td>
+            <q-td class="text-center" key="softskill">{{ props.row.softSkill }}/30</q-td>
+            <q-td class="text-center" key="hardskill">{{ props.row.hardSkill }}/12</q-td>
+            <q-td class="text-center">
+              <q-badge
+                :label="getStatusLabel(props.row)"
+                :class="getStatusClass(getStatusLabel(props.row))"
+                class="status-badge"
+                rounded
+                unelevated
+              />
+            </q-td>
+          </q-tr>
+        </template>
+      </q-table>
+    </section>
+  </q-page>
+</template>
 
 <style scoped>
 .status-complete {
@@ -123,12 +235,7 @@ const goToConfirmPage = () => {
   padding: 3px 30px;
   width: 130px;
 }
-.Font {
-  color: #000000;
-  font-size: 15px;
-  font-weight: bold;
-  font-family: 'Noto Serif Thai', serif;
-}
+
 .status-badge {
   height: 32px;
   line-height: 28px;
@@ -266,96 +373,3 @@ const goToConfirmPage = () => {
   text-overflow: ellipsis;
 }
 </style>
-
-<template>
-  <q-page class="q-pa-md">
-     <div class="row justify-start items-center"  style="margin-top: 20px">
-      <div class="text-h4">จัดเก็บข้อมูลนิสิต</div>
-    </div>
-    <!-- ส่วนค้นหา + ฟิลเตอร์ + ปุ่มเพิ่ม -->
-    <section class="q-mt-lg">
-      <div class="row justify-end items-center">
-        <div class="row">
-          <q-input
-            dense
-            outlined
-            v-model="search1"
-            label="ค้นหา ชื่อนิสิต"
-            class="q-mr-sm searchbox"
-            :style="{ border: 'none' }"
-          >
-            <template v-slot:append>
-              <q-icon name="search" />
-            </template>
-          </q-input>
-
-          <FilterDialog
-            v-model="showFilterDialog1"
-            :categories="filterCategories1"
-            @apply="applyFilters"
-            class="q-mr-sm"
-          />
-
-          <div>
-            <q-btn
-              dense
-              outlined
-              icon="add"
-              label="เพิ่มข้อมูล"
-              class="btnadd"
-              @click="goToConfirmPage"
-            />
-          </div>
-        </div>
-      </div>
-
-      <q-table
-        bordered
-        flat
-        :rows="filteredStudents"
-        :columns="columns"
-        row-key="code"
-        class="q-mt-md"
-        :pagination="{ rowsPerPage: 10 }"
-      >
-        <template v-slot:header="props">
-          <q-tr :props="props" class="sticky-header">
-            <q-th v-for="col in props.cols" :key="col.name" :props="props">
-              {{ col.label }}
-            </q-th>
-          </q-tr>
-        </template>
-
-        <template v-slot:body="props">
-          <q-tr :props="props">
-            <q-td key="index">{{ props.rowIndex + 1 }}</q-td>
-            <q-td key="code">{{ props.row.code }}</q-td>
-            <q-td
-              key="name"
-              style="
-                max-width: 200px;
-                white-space: nowrap;
-                overflow: hidden;
-                text-overflow: ellipsis;
-              "
-            >
-              {{ props.row.name }}
-            </q-td>
-            <q-td key="major">{{ props.row.major }}</q-td>
-            <q-td class="text-center" key="softskill">{{ props.row.softSkill }}/30</q-td>
-            <q-td class="text-center" key="hardskill">{{ props.row.hardSkill }}/12</q-td>
-            <q-td class="text-center">
-              <q-badge
-                :label="getStatusLabel(props.row)"
-                :class="getStatusClass(getStatusLabel(props.row))"
-                class="status-badge"
-                rounded
-                unelevated
-              />
-            </q-td>
-          </q-tr>
-        </template>
-      </q-table>
-    </section>
-  </q-page>
-</template>
