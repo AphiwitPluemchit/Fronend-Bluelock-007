@@ -15,26 +15,73 @@ const filterCategories = ref(['year', 'major', 'statusActivity', 'categoryActivi
 const searchBoxFocused = ref<boolean>(false)
 const calendarRef = ref()
 
-const currentMonthDisplay = computed(() => {
-  const date = new Date(selectedDate.value)
-  const thMonths = [
-    'มกราคม',
-    'กุมภาพันธ์',
-    'มีนาคม',
-    'เมษายน',
-    'พฤษภาคม',
-    'มิถุนายน',
-    'กรกฎาคม',
-    'สิงหาคม',
-    'กันยายน',
-    'ตุลาคม',
-    'พฤศจิกายน',
-    'ธันวาคม',
-  ]
-  const month = thMonths[date.getMonth()]
-  const year = date.getFullYear() + 543
-  return `${month} ${year}`
-})
+const thaiMonths = [
+  'มกราคม',
+  'กุมภาพันธ์',
+  'มีนาคม',
+  'เมษายน',
+  'พฤษภาคม',
+  'มิถุนายน',
+  'กรกฎาคม',
+  'สิงหาคม',
+  'กันยายน',
+  'ตุลาคม',
+  'พฤศจิกายน',
+  'ธันวาคม',
+]
+
+const monthPopup = ref(false)
+const yearPopup = ref(false)
+const yearRangeStart = ref(new Date().getFullYear() - 10)
+const thaiYears = computed(() =>
+  Array.from({ length: 20 }, (_, i) => yearRangeStart.value + i + 543),
+)
+
+function setMonth(monthIndex: number) {
+  const d = new Date(selectedDate.value)
+  d.setMonth(monthIndex)
+  selectedDate.value = d.toISOString().slice(0, 10)
+  monthPopup.value = false
+}
+
+function setYear(gregorianYear: number) {
+  const d = new Date(selectedDate.value)
+  d.setFullYear(gregorianYear)
+  selectedDate.value = d.toISOString().slice(0, 10)
+  yearPopup.value = false
+}
+
+function decreaseYearPage() {
+  yearRangeStart.value -= 20
+}
+
+function increaseYearPage() {
+  yearRangeStart.value += 20
+}
+
+function goPrevMonth() {
+  const current = new Date(selectedDate.value)
+  current.setMonth(current.getMonth() - 1)
+  selectedDate.value = current.toISOString().slice(0, 10)
+}
+
+function goNextMonth() {
+  const current = new Date(selectedDate.value)
+  current.setMonth(current.getMonth() + 1)
+  selectedDate.value = current.toISOString().slice(0, 10)
+}
+
+function goPrevYear() {
+  const current = new Date(selectedDate.value)
+  current.setFullYear(current.getFullYear() - 1)
+  selectedDate.value = current.toISOString().slice(0, 10)
+}
+
+function goNextYear() {
+  const current = new Date(selectedDate.value)
+  current.setFullYear(current.getFullYear() + 1)
+  selectedDate.value = current.toISOString().slice(0, 10)
+}
 
 const query1 = ref<Pagination>({
   page: 1,
@@ -348,6 +395,16 @@ async function onMonthChanged({ start }: { start: { date: string } }) {
     selectedEvents.value = stillHasEvents ? getEvents(selectedDate.value) : []
   }
 }
+
+watch(selectedDate, (val) => {
+  if (!val) {
+    selectedEvents.value = []
+    return
+  }
+
+  const events = getEvents(val)
+  selectedEvents.value = events.length > 0 ? events : []
+})
 </script>
 
 <template>
@@ -360,9 +417,67 @@ async function onMonthChanged({ start }: { start: { date: string } }) {
     <div class="row items-center justify-between q-mb-md">
       <!-- ⬅ อยู่ฝั่ง col-8 แต่จัดด้านซ้าย -->
       <div class="row items-center no-wrap">
-        <q-btn flat dense icon="chevron_left" @click="calendarRef?.prev()" />
+        <!-- <q-btn flat dense icon="chevron_left" @click="calendarRef?.prev()" />
         <q-btn flat dense icon="chevron_right" @click="calendarRef?.next()" />
-        <div class="text-h5 q-mx-md">{{ currentMonthDisplay }}</div>
+        <div class="text-h5 q-mx-md">{{ currentMonthDisplay }}</div> -->
+
+        <div class="row items-center no-wrap">
+          <!-- ปุ่ม prev month -->
+          <q-btn flat dense icon="chevron_left" @click="goPrevMonth" />
+
+          <q-btn dense flat @click="monthPopup = true" class="q-mx-xs">
+            {{ thaiMonths[new Date(selectedDate).getMonth()] }}
+          </q-btn>
+          <!-- ปุ่ม next month -->
+          <q-btn flat dense icon="chevron_right" @click="goNextMonth" />
+
+          <q-btn flat dense icon="chevron_left" @click="goPrevYear" />
+          <q-btn dense flat @click="yearPopup = true">
+            {{ new Date(selectedDate).getFullYear() + 543 }}
+          </q-btn>
+          <q-btn flat dense icon="chevron_right" @click="goNextYear" />
+
+          <!-- POPUP เลือกเดือน -->
+          <q-dialog v-model="monthPopup">
+            <q-card>
+              <q-card-section>
+                <div class="row q-gutter-sm justify-center">
+                  <q-btn
+                    v-for="(month, i) in thaiMonths"
+                    :key="i"
+                    flat
+                    :label="month"
+                    @click="setMonth(i)"
+                  />
+                </div>
+              </q-card-section>
+            </q-card>
+          </q-dialog>
+
+          <!-- POPUP เลือกปี -->
+          <q-dialog v-model="yearPopup">
+            <q-card>
+              <q-card-section>
+                <div class="row justify-center">
+                  <q-btn flat icon="chevron_left" @click="decreaseYearPage" />
+                  <div class="text-h6 q-mx-md">
+                    {{ yearRangeStart + 543 }} - {{ yearRangeStart + 19 + 543 }}
+                  </div>
+                  <q-btn flat icon="chevron_right" @click="increaseYearPage" />
+                </div>
+                <div class="row q-gutter-sm justify-center q-mt-md">
+                  <q-btn
+                    v-for="year in thaiYears"
+                    :key="year"
+                    flat
+                    :label="year.toString()"
+                    @click="setYear(year - 543)"
+                  />
+                </div>
+              </q-card-section>
+            </q-card>
+          </q-dialog>
+        </div>
       </div>
 
       <!-- ฝั่งขวา: search + filter -->
