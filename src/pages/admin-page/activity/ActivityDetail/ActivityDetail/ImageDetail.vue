@@ -89,7 +89,7 @@ const onFileChange = (event: Event) => {
   display: flex;
   justify-content: center;
   align-items: center;
-  background-color: #e2e2e2;
+  background-color: white;
   cursor: pointer;
   transition: border-color 0.3s;
 }

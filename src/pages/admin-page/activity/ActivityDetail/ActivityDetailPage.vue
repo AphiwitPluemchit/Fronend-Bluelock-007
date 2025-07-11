@@ -14,20 +14,27 @@ const activity = ref<Activity | null>(null)
 const tab = ref<string>('activity')
 const search = ref<string>('')
 const isPlanning = computed(() => activity.value?.activityState === 'planning')
-
+const isSmallScreen = ref(false)
+const checkScreen = () => {
+  const width = window.innerWidth
+  isSmallScreen.value = width <= 610
+}
 const currentBreadcrumb = computed(() => {
   if (tab.value === 'activity') return 'รายละเอียดกิจกรรม'
   if (tab.value === 'registration') return 'รายละเอียดการลงทะเบียน'
   if (tab.value === 'students') return 'รายชื่อนิสิต'
   if (tab.value === 'summary') return 'สรุปผลกิจกรรม'
-  return 'รายละเอียดกิจกรรม' // ค่าเริ่มต้น
+  return 'รายละเอียดกิจกรรม'
 })
 onMounted(async () => {
   const id = route.params.id as string
   const res = await ActivityService.getOne(id)
   activity.value = res.data
 })
-
+onMounted(() => {
+  checkScreen()
+  window.addEventListener('resize', checkScreen)
+})
 const breadcrumbs = computed(() => ({
   previousPage: { title: 'จัดการกิจกรรม', path: '/Admin/ActivitiesManagement' },
   currentPage: {
@@ -41,6 +48,12 @@ watch([tab, isPlanning], () => {
     tab.value = 'activity'
   }
 })
+const tabOptions = [
+  { label: 'รายละเอียดกิจกรรม', value: 'activity' },
+  { label: 'รายละเอียดการลงทะเบียน', value: 'registration', disable: isPlanning },
+  { label: 'รายชื่อนิสิต', value: 'students', disable: isPlanning },
+  { label: 'สรุปผลกิจกรรม', value: 'summary', disable: isPlanning },
+]
 </script>
 
 <template>
@@ -50,13 +63,39 @@ watch([tab, isPlanning], () => {
 
       <!-- Tabs -->
       <div class="tab-scroll-wrapper">
-        <q-tabs v-model="tab" align="left" dense   class="tab-no-arrow" >
+        <!-- ✅ จอใหญ่: ใช้ q-tabs -->
+        <q-tabs
+          v-if="!isSmallScreen"
+          v-model="tab"
+          align="left"
+          dense
+          class="tab-no-arrow"
+          indicator-color="transparent"
+        >
           <q-tab name="activity" label="รายละเอียดกิจกรรม" />
           <q-tab name="registration" label="รายละเอียดการลงทะเบียน" :disable="isPlanning" />
           <q-tab name="students" label="รายชื่อนิสิต" :disable="isPlanning" />
           <q-tab name="summary" label="สรุปผลกิจกรรม" :disable="isPlanning" />
         </q-tabs>
+
+        <!-- ✅ จอเล็ก: ใช้ q-select dropdown -->
+        <q-select
+          v-else
+          v-model="tab"
+          :options="tabOptions"
+          emit-value
+          map-options
+          label="เลือกหัวข้อ"
+          dense
+          outlined
+          class="q-mb-md"
+          style="min-width: 250px;"
+          menu-anchor="bottom start"
+          menu-self="top start"
+            :popup-content-style="{ maxHeight: '200px', overflowY: 'auto' }"
+        />
       </div>
+
       <!-- Tab Panels -->
       <q-tab-panels v-model="tab" animated class="custom-panels">
         <q-tab-panel name="activity" class="q-my-md">
@@ -84,15 +123,6 @@ watch([tab, isPlanning], () => {
 </template>
 
 <style scoped>
-.breadcrumb-text {
-  color: black !important;
-}
-
-.active-breadcrumb {
-  text-decoration: underline;
-  color: black;
-}
-
 .q-tabs {
   max-width: 100%;
   margin-left: 20px;
@@ -100,28 +130,29 @@ watch([tab, isPlanning], () => {
 
 .tab-scroll-wrapper {
   overflow-x: auto;
-  -webkit-overflow-scrolling: touch;
   max-width: 100%;
   white-space: nowrap;
   justify-self: end;
-  margin-top: 20px;
 }
 
 .tab-scroll-wrapper::-webkit-scrollbar {
   display: none;
 }
-
 .tab-no-arrow {
-  display: inline-flex;
-  min-width: max-content;
+  display: flex;
 }
-
 .tab-no-arrow .q-tab {
-  flex: 0 0 auto;
-  min-width: 140px;
+  flex: 1 1 0;
+  text-align: center;
+  border-radius: 12px 12px 0 0;
+  min-width: unset; /* ยกเลิก min-width เดิม */
+}
+.tab-no-arrow .q-tab.q-tab--active {
+  background-color: #edf0f5;
 }
 .custom-panels {
-  max-height: 650px;
+  max-height: 680px;
+  background-color: #edf0f5;
 }
 @media (max-width: 1650px) {
   .custom-panels {

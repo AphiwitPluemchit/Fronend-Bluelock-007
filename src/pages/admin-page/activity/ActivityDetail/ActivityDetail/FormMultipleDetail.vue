@@ -1001,7 +1001,7 @@ onMounted(() => {
     </div>
 
     <!-- Save / Cancel Button -->
-    <div class="button-group" style="margin-bottom: 30px">
+    <div class="button-group" >
       <q-btn v-if="!props.isEditing" class="btnedit" label="แก้ไข" @click="enterEditMode" />
       <template v-else>
         <q-btn class="btnreject" label="ยกเลิก" @click="openCancelDialog" />

@@ -1592,11 +1592,6 @@ watchEffect(() => {
 .my-sticky-header-table .q-icon {
   color: #4a4a4a;
 }
-
-
-
-
-
 .status-close {
   background-color: #cfd7ff;
   color: #001780;

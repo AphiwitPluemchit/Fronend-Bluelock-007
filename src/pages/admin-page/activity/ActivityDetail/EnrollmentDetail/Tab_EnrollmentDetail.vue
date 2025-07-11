@@ -6,15 +6,15 @@ import type { Activity, EnrollmentSummary } from 'src/types/activity'
 
 const route = useRoute()
 const activityId = route.params.id as string
-const isMobile = ref(false)
-const checkMobile = () => {
-  isMobile.value = window.innerWidth <= 830
-}
-onMounted(() => {
-  checkMobile()
-  window.addEventListener('resize', checkMobile)
-})
+const expandedIndices = ref<number[]>([])
 
+const toggleExpanded = (index: number) => {
+  if (expandedIndices.value.includes(index)) {
+    expandedIndices.value = expandedIndices.value.filter((i) => i !== index)
+  } else {
+    expandedIndices.value.push(index)
+  }
+}
 const enrollmentSummary = ref<EnrollmentSummary | null>(null)
 const majorList = [
   { majorName: 'CS' },
@@ -43,7 +43,6 @@ const registrationRows = computed(() => {
   })
 })
 
-// rows สำหรับ q-table
 const foodRows = computed(() => activityDetail.value?.foodVotes ?? [])
 
 const fetchEnrollmentSummary = async () => {
@@ -65,7 +64,22 @@ const fetchActivityDetail = async () => {
     console.error('Error fetching activity detail:', error)
   }
 }
+const totalByMajor = computed(() => {
+  const result: Record<string, number> = {}
+  majorList.forEach((m) => {
+    result[m.majorName] = 0
+  })
 
+  enrollmentSummary.value?.activityItemSums?.forEach((item) => {
+    if (Array.isArray(item.registeredByMajor)) {
+      item.registeredByMajor.forEach((major) => {
+        result[major.majorName] = (result[major.majorName] ?? 0) + major.count
+      })
+    }
+  })
+
+  return result
+})
 onMounted(async () => {
   await fetchEnrollmentSummary()
   await fetchActivityDetail()
@@ -73,237 +87,140 @@ onMounted(async () => {
 </script>
 
 <template>
-  <div class="registration-content-scroll">
-    <!-- Header ข้อมูลกิจกรรม -->
-    <div class="info-group-header">
-      <div class="activity-name-wrapper">
-        <div class="ActivityName">{{ activityDetail?.name }}</div>
-      </div>
-      <div v-if="!isMobile" class="info-row-header">
-        <span class="label">จำนวนที่รับ / จำนวนนิสิตที่ลงทะเบียน / จำนวนที่ว่าง :</span>
-        <span class="value">
-          {{ enrollmentSummary?.maxParticipants || 0 }} /
-          {{ enrollmentSummary?.totalRegistered || 0 }} /
-          {{ enrollmentSummary?.remainingSlots || 0 }}
-        </span>
-        <span class="unit">คน</span>
-      </div>
-      <div v-else class="info-row-header-mobile">
-        <div class="row-line">
-          <div class="label-mobile">จำนวนที่รับ</div>
-          <div class="value-mobile">: {{ enrollmentSummary?.maxParticipants || 0 }}</div>
-        </div>
-        <div class="row-line">
-          <div class="label-mobile">จำนวนนิสิตที่ลงทะเบียน</div>
-          <div class="value-mobile">: {{ enrollmentSummary?.totalRegistered || 0 }}</div>
-        </div>
-        <div class="row-line">
-          <div class="label-mobile">จำนวนที่ว่าง</div>
-          <div class="value-mobile">: {{ enrollmentSummary?.remainingSlots || 0 }}</div>
-        </div>
-      </div>
-    </div>
-
-    <!-- ตารางผลการลงทะเบียน หรือ Card Layout -->
-    <div class="registration-title-center">
-      <span class="registration-title-text">ผลการลงทะเบียน</span>
-    </div>
-
-    <q-list class="q-mt-sm">
-      <q-card v-for="(row, index) in registrationRows" :key="index" class="q-mb-sm">
-        <q-card-section>
-          <div class="text-subtitle1 q-mb-sm">
-            <b>{{ row.activity }}</b>
-          </div>
-
-          <!-- ข้อมูลทั่วไป -->
-          <div class="info-row">
-            <span class="labels">จำนวนที่รับ</span>
-            <span class="value">: {{ row.max }}</span>
-          </div>
-          <div class="info-row">
-            <span class="labels">จำนวนที่ลงทะเบียน</span>
-            <span class="value">: {{ row.enrolled }}</span>
-          </div>
-          <div class="info-row">
-            <span class="labels">จำนวนที่ว่าง</span>
-            <span class="value">: {{ row.remaining }}</span>
-          </div>
-
-          <!-- แสดงแต่ละสาขา -->
-          <div v-for="major in majorList" :key="major.majorName" class="info-row">
-            <span class="labels">{{ major.majorName }}</span>
-            <span class="value">: {{ row[major.majorName] }}</span>
-          </div>
-        </q-card-section>
-      </q-card>
-    </q-list>
-    <!-- ตารางอาหาร (เฉพาะกรณีมีข้อมูล) -->
-    <div v-if="activityDetail?.foodVotes?.length" class="registration-food-section">
-      <div class="registration-title-center">
-        <span class="registration-title-text">ผลการเลือกอาหาร</span>
-      </div>
-
-      <q-list class="q-mt-sm">
-        <q-card v-for="(food, index) in foodRows" :key="index" class="q-mb-sm">
-          <q-card-section>
-            <div class="text-subtitle1">
-              <b>{{ food.foodName }}</b>
-            </div>
-            <div class="label-mobiles">จำนวน: {{ food.vote }}</div>
-          </q-card-section>
+  <div class="panel">
+    <div class="mainActivity">
+      <div class="header_Name">{{ activityDetail?.name }}</div>
+      <div class="row cards-wrapper">
+        <q-card class="card bg-blue-2 text-center q-pa-md">
+          <div class="text-h5">{{ enrollmentSummary?.maxParticipants || 0 }}</div>
+          <div class="text-subtitle2">จำนวนที่รับ</div>
         </q-card>
-      </q-list>
+
+        <q-card class="card bg-green-2 text-center q-pa-md">
+          <div class="text-h5">{{ enrollmentSummary?.totalRegistered || 0 }}</div>
+          <div class="text-subtitle2">จำนวนนิสิตที่ลงทะเบียน</div>
+        </q-card>
+
+        <q-card class="card bg-yellow-2 text-center q-pa-md">
+          <div class="text-h5">{{ enrollmentSummary?.remainingSlots || 0 }}</div>
+          <div class="text-subtitle2">จำนวนที่ว่าง</div>
+        </q-card>
+      </div>
+
+      <div class="header_Name">รายละเอียดตามสาขา</div>
+      <div class="columns cards-wrapper">
+        <q-card
+          class="card bg-yellow-2 text-center q-pa-md"
+          v-for="major in majorList"
+          :key="major.majorName"
+        >
+          <div class="text-h5">{{ totalByMajor[major.majorName] || 0 }}</div>
+          <div class="text-subtitle2">{{ major.majorName }}</div>
+        </q-card>
+      </div>
+
+      <!-- อาหาร (เฉพาะกรณีมีข้อมูล) -->
+      <div v-if="activityDetail?.foodVotes?.length">
+        <div class="header_Name">ผลการเลือกอาหาร</div>
+        <div v-for="(food, index) in foodRows" :key="index" class="Food-wrapper">
+          <span class="TextFood">{{ food.foodName }}</span>
+          <span class="ValueFood">: {{ food.vote }} คน</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="subActivity" v-for="(row, index) in registrationRows" :key="index">
+      <div class="row justify-between items-center">
+        <span class="header_Name">{{ row.activity }}</span>
+        <q-icon
+          :name="expandedIndices.includes(index) ? 'keyboard_arrow_up' : 'keyboard_arrow_down'"
+          class="cursor-pointer"
+          size="md"
+          @click="toggleExpanded(index)"
+        />
+      </div>
+
+      <div class="cards-wrapper">
+        <q-card class="card bg-blue-2 text-center q-pa-md">
+          <div class="text-h5">{{ row.max }}</div>
+          <div class="text-subtitle2">จำนวนที่รับ</div>
+        </q-card>
+        <q-card class="card bg-blue-2 text-center q-pa-md">
+          <div class="text-h5">{{ row.enrolled }}</div>
+          <div class="text-subtitle2">จํานวนที่ลงทะเบียน</div>
+        </q-card>
+        <q-card class="card bg-blue-2 text-center q-pa-md">
+          <div class="text-h5">{{ row.remaining }}</div>
+          <div class="text-subtitle2">จํานวนที่ว่าง</div>
+        </q-card>
+      </div>
+      <div v-if="expandedIndices.includes(index)">
+        <span class="text-h6">รายละเอียดตามสาขา</span>
+        <div class="cards-wrapper">
+          <q-card
+            class="card bg-yellow-2 text-center q-pa-md"
+            v-for="major in majorList"
+            :key="major.majorName"
+          >
+            <div class="text-h5">{{ row[major.majorName] }}</div>
+            <div class="text-subtitle2">{{ major.majorName }}</div>
+          </q-card>
+        </div>
+      </div>
     </div>
   </div>
 </template>
 
 <style scoped>
-.registration-content-scroll {
-  height: 600px; /* ใช้ height แทน min/max-height */
-  overflow-y: auto; /* ให้ scroll ตามแนวตั้ง */
-  padding-right: 8px;
-  border-radius: 8px;
-  padding: 12px;
-  background-color: #fff; /* เพื่อให้เห็น scrollbar ชัดเจน */
-  scrollbar-width: none; /* Firefox */
-  -ms-overflow-style: none; /* IE/Edge */
+.panel {
+  max-height: 600px;
+  overflow-y: auto;
 }
-.registration-content-scroll::-webkit-scrollbar {
+.panel::-webkit-scrollbar {
   display: none;
 }
+.mainActivity {
+  background-color: rgb(211, 202, 191);
+  padding: 20px;
+  width: 60%;
+  border-radius: 20px;
+}
+.subActivity {
+  background-color: rgb(211, 202, 191);
+  padding: 20px;
+  width: 60%;
+  border-radius: 20px;
+  margin-top: 20px;
+}
 
-.registration-title-center {
-  display: flex;
-  justify-content: left;
-  align-items: center;
-  margin: 2px 0;
+.header_Name {
+  font-size: 20px;
+  font-weight: bold;
+}
+.card {
+  max-width: 200px;
   width: 100%;
 }
-
-
-.info-group-header {
+.cards-wrapper {
   display: flex;
-  flex-direction: column;
-  gap: 10px;
-  margin-bottom: 40px;
+  gap: 20px;
+  margin-top: 15px;
+  margin-bottom: 15px;
+  flex-wrap: wrap;
 }
-
-.info-row-header {
+.Food-wrapper {
   display: flex;
-  align-items: center;
-  gap: 30px;
+  margin-top: 10px;
+  margin-bottom: 10px;
+  flex-wrap: wrap;
 }
-  .label-mobile {
-    min-width: 200px;
-    font-size: 18px;
-    font-weight: 500;
-    color: #000;
-    text-align: left;
-  }
-.label {
-  white-space: nowrap;
-  text-align: right;
-  min-width: 400px;
-  font-size: 20px;
-  color: #000;
+.TextFood {
+  font-size: 16px;
+  font-weight: 600;
+  min-width: 200px;
+  display: inline-block;
 }
-
-.value,
-.unit {
-  font-size: 20px;
-  color: #000;
-  text-align: left;
-}
-
-.registration-title-center {
-  display: flex;
-  justify-content: left;
-  align-items: self-start;
-  margin: 20px 0;
-  width: 100%;
-}
-
-
-.row {
-  display: flex;
-  align-items: flex-end;
-  gap: 30px;
-}
-.info-row {
-  display: flex;
-  margin-bottom: 4px;
+.ValueFood {
   font-size: 16px;
 }
-.ActivityName {
-  font-size: 22px;
-  font-weight: 600;
-}
-.labels {
-  min-width: 180px; /* หรือเปลี่ยนตามความเหมาะสม เช่น 150px */
-  font-weight: 500;
-}
-@media (max-width: 830px) {
-  .registration-content-scroll {
-    height: auto; /* ใช้ height แทน min/max-height */
-    overflow-y: auto; /* ให้ scroll ตามแนวตั้ง */
-  }
-  .registration-content-scroll {
-    padding: 8px;
-  }
-
-  .info-row-header {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 4px;
-  }
-
-  .label {
-    min-width: auto;
-    font-size: 20px;
-    text-align: left;
-  }
-  .info-row-header-mobile {
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
-  }
-
-  .row-line {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-  }
-
-  .label-mobile {
-    min-width: 200px;
-    font-size: 18px;
-    font-weight: 500;
-    color: #000;
-    text-align: left;
-  }
-
-  .value-mobile {
-    font-size: 18px;
-    color: #000;
-    text-align: right;
-  }
-  .value,
-  .unit {
-    font-size: 20px;
-  }
-
-  .text-subtitle1 {
-    font-size: 18px;
-    font-weight: semibold;
-  }
-  .label-mobiles {
-    font-size: 16px;
-    font-weight: 500;
-    min-width: 140px;
-    color: #000;
-  }
-
-}
-
 </style>

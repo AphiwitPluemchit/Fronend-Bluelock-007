@@ -48,6 +48,7 @@ const breadcrumbs = ref({
   padding: 30px;
   margin-top: 20px;
   flex-wrap: wrap; 
+  background-color: #EDF0F5;
 }
 
 .container {
@@ -96,7 +97,6 @@ const breadcrumbs = ref({
     width: 100%;
     max-width: 430px;
   }
-
   .form-section {
     margin-right: 0;
     max-height: unset;
