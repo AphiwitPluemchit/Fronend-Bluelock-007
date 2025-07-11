@@ -7,6 +7,7 @@ import type { Activity } from 'src/types/activity'
 import type { Pagination } from 'src/types/pagination'
 import { ActivityService } from 'src/services/activity'
 import FilterDialog from 'src/components/Dialog/FilterDialog.vue'
+import type { CalendarEvent } from 'src/types/calendar'
 
 const activitys1 = ref<Activity[]>([])
 const showFilterDialog1 = ref(false)
@@ -112,19 +113,6 @@ const applyFilters1 = async (selectedFilters: SelectedFilters) => {
 
   selectedEvents.value = [] // ล้าง panel ขวาเมื่อใช้ filter
   await data1()
-}
-
-interface CalendarEvent {
-  id: number
-  activityName: string // ชื่อกิจกรรมหลัก
-  activityItemName: string // ชื่อกิจกรรมย่อย
-  activityState: string
-  category: 'soft' | 'hard'
-  date: string
-  time: string
-  location: string
-  participants: string
-  // duration?: number
 }
 
 const todayDate = ref<string>(today())
