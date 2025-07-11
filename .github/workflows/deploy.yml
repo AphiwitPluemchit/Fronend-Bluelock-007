@@ -3,10 +3,10 @@ name: Deploy Frontend & Docker Compose
 on:
   push:
     branches:
-      - main # ทริกเกอร์เมื่อมีการ Push ไปที่ main branch
+      - master # ทริกเกอร์เมื่อมีการ Push ไปที่ main branch
   pull_request:
     branches:
-      - main
+      - master
 
 jobs:
   deploy:
@@ -16,9 +16,11 @@ jobs:
       - name: Checkout Frontend Code # Step นี้จะ Checkout โค้ดของ Frontend Repository ปัจจุบัน
         uses: actions/checkout@v4
 
-      - name: Sync Frontend Code to Deployment Directory # คัดลอกโค้ด Frontend ที่ Checkout มา ไปยังโฟลเดอร์จริงบน Server
+      # pull frontend code
+      - name: Pull Frontend Code
         run: |
-          rsync -av --delete --exclude '.git/' "${GITHUB_WORKSPACE}/" "/home/BUU/65160309/bluelock/Fronend-Bluelock-007/"
+          cd /home/BUU/65160309/bluelock/Fronend-Bluelock-007/
+          git pull origin main
 
       - name: Build and Deploy Docker Compose # รันคำสั่ง Docker Compose
         run: |
