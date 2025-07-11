@@ -16,23 +16,19 @@ jobs:
       - name: Checkout Frontend Code # Step นี้จะ Checkout โค้ดของ Frontend Repository ปัจจุบัน
         uses: actions/checkout@v4
 
-      - name: Sync Frontend Code to Deployment Directory # คัดลอกโค้ด Frontend ที่ Checkout มา ไปยังโฟลเดอร์จริงบน Server
+      # pull frontend code
+      - name: Pull Frontend Code
         run: |
-          rsync -av --delete --exclude '.git/' "${GITHUB_WORKSPACE}/" "/home/dev1/bluelocks/Fronend-Bluelock-007/"
-
-      - name: Pull Backend Code # ดึงโค้ด Backend ล่าสุด (ในกรณีที่ Frontend อัปเดต Backend อาจจะไม่อัปเดต)
-        run: |
-          cd /home/dev1/bluelocks/Backend-Bluelock-007/
-          git pull origin main 
+          cd /home/BUU/65160309/bluelock/Fronend-Bluelock-007/
+          git pull origin main
 
       - name: Build and Deploy Docker Compose # รันคำสั่ง Docker Compose
-        run: | 
-          cd /home/dev1/bluelocks/
+        run: |
+          cd /home/BUU/65160309/bluelock/Fronend-Bluelock-007/
           docker compose down --volumes
-# docker system prune -a --volumes
           docker compose build --no-cache
           docker compose up -d --force-recreate
 
-      - name: Clean up Runner Workspace (Optional but Recommended)
-        run: |
-          rm -rf "${GITHUB_WORKSPACE}"
+      # - name: Clean up Runner Workspace (Optional but Recommended)
+      #   run: |
+      #     rm -rf "${GITHUB_WORKSPACE}"
