@@ -378,14 +378,14 @@ const validateBeforeOpen = async (): Promise<boolean> => {
     const sub = subActivities.value[i]!
 
     // 3.1 ชื่อกิจกรรม
-    if (!sub.subActivityName?.trim()) {
-      subActivityNameErrors.value[i] = 'กรุณากรอกชื่อกิจกรรม'
-      hasError.value = true
-      if (subActivityNameRefs.value[i]?.$el) {
-        scrollTargets.push(subActivityNameRefs.value[i]?.$el)
-        if (!isFirstErrorHandled.value) isFirstErrorHandled.value = true
-      }
-    }
+    // if (!sub.subActivityName?.trim()) {
+    //   subActivityNameErrors.value[i] = 'กรุณากรอกชื่อกิจกรรม'
+    //   hasError.value = true
+    //   if (subActivityNameRefs.value[i]?.$el) {
+    //     scrollTargets.push(subActivityNameRefs.value[i]?.$el)
+    //     if (!isFirstErrorHandled.value) isFirstErrorHandled.value = true
+    //   }
+    // }
 
     // 3.2 วันที่จัดกิจกรรม
     await validateComponent(dateRefs.value[i], scrollTargets, hasError, isFirstErrorHandled)

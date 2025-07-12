@@ -22,7 +22,7 @@ const showFilterDialog = ref(false)
 const options = {
   year: ['1', '2', '3', '4'],
   major: ['CS', 'SE', 'ITDI', 'AAI'],
-  studentStatus: ['3', '2', '1', '0'],
+  studentStatus: ['3', '2', '1'],
   statusActivity: ['planning', 'open', 'close', 'success', 'cancel'],
   categoryActivity: ['soft', 'hard'],
 }
@@ -126,8 +126,8 @@ function toggleFilter(category: keyof typeof tempFilters.value, value: string) {
 </script>
 
 <template>
-  <q-btn class="btnfilter" dense>
-    <img src="/icons/sort.svg" alt="Sort Icon" width="30" height="30" />
+  <q-btn class="btnfilter"  :style="{ border: '1px solid #ccc' }">
+   <q-icon name="filter_list_alt"></q-icon>
     <q-menu
       v-model="showFilterDialog"
       :transition-show="'jump-down'"

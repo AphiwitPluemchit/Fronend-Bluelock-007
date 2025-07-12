@@ -68,7 +68,6 @@ const breadcrumbs = ref({
   flex-grow: 1;
   overflow-x: hidden;
   overflow-y: auto;
-  max-height: 640px;
   margin-right: 50px;
 }
 
@@ -99,7 +98,6 @@ const breadcrumbs = ref({
   }
   .form-section {
     margin-right: 0;
-    max-height: unset;
     width: 100%;
     max-width: 770px;
   }
