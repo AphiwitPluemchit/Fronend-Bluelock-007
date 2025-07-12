@@ -173,7 +173,7 @@ onMounted(async () => {
 
 <style scoped>
 .panel {
-  max-height: 600px;
+  min-height: 600px;
   overflow-y: auto;
 }
 .panel::-webkit-scrollbar {
@@ -183,7 +183,7 @@ onMounted(async () => {
   background-color: rgb(211, 202, 191);
   padding: 20px;
   width: 60%;
-  border-radius: 20px;
+  border-radius: 50px;
 }
 .subActivity {
   background-color: rgb(211, 202, 191);

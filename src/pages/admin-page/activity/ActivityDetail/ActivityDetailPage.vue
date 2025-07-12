@@ -151,7 +151,7 @@ const tabOptions = [
   background-color: #edf0f5;
 }
 .custom-panels {
-  max-height: 680px;
+   max-height: unset;
   background-color: #edf0f5;
 }
 @media (max-width: 1650px) {

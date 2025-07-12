@@ -18,7 +18,7 @@ const removeStudentFromActivity = () => {
 <template>
     <div>
         <!-- ไอคอนกากบาท -->
-        <q-icon name="close" class="remove-icon" @click="showDialog = true" />
+        <q-icon name="delete"  class="bg-red-7  text-red-1 text-white q-pa-xs rounded-borders q-mr-sm" @click="showDialog = true" />
 
         <!-- Pop-up Dialog ยืนยันการลบ -->
         <q-dialog v-model="showDialog">
@@ -84,16 +84,9 @@ const removeStudentFromActivity = () => {
     min-width: 70px;
     border-radius: 10px;
 }
-
-.remove-icon {
-    font-size: 24px;
-    color: red;
-    cursor: pointer;
-    transition: transform 0.2s, color 0.2s;
-}
-
-.remove-icon:hover {
-    color: rgb(156, 12, 12);
-    transform: scale(1.2);
+@media (max-width: 600px){
+  .dialog-box{
+    width: 100%;
+  }
 }
 </style>
