@@ -61,27 +61,14 @@ const unRegister = async (modelValue: boolean) => {
 }
 
 const isRegistrationNotAllowed = computed(() => {
-  // ตรวจสอบว่า activity.value?.activityItems มีข้อมูลหรือไม่
-  if (!activity.value?.activityItems || activity.value.activityItems.length === 0) {
-    return false // ถ้าไม่มีข้อมูลให้คืนค่า false หรือค่าอื่นๆ ตามที่ต้องการ
+  if (!activity.value?.endDateEnroll) {
+    return false // ถ้าไม่มี endDateEnroll ให้อนุญาตลงทะเบียนไว้ก่อน
   }
 
-  // ดึงวันที่จาก activityItems และตรวจสอบก่อน
-  const dateString = activity.value.activityItems[0]?.dates?.[0]?.date
+  const endDate = new Date(activity.value.endDateEnroll)
+  const now = new Date()
 
-  if (!dateString) {
-    return false // ถ้าไม่มีวันที่ให้คืนค่า false หรือค่าอื่นๆ ตามที่ต้องการ
-  }
-
-  // สร้าง Date จากวันที่
-  const activityDate = new Date(dateString)
-  const now = new Date() // วันที่ปัจจุบัน
-  const diffTime = activityDate.getTime() - now.getTime() // หาค่าความแตกต่างระหว่างวันที่
-
-  const diffDays = diffTime / (1000 * 3600 * 24) // แปลงเวลาเป็นจำนวนวัน
-
-  // ตรวจสอบว่าเหลือ 7 วันก่อนวันกิจกรรม
-  return diffDays < 7 // ถ้ามีวันเหลือมากกว่า 7 วัน จึงจะสามารถลงทะเบียนได้
+  return now > endDate // ถ้าวันปัจจุบันเลยวันสิ้นสุดแล้ว ไม่ให้ลงทะเบียน
 })
 
 async function fetchData() {
