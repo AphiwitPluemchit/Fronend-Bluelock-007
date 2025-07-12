@@ -80,7 +80,7 @@ const onConfirm = async () => {
 
       <!-- แสดง QR -->
       <q-card-section class="dialog-body" v-else>
-        {{ qrLink }}
+        {{ 'http://localhost:9000' + qrLink }}
         <q-img
           :src="`https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=http://localhost:9000${qrLink}`"
           style="margin-top: 10px; max-width: 150px"

@@ -31,9 +31,9 @@ class CheckinoutService {
       console.error('failed:', error)
     }
   }
-  static async checkout(userId: string, uuid: string) {
+  static async checkout(userId: string, evaluationId: string, uuid: string) {
     try {
-      const res = await api.post(`/checkInOuts/checkout/${uuid}`, { userId })
+      const res = await api.post(`/checkInOuts/checkout/${uuid}`, { userId, evaluationId })
       return res.data
     } catch (error) {
       showError('เช็คชื่อล้มเหลว')

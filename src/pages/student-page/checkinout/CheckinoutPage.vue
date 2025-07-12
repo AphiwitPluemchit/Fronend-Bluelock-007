@@ -22,7 +22,12 @@ onMounted(() => {
       :studentId="auth.getUser?.id?.toString() || ''"
       :uuid="uuid?.toString() || ''"
     />
-    <Checkoutpage v-else-if="route.path.startsWith('/checkout')" />
+    <Checkoutpage
+      v-else-if="route.path.startsWith('/checkout')"
+      :studentId="auth.getUser?.id?.toString() || ''"
+      :evaluationId="'123'"
+      :uuid="uuid?.toString() || ''"
+    />
 
     <div v-else class="text-negative">ไม่พบหน้าเช็คชื่อ</div>
   </q-page>
