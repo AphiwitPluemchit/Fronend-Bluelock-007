@@ -129,6 +129,17 @@ const activityColors = {
     icon: 'book',
   },
 }
+
+const majorFullName = computed(() => {
+  const majorMap: Record<string, string> = {
+    CS: 'วิทยาการคอมพิวเตอร์',
+    SE: 'วิศวกรรมซอฟต์แวร์',
+    AAI: 'ปัญญาประดิษฐ์ประยุกต์',
+    ITDI: 'นวัตกรรมดิจิทัล',
+  }
+  return majorMap[studentData.value.major] || studentData.value.major
+})
+
 </script>
 
 <template>
@@ -152,8 +163,9 @@ const activityColors = {
               </div>
               <div class="row q-col-gutter-sm text-body2 q-py-xs">
                 <div class="col-4 text-right text-weight-medium">สาขา :</div>
-                <div class="col-8">{{ studentData.major }}</div>
+                <div class="col-8">{{ majorFullName }}</div>
               </div>
+
               <div class="row q-col-gutter-sm text-body2 q-py-xs">
                 <div class="col-4 text-right text-weight-medium">รหัสนิสิต :</div>
                 <div class="col-8">{{ studentData.studentId }}</div>
@@ -335,7 +347,7 @@ const activityColors = {
                 </q-item-label>
               </q-item-section>
 
-              <q-item-section side top>
+              <q-item-section side>
                 <div class="row items-center">
                   <q-badge
                     rounded
