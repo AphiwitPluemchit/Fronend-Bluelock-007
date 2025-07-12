@@ -1,158 +1,167 @@
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import FilterDialog from 'src/components/Dialog/FilterDialog.vue'
 import { useStudentStore } from 'src/stores/student'
-import type { Student } from 'src/types/student'
 
-const router = useRouter()
 const studentStore = useStudentStore()
+const router = useRouter()
+const show = ref(false)
+const students = computed(() => studentStore.students ?? [])
 
-const search1 = ref('')
+interface SelectedFilters {
+  major: string[]
+}
 const showFilterDialog1 = ref(false)
+const filterCategories1 = ref(['major'])
 
-const filterCategories1 = ref(['major']) // <== แก้ตรงนี้
-const filters = ref({
-  major: [] as string[],
-})
+async function onRequest(requestProp: {
+  pagination: { sortBy: string; descending: boolean; page: number; rowsPerPage: number }
+}) {
+  query.value.page = requestProp.pagination.page
+  query.value.limit = requestProp.pagination.rowsPerPage
+  query.value.sortBy = requestProp.pagination.sortBy
+  query.value.order = requestProp.pagination.descending ? 'desc' : 'asc'
+  await data()
+}
 
-// pagination state
+const applyFilters = async (selectedFilters: SelectedFilters) => {
+  studentStore.query.major = selectedFilters.major ?? []
+  studentStore.query.studentStatus = ['0']
+
+  await data()
+}
+
+const data = async () => {
+  studentStore.query.studentStatus = ['0'] // กรองเฉพาะนิสิตที่พ้นสภาพ
+  await studentStore.getStudents() // ✅ เรียกจาก store
+
+  // อัปเดต pagination ให้ sync
+  pagination.value.page = studentStore.query.page
+  pagination.value.rowsPerPage = studentStore.query.limit
+  pagination.value.sortBy = studentStore.query.sortBy
+  pagination.value.rowsNumber = studentStore.totalStudentsCount
+}
+
+const query = computed(() => studentStore.query)
+
 const pagination = ref({
-  page: 1,
-  rowsPerPage: 10,
+  sortBy: query.value.sortBy,
+  descending: query.value.order === 'desc',
+  page: query.value.page,
+  rowsPerPage: query.value.limit,
   rowsNumber: 0,
 })
+// const manageDialogRef = ref<InstanceType<typeof ManageStudentDialog> | null>(null)
 
-// โหลดข้อมูลนิสิตพร้อมอัพเดต pagination.rowsNumber
-onMounted(async () => {
-  try {
-    await studentStore.getStudents()
-    pagination.value.rowsNumber = studentStore.students.length
-  } catch (err) {
-    console.error('โหลดข้อมูลนิสิตล้มเหลว:', err)
-  }
-})
-
-// ฟังก์ชันจัดการ event pagination request
-function onRequest(props: { pagination: { page: number; rowsPerPage: number } }) {
-  pagination.value.page = props.pagination.page
-  pagination.value.rowsPerPage = props.pagination.rowsPerPage
-}
-
-// ฟิลเตอร์ข้อมูลนิสิตพ้นสภาพ + กรองตาม search + major
-const filteredStudents = computed(() => {
-  return studentStore.students.filter((student) => {
-    const isTerminated = student.status === 0
-    const matchesSearch =
-      search1.value.trim() === '' ||
-      student.name.toLowerCase().includes(search1.value.trim().toLowerCase())
-    const matchesMajor =
-      filters.value.major.length === 0 || filters.value.major.includes(student.major)
-
-    return isTerminated && matchesSearch && matchesMajor
-  })
-})
-
-// ฟิลเตอร์ตาม major
-const applyFilters = (selectedFilters: typeof filters.value) => {
-  filters.value = selectedFilters
-}
-
-const getStatusLabel = (student: Student): string => {
-  if (student.status === 0) return 'พ้นสภาพ'
-  if (student.softSkill >= 30 && student.hardSkill >= 12) return 'ชั่วโมงครบแล้ว'
-  if (student.softSkill >= 20 && student.hardSkill >= 8) return 'ชั่วโมงมาก'
-  if (student.softSkill >= 10 && student.hardSkill >= 4) return 'ชั่วโมงน้อย'
-  return 'ชั่วโมงน้อยมาก'
-}
-
-const getStatusClass = (status: string): string => {
-  if (status === 'พ้นสภาพ') return 'status-terminated'
-  if (status === 'ชั่วโมงมาก') return 'status-high'
-  if (status === 'ชั่วโมงน้อย') return 'status-medium'
-  if (status === 'ชั่วโมงครบแล้ว') return 'status-complete'
-  if (status === 'ชั่วโมงน้อยมาก') return 'status-low'
-  return ''
+// ฟังก์ชันเปิด ManageStudentDialog
+const goToConfirmStudentDataPage = () => {
+  void router.push('/Admin/StudentStorage/ConfirmStudentDataPage')
 }
 
 const columns = [
   { name: 'index', label: 'ลำดับ', field: 'index', align: 'left' as const },
   { name: 'code', label: 'รหัสนิสิต', field: 'code', align: 'left' as const },
-  { name: 'name', label: 'ชื่อ-สกุล', field: 'name', align: 'left' as const },
+  {
+    name: 'name',
+    label: 'ชื่อ-สกุล',
+    field: 'name',
+    align: 'left' as const,
+  },
   { name: 'major', label: 'สาขา', field: 'major', align: 'left' as const },
   {
     name: 'softskill',
     label: 'ชั่วโมงเตรียมความพร้อม',
-    field: 'softSkill',
+    field: 'softskill',
     align: 'center' as const,
   },
   {
     name: 'hardskill',
     label: 'ชั่วโมงทักษะทางวิชาการ',
-    field: 'hardSkill',
+    field: 'hardskill',
     align: 'center' as const,
   },
   { name: 'status', label: 'สถานะ', field: 'status', align: 'center' as const },
+  { name: 'action', label: '', field: 'action', align: 'center' as const },
 ]
-
-const goToConfirmPage = () => {
-  void router.push('/Admin/StudentStorePage/ConfirmStudentDataPage')
-}
+onMounted(async () => {
+  show.value = false
+  studentStore.query = {
+    page: 1,
+    limit: 10,
+    sortBy: 'code',
+    order: 'asc',
+    search: '',
+    major: [],
+    studentStatus: ['0'],
+    studentCode: [], // กรองเฉพาะนิสิตที่พ้นสภาพ
+    skill: [],
+    studentYear: [],
+  }
+  await data()
+  show.value = true
+})
 </script>
 
 <template>
   <q-page class="q-pa-md">
-    <div class="row justify-start items-center" style="margin-top: 20px">
-      <div class="text-h4">จัดเก็บข้อมูลนิสิต</div>
+    <!-- ชื่อหน้า -->
+    <div class="row justify-between items-center" style="margin-top: 20px">
+      <div class="texttitle">จัดเก็บข้อมูลนิสิต</div>
+      <q-btn
+        v-if="show"
+        dense
+        outlined
+        label="จัดเก็บนิสิต"
+        @click="goToConfirmStudentDataPage"
+        class="btnadd"
+      >
+      </q-btn>
     </div>
-    <!-- ส่วนค้นหา + ฟิลเตอร์ + ปุ่มเพิ่ม -->
-    <section class="q-mt-lg">
-      <div class="row justify-end items-center">
-        <div class="row">
-          <q-input
-            dense
-            outlined
-            v-model="search1"
-            label="ค้นหา ชื่อนิสิต"
-            class="q-mr-sm searchbox"
-            :style="{ border: 'none' }"
-          >
-            <template v-slot:append>
-              <q-icon name="search" />
-            </template>
-          </q-input>
 
+    <!-- ตาราง 1 -->
+    <section class="q-mt-lg" v-if="show">
+      <div class="search-filter-wrapper row wrap justify-end items-start">
+        <!-- Search box -->
+        <q-input
+          dense
+          outlined
+          v-model="query.search"
+          label="ค้นหา ชื่อนิสิต"
+          class="q-mr-sm searchbox"
+          :style="{ border: 'none' }"
+          @keyup.enter="applyFilters"
+        >
+          <template v-slot:append>
+            <q-icon name="search" />
+          </template>
+        </q-input>
+
+        <!-- Buttons -->
+        <div class="btn-filter-wrapper row no-wrap">
           <FilterDialog
             v-model="showFilterDialog1"
             :categories="filterCategories1"
             @apply="applyFilters"
             class="q-mr-sm"
           />
-
-          <div>
-            <q-btn
-              dense
-              outlined
-              icon="add"
-              label="เพิ่มข้อมูล"
-              class="btnadd"
-              @click="goToConfirmPage"
-            />
-          </div>
         </div>
       </div>
 
+      <!-- ตาราง -->
       <q-table
         bordered
         flat
-        :rows="filteredStudents"
+        :rows="students"
         :columns="columns"
-        row-key="code"
-        class="q-mt-md"
         v-model:pagination="pagination"
         :rows-per-page-options="[5, 7, 10, 15, 20]"
         @request="onRequest"
+        row-key="code"
+        class="q-mt-md"
       >
+        <!-- <q-table bordered flat :rows="students" :columns="columns" @request="applyFilters" row-key="id" class="q-mt-md"> -->
+        <!-- หัวตาราง Sticky -->
         <template v-slot:header="props">
           <q-tr :props="props" class="sticky-header">
             <q-th v-for="col in props.cols" :key="col.name" :props="props">
@@ -160,7 +169,7 @@ const goToConfirmPage = () => {
             </q-th>
           </q-tr>
         </template>
-
+        <!-- เนื้อหาตาราง -->
         <template v-slot:body="props">
           <q-tr :props="props">
             <q-td key="index">{{ props.rowIndex + 1 }}</q-td>
@@ -173,18 +182,17 @@ const goToConfirmPage = () => {
                 overflow: hidden;
                 text-overflow: ellipsis;
               "
+              >{{ props.row.name }}</q-td
             >
-              {{ props.row.name }}
-            </q-td>
             <q-td key="major">{{ props.row.major }}</q-td>
             <q-td class="text-center" key="softskill">{{ props.row.softSkill }}/30</q-td>
             <q-td class="text-center" key="hardskill">{{ props.row.hardSkill }}/12</q-td>
+            <!-- แสดงสถานะพร้อมสี -->
             <q-td class="text-center">
               <q-badge
-                :label="getStatusLabel(props.row)"
-                :class="getStatusClass(getStatusLabel(props.row))"
+                :label="studentStore.getStatusText(props.row.status)"
+                :class="studentStore.getStatusClass(props.row.status)"
                 class="status-badge"
-                rounded
                 unelevated
               />
             </q-td>
@@ -196,44 +204,12 @@ const goToConfirmPage = () => {
 </template>
 
 <style scoped>
-.status-complete {
-  background-color: #cfd7ff;
-  color: #001780;
-  border: 2px solid #002dff;
-  padding: 3px 30px;
-  width: 130px;
+.clickable-row:hover {
+  background-color: #f5f5f5;
 }
-
-.status-high {
-  background-color: #d0ffc5;
-  color: #009812;
-  border: 2px solid #00bb16;
-  padding: 3px 30px;
-  width: 130px;
-}
-
-.status-medium {
-  background-color: #ffe7ba;
-  color: #ff6f00;
-  border: 2px solid #ffa500;
-  padding: 3px 30px;
-  width: 130px;
-}
-
-.status-low {
-  background-color: #ffc5c5;
-  color: #ff0000;
-  border: 2px solid #f32323;
-  padding: 3px 30px;
-  width: 130px;
-}
-
-.status-terminated {
-  background-color: #e0e0e0;
-  color: #5f5f5f;
-  border: 2px solid #b0b0b0;
-  padding: 3px 30px;
-  width: 130px;
+.info-icon {
+  cursor: pointer;
+  width: 60px;
 }
 
 .status-badge {
@@ -245,131 +221,40 @@ const goToConfirmPage = () => {
   display: inline-block;
   font-size: 15px;
 }
-</style>
 
-<style lang="scss" scoped>
-/* โครงสร้างหลัก */
-.student-container {
-  background-color: #edf0f5;
-  height: 680px;
-  width: 100%;
-}
-
-/* ตารางให้เลื่อนแนวนอนบนมือถือ */
-.q-table {
-  overflow-x: auto;
-}
-
-/* ตารางจัดให้ column กว้างพออ่านได้ */
-.q-table table {
-  min-width: 700px; /* กำหนดความกว้างขั้นต่ำ */
-  table-layout: fixed;
-}
-
-@media (max-width: 600px) {
-  /* จัด search กับปุ่ม filter, add เป็นแนวตั้ง */
-  section > div.row.justify-end {
+@media (max-width: 620px) {
+  .search-filter-wrapper {
     flex-direction: column;
     align-items: stretch;
+    gap: 10px; /* เพิ่มระยะห่างระหว่างกล่อง search กับปุ่มทั้งชุด */
   }
-
-  /* input search กว้างเต็ม */
   .searchbox {
     width: 100% !important;
-    margin-bottom: 8px;
+    margin-bottom: 0 !important; /* ใช้ gap แทน */
   }
 
-  /* ปุ่มเพิ่มข้อมูล กว้างเต็ม */
-  .btnadd {
+  .btn-filter-wrapper {
     width: 100%;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    gap: 5px;
+    flex-wrap: nowrap;
   }
 
-  /* ปุ่มฟิลเตอร์ dialog กว้างเต็ม */
-  .q-mr-sm {
-    width: 100% !important;
-    margin-bottom: 8px !important;
+  .btn-filter-wrapper .btnadd {
+    width: 90%;
   }
 
-  /* ตารางเลื่อนแนวนอน */
-  .q-table {
-    overflow-x: auto;
-  }
-
-  /* ตารางขนาด font เล็กลง */
-  .q-table table {
-    font-size: 14px;
+  .btn-filter-wrapper .q-mr-sm {
+    margin-right: 0 !important;
   }
 }
 
-/* กำหนดให้ชื่อไม่ตัดกลางๆ บนมือถือ */
-.q-td[style] {
-  white-space: normal !important;
-  max-width: 100% !important;
-  overflow: visible !important;
-  text-overflow: unset !important;
-}
-
-// .student-table-wrapper {
-//   display: flex;
-//   width: 100%;
-//   max-width: 100%;
-//   display: flex;
-//   flex-direction: column;
-// }
-
-// .my-sticky-header-table {
-//   min-height: 450px;
-//   overflow: auto;
-// }
-
-.q-table table {
-  table-layout: fixed;
-}
-
-.my-sticky-header-table thead th {
-  position: sticky;
-  top: 0;
-  z-index: 1;
-  background-color: #f5f5f5;
-}
-
-.new-sticky-header {
-  .my-sticky-header-table {
-    /* Fix header */
-    thead tr:first-child th {
-      background-color: #f5f5f5;
-    }
-
-    /* Make tbody scrollable */
-    tbody {
-      display: block;
-      overflow-y: auto;
-    }
-
-    /* Ensure header and body columns align */
-    thead,
-    tbody tr {
-      display: table;
-      width: 100%;
-      table-layout: fixed;
-    }
-
-    /* Optional: ปรับ scrollbar ไม่ทับ */
-    tbody::-webkit-scrollbar {
-      width: 12px;
-    }
-
-    tbody::-webkit-scrollbar-thumb {
-      background: #a7a7a7;
-      border-radius: 10px;
-      cursor: pointer;
-    }
+@media (max-width: 450px) {
+  .texttitle {
+    font-size: 28px;
+    font-weight: 400;
   }
-}
-
-.ellipsis-cell {
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
 }
 </style>

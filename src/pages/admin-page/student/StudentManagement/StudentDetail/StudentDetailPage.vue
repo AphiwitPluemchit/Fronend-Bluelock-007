@@ -7,7 +7,7 @@
       <div class="text-h6 q-mt-lg">ข้อมูลนิสิต</div>
       <q-card flat class="q-mt-md">
         <!-- ข้อมูลนิสิต -->
-        <div v-if="studentStore.student" class="row q-col-gutter-md">
+        <div v-if="show" class="row q-col-gutter-md">
           <!-- ชื่อและข้อมูลนิสิต -->
           <div class="col-12 row items-center q-pa-sm">
             <div class="col-1 text-right q-pr-md">
@@ -217,21 +217,22 @@ import { onMounted, ref } from 'vue'
 import { useRoute } from 'vue-router'
 import AppBreadcrumbs from 'src/components/AppBreadcrumbs.vue'
 import FilterDialog from 'src/components/Dialog/FilterDialog.vue'
-import studentEditIcon from 'src/pages/admin-page/student/icons pics/user-edit-icon.png'
 import { useStudentStore } from 'src/stores/student'
 import type { Student } from 'src/types/student'
 
 const majorOptions = ['CS', 'AAI', 'IT', 'SE']
 
 const originalStudentData = ref<Student | null>(null) // เก็บข้อมูลเดิมก่อนแก้ไข
-
+const show = ref(false)
 const route = useRoute()
 const studentCode = ref(route.params.code as unknown as string) // ดึงค่า code จาก URL
 const studentStore = useStudentStore()
 onMounted(async () => {
+  show.value = false
   if (!studentCode.value) return
   await studentStore.getStudentByCode(studentCode.value)
   originalStudentData.value = { ...studentStore.student } // เก็บข้อมูลเดิม
+  show.value = true
 })
 
 //คำนวณชั้นปี
@@ -256,7 +257,7 @@ onMounted(async () => {
 const breadcrumbs = ref({
   previousPage: { title: 'จัดการข้อมูลนิสิต', path: '/Admin/StudentManagement' },
   currentPage: { title: 'รายละเอียดนิสิต', path: `/Admin/StudentManagement/StudentDetail/` },
-  icon: studentEditIcon,
+  icon: 'people',
 })
 
 const showFilterDialog1 = ref(false)

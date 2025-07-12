@@ -17,7 +17,7 @@ export class StudentService {
   static path = '/students'
 
   static async getAll(params: Pagination) {
-    const { studentStatus, major, studentYear, ...rest } = params
+    const { studentStatus, major, studentYear, studentCode, ...rest } = params
     const queryParams = {
       ...rest,
       ...(studentStatus && studentStatus.length > 0
@@ -25,6 +25,7 @@ export class StudentService {
         : {}),
       ...(major && major.length > 0 ? { major: major.join(',') } : {}),
       ...(studentYear && studentYear.length > 0 ? { studentYear: studentYear.join(',') } : {}),
+      ...(studentCode && studentCode.length > 0 ? { studentCode: studentCode.join(',') } : {}),
     }
 
     try {

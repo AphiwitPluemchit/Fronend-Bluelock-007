@@ -2,56 +2,80 @@
 import { ref, computed, onMounted } from 'vue'
 import { useStudentStore } from 'src/stores/student'
 import AppBreadcrumbs from 'src/components/AppBreadcrumbs.vue'
-import { watch } from 'vue'
-
-interface Student {
-  id?: string
-  code: string
-  name: string
-  email: string
-  password: string
-  status: number
-  softSkill: number
-  hardSkill: number
-  major: string
-}
 
 const breadcrumbs = ref({
   previousPage: { title: 'จัดเก็บข้อมูลนิสิต', path: '/Admin/StudentStorePage' },
-  currentPage: { title: 'ยืนยันการจัดเก็บข้อมูลนิสิต',path: '/Admin/StudentStorePage/ConfirmStudentDataPage',
+  currentPage: {
+    title: 'ยืนยันการจัดเก็บข้อมูลนิสิต',
+    path: '/Admin/StudentStorePage/ConfirmStudentDataPage',
   },
   icon: 'people',
 })
-
+const show = ref(false)
 const studentStore = useStudentStore()
-
-const selectedYear = ref(62)
-const yearOptions = [60, 61, 62, 63, 64, 65, 66]
-
-const selectedMajors = ref<string[]>([])
-const majorOptions = ['CS', 'AI', 'SE', 'ITDI']
+interface SelectedFilters {
+  studentCode: string
+  major: string
+}
+const selectedStudentCode = ref<string>('')
+const selectedMajors = ref<string>('')
+const yearOptions = ['60', '61', '62', '63', '64', '65', '66']
+const majorOptions = ['CS', 'AAI', 'SE', 'ITDI']
 
 const selectedStudents = ref<string[]>([])
+const students = computed(() => studentStore.students ?? [])
 
-onMounted(async () => {
+const data = async () => {
+  console.log(studentStore.query)
+
+  await studentStore.getStudents()
+  // อัปเดต pagination ให้ sync
+  pagination.value.page = studentStore.query.page
+  pagination.value.rowsPerPage = studentStore.query.limit
+  pagination.value.sortBy = studentStore.query.sortBy
+  pagination.value.rowsNumber = studentStore.totalStudentsCount
+}
+async function onRequest(requestProp: {
+  pagination: { sortBy: string; descending: boolean; page: number; rowsPerPage: number }
+}) {
+  query.value.page = requestProp.pagination.page
+  query.value.limit = requestProp.pagination.rowsPerPage
+  query.value.sortBy = requestProp.pagination.sortBy
+  query.value.order = requestProp.pagination.descending ? 'desc' : 'asc'
+  await data()
+}
+const applyFilters = async (selectedFilters: SelectedFilters) => {
+  studentStore.query.studentCode = selectedFilters.studentCode ? [selectedFilters.studentCode] : []
+  studentStore.query.major = selectedFilters.major ? [selectedFilters.major] : []
+  await data()
+}
+const query = computed(() => studentStore.query)
+
+const pagination = ref({
+  sortBy: query.value.sortBy,
+  descending: query.value.order === 'desc',
+  page: query.value.page,
+  rowsPerPage: query.value.limit,
+  rowsNumber: 0,
+})
+const saveStudents = async () => {
   try {
+    for (const code of selectedStudents.value) {
+      const student = studentStore.students.find((s) => s.code === code)
+      if (student) {
+        const updatedStudent = { ...student, status: 0 }
+        await studentStore.updateStudent(updatedStudent)
+      }
+    }
     await studentStore.getStudents()
-  } catch (err) {
-    console.error('โหลดข้อมูลนิสิตล้มเหลว:', err)
+    selectedStudents.value = []
+  } catch (error) {
+    console.error('จัดเก็บนิสิตล้มเหลว:', error)
   }
-})
-
-const filteredStudents = computed(() => {
-  return studentStore.students.filter((student) => {
-    const isYearMatch = student.code.startsWith(selectedYear.value.toString())
-    const isMajorMatch =
-      selectedMajors.value.length === 0 || selectedMajors.value.includes(student.major)
-    const isNotTerminated = student.status !== 0
-    return isYearMatch && isMajorMatch && isNotTerminated
-  })
-})
+}
 
 const columns = [
+  { name: 'check', label: '', field: 'check', align: 'left' as const },
   { name: 'index', label: 'ลำดับ', field: 'index', align: 'left' as const },
   { name: 'code', label: 'รหัสนิสิต', field: 'code', align: 'left' as const },
   { name: 'name', label: 'ชื่อ-สกุล', field: 'name', align: 'left' as const },
@@ -71,48 +95,23 @@ const columns = [
   { name: 'status', label: 'สถานะ', field: 'status', align: 'center' as const },
 ]
 
-// สร้าง computed สำหรับ columns ที่จะ render โดยตัด col ที่ชื่อ 'selected' ทิ้ง
-const visibleColumns = computed(() => columns.filter((col) => col.name !== 'selected'))
-
-const getStatusLabel = (student: Student): string => {
-  if (student.status === 0) return 'พ้นสภาพ'
-  if (student.softSkill >= 30 && student.hardSkill >= 12) return 'ชั่วโมงครบแล้ว'
-  if (student.softSkill >= 20 && student.hardSkill >= 8) return 'ชั่วโมงมาก'
-  if (student.softSkill >= 10 && student.hardSkill >= 4) return 'ชั่วโมงน้อย'
-  return 'ชั่วโมงน้อยมาก'
-}
-
-const getStatusClass = (status: string): string => {
-  if (status === 'พ้นสภาพ') return 'status-terminated'
-  if (status === 'ชั่วโมงมาก') return 'status-high'
-  if (status === 'ชั่วโมงน้อย') return 'status-medium'
-  if (status === 'ชั่วโมงครบแล้ว') return 'status-complete'
-  if (status === 'ชั่วโมงน้อยมาก') return 'status-low'
-  return ''
-}
-
-const saveStudents = async () => {
-  try {
-    for (const code of selectedStudents.value) {
-      const student = studentStore.students.find((s) => s.code === code)
-      if (student) {
-        const updatedStudent = { ...student, status: 0 }
-        await studentStore.updateStudent(updatedStudent)
-      }
-    }
-    await studentStore.getStudents()
-    selectedStudents.value = []
-  } catch (error) {
-    console.error('จัดเก็บนิสิตล้มเหลว:', error)
+onMounted(async () => {
+  show.value = false
+  studentStore.query = {
+    page: 1,
+    limit: 10,
+    sortBy: 'code',
+    order: 'asc',
+    search: '',
+    major: [],
+    studentStatus: [],
+    studentCode: [], // กรองเฉพาะนิสิตที่พ้นสภาพ
+    skill: [],
+    studentYear: [],
   }
-}
-watch(
-  filteredStudents,
-  (newStudents) => {
-    selectedStudents.value = newStudents.map((s) => s.code)
-  },
-  { immediate: true },
-)
+  await data()
+  show.value = true
+})
 </script>
 
 <template>
@@ -121,7 +120,7 @@ watch(
       <AppBreadcrumbs :breadcrumbs="breadcrumbs" />
     </div>
 
-    <section class="q-mt-lg">
+    <section class="q-mt-lg" v-if="show">
       <div class="col-12 row items-center q-pa-sm">
         <div class="col-auto text-right q-pr-md">
           <p class="q-my-none">ปีการศึกษาที่ต้องการจัดเก็บ :</p>
@@ -129,13 +128,16 @@ watch(
         <q-select
           dense
           outlined
-          v-model="selectedYear"
+          v-model="selectedStudentCode"
           :options="yearOptions"
           label="รหัสปีนิสิต"
           emit-value
           map-options
           class="q-mr-sm dropdown"
           :style="{ border: 'none' }"
+          @update:model-value="
+            applyFilters({ studentCode: selectedStudentCode, major: selectedMajors })
+          "
         />
 
         <q-select
@@ -144,12 +146,27 @@ watch(
           v-model="selectedMajors"
           :options="majorOptions"
           label="สาขาที่ต้องการจัดเก็บ"
-          multiple
           emit-value
           map-options
           class="q-mr-sm dropdown"
           :style="{ border: 'none' }"
+          @update:model-value="
+            applyFilters({ studentCode: selectedStudentCode, major: selectedMajors })
+          "
         />
+        <q-input
+          dense
+          outlined
+          v-model="query.search"
+          label="ค้นหา ชื่อนิสิต"
+          class="q-mr-sm searchbox"
+          :style="{ border: 'none' }"
+          @keyup.enter="applyFilters"
+        >
+          <template v-slot:append>
+            <q-icon name="search" />
+          </template>
+        </q-input>
       </div>
 
       <div class="col-12 row justify-center items-center q-pr-md">
@@ -159,22 +176,24 @@ watch(
       <q-table
         bordered
         flat
-        :rows="filteredStudents"
+        :rows="students"
         :columns="columns"
+        v-model:pagination="pagination"
+        :rows-per-page-options="[5, 7, 10, 15, 20]"
+        @request="onRequest"
         row-key="code"
         class="q-mt-md"
-        :pagination="{ rowsPerPage: 10 }"
       >
+        <!-- <q-table bordered flat :rows="students" :columns="columns" @request="applyFilters" row-key="id" class="q-mt-md"> -->
+        <!-- หัวตาราง Sticky -->
         <template v-slot:header="props">
           <q-tr :props="props" class="sticky-header">
-            <q-th style="width: 50px; text-align: center"> </q-th>
-            <!-- ใช้ visibleColumns แทน props.cols -->
-            <q-th v-for="col in visibleColumns" :key="col.name" :props="props">
+            <q-th v-for="col in props.cols" :key="col.name" :props="props">
               {{ col.label }}
             </q-th>
           </q-tr>
         </template>
-
+        <!-- เนื้อหาตาราง -->
         <template v-slot:body="props">
           <q-tr :props="props">
             <q-td style="width: 50px; text-align: center">
@@ -186,27 +205,27 @@ watch(
                 keep-focus
               />
             </q-td>
-            <q-td>{{ props.rowIndex + 1 }}</q-td>
-            <q-td>{{ props.row.code }}</q-td>
+            <q-td key="index">{{ props.rowIndex + 1 }}</q-td>
+            <q-td key="code">{{ props.row.code }}</q-td>
             <q-td
+              key="name"
               style="
                 max-width: 200px;
                 white-space: nowrap;
                 overflow: hidden;
                 text-overflow: ellipsis;
               "
+              >{{ props.row.name }}</q-td
             >
-              {{ props.row.name }}
-            </q-td>
-            <q-td>{{ props.row.major }}</q-td>
-            <q-td class="text-center">{{ props.row.softSkill }}/30</q-td>
-            <q-td class="text-center">{{ props.row.hardSkill }}/12</q-td>
+            <q-td key="major">{{ props.row.major }}</q-td>
+            <q-td class="text-center" key="softskill">{{ props.row.softSkill }}/30</q-td>
+            <q-td class="text-center" key="hardskill">{{ props.row.hardSkill }}/12</q-td>
+            <!-- แสดงสถานะพร้อมสี -->
             <q-td class="text-center">
               <q-badge
-                :label="getStatusLabel(props.row)"
-                :class="getStatusClass(getStatusLabel(props.row))"
+                :label="studentStore.getStatusText(props.row.status)"
+                :class="studentStore.getStatusClass(props.row.status)"
                 class="status-badge"
-                rounded
                 unelevated
               />
             </q-td>
@@ -230,41 +249,6 @@ watch(
 </template>
 
 <style scoped>
-.status-complete {
-  background-color: #cfd7ff;
-  color: #001780;
-  border: 2px solid #002dff;
-  padding: 3px 30px;
-  width: 130px;
-}
-.status-high {
-  background-color: #d0ffc5;
-  color: #009812;
-  border: 2px solid #00bb16;
-  padding: 3px 30px;
-  width: 130px;
-}
-.status-medium {
-  background-color: #ffe7ba;
-  color: #ff6f00;
-  border: 2px solid #ffa500;
-  padding: 3px 30px;
-  width: 130px;
-}
-.status-low {
-  background-color: #ffc5c5;
-  color: #ff0000;
-  border: 2px solid #f32323;
-  padding: 3px 30px;
-  width: 130px;
-}
-.status-terminated {
-  background-color: #e0e0e0;
-  color: #5f5f5f;
-  border: 2px solid #b0b0b0;
-  padding: 3px 30px;
-  width: 130px;
-}
 .status-badge {
   height: 32px;
   line-height: 28px;

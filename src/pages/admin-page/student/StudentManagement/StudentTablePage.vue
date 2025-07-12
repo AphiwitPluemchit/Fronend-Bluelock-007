@@ -6,12 +6,8 @@ import { useStudentStore } from 'src/stores/student'
 
 const studentStore = useStudentStore()
 const router = useRouter()
-
+const show = ref(false)
 const students = computed(() => studentStore.students ?? [])
-
-onMounted(async () => {
-  await data()
-})
 
 const goToDetail = (code: string) => {
   void router.push(`/Admin/StudentManagement/StudentDetail/${code}`)
@@ -43,6 +39,7 @@ const applyFilters = async (selectedFilters: SelectedFilters) => {
 }
 
 const data = async () => {
+  console.log(studentStore.query)
   await studentStore.getStudents() // ✅ เรียกจาก store
 
   // อัปเดต pagination ให้ sync
@@ -64,31 +61,8 @@ const pagination = ref({
 // const manageDialogRef = ref<InstanceType<typeof ManageStudentDialog> | null>(null)
 
 // ฟังก์ชันเปิด ManageStudentDialog
-const openManageDialog = () => {
+const goToUplaodPage = () => {
   void router.push('/Admin/StudentManagement/UploadStudent')
-}
-
-const getStatusClass = (status: number) => {
-  if (status === 3) return 'status-complete'
-  if (status === 2) return 'status-medium'
-  if (status === 1) return 'status-low'
-  if (status === 0) return 'status-out'
-  return ''
-}
-
-const getStatusText = (status: number) => {
-  switch (status) {
-    case 0:
-      return 'พ้นสภาพ'
-    case 1:
-      return 'ชั่วโมงน้อยมาก'
-    case 2:
-      return 'ชั่วโมงน้อย'
-    case 3:
-      return 'ชั่วโมงครบ'
-    default:
-      return 'ไม่ทราบสถานะ'
-  }
 }
 
 const columns = [
@@ -116,16 +90,37 @@ const columns = [
   { name: 'status', label: 'สถานะ', field: 'status', align: 'center' as const },
   { name: 'action', label: '', field: 'action', align: 'center' as const },
 ]
+
+onMounted(async () => {
+  show.value = false
+  studentStore.query = {
+    page: 1,
+    limit: 10,
+    sortBy: 'code',
+    order: 'asc',
+    search: '',
+    major: [],
+    studentStatus: [],
+    studentCode: [], // กรองเฉพาะนิสิตที่พ้นสภาพ
+    skill: [],
+    studentYear: [],
+  }
+  await data()
+  show.value = true
+})
 </script>
 
 <template>
   <q-page class="q-pa-md">
     <!-- ชื่อหน้า -->
-    <div class="row justify-start items-center" style="margin-top: 20px">
+    <div class="row justify-between items-center" style="margin-top: 20px">
       <div class="texttitle">จัดการข้อมูลนิสิต</div>
+      <q-btn v-if="show" dense outlined label="เพิ่มนิสิต" @click="goToUplaodPage" class="btnadd">
+      </q-btn>
     </div>
+
     <!-- ตาราง 1 -->
-    <section class="q-mt-lg">
+    <section class="q-mt-lg" v-if="show">
       <div class="search-filter-wrapper row wrap justify-end items-start">
         <!-- Search box -->
         <q-input
@@ -135,6 +130,7 @@ const columns = [
           label="ค้นหา ชื่อนิสิต"
           class="q-mr-sm searchbox"
           :style="{ border: 'none' }"
+          @keyup.enter="applyFilters"
         >
           <template v-slot:append>
             <q-icon name="search" />
@@ -143,16 +139,6 @@ const columns = [
 
         <!-- Buttons -->
         <div class="btn-filter-wrapper row no-wrap">
-          <q-btn
-            dense
-            outlined
-            label="เพิ่มข้อมูลนิสิต"
-            @click="openManageDialog"
-            class="q-mr-sm btnadd"
-          >
-            <!-- <ManageStudentDialog ref="manageDialogRef" /> -->
-          </q-btn>
-
           <FilterDialog
             v-model="showFilterDialog1"
             :categories="filterCategories1"
@@ -204,8 +190,8 @@ const columns = [
             <!-- แสดงสถานะพร้อมสี -->
             <q-td class="text-center">
               <q-badge
-                :label="getStatusText(props.row.status)"
-                :class="getStatusClass(props.row.status)"
+                :label="studentStore.getStatusText(props.row.status)"
+                :class="studentStore.getStatusClass(props.row.status)"
                 class="status-badge"
                 unelevated
               />
@@ -229,43 +215,6 @@ const columns = [
 </template>
 
 <style scoped>
-.status-complete {
-  background-color: #cfd7ff;
-  color: #001780;
-  border: 2px solid #002dff;
-  padding: 3px 30px;
-  width: 130px;
-}
-.status-high {
-  background-color: #d0ffc5;
-  color: #009812;
-  border: 2px solid #00bb16;
-  padding: 3px 30px;
-  width: 130px;
-}
-
-.status-medium {
-  background-color: #ffe7ba;
-  color: #ff6f00;
-  border: 2px solid #ffa500;
-  padding: 3px 30px;
-  width: 130px;
-}
-.status-low {
-  background-color: #ffc5c5;
-  color: #ff0000;
-  border: 2px solid #f32323;
-  padding: 3px 30px;
-  width: 130px;
-}
-.status-out {
-  background-color: #dadada;
-  color: #000000;
-  border: 2px solid #575656;
-  padding: 3px 30px;
-  width: 130px;
-}
-
 .clickable-row:hover {
   background-color: #f5f5f5;
 }

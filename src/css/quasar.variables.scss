@@ -63,6 +63,52 @@ $dark-page: #121212;
   min-width: 70px;
   border-radius: 10px;
 }
+.btnadd {
+  background-color: #162aae;
+  color: white;
+  height: 40px;
+  min-width: 70px;
+  border-radius: 10px;
+  font-weight: bold;
+  font-size: medium;
+}
+
+.status-complete {
+  background-color: #cfd7ff;
+  color: #001780;
+  border: 1px solid #002dff;
+  padding: 3px 30px;
+  width: 130px;
+}
+.status-high {
+  background-color: #d0ffc5;
+  color: #009812;
+  border: 1px solid #00bb16;
+  padding: 3px 30px;
+  width: 130px;
+}
+
+.status-medium {
+  background-color: #ffe7ba;
+  color: #ff6f00;
+  border: 1px solid #ffa500;
+  padding: 3px 30px;
+  width: 130px;
+}
+.status-low {
+  background-color: #ffc5c5;
+  color: #ff0000;
+  border: 1px solid #f32323;
+  padding: 3px 30px;
+  width: 130px;
+}
+.status-out {
+  background-color: #dadada;
+  color: #000000;
+  border: 1px solid #575656;
+  padding: 3px 30px;
+  width: 130px;
+}
 
 .searchbox {
   width: 350px;
@@ -172,13 +218,13 @@ $dark-page: #121212;
   font-size: 34px;
   font-weight: 400;
 }
-.btnadd {
-  background-color: #ffffff;
-  border-radius: 15px;
-  height: 40px;
-  border: 1px solid #000000; /* สีขอบ */
-  min-width: 150px;
-}
+// .btnadd {
+//   background-color: #ffffff;
+//   border-radius: 15px;
+//   height: 40px;
+//   border: 1px solid #000000; /* สีขอบ */
+//   min-width: 150px;
+// }
 .q-chip {
   background-color: white; // สีเริ่มต้นเป็นสีขาว
   color: black; // สีตัวอักษรดำให้มองเห็นชัด
@@ -242,5 +288,6 @@ $dark-page: #121212;
     pointer-events: none !important; /* ✅ สำคัญมาก */
   }
 }
+
 // นำเข้าฟอนต์
 @import '@fontsource-variable/noto-serif-thai'; // Defaults to wght axis

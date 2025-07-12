@@ -32,6 +32,7 @@ export const useStudentStore = defineStore('student', () => {
     major: [],
     studentYear: [],
     studentStatus: [],
+    studentCode: [],
   })
 
   // ฟังก์ชันสร้างนิสิตใหม่ (จากไฟล์ Excel)
@@ -82,11 +83,41 @@ export const useStudentStore = defineStore('student', () => {
       return false
     }
   }
+  const getStatusText = (status: number) => {
+    switch (status) {
+      case 0:
+        return 'พ้นสภาพ'
+      case 1:
+        return 'ชั่วโมงน้อยมาก'
+      case 2:
+        return 'ชั่วโมงน้อย'
+      case 3:
+        return 'ชั่วโมงครบ'
+      default:
+        return 'ไม่ทราบสถานะ'
+    }
+  }
+  const getStatusClass = (status: number): string => {
+    switch (status) {
+      case 0:
+        return 'status-out'
+      case 1:
+        return 'status-low'
+      case 2:
+        return 'status-medium'
+      case 3:
+        return 'status-complete'
+      default:
+        return ''
+    }
+  }
 
   return {
     createStudent,
     getStudentByCode,
     getStudents,
+    getStatusText,
+    getStatusClass,
     student,
     query,
     students,
