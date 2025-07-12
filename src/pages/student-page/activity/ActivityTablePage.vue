@@ -1,14 +1,13 @@
 <template>
-  <q-layout>
-    <q-page-container>
-      <q-page class="q-pa-md">
-        <div class="row justify-start items-center">
-          <div class="text-h4">กิจกรรมทั้งหมด</div>
+  <q-page class="q-pa-md">
+    <!-- ชื่อหน้า -->
+    <div class="row justify-between items-center q-mb-md" style="margin-top: 20px">
+      <div class="texttitle">กิจกรรมทั้งหมด</div>
         </div>
 
-        <div class="row justify-between items-center">
+        <div class="row justify-between items-center q-pa-md search-filter-wrapper q-col-gutter-md">
           <div class="text-h6"></div>
-          <div class="row">
+          <div class="row search-filter-inner items-center no-wrap">
             <q-input
               dense
               outlined
@@ -22,17 +21,22 @@
                 <q-icon name="search" />
               </template>
             </q-input>
-            <FilterDialog
-              :model-value="showFilterDialog"
-              :categories="filterCategories || []"
-              @apply="applyFilters"
-              :years="query.studentYear || []"
-              :majors="query.major || []"
-              :status-activities="query.activityState || []"
-              :category-activities="query.skill || []"
-            />
+
+            <div class="filter-btn-wrapper">
+              <FilterDialog
+                :model-value="showFilterDialog"
+                :categories="filterCategories"
+                @apply="applyFilters"
+                :years="query.studentYear || []"
+                :majors="query.major || []"
+                :status-activities="query.activityState || []"
+                :category-activities="query.skill || []"
+              />
+            </div>
           </div>
         </div>
+
+
         <!-- แสดงกิจกรรม -->
         <div class="row q-col-gutter-md">
           <div
@@ -44,8 +48,7 @@
           </div>
         </div>
       </q-page>
-    </q-page-container>
-  </q-layout>
+
 </template>
 
 <script setup lang="ts">
@@ -56,7 +59,10 @@ import FilterDialog from 'src/components/Dialog/FilterDialog.vue'
 import { ActivityService } from 'src/services/activity'
 import type { Pagination } from 'src/types/pagination'
 import type { Activity } from 'src/types/activity'
+import { useQuasar } from 'quasar'
 // const StudentActivityStore = useStudentActivitystore()
+const $q = useQuasar()
+
 const activitys = ref<Activity[]>([])
 // const search = ref()
 const showFilterDialog = ref(false)
@@ -121,3 +127,32 @@ onMounted(async () => {
   await fetchData()
 })
 </script>
+
+<style scoped>
+.search-filter-inner {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: nowrap;
+}
+
+
+
+.filter-btn-wrapper {
+  flex-shrink: 0;
+}
+
+/* ✅ Mobile: ชุดค้นหา + ปุ่มกรอง ชิดขวา */
+@media (max-width: 600px) {
+  .search-filter-inner {
+    justify-content: flex-end;
+    width: 100%;
+  }
+}
+</style>
+
+
+
+
+

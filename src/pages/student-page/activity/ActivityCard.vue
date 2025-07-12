@@ -1,5 +1,5 @@
 <template>
-  <q-card class="activity-card q-pa-md q-my-sm">
+  <q-card class="activity-card col-12 col-sm-6 col-md-4 q-pa-md q-my-sm">
     <!-- ... -->
     <div :class="isMobile ? 'column' : 'row items-center'">
       <!-- รูปกิจกรรม -->
@@ -12,7 +12,7 @@
       </div>
 
       <!-- รายละเอียดกิจกรรม -->
-      <div class="col column justify-between">
+      <div class="col column justify-between" style="min-width: 0">
         <div class="text-h6 text-bold q-mb-sm activity-name">
           {{ activity.name }}
         </div>
@@ -20,18 +20,20 @@
           {{ getActivitydates(activity.activityItems) }}
         </div>
         <div class="q-mb-md">จำนวนที่รับ {{ enrollmentSummary(activity.activityItems ?? []) }}</div>
+      </div> 
+      <!-- ปุ่มรายละเอียด -->
+      <div class="text-right full-width q-mt-sm">
+        <q-btn
+          label="รายละเอียด"
+          dense
+          unelevated
+          class="btnconfirm"
+          :to="`/Student/Activity/ActivityDetail/${activity.id}`"
+        />
       </div>
+
     </div>
-    <!-- ปุ่มรายละเอียด -->
-    <div class="q-mt-auto text-right">
-      <q-btn
-        label="รายละเอียด"
-        dense
-        unelevated
-        class="btnconfirm"
-        :to="`/Student/Activity/ActivityDetail/${activity.id}`"
-      />
-    </div>
+   
   </q-card>
 </template>
 
@@ -45,7 +47,9 @@ import { useQuasar } from 'quasar'
 import { computed } from 'vue'
 const baseurl = api.defaults.baseURL
 const $q = useQuasar()
-const isMobile = computed(() => $q.screen.lt.md)
+//const isMobile = computed(() => $q.screen.lt.md)
+const isMobile = computed(() => $q.screen.lt.sm) // sm = <600px
+
 dayjs.locale('th')
 dayjs.extend(buddhistEra)
 // รับ props
@@ -96,14 +100,19 @@ function enrollmentSummary(activityItems: ActivityItem[]) {
 
 <style scoped>
 .activity-card {
-  border-radius: 30px;
-  font-size: 18px;
+  border-radius: 20px;
+  font-size: 16px;
+  padding: 12px; /* ปรับให้เล็กลง */
+  margin: 8px 0;
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
-  height: 100%; /* ทำให้ทุกใบสูงเท่ากัน */
-  min-height: 220px;
+  gap: 12px;
+  max-width: 100%;
+  height: auto; /* ปรับให้สูงตามเนื้อหา */
+  min-height: unset; /* ยกเลิก min-height */
 }
+
+
 
 .activity-img {
   width: 100%;
@@ -112,19 +121,59 @@ function enrollmentSummary(activityItems: ActivityItem[]) {
 }
 
 .activity-name {
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  line-clamp: 2;
-  -webkit-box-orient: vertical;
-  box-orient: vertical;
+  white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  max-width: 100%;
   width: 100%;
+  font-size: 15px;
 }
+
+
+
+
+
 
 @media (max-width: 600px) {
   .activity-card {
-    min-height: 260px;
+    min-height: 280px; /* เพิ่มความสูงให้พอดีกับ layout mobile */
+    padding: 12px;
+    font-size: 15px;
+    border-radius: 16px;
+  }
+
+  .activity-img {
+    max-height: 120px;
+  }
+
+  .btnconfirm {
+    width: 100%; /* ให้ปุ่มขนาดเต็ม */
   }
 }
+
+@media (max-width: 400px) {
+  .activity-card {
+    padding: 10px;
+    font-size: 14px;
+    border-radius: 12px;
+  }
+
+  .activity-img {
+    max-height: 100px;
+    border-radius: 8px;
+  }
+
+  .activity-name {
+    font-size: 14px;
+  }
+
+  .btnconfirm {
+    font-size: 13px;
+    padding: 6px 12px;
+    width: 100%;
+  }
+}
+
+
+
 </style>

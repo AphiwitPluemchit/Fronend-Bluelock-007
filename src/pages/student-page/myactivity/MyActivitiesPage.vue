@@ -51,14 +51,11 @@ onMounted(async () => {
 </script>
 
 <template>
-  <q-layout>
-    <q-page-container>
-      <q-page class="q-pa-md">
-        <!-- กล่องค้นหาและปุ่ม Filter -->
-        <div class="row justify-start items-center">
-          <div class="text-h4">กิจกรรมทั้งหมด</div>
-        </div>
-
+  <q-page class="q-pa-md">
+    <!-- ชื่อหน้า -->
+    <div class="row justify-between items-center q-mb-md" style="margin-top: 20px">
+      <div class="texttitle">กิจกรรมของฉัน</div>
+    </div>
         <div class="row justify-between items-center q-pa-md">
           <div class="text-h6"></div>
           <div class="row">
@@ -94,6 +91,4 @@ onMounted(async () => {
           </div>
         </div>
       </q-page>
-    </q-page-container>
-  </q-layout>
 </template>
