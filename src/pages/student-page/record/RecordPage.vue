@@ -1,28 +1,111 @@
 <script setup lang="ts">
-import { computed, ref } from 'vue'
+import { ref, computed, onMounted } from 'vue'
+import { useAuthStore } from 'src/stores/auth'
+import { StudentService } from 'src/services/student'
 
-type ActivityType = 'academic' | 'preparation'
+const auth = useAuthStore()
 
+interface ActivityHistory {
+  activity: {
+    name: string
+    skill: 'soft' | 'hard'
+    activityItem: {
+      id: string
+      name: string
+      description: string
+      hour: number
+      operator: string
+      dates: {
+        date: string
+        stime: string
+        etime: string
+      }[]
+    }
+    activityState: string
+    id: string
+    type: string
+  }
+  registrationDate: string
+}
+
+interface ActivityDisplay {
+  title: string
+  type: 'academic' | 'preparation'
+  date: string
+  time: string
+  room: string
+  hours: number
+}
 
 const studentData = ref({
-  name: 'นายยอดชาย ต้นไม้โลก',
-  major: 'วิทยาการคอมพิวเตอร์',
-  email: '65160099@go.buu.ac.th',
-  year: 3,
-  studentId: '65160099',
+  name: '',
+  major: '',
+  email: '',
+  studentId: '',
 })
 
-const academicData = ref({ current: 11, required: 12 })
-const prepData = ref({ current: 10, required: 30 })
+const academicData = ref({ current: 0, required: 12 })
+const prepData = ref({ current: 0, required: 30 })
+
+const activities = ref<ActivityDisplay[]>([])
+const showAllActivities = ref(false)
+
+onMounted(async () => {
+  const code = auth.getUser?.code
+  if (!code) return
+
+  try {
+    const summary = await StudentService.getSummaryByCode(code)
+
+    studentData.value = {
+      name: summary.name,
+      major: summary.major,
+      email: summary.email || '',
+      studentId: summary.code,
+    }
+
+    academicData.value.current = summary.hardSkill
+    prepData.value.current = summary.softSkill
+
+    activities.value = Array.isArray(summary.history)
+      ? summary.history
+          .map((h: ActivityHistory) => {
+            const a = h.activity
+            const ai = a.activityItem
+            const d = ai.dates?.[0]
+            if (!d) return null
+
+            return {
+              title: a.name || '-',
+              type: a.skill === 'soft' ? 'preparation' : 'academic',
+              date: new Date(d.date).toLocaleDateString('th-TH', {
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric',
+              }),
+              time: `${d.stime} - ${d.etime}`,
+              room: !ai.operator || ai.operator.trim() === '-' ? 'ไม่ระบุ' : ai.operator,
+              hours: ai.hour ?? 0,
+            }
+          })
+          .filter(Boolean) as ActivityDisplay[]
+      : []
+  } catch (err) {
+    console.error('โหลดข้อมูล student summary ไม่สำเร็จ', err)
+  }
+})
 
 const calculateMissingHours = (data: { current: number; required: number }) =>
   data.required > data.current ? data.required - data.current : 0
 
+const getProgressValue = (data: { current: number; required: number }) =>
+  data.required ? (data.current / data.required) * 100 : 0
+
 const prepProgressRatio = computed(() =>
-  Math.min(prepData.value.current / prepData.value.required, 1)
+  Math.min(prepData.value.current / (prepData.value.required || 1), 1)
 )
 const academicProgressRatio = computed(() =>
-  Math.min(academicData.value.current / academicData.value.required, 1)
+  Math.min(academicData.value.current / (academicData.value.required || 1), 1)
 )
 
 const getProgressColor = (ratio: number) => {
@@ -30,64 +113,6 @@ const getProgressColor = (ratio: number) => {
   if (ratio >= 0.8) return 'orange'
   return 'negative'
 }
-
-const showAllActivities = ref(false)
-
-const activities = ref<Array<{
-  title: string
-  type: ActivityType
-  date: string
-  time: string
-  room: string
-  hours: number
-}>>([
-  {
-    title: 'กิจกรรมเตรียมความพร้อม',
-    type: 'preparation',
-    date: '24 กรกฎาคม 2568',
-    time: '09:00 - 12:00',
-    room: 'Online',
-    hours: 3,
-  },
-  {
-    title: 'กิจกรรมเตรียมความพร้อม',
-    type: 'academic',
-    date: '24 กรกฎาคม 2568',
-    time: '09:00 - 12:00',
-    room: 'Online',
-    hours: 3,
-  },{
-    title: 'กิจกรรมเตรียมความพร้อม',
-    type: 'preparation',
-    date: '24 กรกฎาคม 2568',
-    time: '09:00 - 12:00',
-    room: 'Online',
-    hours: 3,
-  },{
-    title: 'กิจกรรมเตรียมความพร้อม',
-    type: 'academic',
-    date: '24 กรกฎาคม 2568',
-    time: '09:00 - 12:00',
-    room: 'Online',
-    hours: 3,
-  },{
-    title: 'กิจกรรมเตรียมความพร้อม',
-    type: 'preparation',
-    date: '24 กรกฎาคม 2568',
-    time: '09:00 - 12:00',
-    room: 'Online',
-    hours: 3,
-  },{
-    title: 'กิจกรรมเตรียมความพร้อม',
-    type: 'academic',
-    date: '24 กรกฎาคม 2568',
-    time: '09:00 - 12:00',
-    room: 'Online',
-    hours: 3,
-  },
-  // ... อื่น ๆ
-])
-
 
 const activityColors = {
   academic: {
@@ -133,20 +158,16 @@ const activityColors = {
                 <div class="col-4 text-right text-weight-medium">รหัสนิสิต :</div>
                 <div class="col-8">{{ studentData.studentId }}</div>
               </div>
-              <div class="row q-col-gutter-sm text-body2 q-py-xs">
-                <div class="col-4 text-right text-weight-medium">ชั้นปี :</div>
-                <div class="col-8">{{ studentData.year }}</div>
-              </div>
             </div>
           </div>
         </q-card-section>
       </q-card>
 
-      <!-- Hours Progress Cards -->
+      <!-- Progress Cards -->
       <div class="row q-col-gutter-md q-mb-md">
         <div class="col-12 col-md-6">
           <q-card bordered class="rounded-borders shadow-2 full-height">
-            <q-card-section class="bg-blue-1 q-pb-xs">
+            <q-card-section class="bg-blue-1 q-mb-md">
               <div class="text-h6 text-bold text-primary">
                 <q-icon :name="activityColors.academic.icon" class="q-mr-sm" />
                 {{ activityColors.academic.label }}
@@ -157,7 +178,7 @@ const activityColors = {
               <q-circular-progress
                 rounded
                 show-value
-                :value="(academicData.current / academicData.required) * 100"
+                :value="getProgressValue(academicData)"
                 size="150px"
                 :thickness="0.2"
                 color="primary"
@@ -176,7 +197,7 @@ const activityColors = {
                 <div class="row items-center q-mb-xs">
                   <div class="col text-subtitle2">ความคืบหน้า</div>
                   <div class="col-auto text-caption">
-                    {{ Math.round((academicData.current / academicData.required) * 100) }}%
+                    {{ Math.round(getProgressValue(academicData)) }}%
                   </div>
                 </div>
                 <q-linear-progress
@@ -189,8 +210,11 @@ const activityColors = {
                 <div class="flex justify-between text-caption">
                   <div>
                     <q-badge :color="getProgressColor(academicProgressRatio)" outline>
-                      เหลืออีก {{ calculateMissingHours(academicData) }} ชั่วโมง
+                      {{ calculateMissingHours(academicData) > 0
+                        ? `เหลืออีก ${calculateMissingHours(academicData)} ชั่วโมง`
+                        : 'ครบแล้ว' }}
                     </q-badge>
+
                   </div>
                   <div class="text-grey-8">มีอยู่ {{ academicData.current }} ชั่วโมง</div>
                 </div>
@@ -201,7 +225,7 @@ const activityColors = {
 
         <div class="col-12 col-md-6">
           <q-card bordered class="rounded-borders shadow-2 full-height">
-            <q-card-section class="bg-blue-1 q-pb-xs">
+            <q-card-section class="bg-blue-1 q-mb-md">
               <div class="text-h6 text-bold text-primary">
                 <q-icon :name="activityColors.preparation.icon" class="q-mr-sm" />
                 {{ activityColors.preparation.label }}
@@ -212,7 +236,7 @@ const activityColors = {
               <q-circular-progress
                 rounded
                 show-value
-                :value="(prepData.current / prepData.required) * 100"
+                :value="getProgressValue(prepData)"
                 size="150px"
                 :thickness="0.2"
                 color="secondary"
@@ -231,7 +255,7 @@ const activityColors = {
                 <div class="row items-center q-mb-xs">
                   <div class="col text-subtitle2">ความคืบหน้า</div>
                   <div class="col-auto text-caption">
-                    {{ Math.round((prepData.current / prepData.required) * 100) }}%
+                    {{ Math.round(getProgressValue(prepData)) }}%
                   </div>
                 </div>
                 <q-linear-progress
@@ -244,8 +268,11 @@ const activityColors = {
                 <div class="flex justify-between text-caption">
                   <div>
                     <q-badge :color="getProgressColor(prepProgressRatio)" outline>
-                      เหลืออีก {{ calculateMissingHours(prepData) }} ชั่วโมง
+                      {{ calculateMissingHours(prepData) > 0
+                        ? `เหลืออีก ${calculateMissingHours(prepData)} ชั่วโมง`
+                        : 'ครบแล้ว' }}
                     </q-badge>
+
                   </div>
                   <div class="text-grey-8">มีอยู่ {{ prepData.current }} ชั่วโมง</div>
                 </div>
@@ -257,67 +284,72 @@ const activityColors = {
 
       <!-- Activity History -->
       <q-card bordered class="q-mb-md shadow-2 rounded-borders">
-        <q-card-section class="bg-blue-1 q-pb-xs">
+        <q-card-section class="bg-blue-1">
           <div class="row justify-between items-center">
             <div class="text-h6 text-bold text-primary">
               <q-icon name="history" class="q-mr-sm" />
               ประวัติการเข้ากิจกรรม
             </div>
             <q-btn
-              v-if="activities.length > 5"
+              v-if="activities.length > 3"
               flat
               dense
               color="primary"
-              icon="more_horiz"
-              :label="showAllActivities ? 'แสดงน้อยลง' : 'ดูทั้งหมด'"
+              :icon="showAllActivities ? 'expand_less' : 'expand_more'"
+              :label="showAllActivities ? 'แสดงน้อยลง' : 'ทั้งหมด'"
               @click="showAllActivities = !showAllActivities"
             />
           </div>
         </q-card-section>
 
+
         <q-separator />
 
         <q-card-section class="q-pa-none">
           <q-list>
-  <q-item
-    v-for="(activity, index) in (showAllActivities ? activities : activities.slice(0, 5))"
-    :key="index"
-    class="q-py-md"
-  >
-    <q-item-section avatar>
-      <q-avatar color="primary" text-color="white">
-        <q-icon :name="activityColors[activity.type].icon" />
-      </q-avatar>
-    </q-item-section>
+            <q-item
+              v-for="(activity, index) in (showAllActivities ? activities : activities.slice(0, 3))"
+              :key="index"
+            >
+              <q-item-section avatar>
+                <q-avatar color="primary" text-color="white">
+                  <q-icon :name="activityColors[activity.type].icon" />
+                </q-avatar>
+              </q-item-section>
 
-    <q-item-section>
-      <q-item-label class="text-weight-medium">{{ activity.title }}</q-item-label>
-      <q-item-label caption>
-        <div class="row items-center">
-          <q-icon name="event" size="xs" class="q-mr-xs" />
-          {{ activity.date }}
-          <q-separator vertical spaced class="q-mx-sm" />
-          <q-icon name="timer" size="xs" class="q-mr-xs" />
-          {{ activity.hours }} ชั่วโมง
-        </div>
-      </q-item-label>
-    </q-item-section>
+              <q-item-section>
+                <q-item-label
+                  class="text-weight-medium ellipsis"
+                  :title="activity.title"
+                >
+                  {{ activity.title }}
+                </q-item-label>
+                <q-item-label caption>
+                  <div class="row items-center">
+                    <q-icon name="event" size="xs" class="q-mr-xs" />
+                    {{ activity.date }}
+                    <q-separator vertical spaced class="q-mx-sm" />
+                    <q-icon name="timer" size="xs" class="q-mr-xs" />
+                    {{ activity.hours }} ชั่วโมง
+                  </div>
+                </q-item-label>
+              </q-item-section>
 
-    <q-item-section side>
-      <q-badge
-        rounded
-        class="q-px-sm q-py-xs text-weight-medium"
-        :style="`
-          background-color: ${activityColors[activity.type].bgColor};
-          color: ${activityColors[activity.type].textColor};
-          border: 2px solid ${activity.type === 'preparation' ? activityColors[activity.type].border : activityColors[activity.type].textColor};
-        `"
-        :label="activityColors[activity.type].label"
-      />
-    </q-item-section>
-  </q-item>
-</q-list>
+              <q-item-section side top>
+                <div class="row items-center">
+                  <q-badge
+                    rounded
+                    class="q-px-sm q-py-xs text-weight-medium"
+                    :style="`background-color: ${activityColors[activity.type].bgColor}; color: ${activityColors[activity.type].textColor}; border: 1px solid ${
+                      activity.type === 'preparation' ? activityColors[activity.type].border : activityColors[activity.type].textColor
+                    };`"
+                    :label="activityColors[activity.type].label"
+                  />
+                </div>
+              </q-item-section>
 
+            </q-item>
+          </q-list>
         </q-card-section>
       </q-card>
     </div>
@@ -331,5 +363,10 @@ const activityColors = {
 .container {
   width: 100%;
 }
+.q-item-label.ellipsis {
+  max-width: 220px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
 </style>
-
