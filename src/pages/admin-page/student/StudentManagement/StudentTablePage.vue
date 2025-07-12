@@ -1,8 +1,7 @@
 <script setup lang="ts">
-import { computed, nextTick, onMounted, ref } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import FilterDialog from 'src/components/Dialog/FilterDialog.vue'
-import ManageStudentDialog from './ManageStudentDialog.vue'
 import { useStudentStore } from 'src/stores/student'
 
 const studentStore = useStudentStore()
@@ -62,14 +61,11 @@ const pagination = ref({
   rowsPerPage: query.value.limit,
   rowsNumber: 0,
 })
-const manageDialogRef = ref<InstanceType<typeof ManageStudentDialog> | null>(null)
+// const manageDialogRef = ref<InstanceType<typeof ManageStudentDialog> | null>(null)
 
 // ฟังก์ชันเปิด ManageStudentDialog
-const openManageDialog = async () => {
-  await nextTick() // รอให้ DOM อัปเดตก่อน
-  if (manageDialogRef.value) {
-    manageDialogRef.value.openDialog()
-  }
+const openManageDialog = () => {
+  void router.push('/Admin/StudentManagement/UploadStudent')
 }
 
 const getStatusClass = (status: number) => {
@@ -150,12 +146,11 @@ const columns = [
           <q-btn
             dense
             outlined
-            icon="settings"
-            label="จัดการข้อมูล"
+            label="เพิ่มข้อมูลนิสิต"
             @click="openManageDialog"
             class="q-mr-sm btnadd"
           >
-            <ManageStudentDialog ref="manageDialogRef" />
+            <!-- <ManageStudentDialog ref="manageDialogRef" /> -->
           </q-btn>
 
           <FilterDialog

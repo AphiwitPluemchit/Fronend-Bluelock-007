@@ -21,23 +21,26 @@ const adminChildren: RouteRecordRaw[] = [
   },
   {
     path: 'StudentManagement',
-    component: () => import('pages/admin-page/student/StudentTablePage.vue'),
+    component: () => import('pages/admin-page/student/StudentManagement/StudentTablePage.vue'),
   },
   {
-    path: 'StudentManagement/UploadStudentDialog',
-    component: () => import('pages/admin-page/student/UploadStudentDialog.vue'),
+    path: 'StudentManagement/UploadStudent',
+    component: () =>
+      import('pages/admin-page/student/StudentManagement/StudentDetail/UploadStudentPage.vue'),
   },
   {
-    path: 'StudentStorePage',
-    component: () => import('pages/admin-page/student/StudentStorePage.vue'),
+    path: 'StudentStorage',
+    component: () => import('src/pages/admin-page/student/StudentStorage/StudentStoragePage.vue'),
   },
   {
-    path: 'StudentStorePage/ConfirmStudentDataPage',
-    component: () => import('pages/admin-page/student/ConfirmStudentDataPage.vue'),
+    path: 'StudentStorage/ConfirmStudentDataPage',
+    component: () =>
+      import('src/pages/admin-page/student/StudentStorage/ConfirmStudentDataPage.vue'),
   },
   {
     path: 'StudentManagement/StudentDetail/:code',
-    component: () => import('pages/admin-page/student/StudentDetail/StudentDetailPage.vue'),
+    component: () =>
+      import('pages/admin-page/student/StudentManagement/StudentDetail/StudentDetailPage.vue'),
   },
   {
     path: 'Report',
@@ -61,4 +64,3 @@ export const adminRoutes: RouteRecordRaw[] = [
     children: adminChildren,
   },
 ]
-
