@@ -6,18 +6,11 @@ import { useStudentStore } from 'src/stores/student'
 
 const studentStore = useStudentStore()
 const router = useRouter()
-
+const show = ref(false)
 const students = computed(() => studentStore.students ?? [])
-
-onMounted(async () => {
-  await data()
-})
 
 const goToDetail = (code: string) => {
   void router.push(`/Admin/StudentManagement/StudentDetail/${code}`)
-}
-const goToUploadPage = () => {
-  void router.push('/Admin/StudentManagement/UploadStudentDialog')
 }
 interface SelectedFilters {
   year: string[]
@@ -41,6 +34,7 @@ const applyFilters = async (selectedFilters: SelectedFilters) => {
   studentStore.query.studentYear = selectedFilters.year ?? []
   studentStore.query.major = selectedFilters.major ?? []
   studentStore.query.studentStatus = selectedFilters.studentStatus ?? []
+
   await data()
 }
 
@@ -64,37 +58,11 @@ const pagination = ref({
   rowsPerPage: query.value.limit,
   rowsNumber: 0,
 })
-const manageDialogRef = ref<InstanceType<typeof ManageStudentDialog> | null>(null)
+// const manageDialogRef = ref<InstanceType<typeof ManageStudentDialog> | null>(null)
 
 // ฟังก์ชันเปิด ManageStudentDialog
-const openManageDialog = async () => {
-  await nextTick() // รอให้ DOM อัปเดตก่อน
-  if (manageDialogRef.value) {
-    manageDialogRef.value.openDialog()
-  }
-}
-
-const getStatusClass = (status: number) => {
-  if (status === 3) return 'status-complete'
-  if (status === 2) return 'status-medium'
-  if (status === 1) return 'status-low'
-  if (status === 0) return 'status-out'
-  return ''
-}
-
-const getStatusText = (status: number) => {
-  switch (status) {
-    case 0:
-      return 'พ้นสภาพ'
-    case 1:
-      return 'ชั่วโมงน้อยมาก'
-    case 2:
-      return 'ชั่วโมงน้อย'
-    case 3:
-      return 'ชั่วโมงครบ'
-    default:
-      return 'ไม่ทราบสถานะ'
-  }
+const goToUplaodPage = () => {
+  void router.push('/Admin/StudentManagement/UploadStudent')
 }
 
 const columns = [
@@ -122,6 +90,24 @@ const columns = [
   { name: 'status', label: 'สถานะ', field: 'status', align: 'center' as const },
   { name: 'action', label: '', field: 'action', align: 'center' as const },
 ]
+
+onMounted(async () => {
+  show.value = false
+  studentStore.query = {
+    page: 1,
+    limit: 10,
+    sortBy: 'code',
+    order: 'asc',
+    search: '',
+    major: [],
+    studentStatus: [],
+    studentCode: [], // กรองเฉพาะนิสิตที่พ้นสภาพ
+    skill: [],
+    studentYear: [],
+  }
+  await data()
+  show.value = true
+})
 </script>
 
 <template>
@@ -129,6 +115,8 @@ const columns = [
     <!-- ชื่อหน้า -->
     <div class="row justify-between items-center" style="margin-top: 20px">
       <div class="texttitle">จัดการข้อมูลนิสิต</div>
+      <q-btn v-if="show" dense outlined label="เพิ่มนิสิต" @click="goToUplaodPage" class="btnadd">
+      </q-btn>
     </div>
 
     <!-- ตาราง 1 -->
@@ -164,7 +152,7 @@ const columns = [
       <q-table
         bordered
         flat
-      :rows="filteredStudents"
+        :rows="students"
         :columns="columns"
         v-model:pagination="pagination"
         :rows-per-page-options="[5, 7, 10, 15, 20]"
@@ -227,43 +215,6 @@ const columns = [
 </template>
 
 <style scoped>
-.status-complete {
-  background-color: #cfd7ff;
-  color: #001780;
-  border: 2px solid #002dff;
-  padding: 3px 30px;
-  width: 130px;
-}
-.status-high {
-  background-color: #d0ffc5;
-  color: #009812;
-  border: 2px solid #00bb16;
-  padding: 3px 30px;
-  width: 130px;
-}
-
-.status-medium {
-  background-color: #ffe7ba;
-  color: #ff6f00;
-  border: 2px solid #ffa500;
-  padding: 3px 30px;
-  width: 130px;
-}
-.status-low {
-  background-color: #ffc5c5;
-  color: #ff0000;
-  border: 2px solid #f32323;
-  padding: 3px 30px;
-  width: 130px;
-}
-.status-out {
-  background-color: #dadada;
-  color: #000000;
-  border: 2px solid #575656;
-  padding: 3px 30px;
-  width: 130px;
-}
-
 .clickable-row:hover {
   background-color: #f5f5f5;
 }
