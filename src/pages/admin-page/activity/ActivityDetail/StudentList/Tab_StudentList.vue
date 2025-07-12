@@ -1,6 +1,7 @@
 <script setup lang="ts">
 //import
-import { computed, onMounted, ref } from 'vue'
+import { computed, onMounted, onUnmounted, ref } from 'vue'
+import { useQuasar } from 'quasar'
 import { useRoute } from 'vue-router'
 import RemoveStudent from './RemoveStudent.vue'
 import { ActivityService } from 'src/services/activity'
@@ -9,6 +10,9 @@ import { EnrollmentService } from 'src/services/enrollment'
 import FilterDialog from 'src/components/Dialog/FilterDialog.vue'
 import type { Activity, EnrollmentSummary } from 'src/types/activity'
 import type { Pagination } from 'src/types/pagination'
+
+const $q = useQuasar()
+const isMobile = computed(() => $q.screen.width <= 600)
 
 const allTab = ref<Activity | null>(null)
 const indexTab = ref(0)
@@ -22,7 +26,13 @@ const query = ref<Pagination>({
   studentStatus: [],
   studentYear: [],
 })
-
+const visibleColumns = computed(() => {
+  const hasFood = students.value.some((s) => !!s.food && s.food.trim() !== '')
+  return columns.filter((col) => {
+    if (col.name === 'food') return hasFood
+    return true
+  })
+})
 const pagination = ref({
   sortBy: query.value.sortBy,
   descending: query.value.order === 'desc',
@@ -226,10 +236,31 @@ const fetchEnrollmentSummary = async () => {
     console.error('Error fetching enrollment summary:', error)
   }
 }
+const expanded = ref<{ [key: string]: boolean }>({})
+
+function formatStudentName(name: string): string {
+  if (!name) return ''
+  if (name.length <= 25) return name
+  return name.slice(0, 22) + '...'
+}
+
+function toggleCard(studentId: string) {
+  expanded.value[studentId] = !expanded.value[studentId]
+}
+const windowWidth = ref(window.innerWidth)
+
+function handleResize() {
+  windowWidth.value = window.innerWidth
+}
 
 onMounted(async () => {
+  window.addEventListener('resize', handleResize)
   await fetchEnrollmentSummary()
   await fetchActivityDetail()
+})
+
+onUnmounted(() => {
+  window.removeEventListener('resize', handleResize)
 })
 </script>
 
@@ -277,10 +308,11 @@ onMounted(async () => {
       </div>
 
       <q-table
+        v-if="!isMobile"
         flat
         bordered
         :rows="students"
-        :columns="columns"
+        :columns="visibleColumns"
         row-key="id"
         class="q-mt-md new-sticky-header"
         @request="onRequest"
@@ -330,6 +362,66 @@ onMounted(async () => {
           </div>
         </template>
       </q-table>
+
+      <!-- Card layout for mobile -->
+      <div v-else style="margin-top: 20px">
+        <q-card v-for="student in students" :key="student.id" class="student-card" bordered flat>
+          <!-- HEADER -->
+          <q-card-section
+            class="backgroundheader"
+            @click="toggleCard(student.id)"
+            style="cursor: pointer"
+          >
+            <div class="student-header-row row justify-between">
+              <div class="ActivityNamelabel row items-center">
+                <span class="student-code" style="margin-right: 10px"> {{ student.code }}</span>
+                <span class="student-name">{{ formatStudentName(student.name) }}</span>
+                <q-icon
+                  :name="expanded[student.id] ? 'keyboard_arrow_up' : 'keyboard_arrow_down'"
+                  size="28px"
+                  class="q-ml-sm"
+                  style="transition: transform 0.2s"
+                />
+              </div>
+            </div>
+          </q-card-section>
+
+          <!-- CONTENT -->
+          <q-card-section v-if="expanded[student.id]">
+            <div class="info-row" style="display: flex; align-items: center; margin-bottom: 10px">
+              <div class="label" style="margin-right: 5px">สาขา</div>
+              <div class="value">: {{ student.major || '-' }}</div>
+            </div>
+            <div
+              class="info-row"
+              v-if="student.food && student.food.trim() !== ''"
+              style="display: flex; align-items: center; margin-bottom: 10px"
+            >
+              <div class="label" style="margin-right: 5px">อาหาร</div>
+              <div class="value">: {{ student.food }}</div>
+            </div>
+            <div class="info-row" style="display: flex; align-items: center; margin-bottom: 10px">
+              <div class="label" style="margin-right: 5px">เช็คชื่อเข้า</div>
+              <div class="value">: {{ student.checkIn }}</div>
+            </div>
+            <div class="info-row" style="display: flex; align-items: center">
+              <div class="label" style="margin-right: 5px">เช็คชื่อออก</div>
+              <div class="value">: {{ student.checkOut }}</div>
+            </div>
+            <RemoveStudent
+              :id="student.id"
+              @removeStudent="() => removeStudentFromActivity(student.id)"
+            />
+          </q-card-section>
+        </q-card>
+        <div
+          v-if="students.length === 0"
+          class="full-width text-center q-pa-md text-grey"
+          style="font-size: 20px"
+        >
+          ไม่มีนิสิตที่ลงทะเบียน
+        </div>
+      </div>
     </div>
   </div>
 </template>
@@ -342,7 +434,14 @@ onMounted(async () => {
 .q-table table {
   table-layout: fixed;
 }
-
+.ActivityNamelabel {
+  font-size: 16px;
+  font-weight: 600;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
 .my-sticky-header-table thead th {
   position: sticky;
   top: 0;
@@ -383,7 +482,16 @@ onMounted(async () => {
     }
   }
 }
-
+.label {
+  font-weight: 600;
+  font-size: 16px;
+  min-width: 200px;
+  margin-top: 2px;
+}
+.value {
+  font-size: 16px;
+  margin-top: 2px;
+}
 .ellipsis-cell {
   white-space: nowrap;
   overflow: hidden;
@@ -393,7 +501,7 @@ onMounted(async () => {
 .status-complete {
   background-color: #cfd7ff;
   color: #001780;
-  border: 2px solid #002dff;
+  border: 1px solid #002dff;
   padding: 3px 30px;
   width: 130px;
 }
@@ -401,7 +509,7 @@ onMounted(async () => {
 .status-medium {
   background-color: #ffe7ba;
   color: #ff6f00;
-  border: 2px solid #ffa500;
+  border: 1px solid #ffa500;
   padding: 3px 30px;
   width: 130px;
 }
@@ -409,7 +517,7 @@ onMounted(async () => {
 .status-low {
   background-color: #ffc5c5;
   color: #ff0000;
-  border: 2px solid #f32323;
+  border: 1px solid #f32323;
   padding: 3px 30px;
   width: 130px;
 }
@@ -417,7 +525,7 @@ onMounted(async () => {
 .status-out {
   background-color: #dadada;
   color: #000000;
-  border: 2px solid #575656;
+  border: 1px solid #575656;
   padding: 3px 30px;
   width: 130px;
 }
@@ -449,6 +557,29 @@ onMounted(async () => {
   width: 100% !important;
   box-sizing: border-box;
 }
+.backgroundheader {
+  background-color: #90b2ee;
+}
+
+.student-header-row {
+  flex-direction: column !important;
+  align-items: stretch !important;
+}
+.student-header-actions {
+  margin-top: 10px !important;
+  justify-content: space-between;
+}
+
+.ActivityNamelabel .student-name {
+  flex-grow: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.ActivityNamelabel .q-icon {
+  margin-left: auto;
+}
 @media (max-width: 690px) {
   .form-toolbar {
     flex-direction: column;
@@ -467,6 +598,21 @@ onMounted(async () => {
 
   .dropdown {
     width: 90% !important;
+  }
+}
+
+@media (max-width: 600px) {
+  .student-table-wrapper {
+    padding: 0;
+  }
+  .student-card {
+    margin-bottom: 12px;
+    font-size: 16px;
+  }
+}
+@media (max-width: 450px) {
+  .ActivityNamelabel {
+    font-size: 12px;
   }
 }
 </style>

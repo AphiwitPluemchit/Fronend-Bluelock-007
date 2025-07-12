@@ -24,6 +24,8 @@ export type StudentEnrollment = {
   hardSkill: number
   softSkill: number
   registrationDate: string
+  checkIn?: string
+  checkOut?: string
 }
 export type EnrollmentQuery = Pagination & {
   major?: string[]

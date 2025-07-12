@@ -110,7 +110,7 @@ watch(isEditing, (newVal) => {
   display: flex;
   align-items: flex-start;
   column-gap: 150px;
-  padding: 0px 45px;
+  padding: 0px 50px;
   flex-wrap: wrap; 
   background-color:#EDF0F5;
 }
@@ -131,7 +131,7 @@ watch(isEditing, (newVal) => {
   flex-grow: 1;
   overflow-x: hidden;
   overflow-y: auto;
-  max-height: 600px;
+
 }
 
 .form-section::-webkit-scrollbar {
