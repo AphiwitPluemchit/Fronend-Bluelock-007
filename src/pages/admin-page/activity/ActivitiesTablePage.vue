@@ -647,7 +647,6 @@ watchEffect(() => {
           @request="onRequest1"
           row-key="id"
           class="q-mt-md my-sticky-header-table"
-    
         >
           <!-- หัวตาราง Sticky -->
           <template v-slot:header="props">
@@ -657,7 +656,6 @@ watchEffect(() => {
                 :key="col.name"
                 :props="props"
                 :style="col.headerStyle"
-                
               >
                 {{ col.label }}
               </q-th>
@@ -700,10 +698,20 @@ watchEffect(() => {
                 </div>
               </q-td>
               <q-td class="q-gutter-x-sm" key="action">
-                <q-icon clickable name="visibility" @click="goToPageDetail(props.row.id, true)" class="bg-black text-white q-pa-xs rounded-borders q-mr-sm">
+                <q-icon
+                  clickable
+                  name="visibility"
+                  @click="goToPageDetail(props.row.id, true)"
+                  class="bg-black text-white q-pa-xs rounded-borders q-mr-sm"
+                >
                   <q-tooltip>ดูรายละเอียด</q-tooltip>
                 </q-icon>
-                <q-icon clickable name="edit" @click.stop="goToPageDetail(props.row.id, false)" class="bg-primary text-white q-pa-xs rounded-borders q-mr-sm">
+                <q-icon
+                  clickable
+                  name="edit"
+                  @click.stop="goToPageDetail(props.row.id, false)"
+                  class="bg-primary text-white q-pa-xs rounded-borders q-mr-sm"
+                >
                   <q-tooltip>แก้ไข</q-tooltip>
                 </q-icon>
               </q-td>
@@ -858,10 +866,20 @@ watchEffect(() => {
               </q-td>
 
               <q-td key="action" class="text-left q-gutter-x-sm">
-                <q-icon clickable name="visibility" @click="goToPageDetail(props.row.id, true)" class="bg-black text-white q-pa-xs rounded-borders q-mr-sm">
+                <q-icon
+                  clickable
+                  name="visibility"
+                  @click="goToPageDetail(props.row.id, true)"
+                  class="bg-black text-white q-pa-xs rounded-borders q-mr-sm"
+                >
                   <q-tooltip>ดูรายละเอียด</q-tooltip>
                 </q-icon>
-                <q-icon clickable name="edit" @click="goToPageDetail(props.row.id, false)" class="bg-primary text-white q-pa-xs rounded-borders q-mr-sm">
+                <q-icon
+                  clickable
+                  name="edit"
+                  @click="goToPageDetail(props.row.id, false)"
+                  class="bg-primary text-white q-pa-xs rounded-borders q-mr-sm"
+                >
                   <q-tooltip>แก้ไข</q-tooltip>
                 </q-icon>
               </q-td>
@@ -956,10 +974,20 @@ watchEffect(() => {
               </q-td>
 
               <q-td key="action" class="text-left q-gutter-x-sm">
-                <q-icon clickable name="visibility" @click="goToPageDetail(props.row.id, true)" class="bg-black text-white q-pa-xs rounded-borders q-mr-sm">
+                <q-icon
+                  clickable
+                  name="visibility"
+                  @click="goToPageDetail(props.row.id, true)"
+                  class="bg-black text-white q-pa-xs rounded-borders q-mr-sm"
+                >
                   <q-tooltip>ดูรายละเอียด</q-tooltip>
                 </q-icon>
-                <q-icon clickable name="edit" @click="goToPageDetail(props.row.id, false)" class="bg-primary text-white q-pa-xs rounded-borders q-mr-sm">
+                <q-icon
+                  clickable
+                  name="edit"
+                  @click="goToPageDetail(props.row.id, false)"
+                  class="bg-primary text-white q-pa-xs rounded-borders q-mr-sm"
+                >
                   <q-tooltip>แก้ไข</q-tooltip>
                 </q-icon>
                 <!-- <q-icon clickable name="delete" @click="openRemoveDialog(props.row.id)">
@@ -1059,10 +1087,20 @@ watchEffect(() => {
                 <!-- <q-icon clickable name="visibility" @click="goToPageDetail(props.row.id, true)">
                 <q-tooltip>ดูรายละเอียด</q-tooltip>
               </q-icon> -->
-                <q-icon clickable name="edit" @click="goToPageDetail(props.row.id, false)" class="bg-primary text-white q-pa-xs rounded-borders q-mr-sm">
+                <q-icon
+                  clickable
+                  name="edit"
+                  @click="goToPageDetail(props.row.id, false)"
+                  class="bg-primary text-white q-pa-xs rounded-borders q-mr-sm"
+                >
                   <q-tooltip>แก้ไข</q-tooltip>
                 </q-icon>
-                <q-icon clickable name="delete" @click="openRemoveDialog(props.row.id)" class="bg-red text-white q-pa-xs rounded-borders q-mr-sm">
+                <q-icon
+                  clickable
+                  name="delete"
+                  @click="openRemoveDialog(props.row.id)"
+                  class="bg-red text-white q-pa-xs rounded-borders q-mr-sm"
+                >
                   <q-tooltip>ลบ</q-tooltip>
                 </q-icon>
               </q-td>
@@ -1082,7 +1120,7 @@ watchEffect(() => {
       v-if="isMediumScreen"
       v-model="tabIndex"
       dense
-      style="margin-bottom: 30px;"
+      style="margin-bottom: 30px"
       align="justify"
       class="tab-scroll-wrapper q-mb-md"
     >
@@ -1279,7 +1317,7 @@ watchEffect(() => {
           </q-card-section>
 
           <!-- 🔹 CONTENT -->
-           <q-card-section>
+          <q-card-section>
             <div class="q-mb-xs info-row">
               <div class="label">วันที่</div>
               <div class="value">: {{ row.dates || '-' }}</div>
@@ -1484,7 +1522,7 @@ watchEffect(() => {
                 >
                   <q-tooltip>แก้ไข</q-tooltip>
                 </q-btn>
-                 <q-btn
+                <q-btn
                   flat
                   dense
                   icon="delete"
@@ -1498,7 +1536,7 @@ watchEffect(() => {
           </q-card-section>
 
           <!-- 🔹 CONTENT -->
-           <q-card-section>
+          <q-card-section>
             <div class="q-mb-xs info-row">
               <div class="label">วันที่</div>
               <div class="value">: {{ row.dates || '-' }}</div>
@@ -1565,16 +1603,14 @@ watchEffect(() => {
   overflow: hidden;
 }
 
-
 /* Sticky thead (ใช้ภายใน q-table ได้เลย) */
 .my-sticky-header-table thead tr {
-  background-color: #162aae; 
+  background-color: #162aae;
   font-weight: bold;
   font-size: 16px;
   color: #ffffff;
   border-bottom: 2px solid #d0d0d0;
   transition: background-color 0.3s ease;
-
 }
 
 .my-sticky-header-table tbody tr {
@@ -1584,13 +1620,13 @@ watchEffect(() => {
 .my-sticky-header-table tbody tr:hover {
   background-color: #f5f7ff; // Hover แบบนุ่มนวล
 }
-.my-sticky-header-table td, 
+.my-sticky-header-table td,
 .my-sticky-header-table th {
   padding: 10px 12px;
   font-size: 15px;
 }
 .my-sticky-header-table .q-icon {
-  color: #4a4a4a;
+  color: #d0d0d0;
 }
 .status-close {
   background-color: #cfd7ff;
@@ -1653,7 +1689,6 @@ watchEffect(() => {
 }
 .searchbox {
   margin-right: 5px;
-
 }
 .textheader {
   font-size: 20px;
@@ -1709,6 +1744,4 @@ watchEffect(() => {
     width: 100%;
   }
 }
-
-
 </style>

@@ -67,7 +67,7 @@ onMounted(async () => {
               outlined
               v-model="query.search"
               placeholder="ค้นหา ชื่อกิจกรรม"
-              @keyup.enter="fetchData()"
+              @keyup.enter="applyFilters"
               class="q-mr-sm searchbox"
               :style="{ boxShadow: 'none' }"
             >
