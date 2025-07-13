@@ -88,70 +88,94 @@ onMounted(async () => {
 </script>
 <template>
   <q-page class="q-pa-md" v-if="screen">
-    <!-- Breadcrumbs -->
-
-    <q-card-section class="row">
+    <!-- กรอบข้อมูลกิจกรรม -->
+    <q-card-section class="q-col-gutter-md row items-start q-mb-md">
+      <!-- ภาพกิจกรรม -->
       <div class="col-12 col-md-4 text-center">
         <q-img
-          :src="baseurl + '/uploads/activity/images/' + activity?.file"
-          class="image"
-          error-src="/default-placeholder.jpg"
+          :src="activity?.file ? baseurl + '/uploads/activity/images/' + activity.file : '/default-placeholder.jpg'"
+          class="activity-img"
+          :ratio="4 / 3"
+          spinner-color="primary"
         />
       </div>
 
+      <!-- รายละเอียดกิจกรรม -->
       <div class="col-12 col-md-8" v-if="activity">
-        <div v-if="activity?.type == 'one'">
-          <DetailOne :activity="activity ?? {}"></DetailOne>
-        </div>
-        <div v-if="activity?.type == 'many'">
-          <DetailMany :activity="activity ?? {}"></DetailMany>
-        </div>
+        <DetailOne v-if="activity.type === 'one'" :activity="activity" />
+        <DetailMany v-else-if="activity.type === 'many'" :activity="activity" />
       </div>
     </q-card-section>
-    <div class="row justify-center">
+
+    <!-- ปุ่มลงทะเบียน / ยกเลิก -->
+    <div class="row justify-center q-gutter-sm q-mt-md">
       <q-btn
         v-if="enrollment?.isEnrolled && !isRegistrationNotAllowed"
         label="ยกเลิกลงทะเบียน"
         class="btnreject"
         @click="handleUnRegisterClick"
+        unelevated
+        rounded
       />
       <q-btn
         v-else-if="!enrollment?.isEnrolled && !isRegistrationNotAllowed"
         label="ลงทะเบียน"
         class="btnsecces"
         @click="handleRegisterClick"
+        unelevated
+        rounded
       />
-      <q-btn v-else label="ไม่สามารถยกเลิกการลงทะเบียนได้" class="btn-disabled" :disabled="true" />
+      <q-btn
+        v-else
+        label="ไม่สามารถยกเลิกการลงทะเบียนได้"
+        class="btn-disabled"
+        :disabled="true"
+        unelevated
+        rounded
+      />
     </div>
+
+    <!-- หมายเหตุ -->
     <div v-if="isRegistrationNotAllowed">
       <q-item-label class="text-negative q-mt-md text-center">
         หมายเหตุ: กรุณาติดต่อเจ้าหน้าที่หากต้องการยกเลิกการลงทะเบียน
       </q-item-label>
     </div>
+
+    <!-- Dialogs -->
+    <RegisterConfirmDialog
+      v-model="showRegisterDialog"
+      :activityItems="activity?.activityItems ?? []"
+      :food="activity?.foodVotes ?? []"
+      @confirm="register"
+    />
+    <RegisterFailDialog v-model="showFailDialog" />
+    <UnRegisterDialog v-model="showUnRegisterDialog" @confirm="unRegister" />
   </q-page>
-  <!-- Confirm Dialog-->
-  <RegisterConfirmDialog
-    v-model="showRegisterDialog"
-    :activityItems="activity?.activityItems ?? []"
-    :food="activity?.foodVotes ?? []"
-    @confirm="register"
-  />
-  <RegisterFailDialog v-model="showFailDialog" />
-  <UnRegisterDialog v-model="showUnRegisterDialog" @confirm="unRegister" />
 </template>
 
 <style scoped>
 .activity-img {
-  width: 300px;
-  height: 300px;
-  background-color: #d9d9d9;
-  border-radius: 10px;
-}
-.image {
-  width: 430px;
-  height: 330px;
+  width: 100%;
+  max-width: 430px;
+  height: auto;
   background-color: #d9d9d9;
   border-radius: 12px;
   object-fit: cover;
+  margin: 0 auto;
+}
+
+.btnreject {
+  background-color: #f44336;
+  color: white;
+}
+.btnsecces {
+  background-color: #4caf50;
+  color: white;
+}
+.btn-disabled {
+  background-color: #bdbdbd;
+  color: white;
 }
 </style>
+

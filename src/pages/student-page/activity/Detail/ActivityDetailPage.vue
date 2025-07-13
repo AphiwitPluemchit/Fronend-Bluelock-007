@@ -96,40 +96,55 @@ onMounted(async () => {
     <!-- Breadcrumbs -->
     <AppBreadcrumbs :breadcrumbs="breadcrumbs" />
     <div class="activity-detail-card">
-      <q-card-section class="row">
-        <div class="col-12 col-md-4 text-center">
-          <q-img
-            :src="baseurl + '/uploads/activity/images/' + activity?.file"
-            class="image"
-            error-src="/default-placeholder.jpg"
-          />
-        </div>
+      <q-card-section class="q-col-gutter-md row items-start q-mb-md">
+      <!-- ภาพกิจกรรม -->
+      <div class="col-12 col-md-4 text-center">
+        <q-img
+          :src="baseurl + '/uploads/activity/images/' + activity?.file"
+          class="activity-img"
+          error-src="/default-placeholder.jpg"
+        />
+      </div>
 
-        <div class="col-12 col-md-8" v-if="activity">
-          <div v-if="Array.isArray(activity?.activityItems) && activity.activityItems.length > 1">
-            <DetailMany :activity="activity ?? {}"></DetailMany>
-          </div>
-          <div v-else>
-            <DetailOne :activity="activity ?? {}"></DetailOne>
-          </div>
+      <!-- รายละเอียด -->
+      <div class="col-12 col-md-8 " v-if="activity">
+        <div v-if="Array.isArray(activity?.activityItems) && activity.activityItems.length > 1">
+          <DetailMany :activity="activity ?? {}" />
         </div>
-      </q-card-section>
+        <div v-else>
+          <DetailOne :activity="activity ?? {}" />
+        </div>
+      </div>
+    </q-card-section>
 
-      <div class="row justify-center">
+
+      <div class="q-mt-md q-mb-md row justify-center q-gutter-sm">
         <q-btn
           v-if="enrollment?.isEnrolled && !isRegistrationNotAllowed"
           label="ยกเลิกลงทะเบียน"
           class="btnreject"
           @click="handleUnRegisterClick"
+          unelevated
+          rounded
         />
         <q-btn
           v-else-if="!enrollment?.isEnrolled && !isRegistrationNotAllowed"
           label="ลงทะเบียน"
           class="btnsecces"
           @click="handleRegisterClick"
+          unelevated
+          rounded
         />
-        <q-btn v-else label="ปิดลงทะเบียน" class="btngrey" :disabled="true" />
+        <q-btn
+          v-else
+          label="ปิดลงทะเบียน"
+          class="btngrey"
+          :disabled="true"
+          unelevated
+          rounded
+        />
       </div>
+
     </div>
 
     <!-- Confirm Dialog-->
@@ -147,21 +162,34 @@ onMounted(async () => {
 <style scoped>
 .activity-detail-card {
   background-color: #f5f7fa;
-  padding: 20px;
-  font-size: 20px;
+  padding: 16px;
+  font-size: 18px;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
 }
 
 .activity-img {
-  width: 300px;
-  height: 300px;
-  background-color: #d9d9d9;
-  border-radius: 10px;
-}
-.image {
-  width: 430px;
-  height: 330px;
+  width: 100%;
+  max-width: 430px;
+  height: auto;
+  aspect-ratio: 4 / 3;
   background-color: #d9d9d9;
   border-radius: 12px;
   object-fit: cover;
+  margin: 0 auto;
+}
+
+.btnreject {
+  background-color: #ff6b6b;
+  color: white;
+}
+.btnsecces {
+  background-color: #4caf50;
+  color: white;
+}
+.btngrey {
+  background-color: #bdbdbd;
+  color: white;
 }
 </style>
+

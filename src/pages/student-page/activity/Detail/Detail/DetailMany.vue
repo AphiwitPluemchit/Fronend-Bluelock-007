@@ -31,130 +31,110 @@ const getActivityTime = (activityItems: ActivityItem[] | null | undefined): stri
 </script>
 
 <template>
-  <!-- รายละเอียดกิจกรรม -->
   <div class="q-pa-sm">
-    <div class="row">
-      <div class="col-3 text-right">
-        <div class="q-mb-lg q-ml-md">ชื่อกิจกรรม :</div>
-      </div>
-      <div class="col-9">
-        <div class="q-mb-lg q-ml-md">{{ activity?.name ?? 'ไม่ระบุ' }}</div>
+    <!-- ข้อมูลทั่วไป -->
+    <div class="field-pair">
+      <div class="field-label">ชื่อกิจกรรมหลัก</div>
+      <div class="field-value">: {{ activity?.name ?? 'ไม่ระบุ' }}</div>
+    </div>
+    <div class="field-pair">
+      <div class="field-label">วันที่จัดกิจกรรม</div>
+      <div class="field-value">: {{ getActivitydates(activity?.activityItems) }}</div>
+    </div>
+    <div class="field-pair">
+      <div class="field-label">เวลาที่จัดกิจกรรม</div>
+      <div class="field-value">: {{ getActivityTime(activity?.activityItems) }}</div>
+    </div>
+    <div class="field-pair">
+      <div class="field-label">ประเภทกิจกรรม</div>
+      <div class="field-value">: 
+        {{
+          activity?.skill === 'hard'
+            ? 'ชั่วโมงทักษะทางวิชาการ'
+            : activity?.skill === 'soft'
+              ? 'ชั่วโมงทักษะเตรียมความพร้อม'
+              : 'ไม่ระบุประเภท'
+        }}
       </div>
     </div>
-    <div class="row">
-      <div class="col-3 text-right">
-        <div class="q-mb-lg q-ml-md">วันที่จัดกิจกรรม :</div>
-      </div>
-      <div class="col-9">
-        <div class="q-mb-lg q-ml-md">{{ getActivitydates(activity?.activityItems) }}</div>
-      </div>
-    </div>
-    <div class="row">
-      <div class="col-3 text-right">
-        <div class="q-mb-lg q-ml-md">เวลาที่จัดกิจกรรม :</div>
-      </div>
-      <div class="col-9">
-        <div class="q-mb-lg q-ml-md">{{ getActivityTime(activity?.activityItems) }}</div>
-      </div>
-    </div>
-    <div class="row">
-      <div class="col-3 text-right">
-        <div class="q-mb-lg q-ml-md">ประเภทกิจกรรม :</div>
-      </div>
-      <div class="col-9">
-        <div class="q-mb-lg q-ml-md">
-          {{
-            activity?.skill === 'hard'
-              ? 'ชั่วโมงทักษะทางวิชาการ'
-              : activity?.skill === 'soft'
-                ? 'ชั่วโมงทักษะเตรียมความพร้อม'
-                : 'ไม่ระบุประเภท'
-          }}
-        </div>
-      </div>
-    </div>
-    <div class="row">
-      <div class="col-3 text-right">
-        <div class="q-mb-lg q-ml-md">จำนวนกิจกรรม :</div>
-      </div>
-      <div class="col-9">
-        <div class="q-mb-lg q-ml-md">{{ activity.activityItems?.length }}</div>
-      </div>
+    <div class="field-pair">
+      <div class="field-label">จำนวนกิจกรรม</div>
+      <div class="field-value">: {{ activity.activityItems?.length }} กิจกรรม</div>
     </div>
 
     <q-separator spaced />
 
     <!-- รายการรอบกิจกรรม -->
     <div v-for="item in activity.activityItems" :key="item.id || ''">
-      <div class="row">
-        <div class="col-3 text-right">
-          <div class="q-mb-lg q-ml-md">ชื่อกิจกรรม :</div>
-        </div>
-        <div class="col-9">
-          <div class="q-mb-lg q-ml-md">{{ item.name ?? 'ไม่ระบุ' }}</div>
+      <div class="field-pair">
+        <div class="field-label">ชื่อกิจกรรมย่อย</div>
+        <div class="field-value">: {{ item.name ?? 'ไม่ระบุ' }}</div>
+      </div>
+      <div class="field-pair">
+        <div class="field-label">สถานที่จัดกิจกรรม</div>
+        <div class="field-value">: 
+          {{ Array.isArray(item.rooms) ? item.rooms.join(', ') : (item.rooms ?? 'ไม่ระบุ') }}
         </div>
       </div>
-
-      <div class="row">
-        <div class="col-3 text-right">
-          <div class="q-mb-lg q-ml-md">สถานที่ :</div>
-        </div>
-        <div class="col-9">
-          <div class="q-mb-lg q-ml-md">
-            {{ Array.isArray(item.rooms) ? item.rooms.join(', ') : (item.rooms ?? 'ไม่ระบุ') }}
-          </div>
+      <div class="field-pair">
+        <div class="field-label">จำนวนชั่วโมงที่ได้รับ</div>
+        <div class="field-value">: {{ item.hour ?? '-' }} ชั่วโมง</div>
+      </div>
+      <div class="field-pair">
+        <div class="field-label">จำนวนที่ลงทะเบียน</div>
+        <div class="field-value">: 
+          {{ item.enrollmentCount ?? 'ไม่ระบุ' }}/{{ item.maxParticipants ?? 'ไม่ระบุ' }}
         </div>
       </div>
-
-      <div class="row">
-        <div class="col-3 text-right">
-          <div class="q-mb-lg q-ml-md">จำนวนชั่วโมง :</div>
-        </div>
-        <div class="col-9">
-          <div class="q-mb-lg q-ml-md">{{ item.hour ?? '-' }}</div>
-        </div>
+      <div class="field-pair">
+        <div class="field-label">วิทยากร</div>
+        <div class="field-value">: {{ item.operator ?? 'ไม่ระบุ' }}</div>
       </div>
-
-      <div class="row">
-        <div class="col-3 text-right">
-          <div class="q-mb-lg q-ml-md">จำนวนที่ลง :</div>
-        </div>
-        <div class="col-9">
-          <div class="q-mb-lg q-ml-md">
-            {{ item.enrollmentCount ?? 'ไม่ระบุ' }}/{{ item.maxParticipants ?? 'ไม่ระบุ' }}
-          </div>
-        </div>
+      <div class="field-pair">
+        <div class="field-label">รายละเอียดอื่นๆ</div>
+        <div class="field-value">: {{ item.description ?? 'ไม่ระบุ' }}</div>
       </div>
-
-      <div class="row">
-        <div class="col-3 text-right">
-          <div class="q-mb-lg q-ml-md">วิทยากร :</div>
-        </div>
-        <div class="col-9">
-          <div class="q-mb-lg q-ml-md">{{ item.operator ?? 'ไม่ระบุ' }}</div>
-        </div>
-      </div>
-
-      <div class="row">
-        <div class="col-3 text-right">
-          <div class="q-mb-lg q-ml-md">รายละเอียดอื่นๆ :</div>
-        </div>
-        <div class="col-9">
-          <div class="q-mb-lg q-ml-md">{{ item.description ?? 'ไม่ระบุ' }}</div>
-        </div>
-      </div>
-
       <q-separator spaced />
     </div>
   </div>
 </template>
 
+
 <style scoped>
-.activity-detail-card {
-  width: 100%;
-  max-width: 900px;
-  background-color: #f5f7fa;
-  padding: 20px;
-  border-radius: 10px;
+.field-pair {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 12px;
+}
+
+.field-label {
+  font-weight: bold;
+  font-size: 16px;
+  color: #333;
+  margin-bottom: 4px;
+}
+
+.field-value {
+  font-size: 16px;
+  color: #555;
+  word-break: break-word;
+}
+
+/* แสดงแนวนอนเฉพาะจอใหญ่ขึ้นไป */
+@media (min-width: 768px) {
+  .field-pair {
+    flex-direction: row;
+    align-items: baseline;
+  }
+
+  .field-label {
+    width: 200px;
+    margin-bottom: 0;
+  }
+
+  .field-value {
+    flex: 1;
+  }
 }
 </style>
+
