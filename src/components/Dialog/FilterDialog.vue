@@ -126,8 +126,8 @@ function toggleFilter(category: keyof typeof tempFilters.value, value: string) {
 </script>
 
 <template>
-  <q-btn class="btnfilter"  :style="{ border: '1px solid #ccc' }">
-   <q-icon name="filter_list_alt"></q-icon>
+  <q-btn class="btnfilter" :style="{ border: '1px solid #ccc' }">
+    <q-icon name="filter_list_alt"></q-icon>
     <q-menu
       v-model="showFilterDialog"
       :transition-show="'jump-down'"
@@ -154,7 +154,7 @@ function toggleFilter(category: keyof typeof tempFilters.value, value: string) {
                 v-for="categoryActivity in options.categoryActivity"
                 :key="categoryActivity"
                 clickable
-                :class="['quarter-width-chip', getChipClass('categoryActivity', categoryActivity)]"
+                :class="['medium-width-chip', getChipClass('categoryActivity', categoryActivity)]"
                 @click="toggleFilter('categoryActivity', categoryActivity)"
               >
                 <div class="text-center full-width">
@@ -172,7 +172,7 @@ function toggleFilter(category: keyof typeof tempFilters.value, value: string) {
                 v-for="statusActivity in options.statusActivity"
                 :key="statusActivity"
                 clickable
-                :class="['quarter-width-chip', getChipClass('statusActivity', statusActivity)]"
+                :class="['medium-width-chip', getChipClass('statusActivity', statusActivity)]"
                 @click="toggleFilter('statusActivity', statusActivity)"
               >
                 <div class="text-center full-width">{{ activityStatusLebel(statusActivity) }}</div>
@@ -276,6 +276,16 @@ function toggleFilter(category: keyof typeof tempFilters.value, value: string) {
   margin: 1%;
   min-width: 60px;
 }
+.medium-width-chip {
+  height: 35px;
+  flex: 0 1 48%;
+  margin: 1%;
+  min-width: 100px;
+  max-width: 178px;
+  text-align: center;
+  justify-content: center;
+}
+
 .center-mobile-container {
   display: flex;
   flex-wrap: wrap;
