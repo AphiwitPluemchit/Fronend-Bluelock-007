@@ -1,42 +1,3 @@
-<template>
-  <q-card class="activity-card col-12 col-sm-6 col-md-4 q-pa-md q-my-sm">
-    <!-- ... -->
-    <div :class="isMobile ? 'column' : 'row items-center'">
-      <!-- รูปกิจกรรม -->
-      <div :class="isMobile ? 'full-width q-mb-sm' : 'col-4 q-pr-md'">
-        <q-img
-          :src="baseurl + '/uploads/activity/images/' + activity.file"
-          class="activity-img"
-          :ratio="4 / 3"
-        />
-      </div>
-
-      <!-- รายละเอียดกิจกรรม -->
-      <div class="col column justify-between" style="min-width: 0">
-        <div class="text-h6 text-bold q-mb-sm activity-name">
-          {{ activity.name }}
-        </div>
-        <div class="text-subtitle2 q-mb-sm">
-          {{ getActivitydates(activity.activityItems) }}
-        </div>
-        <div class="q-mb-md">จำนวนที่รับ {{ enrollmentSummary(activity.activityItems ?? []) }}</div>
-      </div> 
-      <!-- ปุ่มรายละเอียด -->
-      <div class="text-right full-width q-mt-sm">
-        <q-btn
-          label="รายละเอียด"
-          dense
-          unelevated
-          class="btnconfirm"
-          :to="`/Student/Activity/ActivityDetail/${activity.id}`"
-        />
-      </div>
-
-    </div>
-   
-  </q-card>
-</template>
-
 <script setup lang="ts">
 import type { Activity, ActivityItem } from 'src/types/activity'
 import { api } from 'boot/axios'
@@ -97,6 +58,48 @@ function enrollmentSummary(activityItems: ActivityItem[]) {
   return `${totalEnrolled}/${totalAccepted}`
 }
 </script>
+
+<template>
+  <q-card class="activity-card col-12 col-sm-6 col-md-4 q-pa-md q-my-sm">
+    <!-- ... -->
+    <div :class="isMobile ? 'column' : 'row items-center'">
+      <!-- รูปกิจกรรม -->
+      <div :class="isMobile ? 'full-width q-mb-sm' : 'col-4 q-pr-md'">
+        <q-img
+          :src="baseurl + '/uploads/activity/images/' + activity.file"
+          class="activity-img"
+          :ratio="4 / 3"
+        />
+      </div>
+
+      <!-- รายละเอียดกิจกรรม -->
+      <div class="col column justify-between" style="min-width: 0">
+        <div class="text-h6 text-bold ellipsis-2-lines q-mt-sm">
+          {{ activity.name }}
+        </div>
+        <div class="text-subtitle2 q-mb-sm">
+          {{ getActivitydates(activity.activityItems) }}
+        </div>
+        <div class="q-mb-md">จำนวนที่รับ {{ enrollmentSummary(activity.activityItems ?? []) }}</div>
+      </div> 
+
+      <!-- ปุ่มรายละเอียด -->
+      <div class="text-right full-width q-mt-sm">
+        <q-btn
+          label="รายละเอียด"
+          dense
+          unelevated
+          class="btnconfirm"
+          :to="`/Student/Activity/ActivityDetail/${activity.id}`"
+        />
+      </div>
+
+    </div>
+   
+  </q-card>
+</template>
+
+
 
 <style scoped>
 .activity-card {

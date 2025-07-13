@@ -6,9 +6,9 @@ import type { Activity } from 'src/types/activity'
 import { EnrollmentService } from 'src/services/enrollment'
 import { useAuthStore } from 'src/stores/auth'
 import type { Pagination } from 'src/types/pagination'
+
 const auth = useAuthStore()
 const activitys = ref<Activity[]>([])
-// const search = ref()
 const showFilterDialog = ref(false)
 
 interface SelectedFilters {
@@ -16,12 +16,7 @@ interface SelectedFilters {
 }
 
 const filterCategories = ref(['categoryActivity'])
-const applyFilters = async (selectedFilters: SelectedFilters) => {
-  console.log(selectedFilters)
 
-  query.value.skill = selectedFilters.categoryActivity
-  await fetchData()
-}
 const query = ref<Pagination>({
   page: 1,
   limit: 99,
@@ -33,6 +28,13 @@ const query = ref<Pagination>({
   major: [],
   studentYear: [],
 })
+
+const applyFilters = async (selectedFilters: SelectedFilters) => {
+  console.log(selectedFilters)
+  query.value.skill = selectedFilters.categoryActivity
+  await fetchData()
+}
+
 const fetchData = async () => {
   try {
     const studentId = `${auth.getUser?.id}`
@@ -44,6 +46,7 @@ const fetchData = async () => {
     console.error('เกิดข้อผิดพลาดในการโหลดข้อมูลกิจกรรม:', error)
   }
 }
+
 onMounted(async () => {
   console.log(auth.getUser?.id)
   await fetchData()
@@ -56,39 +59,72 @@ onMounted(async () => {
     <div class="row justify-between items-center q-mb-md" style="margin-top: 20px">
       <div class="texttitle">กิจกรรมของฉัน</div>
     </div>
-        <div class="row justify-between items-center q-pa-md">
-          <div class="text-h6"></div>
-          <div class="row">
-            <q-input
-              dense
-              outlined
-              v-model="query.search"
-              placeholder="ค้นหา ชื่อกิจกรรม"
-              @keyup.enter="applyFilters"
-              class="q-mr-sm searchbox"
-              :style="{ boxShadow: 'none' }"
-            >
-              <template v-slot:append>
-                <q-icon name="search" />
-              </template>
-            </q-input>
-            <FilterDialog
-              :model-value="showFilterDialog"
-              :categories="filterCategories"
-              @apply="applyFilters"
-              :years="query.studentYear || []"
-              :majors="query.major || []"
-              :status-activities="query.activityState || []"
-              :category-activities="query.skill || []"
-            />
-          </div>
-        </div>
 
-        <!-- แสดงกิจกรรม -->
-        <div class="row q-col-gutter-md">
-          <div class="col-xs-12 q-pa-lg" v-for="activitys in activitys" :key="activitys.id || ''">
-            <MyActivityCard :myActivity="activitys" :activitys="activitys" />
-          </div>
+    <!-- ค้นหา + ฟิลเตอร์ -->
+    <div class="row justify-between items-right  q-mb-md search-filter-wrapper q-col-gutter-md">
+      <div class="text-h6"></div>
+        <div class="row search-filter-inner items-center no-wrap">
+          <q-input
+                dense
+                outlined
+                v-model="query.search"
+                placeholder="ค้นหา ชื่อกิจกรรม"
+                @keyup.enter="applyFilters"
+                class="q-mr-sm searchbox"
+                :style="{ boxShadow: 'none' }"
+              >
+                <template v-slot:append>
+                  <q-icon name="search" />
+                </template>
+          </q-input>
+
+        <div class="filter-btn-wrapper">
+              <FilterDialog
+                :model-value="showFilterDialog"
+                :categories="filterCategories"
+                @apply="applyFilters"
+                :years="query.studentYear || []"
+                :majors="query.major || []"
+                :status-activities="query.activityState || []"
+                :category-activities="query.skill || []"
+              />
         </div>
-      </q-page>
+      </div>
+    </div>
+
+    <!-- แสดงกิจกรรม -->
+     
+    <div class="row q-col-gutter-md">
+      <div
+        class="col-xs-12 q-pa-sm"
+        v-for="activity in activitys"
+        :key="activity.id || ''"
+      >
+        <MyActivityCard :myActivity="activity" />
+      </div>
+
+    </div>
+  </q-page>
 </template>
+
+<style scoped>
+.search-filter-inner {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: nowrap;
+}
+
+.filter-btn-wrapper {
+  flex-shrink: 0;
+}
+
+/* ✅ Mobile: ชุดค้นหา + ปุ่มกรอง ชิดขวา */
+@media (max-width: 600px) {
+  .search-filter-inner {
+    justify-content: flex-end;
+    width: 100%;
+  }
+}
+</style>

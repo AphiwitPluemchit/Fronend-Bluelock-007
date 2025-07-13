@@ -3,9 +3,9 @@
     <!-- ชื่อหน้า -->
     <div class="row justify-between items-center q-mb-md" style="margin-top: 20px">
       <div class="texttitle">กิจกรรมทั้งหมด</div>
-        </div>
+    </div>
 
-        <div class="row justify-between items-center q-pa-md search-filter-wrapper q-col-gutter-md">
+        <div class="row justify-between items-right  q-mb-md search-filter-wrapper q-col-gutter-md">
           <div class="text-h6"></div>
           <div class="row search-filter-inner items-center no-wrap">
             <q-input
@@ -59,9 +59,9 @@ import FilterDialog from 'src/components/Dialog/FilterDialog.vue'
 import { ActivityService } from 'src/services/activity'
 import type { Pagination } from 'src/types/pagination'
 import type { Activity } from 'src/types/activity'
-import { useQuasar } from 'quasar'
+//import { useQuasar } from 'quasar'
 // const StudentActivityStore = useStudentActivitystore()
-const $q = useQuasar()
+//const $q = useQuasar()
 
 const activitys = ref<Activity[]>([])
 // const search = ref()
