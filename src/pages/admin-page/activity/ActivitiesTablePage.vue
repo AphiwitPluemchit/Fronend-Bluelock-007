@@ -229,7 +229,7 @@ const activitys4 = ref<Activity[]>([]) // Cancel Table
 const expandedRows1 = ref<Set<string>>(new Set())
 const expandedRows2 = ref<Set<string>>(new Set())
 const expandedRows3 = ref<Set<string>>(new Set())
-// const expandedRows4 = ref<Set<string>>(new Set())
+const expandedRows4 = ref<Set<string>>(new Set())
 
 // Toggle functions for expanding/collapsing rows
 const toggleRowExpansion1 = (rowId: string) => {
@@ -240,7 +240,6 @@ const toggleRowExpansion1 = (rowId: string) => {
   }
 }
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const toggleRowExpansion2 = (rowId: string) => {
   if (expandedRows2.value.has(rowId)) {
     expandedRows2.value.delete(rowId)
@@ -249,7 +248,6 @@ const toggleRowExpansion2 = (rowId: string) => {
   }
 }
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const toggleRowExpansion3 = (rowId: string) => {
   if (expandedRows3.value.has(rowId)) {
     expandedRows3.value.delete(rowId)
@@ -258,13 +256,13 @@ const toggleRowExpansion3 = (rowId: string) => {
   }
 }
 
-// const toggleRowExpansion4 = (rowId: string) => {
-//   if (expandedRows4.value.has(rowId)) {
-//     expandedRows4.value.delete(rowId)
-//   } else {
-//     expandedRows4.value.add(rowId)
-//   }
-// }
+const toggleRowExpansion4 = (rowId: string) => {
+  if (expandedRows4.value.has(rowId)) {
+    expandedRows4.value.delete(rowId)
+  } else {
+    expandedRows4.value.add(rowId)
+  }
+}
 
 const query1 = ref<Pagination>({
   page: 1,
@@ -698,14 +696,22 @@ watchEffect(() => {
                 </div>
               </q-td>
               <q-td class="q-gutter-x-sm" key="action">
-
-                <q-icon clickable name="edit" @click.stop="goToPageDetail(props.row.id, false)" class="bg-primary text-white q-pa-xs rounded-borders q-mr-sm">
+                <q-icon
+                  clickable
+                  name="edit"
+                  @click.stop="goToPageDetail(props.row.id, false)"
+                  class="bg-primary text-white q-pa-xs rounded-borders q-mr-sm"
+                >
                   <q-tooltip>แก้ไข</q-tooltip>
                 </q-icon>
-                <q-icon clickable name="visibility" @click="goToPageDetail(props.row.id, true)" class="bg-black text-white q-pa-xs rounded-borders q-mr-sm">
+                <q-icon
+                  clickable
+                  name="visibility"
+                  @click="goToPageDetail(props.row.id, true)"
+                  class="bg-black text-white q-pa-xs rounded-borders q-mr-sm"
+                >
                   <q-tooltip>ดูรายละเอียด</q-tooltip>
                 </q-icon>
-                
               </q-td>
             </q-tr>
             <!-- Expanded Row Content -->
@@ -713,57 +719,51 @@ watchEffect(() => {
               <q-td colspan="9" class="expanded-content">
                 <div class="q-pa-sm">
                   <div class="text-subtitle2 q-mb-sm">รายละเอียดกิจกรรมย่อย</div>
+
                   <div v-if="props.row.activityItems && props.row.activityItems.length > 0">
                     <div
                       v-for="(item, index) in props.row.activityItems"
                       :key="index"
-                      class="activity-item q-mb-sm q-pa-xs"
+                      class="q-mb-sm q-pa-xs"
                       style="border: 1px solid #e0e0e0; border-radius: 4px"
                     >
-                      <div class="row items-center q-gutter-sm text-body2">
-                        <div class="col-auto">
-                          <span class="text-weight-bold">ชื่อ:</span> {{ item.name || '-' }}
+                      <div class="row text-body2 items-start no-wrap">
+                        <!-- ชื่อกิจกรรม -->
+                        <div class="label-pair">
+                          <span class="label-title">ชื่อกิจกรรม :</span>
+                          <span class="label-value">{{ item.name || '-' }}</span>
                         </div>
 
-                        <div class="col-auto">
-                          <span class="text-weight-bold">รับ:</span>
-                          {{ item.maxParticipants || '-' }} คน
-                        </div>
-                        <div class="col-auto">
-                          <span class="text-weight-bold">ลงทะเบียน:</span>
-                          {{ item.enrollmentCount || 0 }} คน
-                        </div>
-                        <div class="col-auto" v-if="item.dates && item.dates.length > 0">
-                          <span class="text-weight-bold">วันที่:</span>
-                          <span v-for="(date, dateIndex) in item.dates" :key="dateIndex">
-                            {{ formatDateToThai(date.date) }} {{ date.stime }}-{{ date.etime
-                            }}{{ dateIndex < item.dates.length - 1 ? ', ' : '' }}
+                        <!-- จำนวน -->
+                        <div class="label-pair">
+                          <span class="label-title">จำนวนที่รับ/ลงทะเบียน/เหลือ :</span>
+                          <span class="label-value">
+                            {{ item.maxParticipants || '-' }} / {{ item.enrollmentCount || 0 }} /
+                            {{ item.maxParticipants - item.enrollmentCount || 0 }} คน
                           </span>
                         </div>
-                        <div class="col-auto">
-                          <span class="text-weight-bold">ชั่วโมง:</span> {{ item.hour || '-' }} ชม.
+
+                        <!-- ห้อง -->
+                        <div class="label-pair">
+                          <span class="label-title">ห้อง :</span>
+                          <span class="label-value">{{ item.rooms?.join(', ') || '-' }}</span>
                         </div>
-                        <div class="col-auto">
-                          <span class="text-weight-bold">ผู้ดำเนินการ:</span>
-                          {{ item.operator || '-' }}
+
+                        <!-- วันที่ -->
+                        <div class="label-pair" v-if="item.dates && item.dates.length > 0">
+                          <span class="label-title">วันที่ :</span>
+                          <span class="label-value">
+                            <span v-for="(date, dateIndex) in item.dates" :key="dateIndex">
+                              {{ formatDateToThai(date.date) }} ({{ date.stime }}-{{
+                                date.etime
+                              }})<span v-if="dateIndex < item.dates.length - 1">, </span>
+                            </span>
+                          </span>
                         </div>
-                        <div class="col-auto">
-                          <span class="text-weight-bold">ห้อง:</span>
-                          {{ item.rooms?.join(', ') || '-' }}
-                        </div>
-                        <div class="col-auto">
-                          <span class="text-weight-bold">สาขา:</span>
-                          {{ item.majors?.join(', ') || '-' }}
-                        </div>
-                      </div>
-                      <div
-                        v-if="item.description && item.description !== '-'"
-                        class="q-mt-xs text-body2"
-                      >
-                        <span class="text-weight-bold">คำอธิบาย:</span> {{ item.description }}
                       </div>
                     </div>
                   </div>
+
                   <div v-else class="text-grey-6">ไม่มีข้อมูลกิจกรรมย่อย</div>
                 </div>
               </q-td>
@@ -825,15 +825,23 @@ watchEffect(() => {
           <!-- หัวตาราง Sticky -->
           <template v-slot:header="props">
             <q-tr :props="props">
-              <q-th v-for="col in props.cols" :key="col.name" :props="props">
+              <q-th v-for="col in props.cols" :key="col.name" :props="props"  :style="col.headerStyle">
                 {{ col.label }}
               </q-th>
             </q-tr>
           </template>
           <!-- เนื้อหาตาราง -->
           <template v-slot:body="props">
-            <q-tr :props="props">
-              <q-td key="no">{{ props.rowIndex + 1 }}</q-td>
+            <q-tr :props="props"  @click="toggleRowExpansion2(props.row.id)" class="cursor-pointer">
+              <q-td key="no">
+                <div class="row items-center no-wrap">
+                  <q-icon
+                    :name="expandedRows2.has(props.row.id) ? 'expand_less' : 'expand_more'"
+                    class="q-mr-sm"
+                  />
+                  {{ props.rowIndex + 1 }}
+                </div>
+              </q-td>
               <q-td key="name">
                 <div class="ellipsis">
                   {{ truncateText(props.row.name) }}
@@ -858,13 +866,76 @@ watchEffect(() => {
               </q-td>
 
               <q-td key="action" class="text-left q-gutter-x-sm">
-                <q-icon clickable name="edit" @click="goToPageDetail(props.row.id, false)" class="bg-primary text-white q-pa-xs rounded-borders q-mr-sm">
+                <q-icon
+                  clickable
+                  name="edit"
+                  @click="goToPageDetail(props.row.id, false)"
+                  class="bg-primary text-white q-pa-xs rounded-borders q-mr-sm"
+                >
                   <q-tooltip>แก้ไข</q-tooltip>
                 </q-icon>
-                <q-icon clickable name="visibility" @click="goToPageDetail(props.row.id, true)" class="bg-black text-white q-pa-xs rounded-borders q-mr-sm">
+                <q-icon
+                  clickable
+                  name="visibility"
+                  @click="goToPageDetail(props.row.id, true)"
+                  class="bg-black text-white q-pa-xs rounded-borders q-mr-sm"
+                >
                   <q-tooltip>ดูรายละเอียด</q-tooltip>
                 </q-icon>
-        
+              </q-td>
+            </q-tr>
+             <!-- Expanded Row Content -->
+             <q-tr v-if="expandedRows2.has(props.row.id)" class="expanded-row">
+              <q-td colspan="9" class="expanded-content">
+                <div class="q-pa-sm">
+                  <div class="text-subtitle2 q-mb-sm">รายละเอียดกิจกรรมย่อย</div>
+
+                  <div v-if="props.row.activityItems && props.row.activityItems.length > 0">
+                    <div
+                      v-for="(item, index) in props.row.activityItems"
+                      :key="index"
+                      class="q-mb-sm q-pa-xs"
+                      style="border: 1px solid #e0e0e0; border-radius: 4px"
+                    >
+                      <div class="row text-body2 items-start no-wrap">
+                        <!-- ชื่อกิจกรรม -->
+                        <div class="label-pair">
+                          <span class="label-title">ชื่อกิจกรรม :</span>
+                          <span class="label-value">{{ item.name || '-' }}</span>
+                        </div>
+
+                        <!-- จำนวน -->
+                        <div class="label-pair">
+                          <span class="label-title">จำนวนที่รับ/ลงทะเบียน/เหลือ :</span>
+                          <span class="label-value">
+                            {{ item.maxParticipants || '-' }} / {{ item.enrollmentCount || 0 }} /
+                            {{ item.maxParticipants - item.enrollmentCount || 0 }} คน
+                          </span>
+                        </div>
+
+                        <!-- ห้อง -->
+                        <div class="label-pair">
+                          <span class="label-title">ห้อง :</span>
+                          <span class="label-value">{{ item.rooms?.join(', ') || '-' }}</span>
+                        </div>
+
+                        <!-- วันที่ -->
+                        <div class="label-pair" v-if="item.dates && item.dates.length > 0">
+                          <span class="label-title">วันที่ :</span>
+                          <span class="label-value">
+                            <span v-for="(date, dateIndex) in item.dates" :key="dateIndex">
+                              {{ formatDateToThai(date.date) }} ({{ date.stime }}-{{
+                                date.etime
+                              }})<span v-if="dateIndex < item.dates.length - 1">, </span>
+                            </span>
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div v-else class="text-grey-6">ไม่มีข้อมูลกิจกรรมย่อย</div>
+                </div>
               </q-td>
             </q-tr>
           </template>
@@ -931,8 +1002,16 @@ watchEffect(() => {
 
           <!-- เนื้อหาตาราง -->
           <template v-slot:body="props">
-            <q-tr :props="props">
-              <q-td key="no">{{ props.rowIndex + 1 }}</q-td>
+            <q-tr :props="props"   @click="toggleRowExpansion3(props.row.id)" class="cursor-pointer">
+              <q-td key="no">
+                <div class="row items-center no-wrap">
+                  <q-icon
+                    :name="expandedRows3.has(props.row.id) ? 'expand_less' : 'expand_more'"
+                    class="q-mr-sm"
+                  />
+                  {{ props.rowIndex + 1 }}
+                </div>
+              </q-td>
               <q-td key="name">
                 <div class="ellipsis">
                   {{ truncateText(props.row.name) }}
@@ -957,12 +1036,75 @@ watchEffect(() => {
               </q-td>
 
               <q-td key="action" class="text-left q-gutter-x-sm">
-                <q-icon clickable name="edit" @click="goToPageDetail(props.row.id, false)" class="bg-primary text-white q-pa-xs rounded-borders q-mr-sm">
+                <q-icon
+                  clickable
+                  name="edit"
+                  @click="goToPageDetail(props.row.id, false)"
+                  class="bg-primary text-white q-pa-xs rounded-borders q-mr-sm"
+                >
                   <q-tooltip>แก้ไข</q-tooltip>
                 </q-icon>
-                <q-icon clickable name="visibility" @click="goToPageDetail(props.row.id, true)" class="bg-black text-white q-pa-xs rounded-borders q-mr-sm">
+                <q-icon
+                  clickable
+                  name="visibility"
+                  @click="goToPageDetail(props.row.id, true)"
+                  class="bg-black text-white q-pa-xs rounded-borders q-mr-sm"
+                >
                   <q-tooltip>ดูรายละเอียด</q-tooltip>
                 </q-icon>
+              </q-td>
+            </q-tr>
+            <q-tr v-if="expandedRows3.has(props.row.id)" class="expanded-row">
+              <q-td colspan="9" class="expanded-content">
+                <div class="q-pa-sm">
+                  <div class="text-subtitle2 q-mb-sm">รายละเอียดกิจกรรมย่อย</div>
+
+                  <div v-if="props.row.activityItems && props.row.activityItems.length > 0">
+                    <div
+                      v-for="(item, index) in props.row.activityItems"
+                      :key="index"
+                      class="q-mb-sm q-pa-xs"
+                      style="border: 1px solid #e0e0e0; border-radius: 4px"
+                    >
+                      <div class="row text-body2 items-start no-wrap">
+                        <!-- ชื่อกิจกรรม -->
+                        <div class="label-pair">
+                          <span class="label-title">ชื่อกิจกรรม :</span>
+                          <span class="label-value">{{ item.name || '-' }}</span>
+                        </div>
+
+                        <!-- จำนวน -->
+                        <div class="label-pair">
+                          <span class="label-title">จำนวนที่รับ/ลงทะเบียน/เหลือ :</span>
+                          <span class="label-value">
+                            {{ item.maxParticipants || '-' }} / {{ item.enrollmentCount || 0 }} /
+                            {{ item.maxParticipants - item.enrollmentCount || 0 }} คน
+                          </span>
+                        </div>
+
+                        <!-- ห้อง -->
+                        <div class="label-pair">
+                          <span class="label-title">ห้อง :</span>
+                          <span class="label-value">{{ item.rooms?.join(', ') || '-' }}</span>
+                        </div>
+
+                        <!-- วันที่ -->
+                        <div class="label-pair" v-if="item.dates && item.dates.length > 0">
+                          <span class="label-title">วันที่ :</span>
+                          <span class="label-value">
+                            <span v-for="(date, dateIndex) in item.dates" :key="dateIndex">
+                              {{ formatDateToThai(date.date) }} ({{ date.stime }}-{{
+                                date.etime
+                              }})<span v-if="dateIndex < item.dates.length - 1">, </span>
+                            </span>
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div v-else class="text-grey-6">ไม่มีข้อมูลกิจกรรมย่อย</div>
+                </div>
               </q-td>
             </q-tr>
           </template>
@@ -1028,8 +1170,16 @@ watchEffect(() => {
           </template>
           <!-- เนื้อหาตาราง -->
           <template v-slot:body="props">
-            <q-tr :props="props">
-              <q-td key="no" class="text-left">{{ props.rowIndex + 1 }}</q-td>
+            <q-tr :props="props"  @click="toggleRowExpansion4(props.row.id)" class="cursor-pointer">
+              <q-td key="no" >
+                <div class="row items-center no-wrap">
+                  <q-icon
+                    :name="expandedRows4.has(props.row.id) ? 'expand_less' : 'expand_more'"
+                    class="q-mr-sm"
+                  />
+                  {{ props.rowIndex + 1 }}
+                </div>
+              </q-td>
               <q-td key="name">
                 <div class="ellipsis">
                   {{ truncateText(props.row.name) }}
@@ -1073,6 +1223,59 @@ watchEffect(() => {
                 >
                   <q-tooltip>ลบ</q-tooltip>
                 </q-icon>
+              </q-td>
+            </q-tr>
+            <q-tr v-if="expandedRows4.has(props.row.id)" class="expanded-row">
+              <q-td colspan="9" class="expanded-content">
+                <div class="q-pa-sm">
+                  <div class="text-subtitle2 q-mb-sm">รายละเอียดกิจกรรมย่อย</div>
+
+                  <div v-if="props.row.activityItems && props.row.activityItems.length > 0">
+                    <div
+                      v-for="(item, index) in props.row.activityItems"
+                      :key="index"
+                      class="q-mb-sm q-pa-xs"
+                      style="border: 1px solid #e0e0e0; border-radius: 4px"
+                    >
+                      <div class="row text-body2 items-start no-wrap">
+                        <!-- ชื่อกิจกรรม -->
+                        <div class="label-pair">
+                          <span class="label-title">ชื่อกิจกรรม :</span>
+                          <span class="label-value">{{ item.name || '-' }}</span>
+                        </div>
+
+                        <!-- จำนวน -->
+                        <div class="label-pair">
+                          <span class="label-title">จำนวนที่รับ/ลงทะเบียน/เหลือ :</span>
+                          <span class="label-value">
+                            {{ item.maxParticipants || '-' }} / {{ item.enrollmentCount || 0 }} /
+                            {{ item.maxParticipants - item.enrollmentCount || 0 }} คน
+                          </span>
+                        </div>
+
+                        <!-- ห้อง -->
+                        <div class="label-pair">
+                          <span class="label-title">ห้อง :</span>
+                          <span class="label-value">{{ item.rooms?.join(', ') || '-' }}</span>
+                        </div>
+
+                        <!-- วันที่ -->
+                        <div class="label-pair" v-if="item.dates && item.dates.length > 0">
+                          <span class="label-title">วันที่ :</span>
+                          <span class="label-value">
+                            <span v-for="(date, dateIndex) in item.dates" :key="dateIndex">
+                              {{ formatDateToThai(date.date) }} ({{ date.stime }}-{{
+                                date.etime
+                              }})<span v-if="dateIndex < item.dates.length - 1">, </span>
+                            </span>
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div v-else class="text-grey-6">ไม่มีข้อมูลกิจกรรมย่อย</div>
+                </div>
               </q-td>
             </q-tr>
           </template>
@@ -1537,6 +1740,24 @@ watchEffect(() => {
 </template>
 
 <style lang="scss" scoped>
+.label-pair {
+  display: flex;
+  align-items: flex-start;
+}
+
+.label-title {
+  font-weight: bold;
+  display: inline-block;
+  text-align: right;
+  margin-right: 8px;
+}
+
+.label-value {
+  display: inline-block;
+  word-break: break-word;
+  min-width: 150px;
+  margin-right: 20px;
+}
 .roundedd {
   border-radius: 8px;
 }

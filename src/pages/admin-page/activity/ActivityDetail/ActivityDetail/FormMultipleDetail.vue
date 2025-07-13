@@ -754,7 +754,7 @@ onMounted(() => {
     <!-- Status -->
     <!-- Status -->
     <div class="input-group no-wrap status-group" ref="formTop">
-      <p class="label label_minWidth">สถานะ:</p>
+      <p class="label label_minWidth">สถานะ :</p>
       <div class="status-inline-group">
         <q-badge :class="statusClass" class="status-btn">
           <div align="center" class="status-text" style="font-size: 20px">{{ activityStatus }}</div>

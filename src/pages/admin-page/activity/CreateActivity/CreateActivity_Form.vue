@@ -316,7 +316,7 @@ onMounted(() => {
   <q-page class="q-pa-md">
     <!-- Status -->
     <div class="input-group no-wrap">
-      <p class="label label_minWidth">สถานะ:</p>
+      <p class="label label_minWidth">สถานะ :</p>
       <q-badge class="status-btn">กำลังวางแผน</q-badge>
     </div>
 
