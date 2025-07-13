@@ -698,13 +698,11 @@ watchEffect(() => {
                 </div>
               </q-td>
               <q-td class="q-gutter-x-sm" key="action">
-                <q-icon clickable name="visibility" @click="goToPageDetail(props.row.id, true)" class="bg-black text-white q-pa-xs rounded-borders q-mr-sm">
-                  <q-tooltip>ดูรายละเอียด</q-tooltip>
-                </q-icon>
-                <q-icon clickable name="edit" @click.stop="goToPageDetail(props.row.id, false)" class="bg-primary text-white q-pa-xs rounded-borders q-mr-sm">
+                
+                <q-icon clickable name="edit" @click.stop="goToPageDetail(props.row.id, false)" class="bg-primary text-white q-pa-xs roundedd q-mr-sm">
                   <q-tooltip>แก้ไข</q-tooltip>
                 </q-icon>
-                <q-icon clickable name="visibility" @click="goToPageDetail(props.row.id, true)" class="bg-black text-white q-pa-xs rounded-borders q-mr-sm">
+                <q-icon clickable name="visibility" @click="goToPageDetail(props.row.id, true)" class="bg-black text-white q-pa-xs roundedd q-mr-sm">
                   <q-tooltip>ดูรายละเอียด</q-tooltip>
                 </q-icon>
                 
@@ -860,13 +858,10 @@ watchEffect(() => {
               </q-td>
 
               <q-td key="action" class="text-left q-gutter-x-sm">
-                <q-icon clickable name="visibility" @click="goToPageDetail(props.row.id, true)" class="bg-black text-white q-pa-xs rounded-borders q-mr-sm">
-                  <q-tooltip>ดูรายละเอียด</q-tooltip>
-                </q-icon>
-                <q-icon clickable name="edit" @click="goToPageDetail(props.row.id, false)" class="bg-primary text-white q-pa-xs rounded-borders q-mr-sm">
+                <q-icon clickable name="edit" @click="goToPageDetail(props.row.id, false)" class="bg-primary text-white q-pa-xs roundd q-mr-sm">
                   <q-tooltip>แก้ไข</q-tooltip>
                 </q-icon>
-                <q-icon clickable name="visibility" @click="goToPageDetail(props.row.id, true)" class="bg-black text-white q-pa-xs rounded-borders q-mr-sm">
+                <q-icon clickable name="visibility" @click="goToPageDetail(props.row.id, true)" class="bg-black text-white q-pa-xs roundd q-mr-sm">
                   <q-tooltip>ดูรายละเอียด</q-tooltip>
                 </q-icon>
                
@@ -962,17 +957,12 @@ watchEffect(() => {
               </q-td>
 
               <q-td key="action" class="text-left q-gutter-x-sm">
-                <q-icon clickable name="visibility" @click="goToPageDetail(props.row.id, true)" class="bg-black text-white q-pa-xs rounded-borders q-mr-sm">
-                  <q-tooltip>ดูรายละเอียด</q-tooltip>
-                </q-icon>
                 <q-icon clickable name="edit" @click="goToPageDetail(props.row.id, false)" class="bg-primary text-white q-pa-xs rounded-borders q-mr-sm">
                   <q-tooltip>แก้ไข</q-tooltip>
                 </q-icon>
                 <q-icon clickable name="visibility" @click="goToPageDetail(props.row.id, true)" class="bg-black text-white q-pa-xs rounded-borders q-mr-sm">
                   <q-tooltip>ดูรายละเอียด</q-tooltip>
                 </q-icon>
-                
-               
               </q-td>
             </q-tr>
           </template>
@@ -1547,6 +1537,9 @@ watchEffect(() => {
 </template>
 
 <style lang="scss" scoped>
+.roundedd {
+  border-radius: 8px;
+}
 .ellipsis {
   white-space: nowrap;
   text-overflow: ellipsis;
@@ -1608,44 +1601,6 @@ watchEffect(() => {
 .my-sticky-header-table .q-icon {
   color: #d0d0d0;
 }
-.status-close {
-  background-color: #cfd7ff;
-  color: #001780;
-  border: px solid #002dff;
-  width: 130px;
-}
-
-.status-open {
-  background-color: #d0ffc5;
-  color: #009812;
-  border: 1px solid #00bb16;
-  width: 130px;
-}
-
-.status-planning {
-  background-color: #ffe7ba;
-  color: #ff6f00;
-  border: 1px solid #ffa500;
-
-  width: 130px;
-}
-
-.status-cancel {
-  background-color: #ffc5c5;
-  color: #ff0000;
-  border: 1px solid #f32323;
-
-  width: 130px;
-}
-
-.status-success {
-  background-color: #dadada;
-  color: #000000;
-  /* สีม่วง */
-  border: 1px solid #575656;
-
-  width: 130px;
-}
 
 .status-badge {
   height: 32px;
@@ -1660,13 +1615,6 @@ watchEffect(() => {
   white-space: nowrap;
 }
 
-.btnadd {
-  background-color: #162aae;
-  color: white;
-  border: none;
-  font-weight: bold;
-  font-size: medium;
-}
 .searchbox {
   margin-right: 5px;
 }
@@ -1695,13 +1643,13 @@ watchEffect(() => {
 }
 
 @media (max-width: 450px) {
-  .btnadd {
-    width: 120px !important;
-    min-width: 120px !important;
-    max-width: 120px !important;
-    flex: 0 0 120px !important; /* ป้องกัน flex บีบหรือขยาย */
-    padding: 0 !important;
-  }
+  // .btnadd {
+  //   width: 120px !important;
+  //   min-width: 120px !important;
+  //   max-width: 120px !important;
+  //   flex: 0 0 120px !important; /* ป้องกัน flex บีบหรือขยาย */
+  //   padding: 0 !important;
+  // }
   .texttitle {
     font-size: 28px;
     font-weight: 400;

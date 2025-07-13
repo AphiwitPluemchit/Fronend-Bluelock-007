@@ -114,21 +114,18 @@ $dark-page: #121212;
   width: 350px;
   height: 40px;
   border-radius: 15px; /* ทำให้ขอบโค้งมน */
-  border: 1px solid #000000; /* สีขอบ */
   background-color: white;
   transition: border-color 0.3s ease-in-out;
   box-shadow: none;
 }
 
 .searchbox .q-field__control {
-  border: 1px solid #000 !important;
-  border-radius: 15px !important;
+  border-radius: 8px !important;
 }
 /* ปรับขอบของกล่องตอน hover */
 .searchbox .q-field__control:hover {
-  border: 1px solid #000 !important;
   background-color: #f0f0f0;
-  border-radius: 15px;
+  border-radius: 8px;
   box-shadow: none;
 }
 
@@ -208,7 +205,7 @@ $dark-page: #121212;
   background-color: #ffffff;
   height: 40px;
   width: 50px;
-  border-radius: 15px;
+  border-radius: 8px;
   border: 1px solid #000000; /* สีขอบ */
 }
 .btnfilter:hover {
@@ -287,6 +284,40 @@ $dark-page: #121212;
     background: transparent !important;
     pointer-events: none !important; /* ✅ สำคัญมาก */
   }
+}
+
+
+
+//สีสถานะกิจกรรม
+.status-open {
+  background-color: #d0ffc5;
+  color: #009812;
+  border: 1px solid #00bb16;
+  width: 130px;
+}
+.status-close {
+  background-color: #cfd7ff;
+  color: #001780;
+  border: px solid #002dff;
+  width: 130px;
+}
+.status-planning {
+  background-color: #ffe7ba;
+  color: #ff6f00;
+  border: 1px solid #ffa500;
+  width: 130px;
+}
+.status-cancel {
+  background-color: #ffc5c5;
+  color: #ff0000;
+  border: 1px solid #f32323;
+  width: 130px;
+}
+.status-success {
+  background-color: #dadada;
+  color: #000000;
+  border: 1px solid #575656;
+  width: 130px;
 }
 
 // นำเข้าฟอนต์
