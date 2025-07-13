@@ -126,8 +126,8 @@ function toggleFilter(category: keyof typeof tempFilters.value, value: string) {
 </script>
 
 <template>
-  <q-btn class="btnfilter" :style="{ border: '1px solid #ccc' }">
-    <q-icon name="filter_list_alt"></q-icon>
+  <q-btn class="btnfilter"  :style="{ border: '1px solid #ccc' }">
+   <q-icon name="filter_list_alt"></q-icon>
     <q-menu
       v-model="showFilterDialog"
       :transition-show="'jump-down'"

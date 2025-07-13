@@ -698,11 +698,11 @@ watchEffect(() => {
                 </div>
               </q-td>
               <q-td class="q-gutter-x-sm" key="action">
-                
-                <q-icon clickable name="edit" @click.stop="goToPageDetail(props.row.id, false)" class="bg-primary text-white q-pa-xs roundedd q-mr-sm">
+
+                <q-icon clickable name="edit" @click.stop="goToPageDetail(props.row.id, false)" class="bg-primary text-white q-pa-xs rounded-borders q-mr-sm">
                   <q-tooltip>แก้ไข</q-tooltip>
                 </q-icon>
-                <q-icon clickable name="visibility" @click="goToPageDetail(props.row.id, true)" class="bg-black text-white q-pa-xs roundedd q-mr-sm">
+                <q-icon clickable name="visibility" @click="goToPageDetail(props.row.id, true)" class="bg-black text-white q-pa-xs rounded-borders q-mr-sm">
                   <q-tooltip>ดูรายละเอียด</q-tooltip>
                 </q-icon>
                 
@@ -858,13 +858,13 @@ watchEffect(() => {
               </q-td>
 
               <q-td key="action" class="text-left q-gutter-x-sm">
-                <q-icon clickable name="edit" @click="goToPageDetail(props.row.id, false)" class="bg-primary text-white q-pa-xs roundd q-mr-sm">
+                <q-icon clickable name="edit" @click="goToPageDetail(props.row.id, false)" class="bg-primary text-white q-pa-xs rounded-borders q-mr-sm">
                   <q-tooltip>แก้ไข</q-tooltip>
                 </q-icon>
-                <q-icon clickable name="visibility" @click="goToPageDetail(props.row.id, true)" class="bg-black text-white q-pa-xs roundd q-mr-sm">
+                <q-icon clickable name="visibility" @click="goToPageDetail(props.row.id, true)" class="bg-black text-white q-pa-xs rounded-borders q-mr-sm">
                   <q-tooltip>ดูรายละเอียด</q-tooltip>
                 </q-icon>
-               
+        
               </q-td>
             </q-tr>
           </template>
