@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, onMounted, ref, watch } from 'vue'
+import { onMounted, ref, watch } from 'vue'
 import { today } from '@quasar/quasar-ui-qcalendar'
 import '@quasar/quasar-ui-qcalendar/dist/index.css'
 import { QCalendarMonth } from '@quasar/quasar-ui-qcalendar'
@@ -8,80 +8,14 @@ import type { Pagination } from 'src/types/pagination'
 import { ActivityService } from 'src/services/activity'
 import FilterDialog from 'src/components/Dialog/FilterDialog.vue'
 import type { CalendarEvent } from 'src/types/calendar'
+import CalendarMonthYearSelector from './CalendarComponents/CalendarMonthYearSelector.vue'
+import CalendarEventPanel from './CalendarComponents/CalendarEventPanel.vue'
 
 const activitys1 = ref<Activity[]>([])
 const showFilterDialog1 = ref(false)
 const filterCategories = ref(['year', 'major', 'statusActivity', 'categoryActivity'])
 const searchBoxFocused = ref<boolean>(false)
 const calendarRef = ref()
-
-const thaiMonths = [
-  'มกราคม',
-  'กุมภาพันธ์',
-  'มีนาคม',
-  'เมษายน',
-  'พฤษภาคม',
-  'มิถุนายน',
-  'กรกฎาคม',
-  'สิงหาคม',
-  'กันยายน',
-  'ตุลาคม',
-  'พฤศจิกายน',
-  'ธันวาคม',
-]
-
-const monthPopup = ref(false)
-const yearPopup = ref(false)
-const yearRangeStart = ref(new Date().getFullYear() - 10)
-const thaiYears = computed(() =>
-  Array.from({ length: 20 }, (_, i) => yearRangeStart.value + i + 543),
-)
-
-function setMonth(monthIndex: number) {
-  const d = new Date(selectedDate.value)
-  d.setMonth(monthIndex)
-  selectedDate.value = d.toISOString().slice(0, 10)
-  monthPopup.value = false
-}
-
-function setYear(gregorianYear: number) {
-  const d = new Date(selectedDate.value)
-  d.setFullYear(gregorianYear)
-  selectedDate.value = d.toISOString().slice(0, 10)
-  yearPopup.value = false
-}
-
-function decreaseYearPage() {
-  yearRangeStart.value -= 20
-}
-
-function increaseYearPage() {
-  yearRangeStart.value += 20
-}
-
-function goPrevMonth() {
-  const current = new Date(selectedDate.value)
-  current.setMonth(current.getMonth() - 1)
-  selectedDate.value = current.toISOString().slice(0, 10)
-}
-
-function goNextMonth() {
-  const current = new Date(selectedDate.value)
-  current.setMonth(current.getMonth() + 1)
-  selectedDate.value = current.toISOString().slice(0, 10)
-}
-
-function goPrevYear() {
-  const current = new Date(selectedDate.value)
-  current.setFullYear(current.getFullYear() - 1)
-  selectedDate.value = current.toISOString().slice(0, 10)
-}
-
-function goNextYear() {
-  const current = new Date(selectedDate.value)
-  current.setFullYear(current.getFullYear() + 1)
-  selectedDate.value = current.toISOString().slice(0, 10)
-}
 
 const query1 = ref<Pagination>({
   page: 1,
@@ -109,6 +43,16 @@ const pagination1 = ref({
   rowsPerPage: query1.value.limit,
   rowsNumber: 0,
 })
+
+function sortEventsByTimeAndName(events: CalendarEvent[]): CalendarEvent[] {
+  return [...events].sort((a, b) => {
+    const timeA = a.time?.split(' - ')[0] ?? ''
+    const timeB = b.time?.split(' - ')[0] ?? ''
+    return timeA === timeB
+      ? a.activityName.toLowerCase().localeCompare(b.activityName.toLowerCase())
+      : timeA.localeCompare(timeB)
+  })
+}
 
 async function getActivityData(qeury: Pagination) {
   const data = await ActivityService.getAll(qeury)
@@ -198,15 +142,12 @@ watch(
       ;(grouped[e.date] ??= []).push(e)
     })
 
-    // sort time + alphabet
+    // sort time + name
     for (const date in grouped) {
-      grouped[date]!.sort((a, b) => {
-        const timeA = a.time?.split(' - ')[0] ?? ''
-        const timeB = b.time?.split(' - ')[0] ?? ''
-        return timeA === timeB
-          ? a.activityName.toLowerCase().localeCompare(b.activityName.toLowerCase())
-          : timeA.localeCompare(timeB)
-      })
+      const events = grouped[date]
+      if (events) {
+        grouped[date] = sortEventsByTimeAndName(events)
+      }
     }
 
     groupedSearchResults.value = grouped
@@ -231,35 +172,13 @@ function onEventStackClick(date: string) {
 // for panel ด้านขวา และเรียงลำดับตามเวลาเริ่มต้น
 function getEvents(date: string) {
   const events = calendarEvents.value.filter((e) => e.date === date)
-  console.log('getEvents:', date, events)
-  return calendarEvents.value
-    .filter((e) => e.date === date)
-    .sort((a, b) => {
-      const timeA = a.time?.split(' - ')[0] ?? ''
-      const timeB = b.time?.split(' - ')[0] ?? ''
-
-      // ถ้าเวลาเริ่มเท่ากัน ให้เรียงตามตัวอักษรของชื่อกิจกรรมย่อย (ไม่สนพิมพ์เล็ก-ใหญ่)
-      if (timeA === timeB) {
-        return a.activityName.toLowerCase().localeCompare(b.activityName.toLowerCase())
-      }
-      return timeA.localeCompare(timeB)
-    })
+  return sortEventsByTimeAndName(events)
 }
 
 // for event stack ในแต่ละช่องของ QCalendar
 function getEventsForDay(date: string) {
-  return calendarEvents.value
-    .filter((e) => e.date === date)
-    .sort((a, b) => {
-      const timeA = a.time?.split(' - ')[0] ?? ''
-      const timeB = b.time?.split(' - ')[0] ?? ''
-
-      if (timeA === timeB) {
-        return a.activityName.toLowerCase().localeCompare(b.activityName.toLowerCase())
-      }
-      return timeA.localeCompare(timeB)
-    })
-    .map((e) => ({ size: 1, event: e }))
+  const events = calendarEvents.value.filter((e) => e.date === date)
+  return sortEventsByTimeAndName(events).map((e) => ({ size: 1, event: e }))
 }
 
 function activityStatusLabel(status: string): string {
@@ -288,37 +207,9 @@ const getStatusClass = (status: string) => {
   return ''
 }
 
-// สี ของ card activity
-function getStatusColor(status: string): string {
-  switch (status) {
-    case 'กำลังวางแผน':
-      return '#ffa500'
-    case 'เปิดลงทะเบียน':
-      return '#00bb16'
-    case 'ปิดลงทะเบียน':
-      return '#002dff'
-    case 'ยกเลิก':
-      return '#f32323'
-    case 'เสร็จสิ้น':
-      return '#575656'
-    default:
-      return '#e0e0e0'
-  }
-}
-
 function badgeClasses(d: { event: CalendarEvent }) {
   console.log('badgeClasses status:', d.event.activityState)
   return ['my-event', getStatusClass(d.event.activityState)]
-}
-
-function formatThaiDate(dateStr: string) {
-  const d = new Date(dateStr)
-  return d.toLocaleDateString('th-TH', {
-    weekday: 'long',
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric',
-  })
 }
 
 function parseToCalendarEvents(activities: Activity[]): CalendarEvent[] {
@@ -417,66 +308,12 @@ watch(selectedDate, (val) => {
     <div class="row items-center justify-between q-mb-md">
       <!-- ⬅ อยู่ฝั่ง col-8 แต่จัดด้านซ้าย -->
       <div class="row items-center no-wrap">
-        <!-- <q-btn flat dense icon="chevron_left" @click="calendarRef?.prev()" />
-        <q-btn flat dense icon="chevron_right" @click="calendarRef?.next()" />
-        <div class="text-h5 q-mx-md">{{ currentMonthDisplay }}</div> -->
-
         <div class="row items-center no-wrap">
-          <!-- ปุ่ม prev month -->
-          <q-btn flat dense icon="chevron_left" @click="goPrevMonth" />
-
-          <q-btn dense flat @click="monthPopup = true" class="q-mx-xs">
-            {{ thaiMonths[new Date(selectedDate).getMonth()] }}
-          </q-btn>
-          <!-- ปุ่ม next month -->
-          <q-btn flat dense icon="chevron_right" @click="goNextMonth" />
-
-          <q-btn flat dense icon="chevron_left" @click="goPrevYear" />
-          <q-btn dense flat @click="yearPopup = true">
-            {{ new Date(selectedDate).getFullYear() + 543 }}
-          </q-btn>
-          <q-btn flat dense icon="chevron_right" @click="goNextYear" />
-
-          <!-- POPUP เลือกเดือน -->
-          <q-dialog v-model="monthPopup">
-            <q-card>
-              <q-card-section>
-                <div class="row q-gutter-sm justify-center">
-                  <q-btn
-                    v-for="(month, i) in thaiMonths"
-                    :key="i"
-                    flat
-                    :label="month"
-                    @click="setMonth(i)"
-                  />
-                </div>
-              </q-card-section>
-            </q-card>
-          </q-dialog>
-
-          <!-- POPUP เลือกปี -->
-          <q-dialog v-model="yearPopup">
-            <q-card>
-              <q-card-section>
-                <div class="row justify-center">
-                  <q-btn flat icon="chevron_left" @click="decreaseYearPage" />
-                  <div class="text-h6 q-mx-md">
-                    {{ yearRangeStart + 543 }} - {{ yearRangeStart + 19 + 543 }}
-                  </div>
-                  <q-btn flat icon="chevron_right" @click="increaseYearPage" />
-                </div>
-                <div class="row q-gutter-sm justify-center q-mt-md">
-                  <q-btn
-                    v-for="year in thaiYears"
-                    :key="year"
-                    flat
-                    :label="year.toString()"
-                    @click="setYear(year - 543)"
-                  />
-                </div>
-              </q-card-section>
-            </q-card>
-          </q-dialog>
+          <!-- select Date -->
+          <CalendarMonthYearSelector
+            :selected-date="selectedDate"
+            @update:selected-date="selectedDate = $event"
+          />
         </div>
       </div>
 
@@ -554,78 +391,13 @@ watch(selectedDate, (val) => {
 
       <!-- panel แสดงรายละเอียดกิจกรรม -->
       <div class="col-4">
-        <div class="event-panel">
-          <!-- กรณีมี search -->
-          <div v-if="query1.search">
-            <template v-if="groupedSearchResults && Object.keys(groupedSearchResults).length > 0">
-              <div
-                v-for="date in Object.keys(groupedSearchResults).sort()"
-                :key="date"
-                class="q-mb-xl"
-              >
-                <!-- วันที่ -->
-                <div class="text-h6 q-mb-sm">{{ formatThaiDate(date) }}</div>
-
-                <!-- การ์ดกิจกรรม -->
-                <div v-for="event in groupedSearchResults[date]" :key="event.id" class="q-mb-sm">
-                  <q-card
-                    flat
-                    bordered
-                    class="q-pa-md q-mb-sm clickable-card"
-                    :style="`border-left: 5px solid ${getStatusColor(event.activityState)}`"
-                    @click="goToDate(event.date)"
-                  >
-                    <div class="event-header-row">
-                      <div class="event-title">{{ event.activityName }}</div>
-                      <div class="event-category">
-                        {{ event.category === 'soft' ? 'Soft Skill' : 'Hard Skill' }}
-                      </div>
-                    </div>
-                    <div class="q-mt-xs">{{ event.activityItemName }}</div>
-                    <div class="q-mt-xs">{{ event.time }}</div>
-                    <div>จำนวนลงทะเบียน : {{ event.participants }}</div>
-                    <div>สถานที่ : {{ event.location }}</div>
-                  </q-card>
-                </div>
-              </div>
-            </template>
-
-            <!-- กรณีไม่มีผลลัพธ์ -->
-            <div v-else class="text-grey">ไม่พบกิจกรรมที่ตรงกับคำค้นหา</div>
-          </div>
-
-          <!-- แสดง selectedDate (ไม่ได้ค้นหา) -->
-          <div v-else>
-            <div class="text-h6 q-mb-sm">{{ formatThaiDate(selectedDate) }}</div>
-
-            <template v-if="selectedEvents.length">
-              <div v-for="event in selectedEvents" :key="event.id" class="q-mb-sm">
-                <q-card
-                  flat
-                  bordered
-                  class="q-pa-md q-mb-sm"
-                  :style="`border-left: 5px solid ${getStatusColor(event.activityState)}`"
-                >
-                  <div class="event-header-row">
-                    <div class="event-title">
-                      {{ event.activityName }}
-                    </div>
-
-                    <div class="event-category">
-                      {{ event.category === 'soft' ? 'Soft Skill' : 'Hard Skill' }}
-                    </div>
-                  </div>
-                  <div class="q-mt-xs">{{ event.activityItemName }}</div>
-                  <div class="q-mt-xs">{{ event.time }}</div>
-                  <div>จำนวนลงทะเบียน : {{ event.participants }}</div>
-                  <div>สถานที่ : {{ event.location }}</div>
-                </q-card>
-              </div>
-            </template>
-
-            <div v-else class="text-grey">ไม่มีข้อมูลกิจกรรมในวันนี้</div>
-          </div>
-        </div>
+        <CalendarEventPanel
+          :selected-date="selectedDate"
+          :selected-events="selectedEvents"
+          :search-query="query1.search"
+          :grouped-search-results="groupedSearchResults"
+          @go-to-date="goToDate"
+        />
       </div>
     </div>
   </q-page>
@@ -652,30 +424,6 @@ watch(selectedDate, (val) => {
   text-overflow: ellipsis;
   border-radius: 6px;
   cursor: pointer;
-}
-
-.event-header-row {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  flex-wrap: wrap; /* ทำให้ขึ้นบรรทัดใหม่ */
-  gap: 4px;
-}
-
-.event-title {
-  font-weight: bold;
-  font-size: 16px;
-  word-break: break-word; /* บังคับขึ้นบรรทัด */
-  flex-grow: 1;
-  min-width: 0;
-  max-width: calc(100% - 100px); /* ป้องกันชนกับหมวดด้านขวา */
-}
-
-.event-category {
-  font-size: 16px;
-  color: #666;
-  white-space: nowrap;
-  flex-shrink: 0;
 }
 
 .day-cell {
@@ -720,18 +468,6 @@ watch(selectedDate, (val) => {
   color: white;
 }
 
-.event-panel {
-  max-height: 650px;
-  overflow-y: scroll;
-  padding-right: 8px;
-  scrollbar-width: none; /* สำหรับ Firefox */
-}
-
-/* สำหรับ Chrome, Edge, Safari */
-.event-panel::-webkit-scrollbar {
-  display: none;
-}
-
 .status-close {
   background-color: #cfd7ff;
   color: #001780;
@@ -766,12 +502,5 @@ watch(selectedDate, (val) => {
 .q-card {
   border-radius: 12px;
   background-color: #fff;
-}
-
-.clickable-card {
-  cursor: pointer;
-  transition:
-    transform 0.2s ease,
-    box-shadow 0.2s ease;
 }
 </style>
