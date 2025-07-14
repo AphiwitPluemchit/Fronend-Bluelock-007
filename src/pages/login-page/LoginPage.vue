@@ -42,8 +42,7 @@
                 outlined
                 dense
                 class="q-mb-md login-input"
-                :rules="[val => !!val || 'กรุณากรอกอีเมล']"
-                placeholder="65160289@go.buu.ac.th"
+                :rules="[val => !!val ]"
               >
                 <template v-slot:prepend>
                   <q-icon name="email" color="primary" />
@@ -58,8 +57,7 @@
                 outlined
                 dense
                 class="q-mb-lg login-input"
-                :rules="[val => !!val || 'กรุณากรอกรหัสผ่าน']"
-                placeholder="••••••"
+                :rules="[val => !!val ]"
               >
                 <template v-slot:prepend>
                   <q-icon name="lock" color="primary" />
@@ -123,7 +121,6 @@
               outlined
               dense
               class="q-mb-md login-input"
-              placeholder="00000000@go.buu.ac.th"
             >
               <template v-slot:prepend>
                 <q-icon name="email" color="primary" />
@@ -138,8 +135,7 @@
               outlined
               dense
               class="q-mb-lg login-input"
-              :rules="[val => !!val || 'กรุณากรอกรหัสผ่าน']"
-              placeholder="••••••"
+              :rules="[val => !!val ]"
             >
               <template v-slot:prepend>
                 <q-icon name="lock" color="primary" />
