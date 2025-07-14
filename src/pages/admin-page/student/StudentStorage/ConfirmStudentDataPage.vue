@@ -4,10 +4,10 @@ import { useStudentStore } from 'src/stores/student'
 import AppBreadcrumbs from 'src/components/AppBreadcrumbs.vue'
 
 const breadcrumbs = ref({
-  previousPage: { title: 'จัดเก็บข้อมูลนิสิต', path: '/Admin/StudentStorePage' },
+  previousPage: { title: 'จัดเก็บข้อมูลนิสิต', path: '/Admin/StudentStorage' },
   currentPage: {
     title: 'ยืนยันการจัดเก็บข้อมูลนิสิต',
-    path: '/Admin/StudentStorePage/ConfirmStudentDataPage',
+    path: '/Admin/StudentStorage/ConfirmStudentDataPage',
   },
   icon: 'people',
 })
