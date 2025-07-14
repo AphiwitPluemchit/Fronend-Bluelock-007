@@ -301,7 +301,7 @@ watch(selectedDate, (val) => {
 <template>
   <q-page class="q-pa-md">
     <div class="row justify-between items-center q-mb-md" style="margin-top: 20px">
-      <div class="text-h4 q-mb-md">ตารางกิจกรรม</div>
+      <div class="texttitle" style="margin-bottom: 20px">ตารางกิจกรรม</div>
     </div>
 
     <!-- แถวรวมซ้าย: เดือน + ปุ่ม , ขวา: ช่องค้นหา + ฟิลเตอร์ -->
@@ -471,36 +471,31 @@ watch(selectedDate, (val) => {
 .status-close {
   background-color: #cfd7ff;
   color: #001780;
-  border: 2px solid #002dff;
+  border: 1px solid #002dff;
 }
 
 .status-open {
   background-color: #d0ffc5;
   color: #009812;
-  border: 2px solid #00bb16;
+  border: 1px solid #00bb16;
 }
 
 .status-planning {
   background-color: #ffe7ba;
   color: #ff6f00;
-  border: 2px solid #ffa500;
+  border: 1px solid #ffa500;
 }
 
 .status-cancel {
   background-color: #ffc5c5;
   color: #ff0000;
-  border: 2px solid #f32323;
+  border: 1px solid #f32323;
 }
 
 .status-success {
   background-color: #dadada;
   color: #000000;
   /* สีม่วง */
-  border: 2px solid #575656;
-}
-
-.q-card {
-  border-radius: 12px;
-  background-color: #fff;
+  border: 1px solid #575656;
 }
 </style>

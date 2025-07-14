@@ -81,19 +81,79 @@ function increaseYearPage() {
 
 <template>
   <div class="row items-center no-wrap">
-    <q-btn flat dense icon="chevron_left" @click="goPrevMonth" />
-    <q-btn dense flat @click="monthPopup = true" class="q-mx-xs">
-      {{ thaiMonths[new Date(selectedDate).getMonth()] }}
-    </q-btn>
-    <q-btn flat dense icon="chevron_right" @click="goNextMonth" />
-
-    <q-btn flat dense icon="chevron_left" @click="goPrevYear" />
-    <q-btn dense flat @click="yearPopup = true">
-      {{ new Date(selectedDate).getFullYear() + 543 }}
-    </q-btn>
-    <q-btn flat dense icon="chevron_right" @click="goNextYear" />
-
     <!-- เดือน -->
+    <div class="row items-center no-wrap q-mr-md">
+      <q-btn
+        flat
+        dense
+        icon="chevron_left"
+        @click="goPrevMonth"
+        class="bg-white text-black"
+        style="width: 40px; height: 40px; border: 1px solid #d1d5db; border-radius: 8px"
+      />
+
+      <!-- style Month -->
+      <div
+        class="q-mx-sm text-h6 text-weight-medium hover-grey"
+        style="
+          min-width: 125px;
+          text-align: center;
+          cursor: pointer;
+          padding: 6px 12px;
+          border-radius: 8px;
+        "
+        @click="monthPopup = true"
+      >
+        {{ thaiMonths[new Date(selectedDate).getMonth()] }}
+      </div>
+
+      <q-btn
+        flat
+        dense
+        icon="chevron_right"
+        @click="goNextMonth"
+        class="bg-white text-black"
+        style="width: 40px; height: 40px; border: 1px solid #d1d5db; border-radius: 8px"
+      />
+    </div>
+
+    <!-- ปี -->
+    <div class="row items-center no-wrap">
+      <q-btn
+        flat
+        dense
+        icon="chevron_left"
+        @click="goPrevYear"
+        class="bg-white text-black"
+        style="width: 40px; height: 40px; border: 1px solid #d1d5db; border-radius: 8px"
+      />
+
+      <!-- style Year -->
+      <div
+        class="q-mx-sm text-h6 text-weight-medium hover-grey"
+        style="
+          min-width: 80px;
+          text-align: center;
+          cursor: pointer;
+          padding: 6px 12px;
+          border-radius: 8px;
+        "
+        @click="yearPopup = true"
+      >
+        {{ new Date(selectedDate).getFullYear() + 543 }}
+      </div>
+
+      <q-btn
+        flat
+        dense
+        icon="chevron_right"
+        @click="goNextYear"
+        class="bg-white text-black"
+        style="width: 40px; height: 40px; border: 1px solid #d1d5db; border-radius: 8px"
+      />
+    </div>
+
+    <!-- เดือน Popup -->
     <q-dialog v-model="monthPopup">
       <q-card>
         <q-card-section>
@@ -110,7 +170,7 @@ function increaseYearPage() {
       </q-card>
     </q-dialog>
 
-    <!-- ปี -->
+    <!-- ปี Popup -->
     <q-dialog v-model="yearPopup">
       <q-card>
         <q-card-section>
@@ -135,3 +195,10 @@ function increaseYearPage() {
     </q-dialog>
   </div>
 </template>
+
+<style scoped>
+.hover-grey:hover {
+  background-color: #eee;
+  transition: background-color 0.2s ease;
+}
+</style>
