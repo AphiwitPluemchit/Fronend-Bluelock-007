@@ -93,14 +93,25 @@ export class StudentService {
   }
 
   static async getSummaryByCode(code: string) {
-  try {
-    const res = await api.get(`${this.path}/sammary/${code}`)
-    return res.data
-  } catch (error) {
-    showError('ไม่สามารถโหลดข้อมูลสรุปนักศึกษาได้')
-    console.error(`Error fetching student summary by code: ${code}`, error)
-    throw error
+    try {
+      const res = await api.get(`${this.path}/sammary/${code}`)
+      return res.data
+    } catch (error) {
+      showError('ไม่สามารถโหลดข้อมูลสรุปนักศึกษาได้')
+      console.error(`Error fetching student summary by code: ${code}`, error)
+      throw error
+    }
   }
-}
 
+  // เพิ่มฟังก์ชันดึงประวัติการอบรมของนิสิตตามรหัส
+  static async getTrainingHistory(code: string) {
+    try {
+      const res = await api.get(`${this.path}/${code}/training-history`)
+      return res.data
+    } catch (error) {
+      showError('ไม่สามารถโหลดประวัติการอบรมได้')
+      console.error(`Error fetching training history for student code: ${code}`, error)
+      throw error
+    }
+  }
 }

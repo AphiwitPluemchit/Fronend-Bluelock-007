@@ -13,7 +13,7 @@ const breadcrumbs = ref({
   previousPage: { title: 'จัดการข้อมูลนิสิต', path: '/Admin/StudentManagement' },
   currentPage: {
     title: 'อัปโหลดข้อมูลนิสิต',
-    path: '/Admin/StudentManagement/UploadStudentDialog',
+    path: '/Admin/StudentManagement/UploadStudent',
   },
   icon: 'cloud_upload',
 })

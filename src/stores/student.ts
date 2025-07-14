@@ -1,7 +1,7 @@
 import { defineStore } from 'pinia'
 import { StudentService } from 'src/services/student'
 import type { Pagination } from 'src/types/pagination'
-import type { ExcelStudentRow, Student } from 'src/types/student'
+import type { ExcelStudentRow, Student, TrainingHistoryItem } from 'src/types/student' // เพิ่ม TrainingHistoryItem ถ้ามี
 import { ref } from 'vue'
 
 export const useStudentStore = defineStore('student', () => {
@@ -20,6 +20,9 @@ export const useStudentStore = defineStore('student', () => {
     hardSkill: 0,
     major: '',
   })
+
+  // เพิ่ม state เก็บประวัติการอบรม
+  const trainingHistory = ref<TrainingHistoryItem[]>([]) // ต้องสร้าง type นี้ใน types/student.ts
 
   // query
   const query = ref<Pagination>({
@@ -45,23 +48,26 @@ export const useStudentStore = defineStore('student', () => {
     const data = await StudentService.getAll(query.value)
     students.value = data.data
     totalStudentsCount.value = data.meta.total
-    console.log(data.data)
+    console.log(data)
   }
 
   // ฟังก์ชันดึงนิสิตตามรหัส
   const getStudentByCode = async (code: string) => {
     const data = await StudentService.getOne(code)
     console.log('API Response:', data)
-    student.value = data.data
-    // student.value.id = data.id
-    // student.value.code = data.code
-    // student.value.name = data.name
-    // student.value.email = data.email
-    // student.value.password = data.password
-    // student.value.status = data.status
-    // student.value.softSkill = data.softSkill
-    // student.value.hardSkill = data.hardSkill
-    // student.value.major = data.major
+    student.value = data
+  }
+
+  // ฟังก์ชันดึงประวัติการอบรมตามรหัสนิสิต (เพิ่ม)
+  const getTrainingHistory = async (code: string) => {
+    try {
+      const data = await StudentService.getTrainingHistory(code)
+      trainingHistory.value = data
+      console.log('Training History:', data)
+    } catch (error) {
+      console.error('Failed to load training history:', error)
+      trainingHistory.value = []
+    }
   }
 
   // ฟังก์ชันอัปเดตนิสิต (รับ argument)
@@ -82,6 +88,7 @@ export const useStudentStore = defineStore('student', () => {
       return false
     }
   }
+
   const getStatusText = (status: number) => {
     switch (status) {
       case 0:
@@ -96,6 +103,7 @@ export const useStudentStore = defineStore('student', () => {
         return 'ไม่ทราบสถานะ'
     }
   }
+
   const getStatusClass = (status: number): string => {
     switch (status) {
       case 0:
@@ -115,6 +123,7 @@ export const useStudentStore = defineStore('student', () => {
     createStudent,
     getStudentByCode,
     getStudents,
+    getTrainingHistory, // เพิ่ม
     getStatusText,
     getStatusClass,
     student,
@@ -122,6 +131,7 @@ export const useStudentStore = defineStore('student', () => {
     students,
     code,
     totalStudentsCount,
+    trainingHistory, // เพิ่ม
     updateStudent,
   }
 })
