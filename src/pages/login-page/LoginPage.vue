@@ -1,96 +1,170 @@
 <template>
-
-
-
   <q-page class="row items-center justify-center login-page">
-    <q-card class="row login-container" style="flex-wrap: wrap;">
-      <!-- ซ้าย: โลโก้ -->
-      <div class="col-6 left-side flex flex-center column q-px-lg q-py-xl hidden-xs hidden-sm hidden-md">
-        <div class="icon-container q-mb-lg">
-          <q-icon name="school" size="120px" color="white" class="graduation-icon" />
+    <q-card class="login-container">
+      <!-- Desktop Layout -->
+      <div class="row no-wrap full-height hidden-xs hidden-sm">
+        <!-- ซ้าย: โลโก้ -->
+        <div class="col-6 left-side flex flex-center column">
+          <div class="logo-section text-center">
+            <div class="icon-container q-mb-md">
+              <q-icon name="school" size="80px" color="white" />
+            </div>
+            <div class="text-h4 text-white q-mb-xs brand-title">
+              Cooperative<br />Education
+            </div>
+            <div class="text-subtitle1 text-white brand-subtitle">
+              ระบบบริหารจัดการสหกิจศึกษา
+            </div>
+          </div>
+          
+          <!-- Decorative circles -->
+          <div class="decorative-circles">
+            <div class="circle circle-1"></div>
+            <div class="circle circle-2"></div>
+            <div class="circle circle-3"></div>
+          </div>
         </div>
-        <div class="text-h4 text-center text-white q-mb-sm brand-title">
-          Cooperative<br />Education
-        </div>
-        <div class="text-h6 text-center text-white q-mb-sm brand-title">
-          ระบบบริหารจัดการสหกิจศึกษา
-        </div>
-        <div class="decorative-circles">
-          <div class="circle circle-1"></div>
-          <div class="circle circle-2"></div>
-          <div class="circle circle-3"></div>
+
+        <!-- ขวา: ฟอร์ม -->
+        <div class="col-6 right-side flex flex-center">
+          <div class="login-form-container">
+            <div class="text-h5 text-primary text-center q-mb-lg login-title">
+              เข้าสู่ระบบ
+            </div>
+            <div class="login-divider q-mb-lg"></div>
+
+            <q-form @submit.prevent="handleLogin">
+              <!-- อีเมล -->
+              <div class="text-body2 text-grey-8 q-mb-xs">ชื่อผู้ใช้</div>
+              <q-input
+                v-model="auth.form.email"
+                type="email"
+                outlined
+                dense
+                class="q-mb-md login-input"
+                :rules="[val => !!val || 'กรุณากรอกอีเมล']"
+                placeholder="65160289@go.buu.ac.th"
+              >
+                <template v-slot:prepend>
+                  <q-icon name="email" color="primary" />
+                </template>
+              </q-input>
+
+              <!-- รหัสผ่าน -->
+              <div class="text-body2 text-grey-8 q-mb-xs">รหัสผ่าน</div>
+              <q-input
+                v-model="auth.form.password"
+                :type="isPwd ? 'password' : 'text'"
+                outlined
+                dense
+                class="q-mb-lg login-input"
+                :rules="[val => !!val || 'กรุณากรอกรหัสผ่าน']"
+                placeholder="••••••"
+              >
+                <template v-slot:prepend>
+                  <q-icon name="lock" color="primary" />
+                </template>
+                <template v-slot:append>
+                  <q-icon
+                    :name="isPwd ? 'visibility_off' : 'visibility'"
+                    class="cursor-pointer text-grey-6"
+                    @click="isPwd = !isPwd"
+                  />
+                </template>
+              </q-input>
+
+              <!-- ปุ่มเข้าสู่ระบบ -->
+              <q-btn
+                label="เข้าสู่ระบบ"
+                type="submit"
+                color="primary"
+                class="full-width login-btn q-mb-md"
+                unelevated
+                no-caps
+              />
+
+              <!-- ลืมรหัสผ่าน -->
+              <div class="text-right">
+                <q-btn
+                  label="ลืมรหัสผ่าน?"
+                  flat
+                  color="primary"
+                  size="sm"
+                  @click="handResetPassword"
+                  class="forgot-password-btn"
+                  no-caps
+                />
+              </div>
+            </q-form>
+          </div>
         </div>
       </div>
 
-      <!-- ขวา: ฟอร์ม -->
-        <div
-          class="right-side flex flex-center q-pa-xl"
-          :class="$q.screen.lt.lg ? 'col-12' : 'col-lg-6'"
-        >
-        <q-card-section class="full-width login-form">
-          <div class="text-h4 text-center text-weight-medium q-mb-lg login-title">
-            เข้าสู่ระบบ
+      <!-- Mobile Layout -->
+      <div class="mobile-layout column items-center justify-center q-pa-lg hidden-md hidden-lg hidden-xl">
+        <!-- โลโก้ -->
+        <div class="mobile-logo-section text-center q-mb-lg">
+          <div class="mobile-icon-container q-mb-md">
+            <q-icon name="school" size="60px" color="primary" />
           </div>
+          <div class="text-h5 text-primary q-mb-xs">
+            Cooperative<br />Education
+          </div>
+        </div>
 
-          <q-form @submit.prevent="handleLogin" class="login-form-container">
+        <!-- ฟอร์ม -->
+        <div class="mobile-form-container full-width">
+          <q-form @submit.prevent="handleLogin">
             <!-- อีเมล -->
-            <div class="text-body2 q-mt-sm q-mb-xs">ชื่อผู้ใช้</div>
+            <div class="text-body2 text-grey-8 q-mb-xs">ชื่อผู้ใช้</div>
             <q-input
               v-model="auth.form.email"
               type="email"
               outlined
               dense
-              class="q-mb-md custom-input"
-              :rules="[val => !!val || 'กรุณากรอกอีเมล', val => val.includes('@') || 'อีเมลไม่ถูกต้อง']"
-              input-class="text-description"
+              class="q-mb-md login-input"
+              placeholder="00000000@go.buu.ac.th"
             >
-              <template v-slot:label>
-                <div class="text-center full-width">อีเมล</div>
-              </template>
               <template v-slot:prepend>
                 <q-icon name="email" color="primary" />
               </template>
             </q-input>
 
             <!-- รหัสผ่าน -->
-            <div class="text-body2 q-mt-sm q-mb-xs">รหัสผ่าน</div>
+            <div class="text-body2 text-grey-8 q-mb-xs">รหัสผ่าน</div>
             <q-input
               v-model="auth.form.password"
               :type="isPwd ? 'password' : 'text'"
               outlined
               dense
-              class="q-mb-lg custom-input"
+              class="q-mb-lg login-input"
               :rules="[val => !!val || 'กรุณากรอกรหัสผ่าน']"
-              input-class="text-description"
+              placeholder="••••••"
             >
-              <template v-slot:label>
-                <div class="text-center full-width">รหัสผ่าน</div>
-              </template>
               <template v-slot:prepend>
                 <q-icon name="lock" color="primary" />
               </template>
               <template v-slot:append>
                 <q-icon
                   :name="isPwd ? 'visibility_off' : 'visibility'"
-                  class="cursor-pointer"
+                  class="cursor-pointer text-grey-6"
                   @click="isPwd = !isPwd"
                 />
               </template>
             </q-input>
 
             <!-- ปุ่มเข้าสู่ระบบ -->
-            <div class="q-mt-lg flex flex-center">
-              <q-btn
-                label="เข้าสู่ระบบ"
-                type="submit"
-                color="primary"
-                class="login-btn"
-                unelevated
-              />
-            </div>
+            <q-btn
+              label="เข้าสู่ระบบ"
+              type="submit"
+              color="primary"
+              class="full-width login-btn q-mb-md"
+              unelevated
+              no-caps
+            />
 
             <!-- ลืมรหัสผ่าน -->
-            <div class="text-right q-mt-sm">
+            <div class="text-right">
               <q-btn
                 label="ลืมรหัสผ่าน?"
                 flat
@@ -98,10 +172,11 @@
                 size="sm"
                 @click="handResetPassword"
                 class="forgot-password-btn"
+                no-caps
               />
             </div>
           </q-form>
-        </q-card-section>
+        </div>
       </div>
     </q-card>
   </q-page>
@@ -109,8 +184,8 @@
 
 <script setup lang="ts">
 import { ref } from 'vue'
-import { useAuthStore } from 'src/stores/auth'
 import { useRouter } from 'vue-router'
+import { useAuthStore } from 'src/stores/auth'
 import { EnumUserRole } from 'src/data/roles'
 
 const auth = useAuthStore()
@@ -121,12 +196,13 @@ const handleLogin = async () => {
   try {
     const result = await auth.login()
     if (result) {
-      const redirectPath = localStorage.getItem('redirectAfterLogin')
-      if (redirectPath) {
+      const redirect = localStorage.getItem('redirectAfterLogin')
+      if (redirect) {
         localStorage.removeItem('redirectAfterLogin')
-        await router.push(redirectPath)
+        await router.push(redirect)
         return
       }
+
       const role = result.user?.role
       if (role === EnumUserRole.ADMIN) {
         await router.push(`/${EnumUserRole.ADMIN}/ActivitiesCalendar`)
@@ -136,54 +212,63 @@ const handleLogin = async () => {
         throw new Error('ไม่มีสิทธิ์เข้าใช้งาน')
       }
     }
-  } catch (err) {
-    console.error(err)
+  } catch (error) {
+    console.error('Login error:', error)
   }
 }
 
-function handResetPassword() {
+const handResetPassword = () => {
   console.log('ลืมรหัสผ่าน')
 }
 </script>
 
-<style>* {
-  box-sizing: border-box;
-}
-
+<style scoped>
 .login-page {
-  background: linear-gradient(135deg, #334EAC 0%, #081F5C 50%, #7096D1 100%);
+  background: linear-gradient(135deg, #4A5FBF 0%, #2E3F80 50%, #1A2B5C 100%);
   min-height: 100vh;
-  padding: 1rem;
+  padding: 2rem;
 }
 
 .login-container {
   width: 900px;
-  max-width: 90vw;
+  max-width: 95vw;
+  height: 600px;
   border-radius: 20px;
   overflow: hidden;
-  backdrop-filter: blur(10px);
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
   animation: slideUp 0.8s ease-out;
-  height: auto;
 }
 
 @keyframes slideUp {
-  0% { opacity: 0; transform: translateY(30px); }
-  100% { opacity: 1; transform: translateY(0); }
+  0% { 
+    opacity: 0; 
+    transform: translateY(30px); 
+  }
+  100% { 
+    opacity: 1; 
+    transform: translateY(0); 
+  }
 }
 
+/* Desktop Left Side */
 .left-side {
-  background: linear-gradient(135deg, #334EAC 0%, #081F5C 60%, #7096D1 100%);
+  background: linear-gradient(135deg, #4A5FBF 0%, #2E3F80 60%, #1A2B5C 100%);
   position: relative;
   overflow: hidden;
 }
 
+.logo-section {
+  z-index: 2;
+  position: relative;
+}
+
 .icon-container {
-  background: rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.15);
   border-radius: 50%;
-  padding: 40px;
+  padding: 30px;
+  display: inline-block;
   backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.2);
+  border: 2px solid rgba(255, 255, 255, 0);
   animation: float 3s ease-in-out infinite;
 }
 
@@ -195,158 +280,188 @@ function handResetPassword() {
 .brand-title {
   font-weight: 600;
   text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
-  animation: fadeInUp 1s ease-out 0.3s both;
+  line-height: 1.2;
 }
 
-@keyframes fadeInUp {
-  0% { opacity: 0; transform: translateY(20px); }
-  100% { opacity: 1; transform: translateY(0); }
+.brand-subtitle {
+  opacity: 0.9;
+  font-weight: 400;
 }
 
-.decorative-circles .circle {
+/* Decorative Circles */
+.decorative-circles {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+}
+
+.circle {
   position: absolute;
   border-radius: 50%;
   background: rgba(255, 255, 255, 0.08);
   animation: circleFloat 8s infinite linear;
 }
 
-.circle-1 { width: 100px; height: 100px; top: 20%; left: 10%; }
-.circle-2 { width: 150px; height: 150px; top: 60%; right: 20%; }
-.circle-3 { width: 80px; height: 80px; bottom: 20%; left: 60%; }
+.circle-1 { 
+  width: 100px; 
+  height: 100px; 
+  top: 10%; 
+  left: 5%; 
+}
+
+.circle-2 { 
+  width: 150px; 
+  height: 150px; 
+  top: 70%; 
+  right: 10%; 
+}
+
+.circle-3 { 
+  width: 80px; 
+  height: 80px; 
+  bottom: 20%; 
+  left: 70%; 
+}
 
 @keyframes circleFloat {
-  0%, 100% { transform: translateY(0px) rotate(0deg); }
-  50% { transform: translateY(-20px) rotate(180deg); }
+  0%, 100% { 
+    transform: translateY(0px) rotate(0deg); 
+    opacity: 0.6;
+  }
+  50% { 
+    transform: translateY(-20px) rotate(180deg); 
+    opacity: 0.3;
+  }
 }
 
+/* Desktop Right Side */
 .right-side {
-  background: linear-gradient(135deg, #FFF9F0 0%, #D0E3FF 100%);
-  width: 100%;
-  padding: 1.5rem !important;
-  padding-top: 120px !important;
+  background: linear-gradient(135deg, #FFFFFF 0%, #F8F9FF 100%);
+  padding: 2rem;
 }
 
-.login-form {
-  animation: slideInRight 0.8s ease-out 0.2s both;
-  max-width: 450px;
+.login-form-container {
   width: 100%;
-}
-
-@keyframes slideInRight {
-  0% { opacity: 0; transform: translateX(20px); }
-  100% { opacity: 1; transform: translateX(0); }
+  max-width: 400px;
 }
 
 .login-title {
-  color: #081F5C;
-  font-weight: 700;
-  margin-bottom: 2rem;
-  position: relative;
-  font-size: 1.5rem;
-}
-
-.login-title::after {
-  content: '';
-  position: absolute;
-  bottom: -10px;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 50px;
-  height: 3px;
-  background: linear-gradient(90deg, #334EAC, #7096D1);
-  border-radius: 2px;
-}
-
-.custom-input {
+  color: #2E3F80;
+  font-weight: 600;
   margin-bottom: 1rem;
 }
 
-.login-btn {
-  width: 100%;
-  min-height: 45px;
+.login-divider {
+  width: 50px;
+  height: 3px;
+  background: linear-gradient(90deg, #4A5FBF, #2E3F80);
+  border-radius: 2px;
+  margin: 0 auto;
 }
 
-.text-body2 {
-  font-size: 0.9rem;
+.login-input {
+  margin-bottom: 1rem;
+}
+
+.login-input .q-field__control {
+  border-radius: 8px;
+  background: #FAFBFF;
+}
+
+.login-btn {
+  height: 48px;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 16px;
+  background: linear-gradient(135deg, #4A5FBF 0%, #2E3F80 100%);
 }
 
 .forgot-password-btn {
-  font-size: 0.8rem;
+  font-size: 14px;
+  text-decoration: none;
 }
 
-/* Mobile Logo Overlay */
-.mobile-logo {
-  display: none;
-  position: absolute;
-  top: 1rem;
-  left: 0;
-  right: 0;
-  z-index: 10;
-  align-items: center;
-  flex-direction: column;
-  justify-content: center;
+/* Mobile Layout */
+.mobile-layout {
+  background: linear-gradient(135deg, #FFFFFF 0%, #F8F9FF 100%);
+  min-height: 500px;
+  width: 100%;
 }
 
-.mobile-logo .icon-container {
-  background: rgba(255, 255, 255, 0.8);
+.mobile-logo-section {
+  padding-top: 1rem;
+}
+
+.mobile-icon-container {
+  background: rgba(74, 95, 191, 0.1);
   border-radius: 50%;
-  padding: 1.5rem;
-  margin: auto;
-  width: fit-content;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  padding: 20px;
+  display: inline-block;
+  border: 2px solid rgba(74, 95, 191, 0);
 }
 
-.brand-title-mobile {
-  font-weight: bold;
-  margin-top: 0.5rem;
+.mobile-form-container {
+  max-width: 400px;
+  width: 100%;
 }
 
-/* ✅ Responsive: มือถือ & iPad */
-@media (max-width: 1023px) {
+/* Responsive */
+@media (max-width: 599px) {
+  .login-page {
+    padding: 1rem;
+  }
+  
+  .login-container {
+    height: auto;
+    min-height: 500px;
+    border-radius: 15px;
+  }
+  
+  .mobile-layout {
+    padding: 1.5rem;
+  }
+}
+
+@media (min-width: 600px) and (max-width: 1023px) {
   .login-container {
     width: 95vw;
     max-width: 600px;
-    border-radius: 15px;
     height: auto;
+    min-height: 600px;
   }
-
-  .left-side {
-    display: none !important;
-  }
-
-  .mobile-logo {
-    display: flex;
-  }
-
-  .login-form {
-    max-width: 100%;
+  
+  .mobile-layout {
+    padding: 2rem;
   }
 }
 
-@media (min-width: 1030px) and (max-width: 1500px) {
-  .login-container {
-    width: 95vw;
-    max-width: 700px;
-    border-radius: 16px;
-    height: auto;
-  }
+/* Focus States */
+.login-input .q-field--focused .q-field__control {
+  border-color: #4A5FBF;
+  box-shadow: 0 0 0 1px #4A5FBF;
+}
 
-  .left-side {
+/* Hover Effects */
+.login-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(74, 95, 191, 0.3);
+}
+
+.forgot-password-btn:hover {
+  text-decoration: underline;
+}
+
+/* ซ่อน Desktop Layout เมื่อจอกว้างระหว่าง 600px - 1024px */
+@media (min-width: 100px) and (max-width: 1024px) {
+  .login-container > .row.no-wrap {
     display: none !important;
   }
 
-  .right-side {
-    width: 100%;
-    padding: 2rem !important;
-    padding-top: 120px !important;
-  }
-
-  .login-form {
-    max-width: 100%;
-  }
-
-  .mobile-logo {
-    display: flex;
+  .mobile-layout {
+    display: flex !important;
   }
 }
 
