@@ -341,7 +341,7 @@ const majorFullName = computed(() => {
                     <q-icon name="event" size="xs" class="q-mr-xs" />
                     {{ activity.date }}
                     <q-separator vertical spaced class="q-mx-sm" />
-                    <q-icon name="timer" size="xs" class="q-mr-xs" />
+                    <q-icon name="schedule" size="xs" class="q-mr-xs" />
                     {{ activity.hours }} ชั่วโมง
                   </div>
                 </q-item-label>

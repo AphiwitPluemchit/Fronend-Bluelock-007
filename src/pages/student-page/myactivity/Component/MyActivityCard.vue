@@ -13,14 +13,13 @@ dayjs.locale('th')
 dayjs.extend(buddhistEra)
 
 const $q = useQuasar()
-const isMobile = computed(() => $q.screen.lt.sm) // sm = <600px
+const isMobile = computed(() => $q.screen.lt.sm)
 
 function formatDateToThai(dateString: string): string {
   if (!dateString) return '-'
-  return dayjs(dateString).format('D MMMM BBBB') // D = วัน, MMM = เดือน, BBBB = ปี พ.ศ.
+  return dayjs(dateString).format('D MMMM BBBB')
 }
 
-// ฟังก์ชันดึงวันที่
 const getActivitydates = (activityItems: ActivityItem[] | null | undefined): string => {
   const firstItem = activityItems?.find((item) => item.dates && item.dates.length > 0)
   return firstItem?.dates
@@ -28,7 +27,6 @@ const getActivitydates = (activityItems: ActivityItem[] | null | undefined): str
     : 'ไม่ระบุ'
 }
 
-// ฟังก์ชันดึงเวลา
 const getActivityTime = (activityItems: ActivityItem[] | null | undefined): string => {
   const firstItem = activityItems?.find((item) => item.dates && item.dates.length > 0)
   return firstItem?.dates
@@ -39,6 +37,7 @@ const getActivityTime = (activityItems: ActivityItem[] | null | undefined): stri
 defineProps<{ myActivity: Activity }>()
 const router = useRouter()
 const baseurl = api.defaults.baseURL
+
 const onClick = async (id: string) => {
   await router.push(`/Student/Activity/MyActivityDetail/${id}`)
 }
@@ -48,10 +47,11 @@ const getActivityRooms = (activityItems: ActivityItem[] | null | undefined): str
   const rooms = activityItems[0]?.rooms
   return Array.isArray(rooms) && rooms.length > 0 ? rooms.join(' ') : 'ไม่ระบุ'
 }
+
 const getActivityDescription = (activityItems: ActivityItem[] | null | undefined): string => {
   if (!activityItems || activityItems.length === 0) return 'ไม่ระบุ'
-  const rooms = activityItems[0]?.description
-  return Array.isArray(rooms) && rooms.length > 0 ? rooms.join(' ') : 'ไม่ระบุ'
+  const desc = activityItems[0]?.description
+  return Array.isArray(desc) && desc.length > 0 ? desc.join(' ') : 'ไม่ระบุ'
 }
 </script>
 
@@ -59,20 +59,17 @@ const getActivityDescription = (activityItems: ActivityItem[] | null | undefined
   <q-card class="activity-card q-pa-md q-mt-sm q-mb-sm">
     <div class="row q-col-gutter-md items-start">
       <!-- รูปกิจกรรม -->
-      <div :class="isMobile ? 'full-width q-mb-sm' : 'col-4 q-pr-md'">
-      
+      <div :class="isMobile ? 'full-width' : 'col-4'">
         <q-img
           :src="baseurl + '/uploads/activity/images/' + myActivity.file"
           :ratio="4 / 3"
-          style="height: 160px;"
+              style="max-height: 200px; object-fit: cover; border-radius: 12px;"
           class="activity-img"
         />
-
       </div>
 
       <!-- ข้อมูลกิจกรรม + ปุ่ม -->
       <div class="col-12 col-sm-8 column justify-between">
-        <!-- ชื่อ + ประเภท -->
         <div>
           <div class="text-h6 text-bold activity-name">
             {{ myActivity.name }}
@@ -85,24 +82,28 @@ const getActivityDescription = (activityItems: ActivityItem[] | null | undefined
           </div>
         </div>
 
-
-        <!-- รายละเอียดกิจกรรม -->
         <div class="text-body2 q-mt-sm">
+          <q-icon name="event" class="q-mb-xs" />
           วันที่ : {{ getActivitydates(myActivity.activityItems) }}
         </div>
-        <div class="text-body2">เวลา : {{ getActivityTime(myActivity.activityItems) }}</div>
-        <div class="text-body2">ห้อง : {{ getActivityRooms(myActivity.activityItems) }}</div>
         <div class="text-body2">
-          รายละเอียด : {{ getActivityDescription(myActivity.activityItems) }}
+          <q-icon name="schedule" class="q-mb-xs" />
+          เวลา : {{ getActivityTime(myActivity.activityItems) }}
         </div>
+        <div class="text-body2">
+          <q-icon name="room" class="q-mb-xs" />
+
+          ห้อง : {{ getActivityRooms(myActivity.activityItems) }}
+        </div>
+
 
         <!-- ปุ่มรายละเอียด -->
       <div class="text-right full-width q-mt-sm">
-        <q-btn
-          label="รายละเอียด"
-          dense
-          unelevated
-          class="btnconfirm"
+          <q-btn
+            label="รายละเอียด"
+            dense
+            unelevated
+            class="btnconfirm"
             @click="onClick(myActivity.id!)"
           />
         </div>
@@ -113,8 +114,8 @@ const getActivityDescription = (activityItems: ActivityItem[] | null | undefined
 
 <style scoped>
 .activity-card {
-  margin: 12px 0; /* เดิมอาจเป็น margin-bottom เยอะกว่าบน */
-  padding: 16px;  /* ปรับตาม q-pa-md = 16px */
+  margin: 12px 0;
+  padding: 16px;
   border-radius: 20px;
   font-size: 16px;
   display: flex;
@@ -122,9 +123,6 @@ const getActivityDescription = (activityItems: ActivityItem[] | null | undefined
   gap: 12px;
   width: 100%;
 }
-
-
-
 
 .activity-img {
   width: 100%;
@@ -136,15 +134,12 @@ const getActivityDescription = (activityItems: ActivityItem[] | null | undefined
   overflow: hidden;
   display: -webkit-box;
   -webkit-box-orient: vertical;
-  -webkit-line-clamp: 2; /* จำกัด 2 บรรทัด */
+  -webkit-line-clamp: 2;
   line-height: 1.4em;
-  max-height: calc(1.4em * 2); /* บังคับความสูงไม่ให้เกิน 2 บรรทัด */
-  word-break: break-word; /* ตัดคำถ้าจำเป็น */
-  font-size: 1rem; /* responsive font size */
+  max-height: calc(1.4em * 2);
+  word-break: break-word;
+  font-size: 1rem;
 }
-
-
-
 
 .btnconfirm {
   background-color: #2e74ff;
@@ -158,26 +153,13 @@ const getActivityDescription = (activityItems: ActivityItem[] | null | undefined
     width: 100%;
     text-align: center;
   }
-}
 
-
-
-@media (max-width: 600px) {
   .activity-card {
-    min-height: 280px; /* เพิ่มความสูงให้พอดีกับ layout mobile */
+    min-height: 280px;
     padding: 12px;
     font-size: 15px;
     border-radius: 16px;
-    margin: 4px 0; /* จาก 8px เป็น 4px */
-
-  }
-
-  .activity-img {
-    max-height: 120px;
-  }
-
-  .btnconfirm {
-    width: 100%; /* ให้ปุ่มขนาดเต็ม */
+    margin: 4px 0;
   }
 }
 
@@ -188,15 +170,10 @@ const getActivityDescription = (activityItems: ActivityItem[] | null | undefined
     border-radius: 12px;
   }
 
-  .activity-img {
-    max-height: 100px;
-    border-radius: 8px;
-  }
-
   .activity-name {
-    font-size: 1px;
+    font-size: 14px;
     -webkit-line-clamp: 2;
-    max-height: 2.8em; /* 1.4em * 2 */
+    max-height: 2.8em;
   }
 
   .btnconfirm {
@@ -205,7 +182,4 @@ const getActivityDescription = (activityItems: ActivityItem[] | null | undefined
     width: 100%;
   }
 }
-
-
-
 </style>
