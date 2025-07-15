@@ -234,7 +234,7 @@ function increaseYearPage() {
 .year-btn {
   border-radius: 999px;
   font-weight: 500;
-  font-size: 15px;
+  font-size: 14px;
   padding: 6px 20px;
   background-color: white;
   border: 1px solid #d1d5db;

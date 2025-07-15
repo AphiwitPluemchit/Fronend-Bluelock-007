@@ -1,5 +1,5 @@
 export interface CalendarEvent {
-  id: number
+  id: string
   activityName: string        // ชื่อกิจกรรมหลัก
   activityItemName: string    // ชื่อกิจกรรมย่อย
   activityState: string

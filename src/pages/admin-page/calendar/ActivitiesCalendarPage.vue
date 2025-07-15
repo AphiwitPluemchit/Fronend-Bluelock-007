@@ -224,7 +224,7 @@ function parseToCalendarEvents(activities: Activity[]): CalendarEvent[] {
 
       item.dates.forEach((d) => {
         parsed.push({
-          id: parseInt(item.id?.toString().slice(-5) ?? '0', 16),
+          id: activity.id?.toString() || '', 
           activityName: activity.name || '-',
           activityItemName: item.name || activity.name || '-',
           activityState: activityStateLabel,

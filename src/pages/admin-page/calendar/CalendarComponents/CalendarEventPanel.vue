@@ -1,5 +1,8 @@
 <script setup lang="ts">
+import { useRouter } from 'vue-router'
 import type { CalendarEvent } from 'src/types/calendar'
+
+const router = useRouter()
 
 defineProps<{
   selectedDate: string
@@ -39,6 +42,15 @@ function getStatusColor(status: string): string {
       return '#e0e0e0'
   }
 }
+
+const goToPageDetail = async (id: string, disable: boolean) => {
+  await router.push({
+    path: `/Admin/ActivitiesManagement/ActivityDetail/${id}`,
+    query: {
+      disable: String(disable),
+    },
+  })
+}
 </script>
 
 <template>
@@ -64,8 +76,30 @@ function getStatusColor(status: string): string {
               </div>
               <div class="q-mt-xs">{{ event.activityItemName }}</div>
               <div class="q-mt-xs">{{ event.time }}</div>
-              <div>จำนวนลงทะเบียน : {{ event.participants }}</div>
-              <div>สถานที่ : {{ event.location }}</div>
+              <div class="q-mt-xs">จำนวนลงทะเบียน : {{ event.participants }}</div>
+              <div class="event-footer-row">
+                <div>สถานที่ : {{ event.location }}</div>
+                <div class="action-buttons">
+                  <q-icon
+                    clickable
+                    name="edit"
+                    @click.stop="goToPageDetail(event.id as string, false)"
+                    class="bg-primary text-white rounded-borders q-mr-sm edit-icon"
+                    size="18px"
+                  >
+                    <q-tooltip>แก้ไข</q-tooltip>
+                  </q-icon>
+                  <q-icon
+                    clickable
+                    name="visibility"
+                    @click="goToPageDetail(event.id as string, true)"
+                    class="bg-black text-white rounded-borders view-icon"
+                    size="18px"
+                  >
+                    <q-tooltip>ดูรายละเอียด</q-tooltip>
+                  </q-icon>
+                </div>
+              </div>
             </q-card>
           </div>
         </div>
@@ -95,8 +129,30 @@ function getStatusColor(status: string): string {
             </div>
             <div class="q-mt-xs">{{ event.activityItemName }}</div>
             <div class="q-mt-xs">{{ event.time }}</div>
-            <div>จำนวนลงทะเบียน : {{ event.participants }}</div>
-            <div>สถานที่ : {{ event.location }}</div>
+            <div class="q-mt-xs">จำนวนลงทะเบียน : {{ event.participants }}</div>
+            <div class="event-footer-row">
+              <div>สถานที่ : {{ event.location }}</div>
+              <div class="action-buttons">
+                <q-icon
+                  clickable
+                  name="edit"
+                  @click.stop="goToPageDetail(event.id as string, false)"
+                  class="bg-primary text-white rounded-borders q-mr-sm edit-icon"
+                  size="18px"
+                >
+                  <q-tooltip>แก้ไข</q-tooltip>
+                </q-icon>
+                <q-icon
+                  clickable
+                  name="visibility"
+                  @click="goToPageDetail(event.id as string, true)"
+                  class="bg-black text-white rounded-borders view-icon"
+                  size="18px"
+                >
+                  <q-tooltip>ดูรายละเอียด</q-tooltip>
+                </q-icon>
+              </div>
+            </div>
           </q-card>
         </div>
       </template>
@@ -139,6 +195,7 @@ function getStatusColor(status: string): string {
   flex-grow: 1;
   min-width: 0;
   max-width: calc(100% - 100px); /* ป้องกันชนกับหมวดด้านขวา */
+  margin-bottom: 5px;
 }
 
 .event-category {
@@ -153,5 +210,25 @@ function getStatusColor(status: string): string {
   transition:
     transform 0.2s ease,
     box-shadow 0.2s ease;
+}
+
+.event-footer-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 1px;
+}
+
+.action-buttons {
+  display: flex;
+  align-items: end;
+  flex-shrink: 0;
+}
+
+.edit-icon,
+.view-icon {
+  padding: 4px;
+  border-radius: 4px;
+  cursor: pointer;
 }
 </style>
