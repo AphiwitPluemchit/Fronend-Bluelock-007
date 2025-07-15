@@ -10,7 +10,7 @@ import ActivityType from './component/ActivityType.vue'
 
 const baseurl = api.defaults.baseURL
 const $q = useQuasar()
-const isMobile = computed(() => $q.screen.lt.sm) // sm = <600px
+const isMobile = computed(() => $q.screen.lt.sm)
 
 dayjs.locale('th')
 dayjs.extend(buddhistEra)
@@ -51,10 +51,14 @@ function enrollmentSummary(activityItems: ActivityItem[]) {
 </script>
 
 <template>
-  <q-card class="activity-card col-12 col-sm-6 col-md-4 q-pa-md q-my-sm">
+  <q-card
+    class="activity-card col-12 col-sm-6 col-md-4 q-pa-md q-my-sm cursor-pointer"
+    :class="{ 'clickable-card': !isMobile }"
+    @click="!isMobile && $router.push(`/Student/Activity/ActivityDetail/${activity.id}`)"
+  >
     <div class="row q-col-gutter-md items-start">
       <!-- รูปกิจกรรม -->
-      <div :class="isMobile ? 'full-width ' : 'col-4 '">
+      <div :class="isMobile ? 'full-width' : 'col-4'">
         <q-img
           :src="baseurl + '/uploads/activity/images/' + activity.file"
           class="activity-img"
@@ -63,12 +67,11 @@ function enrollmentSummary(activityItems: ActivityItem[]) {
       </div>
 
       <!-- รายละเอียดกิจกรรม -->
-      <div class="col-12 col-sm-8 column justify-between">
+      <div class="col-12 col-sm-8 column justify-between q-pl-md">
         <div class="text-h6 text-bold ellipsis-2-lines">
           {{ activity.name }}
         </div>
 
-        <!-- ✅ ป้ายประเภทกิจกรรม -->
         <div class="q-mb-sm">
           <ActivityType
             v-if="activity.skill === 'hard' || activity.skill === 'soft'"
@@ -88,17 +91,18 @@ function enrollmentSummary(activityItems: ActivityItem[]) {
           <q-icon name="chair" class="q-mb-xs" />
           จำนวนที่รับ : {{ enrollmentSummary(activity.activityItems ?? []) }}
         </div>
-      </div>
 
-      <!-- ปุ่มรายละเอียด -->
-      <div class="text-right full-width q-mt-sm">
-        <q-btn
-          label="รายละเอียด"
-          dense
-          unelevated
-          class="btnconfirm"
-          :to="`/Student/Activity/ActivityDetail/${activity.id}`"
-        />
+        <!-- ✅ ปุ่มรายละเอียดเฉพาะจอมือถือ -->
+        <div v-if="isMobile" class="q-mt-sm">
+          <q-btn
+            label="รายละเอียด"
+            dense
+            unelevated
+            class="btnconfirm full-width"
+            color="btnconfirm"
+            @click.stop="$router.push(`/Student/Activity/ActivityDetail/${activity.id}`)"
+          />
+        </div>
       </div>
     </div>
   </q-card>
@@ -115,11 +119,12 @@ function enrollmentSummary(activityItems: ActivityItem[]) {
   gap: 12px;
   max-width: 100%;
   height: auto;
-  min-height: unset;
+  min-height: 200px;
 }
 
 .activity-img {
   width: 100%;
+  height: 100%;
   object-fit: cover;
   border-radius: 12px;
 }
@@ -144,10 +149,6 @@ function enrollmentSummary(activityItems: ActivityItem[]) {
   .activity-img {
     max-height: 120px;
   }
-
-  .btnconfirm {
-    width: 100%;
-  }
 }
 
 @media (max-width: 400px) {
@@ -165,11 +166,9 @@ function enrollmentSummary(activityItems: ActivityItem[]) {
   .activity-name {
     font-size: 14px;
   }
+}
 
-  .btnconfirm {
-    font-size: 13px;
-    padding: 6px 12px;
-    width: 100%;
-  }
+.btnconfirm {
+  width: 100%;
 }
 </style>

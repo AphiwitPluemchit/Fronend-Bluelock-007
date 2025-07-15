@@ -47,28 +47,26 @@ const getActivityRooms = (activityItems: ActivityItem[] | null | undefined): str
   const rooms = activityItems[0]?.rooms
   return Array.isArray(rooms) && rooms.length > 0 ? rooms.join(' ') : 'ไม่ระบุ'
 }
-
-// const getActivityDescription = (activityItems: ActivityItem[] | null | undefined): string => {
-//   if (!activityItems || activityItems.length === 0) return 'ไม่ระบุ'
-//   const desc = activityItems[0]?.description
-//   return Array.isArray(desc) && desc.length > 0 ? desc.join(' ') : 'ไม่ระบุ'
-// }
 </script>
 
 <template>
-  <q-card class="activity-card q-pa-md q-mt-sm q-mb-sm">
+  <q-card
+    class="activity-card q-pa-md q-mt-sm q-mb-sm cursor-pointer"
+    :class="{ 'clickable-card': !isMobile }"
+    @click="!isMobile && onClick(myActivity.id!)"
+  >
     <div class="row q-col-gutter-md items-start">
       <!-- รูปกิจกรรม -->
       <div :class="isMobile ? 'full-width' : 'col-4'">
         <q-img
           :src="baseurl + '/uploads/activity/images/' + myActivity.file"
           :ratio="4 / 3"
-              style="max-height: 200px; object-fit: cover; border-radius: 12px;"
+          style="max-height: 200px; object-fit: cover; border-radius: 12px"
           class="activity-img"
         />
       </div>
 
-      <!-- ข้อมูลกิจกรรม + ปุ่ม -->
+      <!-- ข้อมูลกิจกรรม -->
       <div class="col-12 col-sm-8 column justify-between">
         <div>
           <div class="text-h6 text-bold activity-name">
@@ -95,16 +93,15 @@ const getActivityRooms = (activityItems: ActivityItem[] | null | undefined): str
           {{ getActivityRooms(myActivity.activityItems) }}
         </div>
 
-
-        <!-- ปุ่มรายละเอียด -->
-        <div class="text-right full-width q-mt-sm">
-            <q-btn
-              label="รายละเอียด"
-              dense
-              unelevated
-              class="btnconfirm"
-              @click="onClick(myActivity.id!)"
-            />
+        <!-- ✅ ปุ่มรายละเอียด (เฉพาะมือถือ) -->
+        <div v-if="isMobile" class="text-right full-width q-mt-sm">
+          <q-btn
+            label="รายละเอียด"
+            dense
+            unelevated
+            class="btnconfirm"
+            @click.stop="onClick(myActivity.id!)"
+          />
         </div>
       </div>
     </div>
@@ -173,8 +170,6 @@ const getActivityRooms = (activityItems: ActivityItem[] | null | undefined): str
     border-radius: 12px;
   }
 
-
-  
   .activity-name {
     font-size: 14px;
     -webkit-line-clamp: 2;

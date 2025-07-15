@@ -27,7 +27,7 @@ const enrollment = ref<Enroll>({ isEnrolled: false, enrollmentId: '' })
 const screen = ref(false)
 const auth = useAuthStore()
 const breadcrumbs = ref({
-  previousPage: { title: 'จัดการกิจกรรม', path: '/Student/ActivityTablePage' },
+  previousPage: { title: 'กิจกรรมทั้งหมด', path: '/Student/ActivityTablePage' },
   currentPage: { title: 'รายละเอียดกิจกรรม', path: `/Student/ActivityTablePage/ActivityDetail` },
   icon: 'description',
 })
@@ -97,32 +97,31 @@ onMounted(async () => {
     <AppBreadcrumbs :breadcrumbs="breadcrumbs" />
     <div class="activity-detail-card">
       <q-card-section class="q-col-gutter-md row items-start q-mb-md">
-      <!-- ภาพกิจกรรม -->
-      <div class="col-12 col-md-4 text-center">
-        <q-img
-          :src="baseurl + '/uploads/activity/images/' + activity?.file"
-          class="activity-img"
-          error-src="/default-placeholder.jpg"
-        />
-      </div>
-
-      <!-- รายละเอียด -->
-      <div class="col-12 col-md-8 " v-if="activity">
-        <div v-if="Array.isArray(activity?.activityItems) && activity.activityItems.length > 1">
-          <DetailMany :activity="activity ?? {}" />
+        <!-- ภาพกิจกรรม -->
+        <div class="col-12 col-md-4 text-center">
+          <q-img
+            :src="baseurl + '/uploads/activity/images/' + activity?.file"
+            class="activity-img"
+            error-src="/default-placeholder.jpg"
+          />
         </div>
-        <div v-else>
-          <DetailOne :activity="activity ?? {}" />
-        </div>
-      </div>
-    </q-card-section>
 
+        <!-- รายละเอียด -->
+        <div class="col-12 col-md-8" v-if="activity">
+          <div v-if="Array.isArray(activity?.activityItems) && activity.activityItems.length > 1">
+            <DetailMany :activity="activity ?? {}" />
+          </div>
+          <div v-else>
+            <DetailOne :activity="activity ?? {}" />
+          </div>
+        </div>
+      </q-card-section>
 
       <div class="q-mt-md q-mb-md row justify-center q-gutter-sm">
         <q-btn
           v-if="enrollment?.isEnrolled && !isRegistrationNotAllowed"
           label="ยกเลิกลงทะเบียน"
-          class="btnreject"
+          class="btnreject full-width-mobile"
           @click="handleUnRegisterClick"
           unelevated
           rounded
@@ -130,7 +129,7 @@ onMounted(async () => {
         <q-btn
           v-else-if="!enrollment?.isEnrolled && !isRegistrationNotAllowed"
           label="ลงทะเบียน"
-          class="btnsecces"
+          class="btnsecces full-width-mobile"
           @click="handleRegisterClick"
           unelevated
           rounded
@@ -138,13 +137,12 @@ onMounted(async () => {
         <q-btn
           v-else
           label="ปิดลงทะเบียน"
-          class="btngrey"
+          class="btngrey full-width-mobile"
           :disabled="true"
           unelevated
           rounded
         />
       </div>
-
     </div>
 
     <!-- Confirm Dialog-->
@@ -191,5 +189,15 @@ onMounted(async () => {
   background-color: #bdbdbd;
   color: white;
 }
-</style>
 
+.full-width-mobile {
+  width: auto;
+}
+
+/* ถ้าหน้าจอเล็กกว่า 600px ให้ปุ่มกว้างเต็ม */
+@media (max-width: 600px) {
+  .full-width-mobile {
+    width: 100% !important;
+  }
+}
+</style>
