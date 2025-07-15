@@ -251,13 +251,14 @@ onMounted(async () => {
 <style scoped>
 .status-badge {
   height: 32px;
-  line-height: 28px;
   padding: 0 12px;
   border-radius: 999px;
   text-align: center;
-  display: inline-block;
+  align-items: center; /* ✅ จัดแนวตั้งให้ตรงกลาง */
+  justify-content: center; /* ✅ จัดแนวนอนให้ตรงกลาง */
   font-size: 15px;
 }
+
 .dropdown {
   min-width: 200px;
 }

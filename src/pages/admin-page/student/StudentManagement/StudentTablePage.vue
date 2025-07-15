@@ -198,14 +198,15 @@ onMounted(async () => {
             </q-td>
 
             <q-td class="q-gutter-x-sm">
-              <q-icon
-                name="visibility"
+              <q-btn
+                flat
+                dense
+                icon="visibility"
+                class="bg-black text-white q-pa-xs rounded-borders"
                 @click="goToDetail(props.row.code)"
-                class="cursor-pointer"
-                size="20px"
               >
-                <q-tooltip> ดูรายละเอียด </q-tooltip>
-              </q-icon></q-td
+                <q-tooltip>ดูรายละเอียด</q-tooltip>
+              </q-btn></q-td
             >
           </q-tr>
         </template>
