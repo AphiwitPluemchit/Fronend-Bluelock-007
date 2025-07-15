@@ -1,9 +1,15 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
+import { useRouter } from 'vue-router'
+import { useQuasar } from 'quasar'
 import { useAuthStore } from 'src/stores/auth'
 import { StudentService } from 'src/services/student'
 
 const auth = useAuthStore()
+const router = useRouter()
+const $q = useQuasar()
+const isSmallScreen = computed(() => !$q.screen.gt.xs)
+
 
 interface ActivityHistory {
   activity: {
@@ -29,6 +35,7 @@ interface ActivityHistory {
 }
 
 interface ActivityDisplay {
+  id: string
   title: string
   type: 'academic' | 'preparation'
   date: string
@@ -49,70 +56,6 @@ const prepData = ref({ current: 0, required: 30 })
 
 const activities = ref<ActivityDisplay[]>([])
 const showAllActivities = ref(false)
-
-onMounted(async () => {
-  const code = auth.getUser?.code
-  if (!code) return
-
-  try {
-    const summary = await StudentService.getSummaryByCode(code)
-
-    studentData.value = {
-      name: summary.name,
-      major: summary.major,
-      email: summary.email || '',
-      studentId: summary.code,
-    }
-
-    academicData.value.current = summary.hardSkill
-    prepData.value.current = summary.softSkill
-
-    activities.value = Array.isArray(summary.history)
-      ? summary.history
-          .map((h: ActivityHistory) => {
-            const a = h.activity
-            const ai = a.activityItem
-            const d = ai.dates?.[0]
-            if (!d) return null
-
-            return {
-              title: a.name || '-',
-              type: a.skill === 'soft' ? 'preparation' : 'academic',
-              date: new Date(d.date).toLocaleDateString('th-TH', {
-                year: 'numeric',
-                month: 'long',
-                day: 'numeric',
-              }),
-              time: `${d.stime} - ${d.etime}`,
-              room: !ai.operator || ai.operator.trim() === '-' ? 'ไม่ระบุ' : ai.operator,
-              hours: ai.hour ?? 0,
-            }
-          })
-          .filter(Boolean) as ActivityDisplay[]
-      : []
-  } catch (err) {
-    console.error('โหลดข้อมูล student summary ไม่สำเร็จ', err)
-  }
-})
-
-const calculateMissingHours = (data: { current: number; required: number }) =>
-  data.required > data.current ? data.required - data.current : 0
-
-const getProgressValue = (data: { current: number; required: number }) =>
-  data.required ? (data.current / data.required) * 100 : 0
-
-const prepProgressRatio = computed(() =>
-  Math.min(prepData.value.current / (prepData.value.required || 1), 1)
-)
-const academicProgressRatio = computed(() =>
-  Math.min(academicData.value.current / (academicData.value.required || 1), 1)
-)
-
-const getProgressColor = (ratio: number) => {
-  if (ratio >= 1) return 'positive'
-  if (ratio >= 0.8) return 'orange'
-  return 'negative'
-}
 
 const activityColors = {
   academic: {
@@ -140,15 +83,85 @@ const majorFullName = computed(() => {
   return majorMap[studentData.value.major] || studentData.value.major
 })
 
+const prepProgressRatio = computed(() =>
+  Math.min(prepData.value.current / (prepData.value.required || 1), 1)
+)
+
+const academicProgressRatio = computed(() =>
+  Math.min(academicData.value.current / (academicData.value.required || 1), 1)
+)
+
+const getProgressColor = (ratio: number) => {
+  if (ratio >= 1) return 'positive'
+  if (ratio >= 0.8) return 'orange'
+  return 'negative'
+}
+
+const calculateMissingHours = (data: { current: number; required: number }) =>
+  data.required > data.current ? data.required - data.current : 0
+
+const getProgressValue = (data: { current: number; required: number }) =>
+  data.required ? (data.current / data.required) * 100 : 0
+
+const onClick = async (id: string) => {
+  await router.push(`/Student/Activity/MyActivityDetail/${id}`)
+}
+
+onMounted(async () => {
+  const code = auth.getUser?.code
+  if (!code) return
+
+  try {
+    const summary = await StudentService.getSummaryByCode(code)
+
+    studentData.value = {
+      name: summary.name,
+      major: summary.major,
+      email: summary.email || '',
+      studentId: summary.code,
+    }
+
+    academicData.value.current = summary.hardSkill
+    prepData.value.current = summary.softSkill
+
+    activities.value = Array.isArray(summary.history)
+      ? summary.history
+          .map((h: ActivityHistory) => {
+            const a = h.activity
+            const ai = a.activityItem
+            const d = ai.dates?.[0]
+            if (!d) return null
+
+            return {
+              id: a.id,
+              title: a.name || '-',
+              type: a.skill === 'soft' ? 'preparation' : 'academic',
+              date: new Date(d.date).toLocaleDateString('th-TH', {
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric',
+              }),
+              time: `${d.stime} - ${d.etime}`,
+              room: !ai.operator || ai.operator.trim() === '-' ? 'ไม่ระบุ' : ai.operator,
+              hours: ai.hour ?? 0,
+            }
+          })
+          .filter(Boolean) as ActivityDisplay[]
+      : []
+  } catch (err) {
+    console.error('โหลดข้อมูล student summary ไม่สำเร็จ', err)
+  }
+})
 </script>
+
 
 <template>
   <q-page>
     <div class="container q-mx-auto q-px-sm q-py-md" style="max-width: 1000px">
       <!-- Student Profile Card -->
       <q-card bordered class="q-mb-md shadow-3 rounded-borders">
-        <q-card-section class="bg-blue-1">
-          <div class="text-h6 text-bold text-primary">
+        <q-card-section class="bg-primary">
+          <div class="text-h6 text-bold text-white">
             <q-icon name="account_circle" class="q-mr-sm" />
             ข้อมูลนิสิต
           </div>
@@ -179,8 +192,8 @@ const majorFullName = computed(() => {
       <div class="row q-col-gutter-md q-mb-md">
         <div class="col-12 col-md-6">
           <q-card bordered class="rounded-borders shadow-2 full-height">
-            <q-card-section class="bg-blue-1 q-mb-md">
-              <div class="text-h6 text-bold text-primary">
+            <q-card-section class="bg-primary q-mb-md">
+              <div class="text-h6 text-bold text-white">
                 <q-icon :name="activityColors.academic.icon" class="q-mr-sm" />
                 {{ activityColors.academic.label }}
               </div>
@@ -237,8 +250,8 @@ const majorFullName = computed(() => {
 
         <div class="col-12 col-md-6">
           <q-card bordered class="rounded-borders shadow-2 full-height">
-            <q-card-section class="bg-blue-1 q-mb-md">
-              <div class="text-h6 text-bold text-primary">
+            <q-card-section class="bg-primary q-mb-md">
+              <div class="text-h6 text-bold text-white">
                 <q-icon :name="activityColors.preparation.icon" class="q-mr-sm" />
                 {{ activityColors.preparation.label }}
               </div>
@@ -296,9 +309,9 @@ const majorFullName = computed(() => {
 
       <!-- Activity History -->
       <q-card bordered class="q-mb-md shadow-2 rounded-borders">
-        <q-card-section class="bg-blue-1">
+        <q-card-section class="bg-primary">
           <div class="row justify-between items-center">
-            <div class="text-h6 text-bold text-primary">
+            <div class="text-h6 text-bold text-white">
               <q-icon name="history" class="q-mr-sm" />
               ประวัติการเข้ากิจกรรม
             </div>
@@ -322,6 +335,9 @@ const majorFullName = computed(() => {
             <q-item
               v-for="(activity, index) in (showAllActivities ? activities : activities.slice(0, 3))"
               :key="index"
+              clickable
+              v-ripple
+              @click="onClick(activity.id)"
             >
               <q-item-section avatar>
                 <q-avatar color="primary" text-color="white">
@@ -330,37 +346,55 @@ const majorFullName = computed(() => {
               </q-item-section>
 
               <q-item-section>
+                <!-- ✅ ชื่อกิจกรรม แสดงตลอด -->
                 <q-item-label
                   class="text-weight-medium ellipsis"
                   :title="activity.title"
                 >
                   {{ activity.title }}
                 </q-item-label>
+
+                <!-- ✅ แสดงวัน เวลา ชั่วโมงในจอใหญ่ และ label ในจอเล็ก -->
                 <q-item-label caption>
                   <div class="row items-center">
-                    <q-icon name="event" size="xs" class="q-mr-xs" />
-                    {{ activity.date }}
-                    <q-separator vertical spaced class="q-mx-sm" />
-                    <q-icon name="schedule" size="xs" class="q-mr-xs" />
-                    {{ activity.hours }} ชั่วโมง
+                    <template v-if="!isSmallScreen">
+                      <q-icon name="event" size="xs" class="q-mr-xs" />
+                      {{ activity.date }}
+                      <q-separator vertical spaced class="q-mx-sm" />
+                      <q-icon name="schedule" size="xs" class="q-mr-xs" />
+                      {{ activity.hours }} ชั่วโมง
+                    </template>
+
+                    <template v-else>
+                      <!-- ✅ แสดงประเภทกิจกรรมในจอเล็ก -->
+                      <q-badge
+                        rounded
+                        class="q-mt-xs q-px-sm q-py-xs text-weight-medium"
+                        :style="`background-color: ${activityColors[activity.type].bgColor}; color: ${activityColors[activity.type].textColor}; border: 1px solid ${
+                          activity.type === 'preparation' ? activityColors[activity.type].border : activityColors[activity.type].textColor
+                        };`"
+                        :label="activityColors[activity.type].label"
+                      />
+                    </template>
                   </div>
                 </q-item-label>
               </q-item-section>
 
-              <q-item-section side>
-                <div class="row items-center">
-                  <q-badge
-                    rounded
-                    class="q-px-sm q-py-xs text-weight-medium"
-                    :style="`background-color: ${activityColors[activity.type].bgColor}; color: ${activityColors[activity.type].textColor}; border: 1px solid ${
-                      activity.type === 'preparation' ? activityColors[activity.type].border : activityColors[activity.type].textColor
-                    };`"
-                    :label="activityColors[activity.type].label"
-                  />
-                </div>
+
+              <!-- ✅ badge ซ่อนในจอเล็ก -->
+              <q-item-section side v-if="!isSmallScreen">
+                <q-badge
+                  rounded
+                  class="q-px-sm q-py-xs text-weight-medium"
+                  :style="`background-color: ${activityColors[activity.type].bgColor}; color: ${activityColors[activity.type].textColor}; border: 1px solid ${
+                    activity.type === 'preparation' ? activityColors[activity.type].border : activityColors[activity.type].textColor
+                  };`"
+                  :label="activityColors[activity.type].label"
+                />
               </q-item-section>
 
             </q-item>
+
           </q-list>
         </q-card-section>
       </q-card>
@@ -381,4 +415,5 @@ const majorFullName = computed(() => {
   text-overflow: ellipsis;
   white-space: nowrap;
 }
+
 </style>

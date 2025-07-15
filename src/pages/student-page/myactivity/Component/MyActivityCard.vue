@@ -98,14 +98,14 @@ const getActivityRooms = (activityItems: ActivityItem[] | null | undefined): str
 
 
         <!-- ปุ่มรายละเอียด -->
-      <div class="text-right full-width q-mt-sm">
-          <q-btn
-            label="รายละเอียด"
-            dense
-            unelevated
-            class="btnconfirm"
-            @click="onClick(myActivity.id!)"
-          />
+        <div class="text-right full-width q-mt-sm">
+            <q-btn
+              label="รายละเอียด"
+              dense
+              unelevated
+              class="btnconfirm"
+              @click="onClick(myActivity.id!)"
+            />
         </div>
       </div>
     </div>
