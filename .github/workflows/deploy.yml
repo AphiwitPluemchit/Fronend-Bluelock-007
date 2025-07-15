@@ -20,14 +20,14 @@ jobs:
       - name: Pull Frontend Code
         run: |
           cd /home/BUU/65160309/bluelock/Fronend-Bluelock-007/
-          git pull origin main
+          git pull origin master
 
       - name: Build and Deploy Docker Compose # รันคำสั่ง Docker Compose
         run: |
-          cd /home/BUU/65160309/bluelock/Fronend-Bluelock-007/
-          docker compose down --volumes
-          docker compose build --no-cache
-          docker compose up -d --force-recreate
+          cd /home/BUU/65160309/bluelock/ && \
+          docker compose down --volumes nginx && \
+          docker compose build --no-cache nginx && \
+          docker compose up -d --force-recreate nginx
 
       # - name: Clean up Runner Workspace (Optional but Recommended)
       #   run: |
