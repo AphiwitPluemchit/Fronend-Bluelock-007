@@ -47,8 +47,12 @@ const adminChildren: RouteRecordRaw[] = [
     component: () => import('pages/admin-page/report/ReportPage.vue'),
   },
   {
-    path: 'CertificateManagement',
+    path: 'CertificateTablePage',
     component: () => import('pages/admin-page/certificate/CertificateTablePage.vue'),
+  },
+  {
+    path: 'ManageCertificateTable',
+    component: () => import('pages/admin-page/certificate/ManageCertificateTable.vue'),
   },
 ].map((route) => ({
   ...route,

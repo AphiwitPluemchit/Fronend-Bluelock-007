@@ -92,7 +92,14 @@ const linksList = [
     ],
   },
   { title: 'รายงานข้อมูล', icon: 'assessment', link: '/Admin/Report' },
-  { title: 'ใบประกาศนียบัตร', icon: 'school', link: '/Admin/CertificateManagement' },
+  {
+    title: 'จัดการใบประกาศนียบัตร',
+    icon: 'school',
+    children: [
+      { title: 'จัดการหัวข้อการอบรม', link: '/Admin/CertificateTablePage' },
+      { title: 'รายการใบประกาศนียบัตร', link: '/Admin/ManageCertificateTable' },
+    ],
+  },
 ]
 
 const drawerBehavior = computed(() => {

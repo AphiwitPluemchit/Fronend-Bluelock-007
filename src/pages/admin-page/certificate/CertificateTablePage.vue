@@ -1,211 +1,162 @@
 <script setup lang="ts">
-import { ref, computed } from 'vue'
+import { ref } from 'vue'
 import type { QTableProps } from 'quasar'
 import FilterDialog from 'src/components/Dialog/FilterDialog.vue'
-import ManageCerDialog from './ManageCerDialog.vue'
 
 const search1 = ref('')
 const showFilterDialog1 = ref(false)
-const filterCategories1 = ref(['major', 'statusCertificate'])
+const filterCategories1 = ref(['categoryActivity'])
 
-const filteredRows = computed(() =>
-  rows.value.filter((row) => row.name.includes(search.value) || row.code.includes(search.value)),
-)
+interface CertificateCourse {
+  id: number
+  certName: string
+  hour: number
+  link: string
+  categoryActivity: 'ทักษะทางวิชาการ' | 'เตรียมความพร้อม'
+}
 
 const columns: QTableProps['columns'] = [
-  { name: 'id', label: 'ลำดับ', field: 'id', align: 'left' },
-  { name: 'code', label: 'รหัสนิสิต', field: 'code', align: 'left' },
-  { name: 'name', label: 'ชื่อ-สกุล', field: 'name', align: 'left' },
-  { name: 'major', label: 'สาขา', field: 'major', align: 'left' },
-  { name: 'certName', label: 'ชื่อ', field: 'certName', align: 'left' },
-  { name: 'uploadDate', label: 'วันที่อัปโหลด', field: 'uploadDate', align: 'left' },
-  { name: 'status', label: 'สถานะ', field: 'status', align: 'center' },
-  { name: 'action', label: '', field: 'action', align: 'center' },
+  { name: 'id', label: 'ที่', field: 'id', align: 'left' },
+  { name: 'certName', label: 'ชื่อหัวข้อการอบรม', field: 'certName', align: 'left' },
+  { name: 'hour', label: 'ชั่วโมง', field: 'hour', align: 'center' },
+  { name: 'link', label: 'Link สมัครเรียน (Short URL)', field: 'link', align: 'left' },
+  {
+    name: 'categoryActivity',
+    label: 'เก็บชั่วโมงในหมวด',
+    field: 'categoryActivity',
+    align: 'center',
+  },
+  { name: 'action', label: '', field: 'action', align: 'left' },
 ]
 
-function getStatusClass(status: CertificateRow['status']) {
-  switch (status) {
-    case 'อนุมัติ':
-      return 'status-approved'
-    case 'รออนุมัติ':
-      return 'status-waiting'
-    case 'ไม่อนุมัติ':
-      return 'status-rejected'
-  }
-}
-
-const showDialog = ref(false)
-const selectedCert = ref({
-  code: '',
-  name: '',
-  certName: '',
-  imageUrl: '',
-  skill: '',
-  hour: 0,
-  status: '',
-  note: '',
-})
-
-const openManageCer = (row: CertificateRow) => {
-  const found = certList.value.find((cert) => cert.code === row.code)
-  if (found) {
-    selectedCert.value = { ...found }
-    showDialog.value = true
-  }
-}
-
-const viewDetail = (row: CertificateRow) => {
-  const found = certList.value.find((cert) => cert.code === row.code)
-  if (found) {
-    selectedCert.value = { ...found }
-    console.log(selectedCert.value)
-
-    showDialog.value = true
-  }
-  console.log(row)
-}
-
-const handleConfirm = (updated: typeof selectedCert.value & { status: string }) => {
-  const found = certList.value.find((c) => c.code === updated.code)
-  if (found) {
-    found.status = updated.status
-  }
-}
-
-interface CertificateRow {
-  id: number
-  code: string
-  name: string
-  major: string
-  certName: string
-  status: 'รออนุมัติ' | 'อนุมัติ' | 'ไม่อนุมัติ'
-  uploadDate: string
-}
-
-const search = ref('')
-
-//Mock up
-//Mock up
-const rows = ref<CertificateRow[]>([
+const rows = ref<CertificateCourse[]>([
   {
     id: 1,
-    code: '65160305',
-    name: 'ศิวะ รัตนวงศ์',
-    major: 'CS',
-    certName: 'ประกาศนียบัตร 2022',
-    status: 'รออนุมัติ',
-    uploadDate: '10 พ.ค. 2568',
+    certName: 'Ready to Work in 12 Hours',
+    hour: 5,
+    link: 'https://mooc.buu.ac.th/courses/course-v1:BUU+LU005+2022/about',
+    categoryActivity: 'เตรียมความพร้อม',
   },
   {
     id: 2,
-    code: '65160332',
-    name: 'กรณิษา ทองเยี่ยม',
-    major: 'CS',
-    certName:
-      'ประกาศนียบัตร 2022 ประกาศนียบัตร 2022 ประกาศนียบัตร 2022 ประกาศนียบัตร 2022 ประกาศนียบัตร 2022 ประกาศนีย',
-    status: 'รออนุมัติ',
-    uploadDate: '10 พ.ค. 2568',
+    certName: 'การสื่อสารภาษาอังกฤษพื้นฐานเพื่อการทำงาน (Basic Comunicative English for Work)',
+    hour: 5,
+    link: 'https://mooc.buu.ac.th/courses/course-v1:BUU+HUS0013+2024/about',
+    categoryActivity: 'เตรียมความพร้อม',
   },
   {
     id: 3,
-    code: '65160302',
-    name: 'อุดม เมธี',
-    major: 'ITDI',
-    certName: 'ประกาศนียบัตร 2022',
-    status: 'รออนุมัติ',
-    uploadDate: '10 พ.ค. 2568',
+    certName: 'การประยุกต์ใช้ Generative AI ในการทำงาน',
+    hour: 3,
+    link: 'https://mooc.buu.ac.th/courses/course-v1:BUU+ICT002+2024/about',
+    categoryActivity: 'เตรียมความพร้อม',
+  },
+  {
+    id: 4,
+    certName: 'ภาษาอังกฤษเพื่อการสื่อสาร | English for Communication',
+    hour: 10,
+    link: 'https://thaimooc.ac.th/courses/course-v1cmu000850/',
+    categoryActivity: 'เตรียมความพร้อม',
+  },
+  {
+    id: 5,
+    certName: 'เทคนิคการจัดการความเครียด | Stress Management Techniques',
+    hour: 10,
+    link: 'https://thaimooc.ac.th/courses/course-v1cmu000980//',
+    categoryActivity: 'เตรียมความพร้อม',
   },
   {
     id: 6,
-    code: '65160333',
-    name: 'กรรณา สีประสงค์',
-    major: 'CS',
-    certName: 'ประกาศนียบัตร 2022',
-    status: 'อนุมัติ',
-    uploadDate: '10 พ.ค. 2568',
+    certName:
+      'จิตวิทยาประยุกต์ในการทํางาน เพื่อความสำเร็จ ความสุข และความมั่งคั่ง | Applied Psychology to Work through Success Happiness and Wealth',
+    hour: 10,
+    link: 'https://thaimooc.ac.th/courses/course-v1cmu000960/',
+    categoryActivity: 'เตรียมความพร้อม',
+  },
+  {
+    id: 7,
+    certName:
+      'ทักษะการสื่อสารระหว่างบุคคลในการทํางาน (Interpersonal Communication Skillsin Workplace)',
+    hour: 10,
+    link: 'https://thaimooc.ac.th/courses/course-v1cmu001070/',
+    categoryActivity: 'เตรียมความพร้อม',
+  },
+  {
+    id: 8,
+    certName: 'ง่าย สบาย กับการอธิบายกราฟเป็นภาษาอังกฤษ',
+    hour: 5,
+    link: 'https://thaimooc.ac.th/courses/course-v1cu001500/',
+    categoryActivity: 'เตรียมความพร้อม',
   },
   {
     id: 9,
-    code: '65160334',
-    name: 'กฤติภัค รัตน์โพธิ์โรจน์',
-    major: 'CS',
-    certName: 'ประกาศนียบัตร 2022',
-    status: 'ไม่อนุมัติ',
-    uploadDate: '10 พ.ค. 2568',
+    certName: 'เทคนิคการนำเสนออย่างมีประสิทธิภาพ',
+    hour: 10,
+    link: 'https://thaimooc.ac.th/courses/course-v1cmu000840/',
+    categoryActivity: 'เตรียมความพร้อม',
+  },
+  {
+    id: 10,
+    certName:
+      'Data Visualization with Tableau Desktop (การสร้างภาพของข้อมูลด้วยโปรแกรม Tableau Desktop)',
+    hour: 5,
+    link: 'https://mooc.buu.ac.th/courses/course-v1:BUU+IF002+2024/about',
+    categoryActivity: 'ทักษะทางวิชาการ',
+  },
+  {
+    id: 11,
+    certName:
+      'การประยุกต์ใช้ Collaboration Tools ในการเพิ่มประสิทธิภาพในการทำงานและประสานงานภายในองค์กร',
+    hour: 5,
+    link: 'https://mooc.buu.ac.th/courses/course-v1:BUU+ICT001+2022/about',
+    categoryActivity: 'ทักษะทางวิชาการ',
+  },
+  {
+    id: 12,
+    certName: 'พื้นฐาน Internet of Things (IoTs) | Basic Internet of Things (IoTs)',
+    hour: 3,
+    link: 'https://lms.thaimooc.org/courses/course-v1:HU+HU008+2019/about',
+    categoryActivity: 'ทักษะทางวิชาการ',
+  },
+  {
+    id: 13,
+    certName: 'การออกแบบ Infographic | Infographic Design',
+    hour: 6,
+    link: 'https://lms.thaimooc.org/courses/course-v1:SWU+SWU011+2018/about',
+    categoryActivity: 'ทักษะทางวิชาการ',
+  },
+  {
+    id: 14,
+    certName: 'การจัดการความรู้ | Knowledge Management',
+    hour: 6,
+    link: 'https://lms.thaimooc.org/courses/course-v1:CU+CU005+2017/about',
+    categoryActivity: 'ทักษะทางวิชาการ',
   },
 ])
 
-const certList = ref([
-  {
-    code: '65160333',
-    name: 'กรรณา สีประสงค์',
-    certName: 'ประกาศนียบัตร 2022',
-    status: 'อนุมัติ',
-    imageUrl: '/images/sample_cert.png',
-    skill: 'เตรียมความพร้อม',
-    hour: 3,
-    note: '',
-  },
-  {
-    code: '65160305',
-    name: 'ศิวะ รัตนวงศ์',
-    certName: 'ประกาศนียบัตร 2022',
-    status: 'รออนุมัติ',
-    imageUrl: '/images/sample_cert.png',
-    skill: '',
-    hour: 0,
-    note: '',
-  },
-  {
-    code: '65160332',
-    name: 'กรณิษา ทองเยี่ยม',
-    certName:
-      'ประกาศนียบัตร 2022 ประกาศนียบัตร 2022 ประกาศนียบัตร 2022 ประกาศนียบัตร 2022 ประกาศนียบัตร 2022 ประกาศนีย',
-    status: 'รออนุมัติ',
-    imageUrl: '/images/sample_cert.png',
-    skill: '',
-    hour: 0,
-    note: 'เอกสารไม่ถูกต้อง',
-  },
-  {
-    code: '65160302',
-    name: 'อุดม เมธี',
-    certName: 'ประกาศนียบัตร 2022',
-    status: 'รออนุมัติ',
-    imageUrl: '/images/sample_cert.png',
-    skill: '',
-    hour: 0,
-    note: '',
-  },
-  {
-    code: '65160334',
-    name: 'กฤติภัค รัตน์โพธิ์โรจน์',
-    certName: 'ประกาศนียบัตร 2022',
-    status: 'ไม่อนุมัติ',
-    imageUrl: '/images/sample_cert.png',
-    skill: '',
-    hour: 0,
-    note: 'ชื่อไม่ตรงกับระบบ',
-  },
-])
+function getcategoryCourse(row: CertificateCourse) {
+  return row.categoryActivity === 'เตรียมความพร้อม' ? 'hard-skill' : 'soft-skill'
+}
 </script>
+
 <template>
   <q-page class="q-pa-md">
     <!-- ชื่อหน้า -->
     <div class="row justify-between items-center q-mb-md" style="margin-top: 20px">
-      <div class="texttitle">จัดการใบประกาศนียบัตร</div>
+      <div class="texttitle">หัวข้ออบรมออนไลน์สำหรับการเก็บชั่วโมงสหกิจศึกษา</div>
+      <!-- ปุ่มเพื่อการเพิ่มข้อมูล -->
+      <q-btn dense outlined label="เพิ่มหัวข้อการอบรม" class="btnadd" bo />
     </div>
 
     <!-- แถวค้นหาและไอคอน -->
     <section class="q-mt-lg">
       <div class="row justify-end items-center">
-        <div class="text-h6"></div>
         <div class="row">
           <q-input
             dense
             outlined
             v-model="search1"
-            label="ค้นหา ชื่อ รหัสนิสิต"
+            label="ค้นหา ชื่อ"
             class="q-mr-sm searchbox"
             :style="{ boxShadow: 'none', border: 'none' }"
           >
@@ -225,7 +176,7 @@ const certList = ref([
       <q-table
         bordered
         flat
-        :rows="filteredRows"
+        :rows="rows"
         :columns="columns"
         row-key="id"
         class="q-mt-md customtable"
@@ -244,66 +195,65 @@ const certList = ref([
         <template v-slot:body="props">
           <q-tr :props="props">
             <q-td key="id">{{ props.row.id }}</q-td>
-            <q-td key="code">{{ props.row.code }}</q-td>
-            <q-td key="name">{{ props.row.name }}</q-td>
-            <q-td key="major">{{ props.row.major }}</q-td>
+
             <q-td
               key="certName"
               style="
-                max-width: 200px;
+                max-width: 350px;
                 white-space: nowrap;
                 overflow: hidden;
                 text-overflow: ellipsis;
               "
-              >{{ props.row.certName }}</q-td
             >
-            <q-td key="uploadDate">{{ props.row.uploadDate }}</q-td>
-            <q-td key="status" class="text-center">
+              {{ props.row.certName }}
+            </q-td>
+
+            <q-td key="hour" class="text-center">{{ props.row.hour }}</q-td>
+
+            <q-td key="link">
+              <a :href="props.row.link" target="_blank" class="text-primary">
+                {{ props.row.link }}
+              </a>
+            </q-td>
+
+            <q-td key="categoryActivity" class="text-center">
               <q-badge
-                :label="props.row.status"
+                :label="props.row.categoryActivity"
                 class="status-badge"
-                :class="getStatusClass(props.row.status)"
+                :class="getcategoryCourse(props.row)"
               />
             </q-td>
-            <td>
-              <q-td key="action" class="text-center q-gutter-x-sm">
-                <q-icon
-                  v-if="props.row.status === 'รออนุมัติ'"
-                  name="edit"
-                  class="cursor-pointer"
-                  size="20px"
-                  @click="openManageCer(props.row)"
-                >
-                  <q-tooltip>แก้ไข</q-tooltip>
-                </q-icon>
 
-                <q-icon
-                  v-else
-                  name="visibility"
-                  class="cursor-pointer"
-                  size="20px"
-                  @click="viewDetail(props.row)"
-                >
-                  <q-tooltip>ดูรายละเอียด</q-tooltip>
-                </q-icon>
-              </q-td>
-            </td>
+            <q-td key="action" class="text-center q-gutter-x-sm">
+              <q-icon name="edit" class="cursor-pointer" size="20px">
+                <q-tooltip>แก้ไข</q-tooltip>
+              </q-icon>
+            </q-td>
           </q-tr>
         </template>
       </q-table>
-      <ManageCerDialog v-model="showDialog" :data="selectedCert" @confirm="handleConfirm" />
     </section>
   </q-page>
 </template>
 
 <style scoped>
-.customtable td,
-.customtable th {
-  height: 36px;
-  vertical-align: middle;
-  line-height: 1.4;
+.hard-skill {
+  color: #001780;
+  border: 1px solid #002dff;
+  background-color: #cfd7ff;
 }
 
+.soft-skill {
+  color: #009812;
+  border: 1px solid #00bb16;
+  background-color: #d2ffc7;
+}
+
+.category-badge {
+  padding: 1px 10px;
+  font-size: 14px;
+  border-radius: 20px;
+}
 .status-badge {
   height: 32px;
   line-height: 28px;
@@ -312,37 +262,20 @@ const certList = ref([
   text-align: center;
   display: inline-block;
   font-size: 15px;
-  width: 130px;
+}
+.bg-yellow-light {
+  background-color: #fff8e1;
 }
 
-.status-approved {
-  background-color: #d0ffc5;
-  color: #009812;
-  border: 2px solid #00bb16;
-  padding: 3px 30px;
-  width: 130px;
+.bg-blue-light {
+  background-color: #e1f5fe;
 }
 
-.status-waiting {
-  background-color: #ffe7ba;
-  color: #ff6f00;
-  border: 2px solid #ffa500;
-  padding: 3px 30px;
-  width: 130px;
-}
-
-.status-rejected {
-  background-color: #ffc5c5;
-  color: #ff0000;
-  border: 2px solid #f32323;
-  padding: 3px 30px;
-  width: 130px;
-}
-
-.sticky-header {
-  position: sticky;
-  top: 0;
-  background: white;
-  z-index: 1;
+.my-table td,
+.my-table th {
+  vertical-align: middle;
+  font-size: 14px;
+  line-height: 1.4;
+  padding: 12px;
 }
 </style>
