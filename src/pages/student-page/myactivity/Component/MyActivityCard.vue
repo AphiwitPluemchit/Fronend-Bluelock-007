@@ -48,11 +48,11 @@ const getActivityRooms = (activityItems: ActivityItem[] | null | undefined): str
   return Array.isArray(rooms) && rooms.length > 0 ? rooms.join(' ') : 'ไม่ระบุ'
 }
 
-const getActivityDescription = (activityItems: ActivityItem[] | null | undefined): string => {
-  if (!activityItems || activityItems.length === 0) return 'ไม่ระบุ'
-  const desc = activityItems[0]?.description
-  return Array.isArray(desc) && desc.length > 0 ? desc.join(' ') : 'ไม่ระบุ'
-}
+// const getActivityDescription = (activityItems: ActivityItem[] | null | undefined): string => {
+//   if (!activityItems || activityItems.length === 0) return 'ไม่ระบุ'
+//   const desc = activityItems[0]?.description
+//   return Array.isArray(desc) && desc.length > 0 ? desc.join(' ') : 'ไม่ระบุ'
+// }
 </script>
 
 <template>

@@ -155,15 +155,17 @@ function increaseYearPage() {
 
     <!-- เดือน Popup -->
     <q-dialog v-model="monthPopup">
-      <q-card>
+      <q-card class="popup-card">
         <q-card-section>
-          <div class="row q-gutter-sm justify-center">
+          <!-- เดือน -->
+          <div class="month-grid">
             <q-btn
               v-for="(month, i) in thaiMonths"
               :key="i"
               flat
               :label="month"
               @click="setMonth(i)"
+              :class="['month-btn', new Date(selectedDate).getMonth() === i ? 'active' : '']"
             />
           </div>
         </q-card-section>
@@ -172,7 +174,7 @@ function increaseYearPage() {
 
     <!-- ปี Popup -->
     <q-dialog v-model="yearPopup">
-      <q-card>
+      <q-card class="popup-card">
         <q-card-section>
           <div class="row justify-center">
             <q-btn flat icon="chevron_left" @click="decreaseYearPage" />
@@ -181,13 +183,17 @@ function increaseYearPage() {
             </div>
             <q-btn flat icon="chevron_right" @click="increaseYearPage" />
           </div>
-          <div class="row q-gutter-sm justify-center q-mt-md">
+          <div class="year-grid q-mt-md">
             <q-btn
               v-for="year in thaiYears"
               :key="year"
               flat
               :label="year.toString()"
               @click="setYear(year)"
+              :class="[
+                'year-btn',
+                new Date(selectedDate).getFullYear() + 543 === year ? 'active' : '',
+              ]"
             />
           </div>
         </q-card-section>
@@ -200,5 +206,52 @@ function increaseYearPage() {
 .hover-grey:hover {
   background-color: #eee;
   transition: background-color 0.2s ease;
+}
+
+.popup-card {
+  border-radius: 10px;
+  padding: 20px;
+  min-width: 500px;
+}
+
+.month-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(100px, 1fr));
+  gap: 12px;
+  justify-content: center;
+  padding: 20px 10px 10px;
+}
+
+.year-grid {
+  display: grid;
+  grid-template-columns: repeat(5, auto);
+  gap: 10px;
+  justify-content: center;
+  padding-top: 10px;
+}
+
+.month-btn,
+.year-btn {
+  border-radius: 999px;
+  font-weight: 500;
+  font-size: 15px;
+  padding: 6px 20px;
+  background-color: white;
+  border: 1px solid #d1d5db;
+  color: black;
+  transition: all 0.2s ease;
+}
+
+.month-btn:hover,
+.year-btn:hover {
+  background-color: #f0f0f0;
+}
+
+.month-btn.active,
+.year-btn.active {
+  background-color: #1976d2;
+  color: white;
+  border: none;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
 }
 </style>

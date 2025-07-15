@@ -459,12 +459,12 @@ watch(selectedDate, (val) => {
 }
 
 .is-today .day-number {
-  border: 2px solid #3e98dc;
-  color: #3e98dc;
+  border: 2px solid #1976d2;
+  color: #1976d2;
 }
 
 .is-selected .day-number {
-  background-color: #3e98dc;
+  background-color: #1976d2;
   color: white;
 }
 
