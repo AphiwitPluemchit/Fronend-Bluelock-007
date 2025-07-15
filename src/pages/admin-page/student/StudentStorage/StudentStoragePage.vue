@@ -82,7 +82,6 @@ const columns = [
     align: 'center' as const,
   },
   { name: 'status', label: 'สถานะ', field: 'status', align: 'center' as const },
-  { name: 'action', label: '', field: 'action', align: 'center' as const },
 ]
 onMounted(async () => {
   show.value = false

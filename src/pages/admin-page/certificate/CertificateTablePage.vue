@@ -6,7 +6,7 @@ import ManageCerDialog from './ManageCerDialog.vue'
 
 const search1 = ref('')
 const showFilterDialog1 = ref(false)
-const filterCategories1 = ref(['major', 'year', 'status'])
+const filterCategories1 = ref(['major', 'statusCertificate'])
 
 const filteredRows = computed(() =>
   rows.value.filter((row) => row.name.includes(search.value) || row.code.includes(search.value)),
@@ -20,6 +20,7 @@ const columns: QTableProps['columns'] = [
   { name: 'certName', label: 'ชื่อ', field: 'certName', align: 'left' },
   { name: 'uploadDate', label: 'วันที่อัปโหลด', field: 'uploadDate', align: 'left' },
   { name: 'status', label: 'สถานะ', field: 'status', align: 'center' },
+  { name: 'action', label: '', field: 'action', align: 'center' },
 ]
 
 function getStatusClass(status: CertificateRow['status']) {
@@ -100,7 +101,8 @@ const rows = ref<CertificateRow[]>([
     code: '65160332',
     name: 'กรณิษา ทองเยี่ยม',
     major: 'CS',
-    certName: 'ประกาศนียบัตร 2022',
+    certName:
+      'ประกาศนียบัตร 2022 ประกาศนียบัตร 2022 ประกาศนียบัตร 2022 ประกาศนียบัตร 2022 ประกาศนียบัตร 2022 ประกาศนีย',
     status: 'รออนุมัติ',
     uploadDate: '10 พ.ค. 2568',
   },
@@ -157,7 +159,8 @@ const certList = ref([
   {
     code: '65160332',
     name: 'กรณิษา ทองเยี่ยม',
-    certName: 'ประกาศนียบัตร 2022',
+    certName:
+      'ประกาศนียบัตร 2022 ประกาศนียบัตร 2022 ประกาศนียบัตร 2022 ประกาศนียบัตร 2022 ประกาศนียบัตร 2022 ประกาศนีย',
     status: 'รออนุมัติ',
     imageUrl: '/images/sample_cert.png',
     skill: '',
@@ -188,9 +191,9 @@ const certList = ref([
 </script>
 <template>
   <q-page class="q-pa-md">
-    <!-- หัวข้อ -->
-    <div class="row justify-start items-center">
-      <div class="text-h4">จัดการใบประกาศนียบัตร</div>
+    <!-- ชื่อหน้า -->
+    <div class="row justify-between items-center q-mb-md" style="margin-top: 20px">
+      <div class="texttitle">จัดการใบประกาศนียบัตร</div>
     </div>
 
     <!-- แถวค้นหาและไอคอน -->
@@ -202,9 +205,9 @@ const certList = ref([
             dense
             outlined
             v-model="search1"
-            label="ค้นหา ชื่อนิสิต"
+            label="ค้นหา ชื่อ รหัสนิสิต"
             class="q-mr-sm searchbox"
-            :style="{ boxShadow: 'none' }"
+            :style="{ boxShadow: 'none', border: 'none' }"
           >
             <template v-slot:append>
               <q-icon name="search" />
@@ -244,7 +247,16 @@ const certList = ref([
             <q-td key="code">{{ props.row.code }}</q-td>
             <q-td key="name">{{ props.row.name }}</q-td>
             <q-td key="major">{{ props.row.major }}</q-td>
-            <q-td key="certName">{{ props.row.certName }}</q-td>
+            <q-td
+              key="certName"
+              style="
+                max-width: 200px;
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
+              "
+              >{{ props.row.certName }}</q-td
+            >
             <q-td key="uploadDate">{{ props.row.uploadDate }}</q-td>
             <q-td key="status" class="text-center">
               <q-badge
@@ -254,11 +266,12 @@ const certList = ref([
               />
             </q-td>
             <td>
-              <q-td key="action" class="text-center">
+              <q-td key="action" class="text-center q-gutter-x-sm">
                 <q-icon
                   v-if="props.row.status === 'รออนุมัติ'"
                   name="edit"
                   class="cursor-pointer"
+                  size="20px"
                   @click="openManageCer(props.row)"
                 >
                   <q-tooltip>แก้ไข</q-tooltip>
@@ -268,6 +281,7 @@ const certList = ref([
                   v-else
                   name="visibility"
                   class="cursor-pointer"
+                  size="20px"
                   @click="viewDetail(props.row)"
                 >
                   <q-tooltip>ดูรายละเอียด</q-tooltip>
@@ -283,6 +297,13 @@ const certList = ref([
 </template>
 
 <style scoped>
+.customtable td,
+.customtable th {
+  height: 36px;
+  vertical-align: middle;
+  line-height: 1.4;
+}
+
 .status-badge {
   height: 32px;
   line-height: 28px;

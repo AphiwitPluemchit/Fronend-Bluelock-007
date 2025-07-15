@@ -264,7 +264,6 @@ const submitActivity = async () => {
   }))
 
   const payload = {
-    type: 'many',
     name: activityName.value,
     activityState: 'planning',
     skill: skill ?? '',

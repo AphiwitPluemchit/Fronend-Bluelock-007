@@ -725,7 +725,7 @@ watchEffect(() => {
                       v-for="(item, index) in props.row.activityItems"
                       :key="index"
                       class="q-mb-sm q-pa-xs"
-                      style="border: 1px solid #e0e0e0; border-radius: 4px"
+
                     >
                       <div class="row text-body2 items-start no-wrap">
                         <!-- ชื่อกิจกรรม -->
@@ -744,13 +744,13 @@ watchEffect(() => {
                         </div>
 
                         <!-- ห้อง -->
-                        <div class="label-pair">
+                        <!-- <div class="label-pair">
                           <span class="label-title">ห้อง :</span>
                           <span class="label-value">{{ item.rooms?.join(', ') || '-' }}</span>
-                        </div>
+                        </div> -->
 
                         <!-- วันที่ -->
-                        <div class="label-pair" v-if="item.dates && item.dates.length > 0">
+                        <!-- <div class="label-pair" v-if="item.dates && item.dates.length > 0">
                           <span class="label-title">วันที่ :</span>
                           <span class="label-value">
                             <span v-for="(date, dateIndex) in item.dates" :key="dateIndex">
@@ -759,7 +759,7 @@ watchEffect(() => {
                               }})<span v-if="dateIndex < item.dates.length - 1">, </span>
                             </span>
                           </span>
-                        </div>
+                        </div> -->
                       </div>
                     </div>
                   </div>
@@ -825,14 +825,19 @@ watchEffect(() => {
           <!-- หัวตาราง Sticky -->
           <template v-slot:header="props">
             <q-tr :props="props">
-              <q-th v-for="col in props.cols" :key="col.name" :props="props"  :style="col.headerStyle">
+              <q-th
+                v-for="col in props.cols"
+                :key="col.name"
+                :props="props"
+                :style="col.headerStyle"
+              >
                 {{ col.label }}
               </q-th>
             </q-tr>
           </template>
           <!-- เนื้อหาตาราง -->
           <template v-slot:body="props">
-            <q-tr :props="props"  @click="toggleRowExpansion2(props.row.id)" class="cursor-pointer">
+            <q-tr :props="props" @click="toggleRowExpansion2(props.row.id)" class="cursor-pointer">
               <q-td key="no">
                 <div class="row items-center no-wrap">
                   <q-icon
@@ -884,8 +889,8 @@ watchEffect(() => {
                 </q-icon>
               </q-td>
             </q-tr>
-             <!-- Expanded Row Content -->
-             <q-tr v-if="expandedRows2.has(props.row.id)" class="expanded-row">
+            <!-- Expanded Row Content -->
+            <q-tr v-if="expandedRows2.has(props.row.id)" class="expanded-row">
               <q-td colspan="9" class="expanded-content">
                 <div class="q-pa-sm">
                   <div class="text-subtitle2 q-mb-sm">รายละเอียดกิจกรรมย่อย</div>
@@ -895,7 +900,7 @@ watchEffect(() => {
                       v-for="(item, index) in props.row.activityItems"
                       :key="index"
                       class="q-mb-sm q-pa-xs"
-                      style="border: 1px solid #e0e0e0; border-radius: 4px"
+                     
                     >
                       <div class="row text-body2 items-start no-wrap">
                         <!-- ชื่อกิจกรรม -->
@@ -910,24 +915,6 @@ watchEffect(() => {
                           <span class="label-value">
                             {{ item.maxParticipants || '-' }} / {{ item.enrollmentCount || 0 }} /
                             {{ item.maxParticipants - item.enrollmentCount || 0 }} คน
-                          </span>
-                        </div>
-
-                        <!-- ห้อง -->
-                        <div class="label-pair">
-                          <span class="label-title">ห้อง :</span>
-                          <span class="label-value">{{ item.rooms?.join(', ') || '-' }}</span>
-                        </div>
-
-                        <!-- วันที่ -->
-                        <div class="label-pair" v-if="item.dates && item.dates.length > 0">
-                          <span class="label-title">วันที่ :</span>
-                          <span class="label-value">
-                            <span v-for="(date, dateIndex) in item.dates" :key="dateIndex">
-                              {{ formatDateToThai(date.date) }} ({{ date.stime }}-{{
-                                date.etime
-                              }})<span v-if="dateIndex < item.dates.length - 1">, </span>
-                            </span>
                           </span>
                         </div>
                       </div>
@@ -1002,7 +989,7 @@ watchEffect(() => {
 
           <!-- เนื้อหาตาราง -->
           <template v-slot:body="props">
-            <q-tr :props="props"   @click="toggleRowExpansion3(props.row.id)" class="cursor-pointer">
+            <q-tr :props="props" @click="toggleRowExpansion3(props.row.id)" class="cursor-pointer">
               <q-td key="no">
                 <div class="row items-center no-wrap">
                   <q-icon
@@ -1064,7 +1051,7 @@ watchEffect(() => {
                       v-for="(item, index) in props.row.activityItems"
                       :key="index"
                       class="q-mb-sm q-pa-xs"
-                      style="border: 1px solid #e0e0e0; border-radius: 4px"
+                     
                     >
                       <div class="row text-body2 items-start no-wrap">
                         <!-- ชื่อกิจกรรม -->
@@ -1079,24 +1066,6 @@ watchEffect(() => {
                           <span class="label-value">
                             {{ item.maxParticipants || '-' }} / {{ item.enrollmentCount || 0 }} /
                             {{ item.maxParticipants - item.enrollmentCount || 0 }} คน
-                          </span>
-                        </div>
-
-                        <!-- ห้อง -->
-                        <div class="label-pair">
-                          <span class="label-title">ห้อง :</span>
-                          <span class="label-value">{{ item.rooms?.join(', ') || '-' }}</span>
-                        </div>
-
-                        <!-- วันที่ -->
-                        <div class="label-pair" v-if="item.dates && item.dates.length > 0">
-                          <span class="label-title">วันที่ :</span>
-                          <span class="label-value">
-                            <span v-for="(date, dateIndex) in item.dates" :key="dateIndex">
-                              {{ formatDateToThai(date.date) }} ({{ date.stime }}-{{
-                                date.etime
-                              }})<span v-if="dateIndex < item.dates.length - 1">, </span>
-                            </span>
                           </span>
                         </div>
                       </div>
@@ -1170,8 +1139,8 @@ watchEffect(() => {
           </template>
           <!-- เนื้อหาตาราง -->
           <template v-slot:body="props">
-            <q-tr :props="props"  @click="toggleRowExpansion4(props.row.id)" class="cursor-pointer">
-              <q-td key="no" >
+            <q-tr :props="props" @click="toggleRowExpansion4(props.row.id)" class="cursor-pointer">
+              <q-td key="no">
                 <div class="row items-center no-wrap">
                   <q-icon
                     :name="expandedRows4.has(props.row.id) ? 'expand_less' : 'expand_more'"
@@ -1235,7 +1204,7 @@ watchEffect(() => {
                       v-for="(item, index) in props.row.activityItems"
                       :key="index"
                       class="q-mb-sm q-pa-xs"
-                      style="border: 1px solid #e0e0e0; border-radius: 4px"
+                     
                     >
                       <div class="row text-body2 items-start no-wrap">
                         <!-- ชื่อกิจกรรม -->
@@ -1250,24 +1219,6 @@ watchEffect(() => {
                           <span class="label-value">
                             {{ item.maxParticipants || '-' }} / {{ item.enrollmentCount || 0 }} /
                             {{ item.maxParticipants - item.enrollmentCount || 0 }} คน
-                          </span>
-                        </div>
-
-                        <!-- ห้อง -->
-                        <div class="label-pair">
-                          <span class="label-title">ห้อง :</span>
-                          <span class="label-value">{{ item.rooms?.join(', ') || '-' }}</span>
-                        </div>
-
-                        <!-- วันที่ -->
-                        <div class="label-pair" v-if="item.dates && item.dates.length > 0">
-                          <span class="label-title">วันที่ :</span>
-                          <span class="label-value">
-                            <span v-for="(date, dateIndex) in item.dates" :key="dateIndex">
-                              {{ formatDateToThai(date.date) }} ({{ date.stime }}-{{
-                                date.etime
-                              }})<span v-if="dateIndex < item.dates.length - 1">, </span>
-                            </span>
                           </span>
                         </div>
                       </div>
