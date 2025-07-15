@@ -2,6 +2,8 @@
 import { ref } from 'vue'
 
 import UploadCertificate from './UploadCertificate.vue'
+import CertificateHistory from './UploadCertHistory.vue'
+
 // import { route } from 'quasar/wrappers';
 
 const tab = ref<string>('certificate')
@@ -29,7 +31,7 @@ const tab = ref<string>('certificate')
       </q-tab-panel>
 
       <q-tab-panel name="history" class="q-my-md">
-        <!-- <RegistrationDetails :activity="activity" /> -->
+        <CertificateHistory />
       </q-tab-panel>
     </q-tab-panels>
   </q-page>

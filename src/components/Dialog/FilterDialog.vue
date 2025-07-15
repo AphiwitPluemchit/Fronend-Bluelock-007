@@ -13,6 +13,7 @@ const props = defineProps<{
   statusActivities?: string[]
   categoryActivities?: string[]
   studentStatus?: string[]
+  statusCertificate?: string[]
 }>()
 
 const emit = defineEmits(['update:modelValue', 'apply'])
@@ -25,6 +26,7 @@ const options = {
   studentStatus: ['3', '2', '1'],
   statusActivity: ['planning', 'open', 'close', 'success', 'cancel'],
   categoryActivity: ['soft', 'hard'],
+  statusCertificate: ['pending', 'approved', 'rejected'],
 }
 
 // 'ชั่วโมงเตรียมความพร้อม', 'ชั่วโมงทักษะทางวิชาการ'
@@ -67,6 +69,18 @@ const getStatusText = (status: string) => {
       return '-'
   }
 }
+//สถานะใบCertificate
+const getStatusCertificateText = (status: string) => {
+  switch (status) {
+    case 'pending':
+      return 'รออนุมัติ'
+    case 'approved':
+      return 'อนุมัติ'
+    case 'rejected':
+      return 'ไม่อนุมัติ'
+  }
+  return status
+}
 
 // ฟิลเตอร์จริง
 const filters = ref({
@@ -75,6 +89,7 @@ const filters = ref({
   statusActivity: props.statusActivities ?? ([] as string[]),
   categoryActivity: props.categoryActivities ?? ([] as string[]),
   studentStatus: props.studentStatus ?? ([] as string[]),
+  statusCertificate: props.statusCertificate ?? ([] as string[]),
 })
 const initialFilters = ref<typeof filters.value>(cloneDeep(filters.value))
 const tempFilters = ref(cloneDeep(filters.value))
@@ -226,6 +241,22 @@ function toggleFilter(category: keyof typeof tempFilters.value, value: string) {
                 <div class="text-center full-width">{{ getStatusText(studentStatus) }}</div>
               </q-chip>
             </div>
+          </div>
+
+          <!-- สถานะCertificate -->
+          <div v-if="availableCategories.includes('statusCertificate')" class="q-mt-md">
+            <p class="q-mb-sm text-h6">สถานะใบรับรอง</p>
+
+            <q-chip
+              v-for="statusCertificate in options.statusCertificate"
+              :key="statusCertificate"
+              clickable
+              :class="{ selected: filters.statusCertificate.includes(statusCertificate) }"
+              @click="toggleFilter('statusCertificate', statusCertificate)"
+              style="height: 35px; width: 120px"
+            >
+              <div style="margin: auto">{{ getStatusCertificateText(statusCertificate) }}</div>
+            </q-chip>
           </div>
         </q-card-section>
         <q-card-actions align="right">

@@ -87,12 +87,13 @@ const confirm = () => {
           <q-btn
             label="อนุมัติ"
             class="custom-approve q-mr-lg"
+            :class="['custom-approve', { 'custom-approve--active': selectedAction === 'อนุมัติ' }]"
             unelevated
             @click="selectedAction = 'อนุมัติ'"
           />
           <q-btn
             label="ไม่อนุมัติ"
-            class="custom-reject"
+            :class="['custom-reject', { 'custom-reject--active': selectedAction === 'ไม่อนุมัติ' }]"
             unelevated
             @click="selectedAction = 'ไม่อนุมัติ'"
           />
@@ -183,16 +184,7 @@ const confirm = () => {
   font-size: 16px;
   width: 130px;
 }
-.badge-approve {
-  background-color: #009812;
-  color: white;
-  height: 32px;
-  padding: 10px 45px;
-  border-radius: 999px;
-  font-size: 16px;
-  width: 130px;
-  display: inline-block;
-}
+
 .custom-reject {
   background-color: #ffc5c5;
   color: #ff0000;
@@ -201,16 +193,41 @@ const confirm = () => {
   padding: 0 32px;
   border-radius: 999px;
   font-size: 16px;
+  width: 130px;
+}
+
+.custom-approve--active {
+  background-color: #009812;
+  border: 2px solid #009812;
+  color: white;
+}
+
+.custom-reject--active {
+  background-color: #ff0000;
+  border: 2px solid #ff0000;
+  color: white;
+}
+.badge-approve {
+  background-color: #009812;
+  color: white;
+  height: 40px;
+  padding: 12px 45px;
+  border-radius: 999px;
+  font-size: 16px;
+  width: 130px;
+  display: inline-block;
 }
 .badge-reject {
   background-color: #ff0000;
   color: white;
-  height: 32px;
-  padding: 10px 40px;
+  height: 40px;
+  padding: 12px 40px;
   border-radius: 999px;
   font-size: 16px;
+  width: 130px;
   display: inline-block;
 }
+
 .btnreject {
   background-color: #f44336;
   color: white;
