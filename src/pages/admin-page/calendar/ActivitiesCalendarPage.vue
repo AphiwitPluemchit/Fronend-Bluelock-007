@@ -16,6 +16,7 @@ const showFilterDialog1 = ref(false)
 const filterCategories = ref(['year', 'major', 'statusActivity', 'categoryActivity'])
 const searchBoxFocused = ref<boolean>(false)
 const calendarRef = ref()
+const displayedMonth = ref(new Date()) // ค่า default เป็นเดือนปัจจุบัน
 
 const query1 = ref<Pagination>({
   page: 1,
@@ -175,9 +176,24 @@ function getEvents(date: string) {
   return sortEventsByTimeAndName(events)
 }
 
-// for event stack ในแต่ละช่องของ QCalendar
-function getEventsForDay(date: string) {
-  const events = calendarEvents.value.filter((e) => e.date === date)
+function getFilteredEventsForDay(date: string) {
+  const d = new Date(date)
+  const currentMonth = displayedMonth.value.getMonth()
+  const currentYear = displayedMonth.value.getFullYear()
+
+  let events: CalendarEvent[] = []
+
+  // เงื่อนไขนี้ใช้เฉพาะตอนค้นหา
+  if (query1.value.search && groupedSearchResults.value) {
+    // ถ้าเดือนนี้ไม่ใช่เดือนที่กำลังแสดงใน calendar → ไม่ render
+    if (d.getMonth() !== currentMonth || d.getFullYear() !== currentYear) return []
+
+    events = groupedSearchResults.value[date] || []
+  } else {
+    // แสดง event ได้ทุกเดือน
+    events = calendarEvents.value.filter((e) => e.date === date)
+  }
+
   return sortEventsByTimeAndName(events).map((e) => ({ size: 1, event: e }))
 }
 
@@ -224,7 +240,7 @@ function parseToCalendarEvents(activities: Activity[]): CalendarEvent[] {
 
       item.dates.forEach((d) => {
         parsed.push({
-          id: activity.id?.toString() || '', 
+          id: activity.id?.toString() || '',
           activityName: activity.name || '-',
           activityItemName: item.name || activity.name || '-',
           activityState: activityStateLabel,
@@ -373,7 +389,7 @@ watch(selectedDate, (val) => {
               <div class="day-number">{{ scope.timestamp.day }}</div>
               <div class="event-stack">
                 <div
-                  v-for="(eventData, idx) in getEventsForDay(scope.timestamp.date)"
+                  v-for="(eventData, idx) in getFilteredEventsForDay(scope.timestamp.date)"
                   :key="idx"
                   :class="badgeClasses(eventData)"
                   class="my-event"
