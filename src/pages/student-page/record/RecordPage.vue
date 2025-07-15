@@ -168,24 +168,24 @@ onMounted(async () => {
         </q-card-section>
 
         <q-card-section>
-          <div class="row q-col-gutter-md">
-            <div class="col-12 col-md-6">
-              <div class="row q-col-gutter-sm text-body2 q-py-xs">
-                <div class="col-4 text-right text-weight-medium">ชื่อ :</div>
-                <div class="col-8">{{ studentData.name }}</div>
-              </div>
-              <div class="row q-col-gutter-sm text-body2 q-py-xs">
-                <div class="col-4 text-right text-weight-medium">สาขา :</div>
-                <div class="col-8">{{ majorFullName }}</div>
-              </div>
+          <div class="text-body2">
+            <div class="field-pair">
+              <div class="field-label">ชื่อ - นามสกุล</div>
+              <div class="field-value">: {{ studentData.name || 'ไม่ระบุ' }}</div>
+            </div>
 
-              <div class="row q-col-gutter-sm text-body2 q-py-xs">
-                <div class="col-4 text-right text-weight-medium">รหัสนิสิต :</div>
-                <div class="col-8">{{ studentData.studentId }}</div>
-              </div>
+            <div class="field-pair">
+              <div class="field-label">สาขาวิชา</div>
+              <div class="field-value">: {{ majorFullName || 'ไม่ระบุ' }}</div>
+            </div>
+
+            <div class="field-pair">
+              <div class="field-label">รหัสนิสิต</div>
+              <div class="field-value">: {{ studentData.studentId || 'ไม่ระบุ' }}</div>
             </div>
           </div>
         </q-card-section>
+
       </q-card>
 
       <!-- Progress Cards -->
@@ -319,9 +319,9 @@ onMounted(async () => {
               v-if="activities.length > 3"
               flat
               dense
-              color="primary"
+              color="white"
               :icon="showAllActivities ? 'expand_less' : 'expand_more'"
-              :label="showAllActivities ? 'แสดงน้อยลง' : 'ทั้งหมด'"
+              :label="showAllActivities ? 'ดูน้อยลง' : 'ดูทั้งหมด'"
               @click="showAllActivities = !showAllActivities"
             />
           </div>
@@ -414,6 +414,23 @@ onMounted(async () => {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+.field-pair {
+  display: flex;
+  margin-bottom: 8px;
+  flex-wrap: wrap;
+}
+
+.field-label {
+  min-width: 120px;
+  font-weight: 700;
+  color: #000000;
+}
+
+.field-value {
+  flex: 1;
+  color: #000000;
 }
 
 </style>

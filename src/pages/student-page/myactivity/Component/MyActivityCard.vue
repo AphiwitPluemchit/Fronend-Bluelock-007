@@ -84,16 +84,15 @@ const getActivityRooms = (activityItems: ActivityItem[] | null | undefined): str
 
         <div class="text-body2 q-mt-sm">
           <q-icon name="event" class="q-mb-xs" />
-          วันที่ : {{ getActivitydates(myActivity.activityItems) }}
+          {{ getActivitydates(myActivity.activityItems) }}
         </div>
         <div class="text-body2">
           <q-icon name="schedule" class="q-mb-xs" />
-          เวลา : {{ getActivityTime(myActivity.activityItems) }}
+          {{ getActivityTime(myActivity.activityItems) }}
         </div>
         <div class="text-body2">
           <q-icon name="room" class="q-mb-xs" />
-
-          ห้อง : {{ getActivityRooms(myActivity.activityItems) }}
+          {{ getActivityRooms(myActivity.activityItems) }}
         </div>
 
 

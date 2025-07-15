@@ -78,13 +78,14 @@ function enrollmentSummary(activityItems: ActivityItem[]) {
 
         <div class="text-subtitle2 q-mb-xs">
           <q-icon name="event" class="q-mb-xs" />
-          {{ getActivityDate(activity.activityItems) }}
+          วันที่จัด : {{ getActivityDate(activity.activityItems) }}
         </div>
         <div class="text-subtitle2 q-mb-sm">
           <q-icon name="schedule" class="q-mb-xs" />
-          {{ getActivityTime(activity.activityItems) }}
+          เวลาที่จัด : {{ getActivityTime(activity.activityItems) }}
         </div>
         <div class="text-subtitle2 q-mb-sm">
+          <q-icon name="chair" class="q-mb-xs" />
           จำนวนที่รับ : {{ enrollmentSummary(activity.activityItems ?? []) }}
         </div>
       </div>
