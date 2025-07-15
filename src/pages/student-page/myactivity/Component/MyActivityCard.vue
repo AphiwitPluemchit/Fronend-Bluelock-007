@@ -154,6 +154,10 @@ const getActivityRooms = (activityItems: ActivityItem[] | null | undefined): str
     text-align: center;
   }
 
+  .activity-img {
+    max-height: 120px;
+  }
+
   .activity-card {
     min-height: 280px;
     padding: 12px;
@@ -170,6 +174,8 @@ const getActivityRooms = (activityItems: ActivityItem[] | null | undefined): str
     border-radius: 12px;
   }
 
+
+  
   .activity-name {
     font-size: 14px;
     -webkit-line-clamp: 2;
