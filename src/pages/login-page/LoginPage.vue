@@ -9,14 +9,10 @@
             <div class="icon-container q-mb-md">
               <q-icon name="school" size="80px" color="white" />
             </div>
-            <div class="text-h4 text-white q-mb-xs brand-title">
-              Cooperative<br />Education
-            </div>
-            <div class="text-subtitle1 text-white brand-subtitle">
-              ระบบบริหารจัดการสหกิจศึกษา
-            </div>
+            <div class="text-h4 text-white q-mb-xs brand-title">Cooperative<br />Education</div>
+            <div class="text-subtitle1 text-white brand-subtitle">ระบบบริหารจัดการสหกิจศึกษา</div>
           </div>
-          
+
           <!-- Decorative circles -->
           <div class="decorative-circles">
             <div class="circle circle-1"></div>
@@ -28,86 +24,88 @@
         <!-- ขวา: ฟอร์ม -->
         <div class="col-6 right-side flex flex-center">
           <div class="login-form-container">
-            <div class="text-h5 text-primary text-center q-mb-lg login-title">
-              เข้าสู่ระบบ
-            </div>
-            <div class="login-divider q-mb-lg"></div>
+            <div v-if="!isResetPassword">
+              <div class="text-h5 text-primary text-center q-mb-lg login-title">เข้าสู่ระบบ</div>
+              <div class="login-divider q-mb-lg"></div>
 
-            <q-form @submit.prevent="handleLogin">
-              <!-- อีเมล -->
-              <div class="text-body2 text-grey-8 q-mb-xs">ชื่อผู้ใช้</div>
-              <q-input
-                v-model="auth.form.email"
-                type="email"
-                outlined
-                dense
-                class="q-mb-md login-input"
-                :rules="[val => !!val ]"
-              >
-                <template v-slot:prepend>
-                  <q-icon name="email" color="primary" />
-                </template>
-              </q-input>
+              <q-form @submit.prevent="handleLogin">
+                <!-- อีเมล -->
+                <div class="text-body2 text-grey-8 q-mb-xs">ชื่อผู้ใช้</div>
+                <q-input
+                  v-model="auth.form.email"
+                  type="email"
+                  outlined
+                  dense
+                  class="q-mb-md login-input"
+                  :rules="[(val) => !!val]"
+                >
+                  <template v-slot:prepend>
+                    <q-icon name="email" color="primary" />
+                  </template>
+                </q-input>
 
-              <!-- รหัสผ่าน -->
-              <div class="text-body2 text-grey-8 q-mb-xs">รหัสผ่าน</div>
-              <q-input
-                v-model="auth.form.password"
-                :type="isPwd ? 'password' : 'text'"
-                outlined
-                dense
-                class="q-mb-lg login-input"
-                :rules="[val => !!val ]"
-              >
-                <template v-slot:prepend>
-                  <q-icon name="lock" color="primary" />
-                </template>
-                <template v-slot:append>
-                  <q-icon
-                    :name="isPwd ? 'visibility_off' : 'visibility'"
-                    class="cursor-pointer text-grey-6"
-                    @click="isPwd = !isPwd"
-                  />
-                </template>
-              </q-input>
+                <!-- รหัสผ่าน -->
+                <div class="text-body2 text-grey-8 q-mb-xs">รหัสผ่าน</div>
+                <q-input
+                  v-model="auth.form.password"
+                  :type="isPwd ? 'password' : 'text'"
+                  outlined
+                  dense
+                  class="q-mb-lg login-input"
+                  :rules="[(val) => !!val]"
+                >
+                  <template v-slot:prepend>
+                    <q-icon name="lock" color="primary" />
+                  </template>
+                  <template v-slot:append>
+                    <q-icon
+                      :name="isPwd ? 'visibility_off' : 'visibility'"
+                      class="cursor-pointer text-grey-6"
+                      @click="isPwd = !isPwd"
+                    />
+                  </template>
+                </q-input>
 
-              <!-- ปุ่มเข้าสู่ระบบ -->
-              <q-btn
-                label="เข้าสู่ระบบ"
-                type="submit"
-                color="primary"
-                class="full-width login-btn q-mb-md"
-                unelevated
-                no-caps
-              />
-
-              <!-- ลืมรหัสผ่าน -->
-              <div class="text-right">
+                <!-- ปุ่มเข้าสู่ระบบ -->
                 <q-btn
-                  label="ลืมรหัสผ่าน?"
-                  flat
+                  label="เข้าสู่ระบบ"
+                  type="submit"
                   color="primary"
-                  size="sm"
-                  @click="handResetPassword"
-                  class="forgot-password-btn"
+                  class="full-width login-btn q-mb-md"
+                  unelevated
                   no-caps
                 />
-              </div>
-            </q-form>
+
+                <!-- ลืมรหัสผ่าน -->
+                <div class="text-right">
+                  <q-btn
+                    label="ลืมรหัสผ่าน?"
+                    flat
+                    color="primary"
+                    size="sm"
+                    @click="isResetPassword = true"
+                    class="forgot-password-btn"
+                    no-caps
+                  />
+                </div>
+              </q-form>
+            </div>
+            <div v-if="isResetPassword">
+              <RecoverPassword />
+            </div>
           </div>
         </div>
       </div>
-
       <!-- Mobile Layout -->
-      <div class="mobile-layout column items-center justify-center q-pa-lg hidden-md hidden-lg hidden-xl">
+      <div
+        class="mobile-layout column items-center justify-center q-pa-lg hidden-md hidden-lg hidden-xl"
+      >
         <!-- โลโก้ -->
         <div class="mobile-logo-section text-center q-mb-lg">
           <div class="mobile-icon-container q-mb-md">
             <q-icon name="school" size="60px" color="primary" />
           </div>
-          <div class="text-h5 text-primary q-mb-xs">
-            Cooperative<br />Education
-          </div>
+          <div class="text-h5 text-primary q-mb-xs">Cooperative<br />Education</div>
         </div>
 
         <!-- ฟอร์ม -->
@@ -135,7 +133,7 @@
               outlined
               dense
               class="q-mb-lg login-input"
-              :rules="[val => !!val ]"
+              :rules="[(val) => !!val]"
             >
               <template v-slot:prepend>
                 <q-icon name="lock" color="primary" />
@@ -166,7 +164,6 @@
                 flat
                 color="primary"
                 size="sm"
-                @click="handResetPassword"
                 class="forgot-password-btn"
                 no-caps
               />
@@ -183,10 +180,12 @@ import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from 'src/stores/auth'
 import { EnumUserRole } from 'src/data/roles'
+import RecoverPassword from './RecoverPassword.vue'
 
 const auth = useAuthStore()
 const router = useRouter()
 const isPwd = ref(true)
+const isResetPassword = ref(false)
 
 const handleLogin = async () => {
   try {
@@ -213,14 +212,12 @@ const handleLogin = async () => {
   }
 }
 
-const handResetPassword = () => {
-  console.log('ลืมรหัสผ่าน')
-}
+
 </script>
 
 <style scoped>
 .login-page {
-  background: linear-gradient(135deg, #4A5FBF 0%, #2E3F80 50%, #1A2B5C 100%);
+  background: linear-gradient(135deg, #4a5fbf 0%, #2e3f80 50%, #1a2b5c 100%);
   min-height: 100vh;
   padding: 2rem;
 }
@@ -236,19 +233,19 @@ const handResetPassword = () => {
 }
 
 @keyframes slideUp {
-  0% { 
-    opacity: 0; 
-    transform: translateY(30px); 
+  0% {
+    opacity: 0;
+    transform: translateY(30px);
   }
-  100% { 
-    opacity: 1; 
-    transform: translateY(0); 
+  100% {
+    opacity: 1;
+    transform: translateY(0);
   }
 }
 
 /* Desktop Left Side */
 .left-side {
-  background: linear-gradient(135deg, #4A5FBF 0%, #2E3F80 60%, #1A2B5C 100%);
+  background: linear-gradient(135deg, #4a5fbf 0%, #2e3f80 60%, #1a2b5c 100%);
   position: relative;
   overflow: hidden;
 }
@@ -269,8 +266,13 @@ const handResetPassword = () => {
 }
 
 @keyframes float {
-  0%, 100% { transform: translateY(0px); }
-  50% { transform: translateY(-10px); }
+  0%,
+  100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
 }
 
 .brand-title {
@@ -301,41 +303,42 @@ const handResetPassword = () => {
   animation: circleFloat 8s infinite linear;
 }
 
-.circle-1 { 
-  width: 100px; 
-  height: 100px; 
-  top: 10%; 
-  left: 5%; 
+.circle-1 {
+  width: 100px;
+  height: 100px;
+  top: 10%;
+  left: 5%;
 }
 
-.circle-2 { 
-  width: 150px; 
-  height: 150px; 
-  top: 70%; 
-  right: 10%; 
+.circle-2 {
+  width: 150px;
+  height: 150px;
+  top: 70%;
+  right: 10%;
 }
 
-.circle-3 { 
-  width: 80px; 
-  height: 80px; 
-  bottom: 20%; 
-  left: 70%; 
+.circle-3 {
+  width: 80px;
+  height: 80px;
+  bottom: 20%;
+  left: 70%;
 }
 
 @keyframes circleFloat {
-  0%, 100% { 
-    transform: translateY(0px) rotate(0deg); 
+  0%,
+  100% {
+    transform: translateY(0px) rotate(0deg);
     opacity: 0.6;
   }
-  50% { 
-    transform: translateY(-20px) rotate(180deg); 
+  50% {
+    transform: translateY(-20px) rotate(180deg);
     opacity: 0.3;
   }
 }
 
 /* Desktop Right Side */
 .right-side {
-  background: linear-gradient(135deg, #FFFFFF 0%, #F8F9FF 100%);
+  background: linear-gradient(135deg, #ffffff 0%, #f8f9ff 100%);
   padding: 2rem;
 }
 
@@ -345,7 +348,7 @@ const handResetPassword = () => {
 }
 
 .login-title {
-  color: #2E3F80;
+  color: #2e3f80;
   font-weight: 600;
   margin-bottom: 1rem;
 }
@@ -353,7 +356,7 @@ const handResetPassword = () => {
 .login-divider {
   width: 50px;
   height: 3px;
-  background: linear-gradient(90deg, #4A5FBF, #2E3F80);
+  background: linear-gradient(90deg, #4a5fbf, #2e3f80);
   border-radius: 2px;
   margin: 0 auto;
 }
@@ -364,7 +367,7 @@ const handResetPassword = () => {
 
 .login-input .q-field__control {
   border-radius: 8px;
-  background: #FAFBFF;
+  background: #fafbff;
 }
 
 .login-btn {
@@ -372,7 +375,7 @@ const handResetPassword = () => {
   border-radius: 8px;
   font-weight: 600;
   font-size: 16px;
-  background: linear-gradient(135deg, #4A5FBF 0%, #2E3F80 100%);
+  background: linear-gradient(135deg, #4a5fbf 0%, #2e3f80 100%);
 }
 
 .forgot-password-btn {
@@ -382,7 +385,7 @@ const handResetPassword = () => {
 
 /* Mobile Layout */
 .mobile-layout {
-  background: linear-gradient(135deg, #FFFFFF 0%, #F8F9FF 100%);
+  background: linear-gradient(135deg, #ffffff 0%, #f8f9ff 100%);
   min-height: 500px;
   width: 100%;
 }
@@ -409,13 +412,13 @@ const handResetPassword = () => {
   .login-page {
     padding: 1rem;
   }
-  
+
   .login-container {
     height: auto;
     min-height: 500px;
     border-radius: 15px;
   }
-  
+
   .mobile-layout {
     padding: 1.5rem;
   }
@@ -428,7 +431,7 @@ const handResetPassword = () => {
     height: auto;
     min-height: 600px;
   }
-  
+
   .mobile-layout {
     padding: 2rem;
   }
@@ -436,8 +439,8 @@ const handResetPassword = () => {
 
 /* Focus States */
 .login-input .q-field--focused .q-field__control {
-  border-color: #4A5FBF;
-  box-shadow: 0 0 0 1px #4A5FBF;
+  border-color: #4a5fbf;
+  box-shadow: 0 0 0 1px #4a5fbf;
 }
 
 /* Hover Effects */
@@ -460,5 +463,4 @@ const handResetPassword = () => {
     display: flex !important;
   }
 }
-
 </style>
