@@ -8,19 +8,6 @@
             class="image"
             error-src="/default-placeholder.jpg"
           />
-          <div class="row q-mt-lg">
-            <div class="col-12 text-left">
-              <div class="q-mb-md q-ml-md">วันที่ 13 มกราคม 2568</div>
-            </div>
-          </div>
-          <div class="row q-ml-md">
-            <div class="col-12 text-left">
-              <div class="q-mb-sm q-ml-md">เช็คชื่อเข้า : 10:00 น. (ทันเวลา)</div>
-            </div>
-            <div class="col-12 text-left">
-              <div class="q-mb-sm q-ml-md">เช็คชื่อออก : 16:30 น. (ทันเวลา)</div>
-            </div>
-          </div>
         </div>
         <!-- ///////////////////////////////////////////// -->
         <div class="col-12 col-md-8">
@@ -101,11 +88,11 @@ type Status = {
 }
 const formatDate = (iso: string): string => {
   if (!iso) return 'ยังไม่เช็คชื่อ'
-  return dayjs(iso).add(7, 'hour').format('D MMMM BBBB')
+  return dayjs(iso).format('D MMMM BBBB')
 }
 const formatTime = (iso: string): string => {
   if (!iso) return 'ยังไม่เช็คชื่อ'
-  return dayjs(iso).add(7, 'hour').format('HH:mm น.')
+  return dayjs(iso).format('HH:mm น.')
 }
 const checkinoutStore = useCheckinoutStore()
 const studentActivityStore = useStudentActivitystore()
