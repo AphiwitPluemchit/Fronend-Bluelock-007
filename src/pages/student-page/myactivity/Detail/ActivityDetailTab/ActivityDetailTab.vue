@@ -93,7 +93,11 @@ onMounted(async () => {
       <!-- ภาพกิจกรรม -->
       <div class="col-12 col-md-4 text-center">
         <q-img
-          :src="activity?.file ? baseurl + '/uploads/activity/images/' + activity.file : '/default-placeholder.jpg'"
+          :src="
+            activity?.file
+              ? baseurl + '/uploads/activity/images/' + activity.file
+              : '/default-placeholder.jpg'
+          "
           class="activity-img"
           :ratio="4 / 3"
           spinner-color="primary"
@@ -102,8 +106,11 @@ onMounted(async () => {
 
       <!-- รายละเอียดกิจกรรม -->
       <div class="col-12 col-md-8" v-if="activity">
-        <DetailOne v-if="activity.type === 'one'" :activity="activity" />
-        <DetailMany v-else-if="activity.type === 'many'" :activity="activity" />
+        <DetailOne
+          v-if="Array.isArray(activity?.activityItems) && activity.activityItems.length > 1"
+          :activity="activity"
+        />
+        <DetailMany v-else :activity="activity" />
       </div>
     </q-card-section>
 
@@ -178,4 +185,3 @@ onMounted(async () => {
   color: white;
 }
 </style>
-
