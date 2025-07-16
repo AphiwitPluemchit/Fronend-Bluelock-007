@@ -47,7 +47,7 @@
             color="primary"
             class="full-width login-btn q-mb-md"
             unelevated
-            @click="goToLogin"
+            @click="handleConfirm"
             no-caps
           />
         </div>
@@ -59,15 +59,15 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import { useAuthStore } from 'src/stores/auth'
-import { useRouter } from 'vue-router'
+import { defineEmits } from 'vue'
 
-const router = useRouter()
 const auth = useAuthStore()
 const isPwd = ref(true)
+const emit = defineEmits(['backToLogin'])
 
-const goToLogin = () => {
-  void router.push({ name: 'Login' });
-};
+function handleConfirm() {
+  emit('backToLogin') // ส่งสัญญาณกลับไปที่ LoginPage.vue
+}
 </script>
 
 <style scoped>

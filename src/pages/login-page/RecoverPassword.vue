@@ -31,7 +31,7 @@
         </div>
 
         <div v-if="isResetPassword">
-          <OTPPage /> 
+          <OTPPage @backToLogin="$emit('backToLogin')" />
         </div>
       </div>
     </div>

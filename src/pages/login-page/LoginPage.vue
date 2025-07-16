@@ -93,7 +93,7 @@
               </q-form>
             </div>
             <div v-else>
-              <RecoverPassword />
+              <RecoverPassword @backToLogin="resetToLogin" />
             </div>
           </div>
         </div>
@@ -176,7 +176,7 @@
             </q-form>
           </div>
           <div v-else>
-            <RecoverPassword />
+            <OTPPage @backToLogin="$emit('backToLogin')" />
           </div>
         </div>
       </div>
@@ -199,6 +199,9 @@ const isPwd = ref(true)
 const isResetPassword = ref(false)
 const isLoggingIn = ref(false)
 
+function resetToLogin() {
+  isResetPassword.value = false
+}
 const handleLogin = async () => {
   try {
     isLoggingIn.value = true
