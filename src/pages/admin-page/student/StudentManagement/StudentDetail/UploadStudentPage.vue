@@ -239,6 +239,11 @@ const clearFile = () => {
             </q-td>
           </q-tr>
         </template>
+        <template v-slot:no-data>
+            <div class="full-width text-center q-pa-md text-grey" style="font-size: 20px">
+              ไม่มีนิสิตที่อัพโหลด
+            </div>
+          </template>
       </q-table>
 
       <div class="row justify-end q-mt-md">
@@ -253,6 +258,7 @@ const clearFile = () => {
         />
       </div>
     </section>
+    
   </q-page>
 </template>
 
