@@ -1317,7 +1317,7 @@ watchEffect(() => {
                   flat
                   dense
                   icon="visibility"
-                  class="bg-blue-10 text-blue-1"
+                  class="bg-black text-white"
                   @click="goToPageDetail(row.id ?? '', true)"
                 >
                   <q-tooltip>ดูรายละเอียด</q-tooltip>
@@ -1326,7 +1326,7 @@ watchEffect(() => {
                   flat
                   dense
                   icon="edit"
-                  class="bg-amber-5 text-yellow-1"
+                  class="bg-primary text-white"
                   @click="goToPageDetail(row.id ?? '', false)"
                 >
                   <q-tooltip>แก้ไข</q-tooltip>
@@ -1422,7 +1422,7 @@ watchEffect(() => {
                   flat
                   dense
                   icon="visibility"
-                  class="bg-blue-10 text-blue-1"
+                  class="bg-black text-white"
                   @click="goToPageDetail(row.id ?? '', true)"
                 >
                   <q-tooltip>ดูรายละเอียด</q-tooltip>
@@ -1431,7 +1431,7 @@ watchEffect(() => {
                   flat
                   dense
                   icon="edit"
-                  class="bg-amber-5 text-yellow-1"
+                  class="bg-primary text-white"
                   @click="goToPageDetail(row.id ?? '', false)"
                 >
                   <q-tooltip>แก้ไข</q-tooltip>
@@ -1527,7 +1527,7 @@ watchEffect(() => {
                   flat
                   dense
                   icon="visibility"
-                  class="bg-blue-10 text-blue-1"
+                  class="bg-black text-white "
                   @click="goToPageDetail(row.id ?? '', true)"
                 >
                   <q-tooltip>ดูรายละเอียด</q-tooltip>
@@ -1536,7 +1536,7 @@ watchEffect(() => {
                   flat
                   dense
                   icon="edit"
-                  class="bg-amber-5 text-yellow-1"
+                  class="bg-primary text-white  "
                   @click="goToPageDetail(row.id ?? '', false)"
                 >
                   <q-tooltip>แก้ไข</q-tooltip>
@@ -1632,7 +1632,7 @@ watchEffect(() => {
                   flat
                   dense
                   icon="visibility"
-                  class="bg-blue-10 text-blue-1"
+                  class="bg-black text-white"
                   @click="goToPageDetail(row.id ?? '', true)"
                 >
                   <q-tooltip>ดูรายละเอียด</q-tooltip>
@@ -1641,7 +1641,7 @@ watchEffect(() => {
                   flat
                   dense
                   icon="edit"
-                  class="bg-amber-5 text-yellow-1"
+                  class="bg-primary text-white "
                   @click="goToPageDetail(row.id ?? '', false)"
                 >
                   <q-tooltip>แก้ไข</q-tooltip>

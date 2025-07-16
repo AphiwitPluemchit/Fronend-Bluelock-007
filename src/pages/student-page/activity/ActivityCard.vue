@@ -62,7 +62,7 @@ function enrollmentSummary(activityItems: ActivityItem[]) {
         <q-img
           :src="baseurl + '/uploads/activity/images/' + activity.file"
           class="activity-img"
-          :ratio="4 / 3"
+          :ratio="4 / 4"
         />
       </div>
 

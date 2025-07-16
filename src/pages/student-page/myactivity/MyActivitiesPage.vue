@@ -74,7 +74,7 @@ onMounted(async () => {
         </template>
       </q-input>
 
-         <div class="filter-btn-wrapper">
+            <div class="filter-btn-wrapper">
               <FilterDialog
                 :model-value="showFilterDialog"
                 :categories="filterCategories"

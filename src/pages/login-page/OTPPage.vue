@@ -3,9 +3,9 @@
     <div class="login-form-container">
       <!-- Check if isResetPassword is false, show login form, else show RecoverPassword component -->
       <div v-if="!isResetPassword">
-        <div class="text-h5 text-primary text-center q-mb-lg login-title">OTP</div>
+        <div class="text-h5 text-primary text-center q-mb-lg login-title">ยืนยัน OTP</div>
         <div class="text-body2 text-grey-8 q-mb-lg">
-          Please enter the OTP received on the email someone@example.com
+          กรุณากรอกรหัส OTP ที่ได้รับ
         </div>
         <div class="text-body2 text-black-8 q-mb-xs">OTP</div>
         <div class="otp-input-container">
@@ -64,7 +64,7 @@
           />
         </div>
         <q-btn
-          label="Confirm"
+          label="ยืนยัน"
           color="primary"
           class="full-width login-btn q-mb-md"
           unelevated
@@ -72,8 +72,8 @@
           no-caps
         />
         <div class="text-center q-mb-lg">
-          <span>OTP not received? </span>
-          <q-btn label="Send again" color="primary" flat no-caps />
+          <span>ไม่ได้รับรหัส? </span>
+          <q-btn label="ส่งอีกครั้ง" color="primary" flat no-caps />
         </div>  
       </div>
     </div>
@@ -157,4 +157,14 @@ const handlePaste = (event: ClipboardEvent, index: number) => {
 ::v-deep(input[type='number']) {
   -moz-appearance: textfield;
 }
+
+.login-btn {
+  height: 48px;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 16px;
+  background: linear-gradient(135deg, #4a5fbf 0%, #2e3f80 100%);
+}
+
+
 </style>

@@ -30,7 +30,7 @@
 
               <q-form @submit.prevent="handleLogin">
                 <!-- อีเมล -->
-                <div class="text-body2 text-grey-8 q-mb-xs">ชื่อผู้ใช้</div>
+                <div class="text-body2 text-grey-8 q-mb-xs">ที่อยู่อีเมล</div>
                 <q-input
                   v-model="auth.form.email"
                   type="email"
@@ -112,7 +112,7 @@
         <div class="mobile-form-container full-width">
           <q-form @submit.prevent="handleLogin">
             <!-- อีเมล -->
-            <div class="text-body2 text-grey-8 q-mb-xs">ชื่อผู้ใช้</div>
+            <div class="text-body2 text-grey-8 q-mb-xs">ที่อยู่อีเมล</div>
             <q-input
               v-model="auth.form.email"
               type="email"

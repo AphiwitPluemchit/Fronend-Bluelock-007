@@ -84,10 +84,6 @@ const totalByMajor = computed(() => {
   return result
 })
 
-const getProgressPercentage = (enrolled: number, max: number) => {
-  return max > 0 ? (enrolled / max) * 100 : 0
-}
-
 onMounted(async () => {
   await fetchEnrollmentSummary()
   await fetchActivityDetail()
@@ -311,7 +307,10 @@ onMounted(async () => {
   font-weight: 700;
   color: #2d3748;
   margin: 0;
+  word-break: break-word; /* เพิ่มบรรทัดนี้ */
+  line-height: 1.3;        /* และบรรทัดนี้ถ้าอยากให้ดูโปร่งขึ้น */
 }
+
 
 .activity-badge {
   padding: 8px 16px;
@@ -714,9 +713,16 @@ onMounted(async () => {
     gap: 16px;
     text-align: center;
   }
-  
   .activity-title h1 {
-    font-size: 24px;
+    font-size: 20px;
+    text-align: center;
+    word-break: break-word;
+  }
+
+  .activity-title {
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
   }
 }
 </style>

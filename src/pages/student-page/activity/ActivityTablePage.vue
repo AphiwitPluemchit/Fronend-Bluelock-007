@@ -5,24 +5,24 @@
       <div class="texttitle">กิจกรรมทั้งหมด</div>
     </div>
 
-        <div class="row justify-between items-right  q-mb-md search-filter-wrapper q-col-gutter-md">
-          <div class="text-h6"></div>
-          <div class="row search-filter-inner items-center no-wrap">
-            <q-input
-              dense
-              outlined
-              v-model="query.search"
-              placeholder="ค้นหา ชื่อกิจกรรม"
-              @keyup.enter="applyFilters"
-              class="q-mr-sm searchbox"
-              :style="{ boxShadow: 'none' }"
-            >
-              <template v-slot:append>
-                <q-icon name="search" />
-              </template>
-            </q-input>
+      <div class="row justify-between items-center q-mb-md search-filter-wrapper q-col-gutter-md">
+        <div class="text-h6"></div>
+        <div class="row search-filter-inner items-center no-wrap">
+          <q-input
+            dense
+            outlined
+            v-model="query.search"
+            placeholder="ค้นหา ชื่อกิจกรรม"
+            @keyup.enter="applyFilters"
+            class="q-mr-sm searchbox"
+            :style="{ boxShadow: 'none' }"
+          >
+            <template v-slot:append>
+              <q-icon name="search" />
+            </template>
+          </q-input>
 
-            <div class="filter-btn-wrapper">
+          <div class="filter-btn-wrapper">
               <FilterDialog
                 :model-value="showFilterDialog"
                 :categories="filterCategories"
@@ -33,8 +33,9 @@
                 :category-activities="query.skill || []"
               />
             </div>
-          </div>
         </div>
+      </div>
+
 
 
         <!-- แสดงกิจกรรม -->
@@ -150,6 +151,31 @@ onMounted(async () => {
     width: 100%;
   }
 }
+
+.search-filter-inner {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: nowrap;
+}
+
+.filter-btn-wrapper {
+  flex-shrink: 0;
+}
+
+@media (max-width: 600px) {
+  .search-filter-inner {
+    justify-content: flex-end;
+    width: 100%;
+  }
+}
+
+.searchbox {
+  flex-grow: 1;
+  min-width: 0;
+}
+
 </style>
 
 

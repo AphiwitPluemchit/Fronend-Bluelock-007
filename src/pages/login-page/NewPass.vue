@@ -5,8 +5,8 @@
       <div class="login-form-container">
         <!-- Check if isResetPassword is false, show login form, else show RecoverPassword component -->
         <div >
-          <div class="text-h5 text-primary text-center q-mb-lg login-title">Confirm Password</div>
-          <div class="text-body2 text-grey-8 q-mb-lg">Please enter your new password.</div>
+          <div class="text-h5 text-primary text-center q-mb-lg login-title">สร้างรหัสผ่านใหม่</div>
+          <div class="text-body2 text-grey-8 q-mb-lg">กรุณากรอกรหัสผ่านใหม่ของคุณ</div>
           
           <q-input
             v-model="auth.form.password"
@@ -15,7 +15,7 @@
             dense
             class="q-mb-lg login-input"
             :rules="[(val) => !!val]"
-            label="New Password"
+            label="รหัสผ่านใหม่"
           >
             <template v-slot:append>
               <q-icon
@@ -32,7 +32,7 @@
             dense
             class="q-mb-lg login-input"
             :rules="[(val) => !!val]"
-            label="Confirm Password"
+            label="ยืนยันรหัสผ่าน"
           >
             <template v-slot:append>
               <q-icon
@@ -69,3 +69,13 @@ const goToLogin = () => {
   void router.push({ name: 'Login' });
 };
 </script>
+
+<style scoped>
+.login-btn {
+  height: 48px;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 16px;
+  background: linear-gradient(135deg, #4a5fbf 0%, #2e3f80 100%);
+}
+</style>
