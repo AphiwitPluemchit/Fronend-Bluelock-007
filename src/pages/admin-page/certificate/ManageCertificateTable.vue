@@ -269,9 +269,9 @@ const certList = ref([
               <q-td key="action" class="text-center q-gutter-x-sm">
                 <q-icon
                   v-if="props.row.status === 'รออนุมัติ'"
+                  clickable
                   name="edit"
-                  class="cursor-pointer"
-                  size="20px"
+                  class="bg-primary text-white q-pa-xs rounded-borders q-mr-sm"
                   @click="openManageCer(props.row)"
                 >
                   <q-tooltip>แก้ไข</q-tooltip>
@@ -279,9 +279,9 @@ const certList = ref([
 
                 <q-icon
                   v-else
+                  clickable
                   name="visibility"
-                  class="cursor-pointer"
-                  size="20px"
+                  class="bg-black text-white q-pa-xs rounded-borders q-mr-sm"
                   @click="viewDetail(props.row)"
                 >
                   <q-tooltip>ดูรายละเอียด</q-tooltip>

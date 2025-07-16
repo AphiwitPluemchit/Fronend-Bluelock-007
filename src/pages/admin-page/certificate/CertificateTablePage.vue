@@ -225,7 +225,11 @@ function getcategoryCourse(row: CertificateCourse) {
             </q-td>
 
             <q-td key="action" class="text-center q-gutter-x-sm">
-              <q-icon name="edit" class="cursor-pointer" size="20px">
+              <q-icon
+                clickable
+                name="edit"
+                class="bg-primary text-white q-pa-xs rounded-borders q-mr-sm"
+              >
                 <q-tooltip>แก้ไข</q-tooltip>
               </q-icon>
             </q-td>
