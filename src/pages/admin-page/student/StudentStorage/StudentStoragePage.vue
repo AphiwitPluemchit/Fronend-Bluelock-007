@@ -114,6 +114,7 @@ onMounted(async () => {
         label="จัดเก็บนิสิต"
         @click="goToConfirmStudentDataPage"
         class="btnadd"
+        style="width: 130px;"
       >
       </q-btn>
     </div>

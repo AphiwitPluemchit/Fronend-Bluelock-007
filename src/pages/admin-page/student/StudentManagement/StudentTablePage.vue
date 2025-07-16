@@ -39,7 +39,6 @@ const applyFilters = async (selectedFilters: SelectedFilters) => {
 }
 
 const data = async () => {
-  console.log(studentStore.query)
   await studentStore.getStudents() // ✅ เรียกจาก store
 
   // อัปเดต pagination ให้ sync
@@ -100,7 +99,7 @@ onMounted(async () => {
     order: 'asc',
     search: '',
     major: [],
-    studentStatus: [],
+    studentStatus: ['1', '2', '3'],
     studentCode: [], // กรองเฉพาะนิสิตที่พ้นสภาพ
     skill: [],
     studentYear: [],
@@ -115,11 +114,10 @@ onMounted(async () => {
     <!-- ชื่อหน้า -->
     <div class="row justify-between items-center" style="margin-top: 20px">
       <div class="texttitle">จัดการข้อมูลนิสิต</div>
-      <q-btn v-if="show" dense outlined label="เพิ่มนิสิต" @click="goToUplaodPage" class="btnadd">
+      <q-btn v-if="show" dense outlined label="เพิ่มนิสิต" @click="goToUplaodPage" class="btnadd" style="width: 130px;">
       </q-btn>
     </div>
 
-    <!-- ตาราง 1 -->
     <section class="q-mt-lg" v-if="show">
       <div class="search-filter-wrapper row wrap justify-end items-start">
         <!-- Search box -->
@@ -158,7 +156,7 @@ onMounted(async () => {
         :rows-per-page-options="[5, 7, 10, 15, 20]"
         @request="onRequest"
         row-key="id"
-        class="q-mt-md"
+        class="q-mt-md my-table"
       >
         <!-- <q-table bordered flat :rows="students" :columns="columns" @request="applyFilters" row-key="id" class="q-mt-md"> -->
         <!-- หัวตาราง Sticky -->
@@ -223,7 +221,9 @@ onMounted(async () => {
   cursor: pointer;
   width: 60px;
 }
-
+.my-table {
+  min-height: 580px;
+}
 .status-badge {
   height: 32px;
   line-height: 28px;

@@ -34,12 +34,11 @@ export const useStudentStore = defineStore('student', () => {
     skill: [],
     major: [],
     studentYear: [],
-    studentStatus: [],
+    studentStatus: ['1','2','3'],
   })
 
   // ฟังก์ชันสร้างนิสิตใหม่ (จากไฟล์ Excel)
   const createStudent = async (student: ExcelStudentRow[]) => {
-    console.log('store', student)
     await StudentService.createStudent(student)
   }
 
@@ -48,13 +47,12 @@ export const useStudentStore = defineStore('student', () => {
     const data = await StudentService.getAll(query.value)
     students.value = data.data
     totalStudentsCount.value = data.meta.total
-    console.log(data)
   }
 
   // ฟังก์ชันดึงนิสิตตามรหัส
   const getStudentByCode = async (code: string) => {
     const data = await StudentService.getOne(code)
-    console.log('API Response:', data)
+
     student.value = data
   }
 
@@ -63,7 +61,6 @@ export const useStudentStore = defineStore('student', () => {
     try {
       const data = await StudentService.getTrainingHistory(code)
       trainingHistory.value = data
-      console.log('Training History:', data)
     } catch (error) {
       console.error('Failed to load training history:', error)
       trainingHistory.value = []
@@ -79,7 +76,6 @@ export const useStudentStore = defineStore('student', () => {
         hardSkill: Number(updatedStudent.hardSkill),
         status: Number(updatedStudent.status),
       }
-      console.log('Update Payload:', payload)
       const res = await StudentService.updateOne(payload)
       console.log('Update success:', res)
       return true

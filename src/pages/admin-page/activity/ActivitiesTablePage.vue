@@ -597,7 +597,7 @@ watchEffect(() => {
     <!-- ชื่อหน้า -->
     <div class="row justify-between items-center q-mb-md" style="margin-top: 20px">
       <div class="texttitle">จัดการกิจกรรม</div>
-      <q-btn dense outlined label="เพิ่มกิจกรรม" class="btnadd" bo @click="goToPage()" />
+      <q-btn dense outlined label="เพิ่มกิจกรรม" class="btnadd" bo @click="goToPage()" style="width: 130px;"/>
     </div>
 
     <!-- FullScreen -->
@@ -636,7 +636,6 @@ watchEffect(() => {
           </div>
         </div>
         <q-table
-          bordered
           flat
           :rows="mapActivitiesToTableRows(activitys1)"
           :columns="columns"
@@ -1757,6 +1756,7 @@ watchEffect(() => {
   border-bottom: 2px solid #d0d0d0;
   transition: background-color 0.3s ease;
 }
+
 
 .my-sticky-header-table tbody tr {
   transition: background-color 0.3s ease;
