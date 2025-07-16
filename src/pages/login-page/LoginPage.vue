@@ -29,30 +29,32 @@
               <div class="login-divider q-mb-lg"></div>
 
               <q-form @submit.prevent="handleLogin">
-                <!-- อีเมล -->
                 <div class="text-body2 text-grey-8 q-mb-xs">ที่อยู่อีเมล</div>
                 <q-input
                   v-model="auth.form.email"
                   type="email"
+                  autocomplete="email"
                   outlined
                   dense
                   class="q-mb-md login-input"
                   :rules="[(val) => !!val]"
+                  aria-label="Email"
                 >
                   <template v-slot:prepend>
                     <q-icon name="email" color="primary" />
                   </template>
                 </q-input>
 
-                <!-- รหัสผ่าน -->
                 <div class="text-body2 text-grey-8 q-mb-xs">รหัสผ่าน</div>
                 <q-input
                   v-model="auth.form.password"
                   :type="isPwd ? 'password' : 'text'"
+                  autocomplete="current-password"
                   outlined
                   dense
                   class="q-mb-lg login-input"
                   :rules="[(val) => !!val]"
+                  aria-label="Password"
                 >
                   <template v-slot:prepend>
                     <q-icon name="lock" color="primary" />
@@ -66,7 +68,6 @@
                   </template>
                 </q-input>
 
-                <!-- ปุ่มเข้าสู่ระบบ -->
                 <q-btn
                   label="เข้าสู่ระบบ"
                   type="submit"
@@ -74,9 +75,10 @@
                   class="full-width login-btn q-mb-md"
                   unelevated
                   no-caps
+                  :loading="isLoggingIn"
+                  :disable="isLoggingIn"
                 />
 
-                <!-- ลืมรหัสผ่าน -->
                 <div class="text-right">
                   <q-btn
                     label="ลืมรหัสผ่าน?"
@@ -90,16 +92,15 @@
                 </div>
               </q-form>
             </div>
-            <div v-if="isResetPassword">
+            <div v-else>
               <RecoverPassword />
             </div>
           </div>
         </div>
       </div>
+
       <!-- Mobile Layout -->
-      <div
-        class="mobile-layout column items-center justify-center q-pa-lg hidden-md hidden-lg hidden-xl"
-      >
+      <div class="mobile-layout column items-center justify-center q-pa-lg hidden-md hidden-lg hidden-xl">
         <!-- โลโก้ -->
         <div class="mobile-logo-section text-center q-mb-lg">
           <div class="mobile-icon-container q-mb-md">
@@ -110,65 +111,73 @@
 
         <!-- ฟอร์ม -->
         <div class="mobile-form-container full-width">
-          <q-form @submit.prevent="handleLogin">
-            <!-- อีเมล -->
-            <div class="text-body2 text-grey-8 q-mb-xs">ที่อยู่อีเมล</div>
-            <q-input
-              v-model="auth.form.email"
-              type="email"
-              outlined
-              dense
-              class="q-mb-md login-input"
-            >
-              <template v-slot:prepend>
-                <q-icon name="email" color="primary" />
-              </template>
-            </q-input>
+          <div v-if="!isResetPassword">
+            <q-form @submit.prevent="handleLogin">
+              <div class="text-body2 text-grey-8 q-mb-xs">ที่อยู่อีเมล</div>
+              <q-input
+                v-model="auth.form.email"
+                type="email"
+                autocomplete="email"
+                outlined
+                dense
+                class="q-mb-md login-input"
+                aria-label="Email"
+              >
+                <template v-slot:prepend>
+                  <q-icon name="email" color="primary" />
+                </template>
+              </q-input>
 
-            <!-- รหัสผ่าน -->
-            <div class="text-body2 text-grey-8 q-mb-xs">รหัสผ่าน</div>
-            <q-input
-              v-model="auth.form.password"
-              :type="isPwd ? 'password' : 'text'"
-              outlined
-              dense
-              class="q-mb-lg login-input"
-              :rules="[(val) => !!val]"
-            >
-              <template v-slot:prepend>
-                <q-icon name="lock" color="primary" />
-              </template>
-              <template v-slot:append>
-                <q-icon
-                  :name="isPwd ? 'visibility_off' : 'visibility'"
-                  class="cursor-pointer text-grey-6"
-                  @click="isPwd = !isPwd"
-                />
-              </template>
-            </q-input>
+              <div class="text-body2 text-grey-8 q-mb-xs">รหัสผ่าน</div>
+              <q-input
+                v-model="auth.form.password"
+                :type="isPwd ? 'password' : 'text'"
+                autocomplete="current-password"
+                outlined
+                dense
+                class="q-mb-lg login-input"
+                :rules="[(val) => !!val]"
+                aria-label="Password"
+              >
+                <template v-slot:prepend>
+                  <q-icon name="lock" color="primary" />
+                </template>
+                <template v-slot:append>
+                  <q-icon
+                    :name="isPwd ? 'visibility_off' : 'visibility'"
+                    class="cursor-pointer text-grey-6"
+                    @click="isPwd = !isPwd"
+                  />
+                </template>
+              </q-input>
 
-            <!-- ปุ่มเข้าสู่ระบบ -->
-            <q-btn
-              label="เข้าสู่ระบบ"
-              type="submit"
-              color="primary"
-              class="full-width login-btn q-mb-md"
-              unelevated
-              no-caps
-            />
-
-            <!-- ลืมรหัสผ่าน -->
-            <div class="text-right">
               <q-btn
-                label="ลืมรหัสผ่าน?"
-                flat
+                label="เข้าสู่ระบบ"
+                type="submit"
                 color="primary"
-                size="sm"
-                class="forgot-password-btn"
+                class="full-width login-btn q-mb-md"
+                unelevated
                 no-caps
+                :loading="isLoggingIn"
+                :disable="isLoggingIn"
               />
-            </div>
-          </q-form>
+
+              <div class="text-right">
+                <q-btn
+                  label="ลืมรหัสผ่าน?"
+                  flat
+                  color="primary"
+                  size="sm"
+                  class="forgot-password-btn"
+                  no-caps
+                  @click="isResetPassword = true"
+                />
+              </div>
+            </q-form>
+          </div>
+          <div v-else>
+            <RecoverPassword />
+          </div>
         </div>
       </div>
     </q-card>
@@ -181,15 +190,20 @@ import { useRouter } from 'vue-router'
 import { useAuthStore } from 'src/stores/auth'
 import { EnumUserRole } from 'src/data/roles'
 import RecoverPassword from './RecoverPassword.vue'
+import { useQuasar } from 'quasar'
 
+const $q = useQuasar()
 const auth = useAuthStore()
 const router = useRouter()
 const isPwd = ref(true)
 const isResetPassword = ref(false)
+const isLoggingIn = ref(false)
 
 const handleLogin = async () => {
   try {
+    isLoggingIn.value = true
     const result = await auth.login()
+
     if (result) {
       const redirect = localStorage.getItem('redirectAfterLogin')
       if (redirect) {
@@ -206,14 +220,28 @@ const handleLogin = async () => {
       } else {
         throw new Error('ไม่มีสิทธิ์เข้าใช้งาน')
       }
+    } else {
+      $q.notify({
+        color: 'negative',
+        message: 'เข้าสู่ระบบไม่สำเร็จ กรุณาตรวจสอบอีเมลหรือรหัสผ่าน',
+        position: 'top',
+        timeout: 3000
+      })
     }
   } catch (error) {
     console.error('Login error:', error)
+    $q.notify({
+      color: 'negative',
+      message: 'เกิดข้อผิดพลาดในการเข้าสู่ระบบ',
+      position: 'top',
+      timeout: 3000
+    })
+  } finally {
+    isLoggingIn.value = false
   }
 }
-
-
 </script>
+
 
 <style scoped>
 .login-page {
