@@ -114,4 +114,15 @@ export class StudentService {
       throw error
     }
   }
+
+  static async getSummaryReport() {
+    try {
+      const res = await api.get(`${this.path}/report/sammary-all`)
+      return res.data
+    } catch (error) {
+      showError('ไม่สามารถโหลดข้อมูลสรุปนักศึกษาได้')
+      console.error(`Error fetching student summary `, error)
+      throw error
+    }
+  }
 }

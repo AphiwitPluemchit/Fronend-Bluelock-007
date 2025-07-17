@@ -29,3 +29,21 @@ export interface TrainingHistoryItem {
   skill: 'soft' | 'hard'  // ประเภทชั่วโมง
   hours: number        // จำนวนชั่วโมง อาจเป็นบวกหรือลบ
 }
+
+export interface SummaryReport {
+ // จำนวนชั่วโมง อาจเป็นบวกหรือล
+ "total": number
+ "completed": number
+ "notCompleted": number
+ "completionRate": number
+ "softSkill": {
+  "completed": number
+  "notCompleted": number
+  "progress": number
+ }
+ "hardSkill": {
+  "completed": number
+  "notCompleted": number
+  "progress": number
+ }
+}
