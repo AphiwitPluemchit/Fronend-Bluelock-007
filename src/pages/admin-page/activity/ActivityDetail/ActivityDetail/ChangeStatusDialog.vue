@@ -136,7 +136,7 @@ const confirmStatusChange = () => {
   width: 200px;
   height: 40px;
   font-size: 18px;
-  border-radius: 10px;
+  border-radius: 50px;
   text-align: center;
 }
 
@@ -169,24 +169,30 @@ const confirmStatusChange = () => {
 }
 
 .status-opens.active-status {
-  background-color: #d0ffc5;
+  background-color: #00bb16;
+  color: #ffffff;
 }
 
 .status-plannings.active-status {
-  background-color: #ffe7ba;
+  background-color: #ffa500;
+  color: #ffffff;
 }
 
 .status-closed.active-status {
-  background-color: #cfd7ff;
+  background-color: #002dff;
+  color: #ffffff;
 }
 
 .status-completed.active-status {
-  background-color: #dadada;
+  background-color: #575656;
+  color: #ffffff;
 }
 
 .status-cancelled.active-status {
-  background-color: #ffa7a7;
+  background-color: #f32323;
+  color: #ffffff;
 }
+
 
 .cancel-btn {
   background-color: red;

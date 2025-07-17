@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, defineEmits, defineProps, onMounted, nextTick, watch } from 'vue'
+import { ref, defineEmits, defineProps, onMounted, watch } from 'vue'
 import { FoodService } from 'src/services/food'
 import type { Food } from 'src/types/food'
 
@@ -8,7 +8,6 @@ const selectedFoods = ref<Food[]>([])
 const foodMenuDisplay = ref('')
 const addingNewFood = ref(false)
 const newFoodName = ref('')
-const inputField = ref<HTMLInputElement | null>(null)
 const menuItems = ref<string[]>([]) // รายชื่ออาหารทั้งหมด
 const menuItemsIdMap = ref<Record<string, string>>({}) // map: name → id
 const selectedFoodNames = ref<string[]>([]) // ชื่ออาหารที่เลือกไว้ (ใช้กับ checkbox)
@@ -44,18 +43,7 @@ const openFoodDialog = () => {
   }
 }
 
-const toggleSelection = (name: string) => {
-  if (props.disable) return
 
-  const id = menuItemsIdMap.value[name] || ''
-  const index = selectedFoods.value.findIndex((f) => f.name === name)
-
-  if (index >= 0) {
-    selectedFoods.value.splice(index, 1)
-  } else {
-    selectedFoods.value.push({ id, name })
-  }
-}
 const confirmSelection = () => {
   if (props.disable) return
 
@@ -77,13 +65,7 @@ const cancelSelection = () => {
   selectedFoods.value = []
   showFoodDialog.value = false
 }
-const startEditing = () => {
-  if (props.disable) return
-  addingNewFood.value = true
-  void nextTick(() => {
-    inputField.value?.focus()
-  })
-}
+
 const addFood = async () => {
   if (props.disable) return
   const newName = newFoodName.value.trim()
@@ -170,7 +152,7 @@ onMounted(async () => {
 
   <!-- Food Selection Dialog -->
   <q-dialog v-model="showFoodDialog" persistent>
-    <q-card class="q-pa-md food-dialog-new">
+    <q-card class="q-pa-md food-dialog-new dialog-box">
       <q-card-section>
         <div class="text-h6">เลือกเมนูอาหาร</div>
       </q-card-section>
@@ -229,6 +211,10 @@ onMounted(async () => {
 </template>
 
 <style scoped>
+.dialog-box {
+  padding: 20px;
+  border-radius: 12px;
+}
 .button-container {
   display: flex;
   justify-content: flex-end;
