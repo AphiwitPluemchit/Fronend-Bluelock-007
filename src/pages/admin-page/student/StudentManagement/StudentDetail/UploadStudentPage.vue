@@ -2,6 +2,7 @@
 import { ref } from 'vue'
 import * as XLSX from 'xlsx'
 import AppBreadcrumbs from 'src/components/AppBreadcrumbs.vue'
+import AlertDialog from 'src/components/Dialog/AlertDialog.vue'
 import type { ExcelStudentRow } from 'src/types/student'
 import { useStudentStore } from 'src/stores/student'
 
@@ -61,6 +62,17 @@ const getStatusClass = (status?: number) => {
   return ''
 }
 
+// ตัวแปรสำหรับ AlertDialog
+const alertDialogModel = ref(false)
+const alertDialogTitle = ref('')
+const alertDialogMessage = ref('')
+
+function showAlertDialog(title: string, message: string) {
+  alertDialogTitle.value = title
+  alertDialogMessage.value = message
+  alertDialogModel.value = true
+}
+
 const downloadTemplate = () => {
   const sampleData = [
     {
@@ -116,13 +128,13 @@ const handleFileChange = async () => {
     students.value = formatted
   } catch (error) {
     console.error('Error parsing file:', error)
-    alert('เกิดข้อผิดพลาดในการอ่านไฟล์ Excel')
+    showAlertDialog('ข้อผิดพลาด', 'เกิดข้อผิดพลาดในการอ่านไฟล์ Excel')
   }
 }
 
 const uploadFile = async () => {
   if (!students.value.length) {
-    alert('กรุณาเลือกไฟล์และโหลดข้อมูลก่อนกดยืนยัน')
+    showAlertDialog('แจ้งเตือน', 'กรุณาเลือกไฟล์และโหลดข้อมูลก่อนกดยืนยัน')
     return
   }
 
@@ -139,18 +151,18 @@ const uploadFile = async () => {
   })
 
   if (duplicates.length > 0) {
-    alert(`พบรหัสนิสิตซ้ำในไฟล์: ${[...new Set(duplicates)].join(', ')}`)
+    showAlertDialog('แจ้งเตือน', `พบรหัสนิสิตซ้ำในไฟล์: ${[...new Set(duplicates)].join(', ')}`)
     return
   }
 
   try {
     await studentStore.createStudent(students.value)
-    alert('✅ อัปโหลดสำเร็จ!')
+    showAlertDialog('สำเร็จ', '✅ อัปโหลดสำเร็จ!')
     file.value = null
     students.value = []
   } catch (err) {
     console.error(err)
-    alert('❌ เกิดข้อผิดพลาดในการอัปโหลด')
+    showAlertDialog('ข้อผิดพลาด', '❌ เกิดข้อผิดพลาดในการอัปโหลด')
   }
 }
 
@@ -239,11 +251,12 @@ const clearFile = () => {
             </q-td>
           </q-tr>
         </template>
+
         <template v-slot:no-data>
-            <div class="full-width text-center q-pa-md text-grey" style="font-size: 20px">
-              ไม่มีนิสิตที่อัพโหลด
-            </div>
-          </template>
+          <div class="full-width text-center q-pa-md text-grey" style="font-size: 20px">
+            ไม่มีนิสิตที่อัพโหลด
+          </div>
+        </template>
       </q-table>
 
       <div class="row justify-end q-mt-md">
@@ -258,7 +271,14 @@ const clearFile = () => {
         />
       </div>
     </section>
-    
+
+    <!-- AlertDialog -->
+    <AlertDialog
+      :model-value="alertDialogModel"
+      :title="alertDialogTitle"
+      :message="alertDialogMessage"
+      @update:modelValue="(val) => (alertDialogModel = val)"
+    />
   </q-page>
 </template>
 
