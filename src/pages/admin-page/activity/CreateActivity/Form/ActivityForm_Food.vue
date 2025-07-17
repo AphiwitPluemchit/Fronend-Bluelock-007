@@ -11,6 +11,8 @@ const newFoodName = ref('')
 const inputField = ref<HTMLInputElement | null>(null)
 const menuItems = ref<string[]>([]) // รายชื่ออาหารทั้งหมด
 const menuItemsIdMap = ref<Record<string, string>>({}) // map: name → id
+const selectedFoodNames = ref<string[]>([]) // ชื่ออาหารที่เลือกไว้ (ใช้กับ checkbox)
+
 const props = defineProps<{
   disable?: boolean
   foodMenu?: Food[]
@@ -25,11 +27,13 @@ watch(
   (newVal) => {
     if (newVal) {
       selectedFoods.value = [...newVal]
+      selectedFoodNames.value = newVal.map((f) => f.name)
       foodMenuDisplay.value = newVal.map((f) => f.name).join(', ')
     }
   },
   { immediate: true },
 )
+
 const openFoodDialog = () => {
   if (!props.disable) {
     // sync ทุกครั้งก่อนเปิด
@@ -55,15 +59,19 @@ const toggleSelection = (name: string) => {
 const confirmSelection = () => {
   if (props.disable) return
 
+  selectedFoods.value = selectedFoodNames.value.map((name) => ({
+    id: menuItemsIdMap.value[name] || '',
+    name,
+  }))
+
   foodMenuDisplay.value = selectedFoods.value.map((f) => f.name).join(', ')
   emit('update:foodMenu', selectedFoods.value)
   emit('update:foodMenuDisplay', foodMenuDisplay.value)
 
-  
-  
   showFoodDialog.value = false
   localStorage.clear()
 }
+
 const cancelSelection = () => {
   if (props.disable) return
   selectedFoods.value = []
@@ -81,7 +89,7 @@ const addFood = async () => {
   const newName = newFoodName.value.trim()
 
   const isDuplicate = menuItems.value.some(
-    (existing) => existing.toLowerCase() === newName.toLowerCase()
+    (existing) => existing.toLowerCase() === newName.toLowerCase(),
   )
 
   if (newName !== '' && !isDuplicate) {
@@ -128,9 +136,7 @@ onMounted(async () => {
     const foods: Food[] = await FoodService.getAll()
     menuItems.value = foods.map((food) => food.name)
 
-    menuItemsIdMap.value = Object.fromEntries(
-      foods.filter(f => f.id).map(f => [f.name, f.id!])
-    )
+    menuItemsIdMap.value = Object.fromEntries(foods.filter((f) => f.id).map((f) => [f.name, f.id!]))
 
     const storedMenuItems = localStorage.getItem('menuItems')
     if (storedMenuItems) {
@@ -141,7 +147,6 @@ onMounted(async () => {
     console.error('❌ โหลดรายการอาหารล้มเหลว', error)
   }
 })
-
 </script>
 
 <template>
@@ -165,73 +170,61 @@ onMounted(async () => {
 
   <!-- Food Selection Dialog -->
   <q-dialog v-model="showFoodDialog" persistent>
-    <div class="q-pa-md food-dialog">
-      <h3 class="label" style="justify-content: flex-start; margin-left: 20px">เมนูอาหาร</h3>
+    <q-card class="q-pa-md food-dialog-new">
+      <q-card-section>
+        <div class="text-h6">เลือกเมนูอาหาร</div>
+      </q-card-section>
 
-      <div class="food-container" style="margin-left: 20px">
-        <div class="food-list">
-          <q-btn
-            v-for="(item, index) in menuItems"
-            :key="index"
-            rounded
-            outlined
-            unelevated
-            flat
-            class="FoodChip"
-            :class="{ 'active-btn': selectedFoods.some((f) => f.name === item) }"
-            color="white"
-            text-color="black"
-            :label="item"
-            @click="toggleSelection(item)"
-            :disable="disable"
-          >
-            <template v-slot:default>
-              <q-icon
-                name="close"
-                class="delete-icon"
+      <q-card-section class="scroll-area">
+        <!-- เมนูแสดงผลแบบ 2 คอลัมน์ -->
+        <div class="row q-col-gutter-md">
+          <div v-for="(item, index) in menuItems" :key="index" class="col-12 col-sm-6">
+            <q-card flat bordered class="q-pa-sm row items-center justify-between">
+              <q-checkbox
+                v-model="selectedFoodNames"
+                :val="item"
+                :label="item"
+                :disable="disable"
+              />
+              <q-btn
+                icon="delete"
+                flat
+                dense
+                round
+                class="bg-red text-white q-pa-xs rounded-borders q-mr-sm"
                 @click.stop="removeMenuItem(item)"
                 v-if="!disable"
-              />
-            </template>
-          </q-btn>
-
-          <!-- ปุ่มเพิ่มเมนู -->
-          <q-btn
-            v-if="!disable"
-            ref="editableBtn"
-            rounded
-            outlined
-            unelevated
-            flat
-            class="FoodChip add-food-btn"
-            color="grey-4"
-            text-color="black"
-            @click="startEditing"
-          >
-            <span v-if="!addingNewFood">+</span>
-            <input
-              v-else
-              v-model="newFoodName"
-              type="text"
-              class="editable-input"
-              @blur="addFood"
-              @keyup.enter="addFood"
-              ref="inputField"
-            />
-          </q-btn>
+              >
+                <q-tooltip>ลบ</q-tooltip>
+              </q-btn>
+            </q-card>
+          </div>
         </div>
-      </div>
+      </q-card-section>
+
+      <q-card-section class="row q-gutter-sm">
+        <q-input
+          dense
+          outlined
+          v-model="newFoodName"
+          label="เพิ่มเมนูใหม่"
+          class="col"
+          @keyup.enter="addFood"
+          :disable="disable"
+        />
+        <q-btn
+          label="เพิ่ม"
+          color="primary"
+          @click="addFood"
+          :disable="disable || !newFoodName.trim()"
+        />
+      </q-card-section>
 
       <div class="button-container">
         <q-btn class="btnreject" label="ยกเลิก" @click="cancelSelection" :disable="disable" />
-        <q-btn
-          class="btnconfirm"
-          label="ยืนยัน"
-          @click="confirmSelection"
-          :disable="disable"
-        />
+        <q-btn class="btnconfirm" label="ยืนยัน" @click="confirmSelection" :disable="disable" />
       </div>
-    </div>
+    </q-card>
   </q-dialog>
 </template>
 
@@ -241,7 +234,6 @@ onMounted(async () => {
   justify-content: flex-end;
   gap: 15px;
   padding-top: 30px;
-  border-top: 1px solid #ddd;
 }
 
 .input-group {
@@ -391,7 +383,7 @@ onMounted(async () => {
   width: 660px;
   max-width: 100%;
 }
-@media(max-width: 1880px){
+@media (max-width: 1880px) {
   .input-container {
     width: 530px;
     max-width: 100%;
@@ -401,7 +393,7 @@ onMounted(async () => {
   }
 }
 @media (max-width: 860px) {
-   .input-group:not(.no-wrap) {
+  .input-group:not(.no-wrap) {
     flex-direction: column;
     align-items: flex-start;
     margin-bottom: 10px !important;
@@ -409,7 +401,7 @@ onMounted(async () => {
   }
   .input-container {
     width: 470px;
-    max-width: 100%; 
+    max-width: 100%;
   }
   .label {
     justify-content: flex-start;
