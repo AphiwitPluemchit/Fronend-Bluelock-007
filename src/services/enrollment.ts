@@ -13,7 +13,7 @@ export class EnrollmentService {
       const res = await api.post(this.path, obj)
       return res.status
     } catch (error) {
-      
+
       console.error('Error creating enrollment:', error)
       throw error
     }
@@ -24,7 +24,7 @@ export class EnrollmentService {
     const res = await api.delete(`${this.path}/${id}`)
     return res.status
   } catch (error) {
-    
+
     console.error(`Error deleting enrollment ID: ${id}`, error)
     throw error
   }
@@ -59,8 +59,14 @@ export class EnrollmentService {
 
   static async getEnrollmentsByStudentID(studentId: string, params: Pagination) {
     try {
-      console.log('Sending params:', params)
-      const res = await api.get(`${this.path}/student/${studentId}`, { params })
+      const { activityState, skill, ...rest } = params
+      const queryParams = {
+        ...rest,
+        ...(activityState && activityState.length > 0 ? { activityState: activityState.join(',') } : {}),
+        ...(skill && skill.length > 0 ? { skill: skill.join(',') } : {}),
+      }
+      console.log('Sending params:', queryParams)
+      const res = await api.get(`${this.path}/student/${studentId}`, { params: queryParams })
       console.log('Fetched enrollments:', res.data)
       return res.data
     } catch (error) {

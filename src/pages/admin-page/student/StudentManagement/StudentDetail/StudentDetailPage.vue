@@ -1,10 +1,13 @@
 <script setup lang="ts">
-import { onMounted, ref, computed } from 'vue'
+import { onMounted, ref } from 'vue'
 import { useRoute } from 'vue-router'
 import AppBreadcrumbs from 'src/components/AppBreadcrumbs.vue'
 import FilterDialog from 'src/components/Dialog/FilterDialog.vue'
 import { useStudentStore } from 'src/stores/student'
 import type { Student } from 'src/types/student'
+import { EnrollmentService } from 'src/services/enrollment'
+import type{ Activity } from 'src/types/activity'
+import type { Pagination } from 'src/types/pagination'
 
 const majorOptions = ['CS', 'AAI', 'IT', 'SE']
 
@@ -14,33 +17,19 @@ const route = useRoute()
 const studentCode = ref(route.params.code as unknown as string)
 const studentStore = useStudentStore()
 
-onMounted(async () => {
-  show.value = false
-  if (!studentCode.value) return
-  await studentStore.getStudentByCode(studentCode.value)
-  originalStudentData.value = { ...studentStore.student }
-  await studentStore.getTrainingHistory(studentCode.value)
-  show.value = true
+const historyActivity = ref<Activity[]>([])
+
+const query = ref<Pagination>({
+  page: 1,
+  limit: 99,
+  search: '',
+  sortBy: '_id',
+  order: 'desc',
+  skill: [],
+  activityState: [],
+  major: [],
+  studentYear: [],
 })
-
-//คำนวณชั้นปี
-// const studentYear = computed(() => {
-//   if (!studentStore.student?.code || studentStore.student.code.length < 2) return 'N/A'
-
-//   const currentDate = new Date()
-//   const currentYear = currentDate.getFullYear() + 543 // ปีปัจจุบัน (พ.ศ.)
-//   const currentMonth = currentDate.getMonth() + 1 // เดือนปัจจุบัน (1-12)
-
-//   const admissionYear = 2500 + parseInt(studentStore.student.code.substring(0, 2), 10) // ปีที่เข้าเรียน
-//   const transitionMonth = 6 // เดือนมิถุนายนเป็นจุดเปลี่ยนชั้นปี
-
-//   let yearLevel = currentYear - admissionYear
-//   if (currentMonth >= transitionMonth) {
-//     yearLevel++ // ถ้าเดือนปัจจุบันเป็นมิถุนายนหรือหลังจากนั้น ให้เพิ่มชั้นปีขึ้น 1
-//   }
-
-//   return yearLevel >= 1 && yearLevel <= 4 ? yearLevel.toString() : 'N/A' // จำกัดชั้นปีที่ 1-4
-// })
 
 const breadcrumbs = ref({
   previousPage: { title: 'จัดการข้อมูลนิสิต', path: '/Admin/StudentManagement' },
@@ -54,6 +43,7 @@ const breadcrumbs = ref({
 const showFilterDialog1 = ref(false)
 const filterCategories1 = ref(['categoryActivity'])
 const filters = ref<{ categoryActivity: string[] }>({ categoryActivity: [] })
+
 const applyFilters = (selectedFilters: { categoryActivity: string[] }) => {
   filters.value = selectedFilters
 }
@@ -80,7 +70,18 @@ const cancelEdit = () => {
   studentStore.student = { ...originalStudentData.value } as Student
   isEditMode.value = false
 }
+onMounted(async () => {
+  show.value = false
+  if (!studentCode.value) return
+  await studentStore.getStudentByCode(studentCode.value)
+  originalStudentData.value = { ...studentStore.student }
+  const response = await EnrollmentService.getEnrollmentsByStudentID(studentStore.student.id || '', query.value)
+  console.log(response);
 
+  historyActivity.value = response.data
+  show.value = true
+
+})
 const columns = [
   { name: 'index', label: 'ลำดับ', field: 'index', align: 'left' as const },
   {
@@ -107,7 +108,6 @@ const columns = [
   },
 ]
 
-const historyActivity = computed(() => studentStore.trainingHistory)
 </script>
 
 <template>

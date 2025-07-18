@@ -59,7 +59,7 @@ onMounted(async () => {
     <!-- ค้นหา + ฟิลเตอร์ -->
     <div class="row justify-between items-right  q-mb-md search-filter-wrapper q-col-gutter-md">
       <div class="text-h6"></div>
-      <div class="row search-filter-inner items-center no-wrap">      
+      <div class="row search-filter-inner items-center no-wrap">
       <q-input
         dense
         outlined
