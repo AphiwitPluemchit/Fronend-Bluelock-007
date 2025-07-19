@@ -269,7 +269,7 @@ const query1 = ref<Pagination>({
   limit: 5,
   search: '',
   sortBy: 'dates',
-  order: 'desc',
+  order: 'asc',
   skill: [],
   activityState: ['open', 'close'],
   major: [],
@@ -280,7 +280,7 @@ const query2 = ref<Pagination>({
   limit: 5,
   search: '',
   sortBy: 'dates',
-  order: 'desc',
+  order: 'asc',
   skill: [],
   activityState: ['planning'],
   major: [],
@@ -292,7 +292,7 @@ const query3 = ref<Pagination>({
   limit: 5,
   search: '',
   sortBy: 'dates',
-  order: 'desc',
+  order: 'asc',
   skill: [],
   activityState: ['success'],
   major: [],
@@ -303,7 +303,7 @@ const query4 = ref<Pagination>({
   limit: 5,
   search: '',
   sortBy: 'dates',
-  order: 'desc',
+  order: 'asc',
   skill: [],
   activityState: ['cancel'],
   major: [],
@@ -597,7 +597,15 @@ watchEffect(() => {
     <!-- ชื่อหน้า -->
     <div class="row justify-between items-center q-mb-md" style="margin-top: 20px">
       <div class="texttitle">จัดการกิจกรรม</div>
-      <q-btn dense outlined label="เพิ่มกิจกรรม" class="btnadd" bo @click="goToPage()" style="width: 130px;"/>
+      <q-btn
+        dense
+        outlined
+        label="เพิ่มกิจกรรม"
+        class="btnadd"
+        bo
+        @click="goToPage()"
+        style="width: 130px"
+      />
     </div>
 
     <!-- FullScreen -->
@@ -653,11 +661,30 @@ watchEffect(() => {
                 :key="col.name"
                 :props="props"
                 :style="col.headerStyle"
+                class="text-weight-medium"
               >
-                {{ col.label }}
+                <div
+                  class="header-cell"
+                  :class="{ 'is-sorted': pagination1.sortBy === col.name }"
+                  @click.stop="col.sortable && props.sort(col)"
+                >
+                  {{ col.label }}
+                  <template v-if="col.sortable">
+                    <q-icon
+                      name="expand_more"
+                      size="1.8em"
+                      :class="{
+                        'sort-icon-hover': !(pagination1.sortBy === col.name),
+                        'sort-icon-active': pagination1.sortBy === col.name,
+                        rotated: pagination1.descending && pagination1.sortBy === col.name,
+                      }"
+                    />
+                  </template>
+                </div>
               </q-th>
             </q-tr>
           </template>
+
           <!-- เนื้อหาตาราง -->
           <template v-slot:body="props">
             <q-tr :props="props" @click="toggleRowExpansion1(props.row.id)" class="cursor-pointer">
@@ -724,7 +751,6 @@ watchEffect(() => {
                       v-for="(item, index) in props.row.activityItems"
                       :key="index"
                       class="q-mb-sm q-pa-xs"
-
                     >
                       <div class="row text-body2 items-start no-wrap">
                         <!-- ชื่อกิจกรรม -->
@@ -829,8 +855,26 @@ watchEffect(() => {
                 :key="col.name"
                 :props="props"
                 :style="col.headerStyle"
+                class="text-weight-medium"
               >
-                {{ col.label }}
+                <div
+                  class="header-cell"
+                  :class="{ 'is-sorted': pagination2.sortBy === col.name }"
+                  @click.stop="col.sortable && props.sort(col)"
+                >
+                  {{ col.label }}
+                  <template v-if="col.sortable">
+                    <q-icon
+                      name="expand_more"
+                      size="1.8em"
+                      :class="{
+                        'sort-icon-hover': !(pagination2.sortBy === col.name),
+                        'sort-icon-active': pagination2.sortBy === col.name,
+                        rotated: pagination2.descending && pagination2.sortBy === col.name,
+                      }"
+                    />
+                  </template>
+                </div>
               </q-th>
             </q-tr>
           </template>
@@ -899,7 +943,6 @@ watchEffect(() => {
                       v-for="(item, index) in props.row.activityItems"
                       :key="index"
                       class="q-mb-sm q-pa-xs"
-                     
                     >
                       <div class="row text-body2 items-start no-wrap">
                         <!-- ชื่อกิจกรรม -->
@@ -980,8 +1023,31 @@ watchEffect(() => {
           <!-- หัวตาราง Sticky -->
           <template v-slot:header="props">
             <q-tr :props="props">
-              <q-th v-for="col in props.cols" :key="col.name" :props="props">
-                {{ col.label }}
+              <q-th
+                v-for="col in props.cols"
+                :key="col.name"
+                :props="props"
+                :style="col.headerStyle"
+                class="text-weight-medium"
+              >
+                <div
+                  class="header-cell"
+                  :class="{ 'is-sorted': pagination3.sortBy === col.name }"
+                  @click.stop="col.sortable && props.sort(col)"
+                >
+                  {{ col.label }}
+                  <template v-if="col.sortable">
+                    <q-icon
+                      name="expand_more"
+                      size="1.8em"
+                      :class="{
+                        'sort-icon-hover': !(pagination3.sortBy === col.name),
+                        'sort-icon-active': pagination3.sortBy === col.name,
+                        rotated: pagination3.descending && pagination3.sortBy === col.name,
+                      }"
+                    />
+                  </template>
+                </div>
               </q-th>
             </q-tr>
           </template>
@@ -1050,7 +1116,6 @@ watchEffect(() => {
                       v-for="(item, index) in props.row.activityItems"
                       :key="index"
                       class="q-mb-sm q-pa-xs"
-                     
                     >
                       <div class="row text-body2 items-start no-wrap">
                         <!-- ชื่อกิจกรรม -->
@@ -1131,8 +1196,31 @@ watchEffect(() => {
           <!-- หัวตาราง Sticky -->
           <template v-slot:header="props">
             <q-tr :props="props">
-              <q-th v-for="col in props.cols" :key="col.name" :props="props">
-                {{ col.label }}
+              <q-th
+                v-for="col in props.cols"
+                :key="col.name"
+                :props="props"
+                :style="col.headerStyle"
+                class="text-weight-medium"
+              >
+                <div
+                  class="header-cell"
+                  :class="{ 'is-sorted': pagination4.sortBy === col.name }"
+                  @click.stop="col.sortable && props.sort(col)"
+                >
+                  {{ col.label }}
+                  <template v-if="col.sortable">
+                    <q-icon
+                      name="expand_more"
+                      size="1.8em"
+                      :class="{
+                        'sort-icon-hover': !(pagination4.sortBy === col.name),
+                        'sort-icon-active': pagination4.sortBy === col.name,
+                        rotated: pagination4.descending && pagination4.sortBy === col.name,
+                      }"
+                    />
+                  </template>
+                </div>
               </q-th>
             </q-tr>
           </template>
@@ -1203,7 +1291,6 @@ watchEffect(() => {
                       v-for="(item, index) in props.row.activityItems"
                       :key="index"
                       class="q-mb-sm q-pa-xs"
-                     
                     >
                       <div class="row text-body2 items-start no-wrap">
                         <!-- ชื่อกิจกรรม -->
@@ -1526,7 +1613,7 @@ watchEffect(() => {
                   flat
                   dense
                   icon="visibility"
-                  class="bg-black text-white "
+                  class="bg-black text-white"
                   @click="goToPageDetail(row.id ?? '', true)"
                 >
                   <q-tooltip>ดูรายละเอียด</q-tooltip>
@@ -1535,7 +1622,7 @@ watchEffect(() => {
                   flat
                   dense
                   icon="edit"
-                  class="bg-primary text-white  "
+                  class="bg-primary text-white"
                   @click="goToPageDetail(row.id ?? '', false)"
                 >
                   <q-tooltip>แก้ไข</q-tooltip>
@@ -1640,7 +1727,7 @@ watchEffect(() => {
                   flat
                   dense
                   icon="edit"
-                  class="bg-primary text-white "
+                  class="bg-primary text-white"
                   @click="goToPageDetail(row.id ?? '', false)"
                 >
                   <q-tooltip>แก้ไข</q-tooltip>
@@ -1690,6 +1777,43 @@ watchEffect(() => {
 </template>
 
 <style lang="scss" scoped>
+/* ปิดไอคอน sort ของ Quasar */
+:deep(.q-table th.sortable .q-table__sort-icon) {
+  display: none;
+}
+
+/* ทำให้ pointer กับ hover ใช้งานกับ .header-cell */
+.header-cell {
+  display: inline-flex;
+  align-items: center;
+
+  .q-icon {
+    transition:
+      opacity 0.3s ease,
+      transform 0.3s ease; // ✅ หมุนและจางพร้อมกัน
+    transform: rotate(0deg); // เริ่มไม่หมุน
+  }
+
+  .sort-icon-hover {
+    opacity: 0;
+  }
+
+  &:hover .sort-icon-hover {
+    opacity: 0.7;
+  }
+
+  .sort-icon-active {
+    opacity: 0;
+  }
+
+  &.is-sorted .sort-icon-active {
+    opacity: 1;
+  }
+  .rotated {
+    transform: rotate(180deg); // ✅ หมุนลง
+  }
+}
+
 .label-pair {
   display: flex;
   align-items: flex-start;
@@ -1756,7 +1880,6 @@ watchEffect(() => {
   border-bottom: 2px solid #d0d0d0;
   transition: background-color 0.3s ease;
 }
-
 
 .my-sticky-header-table tbody tr {
   transition: background-color 0.3s ease;
