@@ -5,14 +5,12 @@ import '@quasar/quasar-ui-qcalendar/dist/index.css'
 import { QCalendarMonth } from '@quasar/quasar-ui-qcalendar'
 import type { Activity } from 'src/types/activity'
 import type { Pagination } from 'src/types/pagination'
+import { ActivityService } from 'src/services/activity'
 import FilterDialog from 'src/components/Dialog/FilterDialog.vue'
 import type { CalendarEvent } from 'src/types/calendar'
 import CalendarMonthYearSelector from './CalendarComponents/CalendarMonthYearSelector.vue'
 import CalendarEventPanel from './CalendarComponents/CalendarEventPanel.vue'
-import { EnrollmentService } from 'src/services/enrollment'
-import { useAuthStore } from 'src/stores/auth'
 
-const auth = useAuthStore()
 const activitys1 = ref<Activity[]>([])
 const showFilterDialog1 = ref(false)
 const filterCategories = ref(['year', 'major', 'statusActivity', 'categoryActivity'])
@@ -22,14 +20,19 @@ const displayedMonth = ref(new Date()) // ค่า default เป็นเด�
 
 const query1 = ref<Pagination>({
   page: 1,
-  limit: 20,
+  limit: 99,
   search: '',
   sortBy: 'dates',
   order: 'desc',
   skill: [],
+  activityState: [],
+  major: [],
+  studentYear: [],
 })
 
 interface SelectedFilters {
+  year: string[]
+  major: string[]
   statusActivity: string[]
   categoryActivity: string[]
 }
@@ -53,8 +56,7 @@ function sortEventsByTimeAndName(events: CalendarEvent[]): CalendarEvent[] {
 }
 
 async function getActivityData(qeury: Pagination) {
-  const studentId = `${auth.getUser?.id}`
-  const data = await EnrollmentService.getEnrollmentsByStudentID(studentId, qeury)
+  const data = await ActivityService.getAll(qeury)
   return data
 }
 
@@ -74,16 +76,30 @@ const data1 = async () => {
 }
 
 const dataCalendar = async () => {
-  try {
-    const studentId = `${auth.getUser?.id}`
-    const res = await EnrollmentService.getEnrollmentsByStudentID(studentId, query1.value)
-    calendarEvents.value = parseToCalendarEvents(res.data)
-  } catch (error) {
-    console.error('เกิดข้อผิดพลาดในการโหลดข้อมูลกิจกรรม:', error)
-  }
+  const date = new Date(selectedDate.value)
+  const year = date.getFullYear().toString()
+  const month = (date.getMonth() + 1).toString().padStart(2, '0')
+
+  console.log('filters used:', query1.value)
+
+  const res = await ActivityService.getAllCalendar({
+    year,
+    month,
+    skill: query1.value.skill ?? [],
+    activityState: query1.value.activityState ?? [],
+    major: query1.value.major ?? [],
+    studentYear: query1.value.studentYear ?? [],
+  })
+
+  // แสดงค่าผลลัพธ์จาก API
+  console.log('API response data:', res.data)
+
+  calendarEvents.value = parseToCalendarEvents(res.data)
 }
 
 const applyFilters1 = async (selectedFilters: SelectedFilters) => {
+  query1.value.studentYear = selectedFilters.year
+  query1.value.major = selectedFilters.major
   query1.value.activityState = selectedFilters.statusActivity
   query1.value.skill = selectedFilters.categoryActivity
 
@@ -218,6 +234,9 @@ function parseToCalendarEvents(activities: Activity[]): CalendarEvent[] {
     const category = activity.skill === 'soft' ? 'soft' : 'hard'
     const activityStateLabel = activityStatusLabel(activity.activityState ?? '')
 
+    // ไม่แสดงสถานะกิจกรรม 'ยกเลิก' หรือ 'กำลังวางแผน'
+    if (['cancel', 'planning'].includes(activity.activityState ?? '')) return
+
     activity.activityItems?.forEach((item) => {
       if (!item || !item.dates) return
 
@@ -335,6 +354,8 @@ watch(selectedDate, (val) => {
         <FilterDialog
           :model-value="showFilterDialog1"
           :categories="filterCategories || []"
+          :years="query1.studentYear || []"
+          :majors="query1.major || []"
           :status-activities="query1.activityState || []"
           :category-activities="query1.skill || []"
           @apply="applyFilters1"
