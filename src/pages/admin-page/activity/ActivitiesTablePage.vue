@@ -761,9 +761,9 @@ watchEffect(() => {
 
                         <!-- จำนวน -->
                         <div class="label-pair">
-                          <span class="label-title">จำนวนที่รับ/ลงทะเบียน/เหลือ :</span>
+                          <span class="label-title">จำนวนที่ลงทะเบียน/รับ/เหลือ :</span>
                           <span class="label-value">
-                            {{ item.maxParticipants || '-' }} / {{ item.enrollmentCount || 0 }} /
+                            {{ item.enrollmentCount || 0 }} /{{ item.maxParticipants || '-' }} /
                             {{ item.maxParticipants - item.enrollmentCount || 0 }} คน
                           </span>
                         </div>
@@ -953,9 +953,9 @@ watchEffect(() => {
 
                         <!-- จำนวน -->
                         <div class="label-pair">
-                          <span class="label-title">จำนวนที่รับ/ลงทะเบียน/เหลือ :</span>
+                          <span class="label-title">จำนวนที่ลงทะเบียน/รับ/เหลือ :</span>
                           <span class="label-value">
-                            {{ item.maxParticipants || '-' }} / {{ item.enrollmentCount || 0 }} /
+                            {{ item.enrollmentCount || 0 }} / {{ item.maxParticipants || '-' }} / 
                             {{ item.maxParticipants - item.enrollmentCount || 0 }} คน
                           </span>
                         </div>
@@ -1126,9 +1126,9 @@ watchEffect(() => {
 
                         <!-- จำนวน -->
                         <div class="label-pair">
-                          <span class="label-title">จำนวนที่รับ/ลงทะเบียน/เหลือ :</span>
+                          <span class="label-title">จำนวนที่ลงทะเบียน/รับ/เหลือ :</span>
                           <span class="label-value">
-                            {{ item.maxParticipants || '-' }} / {{ item.enrollmentCount || 0 }} /
+                            {{ item.enrollmentCount || 0 }} /  {{ item.maxParticipants || '-' }} / 
                             {{ item.maxParticipants - item.enrollmentCount || 0 }} คน
                           </span>
                         </div>
@@ -1301,9 +1301,9 @@ watchEffect(() => {
 
                         <!-- จำนวน -->
                         <div class="label-pair">
-                          <span class="label-title">จำนวนที่รับ/ลงทะเบียน/เหลือ :</span>
+                          <span class="label-title">จำนวนที่ลงทะเบียน/รับ/เหลือ :</span>
                           <span class="label-value">
-                            {{ item.maxParticipants || '-' }} / {{ item.enrollmentCount || 0 }} /
+                            {{ item.enrollmentCount || 0 }} /{{ item.maxParticipants || '-' }} /
                             {{ item.maxParticipants - item.enrollmentCount || 0 }} คน
                           </span>
                         </div>
