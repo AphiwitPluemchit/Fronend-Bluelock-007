@@ -6,16 +6,17 @@ import type { Food } from 'src/types/food'
 const showFoodDialog = ref(false)
 const selectedFoods = ref<Food[]>([])
 const foodMenuDisplay = ref('')
-const addingNewFood = ref(false)
 const newFoodName = ref('')
-const menuItems = ref<string[]>([]) // รายชื่ออาหารทั้งหมด
-const menuItemsIdMap = ref<Record<string, string>>({}) // map: name → id
-const selectedFoodNames = ref<string[]>([]) // ชื่ออาหารที่เลือกไว้ (ใช้กับ checkbox)
+const menuItems = ref<string[]>([])
+const menuItemsIdMap = ref<Record<string, string>>({})
+const isEditMode = ref(false)
+const isLoading = ref(false)
 
 const props = defineProps<{
   disable?: boolean
   foodMenu?: Food[]
 }>()
+
 const emit = defineEmits<{
   (event: 'update:foodMenu', value: Food[]): void
   (event: 'update:foodMenuDisplay', value: string): void
@@ -26,7 +27,6 @@ watch(
   (newVal) => {
     if (newVal) {
       selectedFoods.value = [...newVal]
-      selectedFoodNames.value = newVal.map((f) => f.name)
       foodMenuDisplay.value = newVal.map((f) => f.name).join(', ')
     }
   },
@@ -35,61 +35,76 @@ watch(
 
 const openFoodDialog = () => {
   if (!props.disable) {
-    // sync ทุกครั้งก่อนเปิด
-    if (props.foodMenu) {
-      selectedFoods.value = [...props.foodMenu]
-    }
+    if (props.foodMenu) selectedFoods.value = [...props.foodMenu]
     showFoodDialog.value = true
+    isEditMode.value = false
   }
 }
 
+const toggleSelection = (name: string) => {
+  if (props.disable) return
+  const id = menuItemsIdMap.value[name] || ''
+  const index = selectedFoods.value.findIndex((f) => f.name === name)
+  if (index >= 0) selectedFoods.value.splice(index, 1)
+  else selectedFoods.value.push({ id, name })
+}
 
 const confirmSelection = () => {
   if (props.disable) return
 
-  selectedFoods.value = selectedFoodNames.value.map((name) => ({
-    id: menuItemsIdMap.value[name] || '',
-    name,
-  }))
-
-  foodMenuDisplay.value = selectedFoods.value.map((f) => f.name).join(', ')
-  emit('update:foodMenu', selectedFoods.value)
-  emit('update:foodMenuDisplay', foodMenuDisplay.value)
-
-  showFoodDialog.value = false
-  localStorage.clear()
+  if (!isEditMode.value) {
+    // โหมดเลือกอาหาร (view mode)
+    foodMenuDisplay.value = selectedFoods.value.map((f) => f.name).join(', ')
+    emit('update:foodMenu', selectedFoods.value)
+    emit('update:foodMenuDisplay', foodMenuDisplay.value)
+    showFoodDialog.value = false
+  } else {
+    // โหมดแก้ไข => กลับไปโหมดเลือก
+    isEditMode.value = false
+  }
 }
 
 const cancelSelection = () => {
   if (props.disable) return
-  selectedFoods.value = []
-  showFoodDialog.value = false
+  selectedFoods.value = props.foodMenu ? [...props.foodMenu] : []
+  if (isEditMode.value) {
+    // กลับไปโหมดเลือก แต่ไม่ปิด dialog
+    isEditMode.value = false
+  } else {
+    // โหมดปกติ -> ปิด dialog
+    showFoodDialog.value = false
+  }
 }
 
 const addFood = async () => {
   if (props.disable) return
   const newName = newFoodName.value.trim()
+  if (!newName) return
 
-  const isDuplicate = menuItems.value.some(
-    (existing) => existing.toLowerCase() === newName.toLowerCase(),
-  )
+  const isDuplicate = menuItems.value.some((e) => e.toLowerCase() === newName.toLowerCase())
+  const isSelected = selectedFoods.value.some((e) => e.name.toLowerCase() === newName.toLowerCase())
 
-  if (newName !== '' && !isDuplicate) {
-    try {
-      const created = await FoodService.createFood({ name: newName })
-      if (created?.id && created.name) {
-        // เพิ่มรายการใหม่
+  if (isDuplicate || isSelected) {
+    newFoodName.value = ''
+    return
+  }
+
+  try {
+    const created = await FoodService.createFood({ name: newName })
+    if (created?.id && created.name) {
+      // เพิ่มเฉพาะถ้าไม่มีอยู่ใน menuItems
+      if (!menuItems.value.includes(created.name)) {
         menuItems.value.push(created.name)
-        menuItemsIdMap.value[created.name] = created.id
       }
-    } catch (error) {
-      console.error('❌ เพิ่มอาหารไม่สำเร็จ:', error)
+      menuItemsIdMap.value[created.name] = created.id
     }
+  } catch (error) {
+    console.error('เพิ่มอาหารไม่สำเร็จ:', error)
   }
 
   newFoodName.value = ''
-  addingNewFood.value = false
 }
+
 const removeMenuItem = async (name: string) => {
   if (props.disable) return
 
@@ -113,6 +128,7 @@ const removeMenuItem = async (name: string) => {
   }
 }
 
+
 onMounted(async () => {
   try {
     const foods: Food[] = await FoodService.getAll()
@@ -129,10 +145,15 @@ onMounted(async () => {
     console.error('❌ โหลดรายการอาหารล้มเหลว', error)
   }
 })
+
+const enableEditMode = () => {
+  isEditMode.value = true
+}
+
+
 </script>
 
 <template>
-  <!-- Food Menu Input -->
   <div class="input-group">
     <p class="label label_minWidth">รายการอาหาร :</p>
     <div class="input-container">
@@ -150,71 +171,100 @@ onMounted(async () => {
     </div>
   </div>
 
-  <!-- Food Selection Dialog -->
   <q-dialog v-model="showFoodDialog" persistent>
-    <q-card class="q-pa-md food-dialog-new dialog-box">
-      <q-card-section>
-        <div class="text-h6">เลือกเมนูอาหาร</div>
-      </q-card-section>
+    <div class="q-pa-md food-dialog">
+      <!-- Header -->
+      <div class="row items-center justify-between q-mb-md">
+        <div class="text-h6">
+          {{ isEditMode ? 'แก้ไขเมนูอาหาร' : 'เลือกเมนูอาหาร' }}
+        </div>
 
-      <q-card-section class="scroll-area">
-        <!-- เมนูแสดงผลแบบ 2 คอลัมน์ -->
-        <div class="row q-col-gutter-md">
-          <div v-for="(item, index) in menuItems" :key="index" class="col-12 col-sm-6">
-            <q-card flat bordered class="q-pa-sm row items-center justify-between">
-              <q-checkbox
-                v-model="selectedFoodNames"
-                :val="item"
-                :label="item"
-                :disable="disable"
-              />
-              <q-btn
-                icon="delete"
-                flat
-                dense
-                round
-                class="bg-red text-white q-pa-xs rounded-borders q-mr-sm"
+        <div class="row q-gutter-sm">
+          <q-btn
+            v-if="!isEditMode"
+            label="แก้ไข"
+            class="btnedit"
+            unelevated
+            rounded
+            @click="enableEditMode"
+          />
+        </div>
+      </div>
+
+      <!-- Food list -->
+      <div class="food-container">
+        <div class="food-list">
+          <q-spinner v-if="isLoading" color="primary" size="md" class="q-mt-sm" />
+          <div v-if="!isLoading && menuItems.length === 0" class="text-grey text-center q-mt-md">
+            ยังไม่มีรายการอาหารในระบบ
+          </div>
+
+          <q-btn
+            v-for="(item, index) in menuItems"
+            :key="index"
+            rounded
+            outlined
+            flat
+            class="FoodChip"
+            :class="{ 'active-btn': selectedFoods.some((f) => f.name === item) }"
+            color="white"
+            text-color="black"
+            @click="
+              () => {
+                if (!isEditMode) toggleSelection(item)
+              }
+            "
+            :disable="disable"
+          >
+            <template v-slot:default>
+              <q-icon
+                name="close"
+                class="delete-icon"
                 @click.stop="removeMenuItem(item)"
-                v-if="!disable"
-              >
-                <q-tooltip>ลบ</q-tooltip>
-              </q-btn>
-            </q-card>
+                v-if="isEditMode && !disable"
+              />
+              {{ item }}
+            </template>
+          </q-btn>
+
+          <!-- Add new food -->
+          <div class="add-food-row">
+            <q-input
+              v-if="isEditMode && !disable"
+              v-model="newFoodName"
+              dense
+              outlined
+              placeholder="เพิ่มเมนูใหม่"
+              class="input-add-food"
+              @keyup.enter="addFood"
+            />
+            <q-btn
+              v-if="isEditMode && !disable"
+              label="เพิ่ม"
+              color="primary"
+              @click="addFood"
+              class="btn-add-food"
+              :disable="!newFoodName.trim()"
+            />
           </div>
         </div>
-      </q-card-section>
+      </div>
 
-      <q-card-section class="row q-gutter-sm">
-        <q-input
-          dense
-          outlined
-          v-model="newFoodName"
-          label="เพิ่มเมนูใหม่"
-          class="col"
-          @keyup.enter="addFood"
-          :disable="disable"
-        />
-        <q-btn
-          label="เพิ่ม"
-          color="primary"
-          @click="addFood"
-          :disable="disable || !newFoodName.trim()"
-        />
-      </q-card-section>
-
+      <!-- Confirm buttons -->
       <div class="button-container">
         <q-btn class="btnreject" label="ยกเลิก" @click="cancelSelection" :disable="disable" />
-        <q-btn class="btnconfirm" label="ยืนยัน" @click="confirmSelection" :disable="disable" />
+        <q-btn
+          class="btnconfirm"
+          :label="isEditMode ? 'บันทึก' : 'เสร็จสิ้น'"
+          @click="confirmSelection"
+          :disable="disable"
+        />
       </div>
-    </q-card>
+    </div>
   </q-dialog>
 </template>
 
 <style scoped>
-.dialog-box {
-  padding: 20px;
-  border-radius: 12px;
-}
 .button-container {
   display: flex;
   justify-content: flex-end;
@@ -262,7 +312,6 @@ onMounted(async () => {
 .food-dialog {
   background-color: white;
   width: 600px;
-  height: 600px;
   border-radius: 10px;
   padding: 20px;
   display: flex;
@@ -327,11 +376,11 @@ onMounted(async () => {
 }
 .delete-icon {
   position: absolute;
-  top: -2px;
+  top: -8px;
   right: -3px;
   background: red;
   border-radius: 50%;
-  font-size: 10px;
+  font-size: 15px;
   padding: 2px;
   color: white;
   cursor: pointer;
@@ -437,5 +486,21 @@ onMounted(async () => {
     height: 45px;
     font-size: 13px;
   }
+}
+
+.add-food-row {
+  display: flex;
+  gap: 8px; /* ช่องว่างระหว่าง input กับปุ่ม */
+  align-items: center; /* ให้ชิดตรงกลางแนวตั้ง */
+}
+
+.input-add-food {
+  flex-grow: 1;
+  height: 40px; /* กำหนดความสูงเท่ากับปุ่ม */
+}
+
+.btn-add-food {
+  height: 40px; /* กำหนดความสูงเท่ากับ input */
+  min-width: 80px;
 }
 </style>

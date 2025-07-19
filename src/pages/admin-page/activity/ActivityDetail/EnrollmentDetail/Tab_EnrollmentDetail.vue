@@ -21,8 +21,18 @@ const enrollmentSummary = ref<EnrollmentSummary | null>(null)
 const majorList = [
   { majorName: 'CS', fullName: 'สาขาวิชาวิทยาการคอมพิวเตอร์', color: '#2563eb', theme: 'blue' },
   { majorName: 'SE', fullName: 'สาขาวิชาวิศวกรรมซอฟต์แวร์', color: '#dc2626', theme: 'red' },
-  { majorName: 'ITDI', fullName: 'สาขาวิชาเทคโนโลยีสารสนเทศเพื่ออุตสาหกรรมดิจิทัล', color: '#eab308', theme: 'yellow' },
-  { majorName: 'AAI', fullName: 'สาขาวิชาปัญญาประดิษฐ์ประยุกต์และเทคโนโลยีอัจฉริยะ', color: '#1d4ed8', theme: 'blue' },
+  {
+    majorName: 'ITDI',
+    fullName: 'สาขาวิชาเทคโนโลยีสารสนเทศเพื่ออุตสาหกรรมดิจิทัล',
+    color: '#eab308',
+    theme: 'yellow',
+  },
+  {
+    majorName: 'AAI',
+    fullName: 'สาขาวิชาปัญญาประดิษฐ์ประยุกต์และเทคโนโลยีอัจฉริยะ',
+    color: '#1d4ed8',
+    theme: 'blue',
+  },
 ]
 
 const registrationRows = computed(() => {
@@ -91,7 +101,8 @@ onMounted(async () => {
 </script>
 
 <template>
-  <div>    <!-- Main Activity Section -->
+  <div>
+    <!-- Main Activity Section -->
     <div class="main-activity-card">
       <div class="activity-header">
         <div class="activity-title">
@@ -129,7 +140,7 @@ onMounted(async () => {
         <q-card class="stat-card remaining-card">
           <q-card-section class="stat-content">
             <div class="stat-icon">
-              <q-icon name="event_available" size="40px" />
+              <q-icon name="event_seat" size="40px" />
             </div>
             <div class="stat-details">
               <div class="stat-number">{{ enrollmentSummary?.remainingSlots || 0 }}</div>
@@ -139,19 +150,14 @@ onMounted(async () => {
         </q-card>
       </div>
 
-
       <!-- Major Distribution -->
       <div class="section-divider">
         <q-icon name="school" size="24px" class="text-primary" />
         <h3>รายละเอียดตามสาขา</h3>
       </div>
-      
+
       <div class="major-grid">
-        <q-card
-          v-for="major in majorList"
-          :key="major.majorName"
-          class="major-card"
-        >
+        <q-card v-for="major in majorList" :key="major.majorName" class="major-card">
           <q-card-section class="major-content">
             <div class="major-header">
               <div class="major-color" :style="{ backgroundColor: major.color }"></div>
@@ -171,13 +177,9 @@ onMounted(async () => {
           <q-icon name="restaurant" size="24px" class="text-primary" />
           <h3>ผลการเลือกอาหาร</h3>
         </div>
-        
+
         <div class="food-grid">
-          <q-card 
-            v-for="(food, index) in foodRows" 
-            :key="index" 
-            class="food-card"
-          >
+          <q-card v-for="(food, index) in foodRows" :key="index" class="food-card">
             <q-card-section class="food-content">
               <div class="food-icon">
                 <q-icon name="restaurant_menu" size="24px" />
@@ -192,101 +194,84 @@ onMounted(async () => {
       </div>
     </div>
 
+    <q-separator spaced="xl" />
+
     <!-- Sub Activities Section -->
-    <div v-for="(row, index) in registrationRows" :key="index" class="sub-activity-card">
-      <div class="sub-activity-header" @click="toggleExpanded(index)">
-        <div class="sub-activity-title">
-          <q-icon name="event_note" size="24px" class="text-secondary" />
-          <h3>{{ row.activity }}</h3>
+    <div>
+      <div class="sub-activity-card">
+        <div class="activity-header">
+          <div class="activity-title">
+            <q-icon name="event_note" size="32px" class="text-primary" />
+            <h1>กิจกรรมย่อย</h1>
+          </div>
         </div>
-        <q-btn
-          flat
-          round
-          :icon="expandedIndices.includes(index) ? 'keyboard_arrow_up' : 'keyboard_arrow_down'"
-          size="md"
-          class="expand-btn"
+        <div
+          v-for="(row, index) in registrationRows"
+          :key="index"
+          class="q-mb-md q-pa-md bg-white rounded-borders shadow-1"
+          @click="toggleExpanded(index)"
+          style="cursor: pointer"
         >
-          <q-tooltip>
-            {{ expandedIndices.includes(index) ? 'ซ่อนรายละเอียด' : 'ดูรายละเอียด' }}
-          </q-tooltip>
-        </q-btn>
+          <!-- Header: ชื่อกิจกรรมย่อย + จำนวน -->
+          <div class="row items-center justify-between q-gutter-sm">
+            <!-- ชื่อกิจกรรมย่อย -->
+            <div class="text-h6 text-primary q-mb-xs">
+              {{ row.activity }}
+            </div>
 
-      </div>
+            <!-- จำนวนที่รับ / ลง / เหลือ -->
+            <div class="text-h7 text-weight-bold">
+              รับ {{ row.max }} / ลงทะเบียนแล้ว {{ row.enrolled }} / เหลือ {{ row.remaining }}
+            </div>
 
-      <div class="sub-stats-grid">
-        <q-card class="stat-card capacity-card">
-          <q-card-section class="stat-content">
-            <div class="stat-icon">
-              <q-icon name="group" size="36px" />
-            </div>
-            <div class="stat-details">
-              <div class="stat-number">{{ row.max }}</div>
-              <div class="stat-label">จำนวนที่รับ</div>
-            </div>
-          </q-card-section>
-        </q-card>
-
-        <q-card class="stat-card enrolled-card">
-          <q-card-section class="stat-content">
-            <div class="stat-icon">
-              <q-icon name="how_to_reg" size="36px" />
-            </div>
-            <div class="stat-details">
-              <div class="stat-number">{{ row.enrolled }}</div>
-              <div class="stat-label">ลงทะเบียนแล้ว</div>
-            </div>
-          </q-card-section>
-        </q-card>
-
-        <q-card class="stat-card remaining-card">
-          <q-card-section class="stat-content">
-            <div class="stat-icon">
-              <q-icon name="event_available" size="36px" />
-            </div>
-            <div class="stat-details">
-              <div class="stat-number">{{ row.remaining }}</div>
-              <div class="stat-label">จำนวนที่ว่าง</div>
-            </div>
-          </q-card-section>
-        </q-card>
-      </div>
-      
-      <q-slide-transition>
-        <div v-if="expandedIndices.includes(index)" class="expanded-content">
-          <div class="expanded-header">
-            <q-icon name="school" size="20px" class="text-secondary" />
-            <span class="expanded-title">รายละเอียดตามสาขา</span>
+            <q-btn
+              flat
+              dense
+              round
+              color="primary"
+              :icon="expandedIndices.includes(index) ? 'expand_less' : 'expand_more'"
+              class="q-ml-sm"
+              @click.stop="toggleExpanded(index)"
+            />
           </div>
-          
-          <div class="expanded-major-grid">
-            <q-card
-              v-for="major in majorList"
-              :key="major.majorName"
-              class="expanded-major-card"
-            >
-              <q-card-section class="expanded-major-content">
-                <div class="expanded-major-color" :style="{ backgroundColor: major.color }"></div>
-                <div class="expanded-major-details">
-                  <div class="expanded-major-code">{{ major.majorName }}</div>
-                  <div class="expanded-major-count">{{ row[major.majorName] }} คน</div>
+
+          <!-- Expanded Content -->
+          <q-slide-transition>
+            <div v-if="expandedIndices.includes(index)" class="q-mt-sm q-pt-sm q-border-top">
+              <div class="text-subtitle2 q-mb-sm">
+                <q-icon name="school" class="q-mr-xs" />
+                จำนวนนิสิตจากแต่ละสาขา
+              </div>
+              <div class="row q-col-gutter-md q-row-gutter-sm">
+                <div
+                  v-for="major in majorList"
+                  :key="major.majorName"
+                  class="col-12 col-sm-6 col-md-6"
+                >
+                  <q-card flat bordered class="q-pa-sm">
+                    <div class="row items-center">
+                      <div
+                        class="q-mr-sm"
+                        :style="{ width: '10px', height: '30px', backgroundColor: major.color }"
+                      ></div>
+                      <div class="text-body2">
+                        {{ major.fullName }}: {{ row[major.majorName] || 0 }} คน
+                      </div>
+                    </div>
+                  </q-card>
                 </div>
-              </q-card-section>
-            </q-card>
-          </div>
+              </div>
+            </div>
+          </q-slide-transition>
         </div>
-      </q-slide-transition>
-    </div></div>
-
+      </div>
+    </div>
+  </div>
 </template>
 
 <style scoped>
 .main-activity-card {
-  background: white;
-  border-radius: 24px;
-  padding: 32px;
-  margin-bottom: 24px;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
-  border: 1px solid rgba(0, 0, 0, 0.08);
+  margin-bottom: 48px; /* เพิ่ม margin-bottom ให้ช่องว่างก่อนกิจกรรมย่อย */
 }
 
 .activity-header {
@@ -303,14 +288,13 @@ onMounted(async () => {
 }
 
 .activity-title h1 {
-  font-size: 28px;
+  font-size: 32px; /* เพิ่มขนาดตัวอักษร */
   font-weight: 700;
   color: #2d3748;
   margin: 0;
-  word-break: break-word; /* เพิ่มบรรทัดนี้ */
-  line-height: 1.3;        /* และบรรทัดนี้ถ้าอยากให้ดูโปร่งขึ้น */
+  word-break: break-word;
+  line-height: 1.3;
 }
-
 
 .activity-badge {
   padding: 8px 16px;
@@ -369,16 +353,16 @@ onMounted(async () => {
 }
 
 .stat-number {
-  font-size: 32px;
+  font-size: 36px; /* เพิ่มขนาด */
   font-weight: 700;
   line-height: 1;
   margin-bottom: 4px;
 }
 
 .stat-label {
-  font-size: 14px;
+  font-size: 16px; /* เพิ่มขนาด */
   opacity: 0.9;
-  font-weight: 500;
+  font-weight: 600;
 }
 
 .progress-section {
@@ -420,7 +404,7 @@ onMounted(async () => {
 }
 
 .section-divider h3 {
-  font-size: 20px;
+  font-size: 20px; /* เพิ่มขนาด */
   font-weight: 600;
   color: #2d3748;
   margin: 0;
@@ -467,19 +451,19 @@ onMounted(async () => {
 }
 
 .major-code {
-  font-size: 16px;
+  font-size: 18px; /* เพิ่มขนาด */
   font-weight: 700;
   color: #2d3748;
   margin-bottom: 2px;
 }
 
 .major-name {
-  font-size: 12px;
+  font-size: 14px; /* เพิ่มขนาด */
   color: #000000;
 }
 
 .major-count {
-  font-size: 24px;
+  font-size: 28px; /* เพิ่มขนาด */
   font-weight: 700;
   color: #4a5568;
   text-align: right;
@@ -523,27 +507,17 @@ onMounted(async () => {
 }
 
 .food-name {
-  font-size: 14px;
+  font-size: 16px; /* เพิ่มขนาด */
   font-weight: 600;
   color: #2d3748;
   margin-bottom: 4px;
 }
 
 .food-votes {
-  font-size: 16px;
+  font-size: 18px; /* เพิ่มขนาด */
   font-weight: 700;
   color: #000000;
 }
-
-.sub-activity-card {
-  background: white;
-  border-radius: 24px; /* เปลี่ยนจาก 20px เป็น 24px ให้เหมือน .main-activity-card */
-  padding: 32px;       /* เพิ่มจาก 24px ให้เท่ากัน */
-  margin-bottom: 24px; /* ให้ระยะห่างเท่ากัน */
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1); /* เหมือนการ์ดหลัก */
-  border: 1px solid rgba(0, 0, 0, 0.08);     /* เพิ่ม border แบบเดียวกับการ์ดหลัก */
-}
-
 
 .sub-activity-header {
   display: flex;
@@ -561,8 +535,8 @@ onMounted(async () => {
 }
 
 .sub-activity-title h3 {
-  font-size: 18px;
-  font-weight: 600;
+  font-size: 20px; /* เพิ่มขนาด */
+  font-weight: 700;
   color: #2d3748;
   margin: 0;
 }
@@ -639,8 +613,8 @@ onMounted(async () => {
 }
 
 .expanded-title {
-  font-size: 16px;
-  font-weight: 600;
+  font-size: 18px; /* เพิ่มขนาด */
+  font-weight: 700;
   color: #2d3748;
 }
 
@@ -680,14 +654,14 @@ onMounted(async () => {
 }
 
 .expanded-major-code {
-  font-size: 14px;
+  font-size: 16px; /* เพิ่มขนาด */
   font-weight: 700;
   color: #2d3748;
   margin-bottom: 2px;
 }
 
 .expanded-major-count {
-  font-size: 14px;
+  font-size: 16px; /* เพิ่มขนาด */
   color: #000000;
 }
 
@@ -695,26 +669,26 @@ onMounted(async () => {
   .dashboard-container {
     padding: 16px;
   }
-  
+
   .main-activity-card {
     padding: 24px;
   }
-  
+
   .stats-grid {
     grid-template-columns: 1fr;
   }
-  
+
   .major-grid {
     grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
   }
-  
+
   .activity-header {
     flex-direction: column;
     gap: 16px;
     text-align: center;
   }
   .activity-title h1 {
-    font-size: 20px;
+    font-size: 24px; /* ลดขนาดบนมือถือ */
     text-align: center;
     word-break: break-word;
   }
@@ -724,5 +698,85 @@ onMounted(async () => {
     align-items: center;
     gap: 8px;
   }
+}
+
+.sub-activity-wrapper {
+  background: white;
+  border-radius: 16px;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  padding: 20px;
+  margin-bottom: 16px;
+}
+
+.sub-activity-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 8px;
+  cursor: pointer;
+}
+
+.sub-activity-title {
+  display: flex;
+  align-items: center;
+  font-weight: 600;
+  font-size: 16px;
+  color: #2d3748;
+  flex-grow: 1;
+  word-break: break-word;
+}
+
+.sub-activity-numbers {
+  font-size: 14px;
+  color: #4b5563;
+  font-weight: 500;
+}
+
+.sub-major-expanded {
+  margin-top: 16px;
+  padding-top: 12px;
+  border-top: 1px solid #e5e7eb;
+}
+
+.expanded-header {
+  display: flex;
+  align-items: center;
+  margin-bottom: 12px;
+  font-weight: 600;
+  color: #2d3748;
+  font-size: 14px;
+}
+
+.expanded-major-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.expanded-major-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: #f9fafb;
+  padding: 8px 12px;
+  border-radius: 8px;
+  font-size: 14px;
+  color: #374151;
+}
+
+.color-indicator {
+  width: 8px;
+  height: 24px;
+  border-radius: 4px;
+}
+
+.major-label {
+  font-weight: 600;
+}
+
+.major-count {
+  margin-left: auto;
+  font-weight: 500;
 }
 </style>
