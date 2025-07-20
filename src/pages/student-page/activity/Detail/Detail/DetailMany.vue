@@ -34,20 +34,20 @@ const getActivityTime = (activityItems: ActivityItem[] | null | undefined): stri
   <div class="q-pa-sm">
     <!-- ข้อมูลทั่วไป -->
     <div class="field-pair">
-      <div class="field-label">ชื่อกิจกรรมหลัก</div>
-      <div class="field-value">: {{ activity?.name ?? 'ไม่ระบุ' }}</div>
+      <div class="field-label">ชื่อกิจกรรมหลัก : </div>
+      <div class="field-value">{{ activity?.name ?? 'ไม่ระบุ' }}</div>
     </div>
     <div class="field-pair">
-      <div class="field-label">วันที่จัดกิจกรรม</div>
-      <div class="field-value">: {{ getActivitydates(activity?.activityItems) }}</div>
+      <div class="field-label">วันที่จัดกิจกรรม : </div>
+      <div class="field-value"> {{ getActivitydates(activity?.activityItems) }}</div>
     </div>
     <div class="field-pair">
-      <div class="field-label">เวลาที่จัดกิจกรรม</div>
-      <div class="field-value">: {{ getActivityTime(activity?.activityItems) }}</div>
+      <div class="field-label">เวลาที่จัดกิจกรรม : </div>
+      <div class="field-value">{{ getActivityTime(activity?.activityItems) }}</div>
     </div>
     <div class="field-pair">
-      <div class="field-label">ประเภทกิจกรรม</div>
-      <div class="field-value">: 
+      <div class="field-label">ประเภทกิจกรรม : </div>
+      <div class="field-value">
         {{
           activity?.skill === 'hard'
             ? 'ชั่วโมงทักษะทางวิชาการ'
@@ -58,8 +58,8 @@ const getActivityTime = (activityItems: ActivityItem[] | null | undefined): stri
       </div>
     </div>
     <div class="field-pair">
-      <div class="field-label">จำนวนกิจกรรม</div>
-      <div class="field-value">: {{ activity.activityItems?.length }} กิจกรรม</div>
+      <div class="field-label">จำนวนกิจกรรม : </div>
+      <div class="field-value">{{ activity.activityItems?.length }} กิจกรรม</div>
     </div>
 
     <q-separator spaced />
@@ -67,32 +67,32 @@ const getActivityTime = (activityItems: ActivityItem[] | null | undefined): stri
     <!-- รายการรอบกิจกรรม -->
     <div v-for="item in activity.activityItems" :key="item.id || ''">
       <div class="field-pair">
-        <div class="field-label">ชื่อกิจกรรมย่อย</div>
-        <div class="field-value">: {{ item.name ?? 'ไม่ระบุ' }}</div>
+        <div class="field-label">ชื่อกิจกรรมย่อย : </div>
+        <div class="field-value">{{ item.name ?? 'ไม่ระบุ' }}</div>
       </div>
       <div class="field-pair">
-        <div class="field-label">สถานที่จัดกิจกรรม</div>
-        <div class="field-value">: 
+        <div class="field-label">สถานที่จัดกิจกรรม : </div>
+        <div class="field-value">
           {{ Array.isArray(item.rooms) ? item.rooms.join(', ') : (item.rooms ?? 'ไม่ระบุ') }}
         </div>
       </div>
       <div class="field-pair">
-        <div class="field-label">จำนวนชั่วโมงที่ได้รับ</div>
-        <div class="field-value">: {{ item.hour ?? '-' }} ชั่วโมง</div>
+        <div class="field-label">จำนวนชั่วโมงที่ได้รับ : </div>
+        <div class="field-value">{{ item.hour ?? '-' }} ชั่วโมง</div>
       </div>
       <div class="field-pair">
-        <div class="field-label">จำนวนที่ลงทะเบียน</div>
-        <div class="field-value">: 
+        <div class="field-label">จำนวนที่ลงทะเบียน : </div>
+        <div class="field-value">
           {{ item.enrollmentCount ?? 'ไม่ระบุ' }}/{{ item.maxParticipants ?? 'ไม่ระบุ' }}
         </div>
       </div>
       <div class="field-pair">
-        <div class="field-label">วิทยากร</div>
-        <div class="field-value">: {{ item.operator ?? 'ไม่ระบุ' }}</div>
+        <div class="field-label">วิทยากร : </div>
+        <div class="field-value">{{ item.operator ?? 'ไม่ระบุ' }}</div>
       </div>
       <div class="field-pair">
-        <div class="field-label">รายละเอียดอื่นๆ</div>
-        <div class="field-value">: {{ item.description ?? 'ไม่ระบุ' }}</div>
+        <div class="field-label">รายละเอียดอื่น ๆ : </div>
+        <div class="field-value">{{ item.description ?? 'ไม่ระบุ' }}</div>
       </div>
       <q-separator spaced />
     </div>
@@ -107,6 +107,7 @@ const getActivityTime = (activityItems: ActivityItem[] | null | undefined): stri
   margin-bottom: 12px;
 }
 
+/* มือถือ: แสดงแนวตั้งเหมือนเดิม */
 .field-label {
   font-weight: bold;
   font-size: 16px;
@@ -120,7 +121,7 @@ const getActivityTime = (activityItems: ActivityItem[] | null | undefined): stri
   word-break: break-word;
 }
 
-/* แสดงแนวนอนเฉพาะจอใหญ่ขึ้นไป */
+/* แสดงแนวนอนเฉพาะตอนจอใหญ่ */
 @media (min-width: 768px) {
   .field-pair {
     flex-direction: row;
@@ -129,10 +130,19 @@ const getActivityTime = (activityItems: ActivityItem[] | null | undefined): stri
 
   .field-label {
     width: 200px;
+    text-align: right;
     margin-bottom: 0;
+    padding-right: 8px;
+    position: relative;
+  }
+
+  .field-label::after {
+    position: absolute;
+    right: 0;
   }
 
   .field-value {
+    text-align: left;
     flex: 1;
   }
 }

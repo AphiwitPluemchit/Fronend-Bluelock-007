@@ -66,23 +66,23 @@ const getActivityDetail = (activityItems: ActivityItem[] | null | undefined): st
 <template>
   <q-list dense>
     <div class="field-pair">
-      <div class="field-label">ชื่อกิจกรรม</div>
-      <div class="field-value">: {{ activity?.name ?? 'ไม่ระบุ' }}</div>
+      <div class="field-label">ชื่อกิจกรรม : </div>
+      <div class="field-value">{{ activity?.name ?? 'ไม่ระบุ' }}</div>
     </div>
 
     <div class="field-pair">
-      <div class="field-label">วันที่จัดกิจกรรม</div>
-      <div class="field-value">: {{ getActivitydates(activity?.activityItems) }}</div>
+      <div class="field-label">วันที่จัดกิจกรรม : </div>
+      <div class="field-value">{{ getActivitydates(activity?.activityItems) }}</div>
     </div>
 
     <div class="field-pair">
-      <div class="field-label">เวลาที่จัดกิจกรรม</div>
-      <div class="field-value">: {{ getActivityTime(activity?.activityItems) }}</div>
+      <div class="field-label">เวลาที่จัดกิจกรรม : </div>
+      <div class="field-value">{{ getActivityTime(activity?.activityItems) }}</div>
     </div>
 
     <div class="field-pair">
-      <div class="field-label">ประเภทกิจกรรม</div>
-      <div class="field-value">: 
+      <div class="field-label">ประเภทกิจกรรม : </div>
+      <div class="field-value">
         {{
           activity?.skill === 'hard'
             ? 'ชั่วโมงทักษะทางวิชาการ'
@@ -94,28 +94,28 @@ const getActivityDetail = (activityItems: ActivityItem[] | null | undefined): st
     </div>
 
     <div class="field-pair">
-      <div class="field-label">สถานที่จัดกิจกรรม</div>
-      <div class="field-value">: {{ getActivityRooms(activity?.activityItems) }}</div>
+      <div class="field-label">สถานที่จัดกิจกรรม : </div>
+      <div class="field-value">{{ getActivityRooms(activity?.activityItems) }}</div>
     </div>
 
     <div class="field-pair">
-      <div class="field-label">จำนวนชั่วโมงที่ได้รับ</div>
-      <div class="field-value">: {{ getActivityHours(activity?.activityItems) }} ชั่วโมง</div>
+      <div class="field-label">จำนวนชั่วโมงที่ได้รับ : </div>
+      <div class="field-value">{{ getActivityHours(activity?.activityItems) }} ชั่วโมง</div>
     </div>
 
     <div class="field-pair">
-      <div class="field-label">จำนวนที่ลงทะเบียน</div>
-      <div class="field-value">: {{ getActivityEnrollments(activity?.activityItems) }}</div>
+      <div class="field-label">จำนวนที่ลงทะเบียน : </div>
+      <div class="field-value">{{ getActivityEnrollments(activity?.activityItems) }}</div>
     </div>
 
     <div class="field-pair">
-      <div class="field-label">วิทยากร</div>
-      <div class="field-value">: {{ getActivityOperator(activity?.activityItems) }}</div>
+      <div class="field-label">วิทยากร : </div>
+      <div class="field-value">{{ getActivityOperator(activity?.activityItems) }}</div>
     </div>
 
     <div class="field-pair">
-      <div class="field-label">รายละเอียดอื่น ๆ</div>
-      <div class="field-value">: {{ getActivityDetail(activity?.activityItems) }}</div>
+      <div class="field-label">รายละเอียดอื่น ๆ : </div>
+      <div class="field-value">{{ getActivityDetail(activity?.activityItems) }}</div>
     </div>
   </q-list>
 </template>
@@ -127,6 +127,7 @@ const getActivityDetail = (activityItems: ActivityItem[] | null | undefined): st
   margin-bottom: 12px;
 }
 
+/* มือถือ: แสดงแนวตั้งเหมือนเดิม */
 .field-label {
   font-weight: bold;
   font-size: 16px;
@@ -140,7 +141,7 @@ const getActivityDetail = (activityItems: ActivityItem[] | null | undefined): st
   word-break: break-word;
 }
 
-/* แสดงแนวนอนเมื่อจอกว้างขึ้น (เช่น tablet หรือ desktop) */
+/* แสดงแนวนอนเฉพาะตอนจอใหญ่ */
 @media (min-width: 768px) {
   .field-pair {
     flex-direction: row;
@@ -149,12 +150,22 @@ const getActivityDetail = (activityItems: ActivityItem[] | null | undefined): st
 
   .field-label {
     width: 200px;
+    text-align: right;
     margin-bottom: 0;
+    padding-right: 8px;
+    position: relative;
+  }
+
+  .field-label::after {
+    position: absolute;
+    right: 0;
   }
 
   .field-value {
+    text-align: left;
     flex: 1;
   }
 }
 </style>
+
 
