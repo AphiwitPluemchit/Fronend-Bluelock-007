@@ -46,9 +46,11 @@
 import { ref, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { useQuasar } from 'quasar'
+import { useAuthStore } from 'src/stores/auth'
 
 const $q = useQuasar()
 const router = useRouter()
+const authStore = useAuthStore()
 const leftDrawerOpen = ref(false)
 
 const linksList = [
@@ -58,11 +60,21 @@ const linksList = [
   { title: 'บันทึกชั่วโมงอบรม', icon: 'history', link: '/Student/RecordPage' },
   { title: 'ใบประกาศนียบัตร', icon: 'school', link: '/Student/CertificatePage' },
 ]
+
 const drawerBehavior = computed(() => {
   return $q.screen.width < 1100 ? 'mobile' : 'desktop' // ถ้าหน้าจอเล็กกว่า lg (<1100px) ใช้ mobile
 })
+
 async function logout() {
-  await router.push('/')
+  try {
+    await authStore.logout()
+  } catch (error) {
+    console.error('Logout error:', error)
+    // แม้ว่า logout จะล้มเหลว ก็ให้เคลีย localStorage และ redirect ไปหน้า login
+    localStorage.removeItem('access_token')
+    localStorage.removeItem('user')
+    await router.push('/')
+  }
 }
 
 // ฟังก์ชันเปิด/ปิด Sidebar

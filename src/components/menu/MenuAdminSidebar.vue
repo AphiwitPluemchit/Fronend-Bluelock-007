@@ -75,9 +75,11 @@
 import { ref, computed } from 'vue'
 import { useQuasar } from 'quasar'
 import { useRouter } from 'vue-router'
+import { useAuthStore } from 'src/stores/auth'
 
 const $q = useQuasar()
 const router = useRouter()
+const authStore = useAuthStore()
 const leftDrawerOpen = ref(false)
 
 const linksList = [
@@ -105,9 +107,19 @@ const linksList = [
 const drawerBehavior = computed(() => {
   return $q.screen.width < 1100 ? 'mobile' : 'desktop' // ถ้าหน้าจอเล็กกว่า lg (<1100px) ใช้ mobile
 })
+
 async function logout() {
-  await router.push('/')
+  try {
+    await authStore.logout()
+  } catch (error) {
+    console.error('Logout error:', error)
+    // แม้ว่า logout จะล้มเหลว ก็ให้เคลีย localStorage และ redirect ไปหน้า login
+    localStorage.removeItem('access_token')
+    localStorage.removeItem('user')
+    await router.push('/')
+  }
 }
+
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const isActiveLink = (link: any) => {
   return router.currentRoute.value.path.includes(link.link)
