@@ -1,13 +1,24 @@
-import { api } from 'boot/axios'
+import { api } from 'src/boot/axios'
 import { Notify } from 'quasar'
 import type { Pagination, PaginationResponse } from 'src/types/pagination'
 import type { ExcelStudentRow, Student } from 'src/types/student'
+import type { AxiosError } from 'axios'
 
 // 🔔 แสดงข้อความ error
 const showError = (message: string) => {
   Notify.create({
     message,
     type: 'negative',
+    position: 'bottom',
+    timeout: 3000,
+  })
+}
+
+// 🔔 แสดงข้อความ success
+const showSuccess = (message: string) => {
+  Notify.create({
+    message,
+    type: 'positive',
     position: 'bottom',
     timeout: 3000,
   })
@@ -128,6 +139,47 @@ export class StudentService {
     } catch (error) {
       showError('ไม่สามารถโหลดข้อมูลสรุปนักศึกษาได้')
       console.error(`Error fetching student summary `, error)
+      throw error
+    }
+  }
+
+  // อัปเดตสถานะนักเรียนหลายคนโดยใช้ ID (ประสิทธิภาพดีกว่า)
+  static async updateStudentStatusByIDs(studentIds: string[]): Promise<{ message: string; updated: number; success: boolean }> {
+    try {
+      const res = await api.post('/students/update-status-by-ids', {
+        studentIds,
+      })
+
+      if (res.data?.message) {
+        showSuccess(res.data.message)
+      }
+
+      return res.data
+    } catch (error) {
+      console.error('Update student status error:', error)
+      const axiosError = error as AxiosError<{ code: string; error: string }>
+
+      if (axiosError.response?.data?.code) {
+        const errorCode = axiosError.response.data.code
+        const errorMessage = axiosError.response.data.error || 'เกิดข้อผิดพลาด'
+
+        switch (errorCode) {
+          case 'MISSING_IDS':
+            showError('กรุณาเลือกนักเรียนที่ต้องการอัปเดต')
+            break
+          case 'INVALID_STATUS':
+            showError('สถานะไม่ถูกต้อง')
+            break
+          case 'UPDATE_FAILED':
+            showError('อัปเดตสถานะล้มเหลว')
+            break
+          default:
+            showError(errorMessage)
+        }
+      } else {
+        showError('อัปเดตสถานะล้มเหลว กรุณาตรวจสอบการเชื่อมต่อ')
+      }
+
       throw error
     }
   }

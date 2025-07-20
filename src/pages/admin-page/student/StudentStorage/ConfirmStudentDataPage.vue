@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, watch } from 'vue'
 import { useStudentStore } from 'src/stores/student'
 import AppBreadcrumbs from 'src/components/AppBreadcrumbs.vue'
 
@@ -24,6 +24,46 @@ const majorOptions = ['CS', 'AAI', 'SE', 'ITDI']
 
 const selectedStudents = ref<string[]>([])
 const students = computed(() => studentStore.students ?? [])
+
+// เพิ่ม state สำหรับ checkall
+const selectAll = ref(false)
+
+// Computed property สำหรับตรวจสอบว่า checkbox ควรแสดงสถานะอะไร
+const isStudentSelected = (studentCode: string) => {
+  return selectedStudents.value.includes(studentCode)
+}
+
+const toggleSelectAll = () => {
+  if (selectAll.value) {
+    // เลือกทั้งหมดในหน้าปัจจุบัน (เพิ่มเข้าไปในรายการที่เลือกอยู่แล้ว)
+    const currentPageCodes = students.value.map((student) => student.code)
+    selectedStudents.value = [...new Set([...selectedStudents.value, ...currentPageCodes])]
+  } else {
+    // ยกเลิกเลือกเฉพาะในหน้าปัจจุบัน (ไม่กระทบกับหน้าที่เลือกไว้แล้ว)
+    const currentPageCodes = students.value.map((student) => student.code)
+    selectedStudents.value = selectedStudents.value.filter(
+      (code) => !currentPageCodes.includes(code),
+    )
+  }
+}
+
+// Watch selectedStudents เพื่อ sync selectAll state เฉพาะหน้าปัจจุบัน
+watch(
+  selectedStudents,
+  (newSelected) => {
+    const currentPageCodes = students.value.map((student) => student.code)
+    const allCurrentPageSelected = currentPageCodes.every((code) => newSelected.includes(code))
+    selectAll.value = allCurrentPageSelected
+  },
+  { deep: true },
+)
+
+// Watch students เพื่อ reset selectAll state เมื่อเปลี่ยนหน้า
+watch(students, () => {
+  // Reset selectAll และเคลียร์การเลือกเมื่อเปลี่ยนหน้า
+  selectAll.value = false
+  selectedStudents.value = []
+})
 
 const data = async () => {
   console.log(studentStore.query)
@@ -60,15 +100,25 @@ const pagination = ref({
 })
 const saveStudents = async () => {
   try {
-    for (const code of selectedStudents.value) {
-      const student = studentStore.students.find((s) => s.code === code)
-      if (student) {
-        const updatedStudent = { ...student, status: 0 }
-        await studentStore.updateStudent(updatedStudent)
-      }
+    // แปลง student codes เป็น student IDs
+    const studentIds = selectedStudents.value
+      .map((code) => {
+        const student = studentStore.students.find((s) => s.code === code)
+        return student?.id
+      })
+      .filter(Boolean) as string[]
+
+    if (studentIds.length === 0) {
+      console.warn('No valid student IDs found')
+      return
     }
-    await studentStore.getStudents()
+
+    // ใช้ API ใหม่ที่ส่งเฉพาะ ID (ประสิทธิภาพดีกว่า)
+    await studentStore.updateStudentStatusByIDs(studentIds)
+
+    // เคลียร์การเลือกหลังจากสำเร็จ
     selectedStudents.value = []
+    selectAll.value = false
   } catch (error) {
     console.error('จัดเก็บนิสิตล้มเหลว:', error)
   }
@@ -104,7 +154,7 @@ onMounted(async () => {
     order: 'asc',
     search: '',
     major: [],
-    studentStatus: [],
+    studentStatus: ['1', '2', '3'],
     studentCode: [], // กรองเฉพาะนิสิตที่พ้นสภาพ
     skill: [],
     studentYear: [],
@@ -179,7 +229,7 @@ onMounted(async () => {
         :rows="students"
         :columns="columns"
         v-model:pagination="pagination"
-        :rows-per-page-options="[5, 7, 10, 15, 20]"
+        :rows-per-page-options="[5, 7, 10, 15, 20, 50, 100]"
         @request="onRequest"
         row-key="code"
         class="q-mt-md"
@@ -189,7 +239,22 @@ onMounted(async () => {
         <template v-slot:header="props">
           <q-tr :props="props" class="sticky-header">
             <q-th v-for="col in props.cols" :key="col.name" :props="props">
-              {{ col.label }}
+              <!-- Checkall checkbox สำหรับคอลัมน์แรก -->
+              <div v-if="col.name === 'check'">
+                <q-checkbox
+                  v-model="selectAll"
+                :color="selectAll ? 'primary' : 'white'"
+                  keep-color
+
+                  @update:model-value="toggleSelectAll"
+                >
+                  <q-tooltip>เลือกทั้งหมดในหน้านี้</q-tooltip>
+                </q-checkbox>
+              </div>
+              <!-- คอลัมน์อื่นๆ แสดง label ปกติ -->
+              <div v-else>
+                {{ col.label }}
+              </div>
             </q-th>
           </q-tr>
         </template>
@@ -200,7 +265,8 @@ onMounted(async () => {
               <q-checkbox
                 v-model="selectedStudents"
                 :val="props.row.code"
-                color="primary"
+                :color="isStudentSelected(props.row.code) ? 'primary' : 'white'"
+                keep-color
                 dense
                 keep-focus
               />
