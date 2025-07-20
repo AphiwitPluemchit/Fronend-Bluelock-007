@@ -34,10 +34,10 @@ const visibleColumns = computed(() => {
   })
 })
 const pagination = ref({
-  sortBy: query.value.sortBy,
+  sortBy: query.value.sortBy || '',
   descending: query.value.order === 'desc',
-  page: query.value.page,
-  rowsPerPage: query.value.limit,
+  page: query.value.page || 1,
+  rowsPerPage: query.value.limit || 5,
   rowsNumber: 0,
 })
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -99,7 +99,7 @@ const applyStudentFilters = async (selectedFilters: SelectedFilters) => {
 
 const search1 = computed({
   get: () => query.value.search,
-  set: (val) => (query.value.search = val),
+  set: (val) => (query.value.search = val || ''),
 })
 
 const students = computed(() => {
@@ -113,9 +113,9 @@ const fetchStudents = async () => {
   if (allTab.value && allTab.value.activityItems && allTab.value.activityItems.length > 0) {
     const activityItemId = allTab.value.activityItems[indexTab.value]!.id!
     const data = await EnrollmentService.getEnrollmentsByActivityID(activityItemId, query.value)
-    pagination.value.page = query.value.page
-    pagination.value.rowsPerPage = query.value.limit
-    pagination.value.sortBy = query.value.sortBy
+    pagination.value.page = query.value.page || 1
+    pagination.value.rowsPerPage = query.value.limit || 5
+    pagination.value.sortBy = query.value.sortBy || ''
     pagination.value.rowsNumber = data.meta.total
     enrollmentStore.studentEnrollments = data.data
     enrollmentStore.total = data.meta.total // ✅ update rowsNumber ให้ตรง

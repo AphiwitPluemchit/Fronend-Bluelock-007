@@ -1,9 +1,9 @@
 export type Pagination = {
-  page: number
-  limit: number
-  search: string
-  sortBy: string
-  order: string
+  page?: number
+  limit?: number
+  search?: string
+  sortBy?: string
+  order?: string
   skill?: string[]
   activityState?: string[]
   major?: string[]

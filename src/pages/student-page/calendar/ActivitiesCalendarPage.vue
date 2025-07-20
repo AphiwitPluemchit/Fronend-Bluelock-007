@@ -411,7 +411,7 @@ watch(selectedDate, (val) => {
         <CalendarEventPanel
           :selected-date="selectedDate"
           :selected-events="selectedEvents"
-          :search-query="query1.search"
+          :search-query="query1.search || ''"
           :grouped-search-results="groupedSearchResults"
           @go-to-date="goToDate"
         />

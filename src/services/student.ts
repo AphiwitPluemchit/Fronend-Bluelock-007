@@ -17,18 +17,17 @@ export class StudentService {
   static path = '/students'
 
   static async getAll(params: Pagination) {
-    const { studentStatus, major, studentYear, studentCode, ...rest } = params
-    const queryParams = {
-      ...rest,
-      ...(studentStatus && studentStatus.length > 0
-        ? { studentStatus: studentStatus.join(',') }
-        : {}),
-      ...(major && major.length > 0 ? { major: major.join(',') } : {}),
-      ...(studentYear && studentYear.length > 0 ? { studentYear: studentYear.join(',') } : {}),
-      ...(studentCode && studentCode.length > 0 ? { studentCode: studentCode.join(',') } : {}),
-    }
-
     try {
+      const { studentStatus, major, studentYear, studentCode, ...rest } = params
+      const queryParams = {
+        ...rest,
+        ...(studentStatus && studentStatus.length > 0
+          ? { studentStatus: studentStatus.join(',') }
+          : {}),
+        ...(major && major.length > 0 ? { major: major.join(',') } : {}),
+        ...(studentYear && studentYear.length > 0 ? { studentYear: studentYear.join(',') } : {}),
+        ...(studentCode && studentCode.length > 0 ? { studentCode: studentCode.join(',') } : {}),
+      }
       const res = await api.get<PaginationResponse<Student>>(this.path, { params: queryParams })
       return res.data
     } catch (error) {
@@ -115,9 +114,16 @@ export class StudentService {
     }
   }
 
-  static async getSummaryReport() {
+  static async getSummaryReport(params: Pagination) {
     try {
-      const res = await api.get(`${this.path}/report/sammary-all`)
+      const { major, studentYear, ...rest } = params
+      const queryParams = {
+        ...rest,
+
+        ...(major && major.length > 0 ? { major: major.join(',') } : {}),
+        ...(studentYear && studentYear.length > 0 ? { studentYear: studentYear.join(',') } : {}),
+      }
+      const res = await api.get(`${this.path}/report/sammary-all`, { params: queryParams })
       return res.data
     } catch (error) {
       showError('ไม่สามารถโหลดข้อมูลสรุปนักศึกษาได้')

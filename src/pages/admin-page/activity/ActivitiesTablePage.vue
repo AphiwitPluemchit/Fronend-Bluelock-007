@@ -72,9 +72,9 @@ async function getActivityData(qeury: Pagination) {
 
 const data1 = async () => {
   const data = await getActivityData(query1.value)
-  pagination1.value.page = query1.value.page
-  pagination1.value.rowsPerPage = query1.value.limit
-  pagination1.value.sortBy = query1.value.sortBy
+  pagination1.value.page = query1.value.page || 1
+  pagination1.value.rowsPerPage = query1.value.limit || 5
+  pagination1.value.sortBy = query1.value.sortBy || ''
   pagination1.value.rowsNumber = data.meta.total
   pagination1.value.descending = query1.value.order === 'desc'
 
@@ -82,9 +82,9 @@ const data1 = async () => {
 }
 const data2 = async () => {
   const data = await getActivityData(query2.value)
-  pagination2.value.page = query2.value.page
-  pagination2.value.rowsPerPage = query2.value.limit
-  pagination2.value.sortBy = query2.value.sortBy
+  pagination2.value.page = query2.value.page || 1
+  pagination2.value.rowsPerPage = query2.value.limit || 5
+  pagination2.value.sortBy = query2.value.sortBy || ''
   pagination2.value.rowsNumber = data.meta.total
   pagination2.value.descending = query2.value.order === 'desc'
 
@@ -92,9 +92,9 @@ const data2 = async () => {
 }
 const data3 = async () => {
   const data = await getActivityData(query3.value)
-  pagination3.value.page = query3.value.page
-  pagination3.value.rowsPerPage = query3.value.limit
-  pagination3.value.sortBy = query3.value.sortBy
+  pagination3.value.page = query3.value.page || 1
+  pagination3.value.rowsPerPage = query3.value.limit || 5
+  pagination3.value.sortBy = query3.value.sortBy || ''
   pagination3.value.rowsNumber = data.meta.total
   pagination3.value.descending = query3.value.order === 'desc'
 
@@ -102,9 +102,9 @@ const data3 = async () => {
 }
 const data4 = async () => {
   const data = await getActivityData(query4.value)
-  pagination4.value.page = query4.value.page
-  pagination4.value.rowsPerPage = query4.value.limit
-  pagination4.value.sortBy = query4.value.sortBy
+  pagination4.value.page = query4.value.page || 1
+  pagination4.value.rowsPerPage = query4.value.limit || 5
+  pagination4.value.sortBy = query4.value.sortBy || ''
   pagination4.value.rowsNumber = data.meta.total
   pagination4.value.descending = query4.value.order === 'desc'
 
@@ -434,31 +434,31 @@ function enrollmentSummary(activityItems: ActivityItem[]) {
 }
 
 const pagination1 = ref({
-  sortBy: query1.value.sortBy,
+  sortBy: query1.value.sortBy || '',
   descending: query1.value.order === 'desc',
-  page: query1.value.page,
-  rowsPerPage: query1.value.limit,
+  page: query1.value.page || 1,
+  rowsPerPage: query1.value.limit || 5,
   rowsNumber: 0,
 })
 const pagination2 = ref({
-  sortBy: query2.value.sortBy,
+  sortBy: query2.value.sortBy || '',
   descending: query2.value.order === 'desc',
-  page: query2.value.page,
-  rowsPerPage: query2.value.limit,
+  page: query2.value.page || 1,
+  rowsPerPage: query2.value.limit || 5,
   rowsNumber: 0,
 })
 const pagination3 = ref({
-  sortBy: query3.value.sortBy,
+  sortBy: query3.value.sortBy || '',
   descending: query3.value.order === 'desc',
-  page: query3.value.page,
-  rowsPerPage: query3.value.limit,
+  page: query3.value.page || 1,
+  rowsPerPage: query3.value.limit || 5,
   rowsNumber: 0,
 })
 const pagination4 = ref({
-  sortBy: query4.value.sortBy,
+  sortBy: query4.value.sortBy || '',
   descending: query4.value.order === 'desc',
-  page: query4.value.page,
-  rowsPerPage: query4.value.limit,
+  page: query4.value.page || 1,
+  rowsPerPage: query4.value.limit || 5,
   rowsNumber: 0,
 })
 
@@ -647,7 +647,7 @@ watchEffect(() => {
           flat
           :rows="mapActivitiesToTableRows(activitys1)"
           :columns="columns"
-          v-model:pagination="pagination1"
+          v-model:pagination="pagination1 "
           :rows-per-page-options="[5, 7, 10, 15, 20]"
           @request="onRequest1"
           row-key="id"
@@ -955,7 +955,7 @@ watchEffect(() => {
                         <div class="label-pair">
                           <span class="label-title">จำนวนที่ลงทะเบียน/รับ/เหลือ :</span>
                           <span class="label-value">
-                            {{ item.enrollmentCount || 0 }} / {{ item.maxParticipants || '-' }} / 
+                            {{ item.enrollmentCount || 0 }} / {{ item.maxParticipants || '-' }} /
                             {{ item.maxParticipants - item.enrollmentCount || 0 }} คน
                           </span>
                         </div>
@@ -1128,7 +1128,7 @@ watchEffect(() => {
                         <div class="label-pair">
                           <span class="label-title">จำนวนที่ลงทะเบียน/รับ/เหลือ :</span>
                           <span class="label-value">
-                            {{ item.enrollmentCount || 0 }} /  {{ item.maxParticipants || '-' }} / 
+                            {{ item.enrollmentCount || 0 }} /  {{ item.maxParticipants || '-' }} /
                             {{ item.maxParticipants - item.enrollmentCount || 0 }} คน
                           </span>
                         </div>

@@ -81,7 +81,7 @@
                 :angle="180"
                 rotate="180"
               >
-                {{ Math.round((academicSkillHours / totalstudent) * 100) }}% 
+                {{ Math.round((academicSkillHours / totalstudent) * 100) }}%
               </q-circular-progress>
               <div class="text-subtitle1">{{ academicSkillHours }} / {{ totalstudent }} คน</div>
               <div class="row justify-center q-mt-sm text-caption">
@@ -128,10 +128,11 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, watch } from 'vue'
 import { StudentService } from 'src/services/student'
 import type { SummaryReport } from 'src/types/student'
 import Chart from 'chart.js/auto'
+import type { Pagination } from 'src/types/pagination'
 
 const totalstudent = computed(() => summaryReport.value?.total ?? 0)
 
@@ -194,15 +195,28 @@ const summaryCards = computed(() => {
 
 const academicSkillHours = computed(() => summaryReport.value?.hardSkill.completed ?? 0)
 const readinessHours = computed(() => summaryReport.value?.softSkill.completed ?? 0)
-
 const canvas = ref<HTMLCanvasElement | null>(null)
-
+const query = ref<Pagination>({
+  major: [],
+  studentYear: [],
+})
+watch(selectedYear, async (newVal) => {
+  query.value.studentYear = [newVal?.toString() ?? '']
+  await data()
+})
+watch(selectedMajor, async (newVal) => {
+  query.value.major = [newVal ?? '']
+  await data()
+})
+const data = async () => {
+  summaryReport.value  = await StudentService.getSummaryReport(query.value)
+}
 onMounted(async () => {
   isLoading.value = true
   error.value = null
 
   try {
-    summaryReport.value = await StudentService.getSummaryReport()
+    await data()
   } catch (e) {
     error.value = 'ไม่สามารถโหลดข้อมูล summary ได้'
     console.error(e)

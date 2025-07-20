@@ -30,9 +30,9 @@ const data = async () => {
 
   await studentStore.getStudents()
   // อัปเดต pagination ให้ sync
-  pagination.value.page = studentStore.query.page
-  pagination.value.rowsPerPage = studentStore.query.limit
-  pagination.value.sortBy = studentStore.query.sortBy
+  pagination.value.page = studentStore.query.page || 1
+  pagination.value.rowsPerPage = studentStore.query.limit || 5
+  pagination.value.sortBy = studentStore.query.sortBy || ''
   pagination.value.rowsNumber = studentStore.totalStudentsCount
 }
 async function onRequest(requestProp: {
@@ -52,10 +52,10 @@ const applyFilters = async (selectedFilters: SelectedFilters) => {
 const query = computed(() => studentStore.query)
 
 const pagination = ref({
-  sortBy: query.value.sortBy,
+  sortBy: query.value.sortBy || '',
   descending: query.value.order === 'desc',
-  page: query.value.page,
-  rowsPerPage: query.value.limit,
+  page: query.value.page || 1,
+  rowsPerPage: query.value.limit || 5,
   rowsNumber: 0,
 })
 const saveStudents = async () => {
