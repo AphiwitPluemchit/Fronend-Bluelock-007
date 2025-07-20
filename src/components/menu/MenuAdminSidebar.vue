@@ -102,6 +102,7 @@ const linksList = [
       { title: 'รายการใบประกาศนียบัตร', link: '/Admin/ManageCertificateTable' },
     ],
   },
+  { title: 'จัดการฟอร์ม', icon: 'description', link: '/Admin/Forms' },
 ]
 
 const drawerBehavior = computed(() => {

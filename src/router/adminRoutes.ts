@@ -54,6 +54,23 @@ const adminChildren: RouteRecordRaw[] = [
     path: 'ManageCertificateTable',
     component: () => import('pages/admin-page/certificate/ManageCertificateTable.vue'),
   },
+  // Forms routes for admins
+  {
+    path: 'forms',
+    component: () => import('pages/admin-page/forms/FormsListPage.vue'),
+  },
+  {
+    path: 'forms/builder',
+    component: () => import('pages/admin-page/forms/FormBuilderPage.vue'),
+  },
+  {
+    path: 'forms/builder/:id',
+    component: () => import('pages/admin-page/forms/FormBuilderPage.vue'),
+  },
+  {
+    path: 'forms/:id/submissions',
+    component: () => import('pages/admin-page/forms/FormSubmissionsPage.vue'),
+  },
 ].map((route) => ({
   ...route,
   meta: { role: EnumUserRole.ADMIN },
