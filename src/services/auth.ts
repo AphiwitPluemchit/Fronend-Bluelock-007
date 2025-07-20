@@ -35,10 +35,12 @@ class AuthService {
       return res.data
     } catch (error) {
       // Handle specific error codes from backend
-      const axiosError = error as AxiosError<{ code: string; error: string }>
+      const axiosError = error as AxiosError<{ code: string; error: string; remainingTime?: number }>
       if (axiosError.response?.data?.code) {
         const errorCode = axiosError.response.data.code
         const errorMessage = axiosError.response.data.error || 'เกิดข้อผิดพลาด'
+
+        console.log('Error code:', errorCode, 'Message:', errorMessage)
 
         switch (errorCode) {
           case 'MISSING_CREDENTIALS':
@@ -47,9 +49,13 @@ class AuthService {
           case 'INVALID_CREDENTIALS':
             showError('อีเมลหรือรหัสผ่านไม่ถูกต้อง')
             break
-          case 'RATE_LIMITED':
-            showError('เข้าสู่ระบบบ่อยเกินไป กรุณารอสักครู่')
+          case 'RATE_LIMITED': {
+            const remainingTime = axiosError.response?.data?.remainingTime || 0
+            const minutes = Math.floor(remainingTime / 60)
+            const seconds = remainingTime % 60
+            showError(`เข้าสู่ระบบบ่อยเกินไป กรุณารอ ${minutes} นาที ${seconds} วินาที`)
             break
+          }
           case 'TOKEN_ERROR':
             showError('เกิดข้อผิดพลาดในการสร้าง token')
             break

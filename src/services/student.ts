@@ -91,6 +91,47 @@ export class StudentService {
     }
   }
 
+  // อัปเดตสถานะนักเรียนหลายคนโดยใช้ ID (ประสิทธิภาพดีกว่า)
+  static async updateStudentStatusByIDs(studentIds: string[]): Promise<{ message: string; updated: number; success: boolean }> {
+    try {
+      const res = await api.post('/students/update-status-by-ids', {
+        studentIds,
+      })
+
+      if (res.data?.message) {
+        showSuccess(res.data.message)
+      }
+
+      return res.data
+    } catch (error) {
+      console.error('Update student status error:', error)
+      const axiosError = error as AxiosError<{ code: string; error: string }>
+
+      if (axiosError.response?.data?.code) {
+        const errorCode = axiosError.response.data.code
+        const errorMessage = axiosError.response.data.error || 'เกิดข้อผิดพลาด'
+
+        switch (errorCode) {
+          case 'MISSING_IDS':
+            showError('กรุณาเลือกนักเรียนที่ต้องการอัปเดต')
+            break
+          case 'INVALID_STATUS':
+            showError('สถานะไม่ถูกต้อง')
+            break
+          case 'UPDATE_FAILED':
+            showError('อัปเดตสถานะล้มเหลว')
+            break
+          default:
+            showError(errorMessage)
+        }
+      } else {
+        showError('อัปเดตสถานะล้มเหลว กรุณาตรวจสอบการเชื่อมต่อ')
+      }
+
+      throw error
+    }
+  }
+
   static async removeOne(id: string) {
     try {
       const res = await api.delete(`${this.path}/${id}`)
@@ -143,44 +184,5 @@ export class StudentService {
     }
   }
 
-  // อัปเดตสถานะนักเรียนหลายคนโดยใช้ ID (ประสิทธิภาพดีกว่า)
-  static async updateStudentStatusByIDs(studentIds: string[]): Promise<{ message: string; updated: number; success: boolean }> {
-    try {
-      const res = await api.post('/students/update-status-by-ids', {
-        studentIds,
-      })
 
-      if (res.data?.message) {
-        showSuccess(res.data.message)
-      }
-
-      return res.data
-    } catch (error) {
-      console.error('Update student status error:', error)
-      const axiosError = error as AxiosError<{ code: string; error: string }>
-
-      if (axiosError.response?.data?.code) {
-        const errorCode = axiosError.response.data.code
-        const errorMessage = axiosError.response.data.error || 'เกิดข้อผิดพลาด'
-
-        switch (errorCode) {
-          case 'MISSING_IDS':
-            showError('กรุณาเลือกนักเรียนที่ต้องการอัปเดต')
-            break
-          case 'INVALID_STATUS':
-            showError('สถานะไม่ถูกต้อง')
-            break
-          case 'UPDATE_FAILED':
-            showError('อัปเดตสถานะล้มเหลว')
-            break
-          default:
-            showError(errorMessage)
-        }
-      } else {
-        showError('อัปเดตสถานะล้มเหลว กรุณาตรวจสอบการเชื่อมต่อ')
-      }
-
-      throw error
-    }
-  }
 }
