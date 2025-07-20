@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref, onMounted, computed } from 'vue'
-import { useRoute } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 import { useStudentActivitystore } from 'src/stores/activity'
 import { EnrollmentService } from 'src/services/enrollment'
 import RegisterConfirmDialog from '../../Dialog/RegisterConfirmDialog.vue'
@@ -11,18 +11,18 @@ import DetailOne from 'src/pages/student-page/activity/Detail/Detail/DetailOne.v
 import DetailMany from 'src/pages/student-page/activity/Detail/Detail/DetailMany.vue'
 import { useAuthStore } from 'src/stores/auth'
 import { api } from 'boot/axios'
+import type { EnrollmentResponse } from 'src/types/enrollment'
+
 const baseurl = api.defaults.baseURL
-type Enroll = {
-  isEnrolled: boolean
-  enrollmentId: string
-}
 const StudentActivityStore = useStudentActivitystore()
+
+const router = useRouter()
 const route = useRoute()
 const showRegisterDialog = ref(false)
 const showUnRegisterDialog = ref(false)
 const showFailDialog = ref(false)
 const activity = ref<Activity | null>(null)
-const enrollment = ref<Enroll>({ isEnrolled: false, enrollmentId: '' })
+const enrollment = ref<EnrollmentResponse | null>(null)
 const screen = ref(false)
 const auth = useAuthStore()
 
@@ -50,8 +50,11 @@ const register = async (activityItemId: string, selectedFood: string | null) => 
 }
 const unRegister = async (modelValue: boolean) => {
   console.log('ยกเลิกลงทะเบียน', modelValue)
-  await EnrollmentService.removeOne(enrollment.value.enrollmentId)
-  await fetchData()
+  if (enrollment.value) {
+    await EnrollmentService.removeOne(enrollment.value.id)
+    await fetchData()
+    await router.push(`/Student/MyActivitiesPage`)
+  }
 }
 
 const isRegistrationNotAllowed = computed(() => {
@@ -66,18 +69,28 @@ const isRegistrationNotAllowed = computed(() => {
 })
 
 async function fetchData() {
-  await StudentActivityStore.fetchOneData(route.params.id as string)
-  activity.value = StudentActivityStore.form as Activity
   try {
-    const response = await EnrollmentService.getEnrollmentsByStudentIDAndActivityID(
-      `${auth.getUser?.id}`,
-      `${activity.value.id}`,
+    const response = await EnrollmentService.checkEnrollmentByStudentIDAndActivityID(
+      String(auth.getUser?.id),
+      String(route.params.id),
     )
-    enrollment.value = response
-    console.log(enrollment.value)
+
+    if (response.isEnrolled && response.enrollment) {
+      enrollment.value = response.enrollment
+      // Map enrollment response to Activity type for compatibility with existing components
+      if (response.enrollment.activity) {
+        activity.value = response.enrollment.activity as Activity
+      } else {
+        activity.value = null
+      }
+    } else {
+      enrollment.value = null
+      activity.value = null
+    }
   } catch (error) {
     console.log(error)
-    enrollment.value = { isEnrolled: false, enrollmentId: '' }
+    activity.value = null
+    enrollment.value = null
   }
 }
 
@@ -110,14 +123,14 @@ onMounted(async () => {
           v-if="Array.isArray(activity?.activityItems) && activity.activityItems.length > 1"
           :activity="activity"
         />
-        <DetailMany v-else :activity="activity" />
+        <DetailMany v-else :activity="{ ...activity, activityItems: Array.isArray(activity?.activityItems) ? activity.activityItems : (activity?.activityItems ? [activity.activityItems] : []) }" />
       </div>
     </q-card-section>
 
     <!-- ปุ่มลงทะเบียน / ยกเลิก -->
     <div class="row justify-center q-gutter-sm q-mt-md">
       <q-btn
-        v-if="enrollment?.isEnrolled && !isRegistrationNotAllowed"
+        v-if="enrollment && !isRegistrationNotAllowed"
         label="ยกเลิกลงทะเบียน"
         class="btnreject"
         @click="handleUnRegisterClick"
@@ -125,7 +138,7 @@ onMounted(async () => {
         rounded
       />
       <q-btn
-        v-else-if="!enrollment?.isEnrolled && !isRegistrationNotAllowed"
+        v-else-if="!enrollment && !isRegistrationNotAllowed"
         label="ลงทะเบียน"
         class="btnsecces"
         @click="handleRegisterClick"

@@ -15,7 +15,15 @@ import type { Activity } from 'src/types/activity'
 const baseurl = api.defaults.baseURL
 type Enroll = {
   isEnrolled: boolean
-  enrollmentId: string
+  enrollmentId?: string
+  enrollment?: {
+    id: string
+    registrationDate: string
+    studentId: string
+    food?: string
+    activity: Partial<Activity>
+  }
+  message?: string
 }
 const StudentActivityStore = useStudentActivitystore()
 const route = useRoute()
@@ -56,8 +64,10 @@ const register = async (activityItemId: string, selectedFood: string | null) => 
 }
 const unRegister = async (modelValue: boolean) => {
   console.log('ยกเลิกลงทะเบียน', modelValue)
-  await EnrollmentService.removeOne(enrollment.value.enrollmentId)
-  await fetchData()
+  if (enrollment.value?.enrollment?.id) {
+    await EnrollmentService.removeOne(enrollment.value.enrollment.id)
+    await fetchData()
+  }
 }
 
 const isRegistrationNotAllowed = computed(() => {
@@ -75,7 +85,7 @@ async function fetchData() {
   await StudentActivityStore.fetchOneData(route.params.id as string)
   activity.value = StudentActivityStore.form as Activity
   try {
-    const response = await EnrollmentService.getEnrollmentsByStudentIDAndActivityID(
+    const response = await EnrollmentService.checkEnrollmentByStudentIDAndActivityID(
       `${auth.getUser?.id}`,
       `${activity.value.id}`,
     )
@@ -119,7 +129,7 @@ onMounted(async () => {
 
       <div class="q-mt-md q-mb-md row justify-center q-gutter-sm">
         <q-btn
-          v-if="enrollment?.isEnrolled && !isRegistrationNotAllowed"
+          v-if="enrollment.isEnrolled && !isRegistrationNotAllowed"
           label="ยกเลิกลงทะเบียน"
           class="btnreject full-width-mobile"
           @click="handleUnRegisterClick"
@@ -127,7 +137,7 @@ onMounted(async () => {
           rounded
         />
         <q-btn
-          v-else-if="!enrollment?.isEnrolled && !isRegistrationNotAllowed"
+          v-else-if="!enrollment.isEnrolled && !isRegistrationNotAllowed"
           label="ลงทะเบียน"
           class="btnsecces full-width-mobile"
           @click="handleRegisterClick"

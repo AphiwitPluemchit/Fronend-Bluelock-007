@@ -1,3 +1,4 @@
+import type{ Activity } from './activity'
 import type { Pagination } from './pagination'
 
 export type Enrollment = {
@@ -26,6 +27,13 @@ export type StudentEnrollment = {
   registrationDate: string
   checkIn?: string
   checkOut?: string
+}
+export type EnrollmentResponse = {
+  id: string;
+  registrationDate: string;
+  studentId: string;
+  food?: string;
+  activity: Partial<Activity>
 }
 export type EnrollmentQuery = Pagination & {
   major?: string[]
