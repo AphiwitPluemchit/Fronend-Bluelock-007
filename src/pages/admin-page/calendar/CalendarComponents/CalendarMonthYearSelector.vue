@@ -88,7 +88,7 @@ function increaseYearPage() {
 </script>
 
 <template>
-  <div class="calendar-selector q-mt-sm">
+  <div class="calendar-selector">
     <!-- Desktop layout -->
     <div v-if="!isMobile" class="row items-center justify-center q-gutter-sm">
       <!-- เดือน -->
