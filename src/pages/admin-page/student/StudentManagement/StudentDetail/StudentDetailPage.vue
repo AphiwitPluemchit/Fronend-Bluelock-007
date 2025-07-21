@@ -6,7 +6,7 @@ import FilterDialog from 'src/components/Dialog/FilterDialog.vue'
 import { useStudentStore } from 'src/stores/student'
 import type { Student } from 'src/types/student'
 import { EnrollmentService } from 'src/services/enrollment'
-import type{ Activity } from 'src/types/activity'
+import type { Activity } from 'src/types/activity'
 import type { Pagination } from 'src/types/pagination'
 
 const majorOptions = ['CS', 'AAI', 'IT', 'SE']
@@ -75,12 +75,14 @@ onMounted(async () => {
   if (!studentCode.value) return
   await studentStore.getStudentByCode(studentCode.value)
   originalStudentData.value = { ...studentStore.student }
-  const response = await EnrollmentService.getEnrollmentsByStudentID(studentStore.student.id || '', query.value)
-  console.log(response);
+  const response = await EnrollmentService.getEnrollmentsByStudentID(
+    studentStore.student.id || '',
+    query.value,
+  )
+  console.log(response)
 
   historyActivity.value = response.data
   show.value = true
-
 })
 const columns = [
   { name: 'index', label: 'ลำดับ', field: 'index', align: 'left' as const },
@@ -92,8 +94,7 @@ const columns = [
     style: 'max-width: 250px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;',
   },
   { name: 'date', label: 'วันที่', field: 'date', align: 'left' as const },
-  { name: 'time', label: 'เวลา', field: 'time', align: 'left' as const },
-  { name: 'location', label: 'สถานที่', field: 'location', align: 'left' as const },
+
   {
     name: 'softskill',
     label: 'ชั่วโมงเตรียมความพร้อม',
@@ -107,7 +108,6 @@ const columns = [
     align: 'center' as const,
   },
 ]
-
 </script>
 
 <template>
@@ -272,8 +272,6 @@ const columns = [
               >{{ props.row.name }}</q-td
             >
             <q-td key="date">{{ props.row.date }}</q-td>
-            <q-td key="time">{{ props.row.time }}</q-td>
-            <q-td key="location">{{ props.row.location }}</q-td>
             <q-td key="softskill" class="text-center">
               <span
                 :class="{ 'negative-hours': props.row.skill === 'soft' && props.row.hours < 0 }"
