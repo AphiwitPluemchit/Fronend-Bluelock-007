@@ -119,7 +119,7 @@ onMounted(async () => {
               <q-icon name="group" size="40px" />
             </div>
             <div class="stat-details">
-              <div class="stat-number">{{ enrollmentSummary?.maxParticipants || 0 }}</div>
+              <div class="stat-number">{{ enrollmentSummary?.maxParticipants || 0 }} คน</div>
               <div class="stat-label">จำนวนที่รับ</div>
             </div>
           </q-card-section>
@@ -131,7 +131,7 @@ onMounted(async () => {
               <q-icon name="how_to_reg" size="40px" />
             </div>
             <div class="stat-details">
-              <div class="stat-number">{{ enrollmentSummary?.totalRegistered || 0 }}</div>
+              <div class="stat-number">{{ enrollmentSummary?.totalRegistered || 0 }} คน</div>
               <div class="stat-label">จำนวนนิสิตที่ลงทะเบียน</div>
             </div>
           </q-card-section>
@@ -143,7 +143,7 @@ onMounted(async () => {
               <q-icon name="event_seat" size="40px" />
             </div>
             <div class="stat-details">
-              <div class="stat-number">{{ enrollmentSummary?.remainingSlots || 0 }}</div>
+              <div class="stat-number">{{ enrollmentSummary?.remainingSlots || 0 }} คน</div>
               <div class="stat-label">จำนวนที่ว่าง</div>
             </div>
           </q-card-section>
@@ -354,7 +354,6 @@ onMounted(async () => {
 
 .stat-number {
   font-size: 36px; /* เพิ่มขนาด */
-  font-weight: 700;
   line-height: 1;
   margin-bottom: 4px;
 }
@@ -780,3 +779,4 @@ onMounted(async () => {
   font-weight: 500;
 }
 </style>
+

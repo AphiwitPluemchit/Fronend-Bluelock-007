@@ -255,7 +255,7 @@ const enableEditMode = () => {
         <q-btn class="btnreject" label="ยกเลิก" @click="cancelSelection" :disable="disable" />
         <q-btn
           class="btnconfirm"
-          :label="isEditMode ? 'บันทึก' : 'เสร็จสิ้น'"
+          :label="isEditMode ? 'บันทึก' : 'ยืนยัน'"
           @click="confirmSelection"
           :disable="disable"
         />
