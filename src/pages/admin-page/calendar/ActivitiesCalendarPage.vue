@@ -275,6 +275,15 @@ function goToDate(dateStr: string) {
   query1.value.search = '' // reset ช่อง search
 }
 
+function onMonthYearSelected(newDate: string) {
+  // reset search
+  if (query1.value.search) {
+    query1.value.search = ''
+  }
+
+  selectedDate.value = newDate
+}
+
 onMounted(async () => {
   await dataCalendar()
   console.log('calendarRef:', calendarRef.value)
@@ -290,7 +299,9 @@ onMounted(async () => {
 
 async function onMonthChanged({ start }: { start: { date: string } }) {
   // ถ้ากำลังค้นหาอยู่ → ไม่ต้องโหลดข้อมูลใหม่
-  if (query1.value.search) return
+  if (query1.value.search) {
+    query1.value.search = ''
+  }
 
   const newMonth = new Date(start.date)
   const selected = new Date(selectedDate.value)
@@ -332,7 +343,7 @@ watch(selectedDate, (val) => {
     <div v-if="!isMobile">
       <!-- แถวรวมซ้าย: เดือน + ปุ่ม , ขวา: ช่องค้นหา + ฟิลเตอร์ -->
       <div class="row items-center justify-between q-mb-md">
-        <!-- ⬅ อยู่ฝั่ง col-8 แต่จัดด้านซ้าย -->
+        <!-- อยู่ฝั่ง col-8 แต่จัดด้านซ้าย -->
         <div class="row items-center no-wrap">
           <div class="row items-center no-wrap">
             <!-- select Date -->
@@ -434,12 +445,12 @@ watch(selectedDate, (val) => {
       <div class="row q-mb-md justify-center">
         <CalendarMonthYearSelector
           :selected-date="selectedDate"
-          @update:selected-date="selectedDate = $event"
+          @update:selected-date="onMonthYearSelected"
         />
       </div>
 
-      <!-- Search + Filter (stacked above selector) -->
-      <div class="row q-gutter-sm q-mb-md items-center">
+      <!-- Search + Filter -->
+      <div class="row q-gutter-sm q-mb-md items-center no-wrap">
         <q-input
           dense
           outlined
@@ -465,8 +476,19 @@ watch(selectedDate, (val) => {
         />
       </div>
 
-      <!-- Calendar only (no side panel) -->
+      <!-- ถ้ามี search แสดง Panel แทน Calendar -->
+      <CalendarEventPanel
+        v-if="query1.search && groupedSearchResults"
+        :selected-date="selectedDate"
+        :selected-events="[]"
+        :search-query="query1.search"
+        :grouped-search-results="groupedSearchResults"
+        @go-to-date="goToDate"
+      />
+
+      <!-- ถ้าไม่มี search → แสดง Calendar -->
       <q-calendar-month
+        v-else
         ref="calendarRef"
         v-model="selectedDate"
         locale="th-TH"
@@ -507,17 +529,15 @@ watch(selectedDate, (val) => {
 
       <!-- Dialog สำหรับ mobile -->
       <q-dialog v-model="dialog" full-width>
-        <q-card class="q-dialog-card scroll-wrapper">
-          <div class="q-pa-md">
-            <!-- Panel แสดงกิจกรรม -->
-            <CalendarEventPanel
-              :selected-date="selectedDate"
-              :selected-events="selectedEvents"
-              :search-query="query1.search || ''"
-              :grouped-search-results="groupedSearchResults"
-              @go-to-date="goToDate"
-            />
-          </div>
+        <q-card class="q-dialog-card scroll-wrapper q-pa-sm">
+          <!-- Panel แสดงกิจกรรม -->
+          <CalendarEventPanel
+            :selected-date="selectedDate"
+            :selected-events="selectedEvents"
+            :search-query="query1.search || ''"
+            :grouped-search-results="groupedSearchResults"
+            @go-to-date="goToDate"
+          />
         </q-card>
       </q-dialog>
     </div>
@@ -668,6 +688,11 @@ watch(selectedDate, (val) => {
 
   .searchbox {
     width: 100%;
+  }
+
+  .event-panel {
+    padding: 8px 12px;
+    margin-top: -10px;
   }
 }
 </style>
