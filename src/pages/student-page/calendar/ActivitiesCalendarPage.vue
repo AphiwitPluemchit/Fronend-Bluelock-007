@@ -13,7 +13,7 @@ import CalendarEventPanel from './CalendarComponents/CalendarEventPanel.vue'
 
 const activitys1 = ref<Activity[]>([])
 const showFilterDialog1 = ref(false)
-const filterCategories = ref(['year', 'major', 'statusActivity', 'categoryActivity'])
+const filterCategories = ref(['year', 'major', 'categoryActivity'])
 const searchBoxFocused = ref<boolean>(false)
 const calendarRef = ref()
 const displayedMonth = ref(new Date()) // ค่า default เป็นเดือนปัจจุบัน
@@ -33,7 +33,6 @@ const query1 = ref<Pagination>({
 interface SelectedFilters {
   year: string[]
   major: string[]
-  statusActivity: string[]
   categoryActivity: string[]
 }
 
@@ -100,7 +99,6 @@ const dataCalendar = async () => {
 const applyFilters1 = async (selectedFilters: SelectedFilters) => {
   query1.value.studentYear = selectedFilters.year
   query1.value.major = selectedFilters.major
-  query1.value.activityState = selectedFilters.statusActivity
   query1.value.skill = selectedFilters.categoryActivity
 
   selectedEvents.value = [] // ล้าง panel ขวาเมื่อใช้ filter
