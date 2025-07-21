@@ -41,6 +41,7 @@ export const useStudentActivitystore = defineStore('activity', {
       this.dataInit = false
       this.dataInit = false
       const data = await ActivityService.getOne(id)
+      console.log(data.data)
       this.form = data.data
       this.dataInit = true
     },

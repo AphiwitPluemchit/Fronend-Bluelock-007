@@ -3,21 +3,18 @@ import { useCheckinoutStore } from 'src/stores/checkinout'
 
 const checkinoutStore = useCheckinoutStore()
 const props = defineProps<{
-  studentId: string
-  uuid: string
+  token: string
 }>()
 async function checkin() {
-  await checkinoutStore.checkin(props.studentId, props.uuid)
+  await checkinoutStore.checkin(props.token)
 }
-console.log('studentId:', props.studentId)
-console.log('uuid:', props.uuid)
+console.log('token:', props.token)
 </script>
 
 <template>
-  <q-page class="q-pa-md">
+  <div class="q-pa-md">
     <div>Check-in</div>
-    <div>Student ID: {{ props.studentId }}</div>
-    <div>UUID: {{ props.uuid }}</div>
+    <div>Token: {{ props.token }}</div>
     <q-btn @click="checkin">Checkin</q-btn>
-  </q-page>
+  </div>
 </template>

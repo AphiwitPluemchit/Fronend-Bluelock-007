@@ -1,6 +1,6 @@
 import { api } from 'boot/axios'
 import { Notify } from 'quasar'
-import type { Checkinout } from 'src/types/checkinout'
+// import type { Checkinout } from 'src/types/checkinout'
 
 // 📌 Utility แสดงข้อความผิดพลาด
 const showError = (message: string) => {
@@ -13,39 +13,48 @@ const showError = (message: string) => {
 }
 
 class CheckinoutService {
-  static async getLink(activityId: string, Type: string) {
+  static async getLink(activityId: string, type: string) {
     try {
-      const res = await api.post<Checkinout>('/checkInOuts/generate-link', { activityId, Type })
-      return res.data
+      const res = await api.post('/checkInOuts/admin/qr-token', { activityId, type })
+      return res.data // { token, expiresAt, url, type }
     } catch (error) {
       showError('สร้างลิงค์ล้มเหลว')
       console.error('failed:', error)
     }
   }
-  static async checkin(userId: string, uuid: string) {
+  static async getTokenInfo(token: string) {
     try {
-      const res = await api.post(`/checkInOuts/checkin/${uuid}`, { userId })
-      return res.data
+      const res = await api.get(`/checkInOuts/student/qr/${token}`)
+      return res.data // { activityId, token, type }
     } catch (error) {
-      showError('เช็คชื่อล้มเหลว')
+      showError('ไม่พบข้อมูล QR')
       console.error('failed:', error)
     }
   }
-  static async checkout(userId: string, evaluationId: string, uuid: string) {
+  static async checkin(token: string) {
     try {
-      const res = await api.post(`/checkInOuts/checkout/${uuid}`, { userId, evaluationId })
+      const res = await api.post('/checkInOuts/student/checkin', { token })
       return res.data
     } catch (error) {
-      showError('เช็คชื่อล้มเหลว')
+      showError('เช็คชื่อไม่สำเร็จ')
       console.error('failed:', error)
     }
   }
-  static async getStatus(studentId: string, activityItemId: string) {
+  static async checkout(token: string) {
+    try {
+      const res = await api.post('/checkInOuts/student/checkout', { token })
+      return res.data
+    } catch (error) {
+      showError('เช็คชื่อออกไม่สำเร็จ')
+      console.error('failed:', error)
+    }
+  }
+  static async getStatus(studentId: string, activityId: string) {
     try {
       const res = await api.get('/checkInOuts/status', {
         params: {
           studentId,
-          activityItemId,
+          activityId,
         },
       })
       return res.data

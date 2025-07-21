@@ -18,6 +18,7 @@ const dialogVisible = computed({
 const selectedType = ref<'checkin' | 'checkout' | ''>('') // ประเภทที่เลือก
 const confirmedType = ref('') // ประเภทที่ยืนยันแล้ว
 const qrLink = ref('') // ลิงก์ที่ใช้สร้าง QR
+const qrType = ref('') // ประเภทที่ backend ตอบกลับมา
 
 // รีเซตค่าทุกครั้งที่เปิด dialog
 watch(
@@ -46,7 +47,9 @@ const onCancel = () => {
 const onConfirm = async () => {
   confirmedType.value = selectedType.value
   const res = await CheckinoutService.getLink(activityId, confirmedType.value)
+  console.log('res:', res)
   qrLink.value = res?.url || ''
+  qrType.value = res?.type || ''
   emit('confirm')
 }
 </script>
@@ -80,6 +83,7 @@ const onConfirm = async () => {
 
       <!-- แสดง QR -->
       <q-card-section class="dialog-body" v-else>
+        <div v-if="qrType">ประเภท: <b>{{ qrType === 'checkin' ? 'เช็คชื่อเข้า' : qrType === 'checkout' ? 'เช็คชื่อออก' : qrType }}</b></div>
         {{ 'http://localhost:9000' + qrLink }}
         <q-img
           :src="`https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=http://localhost:9000${qrLink}`"
