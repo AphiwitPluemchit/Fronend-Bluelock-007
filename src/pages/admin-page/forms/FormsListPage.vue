@@ -1,17 +1,15 @@
 <template>
-  <q-page class="forms-list-page">
-    <div class="container">
+  <q-page class="q-pa-md">
+    <div>
       <!-- Header -->
-      <div class="page-header">
-        <div class="header-content">
-          <h1 class="page-title">Forms Management</h1>
-          <p class="page-subtitle">Manage and view form submissions</p>
-        </div>
+      <div class="row justify-between items-center q-mb-md" style="margin-top: 20px">
+        <div class="texttitle">จัดการฟอร์มประเมิน</div>
         <div class="header-actions">
           <q-btn
             color="primary"
-            label="Create New Form"
-            icon="add"
+            label="เพิ่มฟอร์ม"
+            class="btnadd"
+            style="width: 130px"
             @click="createForm"
           />
         </div>
@@ -20,7 +18,7 @@
       <!-- Loading State -->
       <div v-if="formsStore.isLoading" class="loading-container">
         <q-spinner-dots size="50px" color="primary" />
-        <p class="q-mt-md">Loading forms...</p>
+        <p class="q-mt-md">กำลังโหลดฟอร์ม...</p>
       </div>
 
       <!-- Error State -->
@@ -34,12 +32,8 @@
       </div>
 
       <!-- Forms List -->
-      <div v-else-if="formsStore.getForms.length > 0" class="forms-grid">
-        <q-card
-          v-for="form in formsStore.getForms"
-          :key="form.id || 'temp'"
-          class="form-card"
-        >
+      <div v-if="Array.isArray(formsStore.getForms) && formsStore.getForms.length > 0" class="pagination-container q-mt-lg">
+        <q-card v-for="form in formsStore.getForms" :key="form.id || 'temp'" class="form-card">
           <q-card-section>
             <div class="form-card-header">
               <div class="form-info">
@@ -83,13 +77,7 @@
               icon="visibility"
               @click="viewSubmissions(form.id!)"
             />
-            <q-btn
-              flat
-              color="secondary"
-              label="Edit"
-              icon="edit"
-              @click="editForm(form.id!)"
-            />
+            <q-btn flat color="secondary" label="Edit" icon="edit" @click="editForm(form.id!)" />
             <q-btn
               flat
               color="negative"
@@ -104,20 +92,14 @@
       <!-- Empty State -->
       <div v-else class="empty-state">
         <q-icon name="description" size="80px" color="grey-4" />
-        <h3 class="empty-title">No Forms Created</h3>
+        <h3 class="empty-title">ไม่มีฟอร์มประเมิน</h3>
         <p class="empty-description">
-          You haven't created any forms yet. Start by creating your first form.
+          คุณยังไม่ได้สร้างฟอร์มประเมิน
         </p>
-        <q-btn
-          color="primary"
-          label="Create Your First Form"
-          icon="add"
-          @click="createForm"
-        />
       </div>
 
       <!-- Pagination -->
-      <div v-if="formsStore.getForms.length > 0" class="pagination-container q-mt-lg">
+      <div v-if="Array.isArray(formsStore.getForms) && formsStore.getForms.length > 0" class="pagination-container q-mt-lg">
         <q-pagination
           v-model="currentPage"
           :max="formsStore.getPagination.totalPages"
@@ -133,11 +115,10 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
-import { useQuasar } from 'quasar'
 import { useFormsStore } from 'src/stores/forms'
 
+
 const router = useRouter()
-const $q = useQuasar()
 const formsStore = useFormsStore()
 const currentPage = ref(1)
 
@@ -166,18 +147,19 @@ const viewSubmissions = async (formId: string) => {
   await router.push(`/Admin/forms/${formId}/submissions`)
 }
 
-const deleteForm = (formId: string) => {
-  $q.dialog({
-    title: 'Delete Form ' + formId,
-    message: 'Are you sure you want to delete this form? This action cannot be undone.',
-    cancel: true,
-    persistent: true
-  })
+const deleteForm = async (formId: string) => {
+  try {
+    await formsStore.deleteForm(formId)
+  } catch (error) {
+    console.error('Error deleting form:', error)
+  }
 }
+
+
 
 const getSubmissionCount = (formId: string): number => {
   // TODO: Get actual submission count from API
-  console.log('formId', formId);
+  console.log('formId', formId)
 
   return Math.floor(Math.random() * 50) + 1
 }
@@ -187,7 +169,7 @@ const formatDate = (dateString?: string): string => {
   return new Date(dateString).toLocaleDateString('en-US', {
     year: 'numeric',
     month: 'short',
-    day: 'numeric'
+    day: 'numeric',
   })
 }
 </script>
@@ -196,12 +178,6 @@ const formatDate = (dateString?: string): string => {
 .forms-list-page {
   background-color: #f8f9fa;
   min-height: 100vh;
-}
-
-.container {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 24px;
 }
 
 .page-header {

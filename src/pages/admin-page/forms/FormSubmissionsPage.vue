@@ -96,7 +96,7 @@
                   :key="answer.questionId"
                   class="answer-preview-item"
                 >
-                  <span class="answer-label">{{ getQuestionText(answer.questionId) }}:</span>
+                  <!-- <span class="answer-label">{{ getQuestionText(answer.questionId) }}:</span> -->
                   <span class="answer-value">{{ formatAnswerValue(answer.value) }}</span>
                 </div>
                 <div v-if="submission.answers.length > 3" class="more-answers">
@@ -164,7 +164,7 @@
                 :key="answer.questionId"
                 class="answer-detail-item"
               >
-                <div class="question-text">{{ getQuestionText(answer.questionId) }}</div>
+                <!-- <div class="question-text">{{ getQuestionText(answer.questionId) }}</div> -->
                 <div class="answer-content">
                   <div v-if="typeof answer.value === 'string'" class="text-answer">
                     {{ answer.value }}
@@ -268,11 +268,11 @@ const handlePageChange = async (page: number) => {
   await formsStore.fetchSubmissions(formId, page, 10)
 }
 
-const getQuestionText = (questionId: string): string => {
-  if (!formsStore.getCurrentForm) return 'Unknown Question'
-  const question = formsStore.getCurrentForm.questions.find(q => q.id === questionId)
-  return question?.questionText || 'Unknown Question'
-}
+// const getQuestionText = (questionId: string): string => {
+//   if (!formsStore.getCurrentForm) return 'Unknown Question'
+//   const question = formsStore.getCurrentForm.questions.find(q => q.id === questionId)
+//   return question?.questionText || 'Unknown Question'
+// }
 
 const formatAnswerValue = (value: AnswerValue): string => {
   if (isStringAnswer(value)) {

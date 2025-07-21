@@ -8,6 +8,7 @@ export type QuestionType =
   | 'dropdown'
   | 'grid_multiple_choice'
   | 'grid_checkbox'
+  | 'rating'
 
 export interface Question {
   id?: string
@@ -20,6 +21,13 @@ export interface Question {
   columns?: string[]
   order?: number
 }
+export type TitleCard = {
+  isTitleCard: true
+  title: string
+  description?: string
+  showDescription?: boolean
+}
+export type FormElement = Question | TitleCard
 
 export interface Form {
   id?: string
@@ -31,9 +39,8 @@ export interface Form {
 
 export interface FormWithQuestions {
   form: Form
-  questions: Question[]
+  questions: FormElement[]
 }
-
 // Answer value types for better type safety
 export type AnswerValue =
   | string // for short_answer, paragraph, multiple_choice, dropdown
@@ -184,7 +191,16 @@ export const QUESTION_TYPES: Record<QuestionType, QuestionTypeConfig> = {
     icon: 'grid_4x4',
     hasChoices: false,
     hasGrid: true
+  },
+  rating: {
+    value: 'rating',
+    label: 'Rating',
+    description: 'Rate on a scale',
+    icon: 'star',
+    hasChoices: false,
+    hasGrid: false
   }
+
 }
 
 // Type guards for better type safety

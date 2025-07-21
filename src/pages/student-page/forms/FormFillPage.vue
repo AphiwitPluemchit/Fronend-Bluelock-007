@@ -48,13 +48,13 @@
 
         <!-- Questions -->
         <div class="questions-section">
-          <QuestionRenderer
-            v-for="(question) in sortedQuestions"
+          <!-- <QuestionRenderer
+            v-for="(question) in formsStore.getCurrentForm"
             :key="question.id || 'temp'"
             :question="question"
             :model-value="getAnswerForQuestion(question.id!)"
             @update:model-value="updateAnswer"
-          />
+          /> -->
         </div>
 
         <!-- Form Actions -->
@@ -66,14 +66,14 @@
             @click="saveDraft"
             :loading="saving"
           />
-          <q-btn
+          <!-- <q-btn
             color="primary"
             label="Submit Form"
             icon="send"
             @click="submitForm"
             :loading="submitting"
             :disable="!isFormValid"
-          />
+          /> -->
         </div>
       </div>
 
@@ -118,9 +118,8 @@ import { ref, computed, onMounted, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useQuasar } from 'quasar'
 import { useFormsStore } from 'src/stores/forms'
-import QuestionRenderer from 'src/components/forms/QuestionRenderer.vue'
-import type { Answer, AnswerValue } from 'src/types/form'
-import { isStringAnswer, isArrayAnswer, isGridAnswer } from 'src/types/form'
+// import QuestionRenderer from 'src/components/forms/QuestionRenderer.vue'
+import type { Answer } from 'src/types/form'
 
 const route = useRoute()
 const router = useRouter()
@@ -130,14 +129,14 @@ const formsStore = useFormsStore()
 const formId = route.params.id as string
 const answers = ref<Map<string, Answer>>(new Map())
 const saving = ref(false)
-const submitting = ref(false)
+// const submitting = ref(false)
 const showConfirmation = ref(false)
 
 // Computed properties
-const sortedQuestions = computed(() => {
-  if (!formsStore.getCurrentForm) return []
-  return [...formsStore.getCurrentForm.questions].sort((a, b) => (a.order || 0) - (b.order || 0))
-})
+// const sortedQuestions = computed(() => {
+//   if (!formsStore.getCurrentForm) return []
+//   return [...formsStore.getCurrentForm.questions].sort((a, b) => (a.order || 0) - (b.order || 0))
+// })
 
 const progressValue = computed(() => {
   if (!formsStore.getCurrentForm) return 0
@@ -150,15 +149,15 @@ const progressPercentage = computed(() => {
   return Math.round(progressValue.value * 100)
 })
 
-const isFormValid = computed(() => {
-  if (!formsStore.getCurrentForm) return false
+// const isFormValid = computed(() => {
+//   if (!formsStore.getCurrentForm) return false
 
-  const requiredQuestions = formsStore.getCurrentForm.questions.filter(q => q.isRequired)
-  return requiredQuestions.every(question => {
-    const answer = answers.value.get(question.id!)
-    return answer && isValidAnswer(answer.value)
-  })
-})
+//   const requiredQuestions = formsStore.getCurrentForm.questions.filter(q => q.isRequired)
+//   return requiredQuestions.every(question => {
+//     const answer = answers.value.get(question.id!)
+//     return answer && isValidAnswer(answer.value)
+//   })
+// })
 
 onMounted(async () => {
   await loadForm()
@@ -172,27 +171,27 @@ const loadForm = async () => {
   }
 }
 
-const getAnswerForQuestion = (questionId: string): Answer | undefined => {
-  return answers.value.get(questionId)
-}
+// const getAnswerForQuestion = (questionId: string): Answer | undefined => {
+//   return answers.value.get(questionId)
+// }
 
-const updateAnswer = (answer: Answer) => {
-  answers.value.set(answer.questionId, answer)
-}
+// const updateAnswer = (answer: Answer) => {
+//   answers.value.set(answer.questionId, answer)
+// }
 
-const isValidAnswer = (value: AnswerValue): boolean => {
-  if (value === null || value === undefined) return false
-  if (isStringAnswer(value)) return value.trim() !== ''
-  if (isArrayAnswer(value)) return value.length > 0
-  if (isGridAnswer(value)) {
-    // For grid questions, check if at least one row has a value
-    return Object.values(value).some(v => {
-      if (Array.isArray(v)) return v.length > 0
-      return v !== null && v !== undefined && v !== ''
-    })
-  }
-  return true
-}
+// const isValidAnswer = (value: AnswerValue): boolean => {
+//   if (value === null || value === undefined) return false
+//   if (isStringAnswer(value)) return value.trim() !== ''
+//   if (isArrayAnswer(value)) return value.length > 0
+//   if (isGridAnswer(value)) {
+//     // For grid questions, check if at least one row has a value
+//     return Object.values(value).some(v => {
+//       if (Array.isArray(v)) return v.length > 0
+//       return v !== null && v !== undefined && v !== ''
+//     })
+//   }
+//   return true
+// }
 
 const saveDraft =  () => {
   saving.value = true
@@ -221,38 +220,38 @@ const saveDraft =  () => {
   }
 }
 
-const submitForm = async () => {
-  if (!isFormValid.value) {
-    $q.notify({
-      type: 'warning',
-      message: 'Please fill in all required fields',
-      position: 'top'
-    })
-    return
-  }
+// const submitForm = async () => {
+//   if (!isFormValid.value) {
+//     $q.notify({
+//       type: 'warning',
+//       message: 'Please fill in all required fields',
+//       position: 'top'
+//     })
+//     return
+//   }
 
-  submitting.value = true
-  try {
-    const submissionData = {
-      answers: Array.from(answers.value.values())
-    }
+//   submitting.value = true
+//   try {
+//     const submissionData = {
+//       answers: Array.from(answers.value.values())
+//     }
 
-    await formsStore.submitForm(formId, submissionData)
+//     await formsStore.submitForm(formId, submissionData)
 
-    // Clear draft
-    localStorage.removeItem(`form-draft-${formId}`)
+//     // Clear draft
+//     localStorage.removeItem(`form-draft-${formId}`)
 
-    showConfirmation.value = true
-  } catch{
-    $q.notify({
-      type: 'negative',
-      message: 'Failed to submit form. Please try again.',
-      position: 'top'
-    })
-  } finally {
-    submitting.value = false
-  }
-}
+//     showConfirmation.value = true
+//   } catch{
+//     $q.notify({
+//       type: 'negative',
+//       message: 'Failed to submit form. Please try again.',
+//       position: 'top'
+//     })
+//   } finally {
+//     submitting.value = false
+//   }
+// }
 
 const handleSubmissionComplete = async () => {
   showConfirmation.value = false
