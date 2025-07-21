@@ -58,7 +58,7 @@ const goToPageDetail = async (id: string, disable: boolean) => {
     <!-- ค้นหากิจกรรม -->
     <div v-if="searchQuery">
       <template v-if="groupedSearchResults && Object.keys(groupedSearchResults).length > 0">
-        <div v-for="date in Object.keys(groupedSearchResults).sort()" :key="date" class="q-mb-xl">
+        <div v-for="date in Object.keys(groupedSearchResults).sort()" :key="date">
           <div class="text-h6 q-mb-sm">{{ formatThaiDate(date) }}</div>
           <div v-for="event in groupedSearchResults[date]" :key="event.id" class="q-mb-sm">
             <q-card
@@ -166,8 +166,9 @@ const goToPageDetail = async (id: string, disable: boolean) => {
 .event-panel {
   max-height: 650px;
   overflow-y: scroll;
-  padding-right: 8px;
   scrollbar-width: none; /* สำหรับ Firefox */
+  -webkit-overflow-scrolling: touch;
+  touch-action: pan-y;
 }
 
 /* สำหรับ Chrome, Edge, Safari */
@@ -230,5 +231,11 @@ const goToPageDetail = async (id: string, disable: boolean) => {
   padding: 4px;
   border-radius: 4px;
   cursor: pointer;
+}
+
+@media (max-width: 880px) {
+  .event-panel {
+    max-height: 70vh;
+  }
 }
 </style>

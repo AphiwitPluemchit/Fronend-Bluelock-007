@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { onMounted, ref, watch } from 'vue'
+import { computed, onMounted, ref, watch } from 'vue'
 import { today } from '@quasar/quasar-ui-qcalendar'
 import '@quasar/quasar-ui-qcalendar/dist/index.css'
 import { QCalendarMonth } from '@quasar/quasar-ui-qcalendar'
@@ -10,6 +10,11 @@ import FilterDialog from 'src/components/Dialog/FilterDialog.vue'
 import type { CalendarEvent } from 'src/types/calendar'
 import CalendarMonthYearSelector from './CalendarComponents/CalendarMonthYearSelector.vue'
 import CalendarEventPanel from './CalendarComponents/CalendarEventPanel.vue'
+import { useQuasar } from 'quasar'
+
+const $q = useQuasar()
+const isMobile = computed(() => $q.screen.lt.md)
+const dialog = ref(false)
 
 const activitys1 = ref<Activity[]>([])
 const showFilterDialog1 = ref(false)
@@ -159,6 +164,8 @@ function onClickDate(payload: { scope: { timestamp: { date: string } } }) {
   selectedDate.value = payload.scope.timestamp.date
   selectedEvents.value = getEvents(payload.scope.timestamp.date)
   query1.value.search = '' // reset การค้นหา
+
+  if (isMobile.value) dialog.value = true
 }
 
 function onEventStackClick(date: string) {
@@ -168,6 +175,8 @@ function onEventStackClick(date: string) {
   if (!searchBoxFocused.value) {
     query1.value.search = ''
   }
+
+  if (isMobile.value) dialog.value = true
 }
 
 // for panel ด้านขวา และเรียงลำดับตามเวลาเริ่มต้น
@@ -320,28 +329,123 @@ watch(selectedDate, (val) => {
       <div class="texttitle" style="margin-bottom: 20px">ตารางกิจกรรม</div>
     </div>
 
-    <!-- แถวรวมซ้าย: เดือน + ปุ่ม , ขวา: ช่องค้นหา + ฟิลเตอร์ -->
-    <div class="row items-center justify-between q-mb-md">
-      <!-- ⬅ อยู่ฝั่ง col-8 แต่จัดด้านซ้าย -->
-      <div class="row items-center no-wrap">
+    <div v-if="!isMobile">
+      <!-- แถวรวมซ้าย: เดือน + ปุ่ม , ขวา: ช่องค้นหา + ฟิลเตอร์ -->
+      <div class="row items-center justify-between q-mb-md">
+        <!-- ⬅ อยู่ฝั่ง col-8 แต่จัดด้านซ้าย -->
         <div class="row items-center no-wrap">
-          <!-- select Date -->
-          <CalendarMonthYearSelector
-            :selected-date="selectedDate"
-            @update:selected-date="selectedDate = $event"
+          <div class="row items-center no-wrap">
+            <!-- select Date -->
+            <CalendarMonthYearSelector
+              :selected-date="selectedDate"
+              @update:selected-date="selectedDate = $event"
+            />
+          </div>
+        </div>
+
+        <!-- ฝั่งขวา: search + filter -->
+        <div class="row items-center no-wrap">
+          <q-input
+            dense
+            outlined
+            v-model="query1.search"
+            label="ค้นหา ชื่อกิจกรรม"
+            class="q-mr-sm searchbox"
+            :style="{ border: 'none', minWidth: '200px' }"
+            @focus="searchBoxFocused = true"
+            @blur="searchBoxFocused = false"
+          >
+            <template v-slot:append>
+              <q-icon name="search" />
+            </template>
+          </q-input>
+
+          <FilterDialog
+            :model-value="showFilterDialog1"
+            :categories="filterCategories || []"
+            :years="query1.studentYear || []"
+            :majors="query1.major || []"
+            :status-activities="query1.activityState || []"
+            :category-activities="query1.skill || []"
+            @apply="applyFilters1"
           />
         </div>
       </div>
 
-      <!-- ฝั่งขวา: search + filter -->
-      <div class="row items-center no-wrap">
+      <!-- Layout แบ่งปฏิทิน (ซ้าย) และรายละเอียดกิจกรรม (ขวา) -->
+      <div class="row q-col-gutter-md calendar-wrapper">
+        <div class="col-8">
+          <q-calendar-month
+            ref="calendarRef"
+            v-model="selectedDate"
+            locale="th-TH"
+            animated
+            bordered
+            :day-min-height="110"
+            :day-class="() => 'bordered-day'"
+            @click-date="onClickDate"
+            @change="onMonthChanged"
+          >
+            <!-- Slot day -->
+            <template #day="{ scope }">
+              <div
+                class="q-calendar__day-ellipsis day-cell"
+                :class="{
+                  'is-today': scope.timestamp.date === todayDate,
+                  'is-selected': scope.timestamp.date === selectedDate,
+                }"
+                @click="onClickDate({ scope })"
+              >
+                <div class="day-number">{{ scope.timestamp.day }}</div>
+                <div class="event-stack">
+                  <div
+                    v-for="(eventData, idx) in getFilteredEventsForDay(scope.timestamp.date)"
+                    :key="idx"
+                    :class="badgeClasses(eventData)"
+                    class="my-event"
+                    @click.stop="onEventStackClick(scope.timestamp.date)"
+                  >
+                    <div class="q-calendar__ellipsis">
+                      {{ eventData.event.activityName }}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </template>
+          </q-calendar-month>
+        </div>
+
+        <!-- panel แสดงรายละเอียดกิจกรรม -->
+        <div class="col-4">
+          <CalendarEventPanel
+            :selected-date="selectedDate"
+            :selected-events="selectedEvents"
+            :search-query="query1.search || ''"
+            :grouped-search-results="groupedSearchResults"
+            @go-to-date="goToDate"
+          />
+        </div>
+      </div>
+    </div>
+
+    <!-- Mobile Layout -->
+    <div v-else>
+      <!-- Month-Year Selector -->
+      <div class="row q-mb-md justify-center">
+        <CalendarMonthYearSelector
+          :selected-date="selectedDate"
+          @update:selected-date="selectedDate = $event"
+        />
+      </div>
+
+      <!-- Search + Filter (stacked above selector) -->
+      <div class="row q-gutter-sm q-mb-md items-center">
         <q-input
           dense
           outlined
+          class="col"
           v-model="query1.search"
           label="ค้นหา ชื่อกิจกรรม"
-          class="q-mr-sm searchbox"
-          :style="{ border: 'none', minWidth: '200px' }"
           @focus="searchBoxFocused = true"
           @blur="searchBoxFocused = false"
         >
@@ -360,61 +464,62 @@ watch(selectedDate, (val) => {
           @apply="applyFilters1"
         />
       </div>
-    </div>
 
-    <!-- Layout แบ่งปฏิทิน (ซ้าย) และรายละเอียดกิจกรรม (ขวา) -->
-    <div class="row q-col-gutter-md calendar-wrapper">
-      <div class="col-8">
-        <q-calendar-month
-          ref="calendarRef"
-          v-model="selectedDate"
-          locale="th-TH"
-          animated
-          bordered
-          :day-min-height="110"
-          :day-class="() => 'bordered-day'"
-          @click-date="onClickDate"
-          @change="onMonthChanged"
-        >
-          <!-- Slot day -->
-          <template #day="{ scope }">
-            <div
-              class="q-calendar__day-ellipsis day-cell"
-              :class="{
-                'is-today': scope.timestamp.date === todayDate,
-                'is-selected': scope.timestamp.date === selectedDate,
-              }"
-              @click="onClickDate({ scope })"
-            >
-              <div class="day-number">{{ scope.timestamp.day }}</div>
-              <div class="event-stack">
-                <div
-                  v-for="(eventData, idx) in getFilteredEventsForDay(scope.timestamp.date)"
-                  :key="idx"
-                  :class="badgeClasses(eventData)"
-                  class="my-event"
-                  @click.stop="onEventStackClick(scope.timestamp.date)"
-                >
-                  <div class="q-calendar__ellipsis">
-                    {{ eventData.event.activityName }}
-                  </div>
+      <!-- Calendar only (no side panel) -->
+      <q-calendar-month
+        ref="calendarRef"
+        v-model="selectedDate"
+        locale="th-TH"
+        animated
+        bordered
+        :day-min-height="110"
+        :day-class="() => 'bordered-day'"
+        @update:model-value="goToDate"
+        @click-date="onClickDate"
+        @change="onMonthChanged"
+      >
+        <template #day="{ scope }">
+          <div
+            class="q-calendar__day-ellipsis day-cell"
+            :class="{
+              'is-today': scope.timestamp.date === todayDate,
+              'is-selected': scope.timestamp.date === selectedDate,
+            }"
+            @click="onClickDate({ scope })"
+          >
+            <div class="day-number">{{ scope.timestamp.day }}</div>
+            <div class="event-stack">
+              <div
+                v-for="(eventData, idx) in getFilteredEventsForDay(scope.timestamp.date)"
+                :key="idx"
+                :class="badgeClasses(eventData)"
+                class="my-event"
+                @click.stop="onEventStackClick(scope.timestamp.date)"
+              >
+                <div class="q-calendar__ellipsis">
+                  {{ eventData.event.activityName }}
                 </div>
               </div>
             </div>
-          </template>
-        </q-calendar-month>
-      </div>
+          </div>
+        </template>
+      </q-calendar-month>
 
-      <!-- panel แสดงรายละเอียดกิจกรรม -->
-      <div class="col-4">
-        <CalendarEventPanel
-          :selected-date="selectedDate"
-          :selected-events="selectedEvents"
-          :search-query="query1.search || ''"
-          :grouped-search-results="groupedSearchResults"
-          @go-to-date="goToDate"
-        />
-      </div>
+      <!-- Dialog สำหรับ mobile -->
+      <q-dialog v-model="dialog" full-width>
+        <q-card class="q-dialog-card scroll-wrapper">
+          <div class="q-pa-md">
+            <!-- Panel แสดงกิจกรรม -->
+            <CalendarEventPanel
+              :selected-date="selectedDate"
+              :selected-events="selectedEvents"
+              :search-query="query1.search || ''"
+              :grouped-search-results="groupedSearchResults"
+              @go-to-date="goToDate"
+            />
+          </div>
+        </q-card>
+      </q-dialog>
     </div>
   </q-page>
 </template>
@@ -513,5 +618,56 @@ watch(selectedDate, (val) => {
   color: #000000;
   /* สีม่วง */
   border: 1px solid #575656;
+}
+
+.q-dialog-card {
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+  background: white;
+  position: relative;
+  border-radius: 12px;
+}
+
+.scroll-wrapper {
+  flex: 1;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+.scroll-wrapper::-webkit-scrollbar {
+  display: none;
+}
+
+@media (max-width: 300px) {
+  .calendar-wrapper {
+    flex-direction: column;
+  }
+
+  .calendar-wrapper .col-8,
+  .calendar-wrapper .col-4 {
+    width: 100%;
+    max-width: 100%;
+  }
+
+  .searchbox {
+    width: 100%;
+  }
+}
+
+@media (max-width: 900px) {
+  .calendar-wrapper {
+    flex-direction: column;
+  }
+
+  .calendar-wrapper .col-8,
+  .calendar-wrapper .col-4 {
+    width: 100%;
+    max-width: 100%;
+  }
+
+  .searchbox {
+    width: 100%;
+  }
 }
 </style>
