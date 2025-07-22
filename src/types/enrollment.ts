@@ -1,4 +1,5 @@
 import type{ Activity } from './activity'
+import type{ CheckInOut } from './checkinout'
 import type { Pagination } from './pagination'
 
 export type Enrollment = {
@@ -25,8 +26,7 @@ export type StudentEnrollment = {
   hardSkill: number
   softSkill: number
   registrationDate: string
-  checkIn?: string
-  checkOut?: string
+  checkInOut?: CheckInOut
 }
 export type EnrollmentResponse = {
   id: string;

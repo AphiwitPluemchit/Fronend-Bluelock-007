@@ -3,7 +3,6 @@ import { api } from 'boot/axios'
 import type { StudentEnrollment } from 'src/types/enrollment'
 import type { Pagination, PaginationResponse } from 'src/types/pagination'
 
-
 export class EnrollmentService {
   static path = 'enrollments'
 
@@ -13,23 +12,20 @@ export class EnrollmentService {
       const res = await api.post(this.path, obj)
       return res.status
     } catch (error) {
-
       console.error('Error creating enrollment:', error)
       throw error
     }
   }
 
- static async removeOne(id: string) {
-  try {
-    const res = await api.delete(`${this.path}/${id}`)
-    return res.status
-  } catch (error) {
-
-    console.error(`Error deleting enrollment ID: ${id}`, error)
-    throw error
+  static async removeOne(id: string) {
+    try {
+      const res = await api.delete(`${this.path}/${id}`)
+      return res.status
+    } catch (error) {
+      console.error(`Error deleting enrollment ID: ${id}`, error)
+      throw error
+    }
   }
-}
-
 
   static async getEnrollmentsByActivityID(activityId: string, params: Pagination) {
     const { studentStatus, major, studentYear, ...rest } = params
@@ -62,7 +58,9 @@ export class EnrollmentService {
       const { activityState, skill, ...rest } = params
       const queryParams = {
         ...rest,
-        ...(activityState && activityState.length > 0 ? { activityState: activityState.join(',') } : {}),
+        ...(activityState && activityState.length > 0
+          ? { activityState: activityState.join(',') }
+          : {}),
         ...(skill && skill.length > 0 ? { skill: skill.join(',') } : {}),
       }
       console.log('Sending params:', queryParams)

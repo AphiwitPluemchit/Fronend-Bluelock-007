@@ -10,7 +10,10 @@ import { EnrollmentService } from 'src/services/enrollment'
 import FilterDialog from 'src/components/Dialog/FilterDialog.vue'
 import type { Activity, EnrollmentSummary } from 'src/types/activity'
 import type { Pagination } from 'src/types/pagination'
-
+import dayjs from 'dayjs'
+import type { CheckInOut } from 'src/types/checkinout'
+import 'dayjs/locale/th'
+dayjs.locale('th')
 const $q = useQuasar()
 const isMobile = computed(() => $q.screen.width <= 600)
 
@@ -26,6 +29,14 @@ const query = ref<Pagination>({
   studentStatus: [],
   studentYear: [],
 })
+const formatDate = (iso: string): string => {
+  if (!iso) return 'ยังไม่เช็คชื่อ'
+  return dayjs(iso).format('D MMMM YYYY')
+}
+const formatTime = (iso: string): string => {
+  if (!iso) return 'ยังไม่เช็คชื่อ'
+  return dayjs(iso).format('HH:mm น.')
+}
 const visibleColumns = computed(() => {
   const hasFood = students.value.some((s) => !!s.food && s.food.trim() !== '')
   return columns.filter((col) => {
@@ -40,8 +51,15 @@ const pagination = ref({
   rowsPerPage: query.value.limit || 5,
   rowsNumber: 0,
 })
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-const onRequest = async (props: any) => {
+interface QTableRequestProps {
+  pagination: {
+    page: number
+    rowsPerPage: number
+    sortBy: string
+    descending: boolean
+  }
+}
+const onRequest = async (props: QTableRequestProps) => {
   const { page, rowsPerPage, sortBy, descending } = props.pagination
 
   // แก้ตรงนี้: sync query กับ pagination จริง
@@ -262,6 +280,31 @@ onMounted(async () => {
 onUnmounted(() => {
   window.removeEventListener('resize', handleResize)
 })
+
+// Add a type for CheckInOutRecord
+
+
+// Add helper methods for checkin/checkout filtering for QTable rows and card layout
+function getRowCheckins(row: { checkInOut?: unknown }): CheckInOut[] {
+  return Array.isArray(row.checkInOut)
+    ? (row.checkInOut as CheckInOut[]).filter((rec) => rec.type === 'checkin')
+    : []
+}
+function getRowCheckouts(row: { checkInOut?: unknown }): CheckInOut[] {
+  return Array.isArray(row.checkInOut)
+    ? (row.checkInOut as CheckInOut[]).filter((rec) => rec.type === 'checkout')
+    : []
+}
+function getStudentCheckins(student: { checkInOut?: unknown }): CheckInOut[] {
+  return Array.isArray(student.checkInOut)
+    ? (student.checkInOut as CheckInOut[]).filter((rec) => rec.type === 'checkin')
+    : []
+}
+function getStudentCheckouts(student: { checkInOut?: unknown }): CheckInOut[] {
+  return Array.isArray(student.checkInOut)
+    ? (student.checkInOut as CheckInOut[]).filter((rec) => rec.type === 'checkout')
+    : []
+}
 </script>
 
 <template>
@@ -356,6 +399,26 @@ onUnmounted(() => {
             />
           </q-td>
         </template>
+        <template v-slot:body-cell-checkIn="props">
+          <q-td :props="props">
+            <div v-if="getRowCheckins(props.row).length">
+              <div v-for="(rec, idx) in getRowCheckins(props.row)" :key="idx">
+                {{ formatDate(rec.checkedAt) }} {{ formatTime(rec.checkedAt) }}
+              </div>
+            </div>
+            <div v-else>-</div>
+          </q-td>
+        </template>
+        <template v-slot:body-cell-checkOut="props">
+          <q-td :props="props">
+            <div v-if="getRowCheckouts(props.row).length">
+              <div v-for="(rec, idx) in getRowCheckouts(props.row)" :key="idx">
+                {{ formatDate(rec.checkedAt) }} {{ formatTime(rec.checkedAt) }}
+              </div>
+            </div>
+            <div v-else>-</div>
+          </q-td>
+        </template>
         <template v-slot:no-data>
           <div class="full-width text-center q-pa-md text-grey" style="font-size: 20px">
             ไม่มีนิสิตที่ลงทะเบียน
@@ -400,13 +463,27 @@ onUnmounted(() => {
               <div class="label" style="margin-right: 5px">อาหาร</div>
               <div class="value">: {{ student.food }}</div>
             </div>
-            <div class="info-row" style="display: flex; align-items: center; margin-bottom: 10px">
-              <div class="label" style="margin-right: 5px">เช็คชื่อเข้า</div>
-              <div class="value">: {{ student.checkIn }}</div>
+            <div class="info-row">
+              <div class="label">เช็คชื่อเข้า</div>
+              <div class="value">
+                <template v-if="getStudentCheckins(student).length">
+                  <div v-for="(rec, idx) in getStudentCheckins(student)" :key="idx">
+                    {{ formatDate(rec.checkedAt) }} {{ formatTime(rec.checkedAt) }}
+                  </div>
+                </template>
+                <div v-else>-</div>
+              </div>
             </div>
-            <div class="info-row" style="display: flex; align-items: center">
-              <div class="label" style="margin-right: 5px">เช็คชื่อออก</div>
-              <div class="value">: {{ student.checkOut }}</div>
+            <div class="info-row">
+              <div class="label">เช็คชื่อออก</div>
+              <div class="value">
+                <template v-if="getStudentCheckouts(student).length">
+                  <div v-for="(rec, idx) in getStudentCheckouts(student)" :key="idx">
+                    {{ formatDate(rec.checkedAt) }} {{ formatTime(rec.checkedAt) }}
+                  </div>
+                </template>
+                <div v-else>-</div>
+              </div>
             </div>
             <RemoveStudent
               :id="student.id"
