@@ -13,6 +13,7 @@ async function checkin() {
     isChecked.value = true
   } catch (error) {
     console.error(error)
+    isChecked.value = false
   }
 }
 console.log('token:', props.token)
