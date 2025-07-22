@@ -36,7 +36,7 @@ onMounted(async () => {
         <div>
           <q-icon name="question_mark" size="64px" style="color: #162aae" />
         </div>
-        <div class="text-h6 text-green-7 q-mt-md">QR Check-in/Check-out</div>
+        <div class="text-h6 text-green-7 q-mt-md">QR {{ tokenInfo?.type }}</div>
         <div v-if="loading" class="q-mt-md">กำลังโหลด...</div>
         <div v-else-if="error" class="text-negative q-mt-md">{{ error }}</div>
         <template v-else>
