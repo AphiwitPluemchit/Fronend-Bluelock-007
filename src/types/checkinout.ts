@@ -4,3 +4,10 @@ export type Checkinout = {
   expiresAt: number
   type: string
 }
+
+export type CheckinoutRecord = {
+  checkin: string
+  checkout?: string
+}
+
+
