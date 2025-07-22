@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { defineProps, defineEmits, ref, watch, computed } from 'vue'
+import { defineProps, defineEmits, ref, watch, computed, onUnmounted } from 'vue'
 import CheckinoutService from 'src/services/checkinout'
 import { useRoute } from 'vue-router'
 const route = useRoute()
@@ -20,6 +20,8 @@ const confirmedType = ref('') // ประเภทที่ยืนยัน�
 const qrLink = ref('') // ลิงก์ที่ใช้สร้าง QR
 const qrType = ref('') // ประเภทที่ backend ตอบกลับมา
 
+let refreshInterval: ReturnType<typeof setInterval> | null = null
+
 // รีเซตค่าทุกครั้งที่เปิด dialog
 watch(
   () => dialogVisible.value,
@@ -28,9 +30,43 @@ watch(
       selectedType.value = ''
       confirmedType.value = ''
       qrLink.value = ''
+      if (refreshInterval) {
+        clearInterval(refreshInterval)
+        refreshInterval = null
+      }
+    } else {
+      if (refreshInterval) {
+        clearInterval(refreshInterval)
+        refreshInterval = null
+      }
     }
   },
 )
+
+// รีเฟรช QR อัตโนมัติทุก 10 วิหลังยืนยัน
+watch(
+  () => confirmedType.value,
+  (val) => {
+    if (val) {
+      if (refreshInterval) clearInterval(refreshInterval)
+      refreshInterval = setInterval(() => {
+        void onConfirm()
+      }, 50000)
+    } else {
+      if (refreshInterval) {
+        clearInterval(refreshInterval)
+        refreshInterval = null
+      }
+    }
+  },
+)
+
+onUnmounted(() => {
+  if (refreshInterval) {
+    clearInterval(refreshInterval)
+    refreshInterval = null
+  }
+})
 
 // เมื่อผู้ใช้เลือกประเภท → โหลดลิงก์ QR จาก backend
 const selectType = (type: 'checkin' | 'checkout') => {
