@@ -578,14 +578,16 @@ watch(selectedDate, (val) => {
 .day-number {
   font-size: 12px;
   font-weight: bold;
-  width: 24px;
-  height: 24px;
-  line-height: 24px;
+  width: 25px;
+  height: 25px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   border-radius: 50%;
-  margin: auto;
+}
+
+:deep(.q-calendar-month__day--label__wrapper) {
+  display: none !important;
 }
 
 :deep(button.q-calendar-month__day--label) {

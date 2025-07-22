@@ -59,7 +59,15 @@ const goToPageDetail = async (id: string, disable: boolean) => {
     <div v-if="searchQuery">
       <template v-if="groupedSearchResults && Object.keys(groupedSearchResults).length > 0">
         <div v-for="date in Object.keys(groupedSearchResults).sort()" :key="date">
-          <div class="text-h6 q-mb-sm">{{ formatThaiDate(date) }}</div>
+          <div
+            class="text-h6 q-mb-sm"
+            :style="{
+              marginTop:
+                Object.keys(groupedSearchResults).sort().indexOf(date) !== 0 ? '30px' : '0',
+            }"
+          >
+            {{ formatThaiDate(date) }}
+          </div>
           <div v-for="event in groupedSearchResults[date]" :key="event.id" class="q-mb-sm">
             <q-card
               flat
@@ -164,7 +172,7 @@ const goToPageDetail = async (id: string, disable: boolean) => {
 
 <style scoped>
 .event-panel {
-  max-height: 650px;
+  max-height: 630px;
   overflow-y: scroll;
   scrollbar-width: none; /* สำหรับ Firefox */
   -webkit-overflow-scrolling: touch;

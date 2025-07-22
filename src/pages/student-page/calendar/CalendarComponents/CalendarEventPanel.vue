@@ -25,24 +25,6 @@ function formatThaiDate(dateStr: string) {
   })
 }
 
-// สี ของ card activity
-function getStatusColor(status: string): string {
-  switch (status) {
-    case 'กำลังวางแผน':
-      return '#ffa500'
-    case 'เปิดลงทะเบียน':
-      return '#00bb16'
-    case 'ปิดลงทะเบียน':
-      return '#002dff'
-    case 'ยกเลิก':
-      return '#f32323'
-    case 'เสร็จสิ้น':
-      return '#575656'
-    default:
-      return '#e0e0e0'
-  }
-}
-
 const goToPageDetail = async (id: string, disable: boolean) => {
   await router.push({
     path: `/Student/Activity/MyActivityDetail/${id}`,
@@ -59,13 +41,26 @@ const goToPageDetail = async (id: string, disable: boolean) => {
     <div v-if="searchQuery">
       <template v-if="groupedSearchResults && Object.keys(groupedSearchResults).length > 0">
         <div v-for="date in Object.keys(groupedSearchResults).sort()" :key="date">
-          <div class="text-h6 q-mb-sm">{{ formatThaiDate(date) }}</div>
+          <div
+            class="text-h6 q-mb-sm"
+            :style="{
+              marginTop:
+                Object.keys(groupedSearchResults).sort().indexOf(date) !== 0 ? '30px' : '0',
+            }"
+          >
+            {{ formatThaiDate(date) }}
+          </div>
+
           <div v-for="event in groupedSearchResults[date]" :key="event.id" class="q-mb-sm">
             <q-card
               flat
               bordered
-              class="q-pa-md q-mb-sm clickable-card"
-              :style="`border-left: 5px solid ${getStatusColor(event.activityState)}`"
+              :class="[
+                'q-pa-md',
+                'q-mb-sm',
+                'clickable-card',
+                event.category === 'hard' ? 'card-hard-skill' : 'card-soft-skill',
+              ]"
               @click="emit('go-to-date', event.date)"
             >
               <div class="event-header-row">
@@ -108,8 +103,11 @@ const goToPageDetail = async (id: string, disable: boolean) => {
           <q-card
             flat
             bordered
-            class="q-pa-md q-mb-sm"
-            :style="`border-left: 5px solid ${getStatusColor(event.activityState)}`"
+            :class="[
+              'q-pa-md',
+              'q-mb-sm',
+              event.category === 'hard' ? 'card-hard-skill' : 'card-soft-skill',
+            ]"
             @click="emit('go-to-date', event.date)"
           >
             <div class="event-header-row">
@@ -146,7 +144,7 @@ const goToPageDetail = async (id: string, disable: boolean) => {
 
 <style scoped>
 .event-panel {
-  max-height: 620px;
+  max-height: 575px;
   overflow-y: scroll;
   scrollbar-width: none; /* สำหรับ Firefox */
   -webkit-overflow-scrolling: touch;
@@ -212,6 +210,14 @@ const goToPageDetail = async (id: string, disable: boolean) => {
   padding: 4px;
   border-radius: 4px;
   cursor: pointer;
+}
+
+.card-hard-skill {
+  border-left: 5px solid #002dff;
+}
+
+.card-soft-skill {
+  border-left: 5px solid #00bb16;
 }
 
 @media (max-width: 880px) {
