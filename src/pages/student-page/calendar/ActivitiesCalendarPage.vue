@@ -220,18 +220,9 @@ function activityStatusLabel(status: string): string {
   }
 }
 
-const getStatusClass = (status: string) => {
-  if (status === 'กำลังวางแผน') return 'status-planning'
-  if (status === 'เปิดลงทะเบียน') return 'status-open'
-  if (status === 'ปิดลงทะเบียน') return 'status-close'
-  if (status === 'เสร็จสิ้น') return 'status-success'
-  if (status === 'ยกเลิก') return 'status-cancel'
-  return ''
-}
-
 function badgeClasses(d: { event: CalendarEvent }) {
   console.log('badgeClasses status:', d.event.activityState)
-  return ['my-event', getStatusClass(d.event.activityState)]
+  return ['my-event', d.event.category === 'hard' ? 'hard-skill' : 'soft-skill']
 }
 
 function parseToCalendarEvents(activities: Activity[]): CalendarEvent[] {
@@ -575,14 +566,16 @@ watch(selectedDate, (val) => {
 .day-number {
   font-size: 12px;
   font-weight: bold;
-  width: 24px;
-  height: 24px;
-  line-height: 24px;
+  width: 25px;
+  height: 25px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   border-radius: 50%;
-  margin: auto;
+}
+
+:deep(.q-calendar-month__day--label__wrapper) {
+  display: none !important;
 }
 
 :deep(button.q-calendar-month__day--label) {
@@ -606,35 +599,16 @@ watch(selectedDate, (val) => {
   color: white;
 }
 
-.status-close {
-  background-color: #cfd7ff;
+.hard-skill {
   color: #001780;
   border: 1px solid #002dff;
+  background-color: #cfd7ff;
 }
 
-.status-open {
-  background-color: #d0ffc5;
+.soft-skill {
   color: #009812;
   border: 1px solid #00bb16;
-}
-
-.status-planning {
-  background-color: #ffe7ba;
-  color: #ff6f00;
-  border: 1px solid #ffa500;
-}
-
-.status-cancel {
-  background-color: #ffc5c5;
-  color: #ff0000;
-  border: 1px solid #f32323;
-}
-
-.status-success {
-  background-color: #dadada;
-  color: #000000;
-  /* สีม่วง */
-  border: 1px solid #575656;
+  background-color: #d2ffc7;
 }
 
 .q-dialog-card {
