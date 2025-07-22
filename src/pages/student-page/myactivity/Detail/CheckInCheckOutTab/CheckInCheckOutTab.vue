@@ -84,7 +84,7 @@ const auth = useAuthStore()
 // ฟังก์ชันลงทะเบียน
 async function fetchStatus(studentId: string, activityId: string) {
   const res = await checkinoutStore.getStatus(studentId, activityId)
-  checkStatus.value = Array.isArray(res) ? res : []
+  checkStatus.value = res
 }
 
 async function fetchData() {
