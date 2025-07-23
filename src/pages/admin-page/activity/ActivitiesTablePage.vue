@@ -292,7 +292,7 @@ const query3 = ref<Pagination>({
   limit: 5,
   search: '',
   sortBy: 'dates',
-  order: 'asc',
+  order: 'desc',
   skill: [],
   activityState: ['success'],
   major: [],
@@ -303,7 +303,7 @@ const query4 = ref<Pagination>({
   limit: 5,
   search: '',
   sortBy: 'dates',
-  order: 'asc',
+  order: 'desc',
   skill: [],
   activityState: ['cancel'],
   major: [],
@@ -647,7 +647,7 @@ watchEffect(() => {
           flat
           :rows="mapActivitiesToTableRows(activitys1)"
           :columns="columns"
-          v-model:pagination="pagination1 "
+          v-model:pagination="pagination1"
           :rows-per-page-options="[5, 7, 10, 15, 20]"
           @request="onRequest1"
           row-key="id"
@@ -1128,7 +1128,7 @@ watchEffect(() => {
                         <div class="label-pair">
                           <span class="label-title">จำนวนที่ลงทะเบียน/รับ/เหลือ :</span>
                           <span class="label-value">
-                            {{ item.enrollmentCount || 0 }} /  {{ item.maxParticipants || '-' }} /
+                            {{ item.enrollmentCount || 0 }} / {{ item.maxParticipants || '-' }} /
                             {{ item.maxParticipants - item.enrollmentCount || 0 }} คน
                           </span>
                         </div>
