@@ -51,7 +51,7 @@ watch(
       if (refreshInterval) clearInterval(refreshInterval)
       refreshInterval = setInterval(() => {
         void onConfirm()
-      }, 50000)
+      }, 8000)
     } else {
       if (refreshInterval) {
         clearInterval(refreshInterval)
@@ -88,6 +88,9 @@ const onConfirm = async () => {
   qrType.value = res?.type || ''
   emit('confirm')
 }
+function copyQRLink() {
+  void navigator.clipboard.writeText(appURL + qrLink.value)
+}
 </script>
 
 <template>
@@ -121,9 +124,11 @@ const onConfirm = async () => {
       <q-card-section class="dialog-body" v-else>
         <div v-if="qrType">ประเภท: <b>{{ qrType === 'checkin' ? 'เช็คชื่อเข้า' : qrType === 'checkout' ? 'เช็คชื่อออก' : qrType }}</b></div>
         {{ appURL + qrLink }}
+        <q-btn @click="copyQRLink">copyQRLink</q-btn>
+
         <q-img
           :src="`https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=http://localhost:9000${qrLink}`"
-          style="margin-top: 10px; max-width: 150px"
+          style="margin-top: 10px; max-width: 250px"
         />
       </q-card-section>
 

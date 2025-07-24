@@ -17,14 +17,23 @@ onMounted(async () => {
   }
   try {
     const res = await CheckinoutService.getTokenInfo(uuid)
-    console.log('res:', res)
     if (!res || !res.type) {
       error.value = 'QR ไม่ถูกต้องหรือหมดอายุ'
     } else {
       tokenInfo.value = res
     }
   } catch {
-    error.value = 'QR ไม่ถูกต้องหรือหมดอายุ'
+    // ถ้า claim ไม่สำเร็จ (เช่น QR หมดอายุ) → fallback ไป validate
+    try {
+      const valid = await CheckinoutService.validateToken(uuid)
+      if (valid && valid.type) {
+        tokenInfo.value = valid
+      } else {
+        error.value = 'QR ไม่ถูกต้องหรือหมดอายุ'
+      }
+    } catch {
+      error.value = 'QR ไม่ถูกต้องหรือหมดอายุ'
+    }
   }
   loading.value = false
 })

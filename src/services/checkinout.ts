@@ -22,6 +22,17 @@ class CheckinoutService {
       console.error('failed:', error)
     }
   }
+
+  static async validateToken(token: string) {
+    try {
+      const res = await api.get(`/checkInOuts/student/validate/${token}`)
+      return res.data // { activityId, token, type }
+    } catch (error) {
+      showError('ตรวจสอบ QR ล้มเหลว')
+      console.error('failed:', error)
+    }
+  }
+
   static async getTokenInfo(token: string) {
     try {
       const res = await api.get(`/checkInOuts/student/qr/${token}`)
@@ -38,6 +49,7 @@ class CheckinoutService {
     } catch (error) {
       showError('เช็คชื่อไม่สำเร็จ')
       console.error('failed:', error)
+      throw error
     }
   }
   static async checkout(token: string) {
@@ -47,6 +59,7 @@ class CheckinoutService {
     } catch (error) {
       showError('เช็คชื่อออกไม่สำเร็จ')
       console.error('failed:', error)
+      throw error
     }
   }
   static async getStatus(studentId: string, activityId: string) {
