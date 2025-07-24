@@ -4,11 +4,8 @@ services:
       context: .
       dockerfile: Dockerfile
     container_name: bluelock-frontend
+    volumes:
+      - ./.env:/app/.env
     ports:
       - '8765:80'
     restart: always
-    networks:
-      - bluelock-net
-networks:
-  bluelock-net:
-    driver: bridge
