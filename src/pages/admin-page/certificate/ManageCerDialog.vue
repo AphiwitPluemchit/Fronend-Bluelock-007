@@ -68,10 +68,10 @@ const confirm = () => {
       <div class="text-h5 q-mb-md">จัดการใบประกาศนียบัตร</div>
 
       <div class="q-mb-sm row">
-        <div class="col-6"><b>ชื่อ-สกุล</b> {{ props.data.name }}</div>
+        <div class="col-6"><b>ชื่อ-สกุล :</b> {{ props.data.name }}</div>
         <div class="col-6"><b>รหัสนิสิต</b> {{ props.data.code }}</div>
       </div>
-      <div class="q-mb-sm"><b>หัวข้ออบรม</b> {{ props.data.certName }}</div>
+      <div class="q-mb-sm cert-title"><b>หัวข้ออบรม</b> {{ props.data.certName }}</div>
       <div class="q-mb-sm"><b>รูปใบประกาศนียบัตร</b></div>
 
       <q-img
@@ -166,6 +166,12 @@ const confirm = () => {
 </template>
 
 <style scoped>
+.cert-title {
+  max-width: 650px; /* หรือขนาดที่ต้องการ */
+  word-break: break-word;
+  white-space: normal;
+  overflow-wrap: break-word;
+}
 .q-img {
   height: 350px;
 }

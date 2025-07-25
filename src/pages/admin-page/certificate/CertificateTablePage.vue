@@ -2,6 +2,7 @@
 import { ref } from 'vue'
 import type { QTableProps } from 'quasar'
 import FilterDialog from 'src/components/Dialog/FilterDialog.vue'
+import { useRouter } from 'vue-router'
 
 const search1 = ref('')
 const showFilterDialog1 = ref(false)
@@ -137,6 +138,14 @@ const rows = ref<CertificateCourse[]>([
 function getcategoryCourse(row: CertificateCourse) {
   return row.categoryActivity === 'เตรียมความพร้อม' ? 'hard-skill' : 'soft-skill'
 }
+
+const router = useRouter()
+
+function goToDetail(row: CertificateCourse) {
+  void router.push({
+    path: `/admin/CertificateDetail/${row.id}`,
+  })
+}
 </script>
 
 <template>
@@ -227,10 +236,11 @@ function getcategoryCourse(row: CertificateCourse) {
             <q-td key="action" class="text-center q-gutter-x-sm">
               <q-icon
                 clickable
-                name="edit"
+                name="visibility"
                 class="bg-primary text-white q-pa-xs rounded-borders q-mr-sm"
+                @click="goToDetail(props.row)"
               >
-                <q-tooltip>แก้ไข</q-tooltip>
+                <q-tooltip>ดูรายละเอียด</q-tooltip>
               </q-icon>
             </q-td>
           </q-tr>

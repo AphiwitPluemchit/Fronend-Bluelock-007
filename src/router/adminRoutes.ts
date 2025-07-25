@@ -54,6 +54,11 @@ const adminChildren: RouteRecordRaw[] = [
     path: 'ManageCertificateTable',
     component: () => import('pages/admin-page/certificate/ManageCertificateTable.vue'),
   },
+  {
+    path: 'CertificateDetail/:id',
+    component: () => import('pages/admin-page/certificate/CertificateDetailPage.vue'),
+    props: true,
+  },
   // Forms routes for admins
   {
     path: 'forms',
