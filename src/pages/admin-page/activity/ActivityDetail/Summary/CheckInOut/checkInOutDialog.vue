@@ -19,7 +19,7 @@ const selectedType = ref<'checkin' | 'checkout' | ''>('') // ประเภท�
 const confirmedType = ref('') // ประเภทที่ยืนยันแล้ว
 const qrLink = ref('') // ลิงก์ที่ใช้สร้าง QR
 const qrType = ref('') // ประเภทที่ backend ตอบกลับมา
-const appURL =  import.meta.env.VITE_APP_URL
+const appURL = import.meta.env.VITE_APP_URL
 let refreshInterval: ReturnType<typeof setInterval> | null = null
 
 // รีเซตค่าทุกครั้งที่เปิด dialog
@@ -122,12 +122,17 @@ function copyQRLink() {
 
       <!-- แสดง QR -->
       <q-card-section class="dialog-body" v-else>
-        <div v-if="qrType">ประเภท: <b>{{ qrType === 'checkin' ? 'เช็คชื่อเข้า' : qrType === 'checkout' ? 'เช็คชื่อออก' : qrType }}</b></div>
+        <div v-if="qrType">
+          ประเภท:
+          <b>{{
+            qrType === 'checkin' ? 'เช็คชื่อเข้า' : qrType === 'checkout' ? 'เช็คชื่อออก' : qrType
+          }}</b>
+        </div>
         {{ appURL + qrLink }}
         <q-btn @click="copyQRLink">copyQRLink</q-btn>
 
         <q-img
-          :src="`https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=http://localhost:9000${qrLink}`"
+          :src="`https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${appURL + qrLink}`"
           style="margin-top: 10px; max-width: 250px"
         />
       </q-card-section>
