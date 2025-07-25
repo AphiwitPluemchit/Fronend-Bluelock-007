@@ -92,7 +92,8 @@ const rows = ref<CertificateRow[]>([
     code: '65160305',
     name: 'ศิวะ รัตนวงศ์',
     major: 'CS',
-    certName: 'ประกาศนียบัตร 2022',
+    certName:
+      'จิตวิทยาประยุกต์ในการทํางาน เพื่อความสำเร็จ ความสุข และความมั่งคั่ง | Applied Psychology to Work through Success Happiness and Wealth',
     status: 'รออนุมัติ',
     uploadDate: '10 พ.ค. 2568',
   },
@@ -149,7 +150,8 @@ const certList = ref([
   {
     code: '65160305',
     name: 'ศิวะ รัตนวงศ์',
-    certName: 'ประกาศนียบัตร 2022',
+    certName:
+      'จิตวิทยาประยุกต์ในการทํางาน เพื่อความสำเร็จ ความสุข และความมั่งคั่ง | Applied Psychology to Work through Success Happiness and Wealth',
     status: 'รออนุมัติ',
     imageUrl: '/images/sample_cert.png',
     skill: '',
@@ -227,9 +229,9 @@ const certList = ref([
         flat
         :rows="filteredRows"
         :columns="columns"
+        :rows-per-page-options="[5, 7, 10, 15, 20]"
         row-key="id"
-        class="q-mt-md customtable"
-        :pagination="{ rowsPerPage: 10 }"
+        class="q-mt-md"
       >
         <!-- Header Sticky -->
         <template v-slot:header="props">
@@ -265,28 +267,26 @@ const certList = ref([
                 :class="getStatusClass(props.row.status)"
               />
             </q-td>
-            <td>
-              <q-td key="action" class="text-center q-gutter-x-sm">
-                <q-icon
-                  v-if="props.row.status === 'รออนุมัติ'"
-                  clickable
-                  name="edit"
-                  class="bg-primary text-white q-pa-xs rounded-borders q-mr-sm"
-                  @click="openManageCer(props.row)"
-                >
-                  <q-tooltip>แก้ไข</q-tooltip>
-                </q-icon>
+            <td key="action" class="text-center q-gutter-x-sm">
+              <q-icon
+                v-if="props.row.status === 'รออนุมัติ'"
+                clickable
+                name="edit"
+                class="bg-primary text-white q-pa-xs rounded-borders q-mr-sm"
+                @click="openManageCer(props.row)"
+              >
+                <q-tooltip>แก้ไข</q-tooltip>
+              </q-icon>
 
-                <q-icon
-                  v-else
-                  clickable
-                  name="visibility"
-                  class="bg-black text-white q-pa-xs rounded-borders q-mr-sm"
-                  @click="viewDetail(props.row)"
-                >
-                  <q-tooltip>ดูรายละเอียด</q-tooltip>
-                </q-icon>
-              </q-td>
+              <q-icon
+                v-else
+                clickable
+                name="visibility"
+                class="bg-black text-white q-pa-xs rounded-borders q-mr-sm"
+                @click="viewDetail(props.row)"
+              >
+                <q-tooltip>ดูรายละเอียด</q-tooltip>
+              </q-icon>
             </td>
           </q-tr>
         </template>
@@ -297,13 +297,6 @@ const certList = ref([
 </template>
 
 <style scoped>
-.customtable td,
-.customtable th {
-  height: 36px;
-  vertical-align: middle;
-  line-height: 1.4;
-}
-
 .status-badge {
   height: 32px;
   line-height: 28px;
