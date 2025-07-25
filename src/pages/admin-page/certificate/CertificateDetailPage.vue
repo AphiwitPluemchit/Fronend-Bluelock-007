@@ -274,10 +274,10 @@ const categoryOptions = [
     <AppBreadcrumbs :breadcrumbs="breadcrumbs" />
 
     <div class="q-mx-lg">
-      <div class="text-h6 q-mt-lg">ข้อมูลนิสิต</div>
+      <div class="text-h6 q-mt-lg">ข้อมูลหัวข้อการอบรม</div>
       <q-card class="q-mt-md full-width" flat>
         <div v-if="cert" class="row q-col-gutter-md">
-          <!-- แถวข้อมูลนิสิต -->
+          <!-- แถวข้อมูล-->
           <div class="col-12 row items-center q-pa-sm">
             <div class="col-1 text-right q-pr-md"><p class="q-my-none">ชื่อ :</p></div>
             <div class="col-10">
