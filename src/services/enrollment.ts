@@ -1,6 +1,6 @@
 import { api } from 'boot/axios'
 
-import type { StudentEnrollment } from 'src/types/enrollment'
+import type { StudentEnrollment, EnrollmentCheckResponse } from 'src/types/enrollment'
 import type { Pagination, PaginationResponse } from 'src/types/pagination'
 
 export class EnrollmentService {
@@ -72,25 +72,26 @@ export class EnrollmentService {
       throw error
     }
   }
-  static async checkEnrollmentByStudentIDAndActivityID(studentId: string, activityId: string) {
+
+  static async checkEnrollmentByStudentIDAndActivityID(studentId: string, activityId: string): Promise<EnrollmentCheckResponse> {
     try {
-      const res = await api.get(`${this.path}/student/${studentId}/activity/${activityId}/check`)
-      console.log('Fetched enrollments:', res.data)
+      const res = await api.get<EnrollmentCheckResponse>(`${this.path}/student/${studentId}/activity/${activityId}/check`)
+      console.log('Fetched enrollment check:', res.data)
       return res.data
     } catch (error) {
-      console.error(`Error fetching enrollment for student ID: ${studentId}`, error)
+      console.error(`Error checking enrollment for student ID: ${studentId}`, error)
       throw error
     }
   }
 
-  static async getEnrollmentsByStudentIDAndActivityID(studentId: string, activityId: string) {
-    try {
-      const res = await api.get(`${this.path}/student/${studentId}/activity/${activityId}`)
-      console.log('Fetched enrollments:', res.data)
-      return res.data
-    } catch (error) {
-      console.error(`Error fetching enrollment for student ID: ${studentId}`, error)
-      throw error
-    }
-  }
+  // static async getEnrollmentsByStudentIDAndActivityID(studentId: string, activityId: string) {
+  //   try {
+  //     const res = await api.get(`${this.path}/student/${studentId}/activity/${activityId}`)
+  //     console.log('Fetched enrollments:', res.data)
+  //     return res.data
+  //   } catch (error) {
+  //     console.error(`Error fetching enrollment for student ID: ${studentId}`, error)
+  //     throw error
+  //   }
+  // }
 }

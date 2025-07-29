@@ -35,6 +35,11 @@ export type EnrollmentResponse = {
   food?: string;
   activity: Partial<Activity>
 }
+export type EnrollmentCheckResponse = {
+  isEnrolled: boolean;
+  activity?: Activity;
+  message: string;
+}
 export type EnrollmentQuery = Pagination & {
   major?: string[]
   status?: string[]

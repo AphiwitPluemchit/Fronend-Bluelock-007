@@ -75,13 +75,15 @@ async function fetchData() {
       String(route.params.id),
     )
 
-    if (response.isEnrolled && response.enrollment) {
-      enrollment.value = response.enrollment
-      // Map enrollment response to Activity type for compatibility with existing components
-      if (response.enrollment.activity) {
-        activity.value = response.enrollment.activity as Activity
-      } else {
-        activity.value = null
+    if (response.isEnrolled && response.activity) {
+      // Map activity response to Activity type for compatibility with existing components
+      activity.value = response.activity
+      // Create enrollment object from activity data for compatibility
+      enrollment.value = {
+        id: response.activity.id || '',
+        registrationDate: new Date().toISOString(), // This will be updated when we have actual enrollment data
+        studentId: String(auth.getUser?.id || ''),
+        activity: response.activity
       }
     } else {
       enrollment.value = null
