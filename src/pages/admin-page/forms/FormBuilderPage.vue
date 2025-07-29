@@ -1,3 +1,4 @@
+<!-- eslint-disable @typescript-eslint/no-unused-vars -->
 <template>
   <q-page class="q-pa-md">
     <!-- Header -->
@@ -9,7 +10,7 @@
           label="Preview"
           icon="visibility"
           @click="showPreview = true"
-          :disable="!formData.title || formData.questions.length === 0"
+          :disable="!formData.title || formData.formElements.length === 0"
           class="q-mr-md"
         />
         <q-btn
@@ -17,7 +18,7 @@
           label="Save"
           icon="save"
           @click="saveForm"
-          :disable="!formData.title || formData.questions.length === 0"
+          :disable="!formData.title || formData.formElements.length === 0"
         />
       </div>
     </div>
@@ -36,7 +37,7 @@
     <div class="flex justify-center q-mt-md">
       <div style="width: 1000px">
         <q-card
-          v-for="(q, index) in formData.questions"
+          v-for="(q, index) in formData.formElements"
           :key="index"
           :class="['q-pa-md q-mb-md', isTitleCard(q) ? 'title-card' : 'question-card']"
         >
@@ -45,7 +46,7 @@
             <!-- 🔹 Row: Title input + action icons -->
             <div class="row justify-between items-start q-mb-sm">
               <q-input
-                v-model="q.title"
+                v-model="q.titleCard.title"
                 placeholder="Untitled Title"
                 dense
                 outlined
@@ -57,11 +58,24 @@
                   round
                   dense
                   icon="content_copy"
-                  color="grey"
+                  class="bg-blue text-white q-pa-xs rounded-borders"
                   @click="copyQuestion(index)"
                 />
-                <q-btn flat round dense icon="delete" @click="removeQuestion(index)" color="grey" />
-                <q-btn flat round dense icon="more_vert" color="grey">
+                <q-btn
+                  flat
+                  round
+                  dense
+                  icon="delete"
+                  @click="removeQuestion(index)"
+                  class="bg-red text-white q-pa-xs rounded-borders"
+                />
+                <q-btn
+                  flat
+                  round
+                  dense
+                  icon="more_vert"
+                  class="bg-amber-8 text-white q-pa-xs rounded-borders"
+                >
                   <q-menu>
                     <q-list>
                       <q-item>
@@ -69,7 +83,7 @@
                       </q-item>
                       <q-item tag="label" clickable>
                         <q-item-section side>
-                          <q-checkbox v-model="q.showDescription" color="primary" dense />
+                          <q-checkbox v-model="q.titleCard.showDescription" color="primary" dense />
                         </q-item-section>
                         <q-item-section>Description</q-item-section>
                       </q-item>
@@ -81,8 +95,8 @@
 
             <!-- 🔸 Description input -->
             <q-input
-              v-if="q.showDescription"
-              v-model="q.description"
+              v-if="q.titleCard.showDescription"
+              v-model="q.titleCard.description"
               placeholder="Description (optional)"
               dense
               outlined
@@ -90,10 +104,10 @@
           </div>
 
           <!-- ✅ ถ้าเป็นคำถามทั่วไป -->
-          <div v-else>
+          <div v-else-if="q.question">
             <div class="row items-start q-gutter-md q-mb-md">
               <q-input
-                v-model="q.questionText"
+                v-model="q.question.questionText"
                 placeholder="Question"
                 outlined
                 dense
@@ -101,8 +115,8 @@
               />
               <q-btn
                 outline
-                :icon="getIcon(q.type)"
-                :label="getLabel(q.type)"
+                :icon="getIcon(q.question.type)"
+                :label="getLabel(q.question.type)"
                 style="border-radius: 8px; max-width: 230px; width: 100%"
               >
                 <q-menu>
@@ -114,18 +128,27 @@
                 round
                 dense
                 icon="content_copy"
-                color="grey"
+                class="bg-blue text-white q-pa-xs rounded-borders"
                 @click="copyQuestion(index)"
               />
-              <q-btn icon="delete" flat round dense color="grey" @click="removeQuestion(index)" />
+              <q-btn
+                icon="delete"
+                flat
+                round
+                dense
+                @click="removeQuestion(index)"
+                class="bg-red text-white q-pa-xs rounded-borders"
+              />
             </div>
 
-            <component
-              v-if="formData.questions[index] && !('isTitleCard' in formData.questions[index])"
-              :is="getComponent(q.type)"
-              v-model="formData.questions[index]"
-              flat
-            />
+            <template v-for="(q, index) in formData.formElements" :key="index">
+              <component
+                v-if="isQuestionElement(q)"
+                :is="getComponent(q.question.type)"
+                v-model="q.question"
+                flat
+              />
+            </template>
           </div>
         </q-card>
       </div>
@@ -149,15 +172,9 @@
 <script setup lang="ts">
 import { ref, reactive } from 'vue'
 import { useQuasar } from 'quasar'
-import { useRouter } from 'vue-router'
-import { useFormsStore } from 'src/stores/forms'
-import type {
-  CreateFormRequest,
-  QuestionType,
-  FormElement,
-  TitleCard,
-  Question,
-} from 'src/types/form'
+import { useFormStore } from 'src/stores/forms'
+import type { QuestionType, Question, TitleCard, FormElement, Form } from 'src/types/form'
+
 import QuestionTypeMenu from './QuestionFormat/QuestionTypeMenu.vue'
 // Components
 import PreviewDialog from './PreviewDialog.vue'
@@ -169,63 +186,75 @@ import ParagraphMenu from './QuestionFormat/ParagraphMenu.vue'
 import RatingMenu from './QuestionFormat/RatingMenu.vue'
 import MultipleChoicegridMenu from './QuestionFormat/MultipleChoicegridMenu.vue'
 import CheckboxGridMenu from './QuestionFormat/CheckboxGridMenu.vue'
+import { useRouter } from 'vue-router'
 
 const router = useRouter()
-const formsStore = useFormsStore()
 const showPreview = ref(false)
 const $q = useQuasar()
+const formStore = useFormStore()
 
-const formData = reactive<{
-  title: string
-  description: string
-  questions: FormElement[]
-}>({
+const formData = reactive<Form>({
   title: '',
   description: '',
-  questions: [],
+  formElements: [],
 })
 
 function addQuestion() {
-  formData.questions.push({
+
+  formData.formElements.push({
+  question: {
     type: 'short_answer',
     questionText: '',
     isRequired: false,
     choices: [],
-  })
+    rows: [],
+    columns: [],
+  },
+  order: formData.formElements.length,
+})
+
 }
 
 function addTitleCard() {
-  formData.questions.push({
-    isTitleCard: true,
+  formData.formElements.push({
+  titleCard: {
     title: '',
     description: '',
     showDescription: true,
-  })
+  },
+  order: formData.formElements.length,
+})
 }
-function isTitleCard(q: FormElement): q is TitleCard {
-  return 'isTitleCard' in q
+
+function isTitleCard(el: FormElement): el is FormElement & { titleCard: TitleCard } {
+  return !!el.titleCard
+}
+function isQuestionElement(el: FormElement): el is FormElement & { question: Question } {
+  return !!el.question
 }
 function removeQuestion(index: number) {
-  formData.questions.splice(index, 1)
+  formData.formElements.splice(index, 1)
 }
 
 function onTypeSelected(index: number, type: { label: string; value: QuestionType; icon: string }) {
-  const q = formData.questions[index]
-  if (!q || 'isTitleCard' in q) return
+  const q = formData.formElements[index]
+  if (!q || !q.question) return
 
-  q.type = type.value
+  q.question.type = type.value
+
   if (['checkbox', 'multiple_choice', 'dropdown'].includes(type.value)) {
-    q.choices = ['Option 1', 'Option 2']
+    q.question.choices = ['Option 1', 'Option 2']
   } else {
-    q.choices = []
+    q.question.choices = []
   }
 }
+
 function copyQuestion(index: number) {
-  const original = formData.questions[index]
+  const original = formData.formElements[index]
   if (!original) return
 
   const copied = JSON.parse(JSON.stringify(original))
-  formData.questions.splice(index + 1, 0, copied)
+  formData.formElements.splice(index + 1, 0, copied)
 }
 
 function getComponent(type: string) {
@@ -253,60 +282,63 @@ function getComponent(type: string) {
 
 function getIcon(type: QuestionType) {
   switch (type) {
-    case 'short_answer': return 'short_text'
-    case 'paragraph': return 'subject'
-    case 'checkbox': return 'check_box'
-    case 'multiple_choice': return 'radio_button_checked'
-    case 'dropdown': return 'arrow_drop_down_circle'
-    case 'rating': return 'star'
+    case 'short_answer':
+      return 'short_text'
+    case 'paragraph':
+      return 'subject'
+    case 'checkbox':
+      return 'check_box'
+    case 'multiple_choice':
+      return 'radio_button_checked'
+    case 'dropdown':
+      return 'arrow_drop_down_circle'
+    case 'rating':
+      return 'star'
     case 'grid_multiple_choice':
     case 'grid_checkbox':
       return 'grid_view'
-    default: return 'short_text'
+    default:
+      return 'short_text'
   }
 }
 
 function getLabel(type: QuestionType) {
   switch (type) {
-    case 'short_answer': return 'Short answer'
-    case 'paragraph': return 'Paragraph'
-    case 'checkbox': return 'Checkboxes'
-    case 'multiple_choice': return 'Multiple choice'
-    case 'dropdown': return 'Dropdown'
-    case 'rating': return 'Rating'
-    case 'grid_multiple_choice': return 'Multiple choice grid'
-    case 'grid_checkbox': return 'Checkbox grid'
-    default: return 'Short answer'
+    case 'short_answer':
+      return 'Short answer'
+    case 'paragraph':
+      return 'Paragraph'
+    case 'checkbox':
+      return 'Checkboxes'
+    case 'multiple_choice':
+      return 'Multiple choice'
+    case 'dropdown':
+      return 'Dropdown'
+    case 'rating':
+      return 'Rating'
+    case 'grid_multiple_choice':
+      return 'Multiple choice grid'
+    case 'grid_checkbox':
+      return 'Checkbox grid'
+    default:
+      return 'Short answer'
   }
 }
 
-const buildFormPayload = (): CreateFormRequest => {
-  const questions = formData.questions
-    .filter((q): q is Question => !('isTitleCard' in q)) // ✅ Narrow down to Question
-    .map((q, index) => ({
-      type: q.type,
-      questionText: q.questionText,
-      isRequired: q.isRequired,
-      choices: q.choices || [],
-      order: index,
-    }))
-
-  return {
-    title: formData.title,
-    description: formData.description,
-    questions,
-  }
-}
-
-const saveForm = async () => {
+async function saveForm() {
   try {
-    const payload = buildFormPayload()
-    await formsStore.createForm(payload)
-    $q.notify({ type: 'positive', message: 'บันทึกฟอร์มสำเร็จ' })
-    await router.push('/Admin/forms')
+    
+    await formStore.create({
+      title: formData.title,
+      description: formData.description,
+      formElements: formData.formElements,
+    })
+    console.log(formData)
+    $q.notify({ type: 'positive', message: 'ฟอร์มถูกบันทึกแล้ว!' })
+    await router.push('/forms') // เปลี่ยนเส้นทางตามต้องการ
   } catch (err) {
-    console.error(err)
-    $q.notify({ type: 'negative', message: 'บันทึกฟอร์มล้มเหลว' })
+    console.log(err)
+    $q.notify({ type: 'negative', message: 'เกิดข้อผิดพลาดในการบันทึกฟอร์ม' })
   }
 }
 </script>

@@ -15,7 +15,7 @@
         class="col"
         @update:model-value="update"
       />
-      <q-btn icon="close" dense flat round @click="removeOption(index)" />
+      <q-btn icon="close" color="negative" dense flat round @click="removeOption(index)" />
     </div>
 
     <!-- ➕ Add Option -->

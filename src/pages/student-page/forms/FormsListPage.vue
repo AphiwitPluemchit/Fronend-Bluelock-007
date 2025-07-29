@@ -7,118 +7,14 @@
         <p class="page-subtitle">Select a form to fill out</p>
       </div>
 
-      <!-- Loading State -->
-      <div v-if="formsStore.isLoading" class="loading-container">
-        <q-spinner-dots size="50px" color="primary" />
-        <p class="q-mt-md">Loading forms...</p>
-      </div>
 
-      <!-- Error State -->
-      <div v-else-if="formsStore.getError" class="error-container">
-        <q-banner class="bg-negative text-white">
-          {{ formsStore.getError }}
-          <template v-slot:action>
-            <q-btn flat color="white" label="Retry" @click="loadForms" />
-          </template>
-        </q-banner>
-      </div>
-
-      <!-- Forms List -->
-      <div v-else-if="formsStore.getForms.length > 0" class="forms-grid">
-        <q-card
-          v-for="form in formsStore.getForms"
-          :key="form.id || 'temp'"
-          class="form-card"
-          clickable
-          @click="openForm(form.id!)"
-        >
-          <q-card-section>
-            <div class="form-card-header">
-              <h3 class="form-title">{{ form.title }}</h3>
-              <q-chip
-                :color="form.createdAt ? 'positive' : 'warning'"
-                text-color="white"
-                size="sm"
-              >
-                {{ form.createdAt ? 'Active' : 'Draft' }}
-              </q-chip>
-            </div>
-            <p class="form-description">{{ form.description }}</p>
-            <div class="form-meta">
-              <q-icon name="event" size="16px" class="q-mr-xs" />
-              <span class="form-date">
-                Created: {{ formatDate(form.createdAt) }}
-              </span>
-            </div>
-          </q-card-section>
-          <q-card-actions align="right">
-            <q-btn
-              color="primary"
-              label="Fill Form"
-              icon="edit"
-              @click.stop="openForm(form.id!)"
-            />
-          </q-card-actions>
-        </q-card>
-      </div>
-
-      <!-- Empty State -->
-      <div v-else class="empty-state">
-        <q-icon name="description" size="80px" color="grey-4" />
-        <h3 class="empty-title">No Forms Available</h3>
-        <p class="empty-description">
-          There are currently no forms available for you to fill out.
-        </p>
-      </div>
-
-      <!-- Pagination -->
-      <div v-if="formsStore.getForms.length > 0" class="pagination-container q-mt-lg">
-        <q-pagination
-          v-model="currentPage"
-          :max="formsStore.getPagination.totalPages"
-          :max-pages="6"
-          boundary-numbers
-          @update:model-value="handlePageChange"
-        />
-      </div>
     </div>
   </q-page>
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
-import { useRouter } from 'vue-router'
-import { useFormsStore } from 'src/stores/forms'
 
-const router = useRouter()
-const formsStore = useFormsStore()
-const currentPage = ref(1)
 
-onMounted(async () => {
-  await loadForms()
-})
-
-const loadForms = async () => {
-  await formsStore.fetchForms(currentPage.value, 10)
-}
-
-const handlePageChange = async (page: number) => {
-  currentPage.value = page
-  await loadForms()
-}
-
-const openForm = async (formId: string) => {
-  await router.push(`/student/forms/${formId}`)
-}
-
-const formatDate = (dateString?: string): string => {
-  if (!dateString) return 'Unknown'
-  return new Date(dateString).toLocaleDateString('en-US', {
-    year: 'numeric',
-    month: 'short',
-    day: 'numeric'
-  })
-}
 </script>
 
 <style scoped>
