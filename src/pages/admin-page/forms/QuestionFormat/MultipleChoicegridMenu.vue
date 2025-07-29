@@ -20,7 +20,7 @@
               class="col"
               @update:model-value="update"
             />
-            <q-btn icon="close" flat round dense @click="removeRow(rowIndex)" />
+            <q-btn icon="close" color="negative" flat round dense @click="removeRow(rowIndex)" />
           </div>
           <q-btn flat dense icon="add" label="Add row" size="sm" @click="addRow" />
         </div>
@@ -42,7 +42,7 @@
               class="col"
               @update:model-value="update"
             />
-            <q-btn icon="close" flat round dense @click="removeColumn(colIndex)" />
+            <q-btn icon="close" color="negative" flat round dense @click="removeColumn(colIndex)" />
           </div>
           <q-btn flat dense icon="add" label="Add column" size="sm" @click="addColumn" />
         </div>

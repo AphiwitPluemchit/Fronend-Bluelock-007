@@ -15,163 +15,26 @@
         </div>
       </div>
 
-      <!-- Loading State -->
-      <div v-if="formsStore.isLoading" class="loading-container">
-        <q-spinner-dots size="50px" color="primary" />
-        <p class="q-mt-md">กำลังโหลดฟอร์ม...</p>
-      </div>
+     
 
-      <!-- Error State -->
-      <div v-else-if="formsStore.getError" class="error-container">
-        <q-banner class="bg-negative text-white">
-          {{ formsStore.getError }}
-          <template v-slot:action>
-            <q-btn flat color="white" label="Retry" @click="loadForms" />
-          </template>
-        </q-banner>
-      </div>
-
-      <!-- Forms List -->
-      <div v-if="Array.isArray(formsStore.getForms) && formsStore.getForms.length > 0" class="pagination-container q-mt-lg">
-        <q-card v-for="form in formsStore.getForms" :key="form.id || 'temp'" class="form-card">
-          <q-card-section>
-            <div class="form-card-header">
-              <div class="form-info">
-                <h3 class="form-title">{{ form.title }}</h3>
-                <p class="form-description">{{ form.description }}</p>
-              </div>
-              <div class="form-status">
-                <q-chip
-                  :color="form.createdAt ? 'positive' : 'warning'"
-                  text-color="white"
-                  size="sm"
-                >
-                  {{ form.createdAt ? 'Active' : 'Draft' }}
-                </q-chip>
-              </div>
-            </div>
-
-            <div class="form-stats">
-              <div class="stat-item">
-                <q-icon name="people" size="20px" color="primary" />
-                <div class="stat-content">
-                  <span class="stat-value">{{ getSubmissionCount(form.id!) }}</span>
-                  <span class="stat-label">Submissions</span>
-                </div>
-              </div>
-              <div class="stat-item">
-                <q-icon name="event" size="20px" color="secondary" />
-                <div class="stat-content">
-                  <span class="stat-value">{{ formatDate(form.createdAt) }}</span>
-                  <span class="stat-label">Created</span>
-                </div>
-              </div>
-            </div>
-          </q-card-section>
-
-          <q-card-actions align="right">
-            <q-btn
-              flat
-              color="primary"
-              label="View Submissions"
-              icon="visibility"
-              @click="viewSubmissions(form.id!)"
-            />
-            <q-btn flat color="secondary" label="Edit" icon="edit" @click="editForm(form.id!)" />
-            <q-btn
-              flat
-              color="negative"
-              label="Delete"
-              icon="delete"
-              @click="deleteForm(form.id!)"
-            />
-          </q-card-actions>
-        </q-card>
-      </div>
-
-      <!-- Empty State -->
-      <div v-else class="empty-state">
-        <q-icon name="description" size="80px" color="grey-4" />
-        <h3 class="empty-title">ไม่มีฟอร์มประเมิน</h3>
-        <p class="empty-description">
-          คุณยังไม่ได้สร้างฟอร์มประเมิน
-        </p>
-      </div>
-
-      <!-- Pagination -->
-      <div v-if="Array.isArray(formsStore.getForms) && formsStore.getForms.length > 0" class="pagination-container q-mt-lg">
-        <q-pagination
-          v-model="currentPage"
-          :max="formsStore.getPagination.totalPages"
-          :max-pages="6"
-          boundary-numbers
-          @update:model-value="handlePageChange"
-        />
-      </div>
+    
     </div>
   </q-page>
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+
 import { useRouter } from 'vue-router'
-import { useFormsStore } from 'src/stores/forms'
+
 
 
 const router = useRouter()
-const formsStore = useFormsStore()
-const currentPage = ref(1)
 
-onMounted(async () => {
-  await loadForms()
-})
-
-const loadForms = async () => {
-  await formsStore.fetchForms(currentPage.value, 10)
-}
-
-const handlePageChange = async (page: number) => {
-  currentPage.value = page
-  await loadForms()
-}
 
 const createForm = async () => {
   await router.push('/Admin/forms/builder')
 }
 
-const editForm = async (formId: string) => {
-  await router.push(`/Admin/forms/builder/${formId}`)
-}
-
-const viewSubmissions = async (formId: string) => {
-  await router.push(`/Admin/forms/${formId}/submissions`)
-}
-
-const deleteForm = async (formId: string) => {
-  try {
-    await formsStore.deleteForm(formId)
-  } catch (error) {
-    console.error('Error deleting form:', error)
-  }
-}
-
-
-
-const getSubmissionCount = (formId: string): number => {
-  // TODO: Get actual submission count from API
-  console.log('formId', formId)
-
-  return Math.floor(Math.random() * 50) + 1
-}
-
-const formatDate = (dateString?: string): string => {
-  if (!dateString) return 'Unknown'
-  return new Date(dateString).toLocaleDateString('en-US', {
-    year: 'numeric',
-    month: 'short',
-    day: 'numeric',
-  })
-}
 </script>
 
 <style scoped>
@@ -325,7 +188,12 @@ const formatDate = (dateString?: string): string => {
   display: flex;
   justify-content: center;
 }
-
+.forms-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr); /* ✅ 3 cards ต่อแถว */
+  gap: 24px;
+  margin-bottom: 32px;
+}
 @media (max-width: 768px) {
   .container {
     padding: 16px;
