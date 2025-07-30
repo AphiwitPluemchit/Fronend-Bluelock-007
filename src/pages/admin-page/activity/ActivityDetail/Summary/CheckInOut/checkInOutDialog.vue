@@ -94,58 +94,63 @@ function copyQRLink() {
 </script>
 
 <template>
-  <q-dialog v-model="dialogVisible">
-    <q-card class="dialog-card">
-      <q-card-section class="dialog-title">
-        <span>สร้าง QR-Code เช็คชื่อ{{ selectedType === 'checkin' ? 'เข้า' : 'ออก' }}</span>
+  <q-dialog v-model="dialogVisible" persistent>
+    <q-card class="dialog-box">
+      <q-card-section>
+        <div class="label">สร้าง QR-Code เช็คชื่อ</div>
       </q-card-section>
 
-      <!-- ยังไม่เลือกประเภท -->
-      <q-card-section class="dialog-body" v-if="!confirmedType">
+      <!-- ปุ่มเลือกประเภท -->
+      <q-card-section class="status-section" v-if="!confirmedType">
         <q-btn
-          unelevated
           label="เช็คชื่อเข้า"
-          class="checktype-btn"
-          :color="selectedType === 'checkin' ? 'primary' : 'white'"
-          text-color="black"
+          class="status-btn"
+          :class="['status-checkin', selectedType === 'checkin' ? 'active-status' : '']"
           @click="selectType('checkin')"
         />
         <q-btn
-          unelevated
           label="เช็คชื่อออก"
-          class="checktype-btn"
-          :color="selectedType === 'checkout' ? 'primary' : 'white'"
-          text-color="black"
+          class="status-btn"
+          :class="['status-checkout', selectedType === 'checkout' ? 'active-status' : '']"
           @click="selectType('checkout')"
         />
       </q-card-section>
 
-      <!-- แสดง QR -->
-      <q-card-section class="dialog-body" v-else>
-        <div v-if="qrType">
-          ประเภท:
-          <b>{{
-            qrType === 'checkin' ? 'เช็คชื่อเข้า' : qrType === 'checkout' ? 'เช็คชื่อออก' : qrType
-          }}</b>
+      <!-- แสดง QR หลังยืนยัน -->
+      <q-card-section v-else>
+        <div class="qr-type-info">
+          ประเภท: <b>{{ qrType === 'checkin' ? 'เช็คชื่อเข้า' : 'เช็คชื่อออก' }}</b>
         </div>
-        {{ appURL + qrLink }}
-        <q-btn @click="copyQRLink">copyQRLink</q-btn>
-
-        <q-img
-          :src="`https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${appURL + qrLink}`"
-          style="margin-top: 10px; max-width: 250px"
-        />
+        <div class="qr-link-container">
+          <span class="qr-link">{{ appURL + qrLink }}</span>
+          <q-btn
+            flat
+            dense
+            icon="content_copy"
+            size="sm"
+            color="primary"
+            @click="copyQRLink"
+            class="copy-btn"
+          >
+            <q-tooltip>คัดลอกลิงก์</q-tooltip>
+          </q-btn>
+        </div>
+        <div class="qr-code-container">
+          <q-img
+            :src="`https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${appURL + qrLink}`"
+            class="qr-image"
+          />
+        </div>
       </q-card-section>
 
-      <q-card-actions align="right" class="action-buttons">
-        <q-btn flat label="ยกเลิก" class="cancel-btn" color="negative" @click="onCancel" />
+      <q-card-actions align="right">
+        <q-btn class="btnreject" label="ยกเลิก" @click="onCancel" />
         <q-btn
-          unelevated
-          label="ยืนยัน"
-          class="confirm-btn"
-          color="primary"
-          @click="onConfirm"
           v-if="!confirmedType"
+          class="btnconfirm"
+          label="ยืนยัน"
+          @click="onConfirm"
+          :disable="!selectedType"
         />
       </q-card-actions>
     </q-card>
@@ -153,26 +158,107 @@ function copyQRLink() {
 </template>
 
 <style scoped>
-.dialog-card {
+.dialog-box {
   width: 400px;
-  padding: 10px;
-  text-align: left;
-  border-radius: 8px;
+  padding: 20px;
+  border-radius: 12px;
 }
-.dialog-title {
+
+.label {
   font-size: 20px;
+  font-weight: normal;
+  margin-bottom: 10px;
 }
-.dialog-body {
+
+.status-section {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 10px;
+  gap: 15px;
+  margin-bottom: 10px;
 }
-.checktype-btn {
-  display: block;
-  width: 100%;
-  margin: 8px 0;
+
+.status-btn {
+  width: 200px;
+  height: 40px;
+  font-size: 18px;
+  border-radius: 50px;
+  text-align: center;
+}
+
+.status-checkin {
+  color: #1a73e8;
+  border: 2px solid #1a73e8;
+}
+
+.status-checkout {
+  color: #e60000;
+  border: 2px solid #e60000;
+}
+
+.active-status.status-checkin {
+  background-color: #1a73e8;
+  color: white;
+}
+
+.active-status.status-checkout {
+  background-color: #e60000;
+  color: white;
+}
+
+.qr-type-info {
   font-size: 16px;
-  border-radius: 10px;
+  color: #333;
+  margin-bottom: 8px;
+}
+
+.qr-link-container {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px;
+  background: #f8f9fa;
+  border-radius: 8px;
+  border: 1px solid #e0e0e0;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.qr-link {
+  font-size: 12px;
+  color: #666;
+  word-break: break-all;
+  flex: 1;
+  font-family: monospace;
+}
+
+.copy-btn {
+  min-width: auto !important;
+  padding: 4px !important;
+}
+
+.qr-code-container {
+  margin-top: 16px;
+  padding: 16px;
+  background: #ffffff;
+  border-radius: 12px;
+  border: 1px solid #e0e0e0;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+
+  display: flex;              /* 👈 ทำให้ลูกอยู่แนวนอน */
+  justify-content: center;    /* 👈 จัดลูกให้อยู่กลางแนวนอน */
+}
+
+
+.qr-image {
+  max-width: 200px;
+  border-radius: 8px;
+}
+
+.btnconfirm:disabled {
+  background: #cccccc;
+  color: #666666;
+  transform: none;
 }
 </style>
+

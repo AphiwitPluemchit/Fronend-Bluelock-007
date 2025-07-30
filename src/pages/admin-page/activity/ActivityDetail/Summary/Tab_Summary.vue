@@ -26,7 +26,7 @@ const confirmCreateQR_Code = () => {
 </script>
 
 <template>
-  <div >
+  <div>
     <!-- ฝั่งขวา: ข้อมูล + ตาราง -->
     <div class="registration-details">
       <!-- การ์ดบนสุด -->
@@ -94,7 +94,7 @@ const confirmCreateQR_Code = () => {
       </div>
 
       <div class="image-section">
-        <q-btn label="เช็คชื่อ" @click="showCreateQR_CodeDialog" class="check-in-btn" />
+        <q-btn label="สร้าง QR-Code เช็คชื่อ" @click="showCreateQR_CodeDialog" class="check-in-btn" />
       </div>
       <!-- ตารางผลการประเมิน -->
       <div class="evaluation-container">
@@ -111,7 +111,6 @@ const confirmCreateQR_Code = () => {
 </template>
 
 <style scoped>
-
 .stats-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
@@ -138,7 +137,6 @@ const confirmCreateQR_Code = () => {
   border-radius: 16px;
   overflow: hidden;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-
 }
 .checkin-card:hover {
   transform: translateY(-4px);
@@ -197,4 +195,14 @@ const confirmCreateQR_Code = () => {
   opacity: 0.9;
   font-weight: 600;
 }
+
+.check-in-btn {
+  background-color: #000 !important;
+  color: white !important;
+  justify-content: flex-end;
+  padding: 10px 20px;
+  border-radius: 8px;
+  font-weight: 600;
+}
 </style>
+
