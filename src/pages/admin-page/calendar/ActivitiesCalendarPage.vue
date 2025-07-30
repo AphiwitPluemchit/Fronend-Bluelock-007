@@ -60,6 +60,31 @@ function sortEventsByTimeAndName(events: CalendarEvent[]): CalendarEvent[] {
   })
 }
 
+function formatThaiDate(dateStr: string): string {
+  if (!dateStr) return ''
+  const months = [
+    'มกราคม',
+    'กุมภาพันธ์',
+    'มีนาคม',
+    'เมษายน',
+    'พฤษภาคม',
+    'มิถุนายน',
+    'กรกฎาคม',
+    'สิงหาคม',
+    'กันยายน',
+    'ตุลาคม',
+    'พฤศจิกายน',
+    'ธันวาคม',
+  ]
+  const days = ['อาทิตย์', 'จันทร์', 'อังคาร', 'พุธ', 'พฤหัสบดี', 'ศุกร์', 'เสาร์']
+  const d = new Date(dateStr)
+  const dayName = days[d.getDay()]
+  const day = d.getDate()
+  const month = months[d.getMonth()]
+  const year = d.getFullYear() + 543
+  return `วัน${dayName} ${day} ${month} ${year}`
+}
+
 async function getActivityData(qeury: Pagination) {
   const data = await ActivityService.getAll(qeury)
   return data
@@ -129,16 +154,11 @@ watch(
 
     const q = { ...query1.value, search: newSearch }
     const data = await getActivityData(q)
+    const keywords = newSearch.trim().toLowerCase().split(/\s+/)
     const parsedEvents = Array.isArray(data.data)
       ? parseToCalendarEvents(data.data).filter((e) => {
-          const keyword = newSearch.trim().toLowerCase()
-          const keywords = keyword.split(/\s+/)
-
-          // ตัดชื่อกิจกรรมออกเป็นคำ เช่น 'In house online' → ['in', 'house', 'online']
-          const tokens = `${e.activityName} ${e.activityItemName}`.toLowerCase().split(/\s+/)
-
-          // ต้องให้ทุกคำที่พิมพ์มา เจอในบางคำของ tokens (บางส่วนก็ได้)
-          return keywords.every((k) => tokens.some((t) => t.includes(k)))
+          const target = `${e.activityName} ${e.activityItemName}`.toLowerCase()
+          return keywords.every((k) => target.includes(k))
         })
       : []
 
@@ -450,7 +470,7 @@ watch(selectedDate, (val) => {
       </div>
 
       <!-- Search + Filter -->
-      <div class="row q-gutter-sm q-mb-md items-center no-wrap">
+      <div class="row q-gutter-sm q-mb-md items-center no-wrap" style="position: relative">
         <q-input
           dense
           outlined
@@ -462,6 +482,33 @@ watch(selectedDate, (val) => {
         >
           <template v-slot:append>
             <q-icon name="search" />
+          </template>
+          <template
+            v-if="query1.search && groupedSearchResults && Object.keys(groupedSearchResults).length"
+            v-slot:after
+          >
+            <div class="dropdown-search-result">
+              <div
+                v-for="date in Object.keys(groupedSearchResults).sort(
+                  (a, b) => new Date(a).getTime() - new Date(b).getTime(),
+                )"
+                :key="date"
+                class="dropdown-date-group"
+              >
+                <div class="date-activity">{{ formatThaiDate(date) }}</div>
+                <div
+                  v-for="event in groupedSearchResults[date]"
+                  :key="event.id"
+                  class="dropdown-item"
+                  @click="goToDate(date)"
+                >
+                  <div class="main-activity" style="font-weight: bold">
+                    {{ event.activityName }}
+                  </div>
+                  <div class="sub-activity">{{ event.activityItemName }}</div>
+                </div>
+              </div>
+            </div>
           </template>
         </q-input>
 
@@ -476,19 +523,8 @@ watch(selectedDate, (val) => {
         />
       </div>
 
-      <!-- ถ้ามี search แสดง Panel แทน Calendar -->
-      <CalendarEventPanel
-        v-if="query1.search && groupedSearchResults"
-        :selected-date="selectedDate"
-        :selected-events="[]"
-        :search-query="query1.search"
-        :grouped-search-results="groupedSearchResults"
-        @go-to-date="goToDate"
-      />
-
-      <!-- ถ้าไม่มี search → แสดง Calendar -->
+      <!-- Calendar always shown -->
       <q-calendar-month
-        v-else
         ref="calendarRef"
         v-model="selectedDate"
         locale="th-TH"
@@ -578,12 +614,13 @@ watch(selectedDate, (val) => {
 .day-number {
   font-size: 12px;
   font-weight: bold;
-  width: 25px;
-  height: 25px;
+  width: 26px;
+  height: 26px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   border-radius: 50%;
+  margin: 2px;
 }
 
 :deep(.q-calendar-month__day--label__wrapper) {
@@ -599,6 +636,61 @@ watch(selectedDate, (val) => {
   display: flex;
   flex-direction: column;
   gap: 2px;
+}
+
+.dropdown-search-result {
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 10;
+  background: #fff;
+  border: 1px solid #ccc;
+  width: 100%;
+  max-width: 100vw;
+  max-height: 300px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  border-radius: 12px;
+  margin-top: 2px;
+  transition: width 0.2s;
+  overflow-y: auto;
+  scrollbar-width: none;
+}
+
+.dropdown-search-result::-webkit-scrollbar {
+  display: none;
+}
+
+.dropdown-item {
+  padding: 8px 12px;
+  cursor: pointer;
+  font-size: 14px;
+  border-bottom: 1px solid #eee;
+  display: flex;
+  flex-direction: column; /* เปลี่ยนเป็น column */
+  justify-content: flex-start;
+}
+
+.main-activity,
+.sub-activity {
+  color: #1f1f1f;
+  margin-bottom: 2px;
+}
+
+.date-activity {
+  color: #1976d2;
+  padding-left: 11px;
+  font-size: 14px;
+  padding-top: 10px;
+  font-weight: bold;
+}
+
+.dropdown-date-group:not(:first-child) {
+  margin-top: 8px;
+}
+
+.dropdown-item:hover {
+  background: #f0f4ff;
 }
 
 .is-today .day-number {
@@ -675,6 +767,19 @@ watch(selectedDate, (val) => {
   .searchbox {
     width: 100%;
   }
+
+  .dropdown-search-result {
+    max-width: 100vw;
+    border-radius: 10px;
+  }
+}
+
+/* สำหรับ mobile ให้ border-radius เล็กลง */
+@media (max-width: 600px) {
+  .dropdown-search-result {
+    border-radius: 10px;
+    max-width: 100vw;
+  }
 }
 
 @media (max-width: 900px) {
@@ -695,6 +800,11 @@ watch(selectedDate, (val) => {
   .event-panel {
     padding: 8px 12px;
     margin-top: -10px;
+  }
+
+  .dropdown-search-result {
+    width: 100%;
+    border-radius: 12px;
   }
 }
 </style>

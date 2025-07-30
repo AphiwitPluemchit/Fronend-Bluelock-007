@@ -27,7 +27,7 @@ function formatThaiDate(dateStr: string) {
 
 const goToPageDetail = async (id: string, disable: boolean) => {
   await router.push({
-    path: `/Student/Activity/MyActivityDetail/${id}`,
+    path: `/Student/Activity/ActivityDetail/${id}`,
     query: {
       disable: String(disable),
     },
