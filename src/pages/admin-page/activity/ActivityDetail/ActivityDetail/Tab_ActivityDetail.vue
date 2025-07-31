@@ -51,7 +51,7 @@ const uploadImageIfChanged = async () => {
 
   if (oldFile && oldFile !== newFileName) {
     try {
-      await ActivityService.deleteImage(props.activity.id, oldFile)
+      
       console.log('🗑 ลบรูปเก่าแล้ว:', oldFile)
     } catch (err) {
       console.warn('⚠️ ลบรูปเก่าไม่สำเร็จ:', err)

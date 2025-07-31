@@ -537,77 +537,88 @@ const saveChanges = async () => {
     console.error('ไม่พบ activity id')
     return
   }
-  const updated: Partial<Activity> = cloneDeep(props.activity)
-  if (activityStatus.value === 'เปิดลงทะเบียน') {
-    const valid = await validateBeforeOpen()
-    if (!valid) return
-  }
-  updated.id = props.activity.id
-  updated.name = activityName.value
-  updated.skill = activityType.value === 'prep' ? 'soft' :'hard' 
-  updated.endDateEnroll = formattedCloseRegisDate.value
-  updated.activityState = statusReverseMap[activityStatus.value] || 'planning'
-  updated.foodVotes = foodMenu.value.map((f) => {
-    const existingVote = updated.foodVotes?.find((vote) => vote.foodName === f.name)
-    return {
-      foodName: f.name,
-      vote: existingVote ? existingVote.vote : 0,
-    }
-  })
-
-  updated.activityItems = subActivities.value.map((sub) => ({
-    name: sub.subActivityName,
-    hour: Number(sub.totalHours),
-    maxParticipants: Number(sub.seats),
-    rooms: sub.roomName,
-    description: sub.detailActivity,
-    operator: sub.lecturer,
-    majors: sub.departments.map(String),
-    studentYears: sub.years.map((y) => Number(y)),
-    dates: sub.selectedDays.map((day) => ({
-      date: day.date,
-      stime: day.startTime,
-      etime: day.endTime,
-    })),
-  }))
 
   try {
-    const result = await ActivityService.updateOne(updated)
-
-    if ((result === 200 || result === 201) && props.imageRef) {
-      const file = props.imageRef.getSelectedFile?.()
-      const fileName = props.imageRef.getSelectedFileName?.()
-      const oldFile = props.activity?.file ?? ''
-
-      if (file && fileName) {
-        if (oldFile && oldFile !== fileName) {
-          try {
-            await ActivityService.deleteImage(props.activity.id, oldFile)
-            console.log('🗑 ลบรูปเก่าเรียบร้อย:', oldFile)
-          } catch (err) {
-            console.warn('⚠️ ลบรูปเก่าไม่สำเร็จ:', err)
-          }
-        }
-
-        try {
-          const uploadResult = await ActivityService.uploadImage(props.activity.id, file)
-          if (uploadResult.status === 200 || uploadResult.status === 201) {
-            emit('saved', uploadResult.fileName)
-            return
-          } else {
-            console.warn('⚠️ รูปใหม่อัปโหลดไม่สำเร็จ')
-          }
-        } catch (uploadErr) {
-          console.error('❌ Upload image failed:', uploadErr)
-        }
-      }
+    // Validate before opening registration
+    if (activityStatus.value === 'เปิดลงทะเบียน') {
+      const valid = await validateBeforeOpen()
+      if (!valid) return
     }
 
-    emit('saved')
+    // 1. Prepare the updated activity data
+    const updated: Partial<Activity> = {
+      ...cloneDeep(props.activity),
+      id: props.activity.id,
+      name: activityName.value,
+      skill: activityType.value === 'prep' ? 'soft' : 'hard',
+      endDateEnroll: formattedCloseRegisDate.value,
+      activityState: statusReverseMap[activityStatus.value] || 'planning',
+      foodVotes: foodMenu.value.map((f) => {
+        const existingVote = props.activity?.foodVotes?.find((vote) => vote.foodName === f.name)
+        return {
+          foodName: f.name,
+          vote: existingVote ? existingVote.vote : 0,
+        }
+      }),
+      activityItems: subActivities.value.map((sub, index) => {
+        const existingItem = props.activity?.activityItems?.[index]
+        return {
+          ...(existingItem || {}),
+          name: sub.subActivityName,
+          hour: Number(sub.totalHours),
+          maxParticipants: Number(sub.seats),
+          rooms: sub.roomName,
+          description: sub.detailActivity,
+          operator: sub.lecturer,
+          majors: sub.departments.map(String),
+          studentYears: sub.years.map((y) => Number(y)),
+          dates: sub.selectedDays.map((day) => ({
+            date: day.date,
+            stime: day.startTime,
+            etime: day.endTime,
+          })),
+        }
+      }),
+    }
+
+    // 2. Update the main activity
+    await ActivityService.updateOne(updated)
+
+    // 3. Handle image upload if there's a new image
+    if (props.imageRef) {
+      const file = props.imageRef.getSelectedFile?.()
+      const oldFile = props.activity?.file ?? ''
+      const newFileName = props.imageRef.getSelectedFileName?.() ?? ''
+
+      // Only upload if a new file is selected and its name is different from the old
+      if (file && newFileName && oldFile !== newFileName) {
+        console.log('📤 Uploading image with file:', file.name)
+        try {
+          const uploadResult = await ActivityService.uploadImage(updated.id!, file, oldFile)
+          if (uploadResult.status === 200 || uploadResult.status === 201) {
+            console.log('✅ Upload success:', uploadResult.fileName)
+            emit('saved', uploadResult.fileName)
+          } else {
+            alert('⚠️ รูปใหม่อัปโหลดไม่สำเร็จ')
+          }
+        } catch (err) {
+          console.error('❌ upload image failed:', err)
+          alert('⚠️ รูปใหม่อัปโหลดไม่สำเร็จ')
+        }
+      } else {
+        // No new file, or same file as old
+        emit('saved', oldFile)
+      }
+    } else {
+      // No imageRef provided
+      emit('saved')
+    }
+
     showSuccessDialog.value = true
     emit('update:isEditing', false)
   } catch (err) {
     console.error('❌ ไม่สามารถอัปเดตกิจกรรมได้:', err)
+    // Consider showing an error message to the user
   }
 }
 
@@ -1001,7 +1012,7 @@ onMounted(() => {
     </div>
 
     <!-- Save / Cancel Button -->
-    <div class="button-group" >
+    <div class="button-group">
       <q-btn v-if="!props.isEditing" class="btnedit" label="แก้ไข" @click="enterEditMode" />
       <template v-else>
         <q-btn class="btnreject" label="ยกเลิก" @click="openCancelDialog" />
@@ -1028,7 +1039,7 @@ onMounted(() => {
 }
 .status-btn {
   display: flex;
-  align-items: center;    /* จัดกลางแนวตั้ง */
+  align-items: center; /* จัดกลางแนวตั้ง */
   justify-content: center; /* จัดกลางแนวนอน */
   height: 40px;
   width: 200px;
@@ -1326,11 +1337,11 @@ onMounted(() => {
     margin-left: 0 !important;
   }
   .btnchange {
-  padding: 2px 10px;
-  font-size: 14px;
-  background-color: #000;
-  color: white;
-  border-radius: 10px;
-}
+    padding: 2px 10px;
+    font-size: 14px;
+    background-color: #000;
+    color: white;
+    border-radius: 10px;
+  }
 }
 </style>

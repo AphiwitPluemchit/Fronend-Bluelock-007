@@ -80,6 +80,7 @@ export class ActivityService {
           'Content-Type': 'multipart/form-data',
         },
       })
+      console.log('📦 upload image response:', res.data)
       return {
         status: res.status,
         fileName: res.data.fileName,
@@ -87,17 +88,6 @@ export class ActivityService {
     } catch (error) {
       showError('ไม่สามารถอัปโหลดรูปกิจกรรมได้')
       console.error('Error uploading image:', error)
-      throw error
-    }
-  }
-
-  static async deleteImage(id: string, fileName: string) {
-    try {
-      const res = await api.delete(`${this.path}/${id}/image?filename=${fileName}`)
-      return res.status
-    } catch (error) {
-      showError('ไม่สามารถลบรูปกิจกรรมได้')
-      console.error('Error deleting image:', error)
       throw error
     }
   }
