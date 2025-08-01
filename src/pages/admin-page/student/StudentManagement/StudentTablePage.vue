@@ -99,7 +99,7 @@ onMounted(async () => {
     order: 'asc',
     search: '',
     major: [],
-    studentStatus: ['1', '2', '3'],
+    studentStatus: ['1', '2', '3', '4'],
     studentCode: [], // กรองเฉพาะนิสิตที่พ้นสภาพ
     skill: [],
     studentYear: [],

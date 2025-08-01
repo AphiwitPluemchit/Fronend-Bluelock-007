@@ -34,7 +34,7 @@ export const useStudentStore = defineStore('student', () => {
     skill: [],
     major: [],
     studentYear: [],
-    studentStatus: ['1','2','3'],
+    studentStatus: ['1','2','3','4'],
   })
 
   // ฟังก์ชันสร้างนิสิตใหม่ (จากไฟล์ Excel)
@@ -109,7 +109,9 @@ export const useStudentStore = defineStore('student', () => {
       case 2:
         return 'ชั่วโมงน้อย'
       case 3:
-        return 'ชั่วโมงครบ'
+        return 'ชั่วโมงครบแล้ว'
+      case 4:
+        return 'ออกผึกแล้ว'
       default:
         return 'ไม่ทราบสถานะ'
     }
@@ -125,6 +127,8 @@ export const useStudentStore = defineStore('student', () => {
         return 'status-medium'
       case 3:
         return 'status-complete'
+      case 4:
+        return 'status-graduated'
       default:
         return ''
     }

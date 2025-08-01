@@ -39,28 +39,7 @@ const columns = [
   { name: 'status', label: 'สถานะ', field: 'status', align: 'center' as const },
 ]
 
-const getStatusText = (status?: number) => {
-  switch (status) {
-    case 0:
-      return 'พ้นสภาพ'
-    case 1:
-      return 'ชั่วโมงน้อยมาก'
-    case 2:
-      return 'ชั่วโมงน้อย'
-    case 3:
-      return 'ชั่วโมงครบ'
-    default:
-      return 'ไม่ทราบสถานะ'
-  }
-}
-
-const getStatusClass = (status?: number) => {
-  if (status === 3) return 'status-complete'
-  if (status === 2) return 'status-medium'
-  if (status === 1) return 'status-low'
-  if (status === 0) return 'status-out'
-  return ''
-}
+// ใช้ store แทนการสร้างฟังก์ชันใหม่
 
 // ตัวแปรสำหรับ AlertDialog
 const alertDialogModel = ref(false)
@@ -243,8 +222,8 @@ const clearFile = () => {
             <q-td class="text-center" key="hardSkill">{{ props.row.hardSkill }}/12</q-td>
             <q-td class="text-center">
               <q-badge
-                :label="getStatusText(props.row.status)"
-                :class="getStatusClass(props.row.status)"
+                :label="studentStore.getStatusText(props.row.status)"
+                :class="studentStore.getStatusClass(props.row.status)"
                 class="status-badge"
                 unelevated
               />
@@ -283,7 +262,7 @@ const clearFile = () => {
 </template>
 
 <style scoped>
-.status-complete {
+/* .status-complete {
   background-color: #cfd7ff;
   color: #001780;
   border: 2px solid #002dff;
@@ -311,6 +290,13 @@ const clearFile = () => {
   padding: 3px 30px;
   width: 130px;
 }
+.status-graduated {
+  background-color: #d4edda;
+  color: #155724;
+  border: 2px solid #28a745;
+  padding: 3px 30px;
+  width: 130px;
+} */
 .status-badge {
   height: 32px;
   line-height: 28px;

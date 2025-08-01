@@ -23,7 +23,7 @@ const showFilterDialog = ref(false)
 const options = {
   year: ['1', '2', '3', '4'],
   major: ['CS', 'SE', 'ITDI', 'AAI'],
-  studentStatus: ['3', '2', '1'],
+  studentStatus: ['3', '2', '1','4'],
   statusActivity: ['planning', 'open', 'close', 'success', 'cancel'],
   categoryActivity: ['soft', 'hard'],
   statusCertificate: ['pending', 'approved', 'rejected'],
@@ -65,6 +65,8 @@ const getStatusText = (status: string) => {
       return 'ชั่วโมงน้อย'
     case 3:
       return 'ชั่วโมงครบแล้ว'
+    case 4:
+      return 'ออกผึกแล้ว'
     default:
       return '-'
   }

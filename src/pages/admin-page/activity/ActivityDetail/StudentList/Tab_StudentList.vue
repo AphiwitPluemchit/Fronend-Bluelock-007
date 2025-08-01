@@ -6,6 +6,7 @@ import { useRoute } from 'vue-router'
 import RemoveStudent from './RemoveStudent.vue'
 import { ActivityService } from 'src/services/activity'
 import { useEnrollmentStore } from 'src/stores/enrollment'
+import { useStudentStore } from 'src/stores/student'
 import { EnrollmentService } from 'src/services/enrollment'
 import FilterDialog from 'src/components/Dialog/FilterDialog.vue'
 import type { Activity, EnrollmentSummary } from 'src/types/activity'
@@ -16,6 +17,7 @@ import 'dayjs/locale/th'
 dayjs.locale('th')
 const $q = useQuasar()
 const isMobile = computed(() => $q.screen.width <= 600)
+const studentStore = useStudentStore()
 
 const allTab = ref<Activity | null>(null)
 const indexTab = ref(0)
@@ -77,30 +79,7 @@ const onRequest = async (props: QTableRequestProps) => {
   await fetchStudents()
 }
 
-const getStatusText = (status: string) => {
-  const numStatus = parseInt(status, 10)
-  switch (numStatus) {
-    case 0:
-      return 'พ้นสภาพ'
-    case 1:
-      return 'ชั่วโมงน้อยมาก'
-    case 2:
-      return 'ชั่วโมงน้อย'
-    case 3:
-      return 'ชั่วโมงครบแล้ว'
-    default:
-      return '-'
-  }
-}
-
-const getStatusClass = (status: string) => {
-  const numStatus = parseInt(status, 10)
-  if (numStatus === 3) return 'status-complete'
-  if (numStatus === 2) return 'status-medium'
-  if (numStatus === 1) return 'status-low'
-  if (numStatus === 0) return 'status-out'
-  return ''
-}
+// ใช้ store แทนการสร้างฟังก์ชันใหม่
 
 interface SelectedFilters {
   year: string[]
@@ -381,11 +360,11 @@ function getStudentCheckouts(student: { checkInOut?: unknown }): CheckInOut[] {
         <template v-slot:body-cell-status="props">
           <q-td :props="props">
             <q-badge
-              :label="getStatusText(props.row.status)"
+              :label="studentStore.getStatusText(parseInt(props.row.status))"
               rounded
               unelevated
               class="status-badge"
-              :class="getStatusClass(props.row.status)"
+              :class="studentStore.getStatusClass(parseInt(props.row.status))"
             />
           </q-td>
         </template>
@@ -603,6 +582,13 @@ function getStudentCheckouts(student: { checkInOut?: unknown }): CheckInOut[] {
   background-color: #dadada;
   color: #000000;
   border: 1px solid #575656;
+  padding: 3px 30px;
+  width: 130px;
+}
+.status-graduated {
+  background-color: #d4edda;
+  color: #155724;
+  border: 1px solid #28a745;
   padding: 3px 30px;
   width: 130px;
 }
