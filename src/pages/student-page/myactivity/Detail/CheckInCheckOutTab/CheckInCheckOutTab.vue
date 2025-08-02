@@ -1,6 +1,5 @@
 <template>
   <q-page class="q-pa-md" v-if="screen">
-    <!-- เอา q-card ออก -->
     <div>
       <!-- ข้อมูลนิสิต -->
       <div class="row q-mb-md">

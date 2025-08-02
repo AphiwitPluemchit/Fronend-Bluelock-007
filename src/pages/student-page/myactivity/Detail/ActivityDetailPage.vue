@@ -34,11 +34,11 @@ const breadcrumbs = computed(() => ({
 
     <!-- Tab Panels -->
     <q-tab-panels v-model="tab" animated class="custom-panels">
-      <q-tab-panel name="activity" class="q-my-md">
+      <q-tab-panel name="activity" class="q-my-none">
         <ActivityDetailTab />
       </q-tab-panel>
 
-      <q-tab-panel name="checkInOut" class="q-my-md">
+      <q-tab-panel name="checkInOut" class="q-my-none">
         <CheckInCheckOutTab />
       </q-tab-panel>
     </q-tab-panels>
@@ -54,7 +54,7 @@ const breadcrumbs = computed(() => ({
 
 .custom-panels {
   background-color: #edf0f5;
-  padding: 20px;
+  /* padding: 20px; */
   font-size: 20px;
   height: 700px;
   overflow: hidden;

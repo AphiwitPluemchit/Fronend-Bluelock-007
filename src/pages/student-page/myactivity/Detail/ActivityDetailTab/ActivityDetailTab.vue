@@ -102,7 +102,7 @@ onMounted(async () => {
 })
 </script>
 <template>
-  <q-page class="q-pa-md" v-if="screen">
+  <q-page class="q-pa-none" v-if="screen">
     <!-- กรอบข้อมูลกิจกรรม -->
     <q-card-section class="q-col-gutter-md row items-start q-mb-md">
       <!-- ภาพกิจกรรม -->
@@ -184,7 +184,7 @@ onMounted(async () => {
   background-color: #d9d9d9;
   border-radius: 12px;
   object-fit: cover;
-  margin: 0 auto;
+  /* margin: 0 auto; */
 }
 
 .btnreject {
