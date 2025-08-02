@@ -144,6 +144,9 @@ const columns = [
   },
   { name: 'status', label: 'สถานะ', field: 'status', align: 'center' as const },
 ]
+const selectedStudentsData = computed(() => {
+  return studentStore.students.filter((student) => selectedStudents.value.includes(student.code))
+})
 
 onMounted(async () => {
   show.value = false
@@ -154,7 +157,7 @@ onMounted(async () => {
     order: 'asc',
     search: '',
     major: [],
-          studentStatus: ['1', '2', '3', '4'],
+    studentStatus: ['1', '2', '3', '4'],
     studentCode: [], // กรองเฉพาะนิสิตที่พ้นสภาพ
     skill: [],
     studentYear: [],
@@ -243,9 +246,8 @@ onMounted(async () => {
               <div v-if="col.name === 'check'">
                 <q-checkbox
                   v-model="selectAll"
-                :color="selectAll ? 'primary' : 'white'"
+                  :color="selectAll ? 'primary' : 'white'"
                   keep-color
-
                   @update:model-value="toggleSelectAll"
                 >
                   <q-tooltip>เลือกทั้งหมดในหน้านี้</q-tooltip>
@@ -289,6 +291,41 @@ onMounted(async () => {
             <!-- แสดงสถานะพร้อมสี -->
             <q-td class="text-center">
               <q-badge
+                :label="studentStore.getStatusText(props.row.status)"
+                :class="studentStore.getStatusClass(props.row.status)"
+                class="status-badge"
+                unelevated
+              />
+            </q-td>
+          </q-tr>
+        </template>
+      </q-table>
+
+      <!-- ตารางแสดงรายชื่อนิสิตที่เลือก -->
+      <q-table
+        bordered
+        flat
+        class="q-mt-xl full-width"
+        :rows="selectedStudentsData"
+        :columns="columns"
+        row-key="code"
+        :pagination="{ rowsPerPage: 5 }"
+      >
+        <template v-slot:body="props">
+          <q-tr :props="props">
+            <!-- คอลัมน์ว่างแทน checkbox -->
+            <q-td style="width: 50px"></q-td>
+
+            <!-- คอลัมน์จริง -->
+            <q-td key="index">{{ props.rowIndex + 1 }}</q-td>
+            <q-td key="code">{{ props.row.code }}</q-td>
+            <q-td key="name">{{ props.row.name }}</q-td>
+            <q-td key="major">{{ props.row.major }}</q-td>
+            <q-td key="softSkill" class="text-center">{{ props.row.softSkill }}/30</q-td>
+            <q-td key="hardSkill" class="text-center">{{ props.row.hardSkill }}/12</q-td>
+            <q-td key="status" class="text-center">
+              <q-badge
+                v-if="props.row.status"
                 :label="studentStore.getStatusText(props.row.status)"
                 :class="studentStore.getStatusClass(props.row.status)"
                 class="status-badge"
