@@ -86,9 +86,9 @@ export const useStudentStore = defineStore('student', () => {
   }
 
   // อัปเดตสถานะนักเรียนหลายคนโดยใช้ ID (ประสิทธิภาพดีกว่า)
-  const updateStudentStatusByIDs = async (studentIds: string[]) => {
+  const updateStudentStatusByIDs = async (studentIds: string[], status: number) => {
     try {
-      const result = await StudentService.updateStudentStatusByIDs(studentIds)
+      const result = await StudentService.updateStudentStatusByIDs(studentIds, status)
 
       // รีเฟรชข้อมูลหลังจากอัปเดต
       await getStudents()

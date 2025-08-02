@@ -114,7 +114,7 @@ const saveStudents = async () => {
     }
 
     // ใช้ API ใหม่ที่ส่งเฉพาะ ID (ประสิทธิภาพดีกว่า)
-    await studentStore.updateStudentStatusByIDs(studentIds)
+    await studentStore.updateStudentStatusByIDs(studentIds, 0)
 
     // เคลียร์การเลือกหลังจากสำเร็จ
     selectedStudents.value = []
