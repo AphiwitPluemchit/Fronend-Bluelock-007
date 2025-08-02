@@ -86,15 +86,15 @@
               <div class="text-subtitle1">{{ academicSkillHours }} / {{ totalstudent }} คน</div>
               <div class="row justify-center q-mt-sm text-caption">
                 <q-chip size="md" color="green" text-color="white" icon="check_circle">
-                  ครบแล้ว {{ summaryReport.completed.toLocaleString() }} คน
+                  ครบแล้ว {{ summaryReport.hardSkill.completed.toLocaleString() }} คน
                 </q-chip>
                 <q-chip size="md" color="red" text-color="white" icon="warning">
-                  ไม่ครบ {{ summaryReport.notCompleted.toLocaleString() }} คน
+                  ไม่ครบ {{ summaryReport.hardSkill.notCompleted.toLocaleString() }} คน
                 </q-chip>
               </div>
             </div>
 
-            <!-- Readiness -->
+            <!-- Prepare Skill -->
             <div class="col-xs-12 col-md-6 text-center">
               <div class="text-subtitle1 text-weight-medium q-mb-md">ชั่วโมงเตรียมความพร้อม</div>
               <q-circular-progress
@@ -113,10 +113,10 @@
               <div class="text-subtitle1">{{ readinessHours }} / {{ totalstudent }} คน</div>
               <div class="row justify-center q-mt-sm text-caption">
                 <q-chip size="md" color="green" text-color="white" icon="check_circle">
-                  ครบแล้ว {{ summaryReport.completed.toLocaleString() }} คน
+                  ครบแล้ว {{ summaryReport.softSkill.completed.toLocaleString() }} คน
                 </q-chip>
                 <q-chip size="md" color="red" text-color="white" icon="warning">
-                  ไม่ครบ {{ summaryReport.notCompleted.toLocaleString() }} คน
+                  ไม่ครบ {{ summaryReport.softSkill.notCompleted.toLocaleString() }} คน
                 </q-chip>
               </div>
             </div>
@@ -209,7 +209,7 @@ watch(selectedMajor, async (newVal) => {
   await data()
 })
 const data = async () => {
-  summaryReport.value  = await StudentService.getSummaryReport(query.value)
+  summaryReport.value = await StudentService.getSummaryReport(query.value)
 }
 onMounted(async () => {
   isLoading.value = true
