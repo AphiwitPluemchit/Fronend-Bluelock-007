@@ -62,7 +62,8 @@ function enrollmentSummary(activityItems: ActivityItem[]) {
         <q-img
           :src="baseurl + '/uploads/activity/images/' + activity.file"
           class="activity-img"
-          :ratio="4 / 4"
+          style="max-height: 200px; object-fit: cover; border-radius: 12px"
+          :ratio="4 / 3"
         />
       </div>
 
@@ -79,7 +80,7 @@ function enrollmentSummary(activityItems: ActivityItem[]) {
           />
         </div>
 
-        <div class="text-subtitle2 q-mb-xs">
+        <div class="text-subtitle2 q-mb-sm">
           <q-icon name="event" class="q-mb-xs" />
           วันที่จัด : {{ getActivityDate(activity.activityItems) }}
         </div>

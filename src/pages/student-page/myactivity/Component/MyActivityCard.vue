@@ -84,11 +84,11 @@ const getActivityRooms = (activityItems: ActivityItem[] | null | undefined): str
           <q-icon name="event" class="q-mb-xs" />
           {{ getActivitydates(myActivity.activityItems) }}
         </div>
-        <div class="text-body2">
+        <div class="text-body2 q-mt-sm">
           <q-icon name="schedule" class="q-mb-xs" />
           {{ getActivityTime(myActivity.activityItems) }}
         </div>
-        <div class="text-body2">
+        <div class="text-body2 q-mt-sm">
           <q-icon name="room" class="q-mb-xs" />
           {{ getActivityRooms(myActivity.activityItems) }}
         </div>
@@ -126,7 +126,7 @@ const getActivityRooms = (activityItems: ActivityItem[] | null | undefined): str
   border-radius: 12px;
 }
 
-.activity-name {
+/* .activity-name {
   overflow: hidden;
   display: -webkit-box;
   -webkit-box-orient: vertical;
@@ -135,7 +135,7 @@ const getActivityRooms = (activityItems: ActivityItem[] | null | undefined): str
   max-height: calc(1.4em * 2);
   word-break: break-word;
   font-size: 1rem;
-}
+} */
 
 .btnconfirm {
   background-color: #2e74ff;

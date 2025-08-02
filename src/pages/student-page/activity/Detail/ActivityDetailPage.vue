@@ -131,7 +131,7 @@ onMounted(async () => {
         <q-btn
           v-if="enrollment.isEnrolled && !isRegistrationNotAllowed"
           label="ยกเลิกลงทะเบียน"
-          class="btnreject full-width-mobile"
+          class="btnreject"
           @click="handleUnRegisterClick"
           unelevated
           rounded
@@ -139,7 +139,7 @@ onMounted(async () => {
         <q-btn
           v-else-if="!enrollment.isEnrolled && !isRegistrationNotAllowed"
           label="ลงทะเบียน"
-          class="btnsecces full-width-mobile"
+          class="btnsecces"
           @click="handleRegisterClick"
           unelevated
           rounded
@@ -147,7 +147,7 @@ onMounted(async () => {
         <q-btn
           v-else
           label="ปิดลงทะเบียน"
-          class="btngrey full-width-mobile"
+          class="btngrey"
           :disabled="true"
           unelevated
           rounded
