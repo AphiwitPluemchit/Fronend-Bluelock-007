@@ -1,8 +1,17 @@
 <template>
   <q-page class="q-pa-md" v-if="screen">
     <div>
-      <!-- ข้อมูลนิสิต -->
+      <!-- ชื่อกิจกรรม -->
       <div class="row q-mb-md">
+        <div class="column">
+          <div class="text-h6">
+            {{ activity?.name || 'กำลังโหลด...' }}
+          </div>
+        </div>
+      </div>
+
+      <!-- ข้อมูลนิสิต -->
+      <!-- <div class="row q-mb-md">
         <div class="column">
           <div class="text-h6 text-weight-bold">
             ชื่อ-นามสกุล :
@@ -13,7 +22,7 @@
             <span class="text-weight-medium">{{ auth.getUser?.code }}</span>
           </div>
         </div>
-      </div>
+      </div> -->
 
       <!-- แสดงรายการเช็คชื่อแบบไม่มีกรอบ -->
       <div v-if="checkStatus.length === 0" class="text-center text-grey">
@@ -25,7 +34,7 @@
           :key="index"
           class="checkin-item q-py-sm q-mb-md"
         >
-          <div class="text-h7 text-weight-bold text-primary q-mb-xs">
+          <div class="text-h7 q-mb-xs">
             วันที่ : {{ formatDate(item.checkin || item.checkout) }}
           </div>
 
@@ -55,10 +64,10 @@
 // โค้ดยังเหมือนเดิม ไม่ต้องแก้ไขอะไร
 import { ref, computed, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
-// import type { Activity } from 'src/types/activity'
+import type { Activity } from 'src/types/activity'
 import type { CheckinoutRecord } from 'src/types/checkinout'
 import { useAuthStore } from 'src/stores/auth'
-// import { api } from 'boot/axios'
+import { ActivityService } from 'src/services/activity'
 import { useCheckinoutStore } from 'src/stores/checkinout'
 import dayjs from 'dayjs'
 import 'dayjs/locale/th'
@@ -80,7 +89,7 @@ const formatTime = (iso?: string): string => {
 const checkinoutStore = useCheckinoutStore()
 const route = useRoute()
 const checkStatus = ref<CheckinoutRecord[]>([])
-// const activity = ref<Activity | null>(null)
+const activity = ref<Activity | null>(null)
 const screen = ref(false)
 const auth = useAuthStore()
 
@@ -97,8 +106,20 @@ async function fetchStatus(studentId: string, activityId: string) {
   checkStatus.value = res
 }
 
+async function fetchActivity(activityId: string) {
+  try {
+    const res = await ActivityService.getOne(activityId)
+    activity.value = res.data
+  } catch (error) {
+    console.error('Error fetching activity:', error)
+  }
+}
+
 onMounted(async () => {
-  await fetchStatus(`${auth.getUser?.id}`, route.params.id as string)
+  await Promise.all([
+    fetchStatus(`${auth.getUser?.id}`, route.params.id as string),
+    fetchActivity(route.params.id as string)
+  ])
   screen.value = true
 })
 </script>
