@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+import { computed, ref, watch } from 'vue'
 import { api } from 'boot/axios'
 
 const baseurl = api.defaults.baseURL
@@ -9,6 +9,24 @@ const isPDF = ref(false)
 const visible = ref(false)
 const fileInput = ref<HTMLInputElement | null>(null)
 const ocrResult = ref<OcrResult | null>(null)
+
+const selectedSource = ref('')
+const selectedTopic = ref('')
+
+watch(selectedSource, () => {
+  selectedTopic.value = ''
+})
+
+const sourceOptions = ['BUU MOOC', 'Thai MOOC']
+const topicOptions = computed(() => {
+  if (selectedSource.value === 'BUU MOOC') {
+    return ['Python เบื้องต้น', 'Data Science พื้นฐาน']
+  } else if (selectedSource.value === 'Thai MOOC') {
+    return ['การตลาดออนไลน์', 'นวัตกรรมเพื่อสุขภาพ']
+  } else {
+    return []
+  }
+})
 
 interface OcrResult {
   student_name: string
@@ -68,21 +86,19 @@ async function uploadFile() {
   }
 }
 </script>
+
 <template>
   <q-page class="q-pa-md">
-    <div class="text-h5 text-center q-mb-md">อัปโหลดใบ Certificate</div>
+    <div class="text-h5 q-mb-md">อัปโหลดใบประกาศนียบัตร</div>
 
-    <!-- Drag & Drop Box -->
     <q-card
-      class="q-pa-lg q-mt-md drop-area"
+      class="q-pa-md q-mt-md drop-area"
       @dragover.prevent
       @drop.prevent="handleDrop"
       @click="fileInput?.click()"
     >
       <div class="column items-center justify-center">
-        <!-- ถ้ามีไฟล์ -->
-        <div v-if="previewUrl" class="relative-container">
-          <!-- ❌ ปุ่มลบ -->
+        <div v-if="previewUrl" class="relative-container full-width">
           <q-btn
             round
             color="negative"
@@ -91,33 +107,67 @@ async function uploadFile() {
             class="close-btn"
             @click.stop="clearFile"
           />
-
-          <!-- PDF Preview -->
           <iframe
             v-if="isPDF"
+            class="preview-frame"
             :src="previewUrl + '#toolbar=0&navpanes=0&scrollbar=0&view=FitH&zoom=page-fit'"
-            width="800"
-            height="500"
-            frameborder="0"
           />
-          <q-icon v-else name="image" size="100px" color="grey-5" />
+          <q-img
+            v-else
+            :src="previewUrl"
+            style="max-width: 100%; max-height: 400px; object-fit: contain"
+            spinner-color="primary"
+          />
         </div>
 
-        <!-- ยังไม่ได้เลือกไฟล์ -->
-        <div v-else class="text-subtitle1 text-grey text-center">
+        <div v-else class="text-subtitle1 text-grey text-center q-pa-md">
           <q-icon name="cloud_upload" size="40px" class="q-mb-sm" />
-          <div>Click or drag your file here to upload</div>
-          <input type="file" ref="fileInput" class="hidden" accept=".pdf" @change="onInputChange" />
+          <div>คลิกหรือลากไฟล์ของคุณมาที่นี่เพื่ออัปโหลด</div>
+          <input
+            type="file"
+            ref="fileInput"
+            class="hidden"
+            accept=".pdf,image/*"
+            @change="onInputChange"
+          />
         </div>
       </div>
     </q-card>
 
-    <!-- ปุ่มยืนยัน -->
-    <div class="row justify-end q-mt-md">
-      <q-btn label="ยืนยัน" color="primary" :disable="!selectedFile" @click="uploadFile" />
+    <!-- Dropdowns -->
+    <div class="column q-gutter-y-sm q-mt-md">
+      <q-select
+        v-model="selectedSource"
+        :options="sourceOptions"
+        label="แหล่งที่มา"
+        dense
+        outlined
+        emit-value
+        map-options
+      />
+      <q-select
+        v-model="selectedTopic"
+        :options="topicOptions"
+        label="หัวข้อ"
+        dense
+        outlined
+        emit-value
+        map-options
+        :disable="!selectedSource"
+      />
     </div>
 
-    <!-- แสดงผล OCR -->
+    <!-- ปุ่มยืนยัน -->
+    <div class="row justify-end q-mt-md">
+      <q-btn
+        label="ยืนยัน"
+        class="btnconfirm"
+        :disable="!selectedFile || !selectedSource || !selectedTopic"
+        @click="uploadFile"
+      />
+    </div>
+
+    <!-- OCR Result -->
     <q-card-section v-if="ocrResult" class="q-mt-lg">
       <q-markup-table>
         <tbody>
@@ -142,7 +192,6 @@ async function uploadFile() {
         </tbody>
       </q-markup-table>
 
-      <!-- ตรวจสอบสถานะ -->
       <div class="q-mt-sm">
         <q-banner
           v-if="ocrResult.verified"
@@ -171,7 +220,6 @@ async function uploadFile() {
       </div>
     </q-card-section>
 
-    <!-- Loading -->
     <q-inner-loading
       :showing="visible"
       label="กำลังอัปโหลด..."
@@ -187,6 +235,8 @@ async function uploadFile() {
   background-color: #e3f2fd;
   cursor: pointer;
   transition: background-color 0.2s;
+  padding: 24px;
+  min-height: 160px;
 }
 
 .drop-area:hover {
@@ -195,7 +245,15 @@ async function uploadFile() {
 
 .relative-container {
   position: relative;
-  display: inline-block;
+  width: 100%;
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.preview-frame {
+  width: 100%;
+  height: 400px;
+  border: none;
 }
 
 .close-btn {

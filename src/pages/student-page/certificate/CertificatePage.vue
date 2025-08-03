@@ -20,7 +20,7 @@ const tab = ref<string>('certificate')
   <q-page class="q-pa-md">
     <!-- Tabs -->
     <q-tabs v-model="tab" align="right" class="custom-tabs" indicator-color="transparent">
-      <q-tab name="certificate" label="อัพโหลดใบประกาศนียบัตร" />
+      <q-tab name="certificate" label="อัปโหลดใบประกาศนียบัตร" />
       <q-tab name="history" label="ประวัติ" />
     </q-tabs>
 

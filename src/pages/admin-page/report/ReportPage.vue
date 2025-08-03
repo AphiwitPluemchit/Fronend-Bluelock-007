@@ -1,34 +1,46 @@
 <template>
-  <q-page class="q-py-lg q-px-md" style="max-width: 1200px; margin: auto">
-    <div class="text-h4 q-mb-md text-weight-medium">รายงานข้อมูลนิสิต</div>
+  <q-page class="q-pa-md">
+    <div class="row justify-between items-center q-mb-md" style="margin-top: 20px">
+      <div class="texttitle" style="margin-bottom: 20px">รายงานข้อมูลนิสิต</div>
+    </div>
 
     <!-- Filters -->
-    <div class="q-mb-md row items-center q-gutter-sm">
-      <div class="text-subtitle1">ตรวจสอบตาม ชั้นปี:</div>
-      <q-select
-        v-model="selectedYear"
-        :options="yearOptions"
-        option-label="label"
-        option-value="value"
-        emit-value
-        map-options
-        outlined
-        dense
-        style="min-width: 150px"
-      />
+    <div class="q-mb-md row items-center q-gutter-sm q-col-gutter">
+      <!-- ชั้นปี -->
+      <div class="row items-center q-gutter-sm col-auto">
+        <div class="text-subtitle1">ตรวจสอบตาม ชั้นปี:</div>
+        <div style="min-width: 150px">
+          <q-select
+            v-model="selectedYear"
+            :options="yearOptions"
+            option-label="label"
+            option-value="value"
+            emit-value
+            map-options
+            outlined
+            dense
+            class="full-width"
+          />
+        </div>
+      </div>
 
-      <div class="text-subtitle1 q-ml-md">สาขา:</div>
-      <q-select
-        v-model="selectedMajor"
-        :options="majorOptions"
-        option-label="label"
-        option-value="value"
-        emit-value
-        map-options
-        outlined
-        dense
-        style="min-width: 150px"
-      />
+      <!-- สาขา -->
+      <div class="row items-center q-gutter-sm col-auto">
+        <div class="text-subtitle1">สาขา:</div>
+        <div style="min-width: 150px">
+          <q-select
+            v-model="selectedMajor"
+            :options="majorOptions"
+            option-label="label"
+            option-value="value"
+            emit-value
+            map-options
+            outlined
+            dense
+            class="full-width"
+          />
+        </div>
+      </div>
     </div>
 
     <!-- Error Message -->

@@ -10,7 +10,6 @@ const router = useRouter()
 const $q = useQuasar()
 const isSmallScreen = computed(() => !$q.screen.gt.xs)
 
-
 interface ActivityHistory {
   activity: {
     name: string
@@ -84,11 +83,11 @@ const majorFullName = computed(() => {
 })
 
 const prepProgressRatio = computed(() =>
-  Math.min(prepData.value.current / (prepData.value.required || 1), 1)
+  Math.min(prepData.value.current / (prepData.value.required || 1), 1),
 )
 
 const academicProgressRatio = computed(() =>
-  Math.min(academicData.value.current / (academicData.value.required || 1), 1)
+  Math.min(academicData.value.current / (academicData.value.required || 1), 1),
 )
 
 const getProgressColor = (ratio: number) => {
@@ -125,7 +124,7 @@ onMounted(async () => {
     prepData.value.current = summary.softSkill
 
     activities.value = Array.isArray(summary.history)
-      ? summary.history
+      ? (summary.history
           .map((h: ActivityHistory) => {
             const a = h.activity
             const ai = a.activityItem
@@ -146,7 +145,7 @@ onMounted(async () => {
               hours: ai.hour ?? 0,
             }
           })
-          .filter(Boolean) as ActivityDisplay[]
+          .filter(Boolean) as ActivityDisplay[])
       : []
   } catch (err) {
     console.error('โหลดข้อมูล student summary ไม่สำเร็จ', err)
@@ -154,10 +153,9 @@ onMounted(async () => {
 })
 </script>
 
-
 <template>
-  <q-page>
-    <div class="container q-mx-auto q-px-sm q-py-md" style="max-width: 1000px">
+  <q-page class="q-pa-md">
+    <div class="container q-mx-auto q-px-sm q=mb-md" style="max-width: 1000px">
       <!-- Student Profile Card -->
       <q-card bordered class="q-mb-md shadow-3 rounded-borders">
         <q-card-section class="bg-primary">
@@ -185,7 +183,6 @@ onMounted(async () => {
             </div>
           </div>
         </q-card-section>
-
       </q-card>
 
       <!-- Progress Cards -->
@@ -235,11 +232,12 @@ onMounted(async () => {
                 <div class="flex justify-between text-caption">
                   <div>
                     <q-badge :color="getProgressColor(academicProgressRatio)" outline>
-                      {{ calculateMissingHours(academicData) > 0
-                        ? `เหลืออีก ${calculateMissingHours(academicData)} ชั่วโมง`
-                        : 'ครบแล้ว' }}
+                      {{
+                        calculateMissingHours(academicData) > 0
+                          ? `เหลืออีก ${calculateMissingHours(academicData)} ชั่วโมง`
+                          : 'ครบแล้ว'
+                      }}
                     </q-badge>
-
                   </div>
                   <div class="text-grey-8">มีอยู่ {{ academicData.current }} ชั่วโมง</div>
                 </div>
@@ -293,11 +291,12 @@ onMounted(async () => {
                 <div class="flex justify-between text-caption">
                   <div>
                     <q-badge :color="getProgressColor(prepProgressRatio)" outline>
-                      {{ calculateMissingHours(prepData) > 0
-                        ? `เหลืออีก ${calculateMissingHours(prepData)} ชั่วโมง`
-                        : 'ครบแล้ว' }}
+                      {{
+                        calculateMissingHours(prepData) > 0
+                          ? `เหลืออีก ${calculateMissingHours(prepData)} ชั่วโมง`
+                          : 'ครบแล้ว'
+                      }}
                     </q-badge>
-
                   </div>
                   <div class="text-grey-8">มีอยู่ {{ prepData.current }} ชั่วโมง</div>
                 </div>
@@ -327,13 +326,12 @@ onMounted(async () => {
           </div>
         </q-card-section>
 
-
         <q-separator />
 
         <q-card-section class="q-pa-none">
           <q-list>
             <q-item
-              v-for="(activity, index) in (showAllActivities ? activities : activities.slice(0, 3))"
+              v-for="(activity, index) in showAllActivities ? activities : activities.slice(0, 3)"
               :key="index"
               clickable
               v-ripple
@@ -347,10 +345,7 @@ onMounted(async () => {
 
               <q-item-section>
                 <!-- ✅ ชื่อกิจกรรม แสดงตลอด -->
-                <q-item-label
-                  class="text-weight-medium ellipsis"
-                  :title="activity.title"
-                >
+                <q-item-label class="text-weight-medium ellipsis" :title="activity.title">
                   {{ activity.title }}
                 </q-item-label>
 
@@ -371,7 +366,9 @@ onMounted(async () => {
                         rounded
                         class="q-mt-xs q-px-sm q-py-xs text-weight-medium"
                         :style="`background-color: ${activityColors[activity.type].bgColor}; color: ${activityColors[activity.type].textColor}; border: 1px solid ${
-                          activity.type === 'preparation' ? activityColors[activity.type].border : activityColors[activity.type].textColor
+                          activity.type === 'preparation'
+                            ? activityColors[activity.type].border
+                            : activityColors[activity.type].textColor
                         };`"
                         :label="activityColors[activity.type].label"
                       />
@@ -380,21 +377,20 @@ onMounted(async () => {
                 </q-item-label>
               </q-item-section>
 
-
               <!-- ✅ badge ซ่อนในจอเล็ก -->
               <q-item-section side v-if="!isSmallScreen">
                 <q-badge
                   rounded
                   class="q-px-sm q-py-xs text-weight-medium"
                   :style="`background-color: ${activityColors[activity.type].bgColor}; color: ${activityColors[activity.type].textColor}; border: 1px solid ${
-                    activity.type === 'preparation' ? activityColors[activity.type].border : activityColors[activity.type].textColor
+                    activity.type === 'preparation'
+                      ? activityColors[activity.type].border
+                      : activityColors[activity.type].textColor
                   };`"
                   :label="activityColors[activity.type].label"
                 />
               </q-item-section>
-
             </q-item>
-
           </q-list>
         </q-card-section>
       </q-card>
@@ -432,5 +428,4 @@ onMounted(async () => {
   flex: 1;
   color: #000000;
 }
-
 </style>
