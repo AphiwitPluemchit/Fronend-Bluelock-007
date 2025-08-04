@@ -47,16 +47,16 @@ const adminChildren: RouteRecordRaw[] = [
     component: () => import('pages/admin-page/report/ReportPage.vue'),
   },
   {
-    path: 'CertificateTablePage',
-    component: () => import('pages/admin-page/certificate/CertificateTablePage.vue'),
+    path: 'CourseTablePage',
+    component: () => import('pages/admin-page/certificate/CourseTablePage.vue'),
   },
   {
     path: 'ManageCertificateTable',
     component: () => import('pages/admin-page/certificate/ManageCertificateTable.vue'),
   },
   {
-    path: 'CertificateDetail/:id',
-    component: () => import('pages/admin-page/certificate/CertificateDetailPage.vue'),
+    path: 'CourseDetail/:id',
+    component: () => import('pages/admin-page/certificate/CourseDetailPage.vue'),
     props: true,
   },
   // Forms routes for admins

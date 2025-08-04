@@ -98,7 +98,7 @@ const linksList = [
     title: 'จัดการใบประกาศนียบัตร',
     icon: 'school',
     children: [
-      { title: 'จัดการหัวข้อการอบรม', link: '/Admin/CertificateTablePage' },
+      { title: 'จัดการหัวข้อการอบรม', link: '/Admin/CourseTablePage' },
       { title: 'รายการใบประกาศนียบัตร', link: '/Admin/ManageCertificateTable' },
     ],
   },

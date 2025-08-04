@@ -33,9 +33,15 @@ export const useCourseStore = defineStore('course', () => {
     return course
   }
 
-  const updateCourse = async (id: string, course: Course) => {
-    await CourseService.updateOne(id, course)
-    await fetchCourses()
+  const updateCourse = async (id: string, data: Course) => {
+    try {
+      const res = await CourseService.updateOne(id, data)
+      console.log('Update success:', res)
+      return true
+    } catch (error) {
+      console.error('Update failed:', error)
+      return false
+    }
   }
 
   const deleteCourse = async (id: string) => {

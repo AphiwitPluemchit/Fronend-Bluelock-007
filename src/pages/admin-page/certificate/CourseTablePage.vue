@@ -54,7 +54,7 @@ const router = useRouter()
 
 function goToDetail(row: Course) {
   void router.push({
-    path: `/admin/CertificateDetail/${row.id}`,
+    path: `/admin/CourseDetail/${row.id}`,
   })
 }
 </script>

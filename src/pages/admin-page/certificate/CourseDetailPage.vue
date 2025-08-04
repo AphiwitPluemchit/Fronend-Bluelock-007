@@ -1,131 +1,31 @@
 <script setup lang="ts">
-import { computed, ref, watch } from 'vue'
+import { onMounted, ref } from 'vue'
 import AppBreadcrumbs from 'src/components/AppBreadcrumbs.vue'
 import FilterDialog from 'src/components/Dialog/FilterDialog.vue'
 import { useRoute } from 'vue-router'
-
-type CertificateCourse = {
-  id: number
-  certName: string
-  hour: number
-  link: string
-  categoryActivity: string
-}
+import { useCourseStore } from 'src/stores/course'
+import type { Course } from 'src/types/course'
 
 const route = useRoute()
-const id = Number(route.params.id)
+const id = route.params.id as string
+
+const courseStore = useCourseStore()
+const course = ref<Course | null>(null)
+
+onMounted(async () => {
+  // course.value = await courseStore.getOneCourse(id)
+  // console.log('Course data:', course.value)
+  if (!course.value) {
+    course.value = await courseStore.getOneCourse(id)
+    originalCourseData.value = { ...course.value }
+  }
+})
 
 const breadcrumbs = ref({
   previousPage: { title: 'รายการหัวข้อทั้งหมด', path: '/admin/CertificateTablePage' },
   currentPage: { title: 'รายละเอียดหัวข้อการอบรม', path: route.fullPath },
   icon: 'school',
 })
-
-const certificateCourses = ref<CertificateCourse[]>([
-  {
-    id: 1,
-    certName: 'Ready to Work in 12 Hours',
-    hour: 5,
-    link: 'https://mooc.buu.ac.th/courses/course-v1:BUU+LU005+2022/about',
-    categoryActivity: 'เตรียมความพร้อม',
-  },
-  {
-    id: 2,
-    certName: 'การสื่อสารภาษาอังกฤษพื้นฐานเพื่อการทำงาน (Basic Comunicative English for Work)',
-    hour: 5,
-    link: 'https://mooc.buu.ac.th/courses/course-v1:BUU+HUS0013+2024/about',
-    categoryActivity: 'เตรียมความพร้อม',
-  },
-  {
-    id: 3,
-    certName: 'การประยุกต์ใช้ Generative AI ในการทำงาน',
-    hour: 3,
-    link: 'https://mooc.buu.ac.th/courses/course-v1:BUU+ICT002+2024/about',
-    categoryActivity: 'เตรียมความพร้อม',
-  },
-  {
-    id: 4,
-    certName: 'ภาษาอังกฤษเพื่อการสื่อสาร | English for Communication',
-    hour: 10,
-    link: 'https://thaimooc.ac.th/courses/course-v1cmu000850/',
-    categoryActivity: 'เตรียมความพร้อม',
-  },
-  {
-    id: 5,
-    certName: 'เทคนิคการจัดการความเครียด | Stress Management Techniques',
-    hour: 10,
-    link: 'https://thaimooc.ac.th/courses/course-v1cmu000980//',
-    categoryActivity: 'เตรียมความพร้อม',
-  },
-  {
-    id: 6,
-    certName:
-      'จิตวิทยาประยุกต์ในการทํางาน เพื่อความสำเร็จ ความสุข และความมั่งคั่ง | Applied Psychology to Work through Success Happiness and Wealth',
-    hour: 10,
-    link: 'https://thaimooc.ac.th/courses/course-v1cmu000960/',
-    categoryActivity: 'เตรียมความพร้อม',
-  },
-  {
-    id: 7,
-    certName:
-      'ทักษะการสื่อสารระหว่างบุคคลในการทํางาน (Interpersonal Communication Skillsin Workplace)',
-    hour: 10,
-    link: 'https://thaimooc.ac.th/courses/course-v1cmu001070/',
-    categoryActivity: 'เตรียมความพร้อม',
-  },
-  {
-    id: 8,
-    certName: 'ง่าย สบาย กับการอธิบายกราฟเป็นภาษาอังกฤษ',
-    hour: 5,
-    link: 'https://thaimooc.ac.th/courses/course-v1cu001500/',
-    categoryActivity: 'เตรียมความพร้อม',
-  },
-  {
-    id: 9,
-    certName: 'เทคนิคการนำเสนออย่างมีประสิทธิภาพ',
-    hour: 10,
-    link: 'https://thaimooc.ac.th/courses/course-v1cmu000840/',
-    categoryActivity: 'เตรียมความพร้อม',
-  },
-  {
-    id: 10,
-    certName:
-      'Data Visualization with Tableau Desktop (การสร้างภาพของข้อมูลด้วยโปรแกรม Tableau Desktop)',
-    hour: 5,
-    link: 'https://mooc.buu.ac.th/courses/course-v1:BUU+IF002+2024/about',
-    categoryActivity: 'ทักษะทางวิชาการ',
-  },
-  {
-    id: 11,
-    certName:
-      'การประยุกต์ใช้ Collaboration Tools ในการเพิ่มประสิทธิภาพในการทำงานและประสานงานภายในองค์กร',
-    hour: 5,
-    link: 'https://mooc.buu.ac.th/courses/course-v1:BUU+ICT001+2022/about',
-    categoryActivity: 'ทักษะทางวิชาการ',
-  },
-  {
-    id: 12,
-    certName: 'พื้นฐาน Internet of Things (IoTs) | Basic Internet of Things (IoTs)',
-    hour: 3,
-    link: 'https://lms.thaimooc.org/courses/course-v1:HU+HU008+2019/about',
-    categoryActivity: 'ทักษะทางวิชาการ',
-  },
-  {
-    id: 13,
-    certName: 'การออกแบบ Infographic | Infographic Design',
-    hour: 6,
-    link: 'https://lms.thaimooc.org/courses/course-v1:SWU+SWU011+2018/about',
-    categoryActivity: 'ทักษะทางวิชาการ',
-  },
-  {
-    id: 14,
-    certName: 'การจัดการความรู้ | Knowledge Management',
-    hour: 6,
-    link: 'https://lms.thaimooc.org/courses/course-v1:CU+CU005+2017/about',
-    categoryActivity: 'ทักษะทางวิชาการ',
-  },
-])
-
 const submissionColumns = [
   { name: 'index', label: 'ลำดับ', field: 'index', align: 'left' as const },
   { name: 'date', label: 'วันที่อัปโหลด', field: 'date', align: 'left' as const },
@@ -188,84 +88,65 @@ const submissionHistory = ref([
 const showFilterDialog1 = ref(false)
 const filterCategories1 = ['major', 'year']
 
+const originalCourseData = ref<Course | null>(null)
+
 const isEditMode = ref(false)
-const showCancelDialog = ref(false)
+const showCancelDialog = ref<boolean>(false)
 
-function enableEditMode() {
-  isEditMode.value = true
-}
-function confirmCancel() {
-  showCancelDialog.value = true
-}
+// const certNameModel = computed({
+//   get: () => (isEditMode.value ? localEditCourse.value.courseName : (course.value?.name ?? '')),
+//   set: (val: string) => {
+//     if (isEditMode.value) localEditCourse.value.courseName = val
+//   },
+// })
+// const linkModel = computed({
+//   get: () => (isEditMode.value ? localEditCourse.value.link : (course.value?.link ?? '')),
+//   set: (val: string) => {
+//     if (isEditMode.value) localEditCourse.value.link = val
+//   },
+// })
+// const categoryActivityModel = computed({
+//   get: () =>
+//     isEditMode.value ? localEditCourse.value.categoryActivity : (course.value?.isHardSkill ?? ''),
+//   set: (val: string) => {
+//     if (isEditMode.value) localEditCourse.value.categoryActivity = val
+//   },
+// })
+// const hourModel = computed({
+//   get: () => (isEditMode.value ? localEditCourse.value.hour : (course.value?.hour ?? 0)),
+//   set: (val: number) => {
+//     if (isEditMode.value) localEditCourse.value.hour = val
+//   },
+// })
 
-// สำหรับแก้ไขข้อมูลแบบ local
-const localEditCert = ref({
-  certName: '',
-  link: '',
-  hour: 0,
-  categoryActivity: '',
-})
+// const categoryOptions = [
+//   { label: 'เตรียมความพร้อม', value: 'เตรียมความพร้อม' },
+//   { label: 'ทักษะทางวิชาการ', value: 'ทักษะทางวิชาการ' },
+// ]
 
-watch(
-  () => isEditMode.value,
-  (val) => {
-    if (val && cert) {
-      localEditCert.value = {
-        certName: cert.certName,
-        link: cert.link,
-        hour: cert.hour,
-        categoryActivity: cert.categoryActivity,
-      }
-    }
-  },
-)
-
-function saveChanges() {
-  if (cert) {
-    cert.certName = localEditCert.value.certName
-    cert.link = localEditCert.value.link
-    cert.hour = localEditCert.value.hour
-    cert.categoryActivity = localEditCert.value.categoryActivity
-  }
+async function saveChanges() {
+  if (!course.value) return
+  await courseStore.updateCourse(course.value.id!, course.value)
+  originalCourseData.value = { ...courseStore.course }
   isEditMode.value = false
 }
 function cancelEdit() {
-  isEditMode.value = false
-  // implement revert logic here if needed
+  showCancelDialog.value = true
 }
 
-const cert = certificateCourses.value.find((item) => item.id === id)
-
-const certNameModel = computed({
-  get: () => (isEditMode.value ? localEditCert.value.certName : (cert?.certName ?? '')),
-  set: (val: string) => {
-    if (isEditMode.value) localEditCert.value.certName = val
-  },
-})
-const linkModel = computed({
-  get: () => (isEditMode.value ? localEditCert.value.link : (cert?.link ?? '')),
-  set: (val: string) => {
-    if (isEditMode.value) localEditCert.value.link = val
-  },
-})
-const categoryActivityModel = computed({
-  get: () =>
-    isEditMode.value ? localEditCert.value.categoryActivity : (cert?.categoryActivity ?? ''),
-  set: (val: string) => {
-    if (isEditMode.value) localEditCert.value.categoryActivity = val
-  },
-})
-const hourModel = computed({
-  get: () => (isEditMode.value ? localEditCert.value.hour : (cert?.hour ?? 0)),
-  set: (val: number) => {
-    if (isEditMode.value) localEditCert.value.hour = val
-  },
-})
-
-const categoryOptions = [
-  { label: 'เตรียมความพร้อม', value: 'เตรียมความพร้อม' },
-  { label: 'ทักษะทางวิชาการ', value: 'ทักษะทางวิชาการ' },
-]
+function enableEditMode() {
+  isEditMode.value = true
+  if (course.value) {
+    originalCourseData.value = { ...course.value }
+  }
+}
+function confirmCancel() {
+  if (originalCourseData.value) {
+    course.value = { ...originalCourseData.value }
+  }
+  isEditMode.value = false
+  showCancelDialog.value = false
+}
 </script>
 
 <template>
@@ -274,15 +155,27 @@ const categoryOptions = [
     <AppBreadcrumbs :breadcrumbs="breadcrumbs" />
 
     <div class="q-mx-lg">
-      <div class="text-h6 q-mt-lg">ข้อมูลหัวข้อการอบรม</div>
+      <div class="row col-12">
+        <div class="text-h6 q-mt-lg col-10">ข้อมูลหัวข้อการอบรม</div>
+        <div class="justify-end q-mt-lg col-2">
+          <q-toggle
+            v-if="course"
+            v-model="course.isActive"
+            :label="course.isActive ? 'เปิดใช้งาน' : 'ปิดใช้งาน (จัดเก็บแล้ว)'"
+            :disable="!isEditMode"
+            color="primary"
+          />
+        </div>
+      </div>
+
       <q-card class="q-mt-md full-width" flat>
-        <div v-if="cert" class="row q-col-gutter-md">
+        <div v-if="course" class="row q-col-gutter-md">
           <!-- แถวข้อมูล-->
           <div class="col-12 row items-center q-pa-sm">
             <div class="col-1 text-right q-pr-md"><p class="q-my-none">ชื่อ :</p></div>
             <div class="col-10">
               <q-input
-                v-model="certNameModel"
+                v-model="course.name"
                 :readonly="!isEditMode"
                 :class="isEditMode ? 'editable' : 'readonly'"
                 borderless
@@ -299,7 +192,7 @@ const categoryOptions = [
               <!-- โหมดแก้ไข -->
               <q-input
                 v-if="isEditMode"
-                v-model="linkModel"
+                v-model="course.link"
                 borderless
                 dense
                 placeholder="https://example.com"
@@ -308,8 +201,8 @@ const categoryOptions = [
               <!-- โหมดอ่านอย่างเดียวแบบมีกรอบ + คลิกลิงก์ได้ -->
               <q-field v-else borderless dense readonly>
                 <template #control>
-                  <a :href="linkModel" target="_blank" rel="noopener" class="link-box">
-                    {{ linkModel }}
+                  <a :href="course.link" target="_blank" rel="noopener" class="link-box">
+                    {{ course.link }}
                   </a>
                 </template>
               </q-field>
@@ -322,8 +215,11 @@ const categoryOptions = [
             <div class="col-4">
               <q-select
                 v-if="isEditMode"
-                v-model="categoryActivityModel"
-                :options="categoryOptions"
+                v-model="course.isHardSkill"
+                :options="[
+                  { label: 'ทักษะทางวิชาการ', value: true },
+                  { label: 'เตรียมความพร้อม', value: false },
+                ]"
                 dense
                 outlined
                 emit-value
@@ -331,7 +227,7 @@ const categoryOptions = [
               />
               <q-input
                 v-else
-                v-model="categoryActivityModel"
+                :model-value="course.isHardSkill ? 'ทักษะทางวิชาการ' : 'เตรียมความพร้อม'"
                 readonly
                 class="readonly"
                 borderless
@@ -343,7 +239,7 @@ const categoryOptions = [
             </div>
             <div class="col-4">
               <q-input
-                v-model="hourModel"
+                v-model="course.hour"
                 :readonly="!isEditMode"
                 :class="isEditMode ? 'editable' : 'readonly'"
                 borderless
@@ -355,7 +251,15 @@ const categoryOptions = [
         </div>
       </q-card>
     </div>
-
+    <div class="q-mt-md q-pa-md text-right">
+      <template v-if="!isEditMode">
+        <q-btn label="แก้ไข" class="btnedit" unelevated rounded @click="enableEditMode" />
+      </template>
+      <template v-else>
+        <q-btn label="ยกเลิก" class="btnreject q-mr-md" unelevated rounded @click="cancelEdit" />
+        <q-btn label="บันทึก" class="btnconfirm" unelevated rounded @click="saveChanges" />
+      </template>
+    </div>
     <!-- ตารางประวัติ -->
     <div class="q-pa-md">
       <div class="header-container text-center">
@@ -380,7 +284,7 @@ const categoryOptions = [
         no-data-label="ไม่พบข้อมูล"
       >
         <template v-slot:body="props">
-          <q-tr :props="props">
+          <q-tr :props="props" class="sticky-header">
             <q-td key="index" style="t">{{ props.rowIndex + 1 }}</q-td>
             <q-td key="date">{{ props.row.date }}</q-td>
             <q-td key="studentCode">{{ props.row.studentCode }}</q-td>
@@ -389,15 +293,6 @@ const categoryOptions = [
           </q-tr>
         </template>
       </q-table>
-    </div>
-    <div class="q-mt-md q-pa-md text-right">
-      <template v-if="!isEditMode">
-        <q-btn label="แก้ไข" class="btnedit" unelevated rounded @click="enableEditMode" />
-      </template>
-      <template v-else>
-        <q-btn label="ยกเลิก" class="btnreject q-mr-md" unelevated rounded @click="confirmCancel" />
-        <q-btn label="บันทึก" class="btnconfirm" unelevated rounded @click="saveChanges" />
-      </template>
     </div>
 
     <!-- Dialog -->
@@ -410,7 +305,7 @@ const categoryOptions = [
         >
         <q-card-actions align="right">
           <q-btn flat label="ยกเลิก" class="btnreject q-mr-md" v-close-popup />
-          <q-btn flat label="ยืนยัน" class="btnconfirm" @click="cancelEdit" v-close-popup />
+          <q-btn flat label="ยืนยัน" class="btnconfirm" @click="confirmCancel" v-close-popup />
         </q-card-actions>
       </q-card>
     </q-dialog>
@@ -418,8 +313,9 @@ const categoryOptions = [
 </template>
 
 <style scoped>
-.editable {
-  background-color: white;
+.readonly {
+  background-color: #e4e4e4;
+  color: #757575;
 }
 .q-input {
   border: 1px solid #757575;
