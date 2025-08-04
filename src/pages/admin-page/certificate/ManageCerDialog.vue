@@ -33,7 +33,7 @@ const rejectReason = ref<string>('')
 
 const isConfirmDisabled = computed(() => {
   if (selectedAction.value === 'อนุมัติ') {
-    return !activityType.value || !hourCount.value || hourCount.value <= 0
+    return !selectedAction.value
   } else if (selectedAction.value === 'ไม่อนุมัติ') {
     return !rejectReason.value.trim()
   }
@@ -69,9 +69,11 @@ const confirm = () => {
 
       <div class="q-mb-sm row">
         <div class="col-6"><b>ชื่อ-สกุล :</b> {{ props.data.name }}</div>
-        <div class="col-6"><b>รหัสนิสิต</b> {{ props.data.code }}</div>
+        <div class="col-6"><b>รหัสนิสิต : </b> {{ props.data.code }}</div>
       </div>
-      <div class="q-mb-sm cert-title"><b>หัวข้ออบรม</b> {{ props.data.certName }}</div>
+      <div class="q-mb-sm cert-title"><b>หัวข้ออบรม : </b> {{ props.data.certName }}</div>
+      <div class="q-mb-sm"><b>ประเภทกิจกรรม : </b> {{ props.data.skill }}</div>
+      <div class="q-mb-sm"><b>จำนวนชั่วโมง : </b> {{ props.data.hour }} ชั่วโมง</div>
       <div class="q-mb-sm"><b>รูปใบประกาศนียบัตร</b></div>
 
       <q-img
@@ -99,20 +101,7 @@ const confirm = () => {
           />
         </div>
 
-        <div v-if="selectedAction === 'อนุมัติ'" class="row q-col-gutter-md q-mb-md">
-          <div class="col-6">
-            <q-select
-              dense
-              outlined
-              v-model="activityType"
-              :options="['เตรียมความพร้อม', 'ทักษะทางวิชาการ']"
-              label="ประเภทกิจกรรม"
-            />
-          </div>
-          <div class="col-6">
-            <q-input dense outlined v-model.number="hourCount" type="number" label="จำนวนชั่วโมง" />
-          </div>
-        </div>
+        <div v-if="selectedAction === 'อนุมัติ'" class="row q-col-gutter-md q-mb-md"></div>
 
         <div v-if="selectedAction === 'ไม่อนุมัติ'" class="q-mb-md">
           <q-input dense outlined v-model="rejectReason" label="หมายเหตุ" type="textarea" />
@@ -133,10 +122,6 @@ const confirm = () => {
             class="badge-approve"
             rounded
           />
-        </div>
-        <div class="row q-col-gutter-md q-mb-md">
-          <div class="col-12"><b>ประเภทกิจกรรม : </b> {{ props.data.skill }}</div>
-          <div class="col-12"><b>จำนวนชั่วโมง : </b> {{ props.data.hour }}<b> ชั่วโมง</b></div>
         </div>
         <div class="q-mb-sm row"></div>
         <div class="row justify-end">
