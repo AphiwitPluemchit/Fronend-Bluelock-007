@@ -51,6 +51,11 @@ const adminChildren: RouteRecordRaw[] = [
     component: () => import('pages/admin-page/certificate/CourseTablePage.vue'),
   },
   {
+    path: 'AddCourse',
+    name: 'AddCourse',
+    component: () => import('pages/admin-page/certificate/AddCoursePage.vue'),
+  },
+  {
     path: 'ManageCertificateTable',
     component: () => import('pages/admin-page/certificate/ManageCertificateTable.vue'),
   },

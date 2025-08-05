@@ -1,13 +1,16 @@
 <script setup lang="ts">
-import { onMounted, ref } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import AppBreadcrumbs from 'src/components/AppBreadcrumbs.vue'
 import FilterDialog from 'src/components/Dialog/FilterDialog.vue'
 import { useRoute } from 'vue-router'
 import { useCourseStore } from 'src/stores/course'
 import type { Course } from 'src/types/course'
+import { useQuasar } from 'quasar'
 
 const route = useRoute()
 const id = route.params.id as string
+const $q = useQuasar()
+const isMobile = computed(() => $q.screen.lt.md)
 
 const courseStore = useCourseStore()
 const course = ref<Course | null>(null)
@@ -22,7 +25,7 @@ onMounted(async () => {
 })
 
 const breadcrumbs = ref({
-  previousPage: { title: 'รายการหัวข้อทั้งหมด', path: '/admin/CertificateTablePage' },
+  previousPage: { title: 'รายการหัวข้อทั้งหมด', path: '/admin/CourseTablePage' },
   currentPage: { title: 'รายละเอียดหัวข้อการอบรม', path: route.fullPath },
   icon: 'school',
 })
@@ -147,6 +150,15 @@ function confirmCancel() {
   isEditMode.value = false
   showCancelDialog.value = false
 }
+
+// Pagination แบบ "load more"
+const rowsPerPage = ref(5)
+const paginatedRows = computed(() => submissionHistory.value.slice(0, rowsPerPage.value))
+const canLoadMore = computed(() => rowsPerPage.value < submissionHistory.value.length)
+
+function loadMore() {
+  rowsPerPage.value += 5
+}
 </script>
 
 <template>
@@ -154,16 +166,17 @@ function confirmCancel() {
     <!-- Breadcrumbs -->
     <AppBreadcrumbs :breadcrumbs="breadcrumbs" />
 
-    <div class="q-mx-lg">
-      <div class="row col-12">
-        <div class="text-h6 q-mt-lg col-10">ข้อมูลหัวข้อการอบรม</div>
-        <div class="justify-end q-mt-lg col-2">
+    <div class="q-mx-lg q-mx-xs-none">
+      <div class="row col-12 items-center">
+        <div class="text-h6 q-mt-lg col-xs-12 col-sm-10">ข้อมูลหัวข้อการอบรม</div>
+        <div class="q-mt-lg col-xs-12 col-sm-2">
           <q-toggle
             v-if="course"
             v-model="course.isActive"
             :label="course.isActive ? 'เปิดใช้งาน' : 'ปิดใช้งาน (จัดเก็บแล้ว)'"
             :disable="!isEditMode"
             color="primary"
+            class="full-width"
           />
         </div>
       </div>
@@ -172,8 +185,10 @@ function confirmCancel() {
         <div v-if="course" class="row q-col-gutter-md">
           <!-- แถวข้อมูล-->
           <div class="col-12 row items-center q-pa-sm">
-            <div class="col-1 text-right q-pr-md"><p class="q-my-none">ชื่อ :</p></div>
-            <div class="col-10">
+            <div class="col-xs-12 col-sm-1 text-right q-pr-md">
+              <p class="q-my-none q-mb-sm">ชื่อ :</p>
+            </div>
+            <div class="col-xs-12 col-sm-11">
               <q-input
                 v-model="course.name"
                 :readonly="!isEditMode"
@@ -184,11 +199,11 @@ function confirmCancel() {
             </div>
           </div>
           <div class="col-12 row items-center q-pa-sm">
-            <div class="col-1 text-right q-pr-md">
+            <div class="col-xs-12 col-sm-1 text-right q-pr-md">
               <p class="q-my-none">Link URL :</p>
             </div>
 
-            <div class="col-10">
+            <div class="col-xs-12 col-sm-11 q-mt-sm">
               <!-- โหมดแก้ไข -->
               <q-input
                 v-if="isEditMode"
@@ -210,9 +225,11 @@ function confirmCancel() {
           </div>
 
           <div class="col-12 row items-center q-pa-sm">
-            <div class="col-1 text-right q-pr-md"><p class="q-my-none">ประเภท :</p></div>
+            <div class="col-xs-12 col-sm-1 text-right q-pr-md">
+              <p class="q-my-none q-mb-sm">ประเภท :</p>
+            </div>
 
-            <div class="col-4">
+            <div class="col-xs-12 col-sm-5 q-mt-sm q-mb-md q-mt-md">
               <q-select
                 v-if="isEditMode"
                 v-model="course.isHardSkill"
@@ -234,10 +251,10 @@ function confirmCancel() {
                 dense
               />
             </div>
-            <div class="col-2 text-right q-pr-md">
-              <p class="q-my-none">จำนวนชั่วโมง :</p>
+            <div class="col-xs-12 col-sm-2 text-right q-pr-md">
+              <p class="q-my-none q-mb-sm q-mt-sm">จำนวนชั่วโมง :</p>
             </div>
-            <div class="col-4">
+            <div class="col-xs-12 col-sm-4 q-mt-sm q-mb-md">
               <q-input
                 v-model="course.hour"
                 :readonly="!isEditMode"
@@ -273,26 +290,57 @@ function confirmCancel() {
         </div>
       </div>
 
-      <q-table
-        :columns="submissionColumns"
-        :rows="submissionHistory"
-        row-key="studentCode"
-        bordered
-        flat
-        class="tableHisAct q-mt-md"
-        :pagination="{ rowsPerPage: 10 }"
-        no-data-label="ไม่พบข้อมูล"
-      >
-        <template v-slot:body="props">
-          <q-tr :props="props" class="sticky-header">
-            <q-td key="index" style="t">{{ props.rowIndex + 1 }}</q-td>
-            <q-td key="date">{{ props.row.date }}</q-td>
-            <q-td key="studentCode">{{ props.row.studentCode }}</q-td>
-            <q-td key="studentName">{{ props.row.studentName }}</q-td>
-            <q-td key="major">{{ props.row.major }}</q-td>
-          </q-tr>
-        </template>
-      </q-table>
+      <div class="table-container">
+        <!-- แสดงข้อความปัดซ้ายเฉพาะ Desktop -->
+        <div v-if="!isMobile" class="scroll-indicator q-mb-sm text-caption text-grey-7">
+          <q-icon name="swipe_left" size="sm" class="q-mr-xs" />
+          ปัดไปทางซ้ายเพื่อดูข้อมูลทั้งหมด
+        </div>
+
+        <!-- TABLE MODE (Desktop) -->
+        <q-table
+          v-if="!isMobile"
+          :columns="submissionColumns"
+          :rows="paginatedRows"
+          row-key="studentCode"
+          bordered
+          flat
+          class="tableHisAct q-mt-md"
+          no-data-label="ไม่พบข้อมูล"
+        >
+          <template v-slot:body="props">
+            <q-tr :props="props" class="sticky-header">
+              <q-td key="index">{{ props.rowIndex + 1 }}</q-td>
+              <q-td key="date">{{ props.row.date }}</q-td>
+              <q-td key="studentCode">{{ props.row.studentCode }}</q-td>
+              <q-td key="studentName">{{ props.row.studentName }}</q-td>
+              <q-td key="major">{{ props.row.major }}</q-td>
+            </q-tr>
+          </template>
+        </q-table>
+
+        <!-- CARD MODE (Mobile) -->
+        <div v-else>
+          <q-card
+            v-for="(row, index) in paginatedRows"
+            :key="row.studentCode"
+            class="q-mb-sm"
+            bordered
+          >
+            <q-card-section>
+              <div class="text-subtitle1">{{ index + 1 }}. {{ row.studentName }}</div>
+              <div class="text-caption">รหัสนิสิต: {{ row.studentCode }}</div>
+              <div class="text-caption">วันที่: {{ row.date }}</div>
+              <div class="text-caption">สาขา: {{ row.major }}</div>
+            </q-card-section>
+          </q-card>
+        </div>
+
+        <!-- ปุ่ม "แสดงเพิ่ม" -->
+        <div class="q-mt-md text-center" v-if="canLoadMore">
+          <q-btn flat label="แสดงเพิ่ม" icon="expand_more" color="primary" @click="loadMore" />
+        </div>
+      </div>
     </div>
 
     <!-- Dialog -->
@@ -322,9 +370,14 @@ function confirmCancel() {
   border-radius: 5px;
   padding-left: 10px;
 }
+
+@media (max-width: 599px) {
+  .q-card {
+    padding: 15px;
+  }
+}
 .q-card {
   background-color: white;
-  width: 600px;
   border-radius: 10px;
   padding: 20px;
   box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.2);
@@ -351,6 +404,48 @@ function confirmCancel() {
 }
 .tableHisAct {
   height: 340px;
+}
+
+.table-container {
+  overflow-x: auto;
+  width: 100%;
+}
+
+@media (max-width: 599px) {
+  .table-container {
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    border-radius: 4px;
+  }
+
+  .table-container::-webkit-scrollbar {
+    height: 8px;
+  }
+
+  .table-container::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 4px;
+  }
+
+  .table-container::-webkit-scrollbar-thumb {
+    background: #888;
+    border-radius: 4px;
+  }
+
+  .table-container::-webkit-scrollbar-thumb:hover {
+    background: #555;
+  }
+}
+
+.scroll-indicator {
+  display: none;
+}
+
+@media (max-width: 599px) {
+  .scroll-indicator {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
 }
 .link-display {
   color: #1976d2;

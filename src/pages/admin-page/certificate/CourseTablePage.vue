@@ -57,6 +57,10 @@ function goToDetail(row: Course) {
     path: `/admin/CourseDetail/${row.id}`,
   })
 }
+
+function goToAddCourse() {
+  void router.push({ name: 'AddCourse' })
+}
 </script>
 
 <template>
@@ -65,7 +69,7 @@ function goToDetail(row: Course) {
     <div class="row justify-between items-center q-mb-md" style="margin-top: 20px">
       <div class="texttitle">หัวข้ออบรมออนไลน์สำหรับการเก็บชั่วโมงสหกิจศึกษา</div>
       <!-- ปุ่มเพื่อการเพิ่มข้อมูล -->
-      <q-btn dense outlined label="เพิ่มหัวข้อการอบรม" class="btnadd" bo />
+      <q-btn dense outlined label="เพิ่มหัวข้อการอบรม" class="btnadd" @click="goToAddCourse" />
     </div>
     <section class="q-mt-lg">
       <template v-if="$q.screen.gt.sm">
@@ -231,6 +235,7 @@ function goToDetail(row: Course) {
         </div>
       </template>
     </section>
+    <router-view />
   </q-page>
 </template>
 
