@@ -1,35 +1,29 @@
 <template>
   <q-card>
-    <!-- 🔘 Options -->
-    <div v-for="(opt, index) in localData.choices" :key="index" class="row items-center q-gutter-sm q-mb-sm">
-      <q-radio
-        disable
-        :model-value="null"
-        val="opt"
-      />
-      <q-input
-        v-model="localData.choices[index]"
-        dense
-        outlined
-        placeholder="Option"
-        class="col"
-        @update:model-value="update"
-      />
-      <q-btn icon="close" color="negative" dense flat round @click="removeOption(index)" />
+    <div v-if="localData.choices && localData.choices.length > 0">
+      <div
+        v-for="(opt, index) in localData.choices"
+        :key="index"
+        class="row items-center q-gutter-sm q-mb-sm"
+      >
+        <q-radio disable :model-value="null" :val="opt.title" />
+        <q-input
+          v-if="localData.choices[index]"
+          v-model="localData.choices[index].title"
+          dense
+          outlined
+          placeholder="Option"
+          class="col"
+          @update:model-value="update"
+        />
+        <q-btn icon="close" color="negative" dense flat round @click="removeOption(index)" />
+      </div>
     </div>
 
-    <!-- ➕ Add Option -->
-    <q-btn
-      dense flat size="sm"
-      icon="add"
-      label="Add option"
-      class="q-mb-sm"
-      @click="addOption"
-    />
+    <q-btn dense flat size="sm" icon="add" label="Add option" class="q-mb-sm" @click="addOption" />
 
     <q-separator spaced />
 
-    <!-- 🔧 Footer Actions -->
     <div class="row justify-between items-center">
       <q-btn flat icon="assignment" size="sm" label="Answer key" />
       <div class="row items-center q-gutter-sm">
@@ -47,18 +41,13 @@
 
 <script setup lang="ts">
 import { reactive, watch } from 'vue'
+import type { Block } from 'src/types/form'
 
 const props = defineProps<{
-  modelValue: {
-    questionText: string
-    choices: string[]
-    isRequired: boolean
-    type: string
-  }
+  modelValue: Block
 }>()
 
 const emit = defineEmits(['update:modelValue'])
-
 const localData = reactive({ ...props.modelValue })
 
 function update() {
@@ -66,7 +55,10 @@ function update() {
 }
 
 function addOption() {
-  localData.choices.push(`Option ${localData.choices.length + 1}`)
+  localData.choices.push({
+    title: `Option ${localData.choices.length + 1}`,
+    sequence: localData.choices.length + 1,
+  })
   update()
 }
 
@@ -75,9 +67,13 @@ function removeOption(index: number) {
   update()
 }
 
-watch(() => props.modelValue, (val) => {
-  Object.assign(localData, val)
-}, { deep: true })
+watch(
+  () => props.modelValue,
+  (val) => {
+    Object.assign(localData, val)
+  },
+  { deep: true },
+)
 </script>
 
 <style scoped>

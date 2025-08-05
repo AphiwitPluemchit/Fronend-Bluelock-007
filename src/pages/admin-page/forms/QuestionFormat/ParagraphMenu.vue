@@ -1,9 +1,8 @@
 <template>
   <q-card>
     <q-input
+      v-model="answer"
       type="textarea"
-      v-model="previewValue"
-      readonly
       placeholder="Long answer text"
       outlined
       dense
@@ -31,18 +30,11 @@
 
 <script setup lang="ts">
 import { reactive, ref, watch } from 'vue'
+import type { Block } from 'src/types/form'
 
-const props = defineProps<{
-  modelValue: {
-    questionText: string
-    isRequired: boolean
-    type: string
-    choices: string[]
-  }
-}>()
-
+const props = defineProps<{ modelValue: Block }>()
 const emit = defineEmits(['update:modelValue'])
-const previewValue = ref('')
+const answer = ref('')
 const localData = reactive({ ...props.modelValue })
 
 function update() {
@@ -54,10 +46,6 @@ watch(
   (val) => {
     Object.assign(localData, val)
   },
-  { deep: true },
+  { immediate: true, deep: true },
 )
 </script>
-
-<style scoped>
-
-</style>

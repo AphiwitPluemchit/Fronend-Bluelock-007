@@ -1,15 +1,19 @@
 <template>
   <q-card>
     <!-- 🔽 Dropdown Options -->
-    <div v-for="(opt, index) in localData.choices" :key="index" class="row items-center q-gutter-sm q-mb-sm">
+    <div
+      v-for="(opt, index) in localData.choices"
+      :key="index"
+      class="row items-center q-gutter-sm q-mb-sm"
+    >
       <div class="text-caption" style="width: 20px">{{ index + 1 }}.</div>
       <q-input
-        v-model="localData.choices[index]"
         dense
         outlined
+        :model-value="opt"
+        @update:model-value="val => updateOption(index, String(val ?? ''))"
         placeholder="Option"
         class="col"
-        @update:model-value="update"
       />
       <q-btn icon="close" color="negative" dense flat round @click="removeOption(index)" />
     </div>
@@ -49,7 +53,20 @@ const props = defineProps<{
 
 const emit = defineEmits(['update:modelValue'])
 
-const localData = reactive({ ...props.modelValue })
+const localData = reactive({
+  questionText: '',
+  choices: [] as string[],
+  isRequired: false,
+  type: ''
+})
+
+watch(
+  () => props.modelValue,
+  (val) => {
+    Object.assign(localData, val)
+  },
+  { immediate: true, deep: true }
+)
 
 function update() {
   emit('update:modelValue', { ...localData })
@@ -65,16 +82,8 @@ function removeOption(index: number) {
   update()
 }
 
-watch(() => props.modelValue, (val) => {
-  Object.assign(localData, val)
-}, { deep: true })
-</script>
-
-<style scoped>
-.title-card {
-  max-width: 1000px;
-  width: 100%;
-  border-radius: 15px;
-  border: 1px solid #e0e0e0;
+function updateOption(index: number, val: string) {
+  localData.choices[index] = val
+  update()
 }
-</style>
+</script>

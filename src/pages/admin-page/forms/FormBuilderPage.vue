@@ -1,4 +1,3 @@
-<!-- eslint-disable @typescript-eslint/no-unused-vars -->
 <template>
   <q-page class="q-pa-md">
     <!-- Header -->
@@ -10,7 +9,7 @@
           label="Preview"
           icon="visibility"
           @click="showPreview = true"
-          :disable="!formData.title || formData.formElements.length === 0"
+          :disable="!formData.title || formData.blocks?.length === 0"
           class="q-mr-md"
         />
         <q-btn
@@ -18,7 +17,7 @@
           label="Save"
           icon="save"
           @click="saveForm"
-          :disable="!formData.title || formData.formElements.length === 0"
+          :disable="!formData.title || formData.blocks?.length === 0"
         />
       </div>
     </div>
@@ -37,21 +36,13 @@
     <div class="flex justify-center q-mt-md">
       <div style="width: 1000px">
         <q-card
-          v-for="(q, index) in formData.formElements"
+          v-for="(block, index) in formData.blocks"
           :key="index"
-          :class="['q-pa-md q-mb-md', isTitleCard(q) ? 'title-card' : 'question-card']"
+          :class="['q-pa-md q-mb-md', block.type === 'title' ? 'title-card' : 'question-card']"
         >
-          <!-- ✅ ถ้าเป็น title card -->
-          <div v-if="isTitleCard(q)">
-            <!-- 🔹 Row: Title input + action icons -->
+          <div v-if="block.type === 'title'">
             <div class="row justify-between items-start q-mb-sm">
-              <q-input
-                v-model="q.titleCard.title"
-                placeholder="Untitled Title"
-                dense
-                outlined
-                class="col-grow"
-              />
+              <q-input v-model="block.title" placeholder="หัวข้อ" dense outlined class="col-grow" />
               <div class="q-gutter-sm q-ml-sm">
                 <q-btn
                   flat
@@ -59,64 +50,39 @@
                   dense
                   icon="content_copy"
                   class="bg-blue text-white q-pa-xs rounded-borders"
-                  @click="copyQuestion(index)"
+                  @click="copyBlock(index)"
                 />
                 <q-btn
                   flat
                   round
                   dense
                   icon="delete"
-                  @click="removeQuestion(index)"
                   class="bg-red text-white q-pa-xs rounded-borders"
+                  @click="removeBlock(index)"
                 />
-                <q-btn
-                  flat
-                  round
-                  dense
-                  icon="more_vert"
-                  class="bg-amber-8 text-white q-pa-xs rounded-borders"
-                >
-                  <q-menu>
-                    <q-list>
-                      <q-item>
-                        <q-item-section>Show</q-item-section>
-                      </q-item>
-                      <q-item tag="label" clickable>
-                        <q-item-section side>
-                          <q-checkbox v-model="q.titleCard.showDescription" color="primary" dense />
-                        </q-item-section>
-                        <q-item-section>Description</q-item-section>
-                      </q-item>
-                    </q-list>
-                  </q-menu>
-                </q-btn>
               </div>
             </div>
-
-            <!-- 🔸 Description input -->
             <q-input
-              v-if="q.titleCard.showDescription"
-              v-model="q.titleCard.description"
-              placeholder="Description (optional)"
+              v-model="block.description"
+              placeholder="คำอธิบายเพิ่มเติม (ไม่จำเป็น)"
               dense
               outlined
             />
           </div>
 
-          <!-- ✅ ถ้าเป็นคำถามทั่วไป -->
-          <div v-else-if="q.question">
+          <div v-else>
             <div class="row items-start q-gutter-md q-mb-md">
               <q-input
-                v-model="q.question.questionText"
-                placeholder="Question"
+                v-model="block.title"
+                placeholder="คำถาม"
                 outlined
                 dense
                 style="max-width: 610px; width: 100%"
               />
               <q-btn
                 outline
-                :icon="getIcon(q.question.type)"
-                :label="getLabel(q.question.type)"
+                :icon="getIcon(block.type)"
+                :label="getLabel(block.type)"
                 style="border-radius: 8px; max-width: 230px; width: 100%"
               >
                 <q-menu>
@@ -129,26 +95,26 @@
                 dense
                 icon="content_copy"
                 class="bg-blue text-white q-pa-xs rounded-borders"
-                @click="copyQuestion(index)"
+                @click="copyBlock(index)"
               />
               <q-btn
                 icon="delete"
                 flat
                 round
                 dense
-                @click="removeQuestion(index)"
                 class="bg-red text-white q-pa-xs rounded-borders"
+                @click="removeBlock(index)"
               />
             </div>
 
-            <template v-for="(q, index) in formData.formElements" :key="index">
-              <component
-                v-if="isQuestionElement(q)"
-                :is="getComponent(q.question.type)"
-                v-model="q.question"
-                flat
-              />
-            </template>
+            <component
+              flat
+              v-for="(block, i) in formData.blocks"
+              :key="block.id || i"
+              :is="getComponent(block.type)"
+              :model-value="block"
+              @update:model-value="formData.blocks[i] = $event"
+            />
           </div>
         </q-card>
       </div>
@@ -165,7 +131,7 @@
     </div>
 
     <!-- Preview Dialog -->
-    <PreviewDialog v-model="showPreview" :form="formData" />
+    <!-- <PreviewDialog v-model="showPreview" :form="formData" /> -->
   </q-page>
 </template>
 
@@ -173,11 +139,11 @@
 import { ref, reactive } from 'vue'
 import { useQuasar } from 'quasar'
 import { useFormStore } from 'src/stores/forms'
-import type { QuestionType, Question, TitleCard, FormElement, Form } from 'src/types/form'
+import type { Form } from 'src/types/form'
 
 import QuestionTypeMenu from './QuestionFormat/QuestionTypeMenu.vue'
 // Components
-import PreviewDialog from './PreviewDialog.vue'
+// import PreviewDialog from './PreviewDialog.vue'
 import ShortAnswer from './QuestionFormat/ShortAnswer.vue'
 import CheckboxesMenu from './QuestionFormat/CheckboxesMenu.vue'
 import MutipleChoice from './QuestionFormat/MutipleChoice.vue'
@@ -196,65 +162,59 @@ const formStore = useFormStore()
 const formData = reactive<Form>({
   title: '',
   description: '',
-  formElements: [],
+  activityId: '',
+  isOrigin: true,
+  blocks: [],
 })
 
 function addQuestion() {
-
-  formData.formElements.push({
-  question: {
+  formData.blocks?.push({
+    title: '',
     type: 'short_answer',
-    questionText: '',
+    description: '',
     isRequired: false,
+    session: 1,
+    sequence: formData.blocks.length + 1,
     choices: [],
     rows: [],
-    columns: [],
-  },
-  order: formData.formElements.length,
-})
-
+  })
 }
 
 function addTitleCard() {
-  formData.formElements.push({
-  titleCard: {
+  formData.blocks?.push({
     title: '',
+    type: 'title',
     description: '',
-    showDescription: true,
-  },
-  order: formData.formElements.length,
-})
+    isRequired: false,
+    session: 1,
+    sequence: formData.blocks.length + 1,
+    choices: [],
+    rows: [],
+  })
+}
+function removeBlock(index: number) {
+  formData.blocks?.splice(index, 1)
 }
 
-function isTitleCard(el: FormElement): el is FormElement & { titleCard: TitleCard } {
-  return !!el.titleCard
-}
-function isQuestionElement(el: FormElement): el is FormElement & { question: Question } {
-  return !!el.question
-}
-function removeQuestion(index: number) {
-  formData.formElements.splice(index, 1)
-}
-
-function onTypeSelected(index: number, type: { label: string; value: QuestionType; icon: string }) {
-  const q = formData.formElements[index]
-  if (!q || !q.question) return
-
-  q.question.type = type.value
-
+function onTypeSelected(index: number, type: { label: string; value: string; icon: string }) {
+  const block = formData.blocks?.[index]
+  if (!block) return
+  block.type = type.value
   if (['checkbox', 'multiple_choice', 'dropdown'].includes(type.value)) {
-    q.question.choices = ['Option 1', 'Option 2']
+    block.choices = [
+      { title: 'Option 1', sequence: 1 },
+      { title: 'Option 2', sequence: 2 },
+    ]
   } else {
-    q.question.choices = []
+    block.choices = []
   }
 }
-
-function copyQuestion(index: number) {
-  const original = formData.formElements[index]
+function copyBlock(index: number) {
+  const original = formData.blocks?.[index]
   if (!original) return
 
   const copied = JSON.parse(JSON.stringify(original))
-  formData.formElements.splice(index + 1, 0, copied)
+  formData.blocks?.splice(index + 1, 0, copied)
 }
 
 function getComponent(type: string) {
@@ -280,7 +240,7 @@ function getComponent(type: string) {
   }
 }
 
-function getIcon(type: QuestionType) {
+function getIcon(type: string) {
   switch (type) {
     case 'short_answer':
       return 'short_text'
@@ -302,7 +262,7 @@ function getIcon(type: QuestionType) {
   }
 }
 
-function getLabel(type: QuestionType) {
+function getLabel(type: string) {
   switch (type) {
     case 'short_answer':
       return 'Short answer'
@@ -327,17 +287,37 @@ function getLabel(type: QuestionType) {
 
 async function saveForm() {
   try {
-    
-    await formStore.create({
+    const blocks = formData.blocks.map((block, index) => ({
+      title: block.title,
+      type: block.type,
+      description: block.description || '',
+      isRequired: block.isRequired,
+      session: block.session ?? 1,
+      sequence: index + 1,
+      choices:
+        block.choices?.map((c, i) => ({
+          title: typeof c === 'string' ? c : c.title,
+          sequence: i + 1,
+        })) ?? [],
+      rows:
+        block.rows?.map((r, i) => ({
+          title: typeof r === 'string' ? r : r.title,
+          sequence: i + 1,
+        })) ?? [],
+    }))
+
+    await formStore.createForm({
       title: formData.title,
       description: formData.description,
-      formElements: formData.formElements,
+      activityId: formData.activityId,
+      isOrigin: true,
+      blocks,
     })
-    console.log(formData)
+
     $q.notify({ type: 'positive', message: 'ฟอร์มถูกบันทึกแล้ว!' })
-    await router.push('/forms') // เปลี่ยนเส้นทางตามต้องการ
+    await router.push('/forms')
   } catch (err) {
-    console.log(err)
+    console.error(err)
     $q.notify({ type: 'negative', message: 'เกิดข้อผิดพลาดในการบันทึกฟอร์ม' })
   }
 }
