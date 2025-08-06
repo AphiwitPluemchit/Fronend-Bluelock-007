@@ -18,8 +18,9 @@ const course = ref<Course>({
   issuer: '',
   type: '',
   hour: 0,
-  isHardSkill: false,
+  isHardSkill: null as boolean | null,
   isActive: true,
+  description: '',
 })
 
 // File upload
@@ -32,7 +33,7 @@ const errors = ref<Record<string, string>>({})
 // Breadcrumbs
 const breadcrumbs = ref({
   previousPage: { title: 'รายการหัวข้อทั้งหมด', path: '/admin/CourseTablePage' },
-  currentPage: { title: 'เพิ่มหัวข้อการอบรม', path: '/admin/AddCourse' },
+  currentPage: { title: 'เพิ่มหัวข้อการอบรม', path: '/admin/CourseTablePage/AddCourse' },
   icon: 'school',
 })
 
@@ -51,7 +52,9 @@ const validateForm = () => {
   if (!Number.isInteger(course.value.hour) || course.value.hour <= 0) {
     errors.value.hour = 'กรุณากรอกจำนวนชั่วโมงให้ถูกต้อง'
   }
-  if (!course.value.isHardSkill) errors.value.isHardSkill = 'กรุณาเลือกประเภทหัวข้อ'
+  if (course.value.isHardSkill === null) {
+    errors.value.isHardSkill = 'กรุณาเลือกประเภทหัวข้อ'
+  }
 
   return Object.keys(errors.value).length === 0
 }
@@ -86,33 +89,27 @@ const isImageFile = computed(() => {
   return file.type.startsWith('image/')
 })
 
-// Form actions
-const saveCourse = async () => {
-  if (!validateForm()) return
-
-  try {
-    // Save course data
-    await courseStore.addCourse(course.value)
-
-    // Handle file upload if needed (simplified for now)
-    if (uploadedFiles.value.length > 0 && uploadedFiles.value[0]) {
-      const formData = new FormData()
-      formData.append('file', uploadedFiles.value[0])
-      // For now, we'll just show a notification that file upload is not implemented
-      $q.notify({ message: 'บันทึกข้อมูลสำเร็จ (การอัปโหลดไฟล์จะถูกเพิ่มในภายหลัง)', type: 'info' })
-    } else {
-      $q.notify({ message: 'บันทึกข้อมูลสำเร็จ', type: 'positive' })
-    }
-
-    void router.push('/admin/CourseTablePage')
-  } catch (error) {
-    $q.notify({ message: 'ไม่สามารถบันทึกข้อมูลได้', type: 'negative' })
-    console.error('Error saving course:', error)
-  }
-}
-
 const cancel = () => {
   void router.push('/admin/CourseTablePage')
+}
+
+const submit = async () => {
+  console.log('Submit clicked')
+
+  if (!validateForm()) {
+    console.log('Validation failed', errors.value)
+    return
+  }
+
+  try {
+    console.log('Saving course...', course.value)
+    await courseStore.addCourse(course.value)
+    $q.notify({ message: 'บันทึกข้อมูลสำเร็จ', type: 'positive' })
+    void router.push('/admin/CourseTablePage')
+  } catch (err) {
+    console.error('Error saving course:', err)
+    $q.notify({ message: 'ไม่สามารถบันทึกข้อมูลได้', type: 'negative' })
+  }
 }
 </script>
 
@@ -123,13 +120,13 @@ const cancel = () => {
 
     <div class="q-mx-lg">
       <q-card class="q-mt-md full-width" flat>
-        <q-form @submit.prevent="saveCourse">
+        <q-form @submit.prevent="submit">
           <!-- Form Fields -->
           <div class="row q-col-gutter-md q-pa-md">
             <!-- Name Field -->
             <div class="col-12 row items-center q-pa-sm">
               <div class="col-xs-12 col-md-1 text-right q-pr-md">
-                <p class="q-my-none">ชื่อหลักสูตร <span class="text-red">*</span>:</p>
+                <p class="q-my-none">ชื่อหัวข้อ <span class="text-red">*</span>:</p>
               </div>
               <div class="col-xs-12 col-md-11">
                 <q-input
@@ -180,13 +177,11 @@ const cancel = () => {
             <!-- ประเภทหัวข้อ -->
             <div class="col-12 row items-center q-pa-sm">
               <div class="col-xs-12 col-md-1 text-right q-pr-md">
-                <p class="q-my-none">ประเภทหัวข้อ<span class="text-red">*</span>:</p>
+                <p class="q-my-none">ประเภทหัวข้อ <span class="text-red">*</span>:</p>
               </div>
               <div class="col-xs-12 col-md-11">
                 <q-select
-                  v-model="course.type"
-                  :error="!!errors.type"
-                  :error-message="errors.type"
+                  v-model="course.isHardSkill"
                   :options="[
                     { label: 'ทักษะทางวิชาการ', value: true },
                     { label: 'เตรียมความพร้อม', value: false },
@@ -222,7 +217,7 @@ const cancel = () => {
               </div>
               <div class="col-xs-12 col-md-11">
                 <q-select
-                  v-model="course.issuer"
+                  v-model="course.type"
                   :options="[
                     { label: 'Buu Mooc', value: 'buumooc' },
                     { label: 'Thai Mooc', value: 'thaimooc' },
@@ -232,6 +227,14 @@ const cancel = () => {
                   emit-value
                   map-options
                 />
+              </div>
+            </div>
+            <div class="col-12 row items-center q-pa-sm">
+              <div class="col-xs-12 col-md-1 text-right q-pr-md">
+                <p class="q-my-none align-self: flex-start">รายละเอียด:</p>
+              </div>
+              <div class="col-xs-12 col-md-11">
+                <q-input v-model="course.description" outlined dense type="textarea" />
               </div>
             </div>
 
@@ -291,15 +294,9 @@ const cancel = () => {
           </div>
 
           <!-- Form Actions -->
-          <div class="q-mt-md q-pa-md text-right">
-            <q-btn
-              label="ยกเลิก"
-              class="btnreject q-mr-sm q-mb-sm"
-              unelevated
-              rounded
-              @click="cancel"
-            />
-            <q-btn label="บันทึก" class="btnconfirm q-mb-sm" unelevated rounded type="submit" />
+          <div class="q-mt-md q-pa-md flex justify-end q-gutter-sm form-actions">
+            <q-btn label="ยกเลิก" class="btnreject" unelevated rounded @click="cancel" />
+            <q-btn label="บันทึก" class="btnconfirm" unelevated rounded type="submit" />
           </div>
         </q-form>
       </q-card>
@@ -308,33 +305,34 @@ const cancel = () => {
 </template>
 
 <style scoped>
+.form-actions {
+  flex-wrap: wrap;
+}
+
+@media (max-width: 600px) {
+  .form-actions {
+    justify-content: center;
+  }
+
+  .form-actions .q-btn {
+    width: 100%;
+    max-width: 250px;
+  }
+}
+.container {
+  display: flex;
+  align-items: flex-start;
+  width: 100%;
+  flex-wrap: wrap;
+}
 .text-red {
   color: red;
 }
 
 .q-card {
-  background-color: white;
+  background-color: #edf0f5;
   border-radius: 10px;
   padding: 20px;
   box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.2);
-}
-
-@media (max-width: 599px) {
-  .q-card {
-    padding: 15px;
-  }
-
-  .text-right {
-    text-align: left !important;
-  }
-
-  .q-mr-sm {
-    margin-right: 0 !important;
-    margin-bottom: 8px !important;
-  }
-
-  .text-right {
-    text-align: left !important;
-  }
 }
 </style>

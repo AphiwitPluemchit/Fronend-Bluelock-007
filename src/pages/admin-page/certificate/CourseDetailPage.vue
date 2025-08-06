@@ -128,10 +128,17 @@ const showCancelDialog = ref<boolean>(false)
 // ]
 
 async function saveChanges() {
-  if (!course.value) return
-  await courseStore.updateCourse(course.value.id!, course.value)
-  originalCourseData.value = { ...courseStore.course }
-  isEditMode.value = false
+  console.log('saveChanges called')
+  try {
+    if (!course.value) return
+    await courseStore.updateCourse(course.value.id!, course.value)
+    originalCourseData.value = { ...courseStore.course }
+    isEditMode.value = false
+    $q.notify({ message: 'แก้ไขข้อมูลสำเร็จ', type: 'positive' })
+  } catch (err) {
+    $q.notify({ message: 'ไม่สามารถบันทึกข้อมูลได้', type: 'negative' })
+    console.error('Error updating course:', err)
+  }
 }
 function cancelEdit() {
   showCancelDialog.value = true

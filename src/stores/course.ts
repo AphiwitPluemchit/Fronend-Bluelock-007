@@ -16,6 +16,7 @@ export const useCourseStore = defineStore('course', () => {
     issuer: '',
     hour: 0,
     type: '',
+    description: '',
   })
 
   const fetchCourses = async () => {
@@ -26,6 +27,8 @@ export const useCourseStore = defineStore('course', () => {
   const addCourse = async (course: Course) => {
     await CourseService.createCourse(course)
     await fetchCourses()
+    console.log('Mock addCourse:', course)
+    return Promise.resolve()
   }
 
   const getOneCourse = async (id: string) => {
