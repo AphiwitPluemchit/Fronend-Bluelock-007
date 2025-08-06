@@ -13,12 +13,23 @@ const showError = (message: string) => {
   })
 }
 
+export interface CourseQuery {
+  page: number
+  limit: number
+  search?: string | undefined
+  sortBy?: string
+  order?: 'asc' | 'desc'
+  isActive?: boolean | undefined
+  isHardSkill?: boolean | undefined
+  type?: string | undefined
+}
+
 export class CourseService {
   static path = 'courses'
 
-  static async getAll(): Promise<PaginationResponse<Course>> {
+  static async getAll(params?: CourseQuery): Promise<PaginationResponse<Course>> {
     try {
-      const res = await api.get(this.path)
+      const res = await api.get(this.path, { params })
       return res.data
     } catch (error) {
       showError('ไม่สามารถดึงรายการหัวข้ออบรมได้')

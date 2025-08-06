@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { nextTick, onMounted, ref } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import type { QTableProps } from 'quasar'
 import FilterDialog from 'src/components/Dialog/FilterDialog.vue'
 import { useRouter } from 'vue-router'
@@ -11,18 +11,60 @@ const showFilterDialog1 = ref(false)
 const filterCategories1 = ref(['categoryActivity'])
 
 const courseStore = useCourseStore()
-const rows = ref<Course[]>([])
+const rows = computed(() => courseStore.courses ?? [])
 
 onMounted(async () => {
   console.log('Fetching courses...')
-  await nextTick(async () => {
-    await courseStore.fetchCourses()
-  })
+  await fetchCoursesWithPagination()
   console.log('Courses from store:', courseStore.courses)
-
-  rows.value = courseStore.courses
-  console.log('Rows value:', rows.value)
 })
+
+// ฟังก์ชัน fetch ข้อมูลและ sync pagination
+async function fetchCoursesWithPagination() {
+  await courseStore.fetchCourses()
+
+  pagination.value.rowsNumber = courseStore.meta.total
+  pagination.value.page = courseStore.params.page
+  pagination.value.rowsPerPage = courseStore.params.limit
+  pagination.value.sortBy = courseStore.params.sortBy || ''
+  pagination.value.descending = courseStore.params.order === 'desc'
+}
+
+async function onRequest(requestProp: {
+  pagination: { sortBy: string; descending: boolean; page: number; rowsPerPage: number }
+}) {
+  const { pagination: p } = requestProp
+
+  courseStore.params.page = p.page
+  courseStore.params.limit = p.rowsPerPage
+  courseStore.params.sortBy = p.sortBy || 'name'
+  courseStore.params.order = p.descending ? 'desc' : 'asc'
+
+  await fetchCoursesWithPagination()
+}
+
+const pagination = ref({
+  sortBy: courseStore.params.sortBy || '',
+  descending: courseStore.params.order === 'desc',
+  page: courseStore.params.page || 1,
+  rowsPerPage: courseStore.params.limit || 5,
+  rowsNumber: courseStore.meta.total || 0, // จำนวนข้อมูลรวม
+})
+
+const applyFilters = async (selectedFilters: { categoryActivity: string[] }) => {
+  const selected = selectedFilters.categoryActivity || []
+
+  if (selected.length === 0 || selected.length === 2) {
+    // ไม่เลือก หรือเลือกทั้งคู่
+    courseStore.params.isHardSkill = undefined
+  } else if (selected.length === 1) {
+    // เลือกอย่างเดียว
+    courseStore.params.isHardSkill = selected[0] === 'hard' ? true : false
+  }
+
+  console.log('isHardSkill:', courseStore.params.isHardSkill)
+  await courseStore.fetchCourses()
+}
 
 // interface CertificateCourse {
 //   id: number
@@ -31,7 +73,6 @@ onMounted(async () => {
 //   link: string
 //   categoryActivity: 'ทักษะทางวิชาการ' | 'เตรียมความพร้อม'
 // }
-
 const columns: QTableProps['columns'] = [
   { name: 'id', label: 'ลำดับ', field: 'id', align: 'left' },
   { name: 'name', label: 'ชื่อหัวข้อการอบรม', field: 'name', align: 'left' },
@@ -78,10 +119,16 @@ function goToAddCourse() {
           <q-input
             dense
             outlined
-            v-model="search1"
-            label="ค้นหา ชื่อ"
+            v-model="courseStore.params.search"
+            placeholder="ค้นหาหัวข้อการอบรม..."
             class="searchbox q-pr-sm"
             :style="{ boxShadow: 'none', border: 'none' }"
+            @update:model-value="
+              () => {
+                courseStore.params.page = 1
+                courseStore.fetchCourses()
+              }
+            "
           >
             <template v-slot:append>
               <q-icon name="search" />
@@ -90,17 +137,20 @@ function goToAddCourse() {
           <FilterDialog
             v-model="showFilterDialog1"
             :categories="filterCategories1"
+            @apply="applyFilters"
             class="filter-btn"
           />
         </div>
         <!-- Desktop: QTable -->
         <q-table
-          bordered
-          flat
           :rows="rows"
           :columns="columns"
-          class="q-mt-md customtable"
-          :pagination="{ rowsPerPage: 10 }"
+          :loading="courseStore.loading"
+          v-model:pagination="pagination"
+          :rows-per-page-options="[5, 10, 15, 20]"
+          row-key="id"
+          @request="onRequest"
+          class="q-mt-md my-table"
         >
           <!-- Header Sticky -->
           <template v-slot:header="props">
@@ -114,7 +164,7 @@ function goToAddCourse() {
           <!-- Body -->
           <template v-slot:body="props">
             <q-tr :props="props">
-              <q-td key="index">{{ props.pageIndex + 1 }}</q-td>
+              <q-td key="index">{{ props.rowIndex + 1 }}</q-td>
 
               <q-td
                 key="name"
@@ -274,14 +324,6 @@ function goToAddCourse() {
 .bg-blue-light {
   background-color: #e1f5fe;
 }
-
-.my-table td,
-.my-table th {
-  vertical-align: middle;
-  font-size: 14px;
-  line-height: 1.4;
-  padding: 12px;
-}
 .ellipsis {
   white-space: nowrap;
   text-overflow: ellipsis;
@@ -337,9 +379,5 @@ function goToAddCourse() {
   display: inline-block;
   max-width: 100%;
   overflow-wrap: anywhere;
-}
-.texttitle {
-  font-size: 28px;
-  font-weight: 400;
 }
 </style>
