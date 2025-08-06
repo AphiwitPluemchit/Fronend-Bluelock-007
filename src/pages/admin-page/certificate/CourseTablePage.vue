@@ -6,7 +6,6 @@ import { useRouter } from 'vue-router'
 import { useCourseStore } from 'src/stores/course'
 import type { Course } from 'src/types/course'
 
-const search1 = ref('')
 const showFilterDialog1 = ref(false)
 const filterCategories1 = ref(['categoryActivity'])
 
@@ -84,11 +83,16 @@ const columns: QTableProps['columns'] = [
     field: 'isHardSkill',
     align: 'center',
   },
+  { name: 'isActive', label: 'สถานะการใช้งาน', field: 'isActive', align: 'center' },
   { name: 'action', label: '', field: 'action', align: 'left' },
 ]
 
 function getcategoryCourse(row: Course) {
-  return row.isHardSkill ? ' soft-skill' : 'hard-skill'
+  return row.isHardSkill ? ' hard-skill' : 'soft-skill'
+}
+
+function getActiveText(isActive: boolean) {
+  return isActive ? 'status-planning' : 'status-close'
 }
 
 const router = useRouter()
@@ -194,6 +198,14 @@ function goToAddCourse() {
                 />
               </q-td>
 
+              <q-td key="isActive" class="text-center">
+                <q-badge
+                  :label="props.row.isActive ? 'ใช้งาน' : 'ไม่ใช้งาน'"
+                  class="status-badge"
+                  :class="getActiveText(props.row.isActive)"
+                />
+              </q-td>
+
               <q-td key="action" class="text-center q-gutter-x-sm">
                 <q-icon
                   clickable
@@ -216,10 +228,16 @@ function goToAddCourse() {
             dense
             style="flex: 1"
             outlined
-            v-model="search1"
-            label="ค้นหา ชื่อ"
+            v-model="courseStore.params.search"
+            placeholder="ค้นหาหัวข้อการอบรม..."
             class="searchbox q-pr-sm"
             :style="{ boxShadow: 'none', border: 'none' }"
+            @update:model-value="
+              () => {
+                courseStore.params.page = 1
+                courseStore.fetchCourses()
+              }
+            "
           >
             <template v-slot:append>
               <q-icon name="search" />
@@ -229,6 +247,7 @@ function goToAddCourse() {
             v-model="showFilterDialog1"
             :categories="filterCategories1"
             class="filter-btn"
+            @apply="applyFilters"
           />
         </div>
         <div class="q-mt-md">
@@ -252,6 +271,11 @@ function goToAddCourse() {
                   :label="row.isHardSkill ? 'ทักษะทางวิชาการ' : 'เตรียมความพร้อม'"
                   :class="getcategoryCourse(row)"
                   class="status-badge"
+                />
+                <q-badge
+                  :label="row.isActive ? 'ใช้งาน' : 'ไม่ใช้งาน'"
+                  class="status-badge"
+                  :class="getActiveText(row.isActive)"
                 />
                 <q-btn
                   flat
@@ -310,6 +334,20 @@ function goToAddCourse() {
   color: #009812;
   border: 1px solid #00bb16;
   background-color: #d2ffc7;
+}
+
+.status-planning {
+  background-color: #ffe7ba;
+  color: #ff6f00;
+  border: 1px solid #ffa500;
+  width: 130px;
+}
+
+.status-close {
+  background-color: #dadada;
+  color: #000000;
+  border: 1px solid #575656;
+  width: 130px;
 }
 
 .category-badge {
