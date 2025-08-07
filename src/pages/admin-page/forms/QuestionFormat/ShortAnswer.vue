@@ -1,9 +1,20 @@
 <template>
-  <q-card >
+  <q-card>
+    <!-- Editable question text -->
+    <q-input
+      v-model="localData.questionText"
+      label="คำถาม"
+      outlined
+      dense
+      class="q-mb-sm"
+      @update:model-value="update"
+    />
+
+    <!-- Preview short answer -->
     <q-input
       v-model="shortAnswer"
       readonly
-      placeholder="Short answer text"
+      placeholder="ตัวอย่างคำตอบ"
       outlined
       dense
       class="q-mb-md"
@@ -11,6 +22,7 @@
 
     <q-separator spaced />
 
+    <!-- Footer actions -->
     <div class="row justify-between items-center">
       <q-btn flat size="sm" icon="assignment" label="Answer key" />
       <div class="row items-center q-gutter-sm">
@@ -46,21 +58,10 @@ function update() {
   emit('update:modelValue', { ...localData })
 }
 
+// sync external props
 watch(
   () => props.modelValue,
-  (val) => {
-    Object.assign(localData, val)
-  },
-  { deep: true },
+  (val) => Object.assign(localData, val),
+  { deep: true }
 )
 </script>
-
-<style scoped>
-.title-card {
-  max-width: 1000px;
-  width: 100%;
-  min-height: 150px;
-  border-radius: 15px;
-  border: 1px solid #e0e0e0;
-}
-</style>

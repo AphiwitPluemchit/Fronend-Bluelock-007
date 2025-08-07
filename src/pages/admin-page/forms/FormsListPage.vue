@@ -15,8 +15,16 @@
         </div>
       </div>
 
-     
-
+      <q-table
+        :rows="formStore.forms"
+        :columns="columns"
+        row-key="id"
+        flat
+        bordered
+        :loading="formStore.loading"
+        no-data-label="ยังไม่มีฟอร์ม"
+        no-results-label="ไม่พบผลลัพธ์"
+      />
     
     </div>
   </q-page>
@@ -24,16 +32,29 @@
 
 <script setup lang="ts">
 
+import { useFormStore } from 'src/stores/forms'
+import { computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 
 
-
+const formStore = useFormStore()
 const router = useRouter()
-
 
 const createForm = async () => {
   await router.push('/Admin/forms/builder')
 }
+const columns = computed(() => [
+  {
+    name: 'title',
+    label: 'ชื่อฟอร์ม',
+    field: 'title',
+    align: 'left' as const,
+    sortable: true,
+  }
+])
+onMounted(async () => {
+  await formStore.fetchForms()
+})
 
 </script>
 

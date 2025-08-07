@@ -109,11 +109,9 @@
 
             <component
               flat
-              v-for="(block, i) in formData.blocks"
-              :key="block.id || i"
               :is="getComponent(block.type)"
               :model-value="block"
-              @update:model-value="formData.blocks[i] = $event"
+              @update:model-value="formData.blocks[index] = $event"
             />
           </div>
         </q-card>
@@ -131,7 +129,7 @@
     </div>
 
     <!-- Preview Dialog -->
-    <!-- <PreviewDialog v-model="showPreview" :form="formData" /> -->
+    <PreviewDialog v-model="showPreview" :form="formData" />
   </q-page>
 </template>
 
@@ -143,7 +141,7 @@ import type { Form } from 'src/types/form'
 
 import QuestionTypeMenu from './QuestionFormat/QuestionTypeMenu.vue'
 // Components
-// import PreviewDialog from './PreviewDialog.vue'
+import PreviewDialog from './PreviewDialog.vue'
 import ShortAnswer from './QuestionFormat/ShortAnswer.vue'
 import CheckboxesMenu from './QuestionFormat/CheckboxesMenu.vue'
 import MutipleChoice from './QuestionFormat/MutipleChoice.vue'
@@ -287,24 +285,26 @@ function getLabel(type: string) {
 
 async function saveForm() {
   try {
-    const blocks = formData.blocks.map((block, index) => ({
-      title: block.title,
-      type: block.type,
-      description: block.description || '',
-      isRequired: block.isRequired,
-      session: block.session ?? 1,
-      sequence: index + 1,
-      choices:
-        block.choices?.map((c, i) => ({
-          title: typeof c === 'string' ? c : c.title,
-          sequence: i + 1,
-        })) ?? [],
-      rows:
-        block.rows?.map((r, i) => ({
-          title: typeof r === 'string' ? r : r.title,
-          sequence: i + 1,
-        })) ?? [],
-    }))
+    const blocks = formData.blocks.map((block, index) => {
+      return {
+        title: block.title,
+        type: block.type,
+        description: block.description || '',
+        isRequired: block.isRequired,
+        session: block.session ?? 1,
+        sequence: index + 1,
+        choices:
+          block.choices?.map((c, i) => ({
+            title: typeof c === 'string' ? c : c.title,
+            sequence: i + 1,
+          })) ?? [],
+        rows:
+          block.rows?.map((r, i) => ({
+            title: typeof r === 'string' ? r : r.title,
+            sequence: i + 1,
+          })) ?? [],
+      }
+    })
 
     await formStore.createForm({
       title: formData.title,
@@ -315,7 +315,7 @@ async function saveForm() {
     })
 
     $q.notify({ type: 'positive', message: 'ฟอร์มถูกบันทึกแล้ว!' })
-    await router.push('/forms')
+    await router.push('/Admin/Forms')
   } catch (err) {
     console.error(err)
     $q.notify({ type: 'negative', message: 'เกิดข้อผิดพลาดในการบันทึกฟอร์ม' })
