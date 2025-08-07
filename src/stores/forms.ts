@@ -1,3 +1,4 @@
+// stores/form.ts
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
 import type { Form } from 'src/types/form'
@@ -64,6 +65,7 @@ export const useFormStore = defineStore('form', () => {
     fetchFormById,
     createForm,
     updateForm,
+
     deleteForm,
   }
 })

@@ -112,6 +112,7 @@
               :is="getComponent(block.type)"
               :model-value="block"
               @update:model-value="formData.blocks[index] = $event"
+
             />
           </div>
         </q-card>
@@ -129,7 +130,7 @@
     </div>
 
     <!-- Preview Dialog -->
-    <PreviewDialog v-model="showPreview" :form="formData" />
+    <!-- <PreviewDialog v-model="showPreview" :form="formData" /> -->
   </q-page>
 </template>
 
@@ -141,7 +142,7 @@ import type { Form } from 'src/types/form'
 
 import QuestionTypeMenu from './QuestionFormat/QuestionTypeMenu.vue'
 // Components
-import PreviewDialog from './PreviewDialog.vue'
+// import PreviewDialog from './PreviewDialog.vue'
 import ShortAnswer from './QuestionFormat/ShortAnswer.vue'
 import CheckboxesMenu from './QuestionFormat/CheckboxesMenu.vue'
 import MutipleChoice from './QuestionFormat/MutipleChoice.vue'
@@ -315,7 +316,9 @@ async function saveForm() {
     })
 
     $q.notify({ type: 'positive', message: 'ฟอร์มถูกบันทึกแล้ว!' })
+
     await router.push('/Admin/Forms')
+
   } catch (err) {
     console.error(err)
     $q.notify({ type: 'negative', message: 'เกิดข้อผิดพลาดในการบันทึกฟอร์ม' })
