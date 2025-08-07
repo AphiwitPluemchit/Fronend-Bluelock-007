@@ -2,6 +2,7 @@
 import { ref, computed, onMounted, watch } from 'vue'
 import { useStudentStore } from 'src/stores/student'
 import AppBreadcrumbs from 'src/components/AppBreadcrumbs.vue'
+import type { Student } from 'src/types/student'
 
 const breadcrumbs = ref({
   previousPage: { title: 'จัดเก็บข้อมูลนิสิต', path: '/Admin/StudentStorage' },
@@ -58,11 +59,9 @@ watch(
   { deep: true },
 )
 
-// Watch students เพื่อ reset selectAll state เมื่อเปลี่ยนหน้า
+// เมื่อเปลี่ยนหน้า อย่า clear selectedStudents เพราะต้องการจำสิ่งที่เลือกไว้
 watch(students, () => {
-  // Reset selectAll และเคลียร์การเลือกเมื่อเปลี่ยนหน้า
   selectAll.value = false
-  selectedStudents.value = []
 })
 
 const data = async () => {
@@ -144,8 +143,23 @@ const columns = [
   },
   { name: 'status', label: 'สถานะ', field: 'status', align: 'center' as const },
 ]
-const selectedStudentsData = computed(() => {
-  return studentStore.students.filter((student) => selectedStudents.value.includes(student.code))
+
+const selectedStudentsData = computed(() => selectedStudentsDataRaw.value)
+
+// เก็บ object ของนิสิตที่ถูกเลือกแบบถาวร (ข้ามหน้าได้)
+const selectedStudentsDataRaw = ref<Student[]>([])
+
+watch(selectedStudents, (codes) => {
+  // ทุกครั้งที่รหัสเปลี่ยน ให้เพิ่ม object ใหม่เข้า raw ถ้ายังไม่มี
+  const newStudents = studentStore.students.filter(
+    (s) => codes.includes(s.code) && !selectedStudentsDataRaw.value.some((d) => d.code === s.code),
+  )
+  selectedStudentsDataRaw.value.push(...newStudents)
+
+  // ลบรายการที่ไม่อยู่ใน selectedStudents
+  selectedStudentsDataRaw.value = selectedStudentsDataRaw.value.filter((s) =>
+    codes.includes(s.code),
+  )
 })
 
 onMounted(async () => {
