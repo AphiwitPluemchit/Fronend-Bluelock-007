@@ -3,7 +3,7 @@
     <!-- Grid Table -->
     <div class="q-mb-md">
       <div class="row q-col-gutter-md">
-        <!-- Columns -->
+        <!-- 🟩 Rows -->
         <div class="col-6">
           <div class="text-subtitle2">Rows</div>
           <div
@@ -15,17 +15,17 @@
             <q-input
               dense
               outlined
-              v-model="localData.rows[rowIndex]"
+              :model-value="row"
+               @update:model-value="val => updateRow(rowIndex, String(val ?? ''))"
               placeholder="Row label"
               class="col"
-              @update:model-value="update"
             />
             <q-btn icon="close" color="negative" flat round dense @click="removeRow(rowIndex)" />
           </div>
           <q-btn flat dense icon="add" label="Add row" size="sm" @click="addRow" />
         </div>
 
-        <!-- Rows -->
+        <!-- 🟦 Columns -->
         <div class="col-6">
           <div class="text-subtitle2">Columns</div>
           <div
@@ -37,10 +37,10 @@
             <q-input
               dense
               outlined
-              v-model="localData.columns[colIndex]"
+              :model-value="col"
+             @update:model-value="val => updateColumn(colIndex, String(val ?? ''))"
               placeholder="Column label"
               class="col"
-              @update:model-value="update"
             />
             <q-btn icon="close" color="negative" flat round dense @click="removeColumn(colIndex)" />
           </div>
@@ -67,8 +67,7 @@
 <script setup lang="ts">
 import { reactive, ref, watch } from 'vue'
 
-const dummy = ref(null)
-
+// Props
 const props = defineProps<{
   modelValue: {
     questionText: string
@@ -81,6 +80,10 @@ const props = defineProps<{
 
 const emit = defineEmits(['update:modelValue'])
 
+// Dummy สำหรับ radio disable
+const dummy = ref(null)
+
+// Local reactive data (deep clone จาก props)
 const localData = reactive({
   questionText: '',
   isRequired: false,
@@ -89,24 +92,34 @@ const localData = reactive({
   columns: [] as string[]
 })
 
+// Watch sync data เข้า localData
 watch(
   () => props.modelValue,
-  (val) => {
-    Object.assign(localData, val)
-  },
+  (val) => Object.assign(localData, val),
   { immediate: true, deep: true }
 )
 
+// Emit ออกไปทุกครั้งที่มีการเปลี่ยน
 function update() {
   emit('update:modelValue', { ...localData })
 }
 
+// 🔧 Row / Column Handler
+function updateRow(index: number, val: string) {
+  localData.rows[index] = val
+  update()
+}
 function addRow() {
   localData.rows.push('')
   update()
 }
 function removeRow(index: number) {
   localData.rows.splice(index, 1)
+  update()
+}
+
+function updateColumn(index: number, val: string) {
+  localData.columns[index] = val
   update()
 }
 function addColumn() {
@@ -117,5 +130,8 @@ function removeColumn(index: number) {
   localData.columns.splice(index, 1)
   update()
 }
-
 </script>
+
+<style scoped>
+/* Optional Style */
+</style>

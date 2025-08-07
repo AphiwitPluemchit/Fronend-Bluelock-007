@@ -71,15 +71,10 @@
 
 <script setup lang="ts">
 import { reactive, watch } from 'vue'
+import type { Block } from 'src/types/form'
 
 const props = defineProps<{
-  modelValue: {
-    questionText: string
-    type: string
-    isRequired: boolean
-    max: number
-    icon: string
-  }
+  modelValue: Block
 }>()
 
 const emit = defineEmits(['update:modelValue'])
@@ -95,6 +90,7 @@ const iconOptions = [
   { label: '', value: 'star', color: 'amber' },
   { label: '', value: 'favorite', color: 'red' },
 ]
+
 function update() {
   emit('update:modelValue', { ...localData })
 }
@@ -104,9 +100,10 @@ watch(
   (val) => {
     Object.assign(localData, val)
   },
-  { deep: true },
+  { deep: true }
 )
 </script>
+
 
 <style scoped>
 .q-select-align .q-field__control {

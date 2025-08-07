@@ -1,44 +1,38 @@
-// Form Types for Google Forms-like system
-
-export type QuestionType =
-  | 'short_answer'
-  | 'paragraph'
-  | 'multiple_choice'
-  | 'checkbox'
-  | 'dropdown'
-  | 'grid_multiple_choice'
-  | 'grid_checkbox'
-  | 'rating'
-
-export interface Question {
-  id?: string
-  type: QuestionType
-  questionText: string
-  isRequired: boolean
-  choices?: string[]
-  rows?: string[]
-  columns?: string[]
-  titleCard?: null
-}
-
-export type TitleCard = {
-  title: string
-  description?: string
-  showDescription?: boolean
-  question?: null
-}
-export type FormElement ={
-  question?: Question | null
-  titleCard?: TitleCard | null
-  order: number
-}
+// types/form.ts
 
 export interface Form {
   id?: string
+  activityId: string
   title: string
   description: string
-  createdAt?: string
-  updatedAt?: string
-  formElements: FormElement[]
+  isOrigin: boolean
+  // category: string
+  blocks: Block[]
 }
 
+export interface Block {
+  id?: string
+  title: string
+  session: number
+  type: string // เช่น "short_answer", "multiple_choice"
+  description: string
+  isRequired: boolean
+  sequence: number
+  choices: Choice[] 
+  rows?: Row[]
+
+  max?: number        // สำหรับ rating scale เช่น 1-5, 1-10
+  icon?: string       // สำหรับไอคอน rating เช่น 'star', 'thumb_up'
+}
+
+export interface Choice {
+  id?: string
+  title: string
+  sequence: number
+}
+
+export interface Row {
+  id?: string
+  title: string
+  sequence: number
+}

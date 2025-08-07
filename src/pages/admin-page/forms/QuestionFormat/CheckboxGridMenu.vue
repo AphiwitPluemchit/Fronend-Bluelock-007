@@ -13,12 +13,12 @@
           >
             <div>{{ rowIndex + 1 }}.</div>
             <q-input
-              v-model="localData.rows[rowIndex]"
+              :model-value="row"
+              @update:model-value="val => updateRow(rowIndex, String(val ?? ''))"
               placeholder="Row label"
               dense
               outlined
               class="col"
-              @update:model-value="update"
             />
             <q-btn icon="close" color="negative" flat round dense @click="removeRow(rowIndex)" />
           </div>
@@ -35,12 +35,12 @@
           >
             <q-checkbox dense disable v-model="dummy[colIndex]" />
             <q-input
-              v-model="localData.columns[colIndex]"
+              :model-value="col"
+              @update:model-value="val => updateColumn(colIndex, String(val ?? ''))"
               placeholder="Column label"
               dense
               outlined
               class="col"
-              @update:model-value="update"
             />
             <q-btn icon="close" color="negative" flat round dense @click="removeColumn(colIndex)" />
           </div>
@@ -91,7 +91,11 @@ const localData = reactive({
 
 watch(
   () => props.modelValue,
-  (val) => Object.assign(localData, val),
+  (val) => {
+    Object.assign(localData, val)
+    // ให้ dummy มีขนาดเท่ากับ columns เสมอ
+    dummy.value = val.columns.map(() => false)
+  },
   { immediate: true, deep: true }
 )
 
@@ -99,19 +103,32 @@ function update() {
   emit('update:modelValue', { ...localData })
 }
 
+function updateRow(index: number, val: string) {
+  localData.rows[index] = val
+  update()
+}
+
+function updateColumn(index: number, val: string) {
+  localData.columns[index] = val
+  update()
+}
+
 function addRow() {
   localData.rows.push('')
   update()
 }
+
 function removeRow(index: number) {
   localData.rows.splice(index, 1)
   update()
 }
+
 function addColumn() {
   localData.columns.push('')
   dummy.value.push(false)
   update()
 }
+
 function removeColumn(index: number) {
   localData.columns.splice(index, 1)
   dummy.value.splice(index, 1)
