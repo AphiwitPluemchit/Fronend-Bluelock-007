@@ -7,6 +7,9 @@ import { useAuthStore } from 'src/stores/auth'
 const courseStore = useCourseStore()
 const authStore = useAuthStore()
 const baseurl = api.defaults.baseURL
+
+// ตั้งค่าเริ่มต้นให้แสดงเฉพาะคอร์สที่เปิดใช้งาน
+courseStore.params.isActive = true
 const selectedFile = ref<File | null>(null)
 const previewUrl = ref<string | null>(null)
 const isPDF = ref(false)
@@ -91,6 +94,7 @@ async function uploadFile() {
 
 function onSearch(val: string, update: (callback: () => void) => void) {
   courseStore.params.search = val
+  courseStore.params.isActive = true
   courseStore
     .fetchCourses()
     .catch((err) => console.error('Course load failed:', err))
@@ -101,8 +105,15 @@ function onSearch(val: string, update: (callback: () => void) => void) {
 
 function setCourseFilter() {
   courseStore.params.type = selectedSource.value
-  console.log(courseStore.params.type)
+  courseStore.params.isActive = true
+
+  selectedTopic.value = null
+
+  courseStore
+    .fetchCourses()
+    .catch((err) => console.error('Course load failed:', err))
 }
+
 </script>
 
 <template>
@@ -177,7 +188,11 @@ function setCourseFilter() {
         :disable="!selectedSource"
         use-input
         :debounce="300"
-      />
+      >
+        <template v-slot:hint>
+          แสดงเฉพาะหัวข้อที่เปิดใช้งานเท่านั้น
+        </template>
+      </q-select>
     </div>
 
     <!-- ปุ่มยืนยัน -->
