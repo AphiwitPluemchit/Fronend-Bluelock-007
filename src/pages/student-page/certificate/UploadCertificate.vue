@@ -2,8 +2,10 @@
 import { computed, ref } from 'vue'
 import { api } from 'boot/axios'
 import { useCourseStore } from 'src/stores/course'
+import { useAuthStore } from 'src/stores/auth'
 
 const courseStore = useCourseStore()
+const authStore = useAuthStore()
 const baseurl = api.defaults.baseURL
 const selectedFile = ref<File | null>(null)
 const previewUrl = ref<string | null>(null)
@@ -13,7 +15,7 @@ const fileInput = ref<HTMLInputElement | null>(null)
 const ocrResult = ref<OcrResult | null>(null)
 
 const selectedSource = ref('')
-const selectedTopic = ref('')
+const selectedTopic = ref<{ id: number; name: string } | null>(null)
 
 const sourceOptions = [
   { value: 'buumooc', label: 'BUU MOOC' },
@@ -68,7 +70,14 @@ async function uploadFile() {
   formData.append('file', selectedFile.value)
 
   try {
+    console.log('Student ID:', authStore.getUser?.id)
+    console.log('Course ID:', selectedTopic.value?.id)
     const res = await api.post(baseurl + '/ocr/upload', formData, {
+      params: {
+        // get id of course
+        studentId: authStore.getUser?.id,
+        courseId: selectedTopic.value?.id,
+      },
       headers: { 'Content-Type': 'multipart/form-data' },
     })
     const parsed = JSON.parse(res.data.data)
@@ -157,12 +166,12 @@ function setCourseFilter() {
       />
       <q-select
         v-model="selectedTopic"
-        :options="topicOptions.map((course) => course.name)"
+        :options="topicOptions"
+        option-label="name"
+        option-value="id"
         label="หัวข้อ"
         dense
         outlined
-        emit-value
-        map-options
         :loading="courseStore.loading"
         @filter="onSearch"
         :disable="!selectedSource"
