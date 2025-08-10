@@ -100,7 +100,9 @@
       </div>
 
       <!-- Mobile Layout -->
-      <div class="mobile-layout column items-center justify-center q-pa-lg hidden-md hidden-lg hidden-xl">
+      <div
+        class="mobile-layout column items-center justify-center q-pa-lg hidden-md hidden-lg hidden-xl"
+      >
         <!-- โลโก้ -->
         <div class="mobile-logo-section text-center q-mb-lg">
           <div class="mobile-icon-container q-mb-md">
@@ -212,7 +214,6 @@ const handleLogin = async () => {
       if (redirect) {
         localStorage.removeItem('redirectAfterLogin')
         await router.push(redirect)
-        return
       }
 
       const role = result.user?.role
@@ -228,7 +229,7 @@ const handleLogin = async () => {
         color: 'negative',
         message: 'เข้าสู่ระบบไม่สำเร็จ กรุณาตรวจสอบอีเมลหรือรหัสผ่าน',
         position: 'top',
-        timeout: 3000
+        timeout: 3000,
       })
     }
   } catch (error) {
@@ -237,14 +238,14 @@ const handleLogin = async () => {
       color: 'negative',
       message: 'เกิดข้อผิดพลาดในการเข้าสู่ระบบ',
       position: 'top',
-      timeout: 3000
+      timeout: 3000,
     })
   } finally {
     isLoggingIn.value = false
+    auth.clearForm()
   }
 }
 </script>
-
 
 <style scoped>
 .login-page {

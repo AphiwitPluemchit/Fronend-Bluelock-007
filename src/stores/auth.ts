@@ -75,9 +75,9 @@ export const useAuthStore = defineStore('auth', {
           localStorage.setItem('access_token', data.token)
           localStorage.setItem('user', JSON.stringify(data.user))
 
-          // เคลีย form
-          this.form.email = ''
-          this.form.password = ''
+          // // เคลีย form
+          // this.form.email = ''
+          // this.form.password = ''
 
           return data
         }
@@ -113,6 +113,12 @@ export const useAuthStore = defineStore('auth', {
       localStorage.removeItem('access_token')
       localStorage.removeItem('user')
       localStorage.removeItem('redirectAfterLogin')
+    },
+
+    // clear form
+    clearForm(): void {
+      this.form.email = ''
+      this.form.password = ''
     },
 
     // ✅ โหลดใหม่หลังรีเฟรช (ไม่มี state แต่ไว้ใช้ใน future)
