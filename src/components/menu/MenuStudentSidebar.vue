@@ -59,6 +59,7 @@ const linksList = [
   { title: 'กิจกรรมของฉัน', icon: 'assignment_ind', link: '/Student/MyActivitiesPage' },
   { title: 'บันทึกชั่วโมงอบรม', icon: 'history', link: '/Student/RecordPage' },
   { title: 'ใบประกาศนียบัตร', icon: 'school', link: '/Student/CertificatePage' },
+  { title: 'หัวข้ออบรมออนไลน์', icon: 'computer', link: '/Student/OnlineCoursesPage' },
 ]
 
 const drawerBehavior = computed(() => {
