@@ -1,7 +1,9 @@
 <script setup lang="ts">
-import { computed, ref, watch } from 'vue'
+import { computed, ref } from 'vue'
 import { api } from 'boot/axios'
+import { useCourseStore } from 'src/stores/course'
 
+const courseStore = useCourseStore()
 const baseurl = api.defaults.baseURL
 const selectedFile = ref<File | null>(null)
 const previewUrl = ref<string | null>(null)
@@ -13,20 +15,12 @@ const ocrResult = ref<OcrResult | null>(null)
 const selectedSource = ref('')
 const selectedTopic = ref('')
 
-watch(selectedSource, () => {
-  selectedTopic.value = ''
-})
+const sourceOptions = [
+  { value: 'buumooc', label: 'BUU MOOC' },
+  { value: 'thaimooc', label: 'Thai MOOC' },
+]
 
-const sourceOptions = ['BUU MOOC', 'Thai MOOC']
-const topicOptions = computed(() => {
-  if (selectedSource.value === 'BUU MOOC') {
-    return ['Python เบื้องต้น', 'Data Science พื้นฐาน']
-  } else if (selectedSource.value === 'Thai MOOC') {
-    return ['การตลาดออนไลน์', 'นวัตกรรมเพื่อสุขภาพ']
-  } else {
-    return []
-  }
-})
+const topicOptions = computed(() => courseStore.courses)
 
 interface OcrResult {
   student_name: string
@@ -84,6 +78,21 @@ async function uploadFile() {
   } finally {
     visible.value = false
   }
+}
+
+function onSearch(val: string, update: (callback: () => void) => void) {
+  courseStore.params.search = val
+  courseStore
+    .fetchCourses()
+    .catch((err) => console.error('Course load failed:', err))
+    .finally(() => {
+      update(() => {})
+    })
+}
+
+function setCourseFilter() {
+  courseStore.params.type = selectedSource.value
+  console.log(courseStore.params.type)
 }
 </script>
 
@@ -144,16 +153,21 @@ async function uploadFile() {
         outlined
         emit-value
         map-options
+        @update:model-value="setCourseFilter"
       />
       <q-select
         v-model="selectedTopic"
-        :options="topicOptions"
+        :options="topicOptions.map((course) => course.name)"
         label="หัวข้อ"
         dense
         outlined
         emit-value
         map-options
+        :loading="courseStore.loading"
+        @filter="onSearch"
         :disable="!selectedSource"
+        use-input
+        :debounce="300"
       />
     </div>
 
