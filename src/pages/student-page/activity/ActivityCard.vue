@@ -113,7 +113,7 @@ function enrollmentSummary(activityItems: ActivityItem[]) {
 .activity-card {
   border-radius: 20px;
   font-size: 16px;
-  padding: 12px;
+  padding: 16px;
   margin: 8px 0;
   display: flex;
   flex-direction: column;

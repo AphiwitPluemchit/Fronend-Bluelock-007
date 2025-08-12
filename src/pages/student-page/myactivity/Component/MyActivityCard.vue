@@ -112,7 +112,7 @@ const getActivityRooms = (activityItems: ActivityItem[] | null | undefined): str
 .activity-card {
   margin: 12px 0;
   padding: 16px;
-  border-radius: 20px;
+  border-radius: 16px;
   font-size: 16px;
   display: flex;
   flex-direction: column;
@@ -163,7 +163,7 @@ const getActivityRooms = (activityItems: ActivityItem[] | null | undefined): str
   }
 }
 
-@media (max-width: 400px) {
+@media (max-width: 100px) {
   .activity-card {
     padding: 10px;
     font-size: 14px;
@@ -172,8 +172,8 @@ const getActivityRooms = (activityItems: ActivityItem[] | null | undefined): str
 
   .activity-name {
     font-size: 14px;
-    -webkit-line-clamp: 2;
-    max-height: 2.8em;
+    /* -webkit-line-clamp: 2;
+    max-height: 2.8em; */
   }
 
   .btnconfirm {
