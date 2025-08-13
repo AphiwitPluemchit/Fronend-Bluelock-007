@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, onMounted, onBeforeUnmount, watchEffect } from 'vue'
 
 interface UploadHistoryRow {
   id: number
@@ -52,13 +52,69 @@ const rows = ref<UploadHistoryRow[]>([
 ])
 
 const columns = [
-  { name: 'id', label: 'ลำดับ', field: 'id', align: 'left' as const },
-  { name: 'certName', label: 'ชื่อ', field: 'certName', align: 'left' as const },
-  { name: 'skill', label: 'ประเภทกิจกรรม', field: 'skill', align: 'left' as const },
-  { name: 'hour', label: 'ชั่วโมงที่ได้รับ', field: 'hour', align: 'center' as const },
-  { name: 'uploadDate', label: 'วันที่อัปโหลด', field: 'uploadDate', align: 'left' as const },
-  { name: 'status', label: 'สถานะ', field: 'status', align: 'center' as const },
-  { name: 'note', label: 'หมายเหตุ', field: 'note', align: 'center' as const },
+  {
+    name: 'id',
+    label: 'ลำดับ',
+    field: 'id',
+    align: 'left' as const,
+    sortable: false,
+    style: 'width: 8%',
+    headerStyle: 'width: 8%; text-align: left;',
+  },
+  {
+    name: 'certName',
+    label: 'ชื่อ',
+    field: 'certName',
+    align: 'left' as const,
+    sortable: true,
+    style: 'width: 25%; overflow: hidden; text-overflow: ellipsis;',
+    headerStyle: 'width: 25%; text-align: left;',
+  },
+  {
+    name: 'skill',
+    label: 'ประเภทกิจกรรม',
+    field: 'skill',
+    align: 'left' as const,
+    sortable: true,
+    style: 'width: 18%',
+    headerStyle: 'width: 18%; text-align: left;',
+  },
+  {
+    name: 'hour',
+    label: 'ชั่วโมงที่ได้รับ',
+    field: 'hour',
+    align: 'center' as const,
+    sortable: true,
+    style: 'width: 15%',
+    headerStyle: 'width: 15%; text-align: center;',
+  },
+  {
+    name: 'uploadDate',
+    label: 'วันที่อัปโหลด',
+    field: 'uploadDate',
+    align: 'left' as const,
+    sortable: true,
+    style: 'width: 12%',
+    headerStyle: 'width: 12%; text-align: left;',
+  },
+  {
+    name: 'status',
+    label: 'สถานะ',
+    field: 'status',
+    align: 'center' as const,
+    sortable: true,
+    style: 'width: 12%',
+    headerStyle: 'width: 12%; text-align: center;',
+  },
+  {
+    name: 'note',
+    label: 'หมายเหตุ',
+    field: 'note',
+    align: 'center' as const,
+    sortable: false,
+    style: 'width: 10%',
+    headerStyle: 'width: 10%; text-align: center;',
+  },
 ]
 
 function getStatusClass(status: string) {
@@ -84,143 +140,288 @@ function translateSkillType(skill: string) {
       return '-'
   }
 }
+
+// Responsive variables
+const isMediumScreen = ref(false)
+const isSmallScreen = ref(false)
+
+const checkScreen = () => {
+  const width = window.innerWidth
+  isSmallScreen.value = width <= 650
+  isMediumScreen.value = width <= 850
+}
+
+function truncateText(text: string, maxLength = 30): string {
+  if (!text) return '-'
+
+  let dynamicMaxLength = maxLength
+  if (isSmallScreen.value) {
+    dynamicMaxLength = 45
+  } else if (isMediumScreen.value) {
+    dynamicMaxLength = 35
+  }
+
+  return text.length > dynamicMaxLength ? text.slice(0, dynamicMaxLength - 3) + '...' : text
+}
+
+onMounted(() => {
+  checkScreen()
+  window.addEventListener('resize', checkScreen)
+})
+
+onBeforeUnmount(() => {
+  window.removeEventListener('resize', checkScreen)
+})
+
+watchEffect(() => {
+  console.log('screen width changed →', {
+    isSmall: isSmallScreen.value,
+    isMedium: isMediumScreen.value,
+  })
+})
 </script>
 
 <template>
-  <q-page>
-    <!-- Header Card -->
-    <div class="q-pa-md q-mb-md">
-      <div class="text-h6">ประวัติการอัพโหลด</div>
+  <q-page class="q-pa-md">
+    <!-- ชื่อหน้า -->
+    <div class="row justify-between items-center q-mb-md" style="margin-top: 20px">
+      <div class="text-h5 q-mb-md">ประวัติการอัปโหลด</div>
     </div>
 
-    <!-- Table Container -->
-    <div class="table-container">
-      <!-- Desktop Table -->
-      <div class="desktop-table">
+    <!-- Desktop View -->
+    <template v-if="!isMediumScreen">
+      <section class="q-mt-lg">
         <q-table
           flat
           bordered
           :rows="rows"
           :columns="columns"
           row-key="id"
-          class="custom-table"
+          class="my-sticky-header-table"
           :pagination="{ rowsPerPage: 10 }"
         >
-          <template v-slot:body-cell-status="props">
-            <q-td class="flex flex-center">
-              <q-badge
-                :label="props.value"
-                :class="getStatusClass(props.value)"
-                class="status-badge"
-              />
-            </q-td>
-          </template>
-          <template v-slot:body-cell-skill="props">
-            <q-td>{{ translateSkillType(props.value) }}</q-td>
-          </template>
-          <template v-slot:body-cell-hour="props">
-            <q-td class="text-center">{{ props.value !== null ? props.value : '-' }}</q-td>
-          </template>
-          <template v-slot:body-cell-note="props">
-            <q-td class="text-center">{{ props.value || '-' }}</q-td>
-          </template>
-        </q-table>
-      </div>
-
-      <!-- Mobile Cards -->
-      <div class="mobile-cards">
-        <q-card v-for="row in rows" :key="row.id" class="mobile-card q-mb-md" flat bordered>
-          <q-card-section class="q-pa-md">
-            <div class="row q-col-gutter-md">
-              <!-- Left Column -->
-              <div class="col-12 col-sm-8">
-                <div class="text-weight-bold text-body1 q-mb-xs">
-                  {{ row.certName }}
+          <!-- หัวตาราง Sticky -->
+          <template v-slot:header="props">
+            <q-tr :props="props">
+              <q-th
+                v-for="col in props.cols"
+                :key="col.name"
+                :props="props"
+                :style="col.headerStyle"
+                class="text-weight-medium"
+              >
+                <div class="header-cell" @click.stop="col.sortable && props.sort(col)">
+                  {{ col.label }}
+                  <template v-if="col.sortable">
+                    <q-icon name="expand_more" size="1.8em" class="sort-icon-hover" />
+                  </template>
                 </div>
-                <div class="text-grey-7 text-body2 q-mb-sm">ลำดับ: {{ row.id }}</div>
-                <div class="row q-col-gutter-sm q-mb-sm">
-                  <div class="col-6">
-                    <div class="text-caption text-grey-6">ประเภทกิจกรรม</div>
-                    <div class="text-body2">{{ translateSkillType(row.skill) }}</div>
-                  </div>
-                  <div class="col-6">
-                    <div class="text-caption text-grey-6">ชั่วโมงที่ได้รับ</div>
-                    <div class="text-body2">{{ row.hour !== null ? row.hour : '-' }}</div>
-                  </div>
-                </div>
-                <div class="text-caption text-grey-6 q-mb-xs">วันที่อัปโหลด</div>
-                <div class="text-body2">{{ row.uploadDate }}</div>
-              </div>
+              </q-th>
+            </q-tr>
+          </template>
 
-              <!-- Right Column -->
-              <div class="col-12 col-sm-4 text-right">
-                <div class="q-mb-md">
+          <!-- เนื้อหาตาราง -->
+          <template v-slot:body="props">
+            <q-tr :props="props">
+              <q-td key="id">{{ props.row.id }}</q-td>
+              <q-td key="certName">
+                <div class="ellipsis">
+                  {{ truncateText(props.row.certName) }}
+                  <q-tooltip>{{ props.row.certName }}</q-tooltip>
+                </div>
+              </q-td>
+              <q-td key="skill">{{ translateSkillType(props.row.skill) }}</q-td>
+              <q-td key="hour" class="text-center">{{
+                props.row.hour !== null ? props.row.hour : '-'
+              }}</q-td>
+              <q-td key="uploadDate">{{ props.row.uploadDate }}</q-td>
+              <q-td key="status">
+                <div class="row justify-center items-center full-width">
                   <q-badge
-                    :label="row.status"
-                    :class="getStatusClass(row.status)"
-                    class="status-badge mobile-status-badge"
+                    :label="props.row.status"
+                    :class="getStatusClass(props.row.status)"
+                    class="status-badge"
+                    rounded
+                    unelevated
                   />
                 </div>
-                <div v-if="row.note" class="mobile-note">
-                  <div class="text-caption text-grey-6">หมายเหตุ</div>
-                  <div class="text-body2 text-negative">{{ row.note }}</div>
-                </div>
+              </q-td>
+              <q-td key="note" class="text-center">{{ props.row.note || '-' }}</q-td>
+            </q-tr>
+          </template>
+
+          <template v-slot:no-data>
+            <div class="full-width text-center q-pa-md text-grey" style="font-size: 20px">
+              ไม่มีประวัติการอัพโหลด
+            </div>
+          </template>
+        </q-table>
+      </section>
+    </template>
+
+    <!-- Mobile/Tablet Card View -->
+    <template v-if="isMediumScreen">
+      <section class="q-mt-lg">
+        <!-- Card View -->
+        <q-card
+          v-for="(row, index) in rows"
+          :key="row.id ?? `row-${index}`"
+          bordered
+          flat
+          class="q-mb-md"
+        >
+          <!-- Header -->
+          <q-card-section class="backgroundheader">
+            <div class="row justify-between header-row-responsive">
+              <!-- ซ้าย: ชื่อใบรับรอง -->
+              <div class="ActivityNamelabel">
+                {{ truncateText(row.certName) }}
+                <q-tooltip>{{ row.certName }}</q-tooltip>
+              </div>
+
+              <!-- ขวา: Status Badge -->
+              <div class="row q-gutter-sm action-section">
+                <q-badge
+                  :label="row.status"
+                  :class="getStatusClass(row.status)"
+                  class="status-badge"
+                >
+                </q-badge>
               </div>
             </div>
           </q-card-section>
+
+          <!-- Content -->
+          <q-card-section>
+            <div class="q-mb-xs info-row">
+              <div class="label">ลำดับ</div>
+              <div class="value">: {{ row.id }}</div>
+            </div>
+            <div class="q-mb-xs info-row">
+              <div class="label">ประเภทกิจกรรม</div>
+              <div class="value">: {{ translateSkillType(row.skill) }}</div>
+            </div>
+            <div class="q-mb-xs info-row">
+              <div class="label">ชั่วโมงที่ได้รับ</div>
+              <div class="value">: {{ row.hour !== null ? row.hour : '-' }}</div>
+            </div>
+            <div class="q-mb-xs info-row">
+              <div class="label">วันที่อัปโหลด</div>
+              <div class="value">: {{ row.uploadDate }}</div>
+            </div>
+            <div class="info-row" v-if="row.note">
+              <div class="label">หมายเหตุ</div>
+              <div class="value text-negative">: {{ row.note }}</div>
+            </div>
+          </q-card-section>
         </q-card>
-      </div>
-    </div>
+      </section>
+    </template>
   </q-page>
 </template>
 
-<style scoped>
-.history-header-card {
-  background-color: white;
-  border-radius: 8px;
-  padding: 16px;
-  margin-bottom: 16px;
-}
-
-/* Desktop Table */
-.desktop-table {
-  display: block;
-  padding: 2px;
-}
-
-.mobile-cards {
+<style lang="scss" scoped>
+/* ปิดไอคอน sort ของ Quasar */
+:deep(.q-table th.sortable .q-table__sort-icon) {
   display: none;
-  padding: 16px;
 }
 
-.mobile-card {
-  background-color: white;
+/* ทำให้ pointer กับ hover ใช้งานกับ .header-cell */
+.header-cell {
+  display: inline-flex;
+  align-items: center;
+
+  .q-icon {
+    transition:
+      opacity 0.3s ease,
+      transform 0.3s ease;
+    transform: rotate(0deg);
+  }
+
+  .sort-icon-hover {
+    opacity: 0;
+  }
+
+  &:hover .sort-icon-hover {
+    opacity: 0.7;
+  }
+}
+
+.ellipsis {
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  max-width: 100%;
+}
+
+.label {
+  font-weight: 600;
+  font-size: 16px;
+  min-width: 200px;
+  margin-top: 2px;
+}
+
+.value {
+  font-size: 16px;
+  margin-top: 2px;
+}
+
+.ActivityNamelabel {
+  font-size: 18px;
+  font-weight: 700;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.backgroundheader {
+  background-color: #edf0f5;
+}
+
+.my-sticky-header-table {
+  min-height: 340px;
+  overflow-y: auto;
+  border: 1px solid #ccc;
   border-radius: 8px;
+  overflow: hidden;
 }
 
-.mobile-status-badge {
-  width: 100px !important;
+/* Sticky thead */
+.my-sticky-header-table thead tr {
+  background-color: #162aae;
+  font-weight: bold;
+  font-size: 16px;
+  color: #ffffff;
+  border-bottom: 2px solid #d0d0d0;
+  transition: background-color 0.3s ease;
 }
 
-.mobile-note {
-  text-align: left;
-  margin-top: 8px;
+.my-sticky-header-table tbody tr {
+  transition: background-color 0.3s ease;
 }
 
-.custom-table .q-td,
-.custom-table .q-th {
-  font-size: 14px;
-  padding: 12px 16px;
+.my-sticky-header-table tbody tr:hover {
+  background-color: #f5f7ff;
+}
+
+.my-sticky-header-table td,
+.my-sticky-header-table th {
+  padding: 10px 12px;
+  font-size: 15px;
+}
+
+.my-sticky-header-table .q-icon {
+  color: #d0d0d0;
 }
 
 .status-badge {
-  width: 100px;
-  font-size: 14px;
-  height: 28px;
-  display: flex;
-  justify-content: center;
-  align-items: center;
+  height: 32px;
+  padding: 0 12px;
   border-radius: 999px;
+  font-size: 15px;
+  align-items: center;
+  justify-content: center;
+  white-space: nowrap;
 }
 
 .status-waiting {
@@ -241,44 +442,44 @@ function translateSkillType(skill: string) {
   border: 1px solid #f32323;
 }
 
-/* Responsive Breakpoints */
-@media (max-width: 1024px) {
-  .desktop-table {
-    display: none;
+.texttitle {
+  font-size: 32px;
+  font-weight: 500;
+}
+
+@media (max-width: 650px) {
+  .header-row-responsive {
+    flex-direction: column;
+    align-items: flex-start;
   }
 
-  .mobile-cards {
-    display: block;
+  .action-section {
+    margin-top: 8px;
   }
 }
 
-@media (max-width: 600px) {
-  .history-header-card {
-    padding: 16px;
-    margin-bottom: 12px;
+@media (max-width: 450px) {
+  .texttitle {
+    font-size: 28px;
+    font-weight: 400;
+  }
+}
+
+.info-row {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+}
+
+@media (max-width: 400px) {
+  .info-row {
+    flex-direction: column;
+    align-items: flex-start;
   }
 
-  .table-container {
-    margin: 0 -8px;
-  }
-
-  .mobile-cards {
-    padding: 12px;
-  }
-
-  .mobile-card {
-    margin-bottom: 12px;
-  }
-
-  .mobile-card .q-card-section {
-    padding: 16px;
-  }
-
-  .status-badge,
-  .mobile-status-badge {
-    width: 80px !important;
-    font-size: 12px;
-    height: 24px;
+  .info-row .label,
+  .info-row .value {
+    width: 100%;
   }
 }
 </style>
