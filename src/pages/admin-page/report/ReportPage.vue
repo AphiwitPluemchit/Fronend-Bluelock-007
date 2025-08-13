@@ -200,8 +200,11 @@ onMounted(async () => {
 </script>
 
 <template>
-  <q-page class="q-py-lg q-px-md" style="max-width: 1200px; margin: auto">
-    <div class="text-h4 q-mb-md text-weight-medium">รายงานข้อมูลนิสิต</div>
+  <q-page class="q-pa-md">
+    <!-- ชื่อหน้า -->
+    <div class="row justify-between items-center q-mb-md" style="margin-top: 20px">
+      <div class="texttitle">รายงานข้อมูล</div>
+    </div>
 
     <!-- Filters -->
     <div class="q-mb-md row items-center q-gutter-sm">
