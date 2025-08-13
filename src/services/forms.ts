@@ -43,6 +43,7 @@ export class FormService {
   static async getFormById(id: string): Promise<Form | null> {
     try {
       const res = await api.get<Form>(`${this.path}/${id}`)
+      console.log('✅ Form loaded:', res.data)
       return res.data
     } catch (error) {
       showError('ไม่พบฟอร์มที่ต้องการ')

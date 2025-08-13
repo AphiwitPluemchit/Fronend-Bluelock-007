@@ -73,22 +73,22 @@ function enrollmentSummary(activityItems: ActivityItem[]) {
             {{ activity.name }}
           </div>
 
-          <div class="q-mb-sm">
+          <div class="q-mt-xs">
             <ActivityType
               v-if="activity.skill === 'hard' || activity.skill === 'soft'"
               :skill="activity.skill === 'hard' ? 'hardSkill' : 'softSkill'"
             />
           </div>
 
-          <div class="text-subtitle2 q-mb-sm">
+          <div class="text-subtitle2 q-mt-sm">
             <q-icon name="event" class="q-mb-xs" />
             วันที่จัด : {{ getActivityDate(activity.activityItems) }}
           </div>
-          <div class="text-subtitle2 q-mb-sm">
+          <div class="text-subtitle2 q-mt-sm">
             <q-icon name="schedule" class="q-mb-xs" />
             เวลาที่จัด : {{ getActivityTime(activity.activityItems) }}
           </div>
-          <div class="text-subtitle2 q-mb-sm">
+          <div class="text-subtitle2 q-mt-sm">
             <q-icon name="chair" class="q-mb-xs" />
             จำนวนที่รับ : {{ enrollmentSummary(activity.activityItems ?? []) }}
           </div>
@@ -115,13 +115,12 @@ function enrollmentSummary(activityItems: ActivityItem[]) {
   height: 100%;
   border-radius: 16px;
   box-shadow: 0 6px 18px rgba(0, 0, 0, 0.08);
-}
-
-.clickable-card {
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  background-color: #fff; /* สีปกติ */
+  transition: background-color 0.3s ease, transform 0.2s ease, box-shadow 0.2s ease;
 }
 
 .clickable-card:hover {
+  background-color: #f0f4ff; /* สีตอน hover */
   transform: translateY(-2px);
   box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
 }
@@ -137,8 +136,7 @@ function enrollmentSummary(activityItems: ActivityItem[]) {
   display: flex;
   flex-direction: column;
   height: 100%;
-  border-radius: 12px;
-  background: #fff;
+  background: transparent; /* ไม่ต้อง fix สีในนี้ */
 }
 
 .activity-image-container {

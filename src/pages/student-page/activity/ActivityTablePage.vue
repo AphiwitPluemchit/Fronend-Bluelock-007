@@ -188,50 +188,24 @@ onMounted(async () => {
 </template>
 
 <style scoped>
-.search-filter-inner {
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  gap: 8px;
-  flex-wrap: nowrap;
-}
-
-
-
-.filter-btn-wrapper {
-  flex-shrink: 0;
-}
-
-/* ✅ Mobile: ชุดค้นหา + ปุ่มกรอง ชิดขวา */
-@media (max-width: 600px) {
-  .search-filter-inner {
-    justify-content: flex-end;
-    width: 100%;
-  }
-}
-
-.search-filter-inner {
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  gap: 8px;
-  flex-wrap: nowrap;
-}
-
-.filter-btn-wrapper {
-  flex-shrink: 0;
-}
-
-@media (max-width: 600px) {
-  .search-filter-inner {
-    justify-content: flex-end;
-    width: 100%;
-  }
+.search-filter-wrapper {
+  flex-wrap: wrap;
 }
 
 .searchbox {
   flex-grow: 1;
   min-width: 0;
+}
+
+@media (max-width: 600px) {
+  .search-filter-wrapper {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .searchbox {
+    width: 100%;
+  }
 }
 
 </style>

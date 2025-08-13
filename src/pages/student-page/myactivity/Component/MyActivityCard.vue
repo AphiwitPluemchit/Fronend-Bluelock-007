@@ -110,76 +110,69 @@ const getActivityRooms = (activityItems: ActivityItem[] | null | undefined): str
 
 <style scoped>
 .activity-card {
-  margin: 12px 0;
-  padding: 16px;
+  height: 100%;
   border-radius: 16px;
-  font-size: 16px;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.08);
+  background-color: #fff; /* สีปกติ */
+  transition: background-color 0.3s ease, transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.clickable-card:hover {
+  background-color: #f0f4ff; /* สีตอน hover */
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+}
+
+.outer-box {
+  border-radius: 16px;
   display: flex;
   flex-direction: column;
-  gap: 12px;
-  width: 100%;
+  height: 100%;
+}
+
+.inner-box {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  background: transparent; /* ไม่ต้อง fix สีในนี้ */
+}
+
+.activity-image-container {
+  margin-bottom: 16px;
 }
 
 .activity-img {
   width: 100%;
+  height: 200px;
   object-fit: cover;
   border-radius: 12px;
 }
 
-/* .activity-name {
-  overflow: hidden;
-  display: -webkit-box;
-  -webkit-box-orient: vertical;
-  -webkit-line-clamp: 2;
-  line-height: 1.4em;
-  max-height: calc(1.4em * 2);
-  word-break: break-word;
-  font-size: 1rem;
-} */
+.activity-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
 
-.btnconfirm {
-  background-color: #2e74ff;
-  color: white;
-  border-radius: 8px;
-  padding: 6px 16px;
+.activity-button {
+  margin-top: auto;
+  padding-top: 16px;
 }
 
 @media (max-width: 600px) {
-  .btnconfirm {
-    width: 100%;
-    text-align: center;
-  }
-
   .activity-img {
-    max-height: 120px;
-  }
-
-  .activity-card {
-    min-height: 280px;
-    padding: 12px;
-    font-size: 15px;
-    border-radius: 16px;
-    margin: 4px 0;
+    height: 120px;
   }
 }
 
-@media (max-width: 100px) {
-  .activity-card {
-    padding: 10px;
-    font-size: 14px;
-    border-radius: 12px;
+@media (max-width: 400px) {
+  .activity-img {
+    height: 100px;
+    border-radius: 8px;
   }
+}
 
-  .activity-name {
-    font-size: 14px;
-    /* -webkit-line-clamp: 2;
-    max-height: 2.8em; */
-  }
-
-  .btnconfirm {
-    font-size: 13px;
-    padding: 6px 12px;
-    width: 100%;
-  }
+.btnconfirm {
+  width: 100%;
 }
 </style>
