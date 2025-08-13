@@ -91,6 +91,7 @@ const linksList = [
     children: [
       { title: 'จัดการข้อมูลนิสิต', link: '/Admin/StudentManagement' },
       { title: 'จัดเก็บข้อมูลนิสิต', link: '/Admin/StudentStorage' },
+      { title: 'จัดการฝึกงานนิสิต' , link: '/Admin/StudentInternship'}
     ],
   },
   { title: 'รายงานข้อมูล', icon: 'assessment', link: '/Admin/Report' },
