@@ -52,49 +52,50 @@ function enrollmentSummary(activityItems: ActivityItem[]) {
 
 <template>
   <q-card
-    class="activity-card col-12 col-sm-6 col-md-4 q-pa-md q-my-sm cursor-pointer"
+    class="activity-card cursor-pointer"
     :class="{ 'clickable-card': !isMobile }"
     @click="!isMobile && $router.push(`/Student/Activity/ActivityDetail/${activity.id}`)"
   >
-    <div class="row q-col-gutter-md items-start">
-      <!-- รูปกิจกรรม -->
-      <div :class="isMobile ? 'full-width' : 'col-4'">
-        <q-img
-          :src="baseurl + '/uploads/activity/images/' + activity.file"
-          class="activity-img"
-          style="max-height: 200px; object-fit: cover; border-radius: 12px"
-          :ratio="4 / 3"
-        />
-      </div>
-
-      <!-- รายละเอียดกิจกรรม -->
-      <div class="col-12 col-sm-8 column justify-between q-pl-md">
-        <div class="text-h6 text-bold ellipsis-2-lines">
-          {{ activity.name }}
-        </div>
-
-        <div class="q-mb-sm">
-          <ActivityType
-            v-if="activity.skill === 'hard' || activity.skill === 'soft'"
-            :skill="activity.skill === 'hard' ? 'hardSkill' : 'softSkill'"
+    <q-card-section class="outer-box">
+      <div class="inner-box">
+        <!-- รูปกิจกรรม -->
+        <div class="activity-image-container">
+          <q-img
+            :src="baseurl + '/uploads/activity/images/' + activity.file"
+            class="activity-img"
+            :ratio="4 / 3"
           />
         </div>
 
-        <div class="text-subtitle2 q-mb-sm">
-          <q-icon name="event" class="q-mb-xs" />
-          วันที่จัด : {{ getActivityDate(activity.activityItems) }}
-        </div>
-        <div class="text-subtitle2 q-mb-sm">
-          <q-icon name="schedule" class="q-mb-xs" />
-          เวลาที่จัด : {{ getActivityTime(activity.activityItems) }}
-        </div>
-        <div class="text-subtitle2 q-mb-sm">
-          <q-icon name="chair" class="q-mb-xs" />
-          จำนวนที่รับ : {{ enrollmentSummary(activity.activityItems ?? []) }}
+        <!-- รายละเอียดกิจกรรม -->
+        <div class="activity-content">
+          <div class="text-h6 text-bold ellipsis-2-lines">
+            {{ activity.name }}
+          </div>
+
+          <div class="q-mb-sm">
+            <ActivityType
+              v-if="activity.skill === 'hard' || activity.skill === 'soft'"
+              :skill="activity.skill === 'hard' ? 'hardSkill' : 'softSkill'"
+            />
+          </div>
+
+          <div class="text-subtitle2 q-mb-sm">
+            <q-icon name="event" class="q-mb-xs" />
+            วันที่จัด : {{ getActivityDate(activity.activityItems) }}
+          </div>
+          <div class="text-subtitle2 q-mb-sm">
+            <q-icon name="schedule" class="q-mb-xs" />
+            เวลาที่จัด : {{ getActivityTime(activity.activityItems) }}
+          </div>
+          <div class="text-subtitle2 q-mb-sm">
+            <q-icon name="chair" class="q-mb-xs" />
+            จำนวนที่รับ : {{ enrollmentSummary(activity.activityItems ?? []) }}
+          </div>
         </div>
 
         <!-- ✅ ปุ่มรายละเอียดเฉพาะจอมือถือ -->
-        <div v-if="isMobile" class="q-mt-sm">
+        <div v-if="isMobile" class="activity-button">
           <q-btn
             label="รายละเอียด"
             dense
@@ -105,67 +106,73 @@ function enrollmentSummary(activityItems: ActivityItem[]) {
           />
         </div>
       </div>
-    </div>
+    </q-card-section>
   </q-card>
 </template>
 
 <style scoped>
 .activity-card {
-  border-radius: 20px;
-  font-size: 16px;
-  padding: 12px;
-  margin: 8px 0;
+  height: 100%;
+  border-radius: 16px;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.08);
+}
+
+.clickable-card {
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.clickable-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+}
+
+.outer-box {
+  border-radius: 16px;
   display: flex;
   flex-direction: column;
-  gap: 12px;
-  max-width: 100%;
-  height: auto;
-  min-height: 200px;
+  height: 100%;
+}
+
+.inner-box {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  border-radius: 12px;
+  background: #fff;
+}
+
+.activity-image-container {
+  margin-bottom: 16px;
 }
 
 .activity-img {
   width: 100%;
-  height: 100%;
+  height: 200px;
   object-fit: cover;
   border-radius: 12px;
 }
 
-.activity-name {
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  max-width: 100%;
-  width: 100%;
-  font-size: 15px;
+.activity-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.activity-button {
+  margin-top: auto;
+  padding-top: 16px;
 }
 
 @media (max-width: 600px) {
-  .activity-card {
-    min-height: 280px;
-    padding: 12px;
-    font-size: 15px;
-    border-radius: 16px;
-  }
-
   .activity-img {
-    max-height: 120px;
+    height: 120px;
   }
 }
 
 @media (max-width: 400px) {
-  .activity-card {
-    padding: 10px;
-    font-size: 14px;
-    border-radius: 12px;
-  }
-
   .activity-img {
-    max-height: 100px;
+    height: 100px;
     border-radius: 8px;
-  }
-
-  .activity-name {
-    font-size: 14px;
   }
 }
 

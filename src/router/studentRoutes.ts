@@ -30,6 +30,10 @@ const studentChildren: RouteRecordRaw[] = [
     path: 'CertificatePage',
     component: () => import('pages/student-page/certificate/CertificatePage.vue'),
   },
+  {
+    path: 'OnlineCoursesPage',
+    component: () => import('pages/student-page/online-courses/OnlineCoursesPage.vue'),
+  },
 ].map((route) => ({
   ...route,
   meta: { role: EnumUserRole.STUDENT },

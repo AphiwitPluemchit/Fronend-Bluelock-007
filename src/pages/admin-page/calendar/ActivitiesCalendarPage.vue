@@ -462,7 +462,7 @@ watch(selectedDate, (val) => {
     <!-- Mobile Layout -->
     <div v-else>
       <!-- Month-Year Selector -->
-      <div class="row q-mb-md justify-center">
+      <div class="row q-mb-md full-width justify-end">
         <CalendarMonthYearSelector
           :selected-date="selectedDate"
           @update:selected-date="onMonthYearSelected"
