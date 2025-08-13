@@ -27,8 +27,9 @@ const searchQuery = ref('')
 // ดึงข้อมูลคอร์สจาก API
 const fetchCourses = async () => {
   try {
-    // ดึงเฉพาะคอร์สที่เปิดใช้งาน
+    // ดึงเฉพาะคอร์สที่เปิดใช้งาน และเพิ่ม limit เพื่อแสดงคอร์สทั้งหมด
     courseStore.params.isActive = true
+    courseStore.params.limit = 100 // เพิ่ม limit เพื่อแสดงคอร์สมากขึ้น
     await courseStore.fetchCourses()
   } catch (error) {
     console.error('Error fetching courses:', error)
