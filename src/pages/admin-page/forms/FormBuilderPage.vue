@@ -135,7 +135,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive } from 'vue'
+import { ref, reactive, onMounted } from 'vue'
 import { useQuasar } from 'quasar'
 import { useFormStore } from 'src/stores/forms'
 import type { Form } from 'src/types/form'
@@ -151,8 +151,9 @@ import ParagraphMenu from './QuestionFormat/ParagraphMenu.vue'
 import RatingMenu from './QuestionFormat/RatingMenu.vue'
 import MultipleChoicegridMenu from './QuestionFormat/MultipleChoicegridMenu.vue'
 import CheckboxGridMenu from './QuestionFormat/CheckboxGridMenu.vue'
-import { useRouter } from 'vue-router'
+import { useRouter, useRoute } from 'vue-router'
 
+const route = useRoute()
 const router = useRouter()
 const showPreview = ref(false)
 const $q = useQuasar()
@@ -324,6 +325,22 @@ async function saveForm() {
     $q.notify({ type: 'negative', message: 'เกิดข้อผิดพลาดในการบันทึกฟอร์ม' })
   }
 }
+onMounted(async () => {
+  const formId = route.params.formId as string | undefined
+  if (formId) {
+    const form = await formStore.fetchFormById(formId)
+    if (form) {
+      formData.title = form.title
+      formData.description = form.description
+      formData.activityId = form.activityId
+      formData.isOrigin = form.isOrigin
+      formData.blocks = JSON.parse(JSON.stringify(form.blocks || []))
+    } else {
+      $q.notify({ type: 'negative', message: 'ไม่พบฟอร์มที่ต้องการแก้ไข' })
+    }
+  }
+})
+
 </script>
 
 <style scoped>

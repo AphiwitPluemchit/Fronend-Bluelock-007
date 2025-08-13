@@ -19,12 +19,14 @@ export const useFormStore = defineStore('form', () => {
   }
 
   /** โหลดฟอร์มตาม id */
-  const fetchFormById = async (id: string) => {
-    loading.value = true
-    const form = await FormService.getFormById(id)
-    currentForm.value = form
-    loading.value = false
-  }
+/** โหลดฟอร์มตาม id */
+const fetchFormById = async (id: string): Promise<Form | null> => {
+  loading.value = true
+  const form = await FormService.getFormById(id)
+  currentForm.value = form
+  loading.value = false
+  return form // ✅ ต้องมี return form
+}
 
   /** สร้างฟอร์มใหม่ */
   const createForm = async (form: Form) => {
