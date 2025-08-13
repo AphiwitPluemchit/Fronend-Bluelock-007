@@ -1,46 +1,270 @@
+<script setup lang="ts">
+import { ref, computed, onMounted, watch, nextTick } from 'vue'
+import { StudentService } from 'src/services/student'
+import type { SummaryReport } from 'src/types/student'
+import Chart from 'chart.js/auto'
+import type { Pagination } from 'src/types/pagination'
+
+interface ExtendedSummaryReport extends SummaryReport {
+  perMajor?: {
+    [major: string]: {
+      completed: number
+      notCompleted: number
+    }
+  }
+}
+
+const summaryReport = ref<ExtendedSummaryReport | null>(null)
+const isLoading = ref(false)
+const error = ref<string | null>(null)
+
+const canvas = ref<HTMLCanvasElement | null>(null)
+let chartInstance: Chart | null = null
+
+const yearOptions = [
+  { label: 'ทั้งหมด', value: null },
+  { label: 'ปี 1', value: 1 },
+  { label: 'ปี 2', value: 2 },
+  { label: 'ปี 3', value: 3 },
+  { label: 'ปี 4', value: 4 },
+]
+const selectedYear = ref<number | null>(null)
+
+const majorOptions = [
+  { label: 'CS', value: 'CS' },
+  { label: 'SE', value: 'SE' },
+  { label: 'ITDI', value: 'ITDI' },
+  { label: 'AAI', value: 'AAI' },
+]
+const selectedMajors = ref<string[]>([])
+
+const query = ref<Pagination>({
+  major: [],
+  studentYear: [],
+})
+
+const totalstudent = computed(() => summaryReport.value?.total ?? 0)
+const academicSkillHours = computed(() => summaryReport.value?.hardSkill.completed ?? 0)
+const readinessHours = computed(() => summaryReport.value?.softSkill.completed ?? 0)
+
+const summaryCards = computed(() => {
+  if (!summaryReport.value) return []
+  return [
+    {
+      title: 'จำนวนนิสิตทั้งหมด',
+      value: `${summaryReport.value.total.toLocaleString()} คน`,
+      icon: 'people',
+      color: 'primary',
+      bg: 'blue-1',
+    },
+    {
+      title: 'นิสิตที่ชั่วโมงครบแล้ว',
+      value: `${summaryReport.value.completed.toLocaleString()} คน`,
+      icon: 'task_alt',
+      color: 'positive',
+      bg: 'green-1',
+    },
+    {
+      title: 'นิสิตที่ชั่วโมงยังไม่ครบ',
+      value: `${summaryReport.value.notCompleted.toLocaleString()} คน`,
+      icon: 'warning',
+      color: 'negative',
+      bg: 'red-1',
+    },
+    {
+      title: 'เปอร์เซ็นต์ความสำเร็จ',
+      value: `${summaryReport.value.completionRate}%`,
+      icon: 'percent',
+      color: 'amber',
+      bg: 'amber-1',
+    },
+  ]
+})
+
+// Watch filters แบบรวมกัน ยิง API แค่ครั้งเดียว
+watch([selectedMajors, selectedYear], async ([majors, year]) => {
+  query.value.major = majors
+  query.value.studentYear = year ? [year.toString()] : []
+  await data()
+})
+
+// Chart rendering
+function renderChart() {
+  if (!canvas.value || !summaryReport.value?.perMajor) return
+  const ctx = canvas.value.getContext('2d')
+  if (!ctx) return
+
+  const majors =
+    selectedMajors.value.length > 0
+      ? selectedMajors.value
+      : Object.keys(summaryReport.value.perMajor)
+
+  const completed = majors.map((m) => summaryReport.value?.perMajor?.[m]?.completed ?? 0)
+  const notCompleted = majors.map((m) => summaryReport.value?.perMajor?.[m]?.notCompleted ?? 0)
+
+  if (chartInstance) chartInstance.destroy()
+
+  chartInstance = new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels: majors,
+      datasets: [
+        {
+          label: 'ครบชั่วโมง',
+          backgroundColor: 'green',
+          data: completed,
+        },
+        {
+          label: 'ไม่ครบชั่วโมง',
+          backgroundColor: 'red',
+          data: notCompleted,
+        },
+      ],
+    },
+    options: {
+      responsive: true,
+      scales: {
+        y: {
+          beginAtZero: true,
+          ticks: {
+            stepSize: 50,
+          },
+        },
+      },
+    },
+  })
+}
+
+// Get data from API and create perMajor data
+const data = async () => {
+  isLoading.value = true
+  error.value = null
+  try {
+    const apiData = await StudentService.getSummaryReport(query.value)
+
+    const majorsToShow =
+      selectedMajors.value.length > 0
+        ? selectedMajors.value
+        : ['CS', 'SE', 'ITDI', 'AAI']
+
+    const perMajorData: { [key: string]: { completed: number; notCompleted: number } } = {}
+
+    // เรียก API แยกสำหรับแต่ละสาขาเพื่อให้ได้ข้อมูลจริง
+    if (selectedMajors.value.length === 0) {
+      // กรณีไม่เลือกสาขา - เรียก API สำหรับทุกสาขา
+      const promises = majorsToShow.map(async (major) => {
+        const majorQuery = {
+          ...query.value,
+          major: [major]
+        }
+        try {
+          const majorData = await StudentService.getSummaryReport(majorQuery)
+          return {
+            major,
+            data: majorData
+          }
+        } catch (error) {
+          console.error(`Error fetching data for ${major}:`, error)
+          return {
+            major,
+            data: { completed: 0, notCompleted: 0 }
+          }
+        }
+      })
+
+      const majorResults = await Promise.all(promises)
+      
+      majorResults.forEach(({ major, data }) => {
+        perMajorData[major] = {
+          completed: data.completed,
+          notCompleted: data.notCompleted
+        }
+      })
+    } else {
+      // กรณีเลือกสาขาแล้ว - เรียก API เฉพาะสาขาที่เลือก
+      const promises = selectedMajors.value.map(async (major) => {
+        const majorQuery = {
+          ...query.value,
+          major: [major]
+        }
+        try {
+          const majorData = await StudentService.getSummaryReport(majorQuery)
+          return {
+            major,
+            data: majorData
+          }
+        } catch (error) {
+          console.error(`Error fetching data for ${major}:`, error)
+          return {
+            major,
+            data: { completed: 0, notCompleted: 0 }
+          }
+        }
+      })
+
+      const majorResults = await Promise.all(promises)
+      
+      majorResults.forEach(({ major, data }) => {
+        perMajorData[major] = {
+          completed: data.completed,
+          notCompleted: data.notCompleted
+        }
+      })
+    }
+
+    summaryReport.value = {
+      ...apiData,
+      perMajor: perMajorData,
+    }
+
+    await nextTick()
+    renderChart()
+  } catch (e) {
+    error.value = 'ไม่สามารถโหลดข้อมูล summary ได้'
+    console.error(e)
+  } finally {
+    isLoading.value = false
+  }
+}
+
+onMounted(async () => {
+  await data()
+})
+</script>
+
+
 <template>
-  <q-page class="q-pa-md">
-    <div class="row justify-between items-center q-mb-md" style="margin-top: 20px">
-      <div class="texttitle" style="margin-bottom: 20px">รายงานข้อมูลนิสิต</div>
-    </div>
+  <q-page class="q-py-lg q-px-md" style="max-width: 1200px; margin: auto">
+    <div class="text-h4 q-mb-md text-weight-medium">รายงานข้อมูลนิสิต</div>
 
     <!-- Filters -->
-    <div class="q-mb-md row items-center q-gutter-sm q-col-gutter">
-      <!-- ชั้นปี -->
-      <div class="row items-center q-gutter-sm col-auto">
-        <div class="text-subtitle1">ตรวจสอบตาม ชั้นปี:</div>
-        <div style="min-width: 150px">
-          <q-select
-            v-model="selectedYear"
-            :options="yearOptions"
-            option-label="label"
-            option-value="value"
-            emit-value
-            map-options
-            outlined
-            dense
-            class="full-width"
-          />
-        </div>
-      </div>
+    <div class="q-mb-md row items-center q-gutter-sm">
+      <div class="text-subtitle1">ตรวจสอบตาม ชั้นปี:</div>
+      <q-select
+        v-model="selectedYear"
+        :options="yearOptions"
+        option-label="label"
+        option-value="value"
+        emit-value
+        map-options
+        outlined
+        dense
+        style="min-width: 150px"
+      />
 
-      <!-- สาขา -->
-      <div class="row items-center q-gutter-sm col-auto">
-        <div class="text-subtitle1">สาขา:</div>
-        <div style="min-width: 150px">
-          <q-select
-            v-model="selectedMajor"
-            :options="majorOptions"
-            option-label="label"
-            option-value="value"
-            emit-value
-            map-options
-            outlined
-            dense
-            class="full-width"
-          />
-        </div>
-      </div>
+      <div class="text-subtitle1 q-ml-md">สาขา:</div>
+      <q-select
+        v-model="selectedMajors"
+        :options="majorOptions"
+        option-label="label"
+        option-value="value"
+        emit-value
+        map-options
+        multiple
+        outlined
+        dense
+        style="min-width: 200px"
+      />
     </div>
 
     <!-- Error Message -->
@@ -70,7 +294,7 @@
       </div>
     </div>
 
-    <!-- Progress Section -->
+    <!-- Progress Overview -->
     <div v-if="!isLoading && summaryReport" class="q-mb-lg">
       <q-card class="progress-overview" flat bordered>
         <q-card-section class="custom-header-section">
@@ -106,7 +330,7 @@
               </div>
             </div>
 
-            <!-- Prepare Skill -->
+            <!-- Readiness -->
             <div class="col-xs-12 col-md-6 text-center">
               <div class="text-subtitle1 text-weight-medium q-mb-md">ชั่วโมงเตรียมความพร้อม</div>
               <q-circular-progress
@@ -136,141 +360,20 @@
         </q-card-section>
       </q-card>
     </div>
+
+    <!-- Chart Comparison -->
+    <q-card class="chart-card q-mb-lg" flat bordered v-if="summaryReport?.perMajor">
+      <q-card-section class="custom-header-section">
+        <div class="text-h6">เปรียบเทียบความคืบหน้ารายสาขา</div>
+      </q-card-section>
+
+
+      <q-card-section>
+        <canvas ref="canvas" height="100"></canvas>
+      </q-card-section>
+    </q-card>
   </q-page>
 </template>
-
-<script setup lang="ts">
-import { ref, computed, onMounted, watch } from 'vue'
-import { StudentService } from 'src/services/student'
-import type { SummaryReport } from 'src/types/student'
-import Chart from 'chart.js/auto'
-import type { Pagination } from 'src/types/pagination'
-
-const totalstudent = computed(() => summaryReport.value?.total ?? 0)
-
-const yearOptions = [
-  { label: 'ทั้งหมด', value: null },
-  { label: 'ปี 1', value: 1 },
-  { label: 'ปี 2', value: 2 },
-  { label: 'ปี 3', value: 3 },
-  { label: 'ปี 4', value: 4 },
-]
-const selectedYear = ref<number | null>(null)
-
-const majorOptions = [
-  { label: 'ทั้งหมด', value: null },
-  { label: 'CS', value: 'CS' },
-  { label: 'SE', value: 'SE' },
-  { label: 'ITDI', value: 'ITDI' },
-  { label: 'AAI', value: 'AAI' },
-]
-const selectedMajor = ref<string | null>(null)
-
-const summaryReport = ref<SummaryReport | null>(null)
-const isLoading = ref(false)
-const error = ref<string | null>(null)
-
-const summaryCards = computed(() => {
-  if (!summaryReport.value) return []
-
-  return [
-    {
-      title: 'จำนวนนิสิตทั้งหมด',
-      value: `${summaryReport.value.total.toLocaleString()} คน`,
-      icon: 'people',
-      color: 'primary',
-      bg: 'blue-1',
-    },
-    {
-      title: 'นิสิตที่ชั่วโมงครบแล้ว',
-      value: `${summaryReport.value.completed.toLocaleString()} คน`,
-      icon: 'task_alt',
-      color: 'positive',
-      bg: 'green-1',
-    },
-    {
-      title: 'นิสิตที่ชั่วโมงยังไม่ครบ',
-      value: `${summaryReport.value.notCompleted.toLocaleString()} คน`,
-      icon: 'warning',
-      color: 'negative',
-      bg: 'red-1',
-    },
-    {
-      title: 'เปอร์เซ็นต์ความสำเร็จ',
-      value: `${summaryReport.value.completionRate}%`,
-      icon: 'percent',
-      color: 'amber',
-      bg: 'amber-1',
-    },
-  ]
-})
-
-const academicSkillHours = computed(() => summaryReport.value?.hardSkill.completed ?? 0)
-const readinessHours = computed(() => summaryReport.value?.softSkill.completed ?? 0)
-const canvas = ref<HTMLCanvasElement | null>(null)
-const query = ref<Pagination>({
-  major: [],
-  studentYear: [],
-})
-watch(selectedYear, async (newVal) => {
-  query.value.studentYear = [newVal?.toString() ?? '']
-  await data()
-})
-watch(selectedMajor, async (newVal) => {
-  query.value.major = [newVal ?? '']
-  await data()
-})
-const data = async () => {
-  summaryReport.value = await StudentService.getSummaryReport(query.value)
-}
-onMounted(async () => {
-  isLoading.value = true
-  error.value = null
-
-  try {
-    await data()
-  } catch (e) {
-    error.value = 'ไม่สามารถโหลดข้อมูล summary ได้'
-    console.error(e)
-  } finally {
-    isLoading.value = false
-  }
-
-  // Chart rendering
-  if (canvas.value) {
-    const ctx = canvas.value.getContext('2d')
-    if (ctx) {
-      new Chart(ctx, {
-        type: 'bar',
-        data: {
-          labels: ['CS', 'SE', 'ITDI', 'AAI'],
-          datasets: [
-            {
-              label: 'ครบชั่วโมง',
-              backgroundColor: 'green',
-              data: [150, 250, 300, 450],
-            },
-            {
-              label: 'ไม่ครบชั่วโมง',
-              backgroundColor: 'red',
-              data: [20, 50, 50, 75],
-            },
-          ],
-        },
-        options: {
-          responsive: true,
-          scales: {
-            y: {
-              beginAtZero: true,
-              ticks: { stepSize: 50 },
-            },
-          },
-        },
-      })
-    }
-  }
-})
-</script>
 
 <style scoped>
 .dashboard-card {
@@ -296,5 +399,18 @@ onMounted(async () => {
 .custom-header-section {
   background-color: #162aae;
   color: white;
+}
+
+.chart-card {
+  transition: all 0.3s;
+}
+.chart-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+canvas {
+  max-height: 400px;
+  width: 100% !important;
 }
 </style>
