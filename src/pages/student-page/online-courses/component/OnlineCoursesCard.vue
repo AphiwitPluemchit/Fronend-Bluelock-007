@@ -29,7 +29,7 @@ const handleCardClick = () => {
 </script>
 
 <template>
-  <q-card 
+  <q-card
     class="oc-card cursor-pointer"
     :class="{ 'clickable-card': !isMobile }"
     @click="handleCardClick"
@@ -46,16 +46,16 @@ const handleCardClick = () => {
         <div class="text-subtitle2 q-mb-sm">จำนวนชั่วโมง : {{ hours }} ชั่วโมง</div>
       </div>
 
-                <!-- ปุ่มอยู่ในกรอบ และถูกดันไปก้นการ์ดเสมอ -->
-        <q-btn
-          class="oc-cta q-mt-auto"
-          :href="link"
-          target="_blank"
-          label="ไปยังหน้าอบรม"
-          text-color="white"
-          no-caps
-          unelevated
-        />
+      <q-btn
+        v-if="isMobile"
+        class="oc-cta q-mt-auto"
+        :href="link"
+        target="_blank"
+        label="ไปยังหน้าอบรม"
+        text-color="white"
+        no-caps
+        unelevated
+      />
     </q-card-section>
   </q-card>
 </template>
@@ -65,20 +65,21 @@ const handleCardClick = () => {
   height: 100%;
   border-radius: 16px;
   box-shadow: 0 6px 18px rgba(0, 0, 0, 0.08);
-}
-
-.clickable-card {
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  background-color: #fff; /* สีปกติ */
+  transition:
+    background-color 0.3s ease,
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
 }
 
 .clickable-card:hover {
+  background-color: #f0f4ff; /* สีตอน hover */
   transform: translateY(-2px);
   box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
 }
 
 .outer-box {
   border-radius: 16px;
-  /* padding: 16px; */
   display: flex;
   flex-direction: column;
   height: 100%;
@@ -88,10 +89,8 @@ const handleCardClick = () => {
   display: flex;
   flex-direction: column;
   height: 100%;
-  /* border: 1px solid #ddd; */
   border-radius: 12px;
-  /* padding: 16px; */
-  background: #fff;
+  background: transparent; /* ใช้สีพื้นหลังจาก q-card */
 }
 
 .oc-type {
