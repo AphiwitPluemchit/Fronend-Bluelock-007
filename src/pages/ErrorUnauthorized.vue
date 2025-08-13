@@ -15,12 +15,19 @@
 </template>
 
 <script setup lang="ts">
+// import { useAuthStore } from 'src/stores/auth'
+// import { onMounted } from 'vue'
+
 import { useRouter } from 'vue-router'
 
 const router = useRouter()
+// const authStore = useAuthStore()
 const goHome = () => {
   void router.push('/') // หรือเปลี่ยนเป็น push ตาม role ได้
 }
+// onMounted(async () => {
+//   await authStore.logout()
+// })
 </script>
 
 <style scoped>

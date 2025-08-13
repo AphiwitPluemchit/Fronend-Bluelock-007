@@ -9,19 +9,19 @@ src/
   services/
   store/
   types/
-## 🎯 Coding Style & Standards
-- ใช้ **Composition API** + `<script setup>`
-- ใช้ **TypeScript** เป็นหลัก
-- ใช้ **Pinia** สำหรับ state management
-- เรียก API ผ่าน **service layer** เท่านั้น
-- ใช้ **SCSS Modules** 
-- ชื่อไฟล์ Component เป็น **PascalCase** (`UserProfile.vue`)
-- ตัวแปรใช้ camelCase, ค่าคงที่ใช้ UPPER_CASE
-- ใช้ `async/await` แทน `.then()`
-- หลีกเลี่ยง hardcode string — ใช้ constants หรือ i18n
-- จัด import เป็นหมวด: Vue > Library > Components > Stores > Service
-- ห้ามใช้ console.log ใน production
-- คำนึงถึงประสิทธิภาพของฟังก์ชั่น BigO หลีกเลี่ยงที่เกิน O(2^n)
+  ## 🎯 Coding Style & Standards
+  - ใช้ **Composition API** + `<script setup>`
+  - ใช้ **TypeScript** เป็นหลัก
+  - ใช้ **Pinia** สำหรับ state management
+  - เรียก API ผ่าน **service layer** เท่านั้น
+  - ใช้ **SCSS Modules** 
+  - ชื่อไฟล์ Component เป็น **PascalCase** (`UserProfile.vue`)
+  - ตัวแปรใช้ camelCase, ค่าคงที่ใช้ UPPER_CASE
+  - ใช้ `async/await` แทน `.then()`
+  - หลีกเลี่ยง hardcode string — ใช้ constants หรือ i18n
+  - จัด import เป็นหมวด: Vue > Library > Components > Stores > Service
+  - ห้ามใช้ console.log ใน production
+  - คำนึงถึงประสิทธิภาพของฟังก์ชั่น BigO หลีกเลี่ยงที่เกิน O(2^n)
 
 ## ✅ Lint & Format
 - รัน `npm` 

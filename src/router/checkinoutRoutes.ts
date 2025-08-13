@@ -1,10 +1,9 @@
 import { EnumUserRole } from 'src/data/roles'
 import type { RouteRecordRaw } from 'vue-router'
 
-export const checkinoutRoutes: RouteRecordRaw[] = [
+const checkinoutChildren: RouteRecordRaw[] = [
   {
     path: '/student/qr',
-    component: () => import('layouts/LoginLayout.vue'),
     children: [
       {
         path: ':uuid',
@@ -14,10 +13,19 @@ export const checkinoutRoutes: RouteRecordRaw[] = [
       },
     ],
   },
-  // Forms routes for students
+  {
+    path: '/student/qr',
+    children: [
+      {
+        path: ':uuid',
+        name: 'student-qr',
+        component: () => import('pages/student-page/checkinout/CheckinoutPage.vue'),
+        props: true,
+      },
+    ],
+  },
   {
     path: '/student/forms',
-    component: () => import('layouts/StudentLayout.vue'),
     meta: { role: EnumUserRole.STUDENT },
     children: [
       {
@@ -32,5 +40,19 @@ export const checkinoutRoutes: RouteRecordRaw[] = [
         props: true,
       },
     ],
+  },
+
+].map((route) => ({
+  ...route,
+  meta: { role: EnumUserRole.STUDENT },
+}))
+
+export const checkinoutRoutes: RouteRecordRaw[] = [
+  {
+    path: `/${EnumUserRole.STUDENT}`,
+    name: EnumUserRole.STUDENT,
+    component: () => import('layouts/LoginLayout.vue'),
+    meta: { role: EnumUserRole.STUDENT },
+    children: checkinoutChildren,
   },
 ]

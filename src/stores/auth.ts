@@ -3,7 +3,8 @@ import AuthService from 'src/services/auth'
 import type { Auth } from 'src/types/auth'
 import type { User } from 'src/types/user'
 import { EnumUserRole } from 'src/data/roles'
-import { useRouter } from 'vue-router'
+// ❌ ห้ามใช้ useRouter() ที่ไฟล์ store (นอก setup)
+// ✅ ใช้ router instance แทน
 
 export interface AuthState {
   form: {
@@ -21,14 +22,11 @@ export const useAuthStore = defineStore('auth', {
   }),
 
   getters: {
-    // ✅ ดึง token จาก localStorage
     getAccessToken: (): string | null => localStorage.getItem('access_token'),
 
-    // ✅ ดึง user จาก localStorage แล้ว parse
     getUser: (): Partial<User> | null => {
       const user = localStorage.getItem('user')
       console.log('user', user)
-
       return user ? JSON.parse(user) : null
     },
 
@@ -49,7 +47,6 @@ export const useAuthStore = defineStore('auth', {
       return user?.name || 'ไม่ระบุ'
     },
 
-    // เพิ่ม getter ใหม่
     getStudentYear(): number | undefined {
       return this.getUser?.studentYear
     },
@@ -64,21 +61,13 @@ export const useAuthStore = defineStore('auth', {
   },
 
   actions: {
-    // ✅ Login: แยกเก็บ token กับ user
     async login(): Promise<Auth | null> {
       try {
         const data = await AuthService.login(this.form.email, this.form.password)
         if (data?.token && data?.user) {
           console.log('Login successful:', data.user)
-
-          // เก็บ token และ user
           localStorage.setItem('access_token', data.token)
           localStorage.setItem('user', JSON.stringify(data.user))
-
-          // // เคลีย form
-          // this.form.email = ''
-          // this.form.password = ''
-
           return data
         }
         return null
@@ -88,57 +77,47 @@ export const useAuthStore = defineStore('auth', {
       }
     },
 
-    // ✅ Logout: ลบ token และ user
+    // ✅ ปรับ logout: เคลียร์ session อย่างเดียว
+    //    ส่วน "redirect ไป login" ให้ response interceptor เป็นคนทำ
     async logout(): Promise<void> {
+      console.log('logout')
       try {
         const user = this.getUser
         if (user?.id) {
-          // เรียก API logout
+          // กันลูป 401 ด้วย header บอก interceptor ว่า "ข้าม redirect"
           await AuthService.logout(user.id)
         }
       } catch (err) {
         console.warn('Logout failed silently:', err)
-      } finally {
-        // เคลีย localStorage ไม่ว่าจะ API สำเร็จหรือไม่
-        this.clearLocalStorage()
-
-        // Redirect ไปหน้า login
-        const router = useRouter()
-        await router.push('/')
       }
+      this.clearLocalStorage()
+      // ❌ ไม่ push/replace ที่นี่ เพื่อกันชนกับ interceptor
+      console.log('/logout done (no redirect here)')
     },
 
-    // ✅ เคลีย localStorage
     clearLocalStorage(): void {
       localStorage.removeItem('access_token')
       localStorage.removeItem('user')
       localStorage.removeItem('redirectAfterLogin')
     },
 
-    // clear form
     clearForm(): void {
       this.form.email = ''
       this.form.password = ''
     },
 
-    // ✅ โหลดใหม่หลังรีเฟรช (ไม่มี state แต่ไว้ใช้ใน future)
     loadUserFromLocalStorage() {
-      // ไม่ต้อง set state แล้ว เพราะใช้จาก localStorage ตรง ๆ
-      // ฟังก์ชันนี้เอาไว้ future ถ้าคุณอยากเก็บ user ใน state ชั่วคราว
+      // reserved for future use
     },
 
-    // ✅ ตรวจสอบ token expiry
     isTokenExpired(): boolean {
       const token = this.getAccessToken
       if (!token) return true
-
       try {
-        // Decode JWT token เพื่อดู expiry (ไม่ต้อง verify signature)
         const parts = token.split('.')
         if (parts.length !== 3) return true
-
         const payload = JSON.parse(atob(parts[1] as string))
-        const expiry = payload.exp * 1000 // แปลงเป็น milliseconds
+        const expiry = payload.exp * 1000
         return Date.now() >= expiry
       } catch {
         return true

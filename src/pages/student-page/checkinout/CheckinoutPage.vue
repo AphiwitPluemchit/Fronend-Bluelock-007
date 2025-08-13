@@ -4,7 +4,9 @@ import Checkinpage from 'src/pages/student-page/checkinout/Checkin/CheckinPage.v
 import Checkoutpage from 'src/pages/student-page/checkinout/Checkout/CheckoutPage.vue'
 import { ref, onMounted } from 'vue'
 import CheckinoutService from 'src/services/checkinout'
+// import { useAuthStore } from 'src/stores/auth'
 const route = useRoute()
+// const authStore = useAuthStore()
 const uuid = route.params.uuid?.toString() || ''
 const tokenInfo = ref<{ type: string } | null>(null)
 const loading = ref(true)
@@ -17,8 +19,10 @@ onMounted(async () => {
   }
   try {
     const res = await CheckinoutService.getTokenInfo(uuid)
+    console.log('res', res);
+
     if (!res || !res.type) {
-      error.value = 'QR ไม่ถูกต้องหรือหมดอายุ'
+      error.value = 'QR ไม่ถูกต้องหรือหมดอายุ 1'
     } else {
       tokenInfo.value = res
     }
@@ -26,13 +30,14 @@ onMounted(async () => {
     // ถ้า claim ไม่สำเร็จ (เช่น QR หมดอายุ) → fallback ไป validate
     try {
       const valid = await CheckinoutService.validateToken(uuid)
+      console.log('valid', valid);
       if (valid && valid.type) {
         tokenInfo.value = valid
       } else {
-        error.value = 'QR ไม่ถูกต้องหรือหมดอายุ'
+        error.value = 'QR ไม่ถูกต้องหรือหมดอายุ 2'
       }
     } catch {
-      error.value = 'QR ไม่ถูกต้องหรือหมดอายุ'
+      error.value = 'QR ไม่ถูกต้องหรือหมดอายุ 3'
     }
   }
   loading.value = false
