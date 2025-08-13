@@ -81,7 +81,7 @@ const summaryCards = computed(() => {
   ]
 })
 
-// Watch filters แบบรวมกัน ยิง API แค่ครั้งเดียว
+// Watch filters
 watch([selectedMajors, selectedYear], async ([majors, year]) => {
   query.value.major = majors
   query.value.studentYear = year ? [year.toString()] : []
@@ -123,6 +123,7 @@ function renderChart() {
     },
     options: {
       responsive: true,
+      maintainAspectRatio: false, // ✅ ยืดเต็ม container
       scales: {
         y: {
           beginAtZero: true,
@@ -149,68 +150,34 @@ const data = async () => {
 
     const perMajorData: { [key: string]: { completed: number; notCompleted: number } } = {}
 
-    // เรียก API แยกสำหรับแต่ละสาขาเพื่อให้ได้ข้อมูลจริง
-    if (selectedMajors.value.length === 0) {
-      // กรณีไม่เลือกสาขา - เรียก API สำหรับทุกสาขา
-      const promises = majorsToShow.map(async (major) => {
-        const majorQuery = {
-          ...query.value,
-          major: [major]
+    const promises = majorsToShow.map(async (major) => {
+      const majorQuery = {
+        ...query.value,
+        major: [major]
+      }
+      try {
+        const majorData = await StudentService.getSummaryReport(majorQuery)
+        return {
+          major,
+          data: majorData
         }
-        try {
-          const majorData = await StudentService.getSummaryReport(majorQuery)
-          return {
-            major,
-            data: majorData
-          }
-        } catch (error) {
-          console.error(`Error fetching data for ${major}:`, error)
-          return {
-            major,
-            data: { completed: 0, notCompleted: 0 }
-          }
+      } catch (error) {
+        console.error(`Error fetching data for ${major}:`, error)
+        return {
+          major,
+          data: { completed: 0, notCompleted: 0 }
         }
-      })
+      }
+    })
 
-      const majorResults = await Promise.all(promises)
-      
-      majorResults.forEach(({ major, data }) => {
-        perMajorData[major] = {
-          completed: data.completed,
-          notCompleted: data.notCompleted
-        }
-      })
-    } else {
-      // กรณีเลือกสาขาแล้ว - เรียก API เฉพาะสาขาที่เลือก
-      const promises = selectedMajors.value.map(async (major) => {
-        const majorQuery = {
-          ...query.value,
-          major: [major]
-        }
-        try {
-          const majorData = await StudentService.getSummaryReport(majorQuery)
-          return {
-            major,
-            data: majorData
-          }
-        } catch (error) {
-          console.error(`Error fetching data for ${major}:`, error)
-          return {
-            major,
-            data: { completed: 0, notCompleted: 0 }
-          }
-        }
-      })
-
-      const majorResults = await Promise.all(promises)
-      
-      majorResults.forEach(({ major, data }) => {
-        perMajorData[major] = {
-          completed: data.completed,
-          notCompleted: data.notCompleted
-        }
-      })
-    }
+    const majorResults = await Promise.all(promises)
+    
+    majorResults.forEach(({ major, data }) => {
+      perMajorData[major] = {
+        completed: data.completed,
+        notCompleted: data.notCompleted
+      }
+    })
 
     summaryReport.value = {
       ...apiData,
@@ -231,7 +198,6 @@ onMounted(async () => {
   await data()
 })
 </script>
-
 
 <template>
   <q-page class="q-py-lg q-px-md" style="max-width: 1200px; margin: auto">
@@ -298,7 +264,7 @@ onMounted(async () => {
     <div v-if="!isLoading && summaryReport" class="q-mb-lg">
       <q-card class="progress-overview" flat bordered>
         <q-card-section class="custom-header-section">
-          <div class="text-h6">ภาพรวมความคืบหน้า</div>
+          <div class="text-h6">สรุปผลตามประเภทชั่วโมง</div>
         </q-card-section>
 
         <q-card-section>
@@ -364,12 +330,13 @@ onMounted(async () => {
     <!-- Chart Comparison -->
     <q-card class="chart-card q-mb-lg" flat bordered v-if="summaryReport?.perMajor">
       <q-card-section class="custom-header-section">
-        <div class="text-h6">เปรียบเทียบความคืบหน้ารายสาขา</div>
+        <div class="text-h6">สรุปผลตามสาขา</div>
       </q-card-section>
 
-
       <q-card-section>
-        <canvas ref="canvas" height="100"></canvas>
+        <div class="chart-container">
+          <canvas ref="canvas"></canvas>
+        </div>
       </q-card-section>
     </q-card>
   </q-page>
@@ -409,8 +376,19 @@ onMounted(async () => {
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
+/* ✅ ปรับความสูงของพื้นที่กราฟ */
+.chart-card .q-card-section:last-child {
+  height: 400px;
+}
+
+.chart-container {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+
 canvas {
-  max-height: 400px;
   width: 100% !important;
+  height: 100% !important;
 }
 </style>
