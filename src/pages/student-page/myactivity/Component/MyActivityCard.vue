@@ -39,7 +39,7 @@ const router = useRouter()
 const baseurl = api.defaults.baseURL
 
 const onClick = async (id: string) => {
-  await router.push(`/Student/Activity/MyActivityDetail/${id}`)
+  await router.push(`/Student/Activity/MyActivityDetail/${id}/activity`)
 }
 
 const getActivityRooms = (activityItems: ActivityItem[] | null | undefined): string => {

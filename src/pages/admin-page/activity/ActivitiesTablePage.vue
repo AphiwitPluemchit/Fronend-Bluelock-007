@@ -37,7 +37,7 @@ const handleConfirmRemove = async () => {
 }
 const goToPageDetail = async (id: string, disable: boolean) => {
   await router.push({
-    path: `/Admin/ActivitiesManagement/ActivityDetail/${id}`,
+    path: `/Admin/ActivitiesManagement/ActivityDetail/${id}/activity`,
     query: {
       disable: String(disable),
     },

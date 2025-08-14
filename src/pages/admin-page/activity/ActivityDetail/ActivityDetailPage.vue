@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, ref, onMounted, watch } from 'vue'
-import { useRoute } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 import type { Activity } from 'src/types/activity'
 import { ActivityService } from 'src/services/activity'
 import Tab_Summary from './Summary/Tab_Summary.vue'
@@ -10,15 +10,54 @@ import Tab_EnrollmentDetail from './EnrollmentDetail/Tab_EnrollmentDetail.vue'
 import AppBreadcrumbs from 'src/components/AppBreadcrumbs.vue'
 
 const route = useRoute()
+const router = useRouter()
+
 const activity = ref<Activity | null>(null)
-const tab = ref<string>('activity')
+const tab = ref<string>('') // จะ sync จาก URL
 const search = ref<string>('')
+
+/** ---------- เงื่อนไข disable ---------- */
+// 1) มาจาก query: ?disable=true|false
+const disableFromQuery = computed(() => String(route.query.disable) === 'true')
+// 2) มาจากสถานะกิจกรรม (planning)
 const isPlanning = computed(() => activity.value?.activityState === 'planning')
+// 3) รวมทุกเงื่อนไข
+const isDisabled = computed(() => disableFromQuery.value || isPlanning.value)
+
+/** ---------- responsive ---------- */
 const isSmallScreen = ref(false)
 const checkScreen = () => {
   const width = window.innerWidth
   isSmallScreen.value = width <= 610
 }
+
+/** ---------- tab ที่รองรับ ---------- */
+const VALID_TABS = ['activity', 'registration', 'students', 'summary'] as const
+
+/** อ่าน tab จาก URL → ใส่ลง state */
+const syncTabFromRoute = () => {
+  const fromParam = (route.params.tab as string) || 'activity'
+  const normalized = VALID_TABS.includes(fromParam as (typeof VALID_TABS)[number])
+    ? fromParam
+    : 'activity'
+  if (tab.value !== normalized) tab.value = normalized
+}
+
+/** state tab เปลี่ยน → อัปเดต URL (คง query/hash เดิมไว้) */
+const pushTabToRoute = async (nextTab: string) => {
+  if (!VALID_TABS.includes(nextTab as (typeof VALID_TABS)[number])) return
+  const id = route.params.id as string
+  await router
+    .replace({
+      name: 'ActivityDetail',
+      params: { ...route.params, id, tab: nextTab },
+      query: { ...route.query }, // preserve query (เช่น disable)
+      hash: route.hash,
+    })
+    .catch(() => {}) // กัน duplicated navigation
+}
+
+/** breadcrumb */
 const currentBreadcrumb = computed(() => {
   if (tab.value === 'activity') return 'รายละเอียดกิจกรรม'
   if (tab.value === 'registration') return 'รายละเอียดการลงทะเบียน'
@@ -26,34 +65,77 @@ const currentBreadcrumb = computed(() => {
   if (tab.value === 'summary') return 'สรุปผลกิจกรรม'
   return 'รายละเอียดกิจกรรม'
 })
+
+const breadcrumbs = computed(() => {
+  const id = route.params.id as string
+  return {
+    previousPage: { title: 'จัดการกิจกรรม', path: '/Admin/ActivitiesManagement' },
+    currentPage: {
+      title: currentBreadcrumb.value,
+      path: `/Admin/ActivitiesManagement/ActivityDetail/${id}/${tab.value}`,
+    },
+    icon: 'description',
+  }
+})
+
+/** ---------- lifecycle ---------- */
 onMounted(async () => {
   const id = route.params.id as string
   const res = await ActivityService.getOne(id)
   activity.value = res.data
+
+  // sync tab จาก URL ครั้งแรก
+  syncTabFromRoute()
+
+  // ถ้า URL ไม่มี tab ให้ใส่ activity เป็นค่าเริ่มต้น
+  if (!route.params.tab) {
+    tab.value = 'activity'
+    void pushTabToRoute('activity')
+  }
+
+  // ถ้าโดน disable (query/planning) บังคับกลับ activity
+  if (isDisabled.value && tab.value !== 'activity') {
+    tab.value = 'activity'
+    void pushTabToRoute('activity')
+  }
 })
+
 onMounted(() => {
   checkScreen()
   window.addEventListener('resize', checkScreen)
 })
-const breadcrumbs = computed(() => ({
-  previousPage: { title: 'จัดการกิจกรรม', path: '/Admin/ActivitiesManagement' },
-  currentPage: {
-    title: currentBreadcrumb.value,
-    path: '/Admin/ActivitiesManagement/ActivityDetail',
-  },
-  icon: 'description',
-}))
-watch([tab, isPlanning], () => {
-  if (isPlanning.value && tab.value !== 'activity') {
+
+/** ---------- watchers ---------- */
+// เมื่อ tab ใน state เปลี่ยน → อัปเดต URL (และ enforce disable)
+watch(tab, (next) => {
+  if (isDisabled.value && next !== 'activity') {
     tab.value = 'activity'
+    void pushTabToRoute('activity')
+    return
   }
+  const inUrl = route.params.tab as string
+  if (next !== inUrl) void pushTabToRoute(next)
 })
-const tabOptions = [
-  { label: 'รายละเอียดกิจกรรม', value: 'activity' },
-  { label: 'รายละเอียดการลงทะเบียน', value: 'registration', disable: isPlanning },
-  { label: 'รายชื่อนิสิต', value: 'students', disable: isPlanning },
-  { label: 'สรุปผลกิจกรรม', value: 'summary', disable: isPlanning },
-]
+
+// เมื่อ URL เปลี่ยน (Back/Forward) → sync เข้า state และ enforce disable
+watch(
+  () => route.params.tab,
+  () => {
+    syncTabFromRoute()
+    if (isDisabled.value && tab.value !== 'activity') {
+      tab.value = 'activity'
+      void pushTabToRoute('activity')
+    }
+  },
+)
+
+/** dropdown options (จอเล็ก) */
+const tabOptions = computed(() => [
+  { label: 'รายละเอียดกิจกรรม', value: 'activity', disable: false },
+  { label: 'รายละเอียดการลงทะเบียน', value: 'registration', disable: isDisabled.value },
+  { label: 'รายชื่อนิสิต', value: 'students', disable: isDisabled.value },
+  { label: 'สรุปผลกิจกรรม', value: 'summary', disable: isDisabled.value },
+])
 </script>
 
 <template>
@@ -61,9 +143,8 @@ const tabOptions = [
     <div style="margin-top: 20px">
       <AppBreadcrumbs :breadcrumbs="breadcrumbs" />
 
-      <!-- Tabs -->
       <div class="tab-scroll-wrapper">
-        <!-- ✅ จอใหญ่: ใช้ q-tabs -->
+        <!-- จอใหญ่ -->
         <q-tabs
           v-if="!isSmallScreen"
           v-model="tab"
@@ -73,12 +154,12 @@ const tabOptions = [
           indicator-color="transparent"
         >
           <q-tab name="activity" label="รายละเอียดกิจกรรม" />
-          <q-tab name="registration" label="รายละเอียดการลงทะเบียน" :disable="isPlanning" />
-          <q-tab name="students" label="รายชื่อนิสิต" :disable="isPlanning" />
-          <q-tab name="summary" label="สรุปผลกิจกรรม" :disable="isPlanning" />
+          <q-tab name="registration" label="รายละเอียดการลงทะเบียน" :disable="isDisabled" />
+          <q-tab name="students" label="รายชื่อนิสิต" :disable="isDisabled" />
+          <q-tab name="summary" label="สรุปผลกิจกรรม" :disable="isDisabled" />
         </q-tabs>
 
-        <!-- ✅ จอเล็ก: ใช้ q-select dropdown -->
+        <!-- จอเล็ก -->
         <q-select
           v-else
           v-model="tab"
@@ -89,14 +170,13 @@ const tabOptions = [
           dense
           outlined
           class="q-mb-md"
-          style="min-width: 250px;"
+          style="min-width: 250px"
           menu-anchor="bottom start"
           menu-self="top start"
-            :popup-content-style="{ maxHeight: '200px', overflowY: 'auto' }"
+          :popup-content-style="{ maxHeight: '200px', overflowY: 'auto' }"
         />
       </div>
 
-      <!-- Tab Panels -->
       <q-tab-panels v-model="tab" animated class="custom-panels">
         <q-tab-panel name="activity" class="q-my-md">
           <Tab_ActivityDetail
@@ -127,14 +207,12 @@ const tabOptions = [
   max-width: 100%;
   margin-left: 20px;
 }
-
 .tab-scroll-wrapper {
   overflow-x: auto;
   max-width: 100%;
   white-space: nowrap;
   justify-self: end;
 }
-
 .tab-scroll-wrapper::-webkit-scrollbar {
   display: none;
 }
@@ -145,13 +223,13 @@ const tabOptions = [
   flex: 1 1 0;
   text-align: center;
   border-radius: 12px 12px 0 0;
-  min-width: unset; /* ยกเลิก min-width เดิม */
+  min-width: unset;
 }
 .tab-no-arrow .q-tab.q-tab--active {
   background-color: #edf0f5;
 }
 .custom-panels {
-   max-height: unset;
+  max-height: unset;
   background-color: #edf0f5;
 }
 @media (max-width: 1650px) {
