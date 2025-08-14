@@ -9,7 +9,7 @@ import { useEnrollmentStore } from 'src/stores/enrollment'
 import { useStudentStore } from 'src/stores/student'
 import { EnrollmentService } from 'src/services/enrollment'
 import FilterDialog from 'src/components/Dialog/FilterDialog.vue'
-import type { Activity, EnrollmentSummary } from 'src/types/activity'
+import type { Activity } from 'src/types/activity'
 import type { Pagination } from 'src/types/pagination'
 import dayjs from 'dayjs'
 import type { CheckInOut } from 'src/types/checkinout'
@@ -18,9 +18,13 @@ dayjs.locale('th')
 const $q = useQuasar()
 const isMobile = computed(() => $q.screen.width <= 600)
 const studentStore = useStudentStore()
+const route = useRoute()
+const enrollmentStore = useEnrollmentStore()
+const activityId = route.params.id as string
 
+const filterCategories1 = ref(['year', 'major', 'studentStatus'])
 const allTab = ref<Activity | null>(null)
-const indexTab = ref(0)
+const indexTab = ref(-1)
 const query = ref<Pagination>({
   page: 1,
   limit: 5,
@@ -103,27 +107,6 @@ const students = computed(() => {
   return enrollmentStore.studentEnrollments || []
 })
 
-const fetchStudents = async () => {
-  enrollmentStore.studentEnrollments = []
-  const res = await ActivityService.getOne(activityId)
-  allTab.value = res.data
-  if (allTab.value && allTab.value.activityItems && allTab.value.activityItems.length > 0) {
-    const activityItemId = allTab.value.activityItems[indexTab.value]!.id!
-    const data = await EnrollmentService.getEnrollmentsByActivityID(activityItemId, query.value)
-    pagination.value.page = query.value.page || 1
-    pagination.value.rowsPerPage = query.value.limit || 5
-    pagination.value.sortBy = query.value.sortBy || ''
-    pagination.value.rowsNumber = data.meta.total
-    enrollmentStore.studentEnrollments = data.data
-    enrollmentStore.total = data.meta.total // ✅ update rowsNumber ให้ตรง
-    // ...
-  } else {
-    enrollmentStore.studentEnrollments = []
-    enrollmentStore.total = 0
-    console.error('activityItems is null or undefined')
-  }
-}
-
 const removeStudentFromActivity = async (studentId: string) => {
   try {
     await enrollmentStore.deleteEnrollmentById(studentId)
@@ -134,21 +117,19 @@ const removeStudentFromActivity = async (studentId: string) => {
   }
 }
 const activityItemOptions = computed(() => {
-  if (!allTab.value || !Array.isArray(allTab.value.activityItems)) return []
-  return allTab.value.activityItems.map((item, index) => ({
+  const items = allTab.value?.activityItems ?? []
+  const opts = items.map((item, index) => ({
     label: item.name,
-    value: index,
+    value: index, // index ปกติของรายการ
   }))
+
+  // ถ้า activityItems > 2 ให้เติม "ทุกกิจกรรม" ไว้หัวรายการ
+  if (items.length > 1) {
+    return [{ label: 'ทุกกิจกรรม', value: -1 }, ...opts]
+  }
+  return opts
 })
-onMounted(async () => {
-  await fetchStudents()
-})
-const route = useRoute()
-const enrollmentStore = useEnrollmentStore()
-const activityId = route.params.id as string
-const activityDetail = ref<Activity | null>(null)
-const enrollmentSummary = ref<EnrollmentSummary | null>(null)
-const filterCategories1 = ref(['year', 'major', 'studentStatus'])
+
 const columns = [
   {
     name: 'index',
@@ -217,22 +198,7 @@ const columns = [
   },
   { name: 'actions', label: '', field: 'actions', align: 'center' as const },
 ]
-const fetchActivityDetail = async () => {
-  try {
-    const response = await ActivityService.getOne(activityId)
-    activityDetail.value = response.data
-  } catch (error) {
-    console.error('Error fetching activity detail:', error)
-  }
-}
-const fetchEnrollmentSummary = async () => {
-  try {
-    const response = await ActivityService.getEnrollmentSummary(activityId)
-    enrollmentSummary.value = response
-  } catch (error) {
-    console.error('Error fetching enrollment summary:', error)
-  }
-}
+
 const expanded = ref<{ [key: string]: boolean }>({})
 
 function formatStudentName(name: string): string {
@@ -249,19 +215,6 @@ const windowWidth = ref(window.innerWidth)
 function handleResize() {
   windowWidth.value = window.innerWidth
 }
-
-onMounted(async () => {
-  window.addEventListener('resize', handleResize)
-  await fetchEnrollmentSummary()
-  await fetchActivityDetail()
-})
-
-onUnmounted(() => {
-  window.removeEventListener('resize', handleResize)
-})
-
-// Add a type for CheckInOutRecord
-
 
 // Add helper methods for checkin/checkout filtering for QTable rows and card layout
 function getRowCheckins(row: { checkInOut?: unknown }): CheckInOut[] {
@@ -284,6 +237,59 @@ function getStudentCheckouts(student: { checkInOut?: unknown }): CheckInOut[] {
     ? (student.checkInOut as CheckInOut[]).filter((rec) => rec.type === 'checkout')
     : []
 }
+const fetchStudents = async () => {
+  enrollmentStore.studentEnrollments = []
+
+  const res = await ActivityService.getOne(activityId)
+  allTab.value = res.data
+
+  if (
+    allTab.value &&
+    Array.isArray(allTab.value.activityItems) &&
+    allTab.value.activityItems.length > 0
+  ) {
+
+    // แตกแขนงตามค่า indexTab (จะเข้ามาทาง -1 ครั้งแรกโดยอัตโนมัติ)
+    if (indexTab.value === -1) {
+      const data = await EnrollmentService.getEnrollmentsByActivityIDs(activityId, query.value)
+
+      pagination.value.page = query.value.page || 1
+      pagination.value.rowsPerPage = query.value.limit || 5
+      pagination.value.sortBy = query.value.sortBy || ''
+      pagination.value.descending = query.value.order === 'desc'
+      pagination.value.rowsNumber = data.meta.total
+
+      enrollmentStore.studentEnrollments = data.data
+      enrollmentStore.total = data.meta.total
+    } else {
+      const activityItemId = allTab.value.activityItems[indexTab.value]!.id!
+      const data = await EnrollmentService.getEnrollmentsByActivityID(activityItemId, query.value)
+
+      pagination.value.page = query.value.page || 1
+      pagination.value.rowsPerPage = query.value.limit || 5
+      pagination.value.sortBy = query.value.sortBy || ''
+      pagination.value.descending = query.value.order === 'desc'
+      pagination.value.rowsNumber = data.meta.total
+
+      enrollmentStore.studentEnrollments = data.data
+      enrollmentStore.total = data.meta.total
+    }
+  } else {
+    enrollmentStore.studentEnrollments = []
+    enrollmentStore.total = 0
+    console.error('activityItems is null or undefined')
+  }
+}
+
+
+onMounted(async () => {
+  window.addEventListener('resize', handleResize)
+  await fetchStudents()
+})
+
+onUnmounted(() => {
+  window.removeEventListener('resize', handleResize)
+})
 </script>
 
 <template>
