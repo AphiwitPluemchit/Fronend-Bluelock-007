@@ -183,10 +183,7 @@ watchEffect(() => {
 
 <template>
   <q-page class="q-pa-md">
-    <!-- ชื่อหน้า -->
-    <div class="row justify-between items-center q-mb-md" style="margin-top: 20px">
-      <div class="text-h5 q-mb-md">ประวัติการอัปโหลด</div>
-    </div>
+    <div class="text-h5 q-mb-md">ประวัติการอัปโหลด</div>
 
     <!-- Desktop View -->
     <template v-if="!isMediumScreen">
@@ -293,10 +290,10 @@ watchEffect(() => {
 
           <!-- Content -->
           <q-card-section>
-            <div class="q-mb-xs info-row">
+            <!-- <div class="q-mb-xs info-row">
               <div class="label">ลำดับ</div>
               <div class="value">: {{ row.id }}</div>
-            </div>
+            </div> -->
             <div class="q-mb-xs info-row">
               <div class="label">ประเภทกิจกรรม</div>
               <div class="value">: {{ translateSkillType(row.skill) }}</div>
@@ -375,7 +372,7 @@ watchEffect(() => {
 }
 
 .backgroundheader {
-  background-color: #edf0f5;
+  background-color: #f9fafd;
 }
 
 .my-sticky-header-table {
@@ -449,14 +446,17 @@ watchEffect(() => {
 
 @media (max-width: 650px) {
   .header-row-responsive {
-    flex-direction: column;
-    align-items: flex-start;
+    flex-direction: row; /* ให้เป็นแถว */
+    align-items: center; /* จัดกลางแนวตั้ง */
+    justify-content: space-between; /* แยกซ้าย-ขวา */
+    width: 100%;
   }
 
   .action-section {
-    margin-top: 8px;
+    margin-top: 0; /* ไม่ต้องให้เลื่อนลงมา */
   }
 }
+
 
 @media (max-width: 450px) {
   .texttitle {
