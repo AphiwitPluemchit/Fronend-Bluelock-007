@@ -1,15 +1,5 @@
 <template>
   <q-card>
-    <!-- Editable question text -->
-    <q-input
-      v-model="localData.questionText"
-      label="คำถาม"
-      outlined
-      dense
-      class="q-mb-sm"
-      @update:model-value="update"
-    />
-
     <!-- Preview short answer -->
     <q-input
       v-model="shortAnswer"

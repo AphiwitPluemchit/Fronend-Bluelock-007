@@ -13,12 +13,12 @@
           class="q-mr-md"
         />
         <q-btn
-          color="primary"
-          label="Save"
-          icon="save"
-          @click="saveForm"
-          :disable="!formData.title || formData.blocks?.length === 0"
-        />
+  :color="isEdit ? 'primary' : 'primary'"
+  :label="isEdit ? 'Update' : 'Save'"
+  icon="save"
+  @click="saveForm"
+  :disable="!formData.title || formData.blocks?.length === 0"
+/>
       </div>
     </div>
 
@@ -130,19 +130,19 @@
     </div>
 
     <!-- Preview Dialog -->
-    <!-- <PreviewDialog v-model="showPreview" :form="formData" /> -->
+    <PreviewDialog v-model="showPreview" :form="formData" />
   </q-page>
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, onMounted } from 'vue'
+import { ref, reactive, onMounted, computed, watch, onActivated } from 'vue'
 import { useQuasar } from 'quasar'
 import { useFormStore } from 'src/stores/forms'
 import type { Form } from 'src/types/form'
 
 import QuestionTypeMenu from './QuestionFormat/QuestionTypeMenu.vue'
 // Components
-// import PreviewDialog from './PreviewDialog.vue'
+import PreviewDialog from './PreviewDialog.vue'
 import ShortAnswer from './QuestionFormat/ShortAnswer.vue'
 import CheckboxesMenu from './QuestionFormat/CheckboxesMenu.vue'
 import MutipleChoice from './QuestionFormat/MutipleChoice.vue'
@@ -285,61 +285,92 @@ function getLabel(type: string) {
   }
 }
 
+const formId = computed<string | undefined>(() =>
+  (route.query.id as string | undefined) ||
+  (route.params.id as string | undefined) ||
+  (route.params.formId as string | undefined) // ถ้าเคยตั้งชื่อ param ว่า formId
+)
+const isEdit = computed(() => !!formId.value) // ✅ มี id = โหมดแก้ไข
+
+function buildPayload() {
+  // ✅ รวม logic จัด shape ให้ backend ทีเดียว
+  const blocks = formData.blocks.map((block, index) => ({
+    title: block.title,
+    type: block.type,
+    description: block.description || '',
+    isRequired: !!block.isRequired,
+    session: block.session ?? 1,
+    sequence: index + 1,
+    choices: (block.choices ?? []).map((c, i) => ({
+      title: typeof c === 'string' ? c : c.title,
+      sequence: i + 1,
+    })),
+    rows: (block.rows ?? []).map((r, i) => ({
+      title: typeof r === 'string' ? r : r.title,
+      sequence: i + 1,
+    })),
+  }))
+
+  return {
+    title: formData.title,
+    description: formData.description,
+    activityId: formData.activityId,
+    isOrigin: true,
+    blocks,
+  }
+}
+
 async function saveForm() {
   try {
-    const blocks = formData.blocks.map((block, index) => {
-      return {
-        title: block.title,
-        type: block.type,
-        description: block.description || '',
-        isRequired: block.isRequired,
-        session: block.session ?? 1,
-        sequence: index + 1,
-        choices:
-          block.choices?.map((c, i) => ({
-            title: typeof c === 'string' ? c : c.title,
-            sequence: i + 1,
-          })) ?? [],
-        rows:
-          block.rows?.map((r, i) => ({
-            title: typeof r === 'string' ? r : r.title,
-            sequence: i + 1,
-          })) ?? [],
-      }
-    })
+    const payload = buildPayload()
 
-    await formStore.createForm({
-      title: formData.title,
-      description: formData.description,
-      activityId: formData.activityId,
-      isOrigin: true,
-      blocks,
-    })
-
-    $q.notify({ type: 'positive', message: 'ฟอร์มถูกบันทึกแล้ว!' })
-
+    if (isEdit.value && formId.value) {
+      // ✅ UPDATE
+      const updated = await formStore.updateForm(formId.value, payload)
+      if (!updated) throw new Error('Update failed')
+      $q.notify({ type: 'positive', message: 'อัปเดตฟอร์มเรียบร้อยแล้ว' })
+    } else {
+      const created = await formStore.createForm(payload)
+      if (!created) throw new Error('Create failed')
+      $q.notify({ type: 'positive', message: 'ฟอร์มถูกบันทึกแล้ว!' })
+    }
     await router.push('/Admin/Forms')
-
   } catch (err) {
     console.error(err)
     $q.notify({ type: 'negative', message: 'เกิดข้อผิดพลาดในการบันทึกฟอร์ม' })
   }
 }
-onMounted(async () => {
-  const formId = route.params.formId as string | undefined
-  if (formId) {
-    const form = await formStore.fetchFormById(formId)
-    if (form) {
-      formData.title = form.title
-      formData.description = form.description
-      formData.activityId = form.activityId
-      formData.isOrigin = form.isOrigin
-      formData.blocks = JSON.parse(JSON.stringify(form.blocks || []))
-    } else {
-      $q.notify({ type: 'negative', message: 'ไม่พบฟอร์มที่ต้องการแก้ไข' })
-    }
+
+async function loadFormIfAny(id?: string) {
+  console.log('[Builder] incoming id =', id, 'from', {
+    query: route.query, params: route.params
+  })
+  if (!id) {
+    console.log('[Builder] create mode (no id)')
+    return
   }
+  const form = await formStore.fetchFormById(id)
+  console.log('[Builder] fetched form =', form)
+  if (form) {
+    formData.title = form.title
+    formData.description = form.description
+    formData.activityId = form.activityId
+    formData.isOrigin = form.isOrigin
+    formData.blocks = JSON.parse(JSON.stringify(form.blocks || []))
+  } else {
+    $q.notify({ type: 'negative', message: 'ไม่พบฟอร์มที่ต้องการแก้ไข' })
+  }
+}
+
+onMounted(() => loadFormIfAny(formId.value))
+
+// กรณีเปลี่ยน id ระหว่างอยู่หน้าเดิม
+watch(formId, (newId, oldId) => {
+  if (newId && newId !== oldId) void loadFormIfAny(newId)
 })
+
+// ถ้าใช้ <keep-alive>
+onActivated(() => loadFormIfAny(formId.value))
 
 </script>
 

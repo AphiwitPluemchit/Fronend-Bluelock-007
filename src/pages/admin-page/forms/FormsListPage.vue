@@ -53,7 +53,7 @@
                   clickable
                   name="delete"
                   class="bg-red text-white q-pa-xs rounded-borders q-mr-sm"
-                 @click="deleteForm(props.row)"
+                  @click="askRemove(props.row)"
                 >
                   <q-tooltip>ลบ</q-tooltip>
                 </q-icon>
@@ -67,20 +67,23 @@
         </template>
       </q-table>
     </div>
+    <RemoveFormDailog v-model="showRemoveDialog" @confirm="deleteForm(pendingDeleteId)" />
   </q-page>
 </template>
 
 <script setup lang="ts">
+import RemoveFormDailog from './RemoveFormDailog.vue'
 import { useFormStore } from 'src/stores/forms'
 import type { Form } from 'src/types/form'
-import { computed, onMounted } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
-import { useQuasar } from 'quasar';
+import { useQuasar } from 'quasar'
 
 const formStore = useFormStore()
 const router = useRouter()
-const $q = useQuasar();
-
+const $q = useQuasar()
+const showRemoveDialog = ref(false)
+const pendingDeleteId = ref<string | null>(null) 
 const createForm = async () => {
   await router.push('/Admin/forms/builder')
 }
@@ -105,20 +108,29 @@ const columns = computed(() => [
     field: 'actions',
     align: 'center' as const,
     sortable: false,
-  }
+  },
 ])
 onMounted(async () => {
   await formStore.fetchForms()
 })
 
-const deleteForm = async (form: Form) => {
+function askRemove(row: Form) {
+  pendingDeleteId.value = row.id || null
+  showRemoveDialog.value = true
+}
+
+async function deleteForm(id: string | null) {
   try {
-    if (!form.id) throw new Error('ไม่มีฟอร์ม ID')
-    await formStore.deleteForm(form.id)
+    if (!id) throw new Error('ไม่มีฟอร์ม ID')
+    await formStore.deleteForm(id)
     await formStore.fetchForms()
     $q.notify({ type: 'positive', message: 'ลบฟอร์มเรียบร้อยแล้ว' })
-  } catch (err) {
-    console.error(err)
+  } catch (error) {
+    console.error(error)
+    $q.notify({ type: 'negative', message: 'ลบฟอร์มไม่สำเร็จ' })
+  } finally {
+    showRemoveDialog.value = false
+    pendingDeleteId.value = null
   }
 }
 const editForm = async (form: Form) => {

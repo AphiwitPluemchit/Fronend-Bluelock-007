@@ -19,10 +19,10 @@ export const useFormStore = defineStore('form', () => {
   }
 
   /** โหลดฟอร์มตาม id */
-/** โหลดฟอร์มตาม id */
 const fetchFormById = async (id: string): Promise<Form | null> => {
   loading.value = true
   const form = await FormService.getFormById(id)
+  console.log('📦 Form loaded (store):', form)  
   currentForm.value = form
   loading.value = false
   return form // ✅ ต้องมี return form
@@ -50,6 +50,7 @@ const fetchFormById = async (id: string): Promise<Form | null> => {
     return updated
   }
 
+  
   /** ลบฟอร์ม */
   const deleteForm = async (id: string) => {
     const ok = await FormService.deleteForm(id)
