@@ -55,8 +55,8 @@ const pagination = ref({
 // const manageDialogRef = ref<InstanceType<typeof ManageStudentDialog> | null>(null)
 
 // ฟังก์ชันเปิด ManageStudentDialog
-const goToConfirmStudentDataPage = () => {
-  void router.push('/Admin/StudentInternship/ConfirmStudentDataPage')
+const goToConfirmStudentInternDataPage = () => {
+  void router.push('/Admin/StudentInternship/ConfirmStudentInternDataPage')
 }
 
 const columns = [
@@ -106,15 +106,15 @@ onMounted(async () => {
   <q-page class="q-pa-md">
     <!-- ชื่อหน้า -->
     <div class="row justify-between items-center" style="margin-top: 20px">
-      <div class="texttitle">จัดการข้อมูลนิสิต</div>
+      <div class="texttitle">จัดการฝึกงานนิสิต</div>
       <q-btn
         v-if="show"
         dense
         outlined
         label="จัดเก็บนิสิต"
-        @click="goToConfirmStudentDataPage"
+        @click="goToConfirmStudentInternDataPage"
         class="btnadd"
-        style="width: 130px;"
+        style="width: 130px"
       >
       </q-btn>
     </div>

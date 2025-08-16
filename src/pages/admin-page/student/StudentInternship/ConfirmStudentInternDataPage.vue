@@ -5,10 +5,10 @@ import AppBreadcrumbs from 'src/components/AppBreadcrumbs.vue'
 import type { Student } from 'src/types/student'
 
 const breadcrumbs = ref({
-  previousPage: { title: 'จัดเก็บข้อมูลนิสิต', path: '/Admin/StudentStorage' },
+  previousPage: { title: 'จัดการฝึกงานนิสิต', path: '/Admin/StudentInternship' },
   currentPage: {
     title: 'ยืนยันการจัดเก็บข้อมูลนิสิต',
-    path: '/Admin/StudentStorage/ConfirmStudentDataPage',
+    path: '/Admin/StudentInternship/ConfirmStudentInternDataPage',
   },
   icon: 'people',
 })
@@ -281,7 +281,7 @@ onMounted(async () => {
               <q-checkbox
                 v-model="selectedStudents"
                 :val="props.row.code"
-                :color="isStudentSelected(props.row.code) ? 'primary' : 'white'"
+                :color="isStudentSelected(props.row.code) ? 'primary' : 'gray'"
                 keep-color
                 dense
                 keep-focus

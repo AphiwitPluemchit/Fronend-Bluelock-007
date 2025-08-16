@@ -43,9 +43,9 @@ const adminChildren: RouteRecordRaw[] = [
     component: () => import('src/pages/admin-page/student/StudentInternship/StudentInternshipPage.vue'),
   },
   {
-    path: 'StudentInternship/ConfirmStudentDataPage',
+    path: 'StudentInternship/ConfirmStudentInternDataPage',
     component: () =>
-      import('src/pages/admin-page/student/StudentStorage/ConfirmStudentDataPage.vue'),
+      import('src/pages/admin-page/student/StudentInternship/ConfirmStudentInternDataPage.vue'),
   },
   {
     path: 'StudentManagement/StudentDetail/:code',

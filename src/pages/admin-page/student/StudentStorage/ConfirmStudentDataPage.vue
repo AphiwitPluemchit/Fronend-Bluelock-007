@@ -281,7 +281,7 @@ onMounted(async () => {
               <q-checkbox
                 v-model="selectedStudents"
                 :val="props.row.code"
-                :color="isStudentSelected(props.row.code) ? 'primary' : 'white'"
+                :color="isStudentSelected(props.row.code) ? 'primary' : 'gray'"
                 keep-color
                 dense
                 keep-focus
