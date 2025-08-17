@@ -26,7 +26,12 @@ const showSuccess = (message: string) => {
 class AuthService {
   static async login(email: string, password: string): Promise<Auth | null> {
     try {
+      console.log('🚀 AuthService.login called with:', { email, passwordLength: password?.length || 0 })
+      console.log('🌐 API URL:', import.meta.env.VITE_API_URL)
+
       const res = await api.post<Auth>('/auth/login', { email, password })
+      console.log('📡 API Response:', res)
+      console.log('📊 Response data:', res.data)
 
       if (res.data?.message) {
         showSuccess(res.data.message)
@@ -34,13 +39,15 @@ class AuthService {
 
       return res.data
     } catch (error) {
+      console.error('💥 AuthService login error:', error)
+
       // Handle specific error codes from backend
       const axiosError = error as AxiosError<{ code: string; error: string; remainingTime?: number }>
       if (axiosError.response?.data?.code) {
         const errorCode = axiosError.response.data.code
         const errorMessage = axiosError.response.data.error || 'เกิดข้อผิดพลาด'
 
-        console.log('Error code:', errorCode, 'Message:', errorMessage)
+        console.log('🚨 Error code:', errorCode, 'Message:', errorMessage)
 
         switch (errorCode) {
           case 'MISSING_CREDENTIALS':
@@ -63,6 +70,7 @@ class AuthService {
             showError(errorMessage)
         }
       } else {
+        console.error('🚨 No error code in response:', axiosError.response)
         showError('เข้าสู่ระบบล้มเหลว กรุณาตรวจสอบการเชื่อมต่อ')
       }
 
@@ -73,17 +81,59 @@ class AuthService {
 
   static async logout(userId: string): Promise<boolean> {
     try {
-      const res = await api.post(`/auth/logout/${userId}`)
+      console.log('🚪 AuthService.logout called for user:', userId)
+      console.log('🌐 API URL:', import.meta.env.VITE_API_URL)
+      console.log('🎫 Token exists:', !!localStorage.getItem('access_token'))
+
+      // Backend logout endpoint: /auth/logout
+      // Backend now uses JWT middleware, so userId is extracted from token
+      // No need to send userId in request body
+      const res = await api.post('/auth/logout')
+
+      console.log('📡 Logout API Response:', res)
+      console.log('📊 Response data:', res.data)
 
       if (res.data?.message) {
         showSuccess(res.data.message)
       }
 
+      console.log('✅ Logout API call successful')
       return true
     } catch (error) {
-      // แม้ logout API ล้มเหลว ก็ให้เคลีย localStorage
-      console.warn('Logout API failed:', error)
-      return false
+      console.error('💥 AuthService logout error:', error)
+
+      // Handle specific error types
+      const axiosError = error as AxiosError<{ status: number; data: Record<string, unknown> }>
+
+      if (axiosError.response) {
+        const status = axiosError.response.status
+        const data = axiosError.response.data
+
+        console.log('🚨 Logout failed with status:', status)
+        console.log('🚨 Error data:', data)
+
+        switch (status) {
+          case 401:
+            console.warn('⚠️ Unauthorized - token may be invalid or expired')
+            break
+          case 404:
+            console.warn('⚠️ Logout endpoint not found - check backend configuration')
+            break
+          case 500:
+            console.warn('⚠️ Backend server error during logout')
+            break
+          default:
+            console.warn('⚠️ Logout failed with status:', status)
+        }
+      } else if (axiosError.request) {
+        console.warn('⚠️ No response received - network or backend issue')
+      } else {
+        console.warn('⚠️ Logout request setup failed:', axiosError.message)
+      }
+
+      // Return true to indicate logout was handled (even if API failed)
+      // This prevents the logout process from breaking
+      return true
     }
   }
 

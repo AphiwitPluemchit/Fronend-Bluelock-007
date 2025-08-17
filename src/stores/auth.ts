@@ -58,21 +58,52 @@ export const useAuthStore = defineStore('auth', {
     getLastLogin(): string | undefined {
       return this.getUser?.lastLogin
     },
+
+    getIsAuthenticated(): boolean {
+      const token = this.getAccessToken
+      const user = this.getUser
+      if (!token || !user) return false
+
+      // Check if token is expired
+      try {
+        const parts = token.split('.')
+        if (parts.length !== 3) return false
+        const payload = JSON.parse(atob(parts[1] as string))
+        const expiry = payload.exp * 1000
+        return Date.now() < expiry
+      } catch {
+        return false
+      }
+    },
   },
 
   actions: {
     async login(): Promise<Auth | null> {
       try {
+        console.log('🔐 Starting login process...')
+        console.log('📧 Email:', this.form.email)
+        console.log('🔑 Password length:', this.form.password?.length || 0)
+
         const data = await AuthService.login(this.form.email, this.form.password)
+        console.log('📡 AuthService response:', data)
+
         if (data?.token && data?.user) {
-          console.log('Login successful:', data.user)
+          console.log('✅ Login successful:', data.user)
+          console.log('🎫 Token received:', data.token.substring(0, 20) + '...')
+
           localStorage.setItem('access_token', data.token)
           localStorage.setItem('user', JSON.stringify(data.user))
+
+          console.log('💾 Data saved to localStorage')
+          console.log('👤 Current user role:', data.user.role)
+
           return data
+        } else {
+          console.warn('⚠️ Login response incomplete:', data)
+          return null
         }
-        return null
       } catch (err) {
-        console.error('Login error:', err)
+        console.error('❌ Login error in store:', err)
         throw new Error('เข้าสู่ระบบไม่สำเร็จ')
       }
     },
@@ -80,19 +111,33 @@ export const useAuthStore = defineStore('auth', {
     // ✅ ปรับ logout: เคลียร์ session อย่างเดียว
     //    ส่วน "redirect ไป login" ให้ response interceptor เป็นคนทำ
     async logout(): Promise<void> {
-      console.log('logout')
+      console.log('🚪 Starting logout process...')
       try {
         const user = this.getUser
+        console.log('👤 Current user:', user)
+
         if (user?.id) {
+          console.log('🔄 Calling AuthService.logout with userId:', user.id)
           // กันลูป 401 ด้วย header บอก interceptor ว่า "ข้าม redirect"
-          await AuthService.logout(user.id)
+          const logoutResult = await AuthService.logout(user.id)
+          console.log('✅ AuthService.logout completed with result:', logoutResult)
+
+          if (logoutResult) {
+            console.log('🎯 Backend logout successful')
+          } else {
+            console.warn('⚠️ Backend logout failed, but continuing with local cleanup')
+          }
+        } else {
+          console.warn('⚠️ No user ID found, skipping API call')
         }
       } catch (err) {
-        console.warn('Logout failed silently:', err)
+        console.warn('⚠️ Logout failed silently:', err)
+        // Continue with local cleanup even if API fails
       }
+
+      console.log('🧹 Clearing localStorage...')
       this.clearLocalStorage()
-      // ❌ ไม่ push/replace ที่นี่ เพื่อกันชนกับ interceptor
-      console.log('/logout done (no redirect here)')
+      console.log('✅ Logout process completed (no redirect here)')
     },
 
     clearLocalStorage(): void {
@@ -121,6 +166,125 @@ export const useAuthStore = defineStore('auth', {
         return Date.now() >= expiry
       } catch {
         return true
+      }
+    },
+
+    // ✅ เพิ่ม method ใหม่เพื่อตรวจสอบสิทธิ์การเข้าถึง path
+    canAccessPath(path: string): boolean {
+      const role = this.getRole
+      if (!role) return false
+
+      // ตรวจสอบว่า path ตรงกับ role หรือไม่
+      if (role === EnumUserRole.ADMIN && path.startsWith('/Admin/')) {
+        return true
+      }
+
+      if (role === EnumUserRole.STUDENT && path.startsWith('/Student/')) {
+        return true
+      }
+
+      // public paths
+      if (path === '/' || path === '/unauthorized') {
+        return true
+      }
+
+      return false
+    },
+
+    // ✅ ตรวจสอบว่า user มีสิทธิ์เข้าถึง route scope หรือไม่
+    canAccessScope(scope: string): boolean {
+      const role = this.getRole
+      if (!role) return false
+
+      if (scope === 'public' || scope === 'checkinout') return true
+
+      if (role === EnumUserRole.ADMIN && scope === 'admin') return true
+      if (role === EnumUserRole.STUDENT && scope === 'student') return true
+
+      return false
+    },
+
+    // ✅ ตรวจสอบความถูกต้องของข้อมูล user
+    validateUserData(): boolean {
+      const user = this.getUser
+      const token = this.getAccessToken
+
+      if (!user || !token) return false
+
+      // ตรวจสอบว่ามีข้อมูลที่จำเป็นครบหรือไม่
+      if (!user.id || !user.role || !user.email) return false
+
+      // ตรวจสอบว่า role ถูกต้องหรือไม่
+      if (!Object.values(EnumUserRole).includes(user.role)) return false
+
+      return true
+    },
+
+    // ✅ ตรวจสอบว่า user สามารถเข้าถึง route ที่กำหนดได้หรือไม่
+    canAccessRoute(route: { meta?: { scope?: string } }): boolean {
+      if (!route.meta?.scope) return false
+
+      const scope = route.meta.scope
+      return this.canAccessScope(scope)
+    },
+
+    // ✅ ตรวจสอบว่า user สามารถเข้าถึง nested routes ได้หรือไม่
+    canAccessNestedRoute(matched: Array<{ meta?: { scope?: string } }>): boolean {
+      for (const route of matched) {
+        if (route.meta?.scope && !this.canAccessScope(route.meta.scope)) {
+          return false
+        }
+      }
+      return true
+    },
+
+    // ✅ ตรวจสอบความปลอดภัยของ session
+    validateSession(): boolean {
+      // ตรวจสอบ token
+      if (this.isTokenExpired()) return false
+
+      // ตรวจสอบข้อมูล user
+      if (!this.validateUserData()) return false
+
+      // ตรวจสอบว่า token ตรงกับ user หรือไม่ (ถ้ามีข้อมูลเพิ่มเติม)
+      return true
+    },
+
+    // ✅ สร้าง session security report
+    getSecurityReport(): {
+      isValid: boolean
+      issues: string[]
+      recommendations: string[]
+    } {
+      const issues: string[] = []
+      const recommendations: string[] = []
+
+      if (!this.getAccessToken) {
+        issues.push('No access token found')
+        recommendations.push('Please login again')
+      }
+
+      if (this.isTokenExpired()) {
+        issues.push('Token has expired')
+        recommendations.push('Please login again')
+      }
+
+      if (!this.validateUserData()) {
+        issues.push('Invalid user data')
+        recommendations.push('Please login again')
+      }
+
+      if (!this.getRole) {
+        issues.push('No user role defined')
+        recommendations.push('Please contact administrator')
+      }
+
+      const isValid = issues.length === 0
+
+      return {
+        isValid,
+        issues,
+        recommendations
       }
     },
   },

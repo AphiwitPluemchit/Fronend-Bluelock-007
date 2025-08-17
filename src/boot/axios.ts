@@ -13,9 +13,27 @@ api.interceptors.request.use((config) => {
   const auth = useAuthStore()
   const token = localStorage.getItem('access_token')
 
-  if (auth.isTokenExpired()) {
+  // ✅ ข้ามการตรวจสอบสำหรับ login request
+  if (config.url === '/auth/login') {
+    console.log('🔐 Login request detected, skipping validation')
+    return config
+  }
+
+  // ตรวจสอบความถูกต้องของข้อมูล user ก่อนส่ง request (เฉพาะ non-login requests)
+  if (!auth.validateUserData()) {
+    console.warn('Invalid user data detected in request interceptor')
     auth.clearLocalStorage()
-  } else if (token) {
+    // ไม่ส่ง request และ return error
+    return Promise.reject(new Error('Invalid user data'))
+  }
+
+  if (auth.isTokenExpired()) {
+    console.warn('Token expired in request interceptor')
+    auth.clearLocalStorage()
+    return Promise.reject(new Error('Token expired'))
+  }
+
+  if (token) {
     config.headers.Authorization = `Bearer ${token}`
   }
   return config
@@ -34,27 +52,32 @@ export default boot(({ app, router }) => {
         reqConfig?.headers?.['x-skip-auth-redirect'] === 'true'
 
       if (status === 401 && !skipAuthRedirect) {
-        if (isHandling401) return Promise.reject(new Error(error))
+        if (isHandling401) return Promise.reject(new Error('Already handling 401'))
         isHandling401 = true
+
         try {
           const auth = useAuthStore()
-          const isOnLogin = router.currentRoute.value.name === 'login'
-          try { await auth.logout() } catch {
-            // ignored
-          }
+          const isOnLogin = router.currentRoute.value.name === 'Login'
+
+          // Clear authentication data
+          auth.clearLocalStorage()
 
           if (!isOnLogin) {
             const redirect = router.currentRoute.value.fullPath
 
-            // ✅ ถ้ามี route ชื่อ 'login' ใช้ชื่อนั้น
-            if (typeof router.hasRoute === 'function' && router.hasRoute('Login')) {
+            // Redirect to login page
+            try {
               await router.replace({ name: 'Login', query: { redirect } })
-            } else {
-              // ✅ fallback: ใช้ path '/login' (ต้องมี route path นี้)
-              await router.replace({ path: '/Login', query: { redirect } }).catch(async () => {
-                // ตัวกันสุดท้าย (กันแอปติดหน้าเดิม)
+            } catch (routerError) {
+              console.warn('Router redirect failed, using fallback:', routerError)
+              // Fallback to path-based redirect
+              try {
+                await router.replace({ path: '/', query: { redirect } })
+              } catch (fallbackError) {
+                console.error('Fallback redirect also failed:', fallbackError)
+                // Last resort - go to root
                 await router.replace('/')
-              })
+              }
             }
           }
         } finally {
@@ -62,8 +85,7 @@ export default boot(({ app, router }) => {
         }
       }
 
-      // อย่าห่อ error ทิ้งข้อมูล
-      return Promise.reject(new Error(error))
+      return Promise.reject(new Error(error?.message || 'Request failed'))
     }
   )
 

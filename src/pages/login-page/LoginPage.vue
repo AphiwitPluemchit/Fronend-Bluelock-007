@@ -187,8 +187,8 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
-import { useRouter } from 'vue-router'
+import { ref, onMounted } from 'vue'
+import { useRouter, useRoute } from 'vue-router'
 import { useAuthStore } from 'src/stores/auth'
 import { EnumUserRole } from 'src/data/roles'
 import RecoverPassword from './RecoverPassword.vue'
@@ -197,9 +197,18 @@ import { useQuasar } from 'quasar'
 const $q = useQuasar()
 const auth = useAuthStore()
 const router = useRouter()
+const route = useRoute()
 const isPwd = ref(true)
 const isResetPassword = ref(false)
 const isLoggingIn = ref(false)
+
+// Handle redirect query parameter on mount
+onMounted(() => {
+  const redirect = route.query.redirect as string
+  if (redirect) {
+    localStorage.setItem('redirectAfterLogin', redirect)
+  }
+})
 
 function resetToLogin() {
   isResetPassword.value = false
@@ -214,8 +223,10 @@ const handleLogin = async () => {
       if (redirect) {
         localStorage.removeItem('redirectAfterLogin')
         await router.push(redirect)
+        return // Exit early after redirect
       }
 
+      // Default redirects if no stored redirect
       const role = result.user?.role
       if (role === EnumUserRole.ADMIN) {
         await router.push(`/${EnumUserRole.ADMIN}/ActivitiesCalendar`)

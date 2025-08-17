@@ -69,11 +69,12 @@ const drawerBehavior = computed(() => {
 async function logout() {
   try {
     await authStore.logout()
+    // After logout, redirect to login page
+    await router.push('/')
   } catch (error) {
     console.error('Logout error:', error)
-    // แม้ว่า logout จะล้มเหลว ก็ให้เคลีย localStorage และ redirect ไปหน้า login
-    localStorage.removeItem('access_token')
-    localStorage.removeItem('user')
+    // Even if logout fails, clear localStorage and redirect to login
+    authStore.clearLocalStorage()
     await router.push('/')
   }
 }
