@@ -114,14 +114,23 @@ export class EnrollmentService {
     }
   }
 
-  // static async getEnrollmentsByStudentIDAndActivityID(studentId: string, activityId: string) {
-  //   try {
-  //     const res = await api.get(`${this.path}/student/${studentId}/activity/${activityId}`)
-  //     console.log('Fetched enrollments:', res.data)
-  //     return res.data
-  //   } catch (error) {
-  //     console.error(`Error fetching enrollment for student ID: ${studentId}`, error)
-  //     throw error
-  //   }
-  // }
+  static async getEnrollmentsHistoryByStudentID(studentId: string, params: Pagination) {
+    try {
+      const { activityState, skill, ...rest } = params
+      const queryParams = {
+        ...rest,
+        ...(activityState && activityState.length > 0
+          ? { activityState: activityState.join(',') }
+          : {}),
+        ...(skill && skill.length > 0 ? { skill: skill.join(',') } : {}),
+      }
+      console.log('Sending params:', queryParams)
+      const res = await api.get(`${this.path}/history/student/${studentId}`, { params: queryParams })
+      console.log('Fetched enrollments:', res.data)
+      return res.data
+    } catch (error) {
+      console.error(`Error fetching enrollments for student ID: ${studentId}`, error)
+      throw error
+    }
+  }
 }

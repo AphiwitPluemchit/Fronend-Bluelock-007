@@ -6,9 +6,15 @@ import AppBreadcrumbs from 'src/components/AppBreadcrumbs.vue'
 import { useStudentStore } from 'src/stores/student'
 import type { Student } from 'src/types/student'
 import { EnrollmentService } from 'src/services/enrollment'
-import type { Activity } from 'src/types/activity'
+import type { ActivityHistory } from 'src/types/activity'
 import type { Pagination } from 'src/types/pagination'
-
+interface ActivityRow {
+  id: string
+  name: string
+  skill: string
+  hour: number
+  checkinoutRecord: string // แสดงเป็นข้อความ เช่น "13/08/2025 20:44 -"
+}
 const majorOptions = ['CS', 'AAI', 'IT', 'SE']
 
 const originalStudentData = ref<Student | null>(null)
@@ -17,7 +23,7 @@ const route = useRoute()
 const studentCode = ref(route.params.code as unknown as string)
 const studentStore = useStudentStore()
 
-const historyActivity = ref<Activity[]>([])
+const historyActivity = ref<ActivityHistory[]>([])
 
 const query = ref<Pagination>({
   page: 1,
@@ -70,42 +76,64 @@ const cancelEdit = () => {
   studentStore.student = { ...originalStudentData.value } as Student
   isEditMode.value = false
 }
+function mapHistoryToRows(data: ActivityHistory[]): ActivityRow[] {
+  const rows: ActivityRow[] = []
+  data.forEach((act) => {
+    act.activityItems?.forEach((item) => {
+      // แปลง checkinoutRecord ให้เป็น string
+      const checkinLogs =
+        item.checkinoutRecord && item.checkinoutRecord.length > 0
+          ? item.checkinoutRecord
+              .map(
+                (r) =>
+                  `${new Date(r.checkin).toLocaleString('th-TH', {
+                    dateStyle: 'short',
+                    timeStyle: 'short',
+                  })} - ${
+                    r.checkout
+                      ? new Date(r.checkout).toLocaleTimeString('th-TH', { timeStyle: 'short' })
+                      : 'ยังไม่ออก'
+                  }`,
+              )
+              .join('\n')
+          : '-'
+
+      rows.push({
+        id: item.id || '',
+        name: act.name,
+        skill: act.skill || '',
+        hour: item.hour || 0,
+        checkinoutRecord: checkinLogs,
+      })
+    })
+  })
+  return rows
+}
 onMounted(async () => {
   show.value = false
   if (!studentCode.value) return
   await studentStore.getStudentByCode(studentCode.value)
   originalStudentData.value = { ...studentStore.student }
-  const response = await EnrollmentService.getEnrollmentsByStudentID(
+  const response = await EnrollmentService.getEnrollmentsHistoryByStudentID(
     studentStore.student.id || '',
     query.value,
   )
   console.log(response)
 
-  historyActivity.value = response.data
+  historyActivity.value = mapHistoryToRows(response.data) // ✅ แปลงก่อน
   show.value = true
 })
+
 const columns = [
   { name: 'index', label: 'ลำดับ', field: 'index', align: 'left' as const },
+  { name: 'name', label: 'ชื่อกิจกรรม', field: 'name', align: 'left' as const },
+  { name: 'skill', label: 'ประเภทกิจกรรม', field: 'skill', align: 'center' as const },
+  { name: 'hour', label: 'ชั่วโมง', field: 'hour', align: 'center' as const },
   {
-    name: 'name',
-    label: 'ชื่อกิจกรรม',
-    field: 'name',
-    align: 'left' as const,
-    style: 'max-width: 250px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;',
-  },
-
-  {
-    name: 'skill',
-    label: 'ประเภทกิจกรรม',
-    field: 'skill',
-    align: 'center' as const,
-  },
-  { name: 'hour', label: 'ชั่วโมง', field: 'hour', align: 'left' as const },
-  {
-    name: 'check-in-out',
+    name: 'checkinoutRecord',
     label: 'การเช็คชื่อ',
-    field: 'check-in-out',
-    align: 'center' as const,
+    field: 'checkinoutRecord',
+    align: 'left' as const,
   },
 ]
 </script>
@@ -252,37 +280,18 @@ const columns = [
       <q-table
         :columns="columns"
         :rows="historyActivity"
-        row-key="name"
-        class="tableHisAct"
+        row-key="id"
         bordered
         flat
-        :pagination="{ rowsPerPage: 10 }"
       >
         <template v-slot:body="props">
           <q-tr :props="props">
             <q-td key="index">{{ props.rowIndex + 1 }}</q-td>
-            <q-td
-              key="name"
-              style="
-                max-width: 250px;
-                white-space: nowrap;
-                overflow: hidden;
-                text-overflow: ellipsis;
-              "
-              >{{ props.row.name }}</q-td
-            >
-            <q-td key="date">{{ props.row.date }}</q-td>
-            <q-td key="softskill" class="text-center">
-              <span
-                :class="{ 'negative-hours': props.row.skill === 'soft' && props.row.hours < 0 }"
-                >{{ props.row.skill === 'soft' ? props.row.hours : '-' }}</span
-              >
-            </q-td>
-            <q-td key="hardskill" class="text-center">
-              <span
-                :class="{ 'negative-hours': props.row.skill === 'hard' && props.row.hours < 0 }"
-                >{{ props.row.skill === 'hard' ? props.row.hours : '-' }}</span
-              >
+            <q-td key="name">{{ props.row.name }}</q-td>
+            <q-td key="skill">{{ props.row.skill }}</q-td>
+            <q-td key="hour" class="text-center">{{ props.row.hour }}</q-td>
+            <q-td key="checkinoutRecord">
+              <pre style="white-space: pre-line">{{ props.row.checkinoutRecord }}</pre>
             </q-td>
           </q-tr>
         </template>
@@ -345,7 +354,5 @@ const columns = [
 .editable {
   background-color: white;
 }
-.tableHisAct {
-  height: 340px;
-}
+
 </style>
