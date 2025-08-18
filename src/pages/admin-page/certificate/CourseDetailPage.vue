@@ -1,17 +1,29 @@
 <script setup lang="ts">
-import { computed, onMounted, ref } from 'vue'
+import { onMounted, ref } from 'vue'
 import AppBreadcrumbs from 'src/components/AppBreadcrumbs.vue'
-import FilterDialog from 'src/components/Dialog/FilterDialog.vue'
 import { useRoute } from 'vue-router'
 import { useCourseStore } from 'src/stores/course'
 import type { Course } from 'src/types/course'
-import { useQuasar } from 'quasar'
-
+import Tab_CourseDetail from './Tab_CourseDetail.vue'
+import Tab_StudentSubmission from './Tab_StudentSubmission.vue'
 const route = useRoute()
 const id = route.params.id as string
-const $q = useQuasar()
-const isMobile = computed(() => $q.screen.lt.md)
+const isSmallScreen = ref(false)
+const checkScreen = () => {
+  const width = window.innerWidth
+  isSmallScreen.value = width <= 610
+}
+onMounted(() => {
+  checkScreen()
+})
 
+const activeTab = ref<'course' | 'submission'>('course') // v-model ของ tab/panels
+const courseId = route.params.id as string // ส่ง id ให้แท็บลูก
+
+const tabOptions = [
+  { label: 'รายละเอียดหัวข้อการอบรม', value: 'course' },
+  { label: 'ประวัติการส่งหัวข้อกิจกรรม', value: 'submission' },
+]
 const courseStore = useCourseStore()
 const course = ref<Course | null>(null)
 
@@ -29,72 +41,72 @@ const breadcrumbs = ref({
   currentPage: { title: 'รายละเอียดหัวข้อการอบรม', path: route.fullPath },
   icon: 'school',
 })
-const submissionColumns = [
-  { name: 'index', label: 'ลำดับ', field: 'index', align: 'left' as const },
-  { name: 'date', label: 'วันที่อัปโหลด', field: 'date', align: 'left' as const },
-  { name: 'studentCode', label: 'รหัสนิสิต', field: 'studentCode', align: 'left' as const },
-  { name: 'studentName', label: 'ชื่อ-สกุล', field: 'studentName', align: 'left' as const },
-  { name: 'major', label: 'สาขา', field: 'major', align: 'left' as const },
-]
+// const submissionColumns = [
+//   { name: 'index', label: 'ลำดับ', field: 'index', align: 'left' as const },
+//   { name: 'date', label: 'วันที่อัปโหลด', field: 'date', align: 'left' as const },
+//   { name: 'studentCode', label: 'รหัสนิสิต', field: 'studentCode', align: 'left' as const },
+//   { name: 'studentName', label: 'ชื่อ-สกุล', field: 'studentName', align: 'left' as const },
+//   { name: 'major', label: 'สาขา', field: 'major', align: 'left' as const },
+// ]
 
-const submissionHistory = ref([
-  {
-    date: '27 ก.ค. 2568',
-    studentCode: '61160030',
-    studentName: 'นายชนะพล จงอยู่ดีไพศาล',
-    major: 'CS',
-  },
-  {
-    date: '27 ก.ค. 2568',
-    studentCode: '61160011',
-    studentName: 'นางสาวศศิธร รัตนกาญจน์',
-    major: 'CS',
-  },
-  {
-    date: '27 ก.ค. 2568',
-    studentCode: '61160030',
-    studentName: 'นายธนพล จงอุทัยไพศาล',
-    major: 'CS',
-  },
-  {
-    date: '27 ก.ค. 2568',
-    studentCode: '61160031',
-    studentName: 'นางสาวธนมล บุญช่วย',
-    major: 'CS',
-  },
-  {
-    date: '27 ก.ค. 2568',
-    studentCode: '61160033',
-    studentName: 'นายธันวา ดีศิริ',
-    major: 'CS',
-  },
-  {
-    date: '27 ก.ค. 2568',
-    studentCode: '61160034',
-    studentName: 'นายนนธวัช นิลสนธิ',
-    major: 'CS',
-  },
-  {
-    date: '27 ก.ค. 2568',
-    studentCode: '61160035',
-    studentName: 'นายปุณยวีร์ นามวงษ์',
-    major: 'CS',
-  },
-  {
-    date: '27 ก.ค. 2568',
-    studentCode: '61160036',
-    studentName: 'นายพลพล คุ้มไข่น้ำ',
-    major: 'CS',
-  },
-])
+// const submissionHistory = ref([
+//   {
+//     date: '27 ก.ค. 2568',
+//     studentCode: '61160030',
+//     studentName: 'นายชนะพล จงอยู่ดีไพศาล',
+//     major: 'CS',
+//   },
+//   {
+//     date: '27 ก.ค. 2568',
+//     studentCode: '61160011',
+//     studentName: 'นางสาวศศิธร รัตนกาญจน์',
+//     major: 'CS',
+//   },
+//   {
+//     date: '27 ก.ค. 2568',
+//     studentCode: '61160030',
+//     studentName: 'นายธนพล จงอุทัยไพศาล',
+//     major: 'CS',
+//   },
+//   {
+//     date: '27 ก.ค. 2568',
+//     studentCode: '61160031',
+//     studentName: 'นางสาวธนมล บุญช่วย',
+//     major: 'CS',
+//   },
+//   {
+//     date: '27 ก.ค. 2568',
+//     studentCode: '61160033',
+//     studentName: 'นายธันวา ดีศิริ',
+//     major: 'CS',
+//   },
+//   {
+//     date: '27 ก.ค. 2568',
+//     studentCode: '61160034',
+//     studentName: 'นายนนธวัช นิลสนธิ',
+//     major: 'CS',
+//   },
+//   {
+//     date: '27 ก.ค. 2568',
+//     studentCode: '61160035',
+//     studentName: 'นายปุณยวีร์ นามวงษ์',
+//     major: 'CS',
+//   },
+//   {
+//     date: '27 ก.ค. 2568',
+//     studentCode: '61160036',
+//     studentName: 'นายพลพล คุ้มไข่น้ำ',
+//     major: 'CS',
+//   },
+// ])
 
-const showFilterDialog1 = ref(false)
-const filterCategories1 = ['major', 'year']
+// const showFilterDialog1 = ref(false)
+// const filterCategories1 = ['major', 'year']
 
 const originalCourseData = ref<Course | null>(null)
 
-const isEditMode = ref(false)
-const showCancelDialog = ref<boolean>(false)
+// const isEditMode = ref(false)
+// const showCancelDialog = ref<boolean>(false)
 
 // const certNameModel = computed({
 //   get: () => (isEditMode.value ? localEditCourse.value.courseName : (course.value?.name ?? '')),
@@ -127,257 +139,203 @@ const showCancelDialog = ref<boolean>(false)
 //   { label: 'ทักษะทางวิชาการ', value: 'ทักษะทางวิชาการ' },
 // ]
 
-async function saveChanges() {
-  console.log('saveChanges called')
-  try {
-    if (!course.value) return
-    await courseStore.updateCourse(course.value.id!, course.value)
-    originalCourseData.value = { ...courseStore.course }
-    isEditMode.value = false
-    $q.notify({ message: 'แก้ไขข้อมูลสำเร็จ', type: 'positive' })
-  } catch (err) {
-    $q.notify({ message: 'ไม่สามารถบันทึกข้อมูลได้', type: 'negative' })
-    console.error('Error updating course:', err)
-  }
-}
-function cancelEdit() {
-  showCancelDialog.value = true
-}
+// async function saveChanges() {
+//   console.log('saveChanges called')
+//   try {
+//     if (!course.value) return
+//     await courseStore.updateCourse(course.value.id!, course.value)
+//     originalCourseData.value = { ...courseStore.course }
+//     isEditMode.value = false
+//     $q.notify({ message: 'แก้ไขข้อมูลสำเร็จ', type: 'positive' })
+//   } catch (err) {
+//     $q.notify({ message: 'ไม่สามารถบันทึกข้อมูลได้', type: 'negative' })
+//     console.error('Error updating course:', err)
+//   }
+// }
+// function cancelEdit() {
+//   showCancelDialog.value = true
+// }
 
-function enableEditMode() {
-  isEditMode.value = true
-  if (course.value) {
-    originalCourseData.value = { ...course.value }
-  }
-}
-function confirmCancel() {
-  if (originalCourseData.value) {
-    course.value = { ...originalCourseData.value }
-  }
-  isEditMode.value = false
-  showCancelDialog.value = false
-}
+// function enableEditMode() {
+//   isEditMode.value = true
+//   if (course.value) {
+//     originalCourseData.value = { ...course.value }
+//   }
+// }
+// function confirmCancel() {
+//   if (originalCourseData.value) {
+//     course.value = { ...originalCourseData.value }
+//   }
+//   isEditMode.value = false
+//   showCancelDialog.value = false
+// }
 
 // Pagination แบบ "load more"
-const rowsPerPage = ref(5)
-const paginatedRows = computed(() => submissionHistory.value.slice(0, rowsPerPage.value))
-const canLoadMore = computed(() => rowsPerPage.value < submissionHistory.value.length)
+//const rowsPerPage = ref(5)
+// const paginatedRows = computed(() => submissionHistory.value.slice(0, rowsPerPage.value))
+// const canLoadMore = computed(() => rowsPerPage.value < submissionHistory.value.length)
 
-function loadMore() {
-  rowsPerPage.value += 5
-}
+// function loadMore() {
+//   rowsPerPage.value += 5
+// }
 </script>
 
 <template>
-  <div class="q-pa-md">
-    <!-- Breadcrumbs -->
-    <AppBreadcrumbs :breadcrumbs="breadcrumbs" />
+  <q-page class="q-pa-md">
+    <div style="margin-top: 20px">
+      <AppBreadcrumbs :breadcrumbs="breadcrumbs" />
 
-    <div class="q-mx-lg q-mx-xs-none">
-      <div class="row col-12 items-center">
-        <div class="text-h6 q-mt-lg col-xs-12 col-sm-10">ข้อมูลหัวข้อการอบรม</div>
-        <div class="q-mt-lg col-xs-12 col-sm-2">
-          <q-toggle
-            v-if="course"
-            v-model="course.isActive"
-            :label="course.isActive ? 'เปิดใช้งาน' : 'ปิดใช้งาน (จัดเก็บแล้ว)'"
-            :disable="!isEditMode"
-            color="primary"
-            class="full-width"
-          />
-        </div>
-      </div>
-
-      <q-card class="q-mt-md full-width" flat>
-        <div v-if="course" class="row q-col-gutter-md">
-          <!-- แถวข้อมูล-->
-          <div class="col-12 row items-center q-pa-sm">
-            <div class="col-xs-12 col-sm-1 text-right q-pr-md">
-              <p class="q-my-none q-mb-sm">ชื่อ :</p>
-            </div>
-            <div class="col-xs-12 col-sm-11">
-              <q-input
-                v-model="course.name"
-                :readonly="!isEditMode"
-                :class="isEditMode ? 'editable' : 'readonly'"
-                borderless
-                dense
-              />
-            </div>
-          </div>
-          <div class="col-12 row items-center q-pa-sm">
-            <div class="col-xs-12 col-sm-1 text-right q-pr-md">
-              <p class="q-my-none">Link URL :</p>
-            </div>
-
-            <div class="col-xs-12 col-sm-11 q-mt-sm">
-              <!-- โหมดแก้ไข -->
-              <q-input
-                v-if="isEditMode"
-                v-model="course.link"
-                borderless
-                dense
-                placeholder="https://example.com"
-              />
-
-              <!-- โหมดอ่านอย่างเดียวแบบมีกรอบ + คลิกลิงก์ได้ -->
-              <q-field v-else borderless dense readonly>
-                <template #control>
-                  <a :href="course.link" target="_blank" rel="noopener" class="link-box">
-                    {{ course.link }}
-                  </a>
-                </template>
-              </q-field>
-            </div>
-          </div>
-
-          <div class="col-12 row items-center q-pa-sm">
-            <div class="col-xs-12 col-sm-1 text-right q-pr-md">
-              <p class="q-my-none q-mb-sm">ประเภท :</p>
-            </div>
-
-            <div class="col-xs-12 col-sm-5 q-mt-sm q-mb-md q-mt-md">
-              <q-select
-                v-if="isEditMode"
-                v-model="course.isHardSkill"
-                :options="[
-                  { label: 'ทักษะทางวิชาการ', value: true },
-                  { label: 'เตรียมความพร้อม', value: false },
-                ]"
-                dense
-                outlined
-                emit-value
-                map-options
-              />
-              <q-input
-                v-else
-                :model-value="course.isHardSkill ? 'ทักษะทางวิชาการ' : 'เตรียมความพร้อม'"
-                readonly
-                class="readonly"
-                borderless
-                dense
-              />
-            </div>
-            <div class="col-xs-12 col-sm-2 text-right q-pr-md">
-              <p class="q-my-none q-mb-sm q-mt-sm">จำนวนชั่วโมง :</p>
-            </div>
-            <div class="col-xs-12 col-sm-4 q-mt-sm q-mb-md">
-              <q-input
-                v-model="course.hour"
-                :readonly="!isEditMode"
-                :class="isEditMode ? 'editable' : 'readonly'"
-                borderless
-                dense
-                type="number"
-              />
-            </div>
-          </div>
-        </div>
-      </q-card>
-    </div>
-    <div class="q-mt-md q-pa-md text-right">
-      <template v-if="!isEditMode">
-        <q-btn label="แก้ไข" class="btnedit" unelevated rounded @click="enableEditMode" />
-      </template>
-      <template v-else>
-        <q-btn label="ยกเลิก" class="btnreject q-mr-md" unelevated rounded @click="cancelEdit" />
-        <q-btn label="บันทึก" class="btnconfirm" unelevated rounded @click="saveChanges" />
-      </template>
-    </div>
-    <!-- ตารางประวัติ -->
-    <div class="q-pa-md">
-      <div class="header-container text-center">
-        <div class="text-h6 q-mt-lg">ประวัติการส่งหัวข้อกิจกรรม</div>
-        <div class="filter-container q-mt-sm">
-          <FilterDialog
-            v-model="showFilterDialog1"
-            :categories="filterCategories1"
-            class="q-mr-sm"
-          />
-        </div>
-      </div>
-
-      <div class="table-container">
-        <!-- แสดงข้อความปัดซ้ายเฉพาะ Desktop -->
-        <div v-if="!isMobile" class="scroll-indicator q-mb-sm text-caption text-grey-7">
-          <q-icon name="swipe_left" size="sm" class="q-mr-xs" />
-          ปัดไปทางซ้ายเพื่อดูข้อมูลทั้งหมด
-        </div>
-
-        <!-- TABLE MODE (Desktop) -->
-        <q-table
-          v-if="!isMobile"
-          :columns="submissionColumns"
-          :rows="paginatedRows"
-          row-key="studentCode"
-          bordered
-          flat
-          class="tableHisAct q-mt-md"
-          no-data-label="ไม่พบข้อมูล"
+      <!-- Tabs -->
+      <div class="tab-scroll-wrapper">
+        <!-- ✅ จอใหญ่: ใช้ q-tabs -->
+        <q-tabs
+          v-if="!isSmallScreen"
+          v-model="activeTab"
+          align="left"
+          dense
+          class="tab-no-arrow"
+          indicator-color="transparent"
         >
-          <template v-slot:body="props">
-            <q-tr :props="props" class="sticky-header">
-              <q-td key="index">{{ props.rowIndex + 1 }}</q-td>
-              <q-td key="date">{{ props.row.date }}</q-td>
-              <q-td key="studentCode">{{ props.row.studentCode }}</q-td>
-              <q-td key="studentName">{{ props.row.studentName }}</q-td>
-              <q-td key="major">{{ props.row.major }}</q-td>
-            </q-tr>
-          </template>
-        </q-table>
+          <q-tab name="course" label="รายละเอียดหัวข้ออบรม" />
+          <q-tab name="submission" label="ประวัติการส่งหัวข้อกิจกรรม" />
+        </q-tabs>
 
-        <!-- CARD MODE (Mobile) -->
-        <div v-else>
-          <q-card
-            v-for="(row, index) in paginatedRows"
-            :key="row.studentCode"
-            class="q-mb-sm"
-            bordered
-          >
-            <q-card-section>
-              <div class="text-subtitle1">{{ index + 1 }}. {{ row.studentName }}</div>
-              <div class="text-caption">รหัสนิสิต: {{ row.studentCode }}</div>
-              <div class="text-caption">วันที่: {{ row.date }}</div>
-              <div class="text-caption">สาขา: {{ row.major }}</div>
-            </q-card-section>
-          </q-card>
-        </div>
-
-        <!-- ปุ่ม "แสดงเพิ่ม" -->
-        <div class="q-mt-md text-center" v-if="canLoadMore">
-          <q-btn flat label="แสดงเพิ่ม" icon="expand_more" color="primary" @click="loadMore" />
-        </div>
+        <!-- ✅ จอเล็ก: ใช้ q-select dropdown -->
+        <q-select
+          v-else
+          v-model="activeTab"
+          :options="tabOptions"
+          emit-value
+          map-options
+          label="เลือกหัวข้อ"
+          dense
+          outlined
+          class="q-mb-md"
+          style="min-width: 250px"
+          menu-anchor="bottom start"
+          menu-self="top start"
+          :popup-content-style="{ maxHeight: '200px', overflowY: 'auto' }"
+        />
       </div>
-    </div>
 
-    <!-- Dialog -->
-    <q-dialog v-model="showCancelDialog">
-      <q-card>
-        <q-card-section><div class="text-h6">ยืนยันการยกเลิก</div></q-card-section>
-        <q-card-section
-          >คุณแน่ใจหรือไม่ว่าต้องการยกเลิกการแก้ไข?
-          การเปลี่ยนแปลงทั้งหมดจะไม่ถูกบันทึก</q-card-section
-        >
-        <q-card-actions align="right">
-          <q-btn flat label="ยกเลิก" class="btnreject q-mr-md" v-close-popup />
-          <q-btn flat label="ยืนยัน" class="btnconfirm" @click="confirmCancel" v-close-popup />
-        </q-card-actions>
-      </q-card>
-    </q-dialog>
-  </div>
+      <!-- Tab Panels -->
+      <q-tab-panels v-model="activeTab" animated class="custom-panels">
+        <q-tab-panel name="course" class="q-my-md">
+          <Tab_CourseDetail :id="courseId" />
+        </q-tab-panel>
+
+        <q-tab-panel name="submission" class="q-my-md">
+          <Tab_StudentSubmission :id="courseId" />
+        </q-tab-panel>
+      </q-tab-panels>
+    </div>
+  </q-page>
 </template>
 
 <style scoped>
-.readonly {
-  background-color: #e4e4e4;
-  color: #757575;
+.wrapper {
+  display: flex;
+  align-items: flex-start;
+  column-gap: 150px;
+  padding: 0px 50px;
+  flex-wrap: wrap;
+  background-color: #edf0f5;
 }
-.q-input {
-  border: 1px solid #757575;
-  border-radius: 5px;
-  padding-left: 10px;
+.container {
+  display: flex;
+  align-items: flex-start;
+  width: 100%;
+  flex-wrap: wrap;
+}
+.image-section {
+  align-items: flex-start;
+  width: 100%;
+  flex: 1;
+  margin-left: 80px;
 }
 
+.form-section {
+  flex-grow: 1;
+  overflow-x: hidden;
+  overflow-y: auto;
+}
+
+.form-section::-webkit-scrollbar {
+  width: 8px;
+}
+.Font {
+  color: #ffffff;
+  font-size: 15px;
+  font-weight: bold;
+  font-family: 'Noto Serif Thai', serif;
+}
+@media (max-width: 1880px) {
+  .wrapper {
+    gap: 0px;
+    padding: 0px;
+  }
+  .container {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .image-section {
+    margin-left: 0;
+    width: 100%;
+    max-width: 430px;
+  }
+
+  .form-section {
+    margin-right: 0;
+    max-height: unset;
+    width: 100%;
+    max-width: 770px;
+  }
+}
+@media (max-width: 860px) {
+  .container {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .image-section {
+    margin-left: 0;
+    width: 100%;
+    max-width: 430px;
+  }
+
+  .form-section {
+    margin-right: 0;
+    max-height: unset;
+    width: 100%;
+    max-width: 500px;
+  }
+}
+@media (max-width: 500px) {
+  .wrapper {
+    flex-direction: column;
+    gap: 30px;
+    padding: 5px;
+  }
+
+  .container {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .image-section {
+    margin-left: 0;
+    width: 100%;
+    max-width: 430px;
+  }
+
+  .form-section {
+    margin-right: 0;
+    max-height: unset;
+    width: 100%;
+    max-width: 800px;
+  }
+}
 @media (max-width: 599px) {
   .q-card {
     padding: 15px;
@@ -482,5 +440,41 @@ function loadMore() {
   text-decoration: underline;
   cursor: pointer;
   color: #1976d2;
+}
+.q-tabs {
+  max-width: 100%;
+  margin-left: 20px;
+}
+
+.tab-scroll-wrapper {
+  overflow-x: auto;
+  max-width: 100%;
+  white-space: nowrap;
+  justify-self: end;
+}
+
+.tab-scroll-wrapper::-webkit-scrollbar {
+  display: none;
+}
+.tab-no-arrow {
+  display: flex;
+}
+.tab-no-arrow .q-tab {
+  flex: 1 1 0;
+  text-align: center;
+  border-radius: 12px 12px 0 0;
+  min-width: unset; /* ยกเลิก min-width เดิม */
+}
+.tab-no-arrow .q-tab.q-tab--active {
+  background-color: #edf0f5;
+}
+.custom-panels {
+  max-height: unset;
+  background-color: #edf0f5;
+}
+@media (max-width: 1650px) {
+  .custom-panels {
+    max-height: unset;
+  }
 }
 </style>

@@ -8,4 +8,5 @@ export interface Course {
   hour: number
   type: string
   description: string
+  file?: string
 }

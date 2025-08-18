@@ -24,6 +24,7 @@
     "lodash": "^4.17.21",
     "lodash.debounce": "^4.0.8",
     "mdb-ui-kit": "^8.2.0",
+    "pdfjs-dist": "^5.4.54",
     "pinia": "^3.0.1",
     "quasar": "^2.16.0",
     "tw-elements": "^2.0.0",
