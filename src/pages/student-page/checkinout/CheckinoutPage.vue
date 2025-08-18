@@ -4,13 +4,16 @@ import Checkinpage from 'src/pages/student-page/checkinout/Checkin/CheckinPage.v
 import Checkoutpage from 'src/pages/student-page/checkinout/Checkout/CheckoutPage.vue'
 import { ref, onMounted } from 'vue'
 import CheckinoutService from 'src/services/checkinout'
+import { useStudentActivitystore } from 'src/stores/activity'
 // import { useAuthStore } from 'src/stores/auth'
 const route = useRoute()
 // const authStore = useAuthStore()
 const uuid = route.params.uuid?.toString() || ''
-const tokenInfo = ref<{ type: string } | null>(null)
+const tokenInfo = ref<{ type: string, activityId: string, token: string } | null>(null)
 const loading = ref(true)
 const error = ref('')
+const activityStore = useStudentActivitystore()
+
 onMounted(async () => {
   if (!uuid) {
     error.value = 'ไม่พบ QR Token'
@@ -25,6 +28,12 @@ onMounted(async () => {
       error.value = 'QR ไม่ถูกต้องหรือหมดอายุ 1'
     } else {
       tokenInfo.value = res
+      // โหลดข้อมูลกิจกรรมจาก activityId ที่ได้จาก token
+      try {
+        await activityStore.fetchOneData(res.activityId)
+      } catch (e) {
+        console.error('โหลดข้อมูลกิจกรรมล้มเหลว:', e)
+      }
     }
   } catch {
     // ถ้า claim ไม่สำเร็จ (เช่น QR หมดอายุ) → fallback ไป validate
@@ -33,6 +42,11 @@ onMounted(async () => {
       console.log('valid', valid);
       if (valid && valid.type) {
         tokenInfo.value = valid
+        try {
+          await activityStore.fetchOneData(valid.activityId)
+        } catch (e) {
+          console.error('โหลดข้อมูลกิจกรรมล้มเหลว:', e)
+        }
       } else {
         error.value = 'QR ไม่ถูกต้องหรือหมดอายุ 2'
       }
@@ -54,8 +68,8 @@ onMounted(async () => {
         <div v-if="loading" class="q-mt-md">กำลังโหลด...</div>
         <div v-else-if="error" class="text-negative q-mt-md">{{ error }}</div>
         <template v-else>
-          <Checkinpage v-if="tokenInfo?.type === 'checkin'" :token="uuid" />
-          <Checkoutpage v-else-if="tokenInfo?.type === 'checkout'" :token="uuid" />
+          <Checkinpage v-if="tokenInfo?.type === 'checkin'" :token="uuid" :activity="activityStore.form" />
+          <Checkoutpage v-else-if="tokenInfo?.type === 'checkout'" :token="uuid" :activity="activityStore.form" />
           <div v-else class="text-negative">QR ไม่ถูกต้อง</div>
         </template>
       </q-card>

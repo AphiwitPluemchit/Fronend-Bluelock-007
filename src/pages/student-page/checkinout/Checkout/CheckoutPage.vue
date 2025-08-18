@@ -1,8 +1,9 @@
 <script setup lang="ts">
 import { useCheckinoutStore } from 'src/stores/checkinout'
-import { ref } from 'vue';
+import { ref } from 'vue'
 import type { AxiosError } from 'axios'
-import type{ ErrorResponse } from 'src/types/pagination';
+import type { ErrorResponse } from 'src/types/pagination'
+import type { Activity } from 'src/types/activity'
 
 const checkinoutStore = useCheckinoutStore()
 const errorMessage = ref('')
@@ -10,6 +11,7 @@ const isChecked = ref(false)
 const isSubmitted = ref(false)
 const props = defineProps<{
   token: string
+  activity?: Partial<Activity>
 }>()
 async function checkout() {
   errorMessage.value = ''
@@ -18,23 +20,23 @@ async function checkout() {
   try {
     await checkinoutStore.checkout(props.token)
     isChecked.value = true
-  }  catch (error: unknown) {
+  } catch (error: unknown) {
     console.error(error)
-    let msg = 'เกิดข้อผิดพลาด';
+    let msg = 'เกิดข้อผิดพลาด'
     if (error && typeof error === 'object' && 'isAxiosError' in error) {
-      const axiosErr = error as AxiosError;
-      const errData = axiosErr.response?.data as ErrorResponse;
+      const axiosErr = error as AxiosError
+      const errData = axiosErr.response?.data as ErrorResponse
       if (errData && typeof errData === 'object' && typeof errData.error === 'string') {
-        msg = errData.error;
+        msg = errData.error
       } else if (axiosErr.message) {
-        msg = axiosErr.message;
+        msg = axiosErr.message
       }
     } else if (error instanceof Error) {
-      msg = error.message;
+      msg = error.message
     }
-    errorMessage.value = msg;
+    errorMessage.value = msg
   } finally {
-    isSubmitted.value = true;
+    isSubmitted.value = true
   }
 }
 console.log('studentId:', props.token)
@@ -43,9 +45,12 @@ console.log('studentId:', props.token)
 <template>
   <div class="q-pa-md">
     <div>
-      <div>Check-out</div>
-      <div>Token: {{ props.token }}</div>
-      <q-btn @click="checkout">Checkout</q-btn>
+      <div v-if="props.activity?.name" class="text-grey-8 q-mb-sm">
+        กิจกรรม: {{ props.activity?.name }}
+      </div>
+      <div class="q-pa-md">
+        <q-btn class="btngrey" @click="checkout">Checkout</q-btn>
+      </div>
       <div v-if="isSubmitted">
         <div v-if="isChecked" class="text-positive">Checkout success</div>
         <div v-else-if="errorMessage" class="text-negative q-mt-md">{{ errorMessage }}</div>
