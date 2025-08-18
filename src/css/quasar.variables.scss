@@ -292,7 +292,9 @@ $dark-page: #121212;
     pointer-events: none !important; /* ✅ สำคัญมาก */
   }
 }
-
+.q-tab__label {
+  font-size: 18px !important; /* ขนาดตัวหนังสือ */
+}
 
 
 //สีสถานะกิจกรรม
