@@ -183,7 +183,12 @@ export const useAuthStore = defineStore('auth', {
         return true
       }
 
-      // public paths
+      // QR paths - เฉพาะ student ที่ authenticated
+      if (path.startsWith('/qr/') && role === EnumUserRole.STUDENT) {
+        return true
+      }
+
+      // public paths (ไม่ต้อง login)
       if (path === '/' || path === '/unauthorized') {
         return true
       }

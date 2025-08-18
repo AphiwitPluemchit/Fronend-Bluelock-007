@@ -18,7 +18,10 @@ function tagScope(routes: RouteRecordRaw[], scope: Scope): RouteRecordRaw[] {
   return routes.map((r: RouteRecordRaw) => {
     const routeWithScope: RouteRecordRaw = {
       ...r,
-      meta: { ...(r.meta || {}), scope },
+      meta: {
+        ...(r.meta || {}),
+        scope: r.meta?.scope || scope,
+      },
     }
 
     if (r.children) {
@@ -34,13 +37,6 @@ const routes: RouteRecordRaw[] = [
   ...tagScope(checkinoutRoutes, 'checkinout'),
   ...tagScope(adminRoutes, 'admin'),
   ...tagScope(studentRoutes, 'student'),
-  // 404 (ถ้าโปรเจกต์มีอยู่แล้วข้ามได้)
-  // {
-  //   path: '/:catchAll(.*)*',
-  //   name: 'not-found',
-  //   meta: { scope: 'public' as Scope },
-  //   component: () => import('pages/ErrorNotFound.vue'),
-  // },
 ]
 
 export default route(function () {
@@ -50,63 +46,50 @@ export default route(function () {
     scrollBehavior: () => ({ left: 0, top: 0 }),
   })
 
-  Router.beforeEach(async (to) => {
+  Router.beforeEach((to) => {
     const authStore = useAuthStore()
 
-    // ✅ ตรวจสอบความปลอดภัยของ URL parameters
+    // Basic query safety
     if (to.query && Object.keys(to.query).length > 0) {
       const queryParams: Record<string, string> = {}
       for (const [key, value] of Object.entries(to.query)) {
-        if (typeof value === 'string') {
-          queryParams[key] = value
-        }
+        if (typeof value === 'string') queryParams[key] = value
       }
-
       if (!validateUrlParams(queryParams)) {
-        console.warn('Dangerous query parameters detected, redirecting to login')
         authStore.clearLocalStorage()
         return { path: '/' }
       }
     }
 
-    // หา scope จาก route ที่ match ลึกสุด
+    // Detect scope
     const matched = to.matched.findLast((m) => (m.meta as any)?.scope) ?? to.matched[0]
     const scope = (matched?.meta as { scope?: Scope })?.scope
 
-    // public & checkinout เข้าได้ทุกคน
-    if (scope === 'public' || scope === 'checkinout') return true
+    // Public and checkinout routes are allowed to load; checkinout may require auth on page logic
+    if (scope === 'public') return true
 
-    // ตรวจสอบความถูกต้องของข้อมูล user ก่อน
-    if (!authStore.validateUserData()) {
-      console.warn('Invalid user data, logging out user')
-      await authStore.logout()
-      return false
+    // If not authenticated, redirect to login and preserve intended path
+    const isAuthed = authStore.getIsAuthenticated
+    if (!isAuthed) {
+      const redirect = to.fullPath
+      localStorage.setItem('redirectAfterLogin', redirect)
+      return { name: 'Login', query: { redirect } }
     }
 
-    // ตรวจ token หมดอายุ -> logout ทันที
-    if (authStore.isTokenExpired()) {
-      console.warn('Token expired, logging out user')
-      await authStore.logout()
-      return false
+    // Authenticated: enforce role vs scope
+    const role = authStore.getRole
+    if (!role) return { name: 'Login' }
+
+    if (scope === 'admin' && role !== EnumUserRole.ADMIN) {
+      return { path: '/Admin/ActivitiesCalendar' }
+    }
+    if (scope === 'student' && role !== EnumUserRole.STUDENT) {
+      return { path: '/Student/ActivitiesCalendar' }
     }
 
-    // ตรวจสอบสิทธิ์การเข้าถึง scope
-    if (!authStore.canAccessScope(scope || '')) {
-      console.warn('User cannot access this scope, logging out user')
-      await authStore.logout()
-      return false
-    }
-
-    // ตรวจสอบสิทธิ์การเข้าถึง path
-    if (!authStore.canAccessPath(to.path)) {
-      console.warn('User cannot access this path, redirecting to appropriate home')
-      const role = authStore.getRole
-      if (role === EnumUserRole.ADMIN) {
-        return { path: '/Admin/ActivitiesCalendar' }
-      } else if (role === EnumUserRole.STUDENT) {
-        return { path: '/Student/ActivitiesCalendar' }
-      }
-      return false
+    // checkinout scope: any authenticated student allowed
+    if (scope === 'checkinout' && role !== EnumUserRole.STUDENT) {
+      return { path: '/Student/ActivitiesCalendar' }
     }
 
     return true
@@ -114,4 +97,3 @@ export default route(function () {
 
   return Router
 })
-

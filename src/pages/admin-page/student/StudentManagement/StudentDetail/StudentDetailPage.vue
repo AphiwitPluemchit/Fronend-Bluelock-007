@@ -2,7 +2,7 @@
 import { onMounted, ref } from 'vue'
 import { useRoute } from 'vue-router'
 import AppBreadcrumbs from 'src/components/AppBreadcrumbs.vue'
-import FilterDialog from 'src/components/Dialog/FilterDialog.vue'
+// import FilterDialog from 'src/components/Dialog/FilterDialog.vue'
 import { useStudentStore } from 'src/stores/student'
 import type { Student } from 'src/types/student'
 import { EnrollmentService } from 'src/services/enrollment'
@@ -40,13 +40,13 @@ const breadcrumbs = ref({
   icon: 'people',
 })
 
-const showFilterDialog1 = ref(false)
-const filterCategories1 = ref(['categoryActivity'])
-const filters = ref<{ categoryActivity: string[] }>({ categoryActivity: [] })
+// const showFilterDialog1 = ref(false)
+// const filterCategories1 = ref(['categoryActivity'])
+// const filters = ref<{ categoryActivity: string[] }>({ categoryActivity: [] })
 
-const applyFilters = (selectedFilters: { categoryActivity: string[] }) => {
-  filters.value = selectedFilters
-}
+// const applyFilters = (selectedFilters: { categoryActivity: string[] }) => {
+//   filters.value = selectedFilters
+// }
 
 const isEditMode = ref(false)
 const enableEditMode = () => {
@@ -93,18 +93,18 @@ const columns = [
     align: 'left' as const,
     style: 'max-width: 250px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;',
   },
-  { name: 'date', label: 'วันที่', field: 'date', align: 'left' as const },
 
   {
-    name: 'softskill',
-    label: 'ชั่วโมงเตรียมความพร้อม',
-    field: 'softskill',
+    name: 'skill',
+    label: 'ประเภทกิจกรรม',
+    field: 'skill',
     align: 'center' as const,
   },
+  { name: 'hour', label: 'ชั่วโมง', field: 'hour', align: 'left' as const },
   {
-    name: 'hardskill',
-    label: 'ชั่วโมงทักษะทางวิชาการ',
-    field: 'hardskill',
+    name: 'check-in-out',
+    label: 'การเช็คชื่อ',
+    field: 'check-in-out',
     align: 'center' as const,
   },
 ]
@@ -239,14 +239,14 @@ const columns = [
     <div class="q-pa-md">
       <div class="header-container text-center">
         <div class="text-h6 q-mt-lg">ประวัติการอบรม</div>
-        <div class="filter-container" style="margin-top: 12px">
+        <!-- <div class="filter-container" style="margin-top: 12px">
           <FilterDialog
             v-model="showFilterDialog1"
             :categories="filterCategories1"
             @apply="applyFilters"
             class="q-mr-sm"
           />
-        </div>
+        </div> -->
       </div>
 
       <q-table

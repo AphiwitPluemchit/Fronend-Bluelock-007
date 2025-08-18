@@ -10,29 +10,7 @@ const api = axios.create({
 })
 
 api.interceptors.request.use((config) => {
-  const auth = useAuthStore()
   const token = localStorage.getItem('access_token')
-
-  // ✅ ข้ามการตรวจสอบสำหรับ login request
-  if (config.url === '/auth/login') {
-    console.log('🔐 Login request detected, skipping validation')
-    return config
-  }
-
-  // ตรวจสอบความถูกต้องของข้อมูล user ก่อนส่ง request (เฉพาะ non-login requests)
-  if (!auth.validateUserData()) {
-    console.warn('Invalid user data detected in request interceptor')
-    auth.clearLocalStorage()
-    // ไม่ส่ง request และ return error
-    return Promise.reject(new Error('Invalid user data'))
-  }
-
-  if (auth.isTokenExpired()) {
-    console.warn('Token expired in request interceptor')
-    auth.clearLocalStorage()
-    return Promise.reject(new Error('Token expired'))
-  }
-
   if (token) {
     config.headers.Authorization = `Bearer ${token}`
   }
@@ -64,18 +42,12 @@ export default boot(({ app, router }) => {
 
           if (!isOnLogin) {
             const redirect = router.currentRoute.value.fullPath
-
-            // Redirect to login page
             try {
               await router.replace({ name: 'Login', query: { redirect } })
-            } catch (routerError) {
-              console.warn('Router redirect failed, using fallback:', routerError)
-              // Fallback to path-based redirect
+            } catch {
               try {
                 await router.replace({ path: '/', query: { redirect } })
-              } catch (fallbackError) {
-                console.error('Fallback redirect also failed:', fallbackError)
-                // Last resort - go to root
+              } catch {
                 await router.replace('/')
               }
             }

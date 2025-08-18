@@ -1,29 +1,31 @@
 import { EnumUserRole } from 'src/data/roles'
 import type { RouteRecordRaw } from 'vue-router'
 
-const checkinoutChildren: RouteRecordRaw[] = [
+// QR routes (require authentication but accessible via direct link)
+const qrRoutes: RouteRecordRaw[] = [
   {
-    path: '/student/qr',
+    path: '/qr',
+    component: () => import('layouts/LoginLayout.vue'), // lightweight neutral layout
     children: [
       {
         path: ':uuid',
-        name: 'student-qr',
+        name: 'qr-checkinout',
         component: () => import('pages/student-page/checkinout/CheckinoutPage.vue'),
         props: true,
+        // Use alias instead of redirect so the original URL is preserved
+        alias: ['/Student/qr/:uuid', '/student/qr/:uuid'],
+        meta: {
+          scope: 'checkinout',
+          requiresAuth: true,
+          redirectToLogin: true,
+        },
       },
     ],
   },
-  {
-    path: '/student/qr',
-    children: [
-      {
-        path: ':uuid',
-        name: 'student-qr',
-        component: () => import('pages/student-page/checkinout/CheckinoutPage.vue'),
-        props: true,
-      },
-    ],
-  },
+]
+
+// Protected student routes (require authentication)
+const protectedStudentRoutes: RouteRecordRaw[] = [
   {
     path: '/student/forms',
     meta: { role: EnumUserRole.STUDENT },
@@ -41,18 +43,21 @@ const checkinoutChildren: RouteRecordRaw[] = [
       },
     ],
   },
-
 ].map((route) => ({
   ...route,
   meta: { role: EnumUserRole.STUDENT },
 }))
 
 export const checkinoutRoutes: RouteRecordRaw[] = [
+  // QR routes (require authentication)
+  ...qrRoutes,
+
+  // Protected student routes with layout
   {
     path: `/${EnumUserRole.STUDENT}`,
     name: EnumUserRole.STUDENT,
     component: () => import('layouts/LoginLayout.vue'),
     meta: { role: EnumUserRole.STUDENT },
-    children: checkinoutChildren,
+    children: protectedStudentRoutes,
   },
 ]

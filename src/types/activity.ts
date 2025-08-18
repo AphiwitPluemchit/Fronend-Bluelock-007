@@ -1,3 +1,4 @@
+import type { CheckinoutRecord } from './checkinout'
 import type { Food, FoodVote } from './food'
 
 export type Activity = {
@@ -47,4 +48,14 @@ export type ActivityItemSum = {
     count: number
     majorName: string
   }[]
+}
+export type ActivityHistory = {
+  id?: string
+  name: string
+  type?: string
+  activityState?: string
+  skill?: string
+  activityItems?: ActivityItem[] | null
+  hour: number
+  CheckinoutRecord?: CheckinoutRecord[]
 }

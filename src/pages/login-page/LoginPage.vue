@@ -206,7 +206,14 @@ const isLoggingIn = ref(false)
 onMounted(() => {
   const redirect = route.query.redirect as string
   if (redirect) {
+    console.log('🔄 Redirect detected from query parameter:', redirect)
     localStorage.setItem('redirectAfterLogin', redirect)
+  }
+
+  // Check if there's a stored redirect
+  const storedRedirect = localStorage.getItem('redirectAfterLogin')
+  if (storedRedirect) {
+    console.log('🔄 Stored redirect found:', storedRedirect)
   }
 })
 
@@ -219,8 +226,10 @@ const handleLogin = async () => {
     const result = await auth.login()
 
     if (result) {
+      console.log('✅ Login successful, checking for redirect...')
       const redirect = localStorage.getItem('redirectAfterLogin')
       if (redirect) {
+        console.log('🔄 Redirecting to stored path:', redirect)
         localStorage.removeItem('redirectAfterLogin')
         await router.push(redirect)
         return // Exit early after redirect
@@ -228,6 +237,7 @@ const handleLogin = async () => {
 
       // Default redirects if no stored redirect
       const role = result.user?.role
+      console.log('👤 User role:', role, '- using default redirect')
       if (role === EnumUserRole.ADMIN) {
         await router.push(`/${EnumUserRole.ADMIN}/ActivitiesCalendar`)
       } else if (role === EnumUserRole.STUDENT) {
