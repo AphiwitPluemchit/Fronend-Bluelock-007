@@ -32,6 +32,7 @@ export type StudentEnrollment = {
 export type EnrollmentResponse = {
   id: string;
   registrationDate: string;
+  enrollmentId: string;
   studentId: string;
   food?: string;
   activity: Partial<Activity>
@@ -40,6 +41,7 @@ export type EnrollmentCheckResponse = {
   isEnrolled: boolean;
   activity?: Activity;
   message: string;
+  enrollmentId?: string;
 }
 export type EnrollmentQuery = Pagination & {
   major?: string[]

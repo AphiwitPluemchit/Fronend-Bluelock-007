@@ -51,7 +51,7 @@ const register = async (activityItemId: string, selectedFood: string | null) => 
 const unRegister = async (modelValue: boolean) => {
   console.log('ยกเลิกลงทะเบียน', modelValue)
   if (enrollment.value) {
-    await EnrollmentService.removeOne(enrollment.value.id)
+    await EnrollmentService.removeOne(enrollment.value.enrollmentId)
     await fetchData()
     await router.push(`/Student/MyActivitiesPage`)
   }
@@ -74,6 +74,7 @@ async function fetchData() {
       String(auth.getUser?.id),
       String(route.params.id),
     )
+    console.log(response);
 
     if (response.isEnrolled && response.activity) {
       // Map activity response to Activity type for compatibility with existing components
@@ -83,7 +84,8 @@ async function fetchData() {
         id: response.activity.id || '',
         registrationDate: new Date().toISOString(), // This will be updated when we have actual enrollment data
         studentId: String(auth.getUser?.id || ''),
-        activity: response.activity
+        activity: response.activity,
+        enrollmentId: response.enrollmentId || '',
       }
     } else {
       enrollment.value = null

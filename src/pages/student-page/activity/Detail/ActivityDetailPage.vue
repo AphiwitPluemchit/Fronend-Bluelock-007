@@ -16,13 +16,6 @@ const baseurl = api.defaults.baseURL
 type Enroll = {
   isEnrolled: boolean
   enrollmentId?: string
-  enrollment?: {
-    id: string
-    registrationDate: string
-    studentId: string
-    food?: string
-    activity: Partial<Activity>
-  }
   message?: string
 }
 const StudentActivityStore = useStudentActivitystore()
@@ -64,8 +57,8 @@ const register = async (activityItemId: string, selectedFood: string | null) => 
 }
 const unRegister = async (modelValue: boolean) => {
   console.log('ยกเลิกลงทะเบียน', modelValue)
-  if (enrollment.value?.enrollment?.id) {
-    await EnrollmentService.removeOne(enrollment.value.enrollment.id)
+  if (enrollment.value?.enrollmentId) {
+    await EnrollmentService.removeOne(enrollment.value.enrollmentId)
     await fetchData()
   }
 }
