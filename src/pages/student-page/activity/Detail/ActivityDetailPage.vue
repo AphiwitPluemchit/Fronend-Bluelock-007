@@ -137,14 +137,7 @@ onMounted(async () => {
           unelevated
           rounded
         />
-        <q-btn
-          v-else
-          label="ปิดลงทะเบียน"
-          class="btngrey"
-          :disabled="true"
-          unelevated
-          rounded
-        />
+        <q-btn v-else label="ปิดลงทะเบียน" class="btngrey" :disabled="true" unelevated rounded />
       </div>
     </div>
 
@@ -162,7 +155,7 @@ onMounted(async () => {
 
 <style scoped>
 .activity-detail-card {
-  background-color: #f5f7fa;
+  background-color: #edf0f5; /*f5f7fa */
   padding: 16px;
   font-size: 18px;
   border-radius: 12px;

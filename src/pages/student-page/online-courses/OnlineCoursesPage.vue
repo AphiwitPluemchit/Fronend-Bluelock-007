@@ -128,13 +128,13 @@ onMounted(() => {
       </div>
 
       <!-- Loading State -->
-      <div v-if="courseStore.loading" class="row justify-center q-pa-lg">
+      <!-- <div v-if="courseStore.loading" class="row justify-center q-pa-lg">
         <q-spinner-dots size="50px" color="primary" />
         <div class="text-h6 q-ml-md">กำลังโหลดข้อมูล...</div>
-      </div>
+      </div> -->
 
       <!-- Empty State -->
-      <div v-else-if="filteredCourses.length === 0" class="row justify-center q-pa-lg">
+      <div v-if="filteredCourses.length === 0" class="row justify-center q-pa-lg">
         <div class="text-center">
           <q-icon name="school" size="100px" color="grey-4" />
           <div class="text-h6 q-mt-md text-grey-6">
