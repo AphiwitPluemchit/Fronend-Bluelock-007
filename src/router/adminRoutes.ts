@@ -88,6 +88,10 @@ const adminChildren: RouteRecordRaw[] = [
     component: () => import('pages/admin-page/forms/FormBuilderPage.vue'),
   },
   {
+    path: 'forms/preview/:id',
+    component: () => import('pages/admin-page/forms/FormAnswerPage.vue'),
+  },
+  {
     path: 'forms/:id/submissions',
     component: () => import('pages/admin-page/forms/FormSubmissionsPage.vue'),
   },

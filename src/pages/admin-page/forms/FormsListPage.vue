@@ -16,14 +16,14 @@
       </div>
 
       <q-table
-        :rows="formStore.forms"
+        :rows="filteredForms"
         :columns="columns"
         row-key="id"
         flat
         bordered
         :loading="formStore.loading"
         no-data-label="ยังไม่มีฟอร์ม"
-        no-results-label="ไม่พบผลลัพธ์"
+        style="height: 700px"
       >
         <template v-slot:header="props">
           <q-tr :props="props" class="sticky-header">
@@ -57,6 +57,14 @@
                 >
                   <q-tooltip>ลบ</q-tooltip>
                 </q-icon>
+                <q-icon
+                  clickable
+                  name="quiz"
+                  class="bg-green text-white q-pa-xs rounded-borders q-mr-sm"
+                  @click="previewForm(props.row)"
+                >
+                  <q-tooltip>ทำแบบประเมิน</q-tooltip>
+                </q-icon>
               </template>
 
               <template v-else>
@@ -83,10 +91,13 @@ const formStore = useFormStore()
 const router = useRouter()
 const $q = useQuasar()
 const showRemoveDialog = ref(false)
-const pendingDeleteId = ref<string | null>(null) 
+const pendingDeleteId = ref<string | null>(null)
 const createForm = async () => {
   await router.push('/Admin/forms/builder')
 }
+const filteredForms = computed<Form[]>(() =>
+  (formStore.forms ?? []).filter((f) => f?.isOrigin === true),
+)
 const columns = computed(() => [
   {
     name: 'index',
@@ -136,6 +147,14 @@ async function deleteForm(id: string | null) {
 const editForm = async (form: Form) => {
   await router.push(`/Admin/forms/builder?id=${form.id}`)
 }
+const previewForm = async (form: Form) => {
+  await router.push(`/Admin/forms/preview/${form.id}`)
+}
 </script>
 
-<style scoped></style>
+<style scoped>
+/* บังคับให้แถวสุดท้ายมีเส้นขีดล่าง */
+.q-table__middle tbody tr:last-child td {
+  border-bottom: 1px solid var(--q-border-color, rgba(0, 0, 0, 0.12));
+}
+</style>
