@@ -52,10 +52,10 @@ function enrollmentSummary(activityItems: ActivityItem[]) {
 
 <template>
   <q-card
-    class="activity-card cursor-pointer"
+    class="activity-card cursor-pointer shadow-3"
     :class="{ 'clickable-card': !isMobile }"
     @click="!isMobile && $router.push(`/Student/Activity/ActivityDetail/${activity.id}`)"
-  >
+ shadow-3 >
     <q-card-section class="outer-box">
       <div class="inner-box">
         <!-- รูปกิจกรรม -->
@@ -114,7 +114,7 @@ function enrollmentSummary(activityItems: ActivityItem[]) {
 .activity-card {
   height: 100%;
   border-radius: 16px;
-  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.08);
+  /* box-shadow: 0 6px 18px rgba(0, 0, 0, 0.08); */
   background-color: #fff; /* สีปกติ */
   transition: background-color 0.3s ease, transform 0.2s ease, box-shadow 0.2s ease;
 }

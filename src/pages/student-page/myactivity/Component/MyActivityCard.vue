@@ -51,7 +51,7 @@ const getActivityRooms = (activityItems: ActivityItem[] | null | undefined): str
 
 <template>
   <q-card
-    class="activity-card q-pa-md q-mt-sm q-mb-sm cursor-pointer"
+    class="activity-card q-pa-md q-mt-sm q-mb-sm cursor-pointer shadow-3"
     :class="{ 'clickable-card': !isMobile }"
     @click="!isMobile && onClick(myActivity.id!)"
   >
@@ -112,7 +112,7 @@ const getActivityRooms = (activityItems: ActivityItem[] | null | undefined): str
 .activity-card {
   height: 100%;
   border-radius: 16px;
-  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.08);
+  /* box-shadow: 0 6px 18px rgba(0, 0, 0, 0.08); */
   background-color: #fff; /* สีปกติ */
   transition: background-color 0.3s ease, transform 0.2s ease, box-shadow 0.2s ease;
 }
