@@ -4,6 +4,10 @@ import { useStudentStore } from 'src/stores/student'
 import AppBreadcrumbs from 'src/components/AppBreadcrumbs.vue'
 import type { Student } from 'src/types/student'
 
+// --- state ---
+const show = ref(false)
+const studentStore = useStudentStore()
+
 const breadcrumbs = ref({
   previousPage: { title: 'จัดการฝึกงานนิสิต', path: '/Admin/StudentInternship' },
   currentPage: {
@@ -12,117 +16,23 @@ const breadcrumbs = ref({
   },
   icon: 'people',
 })
-const show = ref(false)
-const studentStore = useStudentStore()
+
+// filters
 interface SelectedFilters {
   studentCode: string
   major: string
 }
 const selectedStudentCode = ref<string>('')
 const selectedMajors = ref<string>('')
+
 const yearOptions = ['60', '61', '62', '63', '64', '65', '66']
 const majorOptions = ['CS', 'AAI', 'SE', 'ITDI']
 
+// selected students
 const selectedStudents = ref<string[]>([])
-const students = computed(() => studentStore.students ?? [])
-
-// เพิ่ม state สำหรับ checkall
 const selectAll = ref(false)
 
-// Computed property สำหรับตรวจสอบว่า checkbox ควรแสดงสถานะอะไร
-const isStudentSelected = (studentCode: string) => {
-  return selectedStudents.value.includes(studentCode)
-}
-
-const toggleSelectAll = () => {
-  if (selectAll.value) {
-    // เลือกทั้งหมดในหน้าปัจจุบัน (เพิ่มเข้าไปในรายการที่เลือกอยู่แล้ว)
-    const currentPageCodes = students.value.map((student) => student.code)
-    selectedStudents.value = [...new Set([...selectedStudents.value, ...currentPageCodes])]
-  } else {
-    // ยกเลิกเลือกเฉพาะในหน้าปัจจุบัน (ไม่กระทบกับหน้าที่เลือกไว้แล้ว)
-    const currentPageCodes = students.value.map((student) => student.code)
-    selectedStudents.value = selectedStudents.value.filter(
-      (code) => !currentPageCodes.includes(code),
-    )
-  }
-}
-
-// Watch selectedStudents เพื่อ sync selectAll state เฉพาะหน้าปัจจุบัน
-watch(
-  selectedStudents,
-  (newSelected) => {
-    const currentPageCodes = students.value.map((student) => student.code)
-    const allCurrentPageSelected = currentPageCodes.every((code) => newSelected.includes(code))
-    selectAll.value = allCurrentPageSelected
-  },
-  { deep: true },
-)
-
-// เมื่อเปลี่ยนหน้า อย่า clear selectedStudents เพราะต้องการจำสิ่งที่เลือกไว้
-watch(students, () => {
-  selectAll.value = false
-})
-
-const data = async () => {
-  console.log(studentStore.query)
-
-  await studentStore.getStudents()
-  // อัปเดต pagination ให้ sync
-  pagination.value.page = studentStore.query.page || 1
-  pagination.value.rowsPerPage = studentStore.query.limit || 5
-  pagination.value.sortBy = studentStore.query.sortBy || ''
-  pagination.value.rowsNumber = studentStore.totalStudentsCount
-}
-async function onRequest(requestProp: {
-  pagination: { sortBy: string; descending: boolean; page: number; rowsPerPage: number }
-}) {
-  query.value.page = requestProp.pagination.page
-  query.value.limit = requestProp.pagination.rowsPerPage
-  query.value.sortBy = requestProp.pagination.sortBy
-  query.value.order = requestProp.pagination.descending ? 'desc' : 'asc'
-  await data()
-}
-const applyFilters = async (selectedFilters: SelectedFilters) => {
-  studentStore.query.studentCode = selectedFilters.studentCode ? [selectedFilters.studentCode] : []
-  studentStore.query.major = selectedFilters.major ? [selectedFilters.major] : []
-  await data()
-}
-const query = computed(() => studentStore.query)
-
-const pagination = ref({
-  sortBy: query.value.sortBy || '',
-  descending: query.value.order === 'desc',
-  page: query.value.page || 1,
-  rowsPerPage: query.value.limit || 5,
-  rowsNumber: 0,
-})
-const saveStudents = async () => {
-  try {
-    // แปลง student codes เป็น student IDs
-    const studentIds = selectedStudents.value
-      .map((code) => {
-        const student = studentStore.students.find((s) => s.code === code)
-        return student?.id
-      })
-      .filter(Boolean) as string[]
-
-    if (studentIds.length === 0) {
-      console.warn('No valid student IDs found')
-      return
-    }
-
-    // ใช้ API ใหม่ที่ส่งเฉพาะ ID (ประสิทธิภาพดีกว่า)
-    await studentStore.updateStudentStatusByIDs(studentIds, 4)
-
-    // เคลียร์การเลือกหลังจากสำเร็จ
-    selectedStudents.value = []
-    selectAll.value = false
-  } catch (error) {
-    console.error('จัดเก็บนิสิตล้มเหลว:', error)
-  }
-}
-
+// columns
 const columns = [
   { name: 'check', label: '', field: 'check', align: 'left' as const },
   { name: 'index', label: 'ลำดับ', field: 'index', align: 'left' as const },
@@ -144,24 +54,103 @@ const columns = [
   { name: 'status', label: 'สถานะ', field: 'status', align: 'center' as const },
 ]
 
+// pagination
+const pagination = ref({
+  sortBy: 'code',
+  descending: false,
+  page: 1,
+  rowsPerPage: 10,
+  rowsNumber: 0,
+})
+
+// --- computed students (status = 3) ---
+const students = computed(() => (studentStore.students ?? []).filter((s) => s.status === 3))
+
+// --- checkbox helpers ---
+const isStudentSelected = (code: string) => selectedStudents.value.includes(code)
+
+const toggleSelectAll = () => {
+  const currentPageCodes = students.value.map((s) => s.code)
+  if (selectAll.value) {
+    selectedStudents.value = [...new Set([...selectedStudents.value, ...currentPageCodes])]
+  } else {
+    selectedStudents.value = selectedStudents.value.filter(
+      (code) => !currentPageCodes.includes(code),
+    )
+  }
+}
+
+watch(
+  selectedStudents,
+  (newSelected) => {
+    const currentPageCodes = students.value.map((s) => s.code)
+    selectAll.value = currentPageCodes.every((code) => newSelected.includes(code))
+  },
+  { deep: true },
+)
+
+watch(students, () => {
+  selectAll.value = false
+})
+
+// --- query ---
+const query = computed(() => studentStore.query)
+
+// --- fetch data ---
+const data = async () => {
+  studentStore.query.studentStatus = ['3'] // string array สำหรับ backend
+  await studentStore.getStudents()
+  pagination.value.page = studentStore.query.page || 1
+  pagination.value.rowsPerPage = studentStore.query.limit || 10
+  pagination.value.sortBy = studentStore.query.sortBy || ''
+  pagination.value.rowsNumber = studentStore.totalStudentsCount
+}
+
+// --- apply filters ---
+const applyFilters = async (filters: SelectedFilters) => {
+  studentStore.query.studentCode = filters.studentCode ? [filters.studentCode] : []
+  studentStore.query.major = filters.major ? [filters.major] : []
+  studentStore.query.studentStatus = ['3']
+  await data()
+}
+
+// --- table request ---
+async function onRequest(requestProp: {
+  pagination: { sortBy: string; descending: boolean; page: number; rowsPerPage: number }
+}) {
+  query.value.page = requestProp.pagination.page
+  query.value.limit = requestProp.pagination.rowsPerPage
+  query.value.sortBy = requestProp.pagination.sortBy
+  query.value.order = requestProp.pagination.descending ? 'desc' : 'asc'
+  await data()
+}
+
+// --- selectedStudentsData ข้ามหน้า ---
+const selectedStudentsDataRaw = ref<Student[]>([])
 const selectedStudentsData = computed(() => selectedStudentsDataRaw.value)
 
-// เก็บ object ของนิสิตที่ถูกเลือกแบบถาวร (ข้ามหน้าได้)
-const selectedStudentsDataRaw = ref<Student[]>([])
-
 watch(selectedStudents, (codes) => {
-  // ทุกครั้งที่รหัสเปลี่ยน ให้เพิ่ม object ใหม่เข้า raw ถ้ายังไม่มี
   const newStudents = studentStore.students.filter(
     (s) => codes.includes(s.code) && !selectedStudentsDataRaw.value.some((d) => d.code === s.code),
   )
   selectedStudentsDataRaw.value.push(...newStudents)
-
-  // ลบรายการที่ไม่อยู่ใน selectedStudents
   selectedStudentsDataRaw.value = selectedStudentsDataRaw.value.filter((s) =>
     codes.includes(s.code),
   )
 })
 
+// --- save selected students ---
+const saveStudents = async () => {
+  const studentIds = selectedStudents.value
+    .map((code) => studentStore.students.find((s) => s.code === code)?.id)
+    .filter(Boolean) as string[]
+  if (studentIds.length === 0) return
+  await studentStore.updateStudentStatusByIDs(studentIds, 3)
+  selectedStudents.value = []
+  selectAll.value = false
+}
+
+// --- onMounted ---
 onMounted(async () => {
   show.value = false
   studentStore.query = {
@@ -171,8 +160,8 @@ onMounted(async () => {
     order: 'asc',
     search: '',
     major: [],
-    studentStatus: ['1', '2', '3'],
-    studentCode: [], // กรองเฉพาะนิสิตที่พ้นสภาพ
+    studentStatus: ['3'], // เฉพาะชั่วโมงครบแล้ว
+    studentCode: [],
     skill: [],
     studentYear: [],
   }
