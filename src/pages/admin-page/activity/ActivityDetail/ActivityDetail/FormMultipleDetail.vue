@@ -76,7 +76,6 @@ const majorRefs = ref<Record<number, InstanceType<typeof ActivityForm_Major> | n
 const yearRefs = ref<Record<number, InstanceType<typeof ActivityForm_StudentYears> | null>>({})
 const hourRefs = ref<Record<number, InstanceType<typeof ActivityForm_Hour> | null>>({})
 const roomRefs = ref<Record<number, InstanceType<typeof ActivityForm_Room> | null>>({})
-const formStore = useFormStore()
   
 const formTop = ref<HTMLElement | null>(null)
 const defaultTime = ref({
@@ -825,7 +824,7 @@ onMounted(() => {
       v-model:foodMenuDisplay="foodMenuDisplay"
       :disable="!isEditing"
     />
-    <ActivityForm_Form v-model="selectedFormIds" :forms="formStore.forms" class="input-group"  :disable="!isEditing" />
+  
     <!-- Sub Activities List -->
     <div v-for="(subActivity, index) in subActivities" :key="index" class="sub-activity">
       <!-- Cancel (X) Icon -->
