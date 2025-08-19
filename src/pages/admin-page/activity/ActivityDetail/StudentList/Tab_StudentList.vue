@@ -380,7 +380,7 @@ onUnmounted(() => {
           <q-td :props="props">
             <RemoveStudent
               :id="props.row.id"
-              @removeStudent="() => removeStudentFromActivity(props.row.id)"
+              @removeStudent="() => removeStudentFromActivity(props.row.enrollmentId)"
             />
           </q-td>
         </template>

@@ -27,6 +27,7 @@ export type StudentEnrollment = {
   softSkill: number
   registrationDate: string
   checkInOut?: CheckInOut
+  enrollmentId: string
 }
 export type EnrollmentResponse = {
   id: string;
