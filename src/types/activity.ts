@@ -3,6 +3,7 @@ import type { Food, FoodVote } from './food'
 
 export type Activity = {
   id?: string
+  formsId?: string
   name: string
   type?: string
   activityState?: string

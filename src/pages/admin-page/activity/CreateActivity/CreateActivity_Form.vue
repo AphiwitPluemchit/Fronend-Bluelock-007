@@ -9,12 +9,14 @@ import ActivityForm_Room from 'src/pages/admin-page/activity/CreateActivity/Form
 import ActivityForm_Food from 'src/pages/admin-page/activity/CreateActivity/Form/ActivityForm_Food.vue'
 import ActivityForm_Type from 'src/pages/admin-page/activity/CreateActivity/Form/ActivityForm_Type.vue'
 import ActivityForm_Major from 'src/pages/admin-page/activity/CreateActivity/Form/ActivityForm_Major.vue'
+import ActivityForm_Form from 'src/pages/admin-page/activity/CreateActivity/Form/ActivityForm_Form.vue'
 import ActivityForm_Seats from 'src/pages/admin-page/activity/CreateActivity/Form/ActivityForm_Seats.vue'
 import ActivityForm_StudentYears from 'src/pages/admin-page/activity/CreateActivity/Form/ActivityForm_StudentYears.vue'
 import ActivityForm_ActivityDate from 'src/pages/admin-page/activity/CreateActivity/Form/ActivityForm_ActivityDate.vue'
 import ActivityForm_ActivityTime from 'src/pages/admin-page/activity/CreateActivity/Form/ActivityForm_ActivityTime.vue'
 import ActivityForm_CloseRegisDate from 'src/pages/admin-page/activity/CreateActivity/Form/ActivityForm_CloseRegisDate.vue'
 import CancelDialog from 'src/components/Dialog/CancelDialog.vue'
+import { useFormStore } from 'src/stores/forms'
 
 interface SubActivity {
   subActivityName: string
@@ -38,12 +40,13 @@ interface DayTimeSelection {
   startTime: string
   endTime: string
 }
-
+const formStore = useFormStore()
 const router = useRouter()
 const activityName = ref('')
 const activityType = ref('prep')
 const CloseRegisDates = ref('')
 const foodMenu = ref<Food[]>([])
+const selectedFormIds = ref<string[]>([])
 const subActivities = ref<SubActivity[]>([])
 const sameTimeForAll = ref(false)
 const showCancelDialog = ref(false)
@@ -217,6 +220,22 @@ const thaiLocale = {
   ],
 }
 
+const duplicateSelectedFormIfAny = async (): Promise<string | null> => {
+  const originFormId = selectedFormIds.value?.[0] ?? null
+  console.log('[dup][page] selected originFormId =', originFormId)
+
+  if (!originFormId) return null
+
+  const newForm = await formStore.duplicateForm(originFormId)
+  console.log('[dup][page] newForm =', newForm)
+
+  const newId = newForm?.id ?? null
+  console.log('[dup][page] newId =', newId)
+
+  return newId
+}
+
+
 // ใช้กับปุ่มยืนยันส่งไปหลังบ้าน
 const submitActivity = async () => {
   activityNameError.value = ''
@@ -233,6 +252,10 @@ const submitActivity = async () => {
   if (validDates.includes(false)) {
     return
   }
+   
+  const formIdForActivity = await duplicateSelectedFormIfAny()
+  console.log('[submit] formIdForActivity =', formIdForActivity)
+  
   const skillMap: Record<string, 'soft' |'hard'   | null> = {
     prep: 'soft',
     academic: 'hard',
@@ -264,16 +287,14 @@ const submitActivity = async () => {
   }))
 
   const payload = {
-    name: activityName.value,
-    activityState: 'planning',
-    skill: skill ?? '',
-    endDateEnroll: CloseRegisDates.value,
-    activityItems,
-    foodVotes,
-  }
-
-  console.log('📦 payload ที่จะส่ง:', payload)
-
+  name: activityName.value,
+  activityState: 'planning',
+  skill: skill ?? '',
+  endDateEnroll: CloseRegisDates.value,
+  activityItems,
+  foodVotes,
+  ...(formIdForActivity ? { formId: formIdForActivity } : {})
+}
   try {
     const { status, id } = await ActivityService.createOne(payload)
 
@@ -342,6 +363,7 @@ onMounted(() => {
     <ActivityForm_Type v-model="activityType" class="input-group" />
     <ActivityForm_CloseRegisDate v-model="CloseRegisDates" class="input-group" />
     <ActivityForm_Food v-model:foodMenu="foodMenu" class="input-group" />
+    <ActivityForm_Form v-model="selectedFormIds" :forms="formStore.forms" class="input-group" />
 
     <!-- Sub Activities List -->
     <div v-for="(subActivity, index) in subActivities" :key="index" class="sub-activity">

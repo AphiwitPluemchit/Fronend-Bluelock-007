@@ -162,7 +162,6 @@ const formStore = useFormStore()
 const formData = reactive<Form>({
   title: '',
   description: '',
-  activityId: '',
   isOrigin: true,
   blocks: [],
 })
@@ -314,7 +313,6 @@ function buildPayload() {
   return {
     title: formData.title,
     description: formData.description,
-    activityId: formData.activityId,
     isOrigin: true,
     blocks,
   }
@@ -354,7 +352,6 @@ async function loadFormIfAny(id?: string) {
   if (form) {
     formData.title = form.title
     formData.description = form.description
-    formData.activityId = form.activityId
     formData.isOrigin = form.isOrigin
     formData.blocks = JSON.parse(JSON.stringify(form.blocks || []))
   } else {

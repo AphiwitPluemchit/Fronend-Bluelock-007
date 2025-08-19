@@ -225,12 +225,4 @@ const emit = defineEmits(['update:modelValue'])
 .rating-icon.star {
   color: #FFD700; /* gold */
 }
-
-.rating-icon.thumb_up {
-  color: #2196F3; /* blue */
-}
-
-.rating-icon.favorite {
-  color: #E53935; /* red */
-}
 </style>

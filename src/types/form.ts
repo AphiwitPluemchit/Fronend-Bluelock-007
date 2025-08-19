@@ -2,7 +2,6 @@
 
 export interface Form {
   id?: string
-  activityId: string
   title: string
   description: string
   isOrigin: boolean
