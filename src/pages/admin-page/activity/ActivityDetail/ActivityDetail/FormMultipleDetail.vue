@@ -42,7 +42,7 @@ interface DayTimeSelection {
   startTime: string
   endTime: string
 }
-
+const selectedFormIds = ref<string[]>([])
 const activityStatus = ref('')
 const activityName = ref('')
 const activityType = ref('')
@@ -76,7 +76,7 @@ const majorRefs = ref<Record<number, InstanceType<typeof ActivityForm_Major> | n
 const yearRefs = ref<Record<number, InstanceType<typeof ActivityForm_StudentYears> | null>>({})
 const hourRefs = ref<Record<number, InstanceType<typeof ActivityForm_Hour> | null>>({})
 const roomRefs = ref<Record<number, InstanceType<typeof ActivityForm_Room> | null>>({})
-
+  
 const formTop = ref<HTMLElement | null>(null)
 const defaultTime = ref({
   startTime: '00:00',
@@ -454,8 +454,6 @@ const onEnterField = (
     | 'date',
   index?: number,
 ) => {
-  console.log('🔥 onEnterField triggered:', type, index)
-  console.log('📦 queue:', pendingScrollQueue.value)
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const isValid = (val: any) =>
     typeof val === 'string'
@@ -618,7 +616,6 @@ const saveChanges = async () => {
     emit('update:isEditing', false)
   } catch (err) {
     console.error('❌ ไม่สามารถอัปเดตกิจกรรมได้:', err)
-    // Consider showing an error message to the user
   }
 }
 
@@ -633,7 +630,7 @@ onMounted(() => {
   if (a.activityState) {
     activityStatus.value = statusMap[a.activityState] || 'กำลังวางแผน'
   }
-
+  
   foodMenu.value =
     a.foodVotes?.map((f) => ({
       id: '',
@@ -691,7 +688,6 @@ const resetFormToOriginal = () => {
   activityType.value = a.skill === 'hard' ? 'prep' : a.skill === 'soft' ? 'academic' : ''
   activityStatus.value = statusMap[a.activityState ?? 'planning'] ?? 'กำลังวางแผน'
   formattedCloseRegisDate.value = a.endDateEnroll ?? ''
-
   foodMenu.value =
     a.foodVotes?.map((f) => ({
       id: '',
@@ -737,6 +733,7 @@ const resetFormToOriginal = () => {
       }
     }) ?? []
 }
+
 onMounted(() => {
   watch(activityName, (val) => {
     if (val.trim() !== '') {
@@ -827,7 +824,7 @@ onMounted(() => {
       v-model:foodMenuDisplay="foodMenuDisplay"
       :disable="!isEditing"
     />
-
+  
     <!-- Sub Activities List -->
     <div v-for="(subActivity, index) in subActivities" :key="index" class="sub-activity">
       <!-- Cancel (X) Icon -->
