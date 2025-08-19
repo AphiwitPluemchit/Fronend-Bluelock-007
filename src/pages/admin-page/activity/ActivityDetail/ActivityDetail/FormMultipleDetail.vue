@@ -1012,7 +1012,7 @@ onMounted(() => {
       <q-btn v-if="!props.isEditing" class="btnedit" label="แก้ไข" @click="enterEditMode" />
       <template v-else>
         <q-btn class="btnreject" label="ยกเลิก" @click="openCancelDialog" />
-        <q-btn class="btnsecces" label="บันทึก" @click="saveChanges" />
+        <q-btn class="btnconfirm" label="บันทึก" @click="saveChanges" />
       </template>
     </div>
 
@@ -1294,7 +1294,7 @@ onMounted(() => {
   }
 
   .button-group .btnreject,
-  .button-group .btnsecces {
+  .button-group .btnconfirm {
     width: 100%;
   }
   .remove-icon {

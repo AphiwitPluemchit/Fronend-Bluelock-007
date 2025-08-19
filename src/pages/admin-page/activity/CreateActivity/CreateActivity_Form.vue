@@ -449,7 +449,7 @@ onMounted(() => {
     </div>
     <div class="button-group">
       <q-btn class="btnreject" @click="openCancelDialog">ยกเลิก</q-btn>
-      <q-btn class="btnsecces" @click="submitActivity">เสร็จสิ้น</q-btn>
+      <q-btn class="btnconfirm" @click="submitActivity">บันทึก</q-btn>
     </div>
 
     <!-- Dialog -->
@@ -553,8 +553,8 @@ onMounted(() => {
   display: flex;
   justify-content: flex-end;
   gap: 25px;
-  
 }
+
 .btn-container {
   display: flex;
   align-items: center;
@@ -669,7 +669,7 @@ onMounted(() => {
   }
 
   .button-group .btnreject,
-  .button-group .btnsecces {
+  .button-group .btnconfirm {
     width: 100%;
   }
   .remove-icon {
