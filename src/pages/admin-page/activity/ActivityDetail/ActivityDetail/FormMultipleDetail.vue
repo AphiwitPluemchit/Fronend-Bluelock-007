@@ -42,7 +42,6 @@ interface DayTimeSelection {
   startTime: string
   endTime: string
 }
-const selectedFormIds = ref<string[]>([])
 const activityStatus = ref('')
 const activityName = ref('')
 const activityType = ref('')
@@ -76,7 +75,7 @@ const majorRefs = ref<Record<number, InstanceType<typeof ActivityForm_Major> | n
 const yearRefs = ref<Record<number, InstanceType<typeof ActivityForm_StudentYears> | null>>({})
 const hourRefs = ref<Record<number, InstanceType<typeof ActivityForm_Hour> | null>>({})
 const roomRefs = ref<Record<number, InstanceType<typeof ActivityForm_Room> | null>>({})
-  
+
 const formTop = ref<HTMLElement | null>(null)
 const defaultTime = ref({
   startTime: '00:00',
@@ -630,7 +629,7 @@ onMounted(() => {
   if (a.activityState) {
     activityStatus.value = statusMap[a.activityState] || 'กำลังวางแผน'
   }
-  
+
   foodMenu.value =
     a.foodVotes?.map((f) => ({
       id: '',
@@ -824,7 +823,7 @@ onMounted(() => {
       v-model:foodMenuDisplay="foodMenuDisplay"
       :disable="!isEditing"
     />
-  
+
     <!-- Sub Activities List -->
     <div v-for="(subActivity, index) in subActivities" :key="index" class="sub-activity">
       <!-- Cancel (X) Icon -->
