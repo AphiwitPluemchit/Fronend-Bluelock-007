@@ -79,11 +79,11 @@ const columns: QTableProps['columns'] = [
   { name: 'link', label: 'Link สมัครเรียน (Short URL)', field: 'link', align: 'left' },
   {
     name: 'isHardSkill',
-    label: 'เก็บชั่วโมงในหมวด',
+    label: 'ประเภท',
     field: 'isHardSkill',
-    align: 'center',
+    align: 'left',
   },
-  { name: 'isActive', label: 'สถานะการใช้งาน', field: 'isActive', align: 'center' },
+  { name: 'isActive', label: 'สถานะ', field: 'isActive', align: 'center' },
   { name: 'action', label: '', field: 'action', align: 'left' },
 ]
 
@@ -103,6 +103,11 @@ function goToDetail(row: Course) {
   })
 }
 
+function goToPageDetailEdit(row: Course) {
+  void router.push({
+    path: `/admin/CourseDetail/${row.id}`,
+  })
+}
 function goToAddCourse() {
   void router.push({ name: 'AddCourse' })
 }
@@ -112,7 +117,7 @@ function goToAddCourse() {
   <q-page class="q-pa-md">
     <!-- ชื่อหน้า -->
     <div class="row justify-between items-center q-mb-md" style="margin-top: 20px">
-      <div class="texttitle">หัวข้ออบรมออนไลน์สำหรับการเก็บชั่วโมงสหกิจศึกษา</div>
+      <div class="texttitle">จัดการหัวข้อการอบรม</div>
       <!-- ปุ่มเพื่อการเพิ่มข้อมูล -->
       <q-btn dense outlined label="เพิ่มหัวข้อการอบรม" class="btnadd" @click="goToAddCourse" />
     </div>
@@ -154,7 +159,7 @@ function goToAddCourse() {
           :rows-per-page-options="[5, 10, 15, 20]"
           row-key="id"
           @request="onRequest"
-          class="q-mt-md my-table"
+          class="q-mt-md my-table my-sticky-header-table"
         >
           <!-- Header Sticky -->
           <template v-slot:header="props">
@@ -184,23 +189,27 @@ function goToAddCourse() {
 
               <q-td key="hour" class="text-center">{{ props.row.hour }}</q-td>
 
-              <q-td key="link">
+              <q-td
+                key="link"
+                style="
+                  max-width: 350px;
+                  white-space: nowrap;
+                  overflow: hidden;
+                  text-overflow: ellipsis;
+                "
+              >
                 <a :href="props.row.link" target="_blank" class="text-primary">
                   {{ props.row.link }}
                 </a>
               </q-td>
 
-              <q-td key="isHardSkill" class="text-center">
-                <q-badge
-                  :label="props.row.isHardSkill ? 'ทักษะทางวิชาการ' : 'เตรียมความพร้อม'"
-                  class="status-badge"
-                  :class="getcategoryCourse(props.row)"
-                />
+              <q-td key="isHardSkill">
+                {{ props.row.isHardSkill ? 'ทักษะทางวิชาการ' : 'เตรียมความพร้อม' }}
               </q-td>
 
               <q-td key="isActive" class="text-center">
                 <q-badge
-                  :label="props.row.isActive ? 'ใช้งาน' : 'ไม่ใช้งาน'"
+                  :label="props.row.isActive ? 'เปิดใช้งาน' : 'ปิดชั่วคราว'"
                   class="status-badge"
                   :class="getActiveText(props.row.isActive)"
                 />
@@ -209,8 +218,16 @@ function goToAddCourse() {
               <q-td key="action" class="text-center q-gutter-x-sm">
                 <q-icon
                   clickable
-                  name="visibility"
+                  name="edit"
                   class="bg-primary text-white q-pa-xs rounded-borders q-mr-sm"
+                  @click="goToPageDetailEdit(props.row)"
+                >
+                  <q-tooltip>แก้ไข</q-tooltip>
+                </q-icon>
+                <q-icon
+                  clickable
+                  name="visibility"
+                  class="bg-black text-white q-pa-xs rounded-borders q-mr-sm"
                   @click="goToDetail(props.row)"
                 >
                   <q-tooltip>ดูรายละเอียด</q-tooltip>
@@ -280,6 +297,15 @@ function goToAddCourse() {
                 <q-btn
                   flat
                   dense
+                  icon="edit"
+                  class="bg-primary text-white"
+                  @click="goToPageDetailEdit(row)"
+                >
+                  <q-tooltip>แก้ไข</q-tooltip>
+                </q-btn>
+                <q-btn
+                  flat
+                  dense
                   icon="visibility"
                   class="bg-black text-white"
                   @click="goToDetail(row)"
@@ -314,6 +340,28 @@ function goToAddCourse() {
 </template>
 
 <style scoped>
+.my-sticky-header-table {
+  min-height: 340px;
+  overflow-y: auto;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+/* Sticky thead (ใช้ภายใน q-table ได้เลย) */
+.my-sticky-header-table thead tr {
+  background-color: #162aae;
+  font-weight: bold;
+  font-size: 16px;
+  color: #ffffff;
+  border-bottom: 2px solid #d0d0d0;
+  transition: background-color 0.3s ease;
+}
+.my-sticky-header-table td,
+.my-sticky-header-table th {
+  padding: 10px 12px;
+  font-size: 15px;
+}
 .status-badge {
   width: 130px;
   height: 32px;

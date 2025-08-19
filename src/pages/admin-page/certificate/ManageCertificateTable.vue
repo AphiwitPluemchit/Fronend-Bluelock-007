@@ -17,7 +17,7 @@ const columns: QTableProps['columns'] = [
   { name: 'code', label: 'รหัสนิสิต', field: 'code', align: 'left' },
   { name: 'name', label: 'ชื่อ-สกุล', field: 'name', align: 'left' },
   { name: 'major', label: 'สาขา', field: 'major', align: 'left' },
-  { name: 'certName', label: 'ชื่อ', field: 'certName', align: 'left' },
+  { name: 'certName', label: 'ชื่อหัวข้อการอบรม', field: 'certName', align: 'left' },
   { name: 'uploadDate', label: 'วันที่อัปโหลด', field: 'uploadDate', align: 'left' },
   { name: 'status', label: 'สถานะ', field: 'status', align: 'center' },
   { name: 'action', label: '', field: 'action', align: 'center' },
@@ -110,7 +110,7 @@ const rows = ref<CertificateRow[]>([
   {
     id: 3,
     code: '65160302',
-    name: 'อุดม เมธี',
+    name: 'อุดม เมธีสสสสสสสสสสสสสสสสสสสสสสสสสสสสสสสสสสสสสสส',
     major: 'ITDI',
     certName: 'ประกาศนียบัตร 2022',
     status: 'รออนุมัติ',
@@ -171,7 +171,7 @@ const certList = ref([
   },
   {
     code: '65160302',
-    name: 'อุดม เมธี',
+    name: 'อุดม เมธีสสสสสสสสสสสสสสสสสสสสสสสสสสสสสสสสสสสสสสสสสสสสสสสสสสสสส',
     certName: 'ประกาศนียบัตร 2022',
     status: 'รออนุมัติ',
     imageUrl: '/images/sample_cert.png',
@@ -231,7 +231,7 @@ const certList = ref([
         :columns="columns"
         :rows-per-page-options="[5, 7, 10, 15, 20]"
         row-key="id"
-        class="q-mt-md"
+        class="q-mt-md my-sticky-header-table"
       >
         <!-- Header Sticky -->
         <template v-slot:header="props">
@@ -247,12 +247,21 @@ const certList = ref([
           <q-tr :props="props">
             <q-td key="id">{{ props.row.id }}</q-td>
             <q-td key="code">{{ props.row.code }}</q-td>
-            <q-td key="name">{{ props.row.name }}</q-td>
+            <q-td
+              key="name"
+              style="
+                max-width: 300px;
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
+              "
+              >{{ props.row.name }}</q-td
+            >
             <q-td key="major">{{ props.row.major }}</q-td>
             <q-td
               key="certName"
               style="
-                max-width: 200px;
+                max-width: 350px;
                 white-space: nowrap;
                 overflow: hidden;
                 text-overflow: ellipsis;
@@ -297,6 +306,28 @@ const certList = ref([
 </template>
 
 <style scoped>
+.my-sticky-header-table {
+  min-height: 340px;
+  overflow-y: auto;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+/* Sticky thead (ใช้ภายใน q-table ได้เลย) */
+.my-sticky-header-table thead tr {
+  background-color: #162aae;
+  font-weight: bold;
+  font-size: 16px;
+  color: #ffffff;
+  border-bottom: 2px solid #d0d0d0;
+  transition: background-color 0.3s ease;
+}
+.my-sticky-header-table td,
+.my-sticky-header-table th {
+  padding: 10px 12px;
+  font-size: 15px;
+}
 .status-badge {
   height: 32px;
   line-height: 28px;

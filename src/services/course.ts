@@ -22,6 +22,7 @@ export interface CourseQuery {
   isActive?: boolean | undefined
   isHardSkill?: boolean | undefined
   type?: string | undefined
+  file?: string | undefined
 }
 
 export class CourseService {
