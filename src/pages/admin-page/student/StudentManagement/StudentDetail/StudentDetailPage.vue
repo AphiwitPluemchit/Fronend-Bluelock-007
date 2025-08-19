@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { onMounted, ref } from 'vue'
+import { onMounted, ref, computed } from 'vue'
 import { useRoute } from 'vue-router'
 import AppBreadcrumbs from 'src/components/AppBreadcrumbs.vue'
 // import FilterDialog from 'src/components/Dialog/FilterDialog.vue'
@@ -8,6 +8,8 @@ import type { Student } from 'src/types/student'
 import { EnrollmentService } from 'src/services/enrollment'
 import type { ActivityHistory } from 'src/types/activity'
 import type { Pagination } from 'src/types/pagination'
+import ActivityType from 'src/pages/student-page/activity/component/ActivityType.vue'
+import FilterDialog from 'src/components/Dialog/FilterDialog.vue'
 interface ActivityRow {
   id: string
   name: string
@@ -46,13 +48,14 @@ const breadcrumbs = ref({
   icon: 'people',
 })
 
-// const showFilterDialog1 = ref(false)
-// const filterCategories1 = ref(['categoryActivity'])
-// const filters = ref<{ categoryActivity: string[] }>({ categoryActivity: [] })
+const showFilterDialog = ref(false)
+const selectedType = ref<string[]>([])
+const searchQuery = ref('')
 
-// const applyFilters = (selectedFilters: { categoryActivity: string[] }) => {
-//   filters.value = selectedFilters
-// }
+function applyFilters(selected: { categoryActivity: string[] }) {
+  selectedType.value = selected.categoryActivity
+  showFilterDialog.value = false
+}
 
 const isEditMode = ref(false)
 const enableEditMode = () => {
@@ -109,6 +112,23 @@ function mapHistoryToRows(data: ActivityHistory[]): ActivityRow[] {
   })
   return rows
 }
+
+const filteredHistory = computed(() => {
+  let rows = historyActivity.value as unknown as ActivityRow[]
+
+  if (selectedType.value.length > 0) {
+    rows = rows.filter((r) =>
+      selectedType.value.includes(r.skill === 'hard' ? 'hard' : r.skill === 'soft' ? 'soft' : ''),
+    )
+  }
+
+  const query = searchQuery.value.trim().toLowerCase()
+  if (query) {
+    rows = rows.filter((r) => r.name.toLowerCase().includes(query))
+  }
+
+  return rows
+})
 onMounted(async () => {
   show.value = false
   if (!studentCode.value) return
@@ -127,8 +147,8 @@ onMounted(async () => {
 const columns = [
   { name: 'index', label: 'ลำดับ', field: 'index', align: 'left' as const },
   { name: 'name', label: 'ชื่อกิจกรรม', field: 'name', align: 'left' as const },
-  { name: 'skill', label: 'ประเภทกิจกรรม', field: 'skill', align: 'center' as const },
-  { name: 'hour', label: 'ชั่วโมง', field: 'hour', align: 'center' as const },
+  { name: 'skill', label: 'ประเภท', field: 'skill', align: 'center' as const },
+  { name: 'hour', label: 'จำนวนชั่วโมง', field: 'hour', align: 'center' as const },
   {
     name: 'checkinoutRecord',
     label: 'การเช็คชื่อ',
@@ -265,30 +285,52 @@ const columns = [
 
     <!-- ส่วนประวัติการอบรม -->
     <div class="q-pa-md">
-      <div class="header-container text-center">
-        <div class="text-h6 q-mt-lg">ประวัติการอบรม</div>
-        <!-- <div class="filter-container" style="margin-top: 12px">
-          <FilterDialog
-            v-model="showFilterDialog1"
-            :categories="filterCategories1"
-            @apply="applyFilters"
-            class="q-mr-sm"
-          />
-        </div> -->
+      <div class="header-container q-mb-md" style="margin-top: 12px">
+        <div class="text-h6 q-mt-lg text-center">ประวัติการอบรม</div>
+      <!-- ค้นหา/ฟิลเตอร์ -->
+      <div class="row justify-between items-center q-mb-md search-filter-wrapper q-col-gutter-md">
+        <div class="text-h6"></div>
+        <div class="row search-filter-inner items-center no-wrap">
+          <!-- <q-input
+            dense
+            outlined
+            v-model="searchQuery"
+            placeholder="ค้นหา ชื่อคอร์ส"
+            class="q-mr-sm searchbox"
+            :style="{ boxShadow: 'none' }"
+            clearable
+          >
+            <template v-slot:append>
+              <q-icon name="search" />
+            </template>
+          </q-input> -->
+
+          <div class="filter-btn-wrapper">
+            <FilterDialog
+              :model-value="showFilterDialog"
+              :categories="['categoryActivity']"
+              :category-activities="selectedType"
+              @apply="applyFilters"
+            />
+          </div>
+        </div>
+      </div>
       </div>
 
-      <q-table
-        :columns="columns"
-        :rows="historyActivity"
-        row-key="id"
-        bordered
-        flat
-      >
+      <q-table :columns="columns" :rows="filteredHistory" row-key="id" bordered flat>
         <template v-slot:body="props">
           <q-tr :props="props">
             <q-td key="index">{{ props.rowIndex + 1 }}</q-td>
             <q-td key="name">{{ props.row.name }}</q-td>
-            <q-td key="skill">{{ props.row.skill }}</q-td>
+            <!-- <q-td key="skill">{{ props.row.skill }}</q-td> -->
+
+            <q-td key="skill" class="text-center">
+              <ActivityType
+                v-if="props.row.skill === 'hard' || props.row.skill === 'soft'"
+                :skill="props.row.skill === 'hard' ? 'hardSkill' : 'softSkill'"
+              />
+              <span v-else>-</span>
+            </q-td>
             <q-td key="hour" class="text-center">{{ props.row.hour }}</q-td>
             <q-td key="checkinoutRecord">
               <pre style="white-space: pre-line">{{ props.row.checkinoutRecord }}</pre>
@@ -334,6 +376,10 @@ const columns = [
 </template>
 
 <style scoped>
+.search-filter-wrapper {
+  flex-wrap: wrap;
+}
+
 .negative-hours {
   color: #f03b2d;
 }
@@ -354,5 +400,4 @@ const columns = [
 .editable {
   background-color: white;
 }
-
 </style>
