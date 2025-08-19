@@ -49,7 +49,7 @@ console.log('token:', props.token)
     <div>
       <div v-if="props.activity?.name" class="text-grey-8 q-mb-sm">กิจกรรม: {{ props.activity?.name }}</div>
       <div class="q-pa-md">
-        <q-btn class="btngrey" @click="checkin">Checkout</q-btn>
+        <q-btn class="btngrey" @click="checkin">Checkin</q-btn>
       </div>
       <div v-if="isSubmitted">
         <div v-if="isChecked" class="text-positive">Checkin success</div>

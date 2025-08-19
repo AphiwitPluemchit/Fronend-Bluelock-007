@@ -153,7 +153,7 @@ onMounted(async () => {
         :rows="students"
         :columns="columns"
         v-model:pagination="pagination"
-        :rows-per-page-options="[5, 7, 10, 15, 20]"
+
         @request="onRequest"
         row-key="id"
         class="q-mt-md my-table"
