@@ -5,23 +5,31 @@
       <div class="texttitle">สร้างฟอร์มประเมิน</div>
       <div class="header-actions">
         <q-btn
+          color="primary"
+          label="Export"
+          icon="download"
+          @click="exportToXlsx"
+          :disable="!formData.title || formData.blocks?.length === 0"
+          class="q-mr-md export-btn"
+        />
+
+        <q-btn
           color="secondary"
-          label="Preview"
+          label="ดูตัวอย่าง"
           icon="visibility"
           @click="showPreview = true"
           :disable="!formData.title || formData.blocks?.length === 0"
-          class="q-mr-md"
+          class="q-mr-md preview-btn"
         />
         <q-btn
-  :color="isEdit ? 'primary' : 'primary'"
-  :label="isEdit ? 'Update' : 'Save'"
-  icon="save"
-  @click="saveForm"
-  :disable="!formData.title || formData.blocks?.length === 0"
-/>
+          class="btnconfirm"
+          label="บันทึก"
+          icon="save"
+          @click="saveForm"
+          :disable="!formData.title || formData.blocks?.length === 0"
+        />
       </div>
     </div>
-
     <!-- Form Title / Description -->
     <div class="justify-center">
       <q-card class="header-card q-mx-auto">
@@ -112,7 +120,6 @@
               :is="getComponent(block.type)"
               :model-value="block"
               @update:model-value="formData.blocks[index] = $event"
-
             />
           </div>
         </q-card>
@@ -137,6 +144,8 @@
 <script setup lang="ts">
 import { ref, reactive, onMounted, computed, watch, onActivated } from 'vue'
 import { useQuasar } from 'quasar'
+import * as XLSX from 'xlsx'
+import dayjs from 'dayjs'
 import { useFormStore } from 'src/stores/forms'
 import type { Form } from 'src/types/form'
 
@@ -152,6 +161,71 @@ import RatingMenu from './QuestionFormat/RatingMenu.vue'
 import MultipleChoicegridMenu from './QuestionFormat/MultipleChoicegridMenu.vue'
 import CheckboxGridMenu from './QuestionFormat/CheckboxGridMenu.vue'
 import { useRouter, useRoute } from 'vue-router'
+
+// ใช่สำหรับ export ให้ excel
+interface ExportRow {
+  Title: string
+  Type: string
+  Description: string
+  IsRequired: string // "yes"/"no"
+  Session: number
+  Choices: string    // คั่นด้วย ;
+  Rows: string       // คั่นด้วย ;
+}
+interface OptionRow {
+  title: string
+  sequence: number
+}
+function exportToXlsx() {
+  // แปลง blocks -> rows
+  const rows: ExportRow[] = (formData.blocks ?? []).map((b) => {
+    // แปลง boolean เป็นข้อความ
+    const isReq = b.isRequired ? 'yes' : 'no'
+
+    // choices และ rows รองรับทั้ง string[] และ {title:string}[]
+    const toTitles = (list?: OptionRow[]): string =>
+  (list ?? [])
+    .map(it => it.title)
+    .filter(t => t.trim().length > 0)
+    .join(';')
+    
+    const choices = toTitles(b.choices)
+    const rowsStr = toTitles(b.rows)
+
+    return {
+      Title: b.title ?? '',
+      Type: b.type ?? 'short_answer',
+      Description: b.description ?? '',
+      IsRequired: isReq,
+      Session: Number(b.session ?? 1),
+      Choices: choices,
+      Rows: rowsStr,
+    }
+  })
+
+  if (rows.length === 0) {
+    $q.notify({ type: 'warning', message: 'ยังไม่มีบล็อกคำถามให้ส่งออก' })
+    return
+  }
+
+  // สร้าง worksheet และ workbook
+  const ws = XLSX.utils.json_to_sheet(rows, {
+    header: ['Title', 'Type', 'Description', 'IsRequired', 'Session', 'Choices', 'Rows'],
+    skipHeader: false,
+  })
+  const wb = XLSX.utils.book_new()
+  XLSX.utils.book_append_sheet(wb, ws, 'Form')
+
+  // ตั้งชื่อไฟล์: <Title>-yyyyMMDD-HHmm.xlsx (fallback เป็น Form)
+  const safeTitle = (formData.title || 'Form').replace(/[\\/:*?"<>|]/g, '_').slice(0, 80)
+  const ts = dayjs().format('YYYYMMDD-HHmm')
+  const filename = `${safeTitle}-${ts}.xlsx`
+
+  // บันทึกไฟล์
+  XLSX.writeFile(wb, filename)
+
+  $q.notify({ type: 'positive', message: `ส่งออกไฟล์ ${filename} สำเร็จ` })
+}
 
 const route = useRoute()
 const router = useRouter()
@@ -284,10 +358,11 @@ function getLabel(type: string) {
   }
 }
 
-const formId = computed<string | undefined>(() =>
-  (route.query.id as string | undefined) ||
-  (route.params.id as string | undefined) ||
-  (route.params.formId as string | undefined) // ถ้าเคยตั้งชื่อ param ว่า formId
+const formId = computed<string | undefined>(
+  () =>
+    (route.query.id as string | undefined) ||
+    (route.params.id as string | undefined) ||
+    (route.params.formId as string | undefined), // ถ้าเคยตั้งชื่อ param ว่า formId
 )
 const isEdit = computed(() => !!formId.value) // ✅ มี id = โหมดแก้ไข
 
@@ -341,7 +416,8 @@ async function saveForm() {
 
 async function loadFormIfAny(id?: string) {
   console.log('[Builder] incoming id =', id, 'from', {
-    query: route.query, params: route.params
+    query: route.query,
+    params: route.params,
   })
   if (!id) {
     console.log('[Builder] create mode (no id)')
@@ -368,10 +444,19 @@ watch(formId, (newId, oldId) => {
 
 // ถ้าใช้ <keep-alive>
 onActivated(() => loadFormIfAny(formId.value))
-
 </script>
 
 <style scoped>
+.export-btn {
+  height: 40px;
+  min-width: 70px;
+  border-radius: 10px;
+}
+.preview-btn {
+  height: 40px;
+  min-width: 70px;
+  border-radius: 10px;
+}
 .header-card {
   max-width: 1000px;
   width: 100%;
