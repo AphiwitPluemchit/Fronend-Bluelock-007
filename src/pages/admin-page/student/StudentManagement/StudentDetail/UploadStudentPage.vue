@@ -9,7 +9,7 @@ import { useStudentStore } from 'src/stores/student'
 const file = ref<File | null>(null)
 const students = ref<ExcelStudentRow[]>([])
 const studentStore = useStudentStore()
-
+const MAX_ROWS = 250
 const breadcrumbs = ref({
   previousPage: { title: 'จัดการข้อมูลนิสิต', path: '/Admin/StudentManagement' },
   currentPage: {
@@ -117,18 +117,23 @@ const uploadFile = async () => {
     return
   }
 
+  // 🔒 กันเกิน MAX_ROWS อีกรอบ (เผื่อกรณีข้อมูลถูกแก้ไขด้วยวิธีอื่น)
+  if (students.value.length > MAX_ROWS) {
+    showAlertDialog(
+      'แจ้งเตือน',
+      `จำกัดการอัปโหลดไม่เกิน ${MAX_ROWS} แถวต่อครั้ง (ขณะนี้มี ${students.value.length} แถว)`,
+    )
+    return
+  }
+
+  // ตรวจซ้ำในไฟล์
   const seen = new Set<string>()
   const duplicates: string[] = []
-
   students.value.forEach((s) => {
     const code = String(s.code)
-    if (seen.has(code)) {
-      duplicates.push(code)
-    } else {
-      seen.add(code)
-    }
+    if (seen.has(code)) duplicates.push(code)
+    else seen.add(code)
   })
-
   if (duplicates.length > 0) {
     showAlertDialog('แจ้งเตือน', `พบรหัสนิสิตซ้ำในไฟล์: ${[...new Set(duplicates)].join(', ')}`)
     return
@@ -144,6 +149,7 @@ const uploadFile = async () => {
     showAlertDialog('ข้อผิดพลาด', '❌ เกิดข้อผิดพลาดในการอัปโหลด')
   }
 }
+
 
 const clearFile = () => {
   file.value = null
