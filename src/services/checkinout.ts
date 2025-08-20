@@ -1,7 +1,8 @@
 import { api } from 'boot/axios'
 import { Notify } from 'quasar'
 // import type { Checkinout } from 'src/types/checkinout'
-
+import axios from 'axios'
+type ErrorBody = { error?: string; message?: string }
 // 📌 Utility แสดงข้อความผิดพลาด
 const showError = (message: string) => {
   Notify.create({
@@ -46,22 +47,62 @@ class CheckinoutService {
     try {
       const res = await api.post('/checkInOuts/student/checkin', { token })
       return res.data
-    } catch (error) {
-      showError('เช็คชื่อไม่สำเร็จ')
-      console.error('failed:', error)
-      throw error
+    } catch (err) {
+      let msg = 'เกิดข้อผิดพลาด'
+      if (axios.isAxiosError(err)) {
+        const data = err.response?.data as unknown
+        if (typeof data === 'string') {
+          try {
+            const parsed = JSON.parse(data) as ErrorBody
+            msg = parsed.error || parsed.message || data
+          } catch {
+            msg = data
+          }
+        } else if (data && typeof data === 'object') {
+          const body = data as ErrorBody
+          msg = body.error || body.message || err.message || msg
+        } else {
+          msg = err.message || msg
+        }
+      }
+      throw new Error(msg) // ✅ โยนข้อความจริงกลับไปให้ component
     }
   }
   static async checkout(token: string) {
     try {
       const res = await api.post('/checkInOuts/student/checkout', { token })
       return res.data
-    } catch (error) {
-      showError('เช็คชื่อออกไม่สำเร็จ')
-      console.error('failed:', error)
-      throw error
+    } catch (err) {
+      let msg = 'เกิดข้อผิดพลาด'
+      if (axios.isAxiosError(err)) {
+        const data = err.response?.data as unknown
+        if (typeof data === 'string') {
+          try {
+            const parsed = JSON.parse(data) as ErrorBody
+            msg = parsed.error || parsed.message || data
+          } catch {
+            msg = data
+          }
+        } else if (data && typeof data === 'object') {
+          const body = data as ErrorBody
+          msg = body.error || body.message || err.message || msg
+        } else {
+          msg = err.message || msg
+        }
+      }
+      throw new Error(msg) // ✅ โยนข้อความจริงกลับไปให้ component
     }
   }
+  // static async checkout(token: string) {
+  //   try {
+  //     const res = await api.post('/checkInOuts/student/checkout', { token })
+  //     return res.data
+  //   } catch (error) {
+  //     showError('เช็คชื่อออกไม่สำเร็จ')
+  //     console.error('failed:', error)
+  //     throw error
+  //   }
+  // }
   static async getStatus(studentId: string, activityId: string) {
     try {
       const res = await api.get('/checkInOuts/status', {

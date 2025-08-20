@@ -5,16 +5,18 @@ import type { AxiosError, AxiosRequestConfig, AxiosResponse } from 'axios'
 import { Loading, QSpinnerOval } from 'quasar'
 import { useAuthStore } from 'src/stores/auth'
 
+/* ------------------ Instance ------------------ */
 const api = axios.create({
   baseURL: import.meta.env.VITE_API_URL,
   timeout: 300000,
   headers: { 'Content-Type': 'application/json' },
 })
 
-/* -------- Global Loading: start on request, stop on finish -------- */
+/* ------------------ Global Loading ------------------ */
 let inflight = 0
 const skip = (cfg?: AxiosRequestConfig) =>
-  cfg?.headers?.['X-Skip-Loading'] === 'true' || cfg?.headers?.['x-skip-loading'] === 'true'
+  cfg?.headers?.['X-Skip-Loading'] === 'true' ||
+  cfg?.headers?.['x-skip-loading'] === 'true'
 
 const start = () => {
   Loading.show({
@@ -30,11 +32,37 @@ api.interceptors.request.use((config) => {
 
   if (!skip(config)) {
     inflight++
-    if (inflight === 1) start() // เริ่มโหลดทันทีเมื่อมีรีเควสต์แรก
+    if (inflight === 1) start()
   }
   return config
 })
 
+/* ------------------ Error Extract Helper ------------------ */
+type ErrorBody = { error?: string; message?: string }
+
+function extractBackendMessage(err: AxiosError): string {
+  const data = err.response?.data
+
+  // กรณี backend ส่งเป็น string (เช่น text/plain หรือ JSON string)
+  if (typeof data === 'string') {
+    try {
+      const parsed = JSON.parse(data) as ErrorBody
+      return parsed.error || parsed.message || data
+    } catch {
+      return data
+    }
+  }
+
+  // กรณี backend ส่งเป็น JSON object
+  if (data && typeof data === 'object') {
+    const body = data as ErrorBody
+    return body.error || body.message || err.message || 'เกิดข้อผิดพลาด'
+  }
+
+  return err.message || 'เกิดข้อผิดพลาด'
+}
+
+/* ------------------ Response Interceptor ------------------ */
 let isHandling401 = false
 
 export default boot(({ app, router }) => {
@@ -42,7 +70,7 @@ export default boot(({ app, router }) => {
     (res: AxiosResponse) => {
       if (!skip(res.config)) {
         inflight = Math.max(0, inflight - 1)
-        if (inflight === 0) stop() // รีเควสต์สุดท้ายจบ -> ปิดโหลดทันที
+        if (inflight === 0) stop()
       }
       return res
     },
@@ -59,8 +87,9 @@ export default boot(({ app, router }) => {
         cfg?.headers?.['X-Skip-Auth-Redirect'] === 'true' ||
         cfg?.headers?.['x-skip-auth-redirect'] === 'true'
 
+      // Handle 401 → clear token + redirect
       if (status === 401 && !skipAuthRedirect) {
-        if (isHandling401) return Promise.reject(new Error('Already handling 401'))
+        if (isHandling401) return Promise.reject(error)
         isHandling401 = true
         try {
           const auth = useAuthStore()
@@ -71,8 +100,11 @@ export default boot(({ app, router }) => {
             try {
               await router.replace({ name: 'Login', query: { redirect } })
             } catch {
-              try { await router.replace({ path: '/', query: { redirect } }) }
-              catch { await router.replace('/') }
+              try {
+                await router.replace({ path: '/', query: { redirect } })
+              } catch {
+                await router.replace('/')
+              }
             }
           }
         } finally {
@@ -80,7 +112,12 @@ export default boot(({ app, router }) => {
         }
       }
 
-      return Promise.reject(new Error(error?.message || 'Request failed'))
+      // ✅ ดึงข้อความจาก backend มาใส่ใน error.message
+      const backendMsg = extractBackendMessage(error)
+      ;(error as AxiosError & { backendMessage?: string }).backendMessage = backendMsg
+      error.message = backendMsg
+
+      return Promise.reject(error)
     }
   )
 
@@ -89,3 +126,4 @@ export default boot(({ app, router }) => {
 })
 
 export { api }
+
