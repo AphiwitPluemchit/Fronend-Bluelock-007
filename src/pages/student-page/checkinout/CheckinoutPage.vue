@@ -9,7 +9,7 @@ import { useStudentActivitystore } from 'src/stores/activity'
 const route = useRoute()
 // const authStore = useAuthStore()
 const uuid = route.params.uuid?.toString() || ''
-const tokenInfo = ref<{ type: string, activityId: string, token: string } | null>(null)
+const tokenInfo = ref<{ type: string; activityId: string; token: string } | null>(null)
 const loading = ref(true)
 const error = ref('')
 const activityStore = useStudentActivitystore()
@@ -22,7 +22,7 @@ onMounted(async () => {
   }
   try {
     const res = await CheckinoutService.getTokenInfo(uuid)
-    console.log('res', res);
+    console.log('res', res)
 
     if (!res || !res.type) {
       error.value = 'QR ไม่ถูกต้องหรือหมดอายุ'
@@ -39,7 +39,7 @@ onMounted(async () => {
     // ถ้า claim ไม่สำเร็จ (เช่น QR หมดอายุ) → fallback ไป validate
     try {
       const valid = await CheckinoutService.validateToken(uuid)
-      console.log('valid', valid);
+      console.log('valid', valid)
       if (valid && valid.type) {
         tokenInfo.value = valid
         try {
@@ -59,21 +59,40 @@ onMounted(async () => {
 </script>
 
 <template>
-    <q-page class="flex flex-center q-pa-md checkinout-page">
-      <q-card class="q-pa-xl text-center checkinout-container">
-        <div>
-          <q-icon name="how_to_reg" size="64px" style="color: #162aae" />
-        </div>
-        <div class="text-h6 text-green-7 q-mt-md">QR {{ tokenInfo?.type }}</div>
-        <div v-if="loading" class="q-mt-md">กำลังโหลด...</div>
-        <div v-else-if="error" class="text-negative q-mt-md">{{ error }}</div>
-        <template v-else>
-          <Checkinpage v-if="tokenInfo?.type === 'checkin'" :token="uuid" :activity="activityStore.form" />
-          <Checkoutpage v-else-if="tokenInfo?.type === 'checkout'" :token="uuid" :activity="activityStore.form" />
-          <div v-else class="text-negative">QR ไม่ถูกต้อง</div>
-        </template>
-      </q-card>
-    </q-page>
+  <q-page class="flex flex-center q-pa-md checkinout-page">
+    <q-card class="q-pa-xl text-center checkinout-container">
+      <div>
+        <q-icon name="how_to_reg" size="64px" color="primary" />
+      </div>
+      <!-- <div class="text-h6 text-green-7 q-mt-md">QR {{ tokenInfo?.type }}</div> -->
+      <div class="text-h6 q-mt-md" :class="tokenInfo?.type === 'checkin' ? 'text-green' : tokenInfo?.type === 'checkout' ? 'text-brown' : ''">
+        {{
+          tokenInfo?.type === 'checkin'
+            ? 'เช็คชื่อเข้า'
+            : tokenInfo?.type === 'checkout'
+              ? 'เช็คชื่อออก'
+              : 'เช็คชื่อเข้ากิจกรรม'
+        }}
+      </div>
+
+      <!-- <div class="text-h6 q-mt-md">เช็คชื่อเข้ากิจกรรม</div> -->
+      <div v-if="loading" class="q-mt-md">กำลังโหลด...</div>
+      <div v-else-if="error" class="text-negative q-mt-md">{{ error }}</div>
+      <template v-else>
+        <Checkinpage
+          v-if="tokenInfo?.type === 'checkin'"
+          :token="uuid"
+          :activity="activityStore.form"
+        />
+        <Checkoutpage
+          v-else-if="tokenInfo?.type === 'checkout'"
+          :token="uuid"
+          :activity="activityStore.form"
+        />
+        <div v-else class="text-negative">QR ไม่ถูกต้อง</div>
+      </template>
+    </q-card>
+  </q-page>
 </template>
 
 <style scoped>
