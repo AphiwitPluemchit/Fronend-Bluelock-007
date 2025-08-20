@@ -367,7 +367,7 @@ onMounted(async () => {
   transform: scale(1.05);
 }
 .custom-header-section {
-  background-color: #162aae;
+  background-color: #14279b;/* #162aae */
   color: white;
 }
 
