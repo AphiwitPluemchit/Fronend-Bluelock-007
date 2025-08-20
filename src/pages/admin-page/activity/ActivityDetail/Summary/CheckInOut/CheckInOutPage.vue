@@ -50,7 +50,7 @@ const copyQRLink = () => {
 </script>
 
 <template>
-  <q-page padding class="bg-grey-1 flex flex-center">
+  <q-page padding class="flex flex-center">
     <!-- Desktop / Tablet -->
     <q-card v-if="$q.screen.gt.xs" class="q-pa-xl shadow-3 full-width full-height flex flex-center">
       <div class="text-center">
