@@ -248,7 +248,6 @@ const fetchStudents = async () => {
     Array.isArray(allTab.value.activityItems) &&
     allTab.value.activityItems.length > 0
   ) {
-
     // แตกแขนงตามค่า indexTab (จะเข้ามาทาง -1 ครั้งแรกโดยอัตโนมัติ)
     if (indexTab.value === -1) {
       const data = await EnrollmentService.getEnrollmentsByActivityIDs(activityId, query.value)
@@ -280,7 +279,6 @@ const fetchStudents = async () => {
     console.error('activityItems is null or undefined')
   }
 }
-
 
 onMounted(async () => {
   window.addEventListener('resize', handleResize)
@@ -316,6 +314,7 @@ onUnmounted(() => {
         <!-- Row 2 -->
         <div class="select-filter-row">
           <q-select
+            v-if="activityItemOptions.length > 1"
             dense
             outlined
             v-model="indexTab"
