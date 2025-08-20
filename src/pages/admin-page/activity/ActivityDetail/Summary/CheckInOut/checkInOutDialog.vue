@@ -1,97 +1,45 @@
 <script setup lang="ts">
-import { defineProps, defineEmits, ref, watch, computed, onUnmounted } from 'vue'
-import CheckinoutService from 'src/services/checkinout'
-import { useRoute } from 'vue-router'
+import { defineProps, defineEmits, ref, computed } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
+
+const router = useRouter()
 const route = useRoute()
 const activityId = route.params.id as string
-// Props และ Emits
-const props = defineProps<{ modelValue: boolean }>()
+// รับ activityId จาก parent
+const props = defineProps<{ modelValue: boolean}>()
 const emit = defineEmits(['update:modelValue', 'confirm', 'cancel'])
 
-// เชื่อมกับ v-model
 const dialogVisible = computed({
   get: () => props.modelValue,
   set: (val: boolean) => emit('update:modelValue', val),
 })
 
-// State
-const selectedType = ref<'checkin' | 'checkout' | ''>('') // ประเภทที่เลือก
-const confirmedType = ref('') // ประเภทที่ยืนยันแล้ว
-const qrLink = ref('') // ลิงก์ที่ใช้สร้าง QR
-const qrType = ref('') // ประเภทที่ backend ตอบกลับมา
-const appURL = import.meta.env.VITE_APP_URL
-let refreshInterval: ReturnType<typeof setInterval> | null = null
+const selectedType = ref<'checkin' | 'checkout' | ''>('')
 
-// รีเซตค่าทุกครั้งที่เปิด dialog
-watch(
-  () => dialogVisible.value,
-  (isOpen) => {
-    if (isOpen) {
-      selectedType.value = ''
-      confirmedType.value = ''
-      qrLink.value = ''
-      if (refreshInterval) {
-        clearInterval(refreshInterval)
-        refreshInterval = null
-      }
-    } else {
-      if (refreshInterval) {
-        clearInterval(refreshInterval)
-        refreshInterval = null
-      }
-    }
-  },
-)
-
-// รีเฟรช QR อัตโนมัติทุก 10 วิหลังยืนยัน
-watch(
-  () => confirmedType.value,
-  (val) => {
-    if (val) {
-      if (refreshInterval) clearInterval(refreshInterval)
-      refreshInterval = setInterval(() => {
-        void onConfirm()
-      }, 8000)
-    } else {
-      if (refreshInterval) {
-        clearInterval(refreshInterval)
-        refreshInterval = null
-      }
-    }
-  },
-)
-
-onUnmounted(() => {
-  if (refreshInterval) {
-    clearInterval(refreshInterval)
-    refreshInterval = null
-  }
-})
-
-// เมื่อผู้ใช้เลือกประเภท → โหลดลิงก์ QR จาก backend
+// เลือกประเภท
 const selectType = (type: 'checkin' | 'checkout') => {
   selectedType.value = type
 }
 
-// ปุ่มยกเลิก
 const onCancel = () => {
   selectedType.value = ''
   emit('cancel')
 }
 
-// ปุ่มยืนยัน
-const onConfirm = async () => {
-  confirmedType.value = selectedType.value
-  const res = await CheckinoutService.getLink(activityId, confirmedType.value)
-  console.log('res:', res)
-  qrLink.value = res?.url || ''
-  qrType.value = res?.type || ''
+// 👉 กดยืนยันแล้วเปิดหน้า CheckInOutPage แท็บใหม่
+const onConfirm = () => {
+  if (!selectedType.value) return
+  const routeData = router.resolve({
+    name: 'ActivityCheckQR', // ตั้งตามที่ประกาศใน routes
+    params: { id: activityId, type: selectedType.value },
+  })
+  window.open(routeData.href, '_blank', 'noopener') // เปิดแท็บใหม่
+
   emit('confirm')
-}
-function copyQRLink() {
-  void navigator.clipboard.writeText(appURL + qrLink.value)
+  dialogVisible.value = false
 }
 </script>
+
 
 <template>
   <q-dialog v-model="dialogVisible" persistent>
@@ -101,7 +49,7 @@ function copyQRLink() {
       </q-card-section>
 
       <!-- ปุ่มเลือกประเภท -->
-      <q-card-section class="status-section" v-if="!confirmedType">
+      <q-card-section class="status-section">
         <q-btn
           label="เช็คชื่อเข้า"
           class="status-btn"
@@ -116,37 +64,9 @@ function copyQRLink() {
         />
       </q-card-section>
 
-      <!-- แสดง QR หลังยืนยัน -->
-      <q-card-section v-else>
-        <div class="qr-type-info">
-          ประเภท: <b>{{ qrType === 'checkin' ? 'เช็คชื่อเข้า' : 'เช็คชื่อออก' }}</b>
-        </div>
-        <div class="qr-link-container">
-          <span class="qr-link">{{ appURL + qrLink }}</span>
-          <q-btn
-            flat
-            dense
-            icon="content_copy"
-            size="sm"
-            color="primary"
-            @click="copyQRLink"
-            class="copy-btn"
-          >
-            <q-tooltip>คัดลอกลิงก์</q-tooltip>
-          </q-btn>
-        </div>
-        <div class="qr-code-container">
-          <q-img
-            :src="`https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${appURL + qrLink}`"
-            class="qr-image"
-          />
-        </div>
-      </q-card-section>
-
       <q-card-actions align="right">
         <q-btn class="btnreject" label="ยกเลิก" @click="onCancel" />
         <q-btn
-          v-if="!confirmedType"
           class="btnconfirm"
           label="ยืนยัน"
           @click="onConfirm"
@@ -245,10 +165,9 @@ function copyQRLink() {
   border: 1px solid #e0e0e0;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
 
-  display: flex;              /* 👈 ทำให้ลูกอยู่แนวนอน */
-  justify-content: center;    /* 👈 จัดลูกให้อยู่กลางแนวนอน */
+  display: flex; /* 👈 ทำให้ลูกอยู่แนวนอน */
+  justify-content: center; /* 👈 จัดลูกให้อยู่กลางแนวนอน */
 }
-
 
 .qr-image {
   max-width: 200px;
@@ -261,4 +180,3 @@ function copyQRLink() {
   transform: none;
 }
 </style>
-

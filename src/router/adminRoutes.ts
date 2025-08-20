@@ -21,6 +21,12 @@ const adminChildren: RouteRecordRaw[] = [
     component: () => import('src/pages/admin-page/activity/ActivityDetail/ActivityDetailPage.vue'),
   },
   {
+    path: '/ActivityCheckQR/:id/:type',
+    name: 'ActivityCheckQR',
+    component: () =>
+      import('src/pages/admin-page/activity/ActivityDetail/Summary/CheckInOut/CheckInOutPage.vue'),
+  },
+  {
     path: 'StudentManagement',
     component: () => import('pages/admin-page/student/StudentManagement/StudentTablePage.vue'),
   },
@@ -40,7 +46,8 @@ const adminChildren: RouteRecordRaw[] = [
   },
   {
     path: 'StudentInternship',
-    component: () => import('src/pages/admin-page/student/StudentInternship/StudentInternshipPage.vue'),
+    component: () =>
+      import('src/pages/admin-page/student/StudentInternship/StudentInternshipPage.vue'),
   },
   {
     path: 'StudentInternship/ConfirmStudentInternDataPage',

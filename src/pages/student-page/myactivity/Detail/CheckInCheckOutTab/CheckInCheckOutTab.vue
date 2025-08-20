@@ -56,7 +56,7 @@ import 'dayjs/locale/th'
 dayjs.locale('th')
 
 const formatDate = (iso?: string): string =>
-  iso ? dayjs(iso).format('D MMMM BBBB') : 'ยังไม่เช็คชื่อ'
+  iso ? dayjs(iso).format('D MMMM YYYY') : 'ยังไม่เช็คชื่อ'
 const formatTime = (iso?: string): string =>
   iso ? dayjs(iso).format('HH:mm น.') : 'ยังไม่เช็คชื่อ'
 
