@@ -125,39 +125,35 @@
                 <span v-if="block.isRequired" class="text-red">*</span>
               </div>
               <q-rating
-  :model-value="(answers[blockKey(block)] as number) ?? 0"
-  @update:model-value="val => (answers[blockKey(block)] = val)"
-  :max="block.max || 5"
-  :icon="block.icon || 'star'"
-  size="32px"
-/>
+                :model-value="(answers[blockKey(block)] as number) ?? 0"
+                @update:model-value="(val) => (answers[blockKey(block)] = val)"
+                :max="block.max || 5"
+                :icon="block.icon || 'star'"
+                size="40px"
+                color="black"
+                color-selected="yellow"
+              />
             </template>
 
             <!-- Grid: Multiple Choice (one per row) -->
             <template v-else-if="block.type === 'grid_multiple_choice'">
               <div class="text-subtitle1 q-mb-sm">
-                {{ block.title }}
-                <span v-if="block.isRequired" class="text-red">*</span>
+                {{ block.title }} <span v-if="block.isRequired" class="text-red">*</span>
               </div>
+
               <q-markup-table flat bordered dense>
                 <thead>
                   <tr>
                     <th></th>
-                    <th
-                      v-for="(col, colIndex) in block.choices"
-                      :key="col.id || col.title || colIndex"
-                    >
+                    <th v-for="(col, colIndex) in getCols(block)" :key="colIndex">
                       {{ col.title }}
                     </th>
                   </tr>
                 </thead>
                 <tbody>
-                  <tr v-for="(row, rowIndex) in block.rows" :key="row.id || row.title || rowIndex">
+                  <tr v-for="(row, rowIndex) in getRows(block)" :key="rowIndex">
                     <td class="text-weight-medium">{{ row.title }}</td>
-                    <td
-                      v-for="(col, colIndex) in block.choices"
-                      :key="col.id || col.title || colIndex"
-                    >
+                    <td v-for="(col, colIndex) in getCols(block)" :key="colIndex">
                       <q-radio
                         :val="col.title"
                         v-model="getGridSingle(blockKey(block))[row.title]"
@@ -172,28 +168,22 @@
             <!-- Grid: Checkbox (multi per row) -->
             <template v-else-if="block.type === 'grid_checkbox'">
               <div class="text-subtitle1 q-mb-sm">
-                {{ block.title }}
-                <span v-if="block.isRequired" class="text-red">*</span>
+                {{ block.title }} <span v-if="block.isRequired" class="text-red">*</span>
               </div>
+
               <q-markup-table flat bordered dense>
                 <thead>
                   <tr>
                     <th></th>
-                    <th
-                      v-for="(col, colIndex) in block.choices"
-                      :key="col.id || col.title || colIndex"
-                    >
+                    <th v-for="(col, colIndex) in getCols(block)" :key="colIndex">
                       {{ col.title }}
                     </th>
                   </tr>
                 </thead>
                 <tbody>
-                  <tr v-for="(row, rowIndex) in block.rows" :key="row.id || row.title || rowIndex">
+                  <tr v-for="(row, rowIndex) in getRows(block)" :key="rowIndex">
                     <td class="text-weight-medium">{{ row.title }}</td>
-                    <td
-                      v-for="(col, colIndex) in block.choices"
-                      :key="col.id || col.title || colIndex"
-                    >
+                    <td v-for="(col, colIndex) in getCols(block)" :key="colIndex">
                       <q-checkbox
                         :model-value="
                           getGridMulti(blockKey(block))[row.title]?.includes(col.title) || false
@@ -240,7 +230,6 @@ type GridSingle = Record<string, string>
 type GridMulti = Record<string, string[]>
 type AnswerValue = string | string[] | number | GridSingle | GridMulti | null
 
-// answers structure: { [blockKey]: AnswerValue }
 const answers = reactive<Record<string, AnswerValue>>({})
 
 const blockKey = (block: Block) => block.id || `${block.type}_${block.sequence}`
@@ -262,9 +251,42 @@ function initAnswer(block: Block) {
   const key = blockKey(block)
   if (block.type === 'checkbox') answers[key] = []
   else if (block.type === 'grid_multiple_choice') answers[key] = {} as GridSingle
-  else if (block.type === 'grid_checkbox') answers[key] = {} as GridMulti
+  else if (block.type === 'grid_checkbox')       answers[key] = {} as GridMulti
   else answers[key] = answers[key] ?? null
 }
+type GridLike = { rows?: unknown; choices?: unknown; columns?: unknown }
+
+const isObj = (v: unknown): v is Record<string, unknown> =>
+  v !== null && typeof v === 'object'
+
+const toTitle = (v: unknown): string => {
+  if (typeof v === 'number') return String(v)
+  if (typeof v === 'string') return v.trim()
+  if (isObj(v)) {
+    const t = v.title
+    const l = v.label
+    const n = v.name
+    if (typeof t === 'string') return t.trim()
+    if (typeof l === 'string') return l.trim()
+    if (typeof n === 'string') return n.trim()
+  }
+  return ''
+}
+const normList = (arr: unknown): Array<{ title: string }> =>
+  Array.isArray(arr)
+    ? arr.map((x) => ({ title: toTitle(x) })).filter((o) => o.title !== '')
+    : []
+
+// columns อาจมาใน choices หรือ columns
+const getCols = (block: Block | GridLike): Array<{ title: string }> => {
+  const gl = block as GridLike
+  const choices = Array.isArray(gl.choices) ? gl.choices : undefined
+  const columns = Array.isArray(gl.columns) ? gl.columns : undefined
+  // ✅ ถ้า choices ไม่มีหรือเป็น [] ให้ fallback ไป columns
+  return normList(choices && choices.length > 0 ? choices : columns)
+}
+const getRows = (block: Block | GridLike): Array<{ title: string }> =>
+  normList((block as GridLike).rows)
 
 function isRequiredInvalid(block: Block): boolean {
   if (!block.isRequired) return false
@@ -299,7 +321,6 @@ function getGridSingle(key: string): Record<string, string> {
   return answers[key] as GridSingle
 }
 
-
 function toggleGridMulti(key: string, rowTitle: string, colTitle: string, checked: boolean) {
   const group = getGridMulti(key)
   const arr = group[rowTitle] || []
@@ -325,6 +346,7 @@ function handleSubmit() {
   Notify.create({ type: 'positive', message: 'บันทึกคำตอบเรียบร้อย (ตัวอย่าง)' })
   router.back()
 }
+
 </script>
 
 <style scoped>

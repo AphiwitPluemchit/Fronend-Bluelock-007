@@ -54,12 +54,35 @@ const loadForms = async () => {
   if (props.forms) return
   await formStore.fetchForms() // ← ใช้เหมือนหน้า table
 }
+const coerceToOriginId = (id: string | null): string | null => {
+  if (!id) return null
+  const list = ensureWithId(allForms.value)
+
+  const selected = list.find(f => f.id === id)
+  if (!selected) return null
+
+  if (selected.isOrigin === true) return selected.id 
+
+  const originId = (selected as { originId?: string }).originId
+  if (typeof originId === 'string' && originId) return originId
+
+  const origin = list.find(
+    f => f.isOrigin === true && (f.title ?? '').trim() === (selected.title ?? '').trim()
+  )
+  return origin?.id ?? null
+}
 
 const openDialog = async () => {
   if (props.disable) return
+
   await formStore.fetchForms()
+
   filteredForms.value = originOnly(allForms.value)
-  localSelectedId.value = selectedFormIds.value[0] ?? null
+
+  const currentId = selectedFormIds.value[0] ?? null
+  // ✅ แปลง id ปัจจุบันให้เป็น id ของฟอร์มต้นฉบับ เพื่อให้รายการใน dialog ถูกติ๊ก
+  localSelectedId.value = coerceToOriginId(currentId)
+
   searchText.value = ''
   await nextTick()
   showFormDialog.value = true

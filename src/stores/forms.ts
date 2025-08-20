@@ -6,6 +6,7 @@ import { FormService } from 'src/services/forms'
 
 // ---------- helpers & normalizers ----------
 type RawForm = Partial<Form> & { _id?: string }
+
 const isIndexable = (v: unknown): v is Record<string, unknown> =>
   v !== null && typeof v === 'object'
 
@@ -15,39 +16,39 @@ const pickId = (obj: unknown): string | null => {
   if (typeof idVal === 'string' && idVal) return idVal
   const mongoIdVal = obj['_id']
   if (typeof mongoIdVal === 'string' && mongoIdVal) return mongoIdVal
-  const insertedIdVal = obj['insertedId']              // ✅ รองรับรูปแบบที่ backend ส่งมา
+  const insertedIdVal = obj['insertedId']
   if (typeof insertedIdVal === 'string' && insertedIdVal) return insertedIdVal
   return null
 }
+
+const pickOriginId = (v: unknown): string | null =>
+  isIndexable(v) && typeof v['originId'] === 'string' && v['originId'].length > 0
+    ? v['originId']
+    : null
+
+const normalizeTitle = (s: unknown): string =>
+  typeof s === 'string' ? s.trim() : ''
 
 const unwrapMaybeWrapped = (
   raw: unknown,
 ): { payload: unknown; idHint?: string } => {
   if (!isIndexable(raw)) return { payload: raw }
-
-  // ที่นี่ raw ถูก narrowed เป็น Record<string, unknown> แล้ว
   if ('form' in raw) {
-    const inner = raw['form']           // unknown
-    const inserted = raw['insertedId']  // unknown
-
+    const inner = raw['form']
+    const inserted = raw['insertedId']
     if (typeof inserted === 'string' && inserted.length > 0) {
-      // ✅ ใส่ idHint เฉพาะเมื่อมีค่าเป็น string
       return { payload: inner, idHint: inserted }
     }
-    // ✅ ถ้าไม่ใช่ string ให้ "ละคีย์" ไปเลย (อย่าใส่ undefined)
     return { payload: inner }
   }
-
   return { payload: raw }
 }
 
-
-
 const normalizeForm = (f: unknown): Form | null => {
-  const { payload, idHint } = unwrapMaybeWrapped(f)    // ✅ แกะห่อก่อน
+  const { payload, idHint } = unwrapMaybeWrapped(f)
   if (!isIndexable(payload)) return null
   const rf = payload as RawForm
-  const id = idHint ?? pickId(rf)                      // ✅ ใช้ insertedId เป็นไพ่ใบแรก
+  const id = idHint ?? pickId(rf)
   const out: Form = { ...(rf as Form), ...(id ? { id } : {}) }
   return out
 }
@@ -79,6 +80,35 @@ export const useFormStore = defineStore('forms', () => {
     } finally {
       loading.value = false
     }
+  }
+
+  const resolveOriginId = async (id: string): Promise<string | null> => {
+    const f = forms.value.find(x => x.id === id) ?? (await fetchFormById(id))
+    if (!f) return null
+
+    const formId = pickId(f)
+
+    // เป็น origin
+    if ((f as unknown as { isOrigin?: boolean }).isOrigin === true) {
+      return formId ?? null
+    }
+
+    // มี originId
+    const viaOriginField = pickOriginId(f)
+    if (viaOriginField) return viaOriginField
+
+    // fallback: เทียบชื่อกับ origin ใน store
+    const title = normalizeTitle(f.title)
+    if (title) {
+      const origin = forms.value.find(
+        x =>
+          (x as unknown as { isOrigin?: boolean }).isOrigin === true &&
+          normalizeTitle(x.title) === title,
+      )
+      return origin?.id ?? null
+    }
+
+    return null
   }
 
   /** โหลดฟอร์มตาม id */
@@ -171,5 +201,6 @@ const duplicateForm = async (originFormId: string): Promise<Form> => {
     updateForm,
     deleteForm,
     duplicateForm,
+    resolveOriginId
   }
 })

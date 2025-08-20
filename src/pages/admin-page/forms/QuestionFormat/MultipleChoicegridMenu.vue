@@ -25,11 +25,11 @@
           <q-btn flat dense icon="add" label="Add row" size="sm" @click="addRow" />
         </div>
 
-        <!-- 🟦 Columns -->
+        <!-- 🟦 choices -->
         <div class="col-6">
-          <div class="text-subtitle2">Columns</div>
+          <div class="text-subtitle2">choices</div>
           <div
-            v-for="(col, colIndex) in localData.columns"
+            v-for="(col, colIndex) in localData.choices"
             :key="colIndex"
             class="row items-center q-gutter-sm q-my-sm"
           >
@@ -74,7 +74,7 @@ const props = defineProps<{
     isRequired: boolean
     type: string
     rows: string[]
-    columns: string[]
+    choices: string[]
   }
 }>()
 
@@ -89,7 +89,7 @@ const localData = reactive({
   isRequired: false,
   type: '',
   rows: [] as string[],
-  columns: [] as string[]
+  choices: [] as string[]
 })
 
 // Watch sync data เข้า localData
@@ -119,15 +119,15 @@ function removeRow(index: number) {
 }
 
 function updateColumn(index: number, val: string) {
-  localData.columns[index] = val
+  localData.choices[index] = val
   update()
 }
 function addColumn() {
-  localData.columns.push('')
+  localData.choices.push('')
   update()
 }
 function removeColumn(index: number) {
-  localData.columns.splice(index, 1)
+  localData.choices.splice(index, 1)
   update()
 }
 </script>

@@ -19,6 +19,8 @@ import ActivityForm_StudentYears from 'src/pages/admin-page/activity/CreateActiv
 import ActivityForm_CloseRegisDate from 'src/pages/admin-page/activity/CreateActivity/Form/ActivityForm_CloseRegisDate.vue'
 import ChangeStatusDialog from 'src/pages/admin-page/activity/ActivityDetail/ActivityDetail/ChangeStatusDialog.vue'
 import CancelDialog from 'src/components/Dialog/CancelDialog.vue'
+import ActivityForm_Form from 'src/pages/admin-page/activity/CreateActivity/Form/ActivityForm_Form.vue'
+import { useFormStore } from 'src/stores/forms'
 interface SubActivity {
   subActivityName: string
   roomName: string[]
@@ -42,6 +44,55 @@ interface DayTimeSelection {
   startTime: string
   endTime: string
 }
+//ใช้สำหรับแบบประเมิน
+const formStore = useFormStore()
+const selectedFormIds = ref<string[]>([])
+const oldChildFormId = ref<string | null>(null)
+const isIndexable = (v: unknown): v is Record<string, unknown> =>
+  v !== null && typeof v === 'object'
+
+const toValidId = (v: unknown): string | null => {
+  if (typeof v === 'string') {
+    const s = v.trim()
+    if (!s || s === '0' || s === 'null' || s === 'undefined' || /^0+$/.test(s)) return null
+    return /^[a-f0-9]{24}$/i.test(s) ? s : null
+  }
+  if (typeof v === 'number') return v > 0 ? String(v) : null
+  return null
+}
+
+const getActivityFormId = (a: unknown): string | null => {
+  if (!isIndexable(a)) return null
+  const fids = a['formsId']
+  if (typeof fids === 'string') return toValidId(fids)
+  if (Array.isArray(fids) && fids.length > 0) return toValidId(fids[0])
+  const legacy = a['formId']
+  if (typeof legacy === 'string') return toValidId(legacy)
+  const maybeForm = a['form']
+  if (isIndexable(maybeForm)) {
+    return toValidId(maybeForm['id']) ?? toValidId(maybeForm['_id'])
+  }
+  return null
+}
+const getExistingActivityFormId = (): string | null => {
+  const a = props.activity as unknown
+  if (!isIndexable(a)) return null
+
+  // รองรับทั้ง formId, formsId (string/array), และ form.{id|_id}
+  const formsId = a['formsId']
+  if (typeof formsId === 'string') return toValidId(formsId)
+  if (Array.isArray(formsId) && formsId.length > 0) return toValidId(formsId[0])
+
+  const legacy = a['formId']
+  if (typeof legacy === 'string') return toValidId(legacy)
+
+  const maybeForm = a['form']
+  if (isIndexable(maybeForm)) {
+    return toValidId(maybeForm['id']) ?? toValidId(maybeForm['_id'])
+  }
+  return null
+}
+
 const activityStatus = ref('')
 const activityName = ref('')
 const activityType = ref('')
@@ -303,10 +354,6 @@ function scrollToTopMost(els: (HTMLElement | null | undefined)[]): void {
   }
 }
 
-/**
- * ฟังก์ชันสำหรับตรวจสอบความถูกต้องของข้อมูลก่อนเปิดลงทะเบียน
- * @returns Promise<boolean> - true ถ้าข้อมูลถูกต้อง, false ถ้ามีข้อผิดพลาด
- */
 const validateComponent = async (
   ref:
     | {
@@ -527,8 +574,50 @@ const onEnterField = (
       break
   }
 }
+/** ถ้ามีการเปลี่ยนฟอร์ม: ลบลูกเก่า (ถ้าเป็นลูกจริง) แล้ว duplicate ใหม่จาก origin ที่เลือก */
+const duplicateSelectedFormIfAny = async (): Promise<string | null> => {
+  const selectedId = selectedFormIds.value?.[0] ?? null
+  const prevChildId = getExistingActivityFormId()
 
-//ใช้กับปุ่มบันทึก ส่งข้อมูลไปหลังบ้าน
+  console.log('[dup][page] selectedId =', selectedId, 'prevChildId =', prevChildId)
+
+  // ไม่มีการเลือกใหม่ → ใช้ของเดิมไป
+  if (!selectedId) return prevChildId
+
+  // หา origin ของที่เลือก และของของเดิม เพื่อตรวจว่า “เปลี่ยนฟอร์มหรือยัง”
+  const selectedOriginId = (await formStore.resolveOriginId(selectedId)) ?? selectedId
+  const prevOriginId     = prevChildId ? await formStore.resolveOriginId(prevChildId) : null
+
+  // ถ้ายังชี้ origin เดิมอยู่ → ไม่ต้องลบ/ไม่ต้อง duplicate ใช้ลูกเดิม
+  if (prevChildId && prevOriginId && prevOriginId === selectedOriginId) {
+    console.log('[dup][page] same origin → reuse prev child:', prevChildId)
+    return prevChildId
+  }
+
+  // ลบลูกเก่า (เฉพาะถ้าเป็นลูกจริง ๆ) ก่อนค่อย duplicate ใหม่
+  if (prevChildId) {
+    try {
+      const prev = await formStore.fetchFormById(prevChildId)
+      if (prev && (prev as unknown as { isOrigin?: boolean }).isOrigin === false) {
+        console.log('[dup][page] deleting old child =', prevChildId)
+        await formStore.deleteForm(prevChildId)
+      } else {
+        console.log('[dup][page] skip delete (old is origin or not found)')
+      }
+    } catch (e) {
+      console.warn('ลบฟอร์มลูกอันเก่าไม่สำเร็จ (ข้าม):', e)
+      // ไม่ต้อง throw เพื่อไม่ให้บล็อกการ duplicate ใหม่
+    }
+  }
+
+  // duplicate ใหม่จาก origin ที่เลือก
+  const created = await formStore.duplicateForm(selectedOriginId)
+  const newId = created?.id ?? null
+  console.log('[dup][page] created new child id =', newId)
+  return newId
+}
+
+
 const saveChanges = async () => {
   if (!props.activity?.id) {
     console.error('ไม่พบ activity id')
@@ -536,13 +625,12 @@ const saveChanges = async () => {
   }
 
   try {
-    // Validate before opening registration
     if (activityStatus.value === 'เปิดลงทะเบียน') {
       const valid = await validateBeforeOpen()
       if (!valid) return
     }
+    const formIdForActivity = await duplicateSelectedFormIfAny()
 
-    // 1. Prepare the updated activity data
     const updated: Partial<Activity> = {
       ...cloneDeep(props.activity),
       id: props.activity.id,
@@ -557,6 +645,7 @@ const saveChanges = async () => {
           vote: existingVote ? existingVote.vote : 0,
         }
       }),
+      ...(formIdForActivity ? { formId: formIdForActivity } : {}),
       activityItems: subActivities.value.map((sub, index) => {
         const existingItem = props.activity?.activityItems?.[index]
         return {
@@ -577,11 +666,8 @@ const saveChanges = async () => {
         }
       }),
     }
-
-    // 2. Update the main activity
     await ActivityService.updateOne(updated)
 
-    // 3. Handle image upload if there's a new image
     if (props.imageRef) {
       const file = props.imageRef.getSelectedFile?.()
       const oldFile = props.activity?.file ?? ''
@@ -607,7 +693,6 @@ const saveChanges = async () => {
         emit('saved', oldFile)
       }
     } else {
-      // No imageRef provided
       emit('saved')
     }
 
@@ -618,9 +703,23 @@ const saveChanges = async () => {
   }
 }
 
-onMounted(() => {
+onMounted(async () => {
   const a = props.activity
   if (!a) return
+
+  await formStore.fetchForms()
+
+  const formId = getActivityFormId(props.activity)
+  selectedFormIds.value = formId ? [formId] : []
+  oldChildFormId.value = formId ?? null
+
+  // ✅ เพิ่มลูกเข้า store ถ้ายังไม่มี
+  if (formId && !formStore.forms.some((f) => f.id === formId)) {
+    const f = await formStore.fetchFormById(formId)
+    if (f && !formStore.forms.some((x) => x.id === f.id)) {
+      formStore.forms.unshift(f)
+    }
+  }
 
   originalActivity.value = cloneDeep(a)
   activityName.value = a.name ?? ''
@@ -823,6 +922,7 @@ onMounted(() => {
       v-model:foodMenuDisplay="foodMenuDisplay"
       :disable="!isEditing"
     />
+    <ActivityForm_Form v-model="selectedFormIds" :disable="!isEditing" :forms="formStore.forms" />
 
     <!-- Sub Activities List -->
     <div v-for="(subActivity, index) in subActivities" :key="index" class="sub-activity">

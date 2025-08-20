@@ -108,37 +108,31 @@
                     class="column items-center"
                     style="width: 50px"
                   >
-                    <q-icon :name="block.icon || 'star'"  :class="['rating-icon', block.icon || 'star']" size="28px"  />
+                    <q-icon
+                      :name="block.icon || 'star'"
+                      :class="['rating-icon', block.icon || 'star']"
+                      size="28px"
+                    />
                     <div class="text-caption q-mt-xs">{{ i }}</div>
                   </div>
                 </div>
               </template>
+
               <!-- Grid: Multiple Choice -->
               <template v-else-if="block.type === 'grid_multiple_choice'">
                 <div class="text-subtitle1 q-mb-sm">{{ block.title }}</div>
-                <q-markup-table flat bordered dense>
+                <q-markup-table flat bordered dense class="grid-preview-table">
                   <thead>
                     <tr>
                       <th></th>
-                      <th
-                        v-for="(col, colIndex) in block.choices"
-                        :key="col.id || col.title || colIndex"
-                      >
-                        {{ col.title }}
-                      </th>
+                      <th v-for="(col, i) in getCols(block)" :key="i">{{ col.title }}</th>
                     </tr>
                   </thead>
                   <tbody>
-                    <tr
-                      v-for="(row, rowIndex) in block.rows"
-                      :key="row.id || row.title || rowIndex"
-                    >
-                      <td>{{ row.title }}</td>
-                      <td
-                        v-for="(col, colIndex) in block.choices"
-                        :key="col.id || col.title || colIndex"
-                      >
-                        <q-radio :model-value="null" disable :val="col.title" />
+                    <tr v-for="(row, r) in getRows(block)" :key="r">
+                      <td class="row-label">{{ row.title }}</td>
+                      <td v-for="(col, c) in getCols(block)" :key="c" class="cell-center">
+                        <q-radio :val="col.title" :model-value="undefined" disable />
                       </td>
                     </tr>
                   </tbody>
@@ -148,29 +142,18 @@
               <!-- Grid: Checkbox -->
               <template v-else-if="block.type === 'grid_checkbox'">
                 <div class="text-subtitle1 q-mb-sm">{{ block.title }}</div>
-                <q-markup-table flat bordered dense>
+                <q-markup-table flat bordered dense class="grid-preview-table">
                   <thead>
                     <tr>
                       <th></th>
-                      <th
-                        v-for="(col, colIndex) in block.choices"
-                        :key="col.id || col.title || colIndex"
-                      >
-                        {{ col.title }}
-                      </th>
+                      <th v-for="(col, i) in getCols(block)" :key="i">{{ col.title }}</th>
                     </tr>
                   </thead>
                   <tbody>
-                    <tr
-                      v-for="(row, rowIndex) in block.rows"
-                      :key="row.id || row.title || rowIndex"
-                    >
-                      <td>{{ row.title }}</td>
-                      <td
-                        v-for="(col, colIndex) in block.choices"
-                        :key="col.id || col.title || colIndex"
-                      >
-                        <q-radio :model-value="null" disable :val="col.title" />
+                    <tr v-for="(row, r) in getRows(block)" :key="r">
+                      <td class="row-label">{{ row.title }}</td>
+                      <td v-for="(col, c) in getCols(block)" :key="c" class="cell-center">
+                        <q-checkbox :val="col.title" :model-value="undefined" disable />
                       </td>
                     </tr>
                   </tbody>
@@ -192,6 +175,7 @@
 <script setup lang="ts">
 import type { PropType } from 'vue'
 import type { Form } from 'src/types/form'
+import type{ Block } from 'src/types/form';
 
 defineProps({
   modelValue: Boolean,
@@ -200,6 +184,47 @@ defineProps({
     required: true,
   },
 })
+// ---- types & guards ----
+type MaybeItem =
+  | string
+  | number
+  | { id?: string; title?: unknown; label?: unknown; name?: unknown }
+
+type GridBlockLite = Partial<Block> & {
+  rows?: MaybeItem[]
+  choices?: MaybeItem[]
+  columns?: MaybeItem[]   // 👈 บางบล็อกใช้คีย์นี้แทน choices
+}
+
+const isObj = (v: unknown): v is Record<string, unknown> =>
+  v !== null && typeof v === 'object'
+
+// ---- normalizers ----
+const toTitle = (v: unknown): string => {
+  if (typeof v === 'number') return String(v)
+  if (typeof v === 'string') return v.trim()
+  if (isObj(v)) {
+    const t = v.title
+    const l = v.label
+    const n = v.name
+    if (typeof t === 'string') return t.trim()
+    if (typeof l === 'string') return l.trim()
+    if (typeof n === 'string') return n.trim()
+  }
+  return ''
+}
+
+const normList = (arr?: MaybeItem[]) =>
+  Array.isArray(arr)
+    ? arr.map(x => ({ title: toTitle(x) })).filter(o => o.title !== '')
+    : []
+
+// ---- accessors (ไม่มี any) ----
+const getCols = (block: GridBlockLite) =>
+  normList((block.choices && block.choices.length ? block.choices : block.columns) ?? [])
+
+const getRows = (block: GridBlockLite) =>
+  normList(block.rows)
 
 const emit = defineEmits(['update:modelValue'])
 </script>
@@ -223,6 +248,7 @@ const emit = defineEmits(['update:modelValue'])
   margin-right: auto;
 }
 .rating-icon.star {
-  color: #FFD700; /* gold */
+  color: black;
 }
+
 </style>

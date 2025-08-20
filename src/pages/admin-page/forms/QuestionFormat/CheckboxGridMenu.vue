@@ -25,11 +25,11 @@
           <q-btn flat dense icon="add" label="Add row" size="sm" @click="addRow" />
         </div>
 
-        <!-- 🔸 Columns -->
+        <!-- 🔸 choices -->
         <div class="col-6">
-          <div class="text-subtitle2">Columns</div>
+          <div class="text-subtitle2">choices</div>
           <div
-            v-for="(col, colIndex) in localData.columns"
+            v-for="(col, colIndex) in localData.choices"
             :key="'col-' + colIndex"
             class="row items-center q-gutter-sm q-my-sm"
           >
@@ -75,7 +75,7 @@ const props = defineProps<{
     isRequired: boolean
     type: string
     rows: string[]
-    columns: string[]
+    choices: string[]
   }
 }>()
 
@@ -86,15 +86,15 @@ const localData = reactive({
   isRequired: false,
   type: 'checkboxGrid',
   rows: [] as string[],
-  columns: [] as string[]
+  choices: [] as string[]
 })
 
 watch(
   () => props.modelValue,
   (val) => {
     Object.assign(localData, val)
-    // ให้ dummy มีขนาดเท่ากับ columns เสมอ
-    dummy.value = val.columns.map(() => false)
+    // ให้ dummy มีขนาดเท่ากับ choices เสมอ
+    dummy.value = val.choices.map(() => false)
   },
   { immediate: true, deep: true }
 )
@@ -109,7 +109,7 @@ function updateRow(index: number, val: string) {
 }
 
 function updateColumn(index: number, val: string) {
-  localData.columns[index] = val
+  localData.choices[index] = val
   update()
 }
 
@@ -124,13 +124,13 @@ function removeRow(index: number) {
 }
 
 function addColumn() {
-  localData.columns.push('')
+  localData.choices.push('')
   dummy.value.push(false)
   update()
 }
 
 function removeColumn(index: number) {
-  localData.columns.splice(index, 1)
+  localData.choices.splice(index, 1)
   dummy.value.splice(index, 1)
   update()
 }
