@@ -385,7 +385,7 @@ function mapActivitiesToTableRows(activitys: Activity[]) {
       participants: enrollmentSummary(activity.activityItems || []) || '-',
       skill:
         activity.skill === 'hard'
-          ? 'ทักษะวิชาการ'
+          ? 'ทักษะทางวิชาการ'
           : activity.skill === 'soft'
             ? 'เตรียมความพร้อม'
             : '-',
