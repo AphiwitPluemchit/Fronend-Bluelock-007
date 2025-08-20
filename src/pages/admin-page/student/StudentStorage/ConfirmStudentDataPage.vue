@@ -237,7 +237,7 @@ onMounted(async () => {
       </div>
 
       <div class="col-12 row justify-center items-center q-pr-md">
-        <div class="text-h6 q-mt-lg">ตารางรายชื่อนิสิต</div>
+        <div class="text-h6 q-mt-lg">ตารางรายชื่อนิสิตทั้งหมด</div>
       </div>
 
       <q-table
@@ -315,11 +315,14 @@ onMounted(async () => {
         </template>
       </q-table>
 
-      <!-- ตารางแสดงรายชื่อนิสิตที่เลือก -->
+      <!-- ตารางแสดงรายชื่อนิสิตที่จัดเก็บ -->
+      <div class="text-h6 text-center q-mt-xl q-mb-md">ตารางรายชื่อนิสิตที่จัดเก็บ</div>
+
+      <!-- ตารางที่ 2 -->
       <q-table
         bordered
         flat
-        class="q-mt-xl full-width"
+        class="q-mt-none full-width"
         :rows="selectedStudentsData"
         :columns="columns"
         row-key="code"
