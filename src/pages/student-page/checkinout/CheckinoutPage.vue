@@ -62,7 +62,7 @@ onMounted(async () => {
     <q-page class="flex flex-center q-pa-md checkinout-page">
       <q-card class="q-pa-xl text-center checkinout-container">
         <div>
-          <q-icon name="question_mark" size="64px" style="color: #162aae" />
+          <q-icon name="how_to_reg" size="64px" style="color: #162aae" />
         </div>
         <div class="text-h6 text-green-7 q-mt-md">QR {{ tokenInfo?.type }}</div>
         <div v-if="loading" class="q-mt-md">กำลังโหลด...</div>

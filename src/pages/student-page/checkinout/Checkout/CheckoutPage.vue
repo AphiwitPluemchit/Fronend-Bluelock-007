@@ -45,14 +45,12 @@ console.log('studentId:', props.token)
 <template>
   <div class="q-pa-md">
     <div>
-      <div v-if="props.activity?.name" class="text-grey-8 q-mb-sm">
-        กิจกรรม: {{ props.activity?.name }}
-      </div>
+      <div v-if="props.activity?.name" class="q-mb-sm">กิจกรรม: {{ props.activity?.name }}</div>
       <div class="q-pa-md">
-        <q-btn class="btngrey" @click="checkout">Checkout</q-btn>
+        <q-btn class="btnconfirm" @click="checkout">เช็คชื่อ</q-btn>
       </div>
       <div v-if="isSubmitted">
-        <div v-if="isChecked" class="text-positive">Checkout success</div>
+        <div v-if="isChecked" class="text-positive">เช็คชื่อออกสำเร็จ</div>
         <div v-else-if="errorMessage" class="text-negative q-mt-md">{{ errorMessage }}</div>
       </div>
     </div>
