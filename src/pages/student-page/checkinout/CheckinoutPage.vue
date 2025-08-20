@@ -25,7 +25,7 @@ onMounted(async () => {
     console.log('res', res);
 
     if (!res || !res.type) {
-      error.value = 'QR ไม่ถูกต้องหรือหมดอายุ 1'
+      error.value = 'QR ไม่ถูกต้องหรือหมดอายุ'
     } else {
       tokenInfo.value = res
       // โหลดข้อมูลกิจกรรมจาก activityId ที่ได้จาก token
@@ -48,10 +48,10 @@ onMounted(async () => {
           console.error('โหลดข้อมูลกิจกรรมล้มเหลว:', e)
         }
       } else {
-        error.value = 'QR ไม่ถูกต้องหรือหมดอายุ 2'
+        error.value = 'QR ไม่ถูกต้องหรือหมดอายุ'
       }
     } catch {
-      error.value = 'QR ไม่ถูกต้องหรือหมดอายุ 3'
+      error.value = 'QR ไม่ถูกต้องหรือหมดอายุ'
     }
   }
   loading.value = false
