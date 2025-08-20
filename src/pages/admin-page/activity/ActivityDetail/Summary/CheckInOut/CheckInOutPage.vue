@@ -1,58 +1,28 @@
-<template>
-  <q-page padding>
-    <!-- <q-banner class="q-mb-md" dense>
-      Activity ID: <b>{{ activityId }}</b> — ประเภท: <b>{{ qrType }}</b>
-    </q-banner> -->
-
-    <q-card class="q-mb-md" style="height: calc(100vh - 150px)">
-      <div class="qr-code-container" v-if="qrLink">
-        <q-img
-          :src="`https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${appURL + qrLink}`"
-          class="qr-image"
-        />
-      </div>
-      <div v-else class="text-grey text-center q-mt-md">กำลังโหลด QR...</div>
-      <div class="text_type">
-        ประเภท: <b>{{ qrType === 'checkin' ? 'เช็คชื่อเข้า' : 'เช็คชื่อออก' }}</b>
-      </div>
-      <div class="qr-link-container" v-if="qrLink">
-        <div>
-          <span class="qr-link">{{ appURL + qrLink }}</span>
-          <q-btn
-            flat
-            dense
-            icon="content_copy"
-            size="sm"
-            color="primary"
-            @click="copyQRLink"
-            class="copy-btn"
-          >
-            <q-tooltip>คัดลอกลิงก์</q-tooltip>
-          </q-btn>
-        </div>
-      </div>
-    </q-card>
-  </q-page>
-</template>
-
 <script setup lang="ts">
 import { onMounted, onUnmounted, ref } from 'vue'
 import { useRoute } from 'vue-router'
 import CheckinoutService from 'src/services/checkinout'
+import { ActivityService } from 'src/services/activity'
 
 const route = useRoute()
-
-// 👉 รับ param มาจาก route
 const activityId = route.params.id as string
 const type = route.params.type as 'checkin' | 'checkout'
 
-// state
 const qrLink = ref('')
 const qrType = ref('')
+const activityName = ref('')
 const appURL = import.meta.env.VITE_APP_URL
 let refreshInterval: ReturnType<typeof setInterval> | null = null
 
-// โหลด QR จาก backend
+const fetchActivity = async () => {
+  try {
+    const res = await ActivityService.getOne(activityId)
+    activityName.value = res.data?.name || ''
+  } catch (err) {
+    console.error('โหลดข้อมูลกิจกรรมล้มเหลว:', err)
+  }
+}
+
 const fetchQR = async () => {
   try {
     const res = await CheckinoutService.getLink(activityId, type)
@@ -64,55 +34,113 @@ const fetchQR = async () => {
 }
 
 onMounted(async () => {
-  await fetchQR()
-  // auto refresh ทุก 8 วิ
+  await Promise.all([fetchActivity(), fetchQR()])
   refreshInterval = setInterval(() => {
     void fetchQR()
   }, 12000)
 })
 
 onUnmounted(() => {
-  if (refreshInterval) {
-    clearInterval(refreshInterval)
-    refreshInterval = null
-  }
+  if (refreshInterval) clearInterval(refreshInterval)
 })
 
-// คัดลอกลิงก์
 const copyQRLink = () => {
-  if (qrLink.value) {
-    void navigator.clipboard.writeText(appURL + qrLink.value)
-  }
+  if (qrLink.value) void navigator.clipboard.writeText(appURL + qrLink.value)
 }
 </script>
 
+<template>
+  <q-page padding class="bg-grey-1 flex flex-center">
+    <!-- Desktop / Tablet -->
+    <q-card v-if="$q.screen.gt.xs" class="q-pa-xl shadow-3 full-width full-height flex flex-center">
+      <div class="text-center">
+        <div class="column items-center text-center q-mb-lg">
+          <div class="text-h4 text-primary">
+            {{ qrType === 'checkin' ? 'เช็คชื่อเข้ากิจกรรม' : 'เช็คชื่อออกกิจกรรม' }}
+          </div>
+        </div>
+        <div class="text-h6 q-mb-md" v-if="activityName">
+          {{ activityName }}
+        </div>
+        <div class="q-my-xl">
+          <q-img
+            v-if="qrLink"
+            :src="`https://api.qrserver.com/v1/create-qr-code/?size=350x350&data=${appURL + qrLink}`"
+            style="width: 350px; height: 350px"
+            spinner-color="primary"
+          />
+          <div v-else class="text-grey text-subtitle1 q-my-md">กำลังโหลด QR...</div>
+        </div>
+        <q-card-section class="bg-white rounded-borders q-pa-md">
+          <div class="row items-center justify-center q-gutter-sm">
+            <span class="text-body2 ellipsis" style="word-break: break-all">
+              {{ appURL + qrLink }}
+            </span>
+            <q-btn
+              round
+              flat
+              dense
+              size="sm"
+              color="primary"
+              icon="content_copy"
+              @click="copyQRLink"
+            >
+              <q-tooltip anchor="top middle" self="bottom middle">คัดลอกลิงก์</q-tooltip>
+            </q-btn>
+          </div>
+        </q-card-section>
+      </div>
+    </q-card>
+
+    <!-- Mobile -->
+    <q-card v-else class="q-pa-lg shadow-3" style="width: 90%; max-width: 500px; max-height: 90vh">
+      <div class="column items-center text-center q-my-sm">
+        <div class="text-h4 text-primary q-mb-sm">
+          {{ qrType === 'checkin' ? 'เช็คชื่อเข้ากิจกรรม' : 'เช็คชื่อออกกิจกรรม' }}
+        </div>
+        <div class="text-h6 q-mb-md" v-if="activityName">
+          {{ activityName }}
+        </div>
+        <q-img
+          v-if="qrLink"
+          :src="`https://api.qrserver.com/v1/create-qr-code/?size=350x350&data=${appURL + qrLink}`"
+          class="qr-image q-mb-md"
+          spinner-color="primary"
+        />
+        <div v-else class="text-grey text-subtitle1 q-my-md">กำลังโหลด QR...</div>
+        <q-card-section class="bg-white rounded-borders q-pa-sm" style="width: 100%">
+          <div class="row items-center justify-center q-gutter-sm">
+            <span class="text-body2 ellipsis qr-link" style="word-break: break-all">
+              {{ appURL + qrLink }}
+            </span>
+            <q-btn
+              round
+              flat
+              dense
+              size="sm"
+              color="primary"
+              icon="content_copy"
+              @click="copyQRLink"
+            >
+              <q-tooltip anchor="top middle" self="bottom middle">คัดลอกลิงก์</q-tooltip>
+            </q-btn>
+          </div>
+        </q-card-section>
+      </div>
+    </q-card>
+  </q-page>
+</template>
+
 <style scoped>
-.qr-link-container {
-  justify-items: center;
-  gap: 8px;
-  padding: 12px;
-  border-radius: 8px;
-  margin-bottom: 16px;
-}
-.qr-link {
-  font-size: 12px;
-  color: #666;
-  word-break: break-all;
-  flex: 1;
-  font-family: monospace;
-}
-.qr-code-container {
-  display: flex;
-  justify-content: center;
-}
-.text_type {
-  margin-top: calc(10vh - 10px);
-  justify-content: center;
-  display: flex;
-  font-size: xx-large;
-}
 .qr-image {
-  max-width: 400px;
+  width: 80%;
+  max-width: 350px;
+  height: auto;
   border-radius: 8px;
+}
+
+.qr-link {
+  font-size: 14px;
+  word-break: break-word;
 }
 </style>
