@@ -111,7 +111,7 @@ export const useStudentStore = defineStore('student', () => {
       case 3:
         return 'ชั่วโมงครบแล้ว'
       case 4:
-        return 'ออกผึกแล้ว'
+        return 'ออกฝึกแล้ว'
       default:
         return 'ไม่ทราบสถานะ'
     }
