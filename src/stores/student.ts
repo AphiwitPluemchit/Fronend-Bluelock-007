@@ -30,7 +30,7 @@ export const useStudentStore = defineStore('student', () => {
     limit: 10,
     search: '',
     sortBy: 'code',
-    order: 'desc',
+    order: 'asc',
     skill: [],
     major: [],
     studentYear: [],

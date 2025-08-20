@@ -224,14 +224,7 @@ const clearFile = () => {
             <q-td key="major">{{ props.row.major }}</q-td>
             <q-td class="text-center" key="softSkill">{{ props.row.softSkill }}/30</q-td>
             <q-td class="text-center" key="hardSkill">{{ props.row.hardSkill }}/12</q-td>
-            <q-td class="text-center">
-              <q-badge
-                :label="studentStore.getStatusText(props.row.status)"
-                :class="studentStore.getStatusClass(props.row.status)"
-                class="status-badge"
-                unelevated
-              />
-            </q-td>
+
           </q-tr>
         </template>
 
@@ -266,41 +259,6 @@ const clearFile = () => {
 </template>
 
 <style scoped>
-/* .status-complete {
-  background-color: #cfd7ff;
-  color: #001780;
-  border: 2px solid #002dff;
-  padding: 3px 30px;
-  width: 130px;
-}
-.status-medium {
-  background-color: #ffe7ba;
-  color: #ff6f00;
-  border: 2px solid #ffa500;
-  padding: 3px 30px;
-  width: 130px;
-}
-.status-low {
-  background-color: #ffc5c5;
-  color: #ff0000;
-  border: 2px solid #f32323;
-  padding: 3px 30px;
-  width: 130px;
-}
-.status-out {
-  background-color: #e0e0e0;
-  color: #5f5f5f;
-  border: 2px solid #b0b0b0;
-  padding: 3px 30px;
-  width: 130px;
-}
-.status-graduated {
-  background-color: #d4edda;
-  color: #155724;
-  border: 2px solid #28a745;
-  padding: 3px 30px;
-  width: 130px;
-} */
 .status-badge {
   height: 32px;
   line-height: 28px;
