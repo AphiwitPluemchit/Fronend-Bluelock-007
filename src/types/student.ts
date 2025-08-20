@@ -15,7 +15,6 @@ export interface ExcelStudentRow {
   engName: string
   code: string | number
   major: string
-  password?: string | number
   softSkill?: number
   hardSkill?: number
 }

@@ -10,6 +10,7 @@ const file = ref<File | null>(null)
 const students = ref<ExcelStudentRow[]>([])
 const studentStore = useStudentStore()
 const MAX_ROWS = 250
+
 const breadcrumbs = ref({
   previousPage: { title: 'จัดการข้อมูลนิสิต', path: '/Admin/StudentManagement' },
   currentPage: {
@@ -59,7 +60,6 @@ const downloadTemplate = () => {
       engName: 'Somchai S.',
       code: '123456',
       major: 'SE',
-      password: '123456',
       softSkill: 0,
       hardSkill: 0,
     },
@@ -68,7 +68,6 @@ const downloadTemplate = () => {
       engName: 'Somying K.',
       code: '123457',
       major: 'CS',
-      password: '123456',
       softSkill: 0,
       hardSkill: 0,
     },
@@ -98,7 +97,6 @@ const handleFileChange = async () => {
       engName: row.engName || '',
       code: row.code?.toString() || '',
       major: row.major || '',
-      password: row.password?.toString() || '123456',
       softSkill: Number(row.softSkill) || 0,
       hardSkill: Number(row.hardSkill) || 0,
       status: 1,

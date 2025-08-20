@@ -92,10 +92,14 @@ export class StudentService {
   }
 
   // อัปเดตสถานะนักเรียนหลายคนโดยใช้ ID (ประสิทธิภาพดีกว่า)
-  static async updateStudentStatusByIDs(studentIds: string[], status: number): Promise<{ message: string; updated: number; success: boolean }> {
+  static async updateStudentStatusByIDs(
+    studentIds: string[],
+    status: number,
+  ): Promise<{ message: string; updated: number; success: boolean }> {
     try {
       const res = await api.post('/students/update-status-by-ids', {
-        studentIds,status
+        studentIds,
+        status,
       })
 
       if (res.data?.message) {
@@ -183,6 +187,4 @@ export class StudentService {
       throw error
     }
   }
-
-
 }
