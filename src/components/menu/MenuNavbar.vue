@@ -45,7 +45,7 @@ const toggleLeftDrawer = () => {
         <div style="font-size: 16px">
           <div>{{ store.getName }}</div>
           <div class="flex justify-end">
-            {{ store.getRole === EnumUserRole.STUDENT ? 'นักศึกษา' : 'ผู้ดูแล' }}
+            {{ store.getRole === EnumUserRole.STUDENT ? 'นิสิต' : 'ผู้ดูแล' }}
           </div>
         </div>
       </div>
