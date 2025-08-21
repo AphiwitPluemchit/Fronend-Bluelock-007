@@ -15,11 +15,7 @@
 
       <!-- Content -->
       <q-card flat bordered class="q-pa-md" v-if="form">
-        <div
-          v-for="(block, index) in form.blocks"
-          :key="block.id || index"
-          class="q-mb-md flex flex-center"
-        >
+        <div v-for="(block, index) in visibleBlocks" :key="block.id || index" class="q-mb-md flex flex-center">
           <q-card class="q-pa-md card-answer" bordered>
             <!-- Title Card -->
             <template v-if="block.type === 'title'">
@@ -35,16 +31,10 @@
                 {{ block.title }}
                 <span v-if="block.isRequired" class="text-red">*</span>
               </div>
-              <q-input
-                dense
-                outlined
-                :model-value="(answers[blockKey(block)] as string) ?? ''"
-                @update:model-value="(val) => (answers[blockKey(block)] = val)"
-                placeholder="คำตอบของคุณ..."
-                class="full-width"
-                :error="showErrors && isRequiredInvalid(block)"
-                :error-message="'จำเป็นต้องกรอกข้อมูล'"
-              />
+              <q-input dense outlined :model-value="(answers[blockKey(block)] as string) ?? ''"
+                @update:model-value="(val) => (answers[blockKey(block)] = val)" placeholder="คำตอบของคุณ..."
+                class="full-width" :error="showErrors && isRequiredInvalid(block)"
+                :error-message="'จำเป็นต้องกรอกข้อมูล'" />
             </template>
 
             <!-- Paragraph -->
@@ -53,17 +43,10 @@
                 {{ block.title }}
                 <span v-if="block.isRequired" class="text-red">*</span>
               </div>
-              <q-input
-                type="textarea"
-                dense
-                outlined
-                :model-value="(answers[blockKey(block)] as string) ?? ''"
-                @update:model-value="(val) => (answers[blockKey(block)] = val)"
-                placeholder="คำตอบของคุณ..."
-                class="full-width"
-                :error="showErrors && isRequiredInvalid(block)"
-                :error-message="'จำเป็นต้องกรอกข้อมูล'"
-              />
+              <q-input type="textarea" dense outlined :model-value="(answers[blockKey(block)] as string) ?? ''"
+                @update:model-value="(val) => (answers[blockKey(block)] = val)" placeholder="คำตอบของคุณ..."
+                class="full-width" :error="showErrors && isRequiredInvalid(block)"
+                :error-message="'จำเป็นต้องกรอกข้อมูล'" />
             </template>
 
             <!-- Multiple Choice -->
@@ -72,13 +55,10 @@
                 {{ block.title }}
                 <span v-if="block.isRequired" class="text-red">*</span>
               </div>
-              <q-option-group
-                :options="(block.choices || []).map((c) => ({ label: c.title, value: c.title }))"
-                type="radio"
-                :model-value="(answers[blockKey(block)] as string) ?? null"
+              <q-option-group :options="(block.choices || []).map((c) => ({ label: c.title, value: c.title }))"
+                type="radio" :model-value="(answers[blockKey(block)] as string) ?? null"
                 @update:model-value="(val) => (answers[blockKey(block)] = val)"
-                :error="showErrors && isRequiredInvalid(block)"
-              />
+                :error="showErrors && isRequiredInvalid(block)" />
             </template>
 
             <!-- Checkbox -->
@@ -87,17 +67,12 @@
                 {{ block.title }}
                 <span v-if="block.isRequired" class="text-red">*</span>
               </div>
-              <q-option-group
-                :options="(block.choices || []).map((c) => ({ label: c.title, value: c.title }))"
-                type="checkbox"
-                :model-value="
-                  Array.isArray(answers[blockKey(block)])
+              <q-option-group :options="(block.choices || []).map((c) => ({ label: c.title, value: c.title }))"
+                type="checkbox" :model-value="Array.isArray(answers[blockKey(block)])
                     ? (answers[blockKey(block)] as string[])
                     : []
-                "
-                @update:model-value="(val) => (answers[blockKey(block)] = val)"
-                :error="showErrors && isRequiredInvalid(block)"
-              />
+                  " @update:model-value="(val) => (answers[blockKey(block)] = val)"
+                :error="showErrors && isRequiredInvalid(block)" />
             </template>
 
             <!-- Dropdown -->
@@ -106,16 +81,10 @@
                 {{ block.title }}
                 <span v-if="block.isRequired" class="text-red">*</span>
               </div>
-              <q-select
-                :options="(block.choices || []).map((c) => c.title)"
+              <q-select :options="(block.choices || []).map((c) => c.title)"
                 :model-value="(answers[blockKey(block)] as string) ?? null"
-                @update:model-value="(val) => (answers[blockKey(block)] = val)"
-                outlined
-                dense
-                placeholder="กรุณาเลือก"
-                class="full-width"
-                :error="showErrors && isRequiredInvalid(block)"
-              />
+                @update:model-value="(val) => (answers[blockKey(block)] = val)" outlined dense placeholder="กรุณาเลือก"
+                class="full-width" :error="showErrors && isRequiredInvalid(block)" />
             </template>
 
             <!-- Rating -->
@@ -124,15 +93,9 @@
                 {{ block.title }}
                 <span v-if="block.isRequired" class="text-red">*</span>
               </div>
-              <q-rating
-                :model-value="(answers[blockKey(block)] as number) ?? 0"
-                @update:model-value="(val) => (answers[blockKey(block)] = val)"
-                :max="block.max || 5"
-                :icon="block.icon || 'star'"
-                size="40px"
-                color="black"
-                color-selected="yellow"
-              />
+              <q-rating :model-value="(answers[blockKey(block)] as number) ?? 0"
+                @update:model-value="(val) => (answers[blockKey(block)] = val)" :max="block.max || 5"
+                :icon="block.icon || 'star'" size="40px" color="black" color-selected="yellow" />
             </template>
 
             <!-- Grid: Multiple Choice (one per row) -->
@@ -154,11 +117,7 @@
                   <tr v-for="(row, rowIndex) in getRows(block)" :key="rowIndex">
                     <td class="text-weight-medium">{{ row.title }}</td>
                     <td v-for="(col, colIndex) in getCols(block)" :key="colIndex">
-                      <q-radio
-                        :val="col.title"
-                        v-model="getGridSingle(blockKey(block))[row.title]"
-                        dense
-                      />
+                      <q-radio :val="col.title" v-model="getGridSingle(blockKey(block))[row.title]" dense />
                     </td>
                   </tr>
                 </tbody>
@@ -184,15 +143,10 @@
                   <tr v-for="(row, rowIndex) in getRows(block)" :key="rowIndex">
                     <td class="text-weight-medium">{{ row.title }}</td>
                     <td v-for="(col, colIndex) in getCols(block)" :key="colIndex">
-                      <q-checkbox
-                        :model-value="
-                          getGridMulti(blockKey(block))[row.title]?.includes(col.title) || false
-                        "
-                        @update:model-value="
+                      <q-checkbox :model-value="getGridMulti(blockKey(block))[row.title]?.includes(col.title) || false
+                        " @update:model-value="
                           (val) => toggleGridMulti(blockKey(block), row.title, col.title, val)
-                        "
-                        dense
-                      />
+                        " dense />
                     </td>
                   </tr>
                 </tbody>
@@ -202,24 +156,42 @@
         </div>
 
         <!-- Actions -->
-        <q-card-actions align="right">
-          <q-btn flat label="ยกเลิก" color="grey-8" @click="goBack" />
-          <q-btn unelevated color="primary" label="ส่งคำตอบ" @click="handleSubmit" />
+        <!-- Actions -->
+        <q-card-actions align="between" class="q-mt-md">
+          <!-- ซ้าย: ย้อนกลับ (เฉพาะเมื่อมีหลาย session และไม่ใช่หน้าตาแรก) -->
+          <div>
+            <q-btn v-if="totalSessions > 1 && currentSession > 1" flat label="ย้อนกลับ" color="primary"
+              @click="currentSession--" />
+          </div>
+
+          <!-- ขวา: ถัดไป/ส่งคำตอบ -->
+          <div class="row q-gutter-sm">
+            <!-- มีหลาย session และยังไม่ใช่หน้าสุดท้าย -->
+            <q-btn v-if="totalSessions > 1 && currentSession < totalSessions" flat label="ถัดไป" color="primary"
+              class="btnnext" @click="
+                () => {
+                  currentSession++;
+                }
+              " />
+
+            <!-- ปุ่มส่งคำตอบ: กรณีมี session เดียว หรืออยู่ session สุดท้าย -->
+            <q-btn v-if="totalSessions === 1 || currentSession === totalSessions" unelevated color="primary"
+              label="ส่งคำตอบ" @click="handleSubmit" />
+          </div>
         </q-card-actions>
+
       </q-card>
     </div>
   </q-page>
 </template>
 
 <script setup lang="ts">
-import { onMounted, reactive, ref } from 'vue'
-import { useRoute, useRouter } from 'vue-router'
+import { onMounted, reactive, ref, computed, watch } from 'vue'
+import { useRoute } from 'vue-router'
 import { useFormStore } from 'src/stores/forms'
 import type { Block, Form } from 'src/types/form'
-import { Notify } from 'quasar'
 
 const route = useRoute()
-const router = useRouter()
 const formStore = useFormStore()
 const form = ref<Form | null>(null)
 const loading = ref(false)
@@ -234,6 +206,21 @@ const answers = reactive<Record<string, AnswerValue>>({})
 
 const blockKey = (block: Block) => block.id || `${block.type}_${block.sequence}`
 
+const currentSession = ref(1)
+
+const totalSessions = computed(() => {
+  const arr = (form.value?.blocks || []).map(b => Number(b.session || 1))
+  return arr.length ? Math.max(...arr) : 1
+})
+
+const visibleBlocks = computed(() => {
+  if (!form.value) return []
+  const s = currentSession.value
+  return (form.value.blocks || [])
+    .filter(b => b.type !== 'session')          // ❌ ไม่แสดงเส้นคั่นในหน้าตอบ
+    .filter(b => (b.session || 1) === s)        // ✅ เฉพาะบล็อกของ session ปัจจุบัน
+})
+
 onMounted(async () => {
   const id = (route.params.id as string) || ''
   if (!id) return
@@ -241,19 +228,21 @@ onMounted(async () => {
   try {
     const res = await formStore.fetchFormById(id)
     form.value = res
-    ;(form.value?.blocks || []).forEach((b) => initAnswer(b))
+      ; (form.value?.blocks || []).forEach((b) => initAnswer(b))
   } finally {
     loading.value = false
   }
 })
 
 function initAnswer(block: Block) {
+  if (block.type === 'session') return
   const key = blockKey(block)
   if (block.type === 'checkbox') answers[key] = []
   else if (block.type === 'grid_multiple_choice') answers[key] = {} as GridSingle
-  else if (block.type === 'grid_checkbox')       answers[key] = {} as GridMulti
+  else if (block.type === 'grid_checkbox') answers[key] = {} as GridMulti
   else answers[key] = answers[key] ?? null
 }
+
 type GridLike = { rows?: unknown; choices?: unknown; columns?: unknown }
 
 const isObj = (v: unknown): v is Record<string, unknown> =>
@@ -282,7 +271,7 @@ const getCols = (block: Block | GridLike): Array<{ title: string }> => {
   const gl = block as GridLike
   const choices = Array.isArray(gl.choices) ? gl.choices : undefined
   const columns = Array.isArray(gl.columns) ? gl.columns : undefined
-  // ✅ ถ้า choices ไม่มีหรือเป็น [] ให้ fallback ไป columns
+  // ถ้า choices ไม่มีหรือเป็น [] ให้ fallback ไป columns
   return normList(choices && choices.length > 0 ? choices : columns)
 }
 const getRows = (block: Block | GridLike): Array<{ title: string }> =>
@@ -306,11 +295,6 @@ function isRequiredInvalid(block: Block): boolean {
   return v === null || v === ''
 }
 
-function validateAll(): boolean {
-  if (!form.value) return false
-  return !(form.value.blocks || []).some((b) => isRequiredInvalid(b))
-}
-
 function getGridMulti(key: string): Record<string, string[]> {
   if (!answers[key]) answers[key] = {} as GridMulti
   return answers[key] as GridMulti
@@ -332,21 +316,34 @@ function toggleGridMulti(key: string, rowTitle: string, colTitle: string, checke
   group[rowTitle] = [...(group[rowTitle] || arr)]
 }
 
-function goBack() {
-  router.back()
-}
-
 function handleSubmit() {
-  showErrors.value = true
-  if (!validateAll()) {
-    Notify.create({ type: 'negative', message: 'กรุณากรอกข้อมูลที่จำเป็นให้ครบถ้วน' })
+  // Only validate blocks in current session
+  const currentSessionBlocks = visibleBlocks.value.filter(b => b.type !== 'session')
+  const hasError = currentSessionBlocks.some(block =>
+    block.isRequired && !answers[blockKey(block)]
+  )
+
+  if (hasError) {
+    showErrors.value = true
     return
   }
-  console.log('Submitting answers for form:', form.value?.id, answers)
-  Notify.create({ type: 'positive', message: 'บันทึกคำตอบเรียบร้อย (ตัวอย่าง)' })
-  router.back()
+
+  if (currentSession.value < totalSessions.value) {
+    // Go to next session
+    currentSession.value++
+    // Scroll to top
+    window.scrollTo({ top: 0, behavior: 'smooth' })
+  } else {
+    // Submit the form
+    console.log('Form submitted:', answers)
+    // Add your form submission logic here
+  }
 }
 
+// Reset to first session when form changes
+watch(() => form.value, () => {
+  currentSession.value = 1
+}, { immediate: true })
 </script>
 
 <style scoped>
@@ -356,15 +353,22 @@ function handleSubmit() {
   border-radius: 15px;
   border: 1px solid #e0e0e0;
 }
+
 .flex-center {
   display: flex;
   justify-content: center;
   align-items: center;
 }
+
 .form_answer {
-  max-width: 1000px;
-  width: 100%;
-  margin-left: auto;
-  margin-right: auto;
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+.btnnext {
+  background-color: #2196f3;
+  color: white;
+  min-width: 100px;
 }
 </style>

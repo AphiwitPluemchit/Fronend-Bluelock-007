@@ -1,10 +1,6 @@
 <template>
-  <q-dialog
-    :model-value="modelValue"
-    @update:model-value="$emit('update:modelValue', $event)"
-    maximized
-  >
-    <q-card class="flex justify-center bg-purple-3">
+  <q-dialog :model-value="modelValue" @update:model-value="$emit('update:modelValue', $event)" maximized>
+    <q-card class="flex justify-center" style="background-color: #26a69a;">
       <div class="form_preview bg-purple-1">
         <!-- Header -->
         <q-card-section>
@@ -15,12 +11,8 @@
         <q-separator />
 
         <!-- Preview Content -->
-        <q-card-section class="scroll">
-          <div
-            v-for="(block, index) in form.blocks"
-            :key="block.id || index"
-            class="q-mb-md flex flex-center"
-          >
+        <q-card-section>
+          <div v-for="(block, index) in visibleBlocks" :key="block.id || index" class="q-mb-md flex flex-center">
             <q-card class="q-pa-md card-preview" bordered>
               <!-- Title Card -->
               <template v-if="block.type === 'title'">
@@ -33,49 +25,28 @@
               <!-- Short Answer -->
               <template v-else-if="block.type === 'short_answer'">
                 <div class="text-subtitle1 q-mb-sm">{{ block.title }}</div>
-                <q-input
-                  dense
-                  outlined
-                  readonly
-                  placeholder="คำตอบของคุณ..."
-                  class="full-width"
-                  :model-value="null"
-                />
+                <q-input dense outlined readonly placeholder="คำตอบของคุณ..." class="full-width" :model-value="null" />
               </template>
 
               <!-- Paragraph -->
               <template v-else-if="block.type === 'paragraph'">
                 <div class="text-subtitle1 q-mb-sm">{{ block.title }}</div>
-                <q-input
-                  type="textarea"
-                  dense
-                  outlined
-                  readonly
-                  placeholder="คำตอบของคุณ..."
-                  class="full-width"
-                  :model-value="null"
-                />
+                <q-input type="textarea" dense outlined readonly placeholder="คำตอบของคุณ..." class="full-width"
+                  :model-value="null" />
               </template>
 
               <!-- Multiple Choice -->
               <template v-else-if="block.type === 'multiple_choice'">
                 <div class="text-subtitle1 q-mb-sm">{{ block.title }}</div>
-                <q-option-group
-                  :options="(block.choices || []).map((c) => ({ label: c.title, value: c.title }))"
-                  type="radio"
-                  model-value="null"
-                  disable
-                />
+                <q-option-group :options="(block.choices || []).map((c) => ({ label: c.title, value: c.title }))"
+                  type="radio" model-value="null" disable />
               </template>
 
               <!-- Checkbox -->
               <template v-else-if="block.type === 'checkbox'">
                 <div class="text-subtitle1 q-mb-sm">{{ block.title }}</div>
-                <div
-                  v-for="(choice, idx) in block.choices"
-                  :key="idx"
-                  class="row items-center q-gutter-sm q-ml-sm q-my-xs"
-                >
+                <div v-for="(choice, idx) in block.choices" :key="idx"
+                  class="row items-center q-gutter-sm q-ml-sm q-my-xs">
                   <q-checkbox :model-value="false" disable />
                   <div>{{ choice.title }}</div>
                 </div>
@@ -84,15 +55,8 @@
               <!-- Dropdown -->
               <template v-else-if="block.type === 'dropdown'">
                 <div class="text-subtitle1 q-mb-sm">{{ block.title }}</div>
-                <q-select
-                  :options="block.choices.map((c) => c.title)"
-                  :model-value="null"
-                  outlined
-                  dense
-                  disable
-                  placeholder="กรุณาเลือก"
-                  class="full-width"
-                />
+                <q-select :options="block.choices.map((c) => c.title)" :model-value="null" outlined dense disable
+                  placeholder="กรุณาเลือก" class="full-width" />
               </template>
 
               <!-- Rating -->
@@ -102,17 +66,8 @@
                   <span v-if="block.isRequired" class="text-red">*</span>
                 </div>
                 <div class="row items-end q-gutter-lg q-mt-sm">
-                  <div
-                    v-for="i in block.max || 5"
-                    :key="i"
-                    class="column items-center"
-                    style="width: 50px"
-                  >
-                    <q-icon
-                      :name="block.icon || 'star'"
-                      :class="['rating-icon', block.icon || 'star']"
-                      size="28px"
-                    />
+                  <div v-for="i in block.max || 5" :key="i" class="column items-center" style="width: 50px">
+                    <q-icon :name="block.icon || 'star'" :class="['rating-icon', block.icon || 'star']" size="28px" />
                     <div class="text-caption q-mt-xs">{{ i }}</div>
                   </div>
                 </div>
@@ -164,8 +119,23 @@
         </q-card-section>
 
         <!-- Actions -->
-        <q-card-actions align="right">
-          <q-btn flat label="ปิด" color="primary" @click="emit('update:modelValue', false)" />
+        <q-card-actions align="between" class="q-px-md q-pb-md">
+          <!-- ซ้าย -->
+          <div>
+            <q-btn v-if="totalSessions > 1 && currentSession > 1" flat label="ย้อนกลับ" color="primary"
+              @click="currentSession--" />
+          </div>
+
+          <!-- ขวา -->
+          <div class="row q-gutter-sm">
+            <!-- กรณีหลาย session และยังไม่ใช่หน้าสุดท้าย -->
+            <q-btn v-if="totalSessions > 1 && currentSession < totalSessions" flat label="ถัดไป" color="primary"
+              class="btnnext" @click="currentSession++" />
+
+            <!-- ยืนยัน: กรณี session เดียว หรือ หน้าสุดท้าย -->
+            <q-btn v-if="(totalSessions === 1) || (currentSession === totalSessions)" flat label="ยืนยัน" class="btnadd"
+              @click="emit('update:modelValue', false)" />
+          </div>
         </q-card-actions>
       </div>
     </q-card>
@@ -173,17 +143,44 @@
 </template>
 
 <script setup lang="ts">
+import { ref, computed, watch } from 'vue'
 import type { PropType } from 'vue'
 import type { Form } from 'src/types/form'
-import type{ Block } from 'src/types/form';
+import type { Block } from 'src/types/form';
 
-defineProps({
+const props = defineProps({
   modelValue: Boolean,
   form: {
     type: Object as PropType<Form>,
     required: true,
   },
 })
+
+// Track current session
+const currentSession = ref(1)
+
+const totalSessions = computed(() => {
+  const sessions = (props.form.blocks ?? []).map(b => Number(b.session || 1))
+  return sessions.length ? Math.max(...sessions) : 1
+})
+
+// Filter blocks to show only current session
+const visibleBlocks = computed(() =>
+  props.form.blocks.filter(
+    b => b.type !== 'session' && (b.session || 1) === currentSession.value
+  )
+)
+
+// Reset to first session when dialog is opened
+watch(() => props.modelValue, (open) => {
+  if (open) currentSession.value = 1
+})
+
+// Declare emits
+const emit = defineEmits<{
+  (e: 'update:modelValue', value: boolean): void
+}>()
+
 // ---- types & guards ----
 type MaybeItem =
   | string
@@ -193,7 +190,7 @@ type MaybeItem =
 type GridBlockLite = Partial<Block> & {
   rows?: MaybeItem[]
   choices?: MaybeItem[]
-  columns?: MaybeItem[]   // 👈 บางบล็อกใช้คีย์นี้แทน choices
+  columns?: MaybeItem[]   // บางบล็อกใช้คีย์นี้แทน choices
 }
 
 const isObj = (v: unknown): v is Record<string, unknown> =>
@@ -225,8 +222,6 @@ const getCols = (block: GridBlockLite) =>
 
 const getRows = (block: GridBlockLite) =>
   normList(block.rows)
-
-const emit = defineEmits(['update:modelValue'])
 </script>
 
 <style scoped>
@@ -236,19 +231,32 @@ const emit = defineEmits(['update:modelValue'])
   border-radius: 15px;
   border: 1px solid #e0e0e0;
 }
+
 .flex-center {
   display: flex;
   justify-content: center;
   align-items: center;
 }
+
 .form_preview {
-  max-width: 1000px;
   width: 100%;
-  margin-left: auto;
-  margin-right: auto;
+  max-width: 800px;
+  display: flex;
+  flex-direction: column;
 }
+
+.card-preview {
+  width: 100%;
+  max-width: 700px;
+  margin: 0 auto;
+}
+
 .rating-icon.star {
   color: black;
 }
-
+.btnnext {
+  background-color: #2196f3;
+  color: white;
+  min-width: 100px;
+}
 </style>

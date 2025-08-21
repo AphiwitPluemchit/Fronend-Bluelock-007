@@ -43,15 +43,77 @@
     <!-- คำถามทั้งหมด -->
     <div class="flex justify-center q-mt-md">
       <div style="width: 1000px">
-        <q-card
-          v-for="(block, index) in formData.blocks"
-          :key="index"
-          :class="['q-pa-md q-mb-md', block.type === 'title' ? 'title-card' : 'question-card']"
-        >
-          <div v-if="block.type === 'title'">
-            <div class="row justify-between items-start q-mb-sm">
-              <q-input v-model="block.title" placeholder="หัวข้อ" dense outlined class="col-grow" />
-              <div class="q-gutter-sm q-ml-sm">
+        <template v-for="(block, index) in formData.blocks" :key="index">
+          <div v-if="block.type === 'session'" class="session-divider row items-center q-mb-lg">
+            <div class="col">
+              <q-separator />
+            </div>
+            <div class="text-center text-grey-7 q-px-md">
+              Session {{ block.session }}
+            </div>
+            <div class="col">
+              <q-separator />
+            </div>
+            <q-btn
+              flat
+              round
+              dense
+              icon="close"
+              size="sm"
+              class="q-ml-sm"
+              @click="deleteSession(block.session)"
+            />
+          </div>
+          <q-card v-else :class="['q-pa-md q-mb-md', block.type === 'title' ? 'title-card' : 'question-card']">
+            <div v-if="block.type === 'title'">
+              <div class="row justify-between items-start q-mb-sm">
+                <q-input v-model="block.title" placeholder="หัวข้อ" dense outlined class="col-grow" />
+                <div class="q-gutter-sm q-ml-sm">
+                  <q-btn
+                    flat
+                    round
+                    dense
+                    icon="content_copy"
+                    class="bg-blue text-white q-pa-xs rounded-borders"
+                    @click="copyBlock(index)"
+                  />
+                  <q-btn
+                    flat
+                    round
+                    dense
+                    icon="delete"
+                    class="bg-red text-white q-pa-xs rounded-borders"
+                    @click="removeBlock(index)"
+                  />
+                </div>
+              </div>
+              <q-input
+                v-model="block.description"
+                placeholder="คำอธิบายเพิ่มเติม (ไม่จำเป็น)"
+                dense
+                outlined
+              />
+            </div>
+
+            <div v-else>
+              <div class="row items-start q-gutter-md q-mb-md">
+                <q-input
+                  v-model="block.title"
+                  placeholder="คำถาม"
+                  outlined
+                  dense
+                  style="max-width: 610px; width: 100%"
+                />
+                <q-btn
+                  outline
+                  :icon="getIcon(block.type)"
+                  :label="getLabel(block.type)"
+                  style="border-radius: 8px; max-width: 230px; width: 100%"
+                >
+                  <q-menu>
+                    <QuestionTypeMenu @selected="(type) => onTypeSelected(index, type)" />
+                  </q-menu>
+                </q-btn>
                 <q-btn
                   flat
                   round
@@ -61,68 +123,24 @@
                   @click="copyBlock(index)"
                 />
                 <q-btn
+                  icon="delete"
                   flat
                   round
                   dense
-                  icon="delete"
                   class="bg-red text-white q-pa-xs rounded-borders"
                   @click="removeBlock(index)"
                 />
               </div>
-            </div>
-            <q-input
-              v-model="block.description"
-              placeholder="คำอธิบายเพิ่มเติม (ไม่จำเป็น)"
-              dense
-              outlined
-            />
-          </div>
 
-          <div v-else>
-            <div class="row items-start q-gutter-md q-mb-md">
-              <q-input
-                v-model="block.title"
-                placeholder="คำถาม"
-                outlined
-                dense
-                style="max-width: 610px; width: 100%"
-              />
-              <q-btn
-                outline
-                :icon="getIcon(block.type)"
-                :label="getLabel(block.type)"
-                style="border-radius: 8px; max-width: 230px; width: 100%"
-              >
-                <q-menu>
-                  <QuestionTypeMenu @selected="(type) => onTypeSelected(index, type)" />
-                </q-menu>
-              </q-btn>
-              <q-btn
+              <component
                 flat
-                round
-                dense
-                icon="content_copy"
-                class="bg-blue text-white q-pa-xs rounded-borders"
-                @click="copyBlock(index)"
-              />
-              <q-btn
-                icon="delete"
-                flat
-                round
-                dense
-                class="bg-red text-white q-pa-xs rounded-borders"
-                @click="removeBlock(index)"
+                :is="getComponent(block.type)"
+                :model-value="block"
+                @update:model-value="formData.blocks[index] = $event"
               />
             </div>
-
-            <component
-              flat
-              :is="getComponent(block.type)"
-              :model-value="block"
-              @update:model-value="formData.blocks[index] = $event"
-            />
-          </div>
-        </q-card>
+          </q-card>
+        </template>
       </div>
     </div>
 
@@ -134,6 +152,9 @@
       <q-btn round color="grey-7" icon="title" size="15px" @click="addTitleCard">
         <q-tooltip>เพิ่มหัวข้อ</q-tooltip>
       </q-btn>
+      <q-btn round color="purple-7" icon="horizontal_split" size="15px"  @click="addSessionDivider">
+        <q-tooltip>แบ่ง Session</q-tooltip>
+      </q-btn>
     </div>
 
     <!-- Preview Dialog -->
@@ -143,7 +164,7 @@
 
 <script setup lang="ts">
 import { ref, reactive, onMounted, computed, watch, onActivated } from 'vue'
-import { useQuasar } from 'quasar'
+import { useQuasar  } from 'quasar'
 import * as XLSX from 'xlsx'
 import dayjs from 'dayjs'
 import { useFormStore } from 'src/stores/forms'
@@ -239,14 +260,30 @@ const formData = reactive<Form>({
   isOrigin: true,
   blocks: [],
 })
+const currentSession = ref(1) // Track current session number
 
+// Add this new function
+function addSessionDivider() {
+  currentSession.value++
+  formData.blocks.push({
+    type: 'session',
+    session: currentSession.value,
+    id: Date.now().toString(),
+    title: '',
+    description: '',
+    isRequired: false,
+    sequence: formData.blocks.length + 1,
+    choices: [],
+    rows: []
+  })
+}
 function addQuestion() {
   formData.blocks?.push({
     title: '',
     type: 'short_answer',
     description: '',
     isRequired: false,
-    session: 1,
+    session:  currentSession.value,
     sequence: formData.blocks.length + 1,
     choices: [],
     rows: [],
@@ -259,7 +296,7 @@ function addTitleCard() {
     type: 'title',
     description: '',
     isRequired: false,
-    session: 1,
+    session:  currentSession.value,
     sequence: formData.blocks.length + 1,
     choices: [],
     rows: [],
@@ -364,10 +401,10 @@ const formId = computed<string | undefined>(
     (route.params.id as string | undefined) ||
     (route.params.formId as string | undefined), // ถ้าเคยตั้งชื่อ param ว่า formId
 )
-const isEdit = computed(() => !!formId.value) // ✅ มี id = โหมดแก้ไข
+const isEdit = computed(() => !!formId.value) // มี id = โหมดแก้ไข
 
 function buildPayload() {
-  // ✅ รวม logic จัด shape ให้ backend ทีเดียว
+  // รวม logic จัด shape ให้ backend ทีเดียว
   const blocks = formData.blocks.map((block, index) => ({
     title: block.title,
     type: block.type,
@@ -398,7 +435,7 @@ async function saveForm() {
     const payload = buildPayload()
 
     if (isEdit.value && formId.value) {
-      // ✅ UPDATE
+      // UPDATE
       const updated = await formStore.updateForm(formId.value, payload)
       if (!updated) throw new Error('Update failed')
       $q.notify({ type: 'positive', message: 'อัปเดตฟอร์มเรียบร้อยแล้ว' })
@@ -442,11 +479,45 @@ watch(formId, (newId, oldId) => {
   if (newId && newId !== oldId) void loadFormIfAny(newId)
 })
 
-// ถ้าใช้ <keep-alive>
 onActivated(() => loadFormIfAny(formId.value))
+
+function deleteSession(sessionNumber: number) {
+  // Find the index of the session block
+  const sessionIndex = formData.blocks.findIndex(b => b.type === 'session' && b.session === sessionNumber);
+  if (sessionIndex === -1) return;
+
+  // Find the next session or end of array
+  let nextSessionIndex = formData.blocks.findIndex((b, i) => 
+    i > sessionIndex && b.type === 'session');
+  
+  if (nextSessionIndex === -1) {
+    nextSessionIndex = formData.blocks.length;
+  }
+
+  // Remove all blocks in this session
+  formData.blocks.splice(sessionIndex, nextSessionIndex - sessionIndex);
+
+  // Update session numbers for remaining sessions
+  formData.blocks.forEach(block => {
+    if (block.type === 'session' && block.session > sessionNumber) {
+      block.session--;
+    }
+  });
+
+  // Update current session number if needed
+  if (currentSession.value >= sessionNumber) {
+    currentSession.value--;
+  }
+}
 </script>
 
 <style scoped>
+.session-divider {
+  display: flex;
+  align-items: center;
+  margin: 40px 0;
+  color: #666;
+}
 .export-btn {
   height: 40px;
   min-width: 70px;
