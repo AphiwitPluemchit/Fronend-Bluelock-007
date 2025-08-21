@@ -54,13 +54,22 @@ const authStore = useAuthStore()
 const leftDrawerOpen = ref(false)
 
 const linksList = [
-  { title: 'ตารางกิจกรรม', icon: 'event', link: '/Student/ActivitiesCalendar' },
-  { title: 'กิจกรรมทั้งหมด', icon: 'build', link: '/Student/ActivityTablePage' },
-  { title: 'กิจกรรมของฉัน', icon: 'assignment_ind', link: '/Student/MyActivitiesPage' },
-  { title: 'บันทึกชั่วโมงอบรม', icon: 'history', link: '/Student/RecordPage' },
-  { title: 'ใบประกาศนียบัตร', icon: 'school', link: '/Student/CertificatePage' },
+  { title: 'ตารางกิจกรรม', icon: 'calendar_today', link: '/Student/ActivitiesCalendar' },
+  { title: 'กิจกรรมทั้งหมด', icon: 'dashboard', link: '/Student/ActivityTablePage' },
+  { title: 'กิจกรรมของฉัน', icon: 'person_outline', link: '/Student/MyActivitiesPage' },
+  { title: 'บันทึกชั่วโมงอบรม', icon: 'schedule', link: '/Student/RecordPage' },
+  { title: 'ใบประกาศนียบัตร', icon: 'workspace_premium', link: '/Student/CertificatePage' },
   { title: 'หัวข้ออบรมออนไลน์', icon: 'computer', link: '/Student/OnlineCoursesPage' },
 ]
+
+// const linksList = [
+//   { title: 'ตารางกิจกรรม', icon: 'calendar_today', link: '/Student/ActivitiesCalendar' },
+//   { title: 'กิจกรรมทั้งหมด', icon: 'grid_view', link: '/Student/ActivityTablePage' },
+//   { title: 'กิจกรรมของฉัน', icon: 'person_outline', link: '/Student/MyActivitiesPage' },
+//   { title: 'บันทึกชั่วโมงอบรม', icon: 'edit_note', link: '/Student/RecordPage' },
+//   { title: 'ใบประกาศนียบัตร', icon: 'workspace_premium', link: '/Student/CertificatePage' },
+//   { title: 'หัวข้ออบรมออนไลน์', icon: 'laptop_chromebook', link: '/Student/OnlineCoursesPage' },
+// ]
 
 const drawerBehavior = computed(() => {
   return $q.screen.width < 1100 ? 'mobile' : 'desktop' // ถ้าหน้าจอเล็กกว่า lg (<1100px) ใช้ mobile

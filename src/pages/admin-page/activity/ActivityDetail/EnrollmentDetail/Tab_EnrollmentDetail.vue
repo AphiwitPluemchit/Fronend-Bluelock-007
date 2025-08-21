@@ -36,19 +36,25 @@ const majorList = [
 ]
 
 const registrationRows = computed(() => {
-  return (enrollmentSummary.value?.activityItemSums ?? []).map((item, index) => {
-    const activity = activityDetail.value?.activityItems?.[index]
+  const itemSums = enrollmentSummary.value?.activityItemSums ?? []
+  const activityItems = activityDetail.value?.activityItems ?? []
+
+  return itemSums.map((sum) => {
+    const matchedItem = activityItems.find((it) => it?.name === sum.activityItemName) ?? null
+    const max = matchedItem?.maxParticipants ?? 0
+    const enrolled = (sum.registeredByMajor ?? []).reduce((acc, cur) => acc + cur.count, 0)
+
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const baseRow: Record<string, any> = {
-      activity: activity?.name ?? '-',
-      max: activity?.maxParticipants ?? 0,
-      enrolled: activity?.enrollmentCount ?? 0,
-      remaining: (activity?.maxParticipants ?? 0) - (activity?.enrollmentCount ?? 0),
+      activity: sum.activityItemName || matchedItem?.name || '-',
+      max,
+      enrolled,
+      remaining: Math.max(max - enrolled, 0),
     }
 
     majorList.forEach((m) => {
       baseRow[m.majorName] =
-        item.registeredByMajor?.find((x) => x.majorName === m.majorName)?.count || 0
+        sum.registeredByMajor?.find((x) => x.majorName === m.majorName)?.count || 0
     })
 
     return baseRow

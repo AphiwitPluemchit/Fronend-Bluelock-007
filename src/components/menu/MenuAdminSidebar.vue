@@ -83,8 +83,8 @@ const authStore = useAuthStore()
 const leftDrawerOpen = ref(false)
 
 const linksList = [
-  { title: 'ตารางกิจกรรม', icon: 'event', link: '/Admin/ActivitiesCalendar' },
-  { title: 'จัดการกิจกรรม', icon: 'description', link: '/Admin/ActivitiesManagement' },
+  { title: 'ตารางกิจกรรม', icon: 'calendar_today', link: '/Admin/ActivitiesCalendar' },
+  { title: 'จัดการกิจกรรม', icon: 'edit_calendar', link: '/Admin/ActivitiesManagement' },
   {
     title: 'จัดการนิสิต',
     icon: 'people',
@@ -97,14 +97,39 @@ const linksList = [
   { title: 'รายงานข้อมูล', icon: 'assessment', link: '/Admin/Report' },
   {
     title: 'จัดการใบประกาศนียบัตร',
-    icon: 'school',
+    icon: 'workspace_premium',
     children: [
       { title: 'จัดการหัวข้อการอบรม', link: '/Admin/CourseTablePage' },
       { title: 'รายการใบประกาศนียบัตร', link: '/Admin/ManageCertificateTable' },
     ],
   },
-  { title: 'จัดการฟอร์ม', icon: 'description', link: '/Admin/Forms' },
+  { title: 'จัดการฟอร์ม', icon: 'edit_document', link: '/Admin/Forms' },
 ]
+
+// const linksList = [
+//   { title: 'ตารางกิจกรรม', icon: 'event', link: '/Admin/ActivitiesCalendar' },
+//   { title: 'จัดการกิจกรรม', icon: 'event_note', link: '/Admin/ActivitiesManagement' },
+//   {
+//     title: 'จัดการนิสิต',
+//     icon: 'people',
+//     children: [
+//       { title: 'จัดการข้อมูลนิสิต', link: '/Admin/StudentManagement' },
+//       { title: 'จัดเก็บข้อมูลนิสิต', link: '/Admin/StudentStorage' },
+//       { title: 'จัดการฝึกงานนิสิต' , link: '/Admin/StudentInternship'}
+//     ],
+//   },
+//   { title: 'รายงานข้อมูล', icon: 'assessment', link: '/Admin/Report' },
+//   {
+//     title: 'จัดการใบประกาศนียบัตร',
+//     icon: 'workspace_premium',
+//     children: [
+//       { title: 'จัดการหัวข้อการอบรม', link: '/Admin/CourseTablePage' },
+//       { title: 'รายการใบประกาศนียบัตร', link: '/Admin/ManageCertificateTable' },
+//     ],
+//   },
+//   { title: 'จัดการฟอร์ม', icon: 'description', link: '/Admin/Forms' },
+// ]
+
 
 const drawerBehavior = computed(() => {
   return $q.screen.width < 1100 ? 'mobile' : 'desktop' // ถ้าหน้าจอเล็กกว่า lg (<1100px) ใช้ mobile

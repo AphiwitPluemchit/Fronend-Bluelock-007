@@ -198,7 +198,7 @@ function setCourseFilter() {
     <!-- ปุ่มยืนยัน -->
     <div class="row justify-end q-mt-md">
       <q-btn
-        label="ยืนยัน"
+        label="บันทึก"
         class="btnconfirm"
         :disable="!selectedFile || !selectedSource || !selectedTopic"
         @click="uploadFile"
