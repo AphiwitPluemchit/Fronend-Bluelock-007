@@ -136,7 +136,7 @@ onMounted(() => {
       <!-- Empty State -->
       <div v-if="filteredCourses.length === 0" class="row justify-center q-pa-lg">
         <div class="text-center">
-          <q-icon name="school" size="100px" color="grey-4" />
+          <q-icon name="workspace_premium" size="100px" color="grey-4" />
           <div class="text-h6 q-mt-md text-grey-6">
             {{ searchQuery.trim() || selectedType.length > 0 ? 'ไม่พบคอร์สที่ตรงกับเงื่อนไข' : 'ยังไม่มีคอร์สในระบบ' }}
           </div>

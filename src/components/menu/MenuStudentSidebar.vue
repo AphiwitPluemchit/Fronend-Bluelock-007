@@ -55,7 +55,7 @@ const leftDrawerOpen = ref(false)
 
 const linksList = [
   { title: 'ตารางกิจกรรม', icon: 'calendar_today', link: '/Student/ActivitiesCalendar' },
-  { title: 'กิจกรรมทั้งหมด', icon: 'dashboard', link: '/Student/ActivityTablePage' },
+  { title: 'กิจกรรมทั้งหมด', icon: 'today', link: '/Student/ActivityTablePage' },
   { title: 'กิจกรรมของฉัน', icon: 'person_outline', link: '/Student/MyActivitiesPage' },
   { title: 'บันทึกชั่วโมงอบรม', icon: 'schedule', link: '/Student/RecordPage' },
   { title: 'ใบประกาศนียบัตร', icon: 'workspace_premium', link: '/Student/CertificatePage' },

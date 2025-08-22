@@ -41,9 +41,9 @@ const handleCardClick = () => {
         <div class="oc-type q-mb-sm">
           <ActivityType :skill="skillType" />
         </div>
-        <div class="text-subtitle2 q-mb-sm">รายละเอียด : {{ description ?? '-' }}</div>
-        <div class="text-subtitle2 q-mb-sm">แหล่งที่มา : {{ platformType }}</div>
-        <div class="text-subtitle2 q-mb-sm">จำนวนชั่วโมง : {{ hours }} ชั่วโมง</div>
+        <!-- <div class="text-subtitle2 q-mb-sm">รายละเอียด : {{ description ?? '-' }}</div> -->
+        <div class="text-subtitle2 q-mb-sm"> <q-icon name="domain" class="q-mb-xs" /> แหล่งที่มา : {{ platformType }}</div>
+        <div class="text-subtitle2 q-mb-sm"><q-icon name="schedule" class="q-mb-xs" /> จำนวนชั่วโมง : {{ hours }} ชั่วโมง</div>
       </div>
 
       <q-btn

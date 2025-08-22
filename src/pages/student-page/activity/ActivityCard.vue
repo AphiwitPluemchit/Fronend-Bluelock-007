@@ -68,12 +68,12 @@ function enrollmentSummary(activityItems: ActivityItem[]) {
         </div>
 
         <!-- รายละเอียดกิจกรรม -->
-        <div class="activity-content">
-          <div class="text-h6 text-bold ellipsis-2-lines">
+        <div class="activity-content ">
+          <div class="text-h6 text-bold ellipsis-2-lines q-mb-sm">
             {{ activity.name }}
           </div>
 
-          <div class="q-mt-xs">
+          <div class="q-mb-sm">
             <ActivityType
               v-if="activity.skill === 'hard' || activity.skill === 'soft'"
               :skill="activity.skill === 'hard' ? 'hardSkill' : 'softSkill'"
@@ -81,7 +81,7 @@ function enrollmentSummary(activityItems: ActivityItem[]) {
           </div>
 
           <div class="text-subtitle2 q-mt-sm">
-            <q-icon name="event" class="q-mb-xs" />
+            <q-icon name="today" class="q-mb-xs" />
             วันที่จัด : {{ getActivityDate(activity.activityItems) }}
           </div>
           <div class="text-subtitle2 q-mt-sm">

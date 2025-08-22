@@ -69,10 +69,10 @@ const getActivityRooms = (activityItems: ActivityItem[] | null | undefined): str
       <!-- ข้อมูลกิจกรรม -->
       <div class="col-12 col-sm-8 column justify-between">
         <div>
-          <div class="text-h6 text-bold activity-name">
+          <div class="text-h6 text-bold activity-name q-mb-sm">
             {{ myActivity.name }}
           </div>
-          <div class="side top q-mt-xs">
+          <div class="side top q-mb-sm">
             <ActivityType
               v-if="myActivity.skill === 'hard' || myActivity.skill === 'soft'"
               :skill="myActivity.skill === 'hard' ? 'hardSkill' : 'softSkill'"
@@ -81,7 +81,7 @@ const getActivityRooms = (activityItems: ActivityItem[] | null | undefined): str
         </div>
 
         <div class="text-body2 q-mt-sm">
-          <q-icon name="event" class="q-mb-xs" />
+          <q-icon name="today" class="q-mb-xs" />
           {{ getActivitydates(myActivity.activityItems) }}
         </div>
         <div class="text-body2 q-mt-sm">

@@ -130,7 +130,7 @@ onMounted(async () => {
     <!-- Empty State -->
     <div v-if="filteredActivitys.length === 0" class="row justify-center q-pa-lg">
       <div class="text-center">
-        <q-icon name="event" size="100px" color="grey-4" />
+        <q-icon name="person_outline" size="100px" color="grey-4" />
         <div class="text-h6 q-mt-md text-grey-6">
           {{ (searchQuery.trim() || selectedFilters.categoryActivity.length > 0) ? 'ไม่พบกิจกรรมที่ตรงกับเงื่อนไข' : 'ยังไม่มีกิจกรรมที่ลงทะเบียน' }}
         </div>
