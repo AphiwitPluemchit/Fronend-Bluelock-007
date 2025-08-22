@@ -43,6 +43,14 @@
               <template v-else-if="col.name === 'actions'">
                 <q-icon
                   clickable
+                  name="visibility"
+                  class="bg-secondary text-white q-pa-xs rounded-borders q-mr-sm"
+                  @click="openPreview(props.row)"
+                >
+                  <q-tooltip>ดูตัวอย่าง</q-tooltip>
+                </q-icon>
+                <q-icon
+                  clickable
                   name="edit"
                   class="bg-primary text-white q-pa-xs rounded-borders q-mr-sm"
                   @click="editForm(props.row)"
@@ -60,8 +68,8 @@
                 <q-icon
                   clickable
                   name="quiz"
-                  class="bg-green text-white q-pa-xs rounded-borders q-mr-sm"
-                  @click="previewForm(props.row)"
+                  class="bg-green text-white q-pa-xs rounded-borders"
+                  @click="startForm(props.row)"
                 >
                   <q-tooltip>ทำแบบประเมิน</q-tooltip>
                 </q-icon>
@@ -75,12 +83,21 @@
         </template>
       </q-table>
     </div>
+    
+    <!-- Preview Dialog -->
+    <PreviewDialog
+      v-model="showPreviewDialog"
+      :form="selectedForm"
+      v-if="selectedForm"
+    />
+    
     <RemoveFormDailog v-model="showRemoveDialog" @confirm="deleteForm(pendingDeleteId)" />
   </q-page>
 </template>
 
 <script setup lang="ts">
 import RemoveFormDailog from './RemoveFormDailog.vue'
+import PreviewDialog from './PreviewDialog.vue'
 import { useFormStore } from 'src/stores/forms'
 import type { Form } from 'src/types/form'
 import { computed, onMounted, ref } from 'vue'
@@ -90,14 +107,20 @@ import { useQuasar } from 'quasar'
 const formStore = useFormStore()
 const router = useRouter()
 const $q = useQuasar()
+
 const showRemoveDialog = ref(false)
+const showPreviewDialog = ref(false)
 const pendingDeleteId = ref<string | null>(null)
+const selectedForm = ref<Form | null>(null)
+
 const createForm = async () => {
   await router.push('/Admin/forms/builder')
 }
+
 const filteredForms = computed<Form[]>(() =>
   (formStore.forms ?? []).filter((f) => f?.isOrigin === true),
 )
+
 const columns = computed(() => [
   {
     name: 'index',
@@ -121,6 +144,20 @@ const columns = computed(() => [
     sortable: false,
   },
 ])
+
+const openPreview = (form: Form) => {
+  selectedForm.value = form
+  showPreviewDialog.value = true
+}
+
+const editForm = async (form: Form) => {
+  await router.push(`/Admin/forms/builder?id=${form.id}`)
+}
+
+const startForm = async (form: Form) => {
+  await router.push(`/Admin/forms/preview/${form.id}`)
+}
+
 onMounted(async () => {
   await formStore.fetchForms()
 })
@@ -143,12 +180,6 @@ async function deleteForm(id: string | null) {
     showRemoveDialog.value = false
     pendingDeleteId.value = null
   }
-}
-const editForm = async (form: Form) => {
-  await router.push(`/Admin/forms/builder?id=${form.id}`)
-}
-const previewForm = async (form: Form) => {
-  await router.push(`/Admin/forms/preview/${form.id}`)
 }
 </script>
 

@@ -293,13 +293,7 @@ const getRows = (block: GridBlockLite) => normList(block.rows)
 }
 
 .form_preview {
-  max-width: 800px;
-  margin: 0 auto;
-  padding: 20px;
-}
-
-.card-preview {
-  max-width: 800px;
+  max-width: 1000px;
   margin: 0 auto;
   padding: 20px;
 }
@@ -307,15 +301,5 @@ const getRows = (block: GridBlockLite) => normList(block.rows)
 .rating-icon.star {
   color: black;
 }
-/* .btnnext {
-  background-color: #2196f3;
-  color: white;
-  min-width: 100px;
-} */
 
-/* .btnback {
-  background-color: #e1e1e1;
-  color: rgb(0, 0, 0);
-  min-width: 100px;
-} */
 </style>

@@ -452,16 +452,11 @@ async function saveForm() {
 }
 
 async function loadFormIfAny(id?: string) {
-  console.log('[Builder] incoming id =', id, 'from', {
-    query: route.query,
-    params: route.params,
-  })
   if (!id) {
     console.log('[Builder] create mode (no id)')
     return
   }
   const form = await formStore.fetchFormById(id)
-  console.log('[Builder] fetched form =', form)
   if (form) {
     formData.title = form.title
     formData.description = form.description
@@ -482,11 +477,9 @@ watch(formId, (newId, oldId) => {
 onActivated(() => loadFormIfAny(formId.value))
 
 function deleteSession(sessionNumber: number) {
-  // Find the index of the session block
   const sessionIndex = formData.blocks.findIndex(b => b.type === 'session' && b.session === sessionNumber);
   if (sessionIndex === -1) return;
 
-  // Find the next session or end of array
   let nextSessionIndex = formData.blocks.findIndex((b, i) => 
     i > sessionIndex && b.type === 'session');
   
@@ -494,17 +487,14 @@ function deleteSession(sessionNumber: number) {
     nextSessionIndex = formData.blocks.length;
   }
 
-  // Remove all blocks in this session
   formData.blocks.splice(sessionIndex, nextSessionIndex - sessionIndex);
 
-  // Update session numbers for remaining sessions
   formData.blocks.forEach(block => {
     if (block.type === 'session' && block.session > sessionNumber) {
       block.session--;
     }
   });
 
-  // Update current session number if needed
   if (currentSession.value >= sessionNumber) {
     currentSession.value--;
   }
