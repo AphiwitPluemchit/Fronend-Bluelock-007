@@ -3,6 +3,7 @@ import { ref, computed, onMounted, watch } from 'vue'
 import { useStudentStore } from 'src/stores/student'
 import AppBreadcrumbs from 'src/components/AppBreadcrumbs.vue'
 import type { Student } from 'src/types/student'
+import { useQuasar } from 'quasar'
 
 const breadcrumbs = ref({
   previousPage: { title: 'จัดเก็บข้อมูลนิสิต', path: '/Admin/StudentStorage' },
@@ -14,6 +15,7 @@ const breadcrumbs = ref({
 })
 const show = ref(false)
 const studentStore = useStudentStore()
+const $q = useQuasar()
 interface SelectedFilters {
   studentCode: string
   major: string
@@ -123,6 +125,27 @@ const saveStudents = async () => {
   }
 }
 
+// --- confirm dialog before save ---
+const confirmSave = () => {
+  $q.dialog({
+    title: 'ยืนยันการทำรายการ',
+    message: 'ต้องการจัดเก็บนิสิตหรือไม่?',
+    cancel: {
+      label: 'ยกเลิก',
+      color: "red",
+    },
+    ok: {
+      label: 'ยืนยัน',
+      color: 'primary',
+    },
+    persistent: true,
+    class: 'my-dialog',     // << ใส่คลาสที่นี่
+    seamless: false         // ถ้าอยากให้มี backdrop ปกติ
+  }).onOk(() => {
+    void saveStudents()
+  })
+}
+
 const columns = [
   { name: 'check', label: '', field: 'check', align: 'left' as const },
   { name: 'index', label: 'ลำดับ', field: 'index', align: 'left' as const },
@@ -178,6 +201,7 @@ onMounted(async () => {
   }
   await data()
   show.value = true
+
 })
 </script>
 
@@ -361,7 +385,8 @@ onMounted(async () => {
           color="primary"
           label="จัดเก็บนิสิต"
           class="btnadd"
-          @click="saveStudents"
+        	@click="confirmSave"
+          :disable="selectedStudents.length === 0"
         />
       </div>
     </section>

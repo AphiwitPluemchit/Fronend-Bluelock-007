@@ -3,9 +3,11 @@ import { ref, computed, onMounted, watch } from 'vue'
 import { useStudentStore } from 'src/stores/student'
 import AppBreadcrumbs from 'src/components/AppBreadcrumbs.vue'
 import type { Student } from 'src/types/student'
+import { useQuasar } from 'quasar'
 
 // --- state ---
 const show = ref(false)
+const $q = useQuasar()
 const studentStore = useStudentStore()
 
 const breadcrumbs = ref({
@@ -148,6 +150,27 @@ const saveStudents = async () => {
   await studentStore.updateStudentStatusByIDs(studentIds, 3)
   selectedStudents.value = []
   selectAll.value = false
+}
+
+// --- confirm dialog before save ---
+const confirmSave = () => {
+  $q.dialog({
+    title: 'ยืนยันการทำรายการ',
+    message: 'ต้องการเพิ่มนิสิตฝึกงานหรือไม่?',
+    cancel: {
+      label: 'ยกเลิก',
+      color: 'red',
+    },
+    ok: {
+      label: 'ยืนยัน',
+      color: 'primary',
+    },
+    persistent: true,
+    class: 'my-dialog',     // << ใส่คลาสที่นี่
+    seamless: false         // ถ้าอยากให้มี backdrop ปกติ
+  }).onOk(() => {
+    void saveStudents()
+  })
 }
 
 // --- onMounted ---
@@ -348,9 +371,10 @@ onMounted(async () => {
           outlined
           icon="save"
           color="primary"
-          label="จัดเก็บนิสิต"
+          label="เพิ่มนิสิตฝึกงาน"
           class="btnadd"
-          @click="saveStudents"
+          @click="confirmSave"
+          :disable="selectedStudents.length === 0"
         />
       </div>
     </section>

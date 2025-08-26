@@ -304,7 +304,43 @@ $dark-page: #121212;
 .q-tab__label {
   font-size: 18px !important; /* ขนาดตัวหนังสือ */
 }
+/* พื้นหลังมืด/backdrop */
+.my-dialog .q-dialog__backdrop {
+  background: rgba(0, 0, 0, 0.6);
+}
 
+/* กล่องการ์ดด้านใน (เนื้อ dialog) */
+.my-dialog .q-card {
+  border-radius: 16px;
+  box-shadow: 0 10px 32px rgba(0, 0, 0, 0.2);
+  min-width: 360px;
+  max-width: 520px;
+}
+
+/* ส่วนหัว (title) */
+.my-dialog .q-card__section--vert:first-child {
+  font-weight: 700;
+  font-size: 18px;
+  color: #1f2d3d;
+  padding-bottom: 8px;
+}
+
+/* เนื้อหา (message) */
+.my-dialog .q-card__section--vert:not(:first-child) {
+  color: #4a5568;
+}
+
+/* แถบปุ่ม */
+.my-dialog .q-card__actions {
+  padding: 12px 16px;
+  border-top: 1px solid #e5e7eb;
+  justify-content: flex-end;
+}
+
+/* ปรับปุ่ม OK/Cancel ถ้าต้องการเพิ่มเติม */
+.my-dialog .q-btn--outline {
+  border-color: #cbd5e1;
+}
 
 //สีสถานะกิจกรรม
 .status-open {

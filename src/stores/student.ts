@@ -34,7 +34,7 @@ export const useStudentStore = defineStore('student', () => {
     skill: [],
     major: [],
     studentYear: [],
-    studentStatus: ['1','2','3','4'],
+    studentStatus: [],
   })
 
   // ฟังก์ชันสร้างนิสิตใหม่ (จากไฟล์ Excel)

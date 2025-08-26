@@ -37,7 +37,6 @@ const columns = [
     field: 'hardSkill',
     align: 'center' as const,
   },
-  { name: 'status', label: 'สถานะ', field: 'status', align: 'center' as const },
 ]
 
 // ใช้ store แทนการสร้างฟังก์ชันใหม่

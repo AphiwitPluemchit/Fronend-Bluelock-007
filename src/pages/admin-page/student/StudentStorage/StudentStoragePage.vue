@@ -27,7 +27,6 @@ async function onRequest(requestProp: {
 
 const applyFilters = async (selectedFilters: SelectedFilters) => {
   studentStore.query.major = selectedFilters.major ?? []
-  studentStore.query.studentStatus = ['0']
 
   await data()
 }
@@ -114,7 +113,7 @@ onMounted(async () => {
         label="จัดเก็บนิสิต"
         @click="goToConfirmStudentDataPage"
         class="btnadd"
-        style="width: 130px;"
+        style="width: 130px"
       >
       </q-btn>
     </div>
@@ -126,7 +125,7 @@ onMounted(async () => {
         <q-input
           dense
           outlined
-          v-model="query.search"
+          v-model="studentStore.query.search"
           label="ค้นหา ชื่อนิสิต"
           class="q-mr-sm searchbox"
           :style="{ border: 'none' }"
