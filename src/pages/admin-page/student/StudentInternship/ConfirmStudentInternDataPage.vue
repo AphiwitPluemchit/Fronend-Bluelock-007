@@ -2,6 +2,7 @@
 import { ref, computed, onMounted, watch } from 'vue'
 import { useStudentStore } from 'src/stores/student'
 import AppBreadcrumbs from 'src/components/AppBreadcrumbs.vue'
+import AlertDialog from 'src/components/Dialog/AlertDialog.vue'
 import type { Student } from 'src/types/student'
 import { useQuasar } from 'quasar'
 
@@ -9,6 +10,17 @@ import { useQuasar } from 'quasar'
 const show = ref(false)
 const $q = useQuasar()
 const studentStore = useStudentStore()
+
+// ตัวแปรสำหรับ AlertDialog
+const alertDialogModel = ref(false)
+const alertDialogTitle = ref('')
+const alertDialogMessage = ref('')
+
+function showAlertDialog(title: string, message: string) {
+  alertDialogTitle.value = title
+  alertDialogMessage.value = message
+  alertDialogModel.value = true
+}
 
 const breadcrumbs = ref({
   previousPage: { title: 'จัดการฝึกงานนิสิต', path: '/Admin/StudentInternship' },
@@ -143,13 +155,19 @@ watch(selectedStudents, (codes) => {
 
 // --- save selected students ---
 const saveStudents = async () => {
-  const studentIds = selectedStudents.value
-    .map((code) => studentStore.students.find((s) => s.code === code)?.id)
-    .filter(Boolean) as string[]
-  if (studentIds.length === 0) return
-  await studentStore.updateStudentStatusByIDs(studentIds, 3)
-  selectedStudents.value = []
-  selectAll.value = false
+  try {
+    const studentIds = selectedStudents.value
+      .map((code) => studentStore.students.find((s) => s.code === code)?.id)
+      .filter(Boolean) as string[]
+    if (studentIds.length === 0) return
+    await studentStore.updateStudentStatusByIDs(studentIds, 3)
+    selectedStudents.value = []
+    selectAll.value = false
+    showAlertDialog('สำเร็จ', '✅ เพิ่มนิสิตฝึกงานสำเร็จ!')
+  } catch (error) {
+    console.error('เพิ่มนิสิตฝึกงานล้มเหลว:', error)
+    showAlertDialog('ข้อผิดพลาด', '❌ เกิดข้อผิดพลาดในการเพิ่มนิสิตฝึกงาน')
+  }
 }
 
 // --- confirm dialog before save ---
@@ -378,6 +396,14 @@ onMounted(async () => {
         />
       </div>
     </section>
+
+    <!-- AlertDialog -->
+    <AlertDialog
+      :model-value="alertDialogModel"
+      :title="alertDialogTitle"
+      :message="alertDialogMessage"
+      @update:modelValue="(val) => (alertDialogModel = val)"
+    />
   </q-page>
 </template>
 

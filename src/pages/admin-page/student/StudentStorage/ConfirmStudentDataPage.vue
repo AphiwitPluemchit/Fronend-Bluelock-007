@@ -2,6 +2,7 @@
 import { ref, computed, onMounted, watch } from 'vue'
 import { useStudentStore } from 'src/stores/student'
 import AppBreadcrumbs from 'src/components/AppBreadcrumbs.vue'
+import AlertDialog from 'src/components/Dialog/AlertDialog.vue'
 import type { Student } from 'src/types/student'
 import { useQuasar } from 'quasar'
 
@@ -16,6 +17,18 @@ const breadcrumbs = ref({
 const show = ref(false)
 const studentStore = useStudentStore()
 const $q = useQuasar()
+
+// ตัวแปรสำหรับ AlertDialog
+const alertDialogModel = ref(false)
+const alertDialogTitle = ref('')
+const alertDialogMessage = ref('')
+
+function showAlertDialog(title: string, message: string) {
+  alertDialogTitle.value = title
+  alertDialogMessage.value = message
+  alertDialogModel.value = true
+}
+
 interface SelectedFilters {
   studentCode: string
   major: string
@@ -120,8 +133,10 @@ const saveStudents = async () => {
     // เคลียร์การเลือกหลังจากสำเร็จ
     selectedStudents.value = []
     selectAll.value = false
+    showAlertDialog('สำเร็จ', '✅ จัดเก็บนิสิตสำเร็จ!')
   } catch (error) {
     console.error('จัดเก็บนิสิตล้มเหลว:', error)
+    showAlertDialog('ข้อผิดพลาด', '❌ เกิดข้อผิดพลาดในการจัดเก็บนิสิต')
   }
 }
 
@@ -390,6 +405,14 @@ onMounted(async () => {
         />
       </div>
     </section>
+
+    <!-- AlertDialog -->
+    <AlertDialog
+      :model-value="alertDialogModel"
+      :title="alertDialogTitle"
+      :message="alertDialogMessage"
+      @update:modelValue="(val) => (alertDialogModel = val)"
+    />
   </q-page>
 </template>
 
