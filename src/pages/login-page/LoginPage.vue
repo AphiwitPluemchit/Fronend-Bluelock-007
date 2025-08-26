@@ -39,6 +39,7 @@
                   class="q-mb-md login-input"
                   :rules="[(val) => !!val]"
                   aria-label="Email"
+                  data-testid="login-email"
                 >
                   <template v-slot:prepend>
                     <q-icon name="email" color="primary" />
@@ -55,6 +56,7 @@
                   class="q-mb-lg login-input"
                   :rules="[(val) => !!val]"
                   aria-label="Password"
+                  data-testid="login-password"
                 >
                   <template v-slot:prepend>
                     <q-icon name="lock" color="primary" />
@@ -77,6 +79,7 @@
                   no-caps
                   :loading="isLoggingIn"
                   :disable="isLoggingIn"
+                  data-testid="login-submit"
                 />
 
                 <div class="text-right">
@@ -88,6 +91,7 @@
                     @click="isResetPassword = true"
                     class="forgot-password-btn"
                     no-caps
+                    data-testid="login-forgot-password"
                   />
                 </div>
               </q-form>
@@ -124,6 +128,7 @@
                 dense
                 class="q-mb-md login-input"
                 aria-label="Email"
+                data-testid="login-email"
               >
                 <template v-slot:prepend>
                   <q-icon name="email" color="primary" />
@@ -140,6 +145,7 @@
                 class="q-mb-lg login-input"
                 :rules="[(val) => !!val]"
                 aria-label="Password"
+                data-testid="login-password"
               >
                 <template v-slot:prepend>
                   <q-icon name="lock" color="primary" />
@@ -162,6 +168,7 @@
                 no-caps
                 :loading="isLoggingIn"
                 :disable="isLoggingIn"
+                data-testid="login-submit"
               />
 
               <div class="text-right">
@@ -516,4 +523,5 @@ const handleLogin = async () => {
     display: flex !important;
   }
 }
+.q-field__bottom--animated { transition: none !important; }
 </style>
