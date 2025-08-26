@@ -25,7 +25,10 @@
           <q-card class="q-pa-md card-preview">
             <!-- Title Card -->
             <template v-if="block.type === 'title'">
-              <div class="text-h6">{{ block.title }}</div>
+              <div class="text-h6">
+                {{ block.title }}
+                <span v-if="block.isRequired" class="text-red" style="margin-left: 2px">*</span>
+              </div>
               <div v-if="block.description" class="text-subtitle2 text-grey-7 q-mt-sm">
                 {{ block.description }}
               </div>
@@ -33,7 +36,10 @@
 
             <!-- Short Answer -->
             <template v-else-if="block.type === 'short_answer'">
-              <div class="text-subtitle1 q-mb-sm">{{ block.title }}</div>
+              <div class="text-subtitle1 q-mb-sm">
+                {{ block.title }}
+                <span v-if="block.isRequired" class="text-red" style="margin-left: 2px">*</span>
+              </div>
               <q-input
                 dense
                 outlined
@@ -46,7 +52,10 @@
 
             <!-- Paragraph -->
             <template v-else-if="block.type === 'paragraph'">
-              <div class="text-subtitle1 q-mb-sm">{{ block.title }}</div>
+              <div class="text-subtitle1 q-mb-sm">
+                {{ block.title }}
+                <span v-if="block.isRequired" class="text-red" style="margin-left: 2px">*</span>
+              </div>
               <q-input
                 type="textarea"
                 dense
@@ -60,7 +69,10 @@
 
             <!-- Multiple Choice -->
             <template v-else-if="block.type === 'multiple_choice'">
-              <div class="text-subtitle1 q-mb-sm">{{ block.title }}</div>
+              <div class="text-subtitle1 q-mb-sm">
+                {{ block.title }}
+                <span v-if="block.isRequired" class="text-red" style="margin-left: 2px">*</span>
+              </div>
               <q-option-group
                 :options="(block.choices || []).map((c) => ({ label: c.title, value: c.title }))"
                 type="radio"
@@ -71,7 +83,10 @@
 
             <!-- Checkbox -->
             <template v-else-if="block.type === 'checkbox'">
-              <div class="text-subtitle1 q-mb-sm">{{ block.title }}</div>
+              <div class="text-subtitle1 q-mb-sm">
+                {{ block.title }}
+                <span v-if="block.isRequired" class="text-red" style="margin-left: 2px">*</span>
+              </div>
               <div
                 v-for="(choice, idx) in block.choices"
                 :key="idx"
@@ -84,7 +99,10 @@
 
             <!-- Dropdown -->
             <template v-else-if="block.type === 'dropdown'">
-              <div class="text-subtitle1 q-mb-sm">{{ block.title }}</div>
+              <div class="text-subtitle1 q-mb-sm">
+                {{ block.title }}
+                <span v-if="block.isRequired" class="text-red" style="margin-left: 2px">*</span>
+              </div>
               <q-select
                 :options="block.choices.map((c) => c.title)"
                 :model-value="null"
@@ -121,7 +139,10 @@
 
             <!-- Grid: Multiple Choice -->
             <template v-else-if="block.type === 'grid_multiple_choice'">
-              <div class="text-subtitle1 q-mb-sm">{{ block.title }}</div>
+              <div class="text-subtitle1 q-mb-sm">
+                {{ block.title }}
+                <span v-if="block.isRequired" class="text-red" style="margin-left: 2px">*</span>
+              </div>
               <q-markup-table flat bordered dense class="grid-preview-table">
                 <thead>
                   <tr>
@@ -142,7 +163,10 @@
 
             <!-- Grid: Checkbox -->
             <template v-else-if="block.type === 'grid_checkbox'">
-              <div class="text-subtitle1 q-mb-sm">{{ block.title }}</div>
+              <div class="text-subtitle1 q-mb-sm">
+                {{ block.title }}
+                <span v-if="block.isRequired" class="text-red" style="margin-left: 2px">*</span>
+              </div>
               <q-markup-table flat bordered dense class="grid-preview-table">
                 <thead>
                   <tr>

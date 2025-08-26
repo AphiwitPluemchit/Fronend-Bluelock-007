@@ -138,7 +138,22 @@
                 :model-value="block"
                 @update:model-value="formData.blocks[index] = $event"
               />
-            </div>
+              
+              <q-separator spaced />
+
+              <!-- Footer -->
+              <div class="row justify-between items-center">
+                <div class="row items-center q-gutter-sm">
+                  <q-toggle
+                    v-model="block.isRequired"
+                    label="Required"
+                    left-label
+                    dense
+                    @update:model-value="console.log('isRequired updated:', $event, 'for block:', block)"
+                  />
+                </div>
+              </div>
+            </div>  
           </q-card>
         </template>
       </div>
@@ -433,7 +448,7 @@ function buildPayload() {
 async function saveForm() {
   try {
     const payload = buildPayload()
-
+    console.log('Saving form with data:', payload);
     if (isEdit.value && formId.value) {
       // UPDATE
       const updated = await formStore.updateForm(formId.value, payload)
@@ -457,6 +472,7 @@ async function loadFormIfAny(id?: string) {
     return
   }
   const form = await formStore.fetchFormById(id)
+  console.log('Loading form data:', form);
   if (form) {
     formData.title = form.title
     formData.description = form.description
