@@ -49,17 +49,6 @@
       </div>
     </div>
 
-    <q-separator spaced />
-    <div class="row justify-between items-center">
-      <q-btn flat icon="assignment" size="sm" label="Answer key" />
-      <q-toggle
-        v-model="localData.isRequired"
-        label="Require a response in each row"
-        left-label
-        dense
-        @update:model-value="update"
-      />
-    </div>
   </q-card>
 </template>
 

@@ -21,21 +21,7 @@
     <!-- ➕ Add Option -->
     <q-btn flat dense size="sm" icon="add" label="Add option" @click="addOption" />
 
-    <q-separator spaced />
 
-    <!-- Footer Actions -->
-    <div class="row justify-between items-center">
-      <q-btn flat icon="assignment" size="sm" label="Answer key" />
-      <div class="row items-center q-gutter-sm">
-        <q-toggle
-          v-model="localData.isRequired"
-          label="Required"
-          left-label
-          dense
-          @update:model-value="update"
-        />
-      </div>
-    </div>
   </q-card>
 </template>
 

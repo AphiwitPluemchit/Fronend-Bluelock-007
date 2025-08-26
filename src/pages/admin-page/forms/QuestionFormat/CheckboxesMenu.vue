@@ -40,21 +40,6 @@
       />
     </div>
 
-    <q-separator spaced />
-
-    <!-- 🔵 Action bar -->
-    <div class="row justify-between items-center">
-      <q-btn flat size="sm" icon="assignment" label="Answer key" />
-      <div class="row items-center q-gutter-sm">
-        <q-toggle
-          v-model="localData.isRequired"
-          label="Required"
-          left-label
-          dense
-          @update:model-value="update"
-        />
-      </div>
-    </div>
   </q-card>
 </template>
 
