@@ -140,6 +140,31 @@ function toggleFilter(category: keyof typeof tempFilters.value, value: string) {
     tempFilters.value[category].splice(index, 1)
   }
 }
+watch(
+  () => ({
+    years: props.years,
+    majors: props.majors,
+    statusActivities: props.statusActivities,
+    categoryActivities: props.categoryActivities,
+    studentStatus: props.studentStatus,
+    statusCertificate: props.statusCertificate,
+  }),
+  (p) => {
+    // ✅ sync props -> filters ภายใน
+    filters.value.year = (p.years ?? []).map(String)
+    filters.value.major = p.majors ?? []
+    filters.value.statusActivity = p.statusActivities ?? []
+    filters.value.categoryActivity = p.categoryActivities ?? []
+    filters.value.studentStatus = p.studentStatus ?? []
+    filters.value.statusCertificate = p.statusCertificate ?? []
+
+    // ✅ ให้ชิปใน UI สะท้อน “ค่าปัจจุบัน” เสมอ
+    if (!showFilterDialog.value) {
+      tempFilters.value = cloneDeep(filters.value)
+    }
+  },
+  { immediate: true, deep: true }
+)
 </script>
 
 <template>
@@ -248,7 +273,7 @@ function toggleFilter(category: keyof typeof tempFilters.value, value: string) {
           <!-- สถานะCertificate -->
           <div v-if="availableCategories.includes('statusCertificate')" class="q-mt-md">
             <p class="q-mb-sm text-h6">สถานะใบรับรอง</p>
-
+            <div class="chip-container">
             <q-chip
               v-for="statusCertificate in options.statusCertificate"
               :key="statusCertificate"
@@ -259,6 +284,7 @@ function toggleFilter(category: keyof typeof tempFilters.value, value: string) {
             >
               <div style="margin: auto">{{ getStatusCertificateText(statusCertificate) }}</div>
             </q-chip>
+            </div>
           </div>
         </q-card-section>
         <q-card-actions align="right">
