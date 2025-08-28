@@ -119,18 +119,36 @@
 
           <!-- Rating -->
           <template v-else-if="block.type === 'rating'">
-            <div class="text-subtitle1 q-mb-xs">
+            <div class="text-subtitle1 q-mb-sm">
               {{ block.title }}
               <span v-if="block.isRequired" class="text-red">*</span>
             </div>
-            <q-rating
+            <div class="row items-end q-gutter-lg q-mt-sm">
+              <div
+                v-for="i in block.max || 5"
+                :key="i"
+                class="column items-center"
+                style="width: 50px"
+                @click="answers[blockKey(block)] = i"
+              >
+                <q-icon
+                  :name="block.icon || 'star'"
+                  :class="[
+                    'rating-icon',
+                    block.icon || 'star',
+                    { 'text-yellow': i <= (answers[blockKey(block)] as number || 0) },
+                  ]"
+                  size="28px"
+                  style="cursor: pointer"
+                />
+                <div class="text-caption q-mt-xs">{{ i }}</div>
+              </div>
+            </div>
+            <q-input
+              v-show="false"
               :model-value="(answers[blockKey(block)] as number) ?? 0"
-              @update:model-value="(val) => (answers[blockKey(block)] = val)"
-              :max="block.max || 5"
-              :icon="block.icon || 'star'"
-              size="40px"
-              color="black"
-              color-selected="yellow"
+              :error="showErrors && isRequiredInvalid(block)"
+              error-message="กรุณาให้คะแนน"
             />
           </template>
 
@@ -143,7 +161,7 @@
             <q-markup-table flat bordered dense class="grid-table">
               <thead>
                 <tr>
-                  <th  class="row-header" ></th>
+                  <th class="row-header"></th>
                   <th v-for="(col, colIndex) in getCols(block)" :key="colIndex" class="col-choice">
                     {{ col.title }}
                   </th>
@@ -151,13 +169,9 @@
               </thead>
               <tbody>
                 <tr v-for="(row, rowIndex) in getRows(block)" :key="rowIndex">
-                  <td class="text-weight-medium row-header ">{{ row.title }}</td>
+                  <td class="text-weight-medium row-header">{{ row.title }}</td>
                   <td v-for="(col, colIndex) in getCols(block)" :key="colIndex" class="col-choice">
-                    <q-radio
-                      :val="col.title"
-                      v-model="getGridSingle(blockKey(block))[row.title]"
-                      
-                    />
+                    <q-radio :val="col.title" v-model="getGridSingle(blockKey(block))[row.title]" />
                   </td>
                 </tr>
               </tbody>
@@ -182,7 +196,7 @@
               <tbody>
                 <tr v-for="(row, rowIndex) in getRows(block)" :key="rowIndex">
                   <td class="text-weight-medium row-header">{{ row.title }}</td>
-                  <td v-for="(col, colIndex) in getCols(block)" :key="colIndex"  class="col-choice">
+                  <td v-for="(col, colIndex) in getCols(block)" :key="colIndex" class="col-choice">
                     <q-checkbox
                       :model-value="
                         getGridMulti(blockKey(block))[row.title]?.includes(col.title) || false
@@ -190,7 +204,6 @@
                       @update:model-value="
                         (val) => toggleGridMulti(blockKey(block), row.title, col.title, val)
                       "
-                      
                     />
                   </td>
                 </tr>
@@ -546,11 +559,10 @@ watch(
 }
 
 .grid-table .row-header {
-  width: 70%;         /* คอลัมน์แรก (ข้อความ row) */
+  width: 70%; /* คอลัมน์แรก (ข้อความ row) */
   text-align: left;
   padding: 6px 10px;
 }
-
 
 .card-answer {
   max-width: 1000px;

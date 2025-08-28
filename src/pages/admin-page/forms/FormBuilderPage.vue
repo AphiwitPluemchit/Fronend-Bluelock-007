@@ -493,28 +493,36 @@ watch(formId, (newId, oldId) => {
 onActivated(() => loadFormIfAny(formId.value))
 
 function deleteSession(sessionNumber: number) {
-  const sessionIndex = formData.blocks.findIndex(b => b.type === 'session' && b.session === sessionNumber);
-  if (sessionIndex === -1) return;
+  // 1) หา range ของ session ที่ต้องการลบ (divider + คำถามใน session นั้น)
+  const start = formData.blocks.findIndex(
+    (b) => b.type === 'session' && b.session === sessionNumber
+  )
+  if (start === -1) return
 
-  let nextSessionIndex = formData.blocks.findIndex((b, i) => 
-    i > sessionIndex && b.type === 'session');
-  
-  if (nextSessionIndex === -1) {
-    nextSessionIndex = formData.blocks.length;
+  let end = formData.blocks.findIndex((b, i) => i > start && b.type === 'session')
+  if (end === -1) end = formData.blocks.length
+
+  // ลบทั้ง session
+  formData.blocks.splice(start, end - start)
+
+  // 2) ลดเลข session ของ "บล็อกที่เหลือทั้งหมด" ที่มี session > sessionNumber
+  for (const b of formData.blocks) {
+    const s = b.session ?? 1
+    if (s > sessionNumber) b.session = s - 1
   }
 
-  formData.blocks.splice(sessionIndex, nextSessionIndex - sessionIndex);
+  // 3) รีซีเคว้นซ์ให้สวยงาม
+  formData.blocks.forEach((b, idx) => (b.sequence = idx + 1))
 
-  formData.blocks.forEach(block => {
-    if (block.type === 'session' && block.session > sessionNumber) {
-      block.session--;
-    }
-  });
+  // 4) ปรับ currentSession ให้ไม่เกินจำนวน session สูงสุดที่เหลือ
+  const remainingSessions = formData.blocks
+    .filter((b) => b.type === 'session')
+    .map((b) => b.session ?? 1)
 
-  if (currentSession.value >= sessionNumber) {
-    currentSession.value--;
-  }
+  const maxSession = remainingSessions.length > 0 ? Math.max(...remainingSessions) : 1
+  if (currentSession.value > maxSession) currentSession.value = maxSession
 }
+
 </script>
 
 <style scoped>

@@ -1,19 +1,8 @@
 <template>
   <q-card>
-    <!-- 🔸 Row: scale selector + icon type -->
-    <div class="row items-center q-gutter-md q-mb-md">
-      <q-select
-        v-model="localData.max"
-        :options="[3, 4, 5, 6, 7, 8, 9, 10]"
-        dense
-        outlined
-        style="width: 140px"
-        @update:model-value="update"
-      />
-    </div>
 
     <!-- 🔸 Rating preview -->
-    <div class="q-mt-md row justify-around">
+    <div class="q-mt-lg row justify-around">
       <div v-for="n in localData.max" :key="n" class="column items-center">
         <q-icon :name="localData.icon" size="24px" />
         <div class="text-caption q-mt-xs">{{ n }}</div>
@@ -32,17 +21,11 @@ const props = defineProps<{
   modelValue: Block
 }>()
 
-const emit = defineEmits(['update:modelValue'])
-
 const localData = reactive({
   ...props.modelValue,
   max: props.modelValue.max || 5,
   icon: props.modelValue.icon || 'star',
 })
-
-function update() {
-  emit('update:modelValue', { ...localData })
-}
 
 watch(
   () => props.modelValue,
