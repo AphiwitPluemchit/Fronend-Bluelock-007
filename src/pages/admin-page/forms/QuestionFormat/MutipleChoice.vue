@@ -62,12 +62,3 @@ watch(
   { deep: true },
 )
 </script>
-
-<style scoped>
-.title-card {
-  max-width: 1000px;
-  width: 100%;
-  border-radius: 15px;
-  border: 1px solid #e0e0e0;
-}
-</style>

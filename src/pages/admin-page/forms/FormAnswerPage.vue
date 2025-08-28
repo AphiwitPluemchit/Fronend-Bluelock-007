@@ -220,7 +220,7 @@
             flat
             label="ถัดไป"
             class="btnconfirm"
-            @click="currentSession++"
+            @click="handleNext"
           />
 
           <q-btn
@@ -228,7 +228,7 @@
             flat
             label="ส่ง"
             class="btnsecces"
-            @click="$emit('update:modelValue', false)"
+            @click="handleSubmit"
           />
         </div>
       </q-card-actions>
@@ -237,11 +237,18 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted, reactive, ref, computed, watch } from 'vue'
+import { onMounted, reactive, ref, computed, watch, nextTick } from 'vue'
 import { useRoute } from 'vue-router'
 import { useFormStore } from 'src/stores/forms'
 import type { Block, Form } from 'src/types/form'
+import type { Submission, Response as SubmissionResponse } from 'src/types/submission'
+import { useQuasar } from 'quasar'
+import { useAuthStore } from 'src/stores/auth'
+import { useSubmissionStore } from 'src/stores/submission'
 
+const $q = useQuasar()
+const userStore = useAuthStore()
+const submissionStore = useSubmissionStore()
 const route = useRoute()
 const formStore = useFormStore()
 const form = ref<Form | null>(null)
@@ -363,32 +370,160 @@ function toggleGridMulti(key: string, rowTitle: string, colTitle: string, checke
   }
   group[rowTitle] = [...(group[rowTitle] || arr)]
 }
+function validateSession(sessionNo: number): boolean {
+  const blocks = (form.value?.blocks || [])
+    .filter((b) => b.type !== 'session')
+    .filter((b) => (b.session || 1) === sessionNo)
 
-// function handleSubmit() {
-//   // Only validate blocks in current session
-//   const currentSessionBlocks = visibleBlocks.value.filter(b => b.type !== 'session')
-//   const hasError = currentSessionBlocks.some(block =>
-//     block.isRequired && !answers[blockKey(block)]
-//   )
+  const hasError = blocks.some((b) => isRequiredInvalid(b))
+  showErrors.value = hasError
+  return !hasError
+}
+// หา id ของ choice จาก title
+function findChoiceIdByTitle(block: Block, title: string | null | undefined): string | null {
+  if (!title) return null
+  const hit = (block.choices || []).find((c) => toTitle(c) === title || c.title === title)
+  return hit?.id ?? null
+}
 
-//   if (hasError) {
-//     showErrors.value = true
-//     return
-//   }
+// หา id ของ row จาก title
+function findRowIdByTitle(block: Block, title: string | null | undefined): string | null {
+  if (!title) return null
+  const hit = (block.rows || []).find((r) => toTitle(r) === title || r.title === title)
+  return hit?.id ?? null
+}
 
-//   if (currentSession.value < totalSessions.value) {
-//     // Go to next session
-//     currentSession.value++
-//     // Scroll to top
-//     window.scrollTo({ top: 0, behavior: 'smooth' })
-//   } else {
-//     // Submit the form
-//     console.log('Form submitted:', answers)
-//     // Add your form submission logic here
-//   }
-// }
+const isString = (x: unknown): x is string => typeof x === 'string'
+const isNumber = (x: unknown): x is number => typeof x === 'number' && Number.isFinite(x)
+const isStringArray = (x: unknown): x is string[] => Array.isArray(x) && x.every(isString)
+type Dict<T = unknown> = Record<string, T>
+const isPlainObject = (x: unknown): x is Dict => !!x && typeof x === 'object' && !Array.isArray(x)
 
-// Reset to first session when form changes
+// เฉพาะการแปลงเป็นข้อความแบบปลอดภัย: รองรับเฉพาะ string/number เท่านั้น
+const toSafeText = (x: unknown): string => (isString(x) ? x : isNumber(x) ? String(x) : '')
+
+function buildResponses(form: Form): SubmissionResponse[] {
+  const out: SubmissionResponse[] = []
+  const blocks = (form.blocks || []).filter((b) => b.type !== 'session')
+
+  for (const block of blocks) {
+    const key = blockKey(block)
+    const v = answers[key]
+
+    if (v == null || (typeof v === 'string' && v.trim() === '')) {
+      if (block.isRequired) {
+        /* empty */
+      } else {
+        continue
+      }
+    }
+
+    if (block.type === 'short_answer' || block.type === 'paragraph') {
+      const text = toSafeText(v)
+      out.push({
+        blockId: block.id!,
+        answerText: text,
+      })
+    } else if (block.type === 'multiple_choice' || block.type === 'dropdown') {
+      const title = typeof v === 'string' ? v : null
+      const choiceId = findChoiceIdByTitle(block, title)
+      // ถ้าไม่เจอ id จะเก็บเป็น answerText (กันข้อมูลหาย) เผื่อกรณีฟอร์มเก่าไม่มี id
+      if (choiceId) {
+        out.push({ blockId: block.id!, choiceId })
+      } else if (title) {
+        out.push({ blockId: block.id!, answerText: title })
+      }
+    } else if (block.type === 'checkbox') {
+      const arr = isStringArray(v) ? v : []
+      for (const title of arr) {
+        const choiceId = findChoiceIdByTitle(block, title)
+        if (choiceId) out.push({ blockId: block.id!, choiceId })
+        else out.push({ blockId: block.id!, answerText: toSafeText(title) })
+      }
+    } else if (block.type === 'rating') {
+      const num = isNumber(v) ? v : 0
+      out.push({
+        blockId: block.id!,
+        answerText: String(num), // backend เก็บที่ answerText (string)
+      })
+    } else if (block.type === 'grid_multiple_choice') {
+      // v เป็น { [rowTitle]: colTitle }
+      const rowMap = isPlainObject(v) ? (v as Record<string, string>) : {}
+      for (const [rowTitle, colTitle] of Object.entries(rowMap)) {
+        const rowId = findRowIdByTitle(block, rowTitle)
+        const choiceId = findChoiceIdByTitle(block, colTitle)
+        if (rowId && choiceId) out.push({ blockId: block.id!, rowId, choiceId })
+        else {
+          out.push({ blockId: block.id!, rowId: rowId ?? null, answerText: toSafeText(colTitle) })
+        }
+      }
+    } else if (block.type === 'grid_checkbox') {
+      // v เป็น { [rowTitle]: string[] }
+      const rowMap = isPlainObject(v) ? (v as Record<string, string[]>) : {}
+      for (const [rowTitle, cols] of Object.entries(rowMap)) {
+        const rowId = findRowIdByTitle(block, rowTitle)
+        for (const colTitle of cols || []) {
+          const choiceId = findChoiceIdByTitle(block, colTitle)
+          if (rowId && choiceId) out.push({ blockId: block.id!, rowId, choiceId })
+          else {
+            out.push({ blockId: block.id!, rowId: rowId ?? null, answerText: toSafeText(colTitle) })
+          }
+        }
+      }
+    }
+  }
+
+  return out
+}
+
+async function handleNext() {
+  if (!validateSession(currentSession.value)) return
+  currentSession.value++
+  await nextTick() // รอ DOM/reactivity อัปเดตให้เสร็จ
+  window.scrollTo({ top: 0, behavior: 'smooth' })
+}
+
+async function handleSubmit() {
+  // ตรวจทุก session ก่อนส่ง
+  const total = totalSessions.value
+  for (let s = 1; s <= total; s++) {
+    if (!validateSession(s)) {
+      currentSession.value = s
+      $q.notify({ type: 'negative', message: 'กรุณากรอกข้อมูลให้ครบถ้วน' })
+      return
+    }
+  }
+
+  if (!form.value?.id) {
+    $q.notify({ type: 'negative', message: 'ไม่พบแบบฟอร์ม' })
+    return
+  }
+
+  const userId = userStore.getUser?.id
+  if (!userId) {
+    $q.notify({ type: 'negative', message: 'ไม่พบผู้ใช้ที่เข้าสู่ระบบ' })
+    return
+  }
+
+  const responses = buildResponses(form.value)
+
+  const payload: Submission = {
+    formId: form.value.id,
+    userId: userId,
+    responses,
+  }
+
+  console.log('Sending submission payload:', JSON.parse(JSON.stringify(payload)))
+
+  try {
+    await submissionStore.addSubmission(payload)
+    $q.notify({ type: 'positive', message: 'ส่งคำตอบเรียบร้อย' })
+  } catch (error) {
+    console.error(error)
+    $q.notify({ type: 'negative', message: 'เกิดข้อผิดพลาดในการส่งคำตอบ' })
+  }
+}
+
 watch(
   () => form.value,
   () => {
@@ -417,5 +552,4 @@ watch(
   margin: 0 auto;
   padding: 20px;
 }
-
 </style>

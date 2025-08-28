@@ -1,10 +1,11 @@
 <template>
-  <q-card>
+  <q-card >
     <!-- 🔵 รายการตัวเลือก checkbox -->
-    <div class="q-mb-md">
+    <div class="q-mb-md" >
       <div
         v-for="(choice, index) in localData.choices"
         :key="index"
+        
         class="row items-center q-gutter-sm q-mb-sm"
       >
         <q-checkbox
@@ -19,6 +20,7 @@
           placeholder="Option"
           outlined
           dense
+          borderless
           class="col"
         />
         <q-btn
@@ -97,10 +99,5 @@ function updateOption(index: number, value: string) {
 </script>
 
 <style scoped>
-.q-card {
-  max-width: 1000px;
-  width: 100%;
-  border-radius: 15px;
-  border: 1px solid #e0e0e0;
-}
+
 </style>
