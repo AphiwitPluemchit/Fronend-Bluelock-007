@@ -42,47 +42,44 @@
 
     <!-- คำถามทั้งหมด -->
     <div class="flex justify-center q-mt-md">
-      <div style="width: 1000px">
-        <draggable
-          :model-value="currentBlocks"
-          @update:model-value="updateBlocks"
-          item-key="id"
-          class="draggable-container"
-          :class="{ 'is-dragging': isDragging }"
-          @start="onDragStart"
-          @end="handleDragEnd"
-        >
-          <template #item="{ element: block, index }">
-            <template v-if="block.type === 'session'">
-              <div class="session-divider row items-center q-mb-lg">
-                <div class="col">
-                  <q-separator />
-                </div>
-                <div class="text-center text-grey-7 q-px-md">Session {{ block.session }}</div>
-                <div class="col">
-                  <q-separator />
-                </div>
-                <q-btn
-                  flat
-                  round
-                  dense
-                  icon="close"
-                  size="sm"
-                  class="q-ml-sm"
-                  @click="deleteSession(block.session)"
-                />
-              </div>
-            </template>
-            <q-card
-              v-else
-              :key="block.id"
-              :class="[
-                'q-pa-md q-mb-md relative-position cursor-move',
-                block.type === 'title' ? 'title-card' : 'question-card',
-                { 'is-dragging': isDragging && draggedBlockId === block.id },
-              ]"
-              @mousedown="onDragStart(block.id)"
-            >
+    <div style="width: 1000px">
+      <draggable
+        v-model="formData.blocks"
+        item-key="id"
+        group="blocks"
+        class="draggable-container"
+        @start="onDragStart"
+        @end="handleDragEnd"
+      >
+      <template #item="{ element: block, index }">
+        <div v-if="block.type === 'session'" class="session-divider row items-center q-mb-lg">
+            <div class="col">
+              <q-separator />
+            </div>
+            <div class="text-center text-grey-7 q-px-md">Session {{ block.session }}</div>
+            <div class="col">
+              <q-separator />
+            </div>
+            <q-btn
+              flat
+              round
+              dense
+              icon="close"
+              size="sm"
+              class="q-ml-sm"
+              @click.stop="deleteSession(block.session)"
+            />
+          </div>
+
+          <q-card
+            v-else
+            :key="block.id"
+            :class="[
+              'q-pa-md q-mb-md relative-position cursor-move',
+              block.type === 'title' ? 'title-card' : 'question-card',
+              { 'is-dragging': isDragging && draggedBlockId === block.id },
+            ]"
+          >
               <div v-if="block.type === 'title'">
                 <div class="row justify-between items-start q-mb-sm">
                   <q-input
@@ -212,6 +209,7 @@ import dayjs from 'dayjs'
 import { useFormStore } from 'src/stores/forms'
 import type { Form } from 'src/types/form'
 import draggable from 'vuedraggable'
+import { v4 as uuidv4 } from 'uuid'
 
 import QuestionTypeMenu from './QuestionFormat/QuestionTypeMenu.vue'
 // Components
@@ -303,22 +301,29 @@ const formData = reactive<Form>({
   isOrigin: true,
   blocks: [],
 })
-const currentSession = ref(1) // Track current session number
+const currentSession = ref(1) 
 
-// Add this new function
 function addSessionDivider() {
-  currentSession.value++
+  // Find the highest session number
+  const maxSession = formData.blocks.length > 0
+    ? Math.max(...formData.blocks.map(b => b.session || 1))
+    : 1
+  
+  const newSession = maxSession + 1
+  
   formData.blocks.push({
     type: 'session',
-    session: currentSession.value,
-    id: Date.now().toString(),
+    session: newSession,
+    id: uuidv4(),
     title: '',
     description: '',
     isRequired: false,
     sequence: formData.blocks.length + 1,
     choices: [],
-    rows: [],
+    rows: []
   })
+  
+  updateBlocks()
 }
 function addQuestion() {
   formData.blocks?.push({
@@ -551,16 +556,6 @@ function deleteSession(sessionNumber: number) {
   if (currentSession.value > maxSession) currentSession.value = maxSession
 }
 
-const currentBlocks = computed(() =>
-  formData.blocks.filter((block) => block.session === currentSession.value),
-)
-
-function onBlockReordered() {
-  currentBlocks.value.forEach((block, index) => {
-    block.sequence = index + 1
-  })
-}
-
 function findBlockIndex(id: string) {
   return formData.blocks.findIndex((block) => block.id === id)
 }
@@ -573,26 +568,27 @@ function onDragStart(blockId: string) {
   draggedBlockId.value = blockId
 }
 
-function handleDragEnd() {
-  isDragging.value = false
-  draggedBlockId.value = null
-  onBlockReordered()
-}
-
-function updateBlocks(newBlocks: never[]) {
-  // Find the indices of the current session blocks
-  const sessionIndices = formData.blocks
-    .map((b, i) => (b.session === currentSession.value ? i : -1))
-    .filter((i) => i !== -1)
-
-  // Update the blocks in the original array
-  newBlocks.forEach((block, index) => {
-    const originalIndex = sessionIndices[index]
-    if (originalIndex !== undefined) {
-      formData.blocks[originalIndex] = block
+function updateBlocks() {
+  let currentSession = 1
+  
+  formData.blocks.forEach((block, index) => {
+    // Update sequence number
+    block.sequence = index + 1
+    
+    // Update session based on the nearest session divider
+    if (block.type === 'session') {
+      currentSession = block.session
+    } else {
+      block.session = currentSession
     }
   })
 }
+function handleDragEnd() {
+  isDragging.value = false
+  draggedBlockId.value = null
+  updateBlocks()
+}
+
 </script>
 
 <style scoped>
