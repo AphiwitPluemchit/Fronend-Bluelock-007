@@ -70,13 +70,19 @@ const data = async () => {
 }
 onMounted(async () => {
   const userMajor = authStore.getMajor // เช่น 'CS'
+  const useYear = authStore.getStudentYear?.toString()
+
 
   // ใช้กรองข้อมูลตั้งแต่โหลดครั้งแรก
   query.value.major = userMajor ? [userMajor] : []
+  query.value.studentYear = useYear ? [useYear] : []
 
   // ✅ ส่งเข้า FilterDialog เป็นค่าเริ่มต้น เพื่อให้ชิปติ๊กค้าง
   if (userMajor) {
     selectedFilters.value.major = [userMajor]
+  }
+  if(useYear){
+    selectedFilters.value.year = [useYear]
   }
 
   await data()
