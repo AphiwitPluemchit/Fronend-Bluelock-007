@@ -143,18 +143,18 @@
                 {{ block.title }}
                 <span v-if="block.isRequired" class="text-red" style="margin-left: 2px">*</span>
               </div>
-              <q-markup-table flat bordered dense class="grid-preview-table">
+              <q-markup-table flat bordered dense class="grid-table">
                 <thead>
                   <tr>
-                    <th></th>
-                    <th v-for="(col, i) in getCols(block)" :key="i">{{ col.title }}</th>
+                    <th class="row-header"></th>
+                    <th v-for="(col, i) in getCols(block)" :key="i"  class="col-choice">{{ col.title }}</th>
                   </tr>
                 </thead>
                 <tbody>
                   <tr v-for="(row, r) in getRows(block)" :key="r">
-                    <td class="row-label">{{ row.title }}</td>
-                    <td v-for="(col, c) in getCols(block)" :key="c" class="cell-center">
-                      <q-radio :val="col.title" :model-value="undefined" disable />
+                    <td  class="row-header">{{ row.title }}</td>
+                    <td v-for="(col, c) in getCols(block)" :key="c"  class="col-choice">
+                      <q-radio :val="col.title" :model-value="undefined" disable  />
                     </td>
                   </tr>
                 </tbody>
@@ -167,18 +167,18 @@
                 {{ block.title }}
                 <span v-if="block.isRequired" class="text-red" style="margin-left: 2px">*</span>
               </div>
-              <q-markup-table flat bordered dense class="grid-preview-table">
+              <q-markup-table flat bordered dense class="grid-table">
                 <thead>
                   <tr>
-                    <th></th>
-                    <th v-for="(col, i) in getCols(block)" :key="i">{{ col.title }}</th>
+                    <th  class="row-header"></th>
+                    <th v-for="(col, i) in getCols(block)" :key="i" class="col-choice">{{ col.title }}</th>
                   </tr>
                 </thead>
                 <tbody>
                   <tr v-for="(row, r) in getRows(block)" :key="r">
-                    <td class="row-label">{{ row.title }}</td>
-                    <td v-for="(col, c) in getCols(block)" :key="c" class="cell-center">
-                      <q-checkbox :val="col.title" :model-value="undefined" disable />
+                    <td class="row-header">{{ row.title }}</td>
+                    <td v-for="(col, c) in getCols(block)" :key="c" class="col-choice">
+                      <q-checkbox :val="col.title" :model-value="undefined" disable  />
                     </td>
                   </tr>
                 </tbody>
@@ -303,6 +303,23 @@ const getRows = (block: GridBlockLite) => normList(block.rows)
 </script>
 
 <style scoped>
+.grid-table {
+  table-layout: fixed;
+  width: 100%;
+}
+
+.grid-table th,
+.grid-table td {
+  text-align: center;
+  vertical-align: middle;
+}
+
+.grid-table .row-header {
+  width: 70%;         /* คอลัมน์แรก (ข้อความ row) */
+  text-align: left;
+  padding: 6px 10px;
+}
+
 .card-preview {
   max-width: 1000px;
   width: 100%;

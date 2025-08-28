@@ -140,23 +140,23 @@
               {{ block.title }} <span v-if="block.isRequired" class="text-red">*</span>
             </div>
 
-            <q-markup-table flat bordered dense>
+            <q-markup-table flat bordered dense class="grid-table">
               <thead>
                 <tr>
-                  <th></th>
-                  <th v-for="(col, colIndex) in getCols(block)" :key="colIndex">
+                  <th  class="row-header" ></th>
+                  <th v-for="(col, colIndex) in getCols(block)" :key="colIndex" class="col-choice">
                     {{ col.title }}
                   </th>
                 </tr>
               </thead>
               <tbody>
                 <tr v-for="(row, rowIndex) in getRows(block)" :key="rowIndex">
-                  <td class="text-weight-medium">{{ row.title }}</td>
-                  <td v-for="(col, colIndex) in getCols(block)" :key="colIndex">
+                  <td class="text-weight-medium row-header ">{{ row.title }}</td>
+                  <td v-for="(col, colIndex) in getCols(block)" :key="colIndex" class="col-choice">
                     <q-radio
                       :val="col.title"
                       v-model="getGridSingle(blockKey(block))[row.title]"
-                      dense
+                      
                     />
                   </td>
                 </tr>
@@ -170,19 +170,19 @@
               {{ block.title }} <span v-if="block.isRequired" class="text-red">*</span>
             </div>
 
-            <q-markup-table flat bordered dense>
+            <q-markup-table flat bordered dense class="grid-table">
               <thead>
                 <tr>
-                  <th></th>
-                  <th v-for="(col, colIndex) in getCols(block)" :key="colIndex">
+                  <th class="row-header"></th>
+                  <th v-for="(col, colIndex) in getCols(block)" :key="colIndex" class="col-choice">
                     {{ col.title }}
                   </th>
                 </tr>
               </thead>
               <tbody>
                 <tr v-for="(row, rowIndex) in getRows(block)" :key="rowIndex">
-                  <td class="text-weight-medium">{{ row.title }}</td>
-                  <td v-for="(col, colIndex) in getCols(block)" :key="colIndex">
+                  <td class="text-weight-medium row-header">{{ row.title }}</td>
+                  <td v-for="(col, colIndex) in getCols(block)" :key="colIndex"  class="col-choice">
                     <q-checkbox
                       :model-value="
                         getGridMulti(blockKey(block))[row.title]?.includes(col.title) || false
@@ -190,7 +190,7 @@
                       @update:model-value="
                         (val) => toggleGridMulti(blockKey(block), row.title, col.title, val)
                       "
-                      dense
+                      
                     />
                   </td>
                 </tr>
@@ -534,6 +534,24 @@ watch(
 </script>
 
 <style scoped>
+.grid-table {
+  table-layout: fixed;
+  width: 100%;
+}
+
+.grid-table th,
+.grid-table td {
+  text-align: center;
+  vertical-align: middle;
+}
+
+.grid-table .row-header {
+  width: 70%;         /* คอลัมน์แรก (ข้อความ row) */
+  text-align: left;
+  padding: 6px 10px;
+}
+
+
 .card-answer {
   max-width: 1000px;
   width: 100%;
