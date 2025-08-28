@@ -128,7 +128,7 @@
                 dense
                 class="q-mb-md login-input"
                 aria-label="Email"
-                data-testid="login-email"
+                data-testid="mobile-login-email"
               >
                 <template v-slot:prepend>
                   <q-icon name="email" color="primary" />
@@ -145,7 +145,7 @@
                 class="q-mb-lg login-input"
                 :rules="[(val) => !!val]"
                 aria-label="Password"
-                data-testid="login-password"
+                data-testid="mobile-login-password"
               >
                 <template v-slot:prepend>
                   <q-icon name="lock" color="primary" />
@@ -168,7 +168,7 @@
                 no-caps
                 :loading="isLoggingIn"
                 :disable="isLoggingIn"
-                data-testid="login-submit"
+                data-testid="mobile-login-submit"
               />
 
               <div class="text-right">
@@ -177,7 +177,7 @@
                   flat
                   color="primary"
                   size="sm"
-                  class="forgot-password-btn"
+                  class="mobile-forgot-password-btn"
                   no-caps
                   @click="isResetPassword = true"
                 />
