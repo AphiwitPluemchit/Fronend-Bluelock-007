@@ -43,32 +43,101 @@
     <!-- คำถามทั้งหมด -->
     <div class="flex justify-center q-mt-md">
       <div style="width: 1000px">
-        <template v-for="(block, index) in formData.blocks" :key="index">
-          <div v-if="block.type === 'session'" class="session-divider row items-center q-mb-lg">
-            <div class="col">
-              <q-separator />
-            </div>
-            <div class="text-center text-grey-7 q-px-md">
-              Session {{ block.session }}
-            </div>
-            <div class="col">
-              <q-separator />
-            </div>
-            <q-btn
-              flat
-              round
-              dense
-              icon="close"
-              size="sm"
-              class="q-ml-sm"
-              @click="deleteSession(block.session)"
-            />
-          </div>
-          <q-card v-else :class="['q-pa-md q-mb-md', block.type === 'title' ? 'title-card' : 'question-card']">
-            <div v-if="block.type === 'title'">
-              <div class="row justify-between items-start q-mb-sm">
-                <q-input v-model="block.title" placeholder="หัวข้อ" dense outlined class="col-grow" />
-                <div class="q-gutter-sm q-ml-sm">
+        <draggable
+          :model-value="currentBlocks"
+          @update:model-value="updateBlocks"
+          item-key="id"
+          class="draggable-container"
+          :class="{ 'is-dragging': isDragging }"
+          @start="onDragStart"
+          @end="handleDragEnd"
+        >
+          <template #item="{ element: block, index }">
+            <template v-if="block.type === 'session'">
+              <div class="session-divider row items-center q-mb-lg">
+                <div class="col">
+                  <q-separator />
+                </div>
+                <div class="text-center text-grey-7 q-px-md">Session {{ block.session }}</div>
+                <div class="col">
+                  <q-separator />
+                </div>
+                <q-btn
+                  flat
+                  round
+                  dense
+                  icon="close"
+                  size="sm"
+                  class="q-ml-sm"
+                  @click="deleteSession(block.session)"
+                />
+              </div>
+            </template>
+            <q-card
+              v-else
+              :key="block.id"
+              :class="[
+                'q-pa-md q-mb-md relative-position cursor-move',
+                block.type === 'title' ? 'title-card' : 'question-card',
+                { 'is-dragging': isDragging && draggedBlockId === block.id },
+              ]"
+              @mousedown="onDragStart(block.id)"
+            >
+              <div v-if="block.type === 'title'">
+                <div class="row justify-between items-start q-mb-sm">
+                  <q-input
+                    v-model="block.title"
+                    placeholder="หัวข้อ"
+                    dense
+                    outlined
+                    class="col-grow"
+                  />
+                  <div class="q-gutter-sm q-ml-sm">
+                    <q-btn
+                      flat
+                      round
+                      dense
+                      icon="content_copy"
+                      class="bg-blue text-white q-pa-xs rounded-borders"
+                      @click="copyBlock(index)"
+                    />
+                    <q-btn
+                      flat
+                      round
+                      dense
+                      icon="delete"
+                      class="bg-red text-white q-pa-xs rounded-borders"
+                      @click="removeBlock(index)"
+                    />
+                  </div>
+                </div>
+                <q-input
+                  v-model="block.description"
+                  placeholder="คำอธิบายเพิ่มเติม (ไม่จำเป็น)"
+                  dense
+                  outlined
+                />
+              </div>
+
+              <div v-else>
+                <div class="row items-start q-gutter-md q-mb-md">
+                  <q-input
+                    v-model="block.title"
+                    placeholder="คำถาม"
+                    outlined
+                    dense
+                    style="max-width: 610px; width: 100%"
+                  />
+                  <q-btn
+                    outline
+                    :icon="getIcon(block.type)"
+                    :label="getLabel(block.type)"
+                    style="border-radius: 8px; max-width: 230px; width: 100%"
+                  >
+                    <q-menu>
+                      <QuestionTypeMenu @selected="(type) => onTypeSelected(index, type)" />
+                    </q-menu>
+                  </q-btn>
                   <q-btn
                     flat
                     round
@@ -78,84 +147,42 @@
                     @click="copyBlock(index)"
                   />
                   <q-btn
+                    icon="delete"
                     flat
                     round
                     dense
-                    icon="delete"
                     class="bg-red text-white q-pa-xs rounded-borders"
                     @click="removeBlock(index)"
                   />
                 </div>
-              </div>
-              <q-input
-                v-model="block.description"
-                placeholder="คำอธิบายเพิ่มเติม (ไม่จำเป็น)"
-                dense
-                outlined
-              />
-            </div>
 
-            <div v-else>
-              <div class="row items-start q-gutter-md q-mb-md">
-                <q-input
-                  v-model="block.title"
-                  placeholder="คำถาม"
-                  outlined
-                  dense
-                  style="max-width: 610px; width: 100%"
-                />
-                <q-btn
-                  outline
-                  :icon="getIcon(block.type)"
-                  :label="getLabel(block.type)"
-                  style="border-radius: 8px; max-width: 230px; width: 100%"
-                >
-                  <q-menu>
-                    <QuestionTypeMenu @selected="(type) => onTypeSelected(index, type)" />
-                  </q-menu>
-                </q-btn>
-                <q-btn
+                <component
                   flat
-                  round
-                  dense
-                  icon="content_copy"
-                  class="bg-blue text-white q-pa-xs rounded-borders"
-                  @click="copyBlock(index)"
+                  :is="getComponent(block.type)"
+                  :model-value="block"
+                  @update:model-value="formData.blocks[findBlockIndex(block.id)] = $event"
                 />
-                <q-btn
-                  icon="delete"
-                  flat
-                  round
-                  dense
-                  class="bg-red text-white q-pa-xs rounded-borders"
-                  @click="removeBlock(index)"
-                />
-              </div>
 
-              <component
-                flat
-                :is="getComponent(block.type)"
-                :model-value="block"
-                @update:model-value="formData.blocks[index] = $event"
-              />
-              
-              <q-separator spaced />
+                <q-separator spaced />
 
-              <!-- Footer -->
-              <div class="row justify-between items-center">
-                <div class="row items-center q-gutter-sm">
-                  <q-toggle
-                    v-model="block.isRequired"
-                    label="Required"
-                    left-label
-                    dense
-                    @update:model-value="console.log('isRequired updated:', $event, 'for block:', block)"
-                  />
+                <!-- Footer -->
+                <div class="row justify-between items-center">
+                  <div class="row items-center q-gutter-sm">
+                    <q-toggle
+                      v-model="block.isRequired"
+                      label="Required"
+                      left-label
+                      dense
+                      @update:model-value="
+                        console.log('isRequired updated:', $event, 'for block:', block)
+                      "
+                    />
+                  </div>
                 </div>
               </div>
-            </div>  
-          </q-card>
-        </template>
+            </q-card>
+          </template>
+        </draggable>
       </div>
     </div>
 
@@ -167,7 +194,7 @@
       <q-btn round color="grey-7" icon="title" size="15px" @click="addTitleCard">
         <q-tooltip>เพิ่มหัวข้อ</q-tooltip>
       </q-btn>
-      <q-btn round color="purple-7" icon="horizontal_split" size="15px"  @click="addSessionDivider">
+      <q-btn round color="purple-7" icon="horizontal_split" size="15px" @click="addSessionDivider">
         <q-tooltip>แบ่ง Session</q-tooltip>
       </q-btn>
     </div>
@@ -179,11 +206,12 @@
 
 <script setup lang="ts">
 import { ref, reactive, onMounted, computed, watch, onActivated } from 'vue'
-import { useQuasar  } from 'quasar'
+import { useQuasar } from 'quasar'
 import * as XLSX from 'xlsx'
 import dayjs from 'dayjs'
 import { useFormStore } from 'src/stores/forms'
 import type { Form } from 'src/types/form'
+import draggable from 'vuedraggable'
 
 import QuestionTypeMenu from './QuestionFormat/QuestionTypeMenu.vue'
 // Components
@@ -205,8 +233,8 @@ interface ExportRow {
   Description: string
   IsRequired: string // "yes"/"no"
   Session: number
-  Choices: string    // คั่นด้วย ;
-  Rows: string       // คั่นด้วย ;
+  Choices: string // คั่นด้วย ;
+  Rows: string // คั่นด้วย ;
 }
 interface OptionRow {
   title: string
@@ -220,11 +248,11 @@ function exportToXlsx() {
 
     // choices และ rows รองรับทั้ง string[] และ {title:string}[]
     const toTitles = (list?: OptionRow[]): string =>
-  (list ?? [])
-    .map(it => it.title)
-    .filter(t => t.trim().length > 0)
-    .join(';')
-    
+      (list ?? [])
+        .map((it) => it.title)
+        .filter((t) => t.trim().length > 0)
+        .join(';')
+
     const choices = toTitles(b.choices)
     const rowsStr = toTitles(b.rows)
 
@@ -289,7 +317,7 @@ function addSessionDivider() {
     isRequired: false,
     sequence: formData.blocks.length + 1,
     choices: [],
-    rows: []
+    rows: [],
   })
 }
 function addQuestion() {
@@ -298,7 +326,7 @@ function addQuestion() {
     type: 'short_answer',
     description: '',
     isRequired: false,
-    session:  currentSession.value,
+    session: currentSession.value,
     sequence: formData.blocks.length + 1,
     choices: [],
     rows: [],
@@ -311,7 +339,7 @@ function addTitleCard() {
     type: 'title',
     description: '',
     isRequired: false,
-    session:  currentSession.value,
+    session: currentSession.value,
     sequence: formData.blocks.length + 1,
     choices: [],
     rows: [],
@@ -448,7 +476,7 @@ function buildPayload() {
 async function saveForm() {
   try {
     const payload = buildPayload()
-    console.log('Saving form with data:', payload);
+    console.log('Saving form with data:', payload)
     if (isEdit.value && formId.value) {
       // UPDATE
       const updated = await formStore.updateForm(formId.value, payload)
@@ -472,7 +500,7 @@ async function loadFormIfAny(id?: string) {
     return
   }
   const form = await formStore.fetchFormById(id)
-  console.log('Loading form data:', form);
+  console.log('Loading form data:', form)
   if (form) {
     formData.title = form.title
     formData.description = form.description
@@ -495,7 +523,7 @@ onActivated(() => loadFormIfAny(formId.value))
 function deleteSession(sessionNumber: number) {
   // 1) หา range ของ session ที่ต้องการลบ (divider + คำถามใน session นั้น)
   const start = formData.blocks.findIndex(
-    (b) => b.type === 'session' && b.session === sessionNumber
+    (b) => b.type === 'session' && b.session === sessionNumber,
   )
   if (start === -1) return
 
@@ -523,6 +551,48 @@ function deleteSession(sessionNumber: number) {
   if (currentSession.value > maxSession) currentSession.value = maxSession
 }
 
+const currentBlocks = computed(() =>
+  formData.blocks.filter((block) => block.session === currentSession.value),
+)
+
+function onBlockReordered() {
+  currentBlocks.value.forEach((block, index) => {
+    block.sequence = index + 1
+  })
+}
+
+function findBlockIndex(id: string) {
+  return formData.blocks.findIndex((block) => block.id === id)
+}
+
+const isDragging = ref(false)
+const draggedBlockId = ref<string | null>(null)
+
+function onDragStart(blockId: string) {
+  isDragging.value = true
+  draggedBlockId.value = blockId
+}
+
+function handleDragEnd() {
+  isDragging.value = false
+  draggedBlockId.value = null
+  onBlockReordered()
+}
+
+function updateBlocks(newBlocks: never[]) {
+  // Find the indices of the current session blocks
+  const sessionIndices = formData.blocks
+    .map((b, i) => (b.session === currentSession.value ? i : -1))
+    .filter((i) => i !== -1)
+
+  // Update the blocks in the original array
+  newBlocks.forEach((block, index) => {
+    const originalIndex = sessionIndices[index]
+    if (originalIndex !== undefined) {
+      formData.blocks[originalIndex] = block
+    }
+  })
+}
 </script>
 
 <style scoped>
@@ -570,5 +640,32 @@ function deleteSession(sessionNumber: number) {
   width: 100%;
   border-radius: 15px;
   border: 1px solid #e0e0e0;
+}
+
+.draggable-container {
+  min-height: 100px;
+}
+
+.is-dragging {
+  opacity: 0.8;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+  transition:
+    opacity 0.2s,
+    transform 0.2s;
+}
+
+.cursor-move {
+  cursor: move;
+  user-select: none;
+}
+
+/* Add smooth transition for drag and drop */
+.sortable-ghost {
+  opacity: 0.5;
+  background: #e0e0e0;
+}
+
+.sortable-chosen {
+  cursor: grabbing;
 }
 </style>
