@@ -12,7 +12,7 @@ export type CheckinoutRecord = {
 export type CheckInOut = {
   id: string
   type: string
-  checkedAt: string
+  timestamp: string
   userId: string
   activityItemId: string
 }

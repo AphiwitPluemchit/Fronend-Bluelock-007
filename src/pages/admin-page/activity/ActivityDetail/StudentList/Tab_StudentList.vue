@@ -387,7 +387,7 @@ onUnmounted(() => {
           <q-td :props="props">
             <div v-if="getRowCheckins(props.row).length">
               <div v-for="(rec, idx) in getRowCheckins(props.row)" :key="idx">
-                {{ formatDate(rec.checkedAt) }} {{ formatTime(rec.checkedAt) }}
+                {{ formatDate(rec.timestamp) }} {{ formatTime(rec.timestamp) }}
               </div>
             </div>
             <div v-else>-</div>
@@ -397,7 +397,7 @@ onUnmounted(() => {
           <q-td :props="props">
             <div v-if="getRowCheckouts(props.row).length">
               <div v-for="(rec, idx) in getRowCheckouts(props.row)" :key="idx">
-                {{ formatDate(rec.checkedAt) }} {{ formatTime(rec.checkedAt) }}
+                {{ formatDate(rec.timestamp) }} {{ formatTime(rec.timestamp) }}
               </div>
             </div>
             <div v-else>-</div>
@@ -452,7 +452,7 @@ onUnmounted(() => {
               <div class="value">
                 <template v-if="getStudentCheckins(student).length">
                   <div v-for="(rec, idx) in getStudentCheckins(student)" :key="idx">
-                    {{ formatDate(rec.checkedAt) }} {{ formatTime(rec.checkedAt) }}
+                    {{ formatDate(rec.timestamp) }} {{ formatTime(rec.timestamp) }}
                   </div>
                 </template>
                 <div v-else>-</div>
@@ -463,7 +463,7 @@ onUnmounted(() => {
               <div class="value">
                 <template v-if="getStudentCheckouts(student).length">
                   <div v-for="(rec, idx) in getStudentCheckouts(student)" :key="idx">
-                    {{ formatDate(rec.checkedAt) }} {{ formatTime(rec.checkedAt) }}
+                    {{ formatDate(rec.timestamp) }} {{ formatTime(rec.timestamp) }}
                   </div>
                 </template>
                 <div v-else>-</div>

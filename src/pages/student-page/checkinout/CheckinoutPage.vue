@@ -5,14 +5,35 @@ import Checkoutpage from 'src/pages/student-page/checkinout/Checkout/CheckoutPag
 import { ref, onMounted } from 'vue'
 import CheckinoutService from 'src/services/checkinout'
 import { useStudentActivitystore } from 'src/stores/activity'
-// import { useAuthStore } from 'src/stores/auth'
+
 const route = useRoute()
-// const authStore = useAuthStore()
 const uuid = route.params.uuid?.toString() || ''
 const tokenInfo = ref<{ type: string; activityId: string; token: string } | null>(null)
 const loading = ref(true)
 const error = ref('')
 const activityStore = useStudentActivitystore()
+
+/** ---------- Helpers ---------- */
+const isNotRegisteredErr = (msg: string) =>
+  /ไม่ได้ลงทะเบียน/i.test(msg)
+
+const isExpiredErr = (msg: string) =>
+  /หมดอายุ/i.test(msg)
+
+const isInvalidQrErr = (msg: string) =>
+  /qr\s*ไม่ถูกต้อง/i.test(msg) || /qr\s*ไม่ถูกต้องหรือหมดอายุ/i.test(msg)
+
+/** โหลดข้อมูลกิจกรรมแบบปลอดภัย */
+const loadActivitySafe = async (activityId: string) => {
+  try {
+    await activityStore.fetchOneData(activityId)
+  } catch (e) {
+    // ถ้าต้อง log ให้ใช้ logger กลาง แทน console ใน prod
+    // console.error('โหลดข้อมูลกิจกรรมล้มเหลว:', e)
+    error.value = 'ไม่สามารถโหลดข้อมูลกิจกรรมได้'
+    throw e
+  }
+}
 
 onMounted(async () => {
   if (!uuid) {
@@ -20,43 +41,68 @@ onMounted(async () => {
     loading.value = false
     return
   }
+
+  // 1) พยายาม Claim ก่อนด้วย getTokenInfo
   try {
     const res = await CheckinoutService.getTokenInfo(uuid)
-    console.log('res', res)
 
     if (!res || !res.type) {
-      error.value = 'QR ไม่ถูกต้องหรือหมดอายุ'
-    } else {
-      tokenInfo.value = res
-      // โหลดข้อมูลกิจกรรมจาก activityId ที่ได้จาก token
-      try {
-        await activityStore.fetchOneData(res.activityId)
-      } catch (e) {
-        console.error('โหลดข้อมูลกิจกรรมล้มเหลว:', e)
-      }
+      // ข้อมูล claim แปลก → ลองไป validate ต่อ
+      throw new Error('QR ไม่ถูกต้องหรือหมดอายุ')
     }
-  } catch {
-    // ถ้า claim ไม่สำเร็จ (เช่น QR หมดอายุ) → fallback ไป validate
+
+    tokenInfo.value = res
+    await loadActivitySafe(res.activityId)
+    return
+  } catch (e: unknown) {
+    // วิเคราะห์ error จาก getTokenInfo
+    const msg = e instanceof Error ? e.message : String(e)
+
+    // กรณีสำคัญ: ไม่ได้ลงทะเบียน → จบที่นี่ ไม่ไป validate ต่อ
+    if (isNotRegisteredErr(msg)) {
+      error.value = 'คุณไม่ได้ลงทะเบียนกิจกรรมนี้'
+      loading.value = false
+      return
+    }
+
+    // กรณีอื่น ๆ (เช่น เคยเคลมแล้ว/QR หมดอายุ หรือข้อความไม่ชัด)
+    // อนุญาตให้ลองใช้ validateToken เพื่อใช้ token เดิมที่เคย claim
     try {
       const valid = await CheckinoutService.validateToken(uuid)
-      console.log('valid', valid)
+
       if (valid && valid.type) {
         tokenInfo.value = valid
-        try {
-          await activityStore.fetchOneData(valid.activityId)
-        } catch (e) {
-          console.error('โหลดข้อมูลกิจกรรมล้มเหลว:', e)
-        }
+        await loadActivitySafe(valid.activityId)
+        return
       } else {
         error.value = 'QR ไม่ถูกต้องหรือหมดอายุ'
+        loading.value = false
+        return
       }
-    } catch {
-      error.value = 'QR ไม่ถูกต้องหรือหมดอายุ'
+    } catch (ve: unknown) {
+      const vmsg = ve instanceof Error ? ve.message : String(ve)
+
+      // map ข้อความ error จาก validate ให้เหมาะสม
+      if (isNotRegisteredErr(vmsg)) {
+        error.value = 'คุณไม่ได้ลงทะเบียนกิจกรรมนี้'
+      } else if (isExpiredErr(vmsg)) {
+        error.value = 'QR Code หมดอายุแล้ว'
+      } else if (isInvalidQrErr(vmsg)) {
+        error.value = 'QR ไม่ถูกต้องหรือหมดอายุ'
+      } else {
+        error.value = vmsg || 'เกิดข้อผิดพลาดที่ไม่ทราบสาเหตุ'
+      }
+      loading.value = false
+      return
     }
+  } finally {
+
+      // ป้องกันค้างโหลดหากไม่มี error/set อื่น ๆ
+      loading.value = false
   }
-  loading.value = false
 })
 </script>
+
 
 <template>
   <q-page class="flex flex-center q-pa-md checkinout-page">

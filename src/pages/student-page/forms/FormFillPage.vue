@@ -136,7 +136,7 @@
                   :class="[
                     'rating-icon',
                     block.icon || 'star',
-                    { 'text-yellow': i <= (answers[blockKey(block)] as number || 0) },
+                    { 'text-yellow': i <= ((answers[blockKey(block)] as number) || 0) },
                   ]"
                   size="28px"
                   style="cursor: pointer"
@@ -258,10 +258,14 @@ import type { Submission, Response as SubmissionResponse } from 'src/types/submi
 import { useQuasar } from 'quasar'
 import { useAuthStore } from 'src/stores/auth'
 import { useSubmissionStore } from 'src/stores/submission'
+import { useCheckinoutStore } from 'src/stores/checkinout'
+import type { AxiosError } from 'axios'
+import type { ErrorResponse } from 'src/types/pagination'
 
 const $q = useQuasar()
 const userStore = useAuthStore()
 const submissionStore = useSubmissionStore()
+const checkinoutStore = useCheckinoutStore()
 const route = useRoute()
 const formStore = useFormStore()
 const form = ref<Form | null>(null)
@@ -529,11 +533,51 @@ async function handleSubmit() {
   console.log('Sending submission payload:', JSON.parse(JSON.stringify(payload)))
 
   try {
-    await submissionStore.addSubmission(payload)
-    $q.notify({ type: 'positive', message: 'ส่งคำตอบเรียบร้อย' })
-  } catch (error) {
+    // ตรวจสอบว่ามี checkout token หรือไม่ (มาจาก checkout page)
+    const checkoutToken = route.query.checkoutToken as string
+    const activityId = route.query.activityId as string
+
+    if (checkoutToken && activityId) {
+      try {
+        // เช็คชื่อออกหลังจากส่ง form สำเร็จ
+        await checkinoutStore.checkout(checkoutToken)
+        await submissionStore.addSubmission(payload)
+        $q.notify({ type: 'positive', message: 'ส่งคำตอบและเช็คชื่อออกเรียบร้อย' })
+      } catch (checkoutError: unknown) {
+        console.error('Checkout error:', checkoutError)
+        let msg = 'ส่งคำตอบเรียบร้อย แต่เช็คชื่อออกไม่สำเร็จ'
+        if (checkoutError && typeof checkoutError === 'object' && 'isAxiosError' in checkoutError) {
+          const axiosErr = checkoutError as AxiosError
+          const errData = axiosErr.response?.data as ErrorResponse
+          if (errData && typeof errData === 'object' && typeof errData.error === 'string') {
+            msg = errData.error
+          } else if (axiosErr.message) {
+            msg = axiosErr.message
+          }
+        } else if (checkoutError instanceof Error) {
+          msg = checkoutError.message
+        }
+        $q.notify({ type: 'warning', message: msg })
+      }
+    } else {
+      await submissionStore.addSubmission(payload)
+      $q.notify({ type: 'positive', message: 'ส่งคำตอบเรียบร้อย' })
+    }
+  } catch (error: unknown) {
     console.error(error)
-    $q.notify({ type: 'negative', message: 'เกิดข้อผิดพลาดในการส่งคำตอบ' })
+    let msg = 'เกิดข้อผิดพลาดในการส่งคำตอบ'
+    if (error && typeof error === 'object' && 'isAxiosError' in error) {
+      const axiosErr = error as AxiosError
+      const errData = axiosErr.response?.data as ErrorResponse
+      if (errData && typeof errData === 'object' && typeof errData.error === 'string') {
+        msg = errData.error
+      } else if (axiosErr.message) {
+        msg = axiosErr.message
+      }
+    } else if (error instanceof Error) {
+      msg = error.message
+    }
+    $q.notify({ type: 'negative', message: msg })
   }
 }
 

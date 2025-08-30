@@ -28,9 +28,25 @@ class CheckinoutService {
     try {
       const res = await api.get(`/checkInOuts/student/validate/${token}`)
       return res.data // { activityId, token, type }
-    } catch (error) {
-      showError('ตรวจสอบ QR ล้มเหลว')
-      console.error('failed:', error)
+    } catch (err) {
+      let msg = 'ตรวจสอบ QR ล้มเหลว'
+      if (axios.isAxiosError(err)) {
+        const data = err.response?.data as unknown
+        if (typeof data === 'string') {
+          try {
+            const parsed = JSON.parse(data) as ErrorBody
+            msg = parsed.error || parsed.message || data
+          } catch {
+            msg = data
+          }
+        } else if (data && typeof data === 'object') {
+          const body = data as ErrorBody
+          msg = body.error || body.message || err.message || msg
+        } else {
+          msg = err.message || msg
+        }
+      }
+      throw new Error(msg)
     }
   }
 
@@ -38,9 +54,25 @@ class CheckinoutService {
     try {
       const res = await api.get(`/checkInOuts/student/qr/${token}`)
       return res.data // { activityId, token, type }
-    } catch (error) {
-      showError('ไม่พบข้อมูล QR')
-      console.error('failed:', error)
+    } catch (err) {
+      let msg = 'ไม่พบข้อมูล QR'
+      if (axios.isAxiosError(err)) {
+        const data = err.response?.data as unknown
+        if (typeof data === 'string') {
+          try {
+            const parsed = JSON.parse(data) as ErrorBody
+            msg = parsed.error || parsed.message || data
+          } catch {
+            msg = data
+          }
+        } else if (data && typeof data === 'object') {
+          const body = data as ErrorBody
+          msg = body.error || body.message || err.message || msg
+        } else {
+          msg = err.message || msg
+        }
+      }
+      throw new Error(msg)
     }
   }
   static async checkin(token: string) {
@@ -115,6 +147,17 @@ class CheckinoutService {
     } catch (error) {
       showError('ดึงข้อมูลล้มเหลว')
       console.error('failed:', error)
+    }
+  }
+
+  static async getActivityForm(activityId: string) {
+    try {
+      const res = await api.get(`/checkInOuts/student/activity/${activityId}/form`)
+      return res.data // { formId }
+    } catch (error) {
+      showError('ดึงข้อมูลฟอร์มล้มเหลว')
+      console.error('failed:', error)
+      throw error
     }
   }
 }

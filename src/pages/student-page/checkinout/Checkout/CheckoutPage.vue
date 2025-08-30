@@ -1,25 +1,49 @@
 <script setup lang="ts">
 import { useCheckinoutStore } from 'src/stores/checkinout'
+import { useRouter } from 'vue-router'
 import { ref } from 'vue'
 import type { AxiosError } from 'axios'
 import type { ErrorResponse } from 'src/types/pagination'
 import type { Activity } from 'src/types/activity'
 
 const checkinoutStore = useCheckinoutStore()
+const router = useRouter()
 const errorMessage = ref('')
-const isChecked = ref(false)
-const isSubmitted = ref(false)
+// const isChecked = ref(false)
+// const isSubmitted = ref(false)
+const loading = ref(false)
 const props = defineProps<{
   token: string
   activity?: Partial<Activity>
 }>()
-async function checkout() {
+
+async function goToForm() {
   errorMessage.value = ''
-  isChecked.value = false
-  isSubmitted.value = false
+  loading.value = true
+
   try {
-    await checkinoutStore.checkout(props.token)
-    isChecked.value = true
+    // ดึงข้อมูล activity เพื่อหา formId
+    if (!props.activity?.id) {
+      errorMessage.value = 'ไม่พบข้อมูลกิจกรรม'
+      return
+    }
+
+    // ดึง formId จาก API
+    const formData = await checkinoutStore.getActivityForm(props.activity.id)
+    if (!formData?.formId) {
+      errorMessage.value = 'กิจกรรมนี้ไม่มีแบบฟอร์มให้ทำ'
+      return
+    }
+
+    // นำทางไปยังหน้า form พร้อมส่ง token และ formId
+    await router.push({
+      name: 'student-form-fill',
+      params: { id: formData.formId },
+      query: {
+        checkoutToken: props.token,
+        activityId: props.activity.id
+      }
+    })
   } catch (error: unknown) {
     console.error(error)
     let msg = 'เกิดข้อผิดพลาด'
@@ -36,9 +60,10 @@ async function checkout() {
     }
     errorMessage.value = msg
   } finally {
-    isSubmitted.value = true
+    loading.value = false
   }
 }
+
 console.log('studentId:', props.token)
 </script>
 
@@ -47,12 +72,16 @@ console.log('studentId:', props.token)
     <div>
       <div v-if="props.activity?.name" class="q-mb-sm">กิจกรรม: {{ props.activity?.name }}</div>
       <div class="q-pa-md">
-        <q-btn class="btnconfirm" @click="checkout">เช็คชื่อ</q-btn>
+        <q-btn
+          class="btnconfirm"
+          @click="goToForm"
+          :loading="loading"
+          :disable="loading"
+        >
+          ทำแบบฟอร์ม
+        </q-btn>
       </div>
-      <div v-if="isSubmitted">
-        <div v-if="isChecked" class="text-positive">เช็คชื่อออกสำเร็จ</div>
-        <div v-else-if="errorMessage" class="text-negative q-mt-md">{{ errorMessage }}</div>
-      </div>
+      <div v-if="errorMessage" class="text-negative q-mt-md">{{ errorMessage }}</div>
     </div>
   </div>
 </template>

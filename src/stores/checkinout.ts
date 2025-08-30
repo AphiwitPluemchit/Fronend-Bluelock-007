@@ -15,5 +15,9 @@ export const useCheckinoutStore = defineStore('checkinout', () => {
     const res = await CheckinoutService.getStatus(studentId, activityId)
     return res
   }
-  return { checkinout, checkin, checkout, getStatus }
+  async function getActivityForm(activityId: string) {
+    const res = await CheckinoutService.getActivityForm(activityId)
+    return res
+  }
+  return { checkinout, checkin, checkout, getStatus, getActivityForm }
 })
