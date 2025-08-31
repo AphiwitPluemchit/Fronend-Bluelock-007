@@ -147,7 +147,6 @@ const uploadFile = async () => {
   }
 }
 
-
 const clearFile = () => {
   file.value = null
   students.value = []
@@ -187,7 +186,7 @@ const clearFile = () => {
           color="secondary"
           label="ดาวน์โหลดตัวอย่างไฟล์"
           dense
-          outline
+          style="height: 40px; width: 200px"
           @click="downloadTemplate"
         />
       </div>
@@ -223,7 +222,6 @@ const clearFile = () => {
             <q-td key="major">{{ props.row.major }}</q-td>
             <q-td class="text-center" key="softSkill">{{ props.row.softSkill }}/30</q-td>
             <q-td class="text-center" key="hardSkill">{{ props.row.hardSkill }}/12</q-td>
-
           </q-tr>
         </template>
 
