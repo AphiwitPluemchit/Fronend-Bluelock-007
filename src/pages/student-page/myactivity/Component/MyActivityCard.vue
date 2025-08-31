@@ -61,7 +61,6 @@ const getActivityRooms = (activityItems: ActivityItem[] | null | undefined): str
         <q-img
           :src="baseurl + '/uploads/activity/images/' + myActivity.file"
           :ratio="4 / 3"
-          style="max-height: 200px; object-fit: cover; border-radius: 12px"
           class="activity-img"
         />
       </div>
@@ -142,8 +141,8 @@ const getActivityRooms = (activityItems: ActivityItem[] | null | undefined): str
 }
 
 .activity-img {
-  width: 100%;
-  height: 200px;
+  /* width: 100%;
+  height: 200px; */
   object-fit: cover;
   border-radius: 12px;
 }
@@ -160,14 +159,14 @@ const getActivityRooms = (activityItems: ActivityItem[] | null | undefined): str
 }
 
 @media (max-width: 600px) {
-  .activity-img {
+  /* .activity-img {
     height: 120px;
-  }
+  } */
 }
 
 @media (max-width: 400px) {
   .activity-img {
-    height: 100px;
+    /* height: 100px; */
     border-radius: 8px;
   }
 }

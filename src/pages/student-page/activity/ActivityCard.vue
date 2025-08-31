@@ -144,8 +144,8 @@ function enrollmentSummary(activityItems: ActivityItem[]) {
 }
 
 .activity-img {
-  width: 100%;
-  height: 200px;
+  /* width: 100%;
+  height: 200px; */
   object-fit: cover;
   border-radius: 12px;
 }
@@ -162,14 +162,14 @@ function enrollmentSummary(activityItems: ActivityItem[]) {
 }
 
 @media (max-width: 600px) {
-  .activity-img {
+  /* .activity-img {
     height: 120px;
-  }
+  } */
 }
 
 @media (max-width: 400px) {
   .activity-img {
-    height: 100px;
+    /* height: 100px; */
     border-radius: 8px;
   }
 }
