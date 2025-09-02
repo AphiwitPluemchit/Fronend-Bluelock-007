@@ -586,7 +586,7 @@ const duplicateSelectedFormIfAny = async (): Promise<string | null> => {
 
   // หา origin ของที่เลือก และของของเดิม เพื่อตรวจว่า “เปลี่ยนฟอร์มหรือยัง”
   const selectedOriginId = (await formStore.resolveOriginId(selectedId)) ?? selectedId
-  const prevOriginId     = prevChildId ? await formStore.resolveOriginId(prevChildId) : null
+  const prevOriginId = prevChildId ? await formStore.resolveOriginId(prevChildId) : null
 
   // ถ้ายังชี้ origin เดิมอยู่ → ไม่ต้องลบ/ไม่ต้อง duplicate ใช้ลูกเดิม
   if (prevChildId && prevOriginId && prevOriginId === selectedOriginId) {
@@ -616,7 +616,6 @@ const duplicateSelectedFormIfAny = async (): Promise<string | null> => {
   console.log('[dup][page] created new child id =', newId)
   return newId
 }
-
 
 const saveChanges = async () => {
   if (!props.activity?.id) {
@@ -927,14 +926,12 @@ onMounted(() => {
     <!-- Sub Activities List -->
     <div v-for="(subActivity, index) in subActivities" :key="index" class="sub-activity">
       <!-- Cancel (X) Icon -->
-      <div class="remove-icon input-group" style="display: flex; justify-content: flex-end">
-        <q-icon
-          name="close"
-          size="35px"
-          color="red"
-          class="cursor-pointer"
-          @click="removeSubActivity(index)"
-        />
+      <div
+        v-if="index > 0"
+        class="button-group"
+        style="display: flex; justify-content: flex-end; margin-bottom: 20px"
+      >
+        <q-btn class="btnreject" @click="removeSubActivity(index)">ลบกิจกรรมย่อย</q-btn>
       </div>
 
       <!-- SubActivity Name -->
@@ -1245,6 +1242,7 @@ onMounted(() => {
   display: flex;
   justify-content: flex-end;
   gap: 25px;
+  margin-right: 10px;
 }
 .btn-container {
   display: flex;
@@ -1303,6 +1301,12 @@ onMounted(() => {
   }
   .label_minWidth {
     min-width: 180px !important;
+  }
+  .button-group {
+    display: flex;
+    justify-content: flex-end;
+    gap: 25px;
+    margin-right: 5px;
   }
 }
 @media (max-width: 860px) {

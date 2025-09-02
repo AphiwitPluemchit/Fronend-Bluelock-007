@@ -74,7 +74,7 @@ const breadcrumbs = computed(() => {
       title: currentBreadcrumb.value,
       path: `/Admin/ActivitiesManagement/ActivityDetail/${id}/${tab.value}`,
     },
-    icon: 'description',
+    icon: 'edit_calendar',
   }
 })
 

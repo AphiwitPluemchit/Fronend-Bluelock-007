@@ -101,7 +101,7 @@ const applySameTime = (subActivityIndex: number) => {
 
   for (let i = 1; i < sub.selectedDays.length; i++) {
     const day = sub.selectedDays[i]
-    if (!day) continue // ✅ ป้องกัน undefined ก่อนใช้
+    if (!day) continue // ป้องกัน undefined ก่อนใช้
 
     day.startTime = firstDay.startTime
     day.startHour = firstDay.startHour
@@ -177,7 +177,7 @@ const addSubActivity = () => {
   watch(
     () => subActivities.value[index]?.selectedDays,
     (newVal) => {
-      console.log('⏱️ selectedDays changed for subActivity', index, newVal)
+      console.log(' selectedDays changed for subActivity', index, newVal)
     },
     { deep: true },
   )
@@ -235,7 +235,6 @@ const duplicateSelectedFormIfAny = async (): Promise<string | null> => {
   return newId
 }
 
-
 // ใช้กับปุ่มยืนยันส่งไปหลังบ้าน
 const submitActivity = async () => {
   activityNameError.value = ''
@@ -252,11 +251,11 @@ const submitActivity = async () => {
   if (validDates.includes(false)) {
     return
   }
-   
+
   const formIdForActivity = await duplicateSelectedFormIfAny()
   console.log('[submit] formIdForActivity =', formIdForActivity)
-  
-  const skillMap: Record<string, 'soft' |'hard'   | null> = {
+
+  const skillMap: Record<string, 'soft' | 'hard' | null> = {
     prep: 'soft',
     academic: 'hard',
     '': null,
@@ -287,14 +286,14 @@ const submitActivity = async () => {
   }))
 
   const payload = {
-  name: activityName.value,
-  activityState: 'planning',
-  skill: skill ?? '',
-  endDateEnroll: CloseRegisDates.value,
-  activityItems,
-  foodVotes,
-  ...(formIdForActivity ? { formId: formIdForActivity } : {})
-}
+    name: activityName.value,
+    activityState: 'planning',
+    skill: skill ?? '',
+    endDateEnroll: CloseRegisDates.value,
+    activityItems,
+    foodVotes,
+    ...(formIdForActivity ? { formId: formIdForActivity } : {}),
+  }
   try {
     const { status, id } = await ActivityService.createOne(payload)
 
@@ -325,10 +324,10 @@ const submitActivity = async () => {
 onMounted(() => {
   addSubActivity()
   watch(activityName, (newVal) => {
-  if (newVal && newVal.trim() !== '') {
-    activityNameError.value = ''
-  }
-})
+    if (newVal && newVal.trim() !== '') {
+      activityNameError.value = ''
+    }
+  })
 })
 </script>
 
@@ -366,16 +365,14 @@ onMounted(() => {
     <ActivityForm_Form v-model="selectedFormIds" :forms="formStore.forms" class="input-group" />
 
     <!-- Sub Activities List -->
-    <div v-for="(subActivity, index) in subActivities" :key="index" class="sub-activity">
-      <!-- Cancel (X) Icon -->
-      <div class="remove-icon input-group" style="display: flex; justify-content: flex-end">
-        <q-icon
-          name="close"
-          size="35px"
-          color="red"
-          class="cursor-pointer"
-          @click="removeSubActivity(index)"
-        />
+    <div v-for="(subActivity, index) in subActivities" :key="index">
+      <!-- Cancel (X) Button -->
+      <div
+        v-if="index > 0"
+        class="button-group"
+        style="display: flex; justify-content: flex-end; margin-bottom: 20px"
+      >
+        <q-btn class="btnreject" @click="removeSubActivity(index)">ลบกิจกรรมย่อย</q-btn>
       </div>
 
       <!-- SubActivity Name -->
@@ -505,7 +502,7 @@ onMounted(() => {
   display: flex;
 }
 .tight-checkbox ::v-deep(.q-checkbox__label) {
-  margin-left: 4px !important; /* ลดจากค่าปกติ 8px หรือมากกว่า */
+  margin-left: 4px !important;
 }
 .input-group p {
   margin: 0;
@@ -543,16 +540,11 @@ onMounted(() => {
   width: 660px;
   max-width: 100%;
 }
-.remove-icon {
-  max-width: 100%;
-  text-align: right;
-  cursor: pointer;
-}
-
 .button-group {
   display: flex;
   justify-content: flex-end;
   gap: 25px;
+  margin-right: 10px;
 }
 
 .btn-container {
@@ -577,7 +569,12 @@ onMounted(() => {
   .label_minWidth {
     min-width: 180px !important;
   }
-
+  .button-group {
+    display: flex;
+    justify-content: flex-end;
+    gap: 25px;
+    margin-right: 5px;
+  }
 }
 @media (max-width: 860px) {
   .input-group.no-wrap {
@@ -631,7 +628,6 @@ onMounted(() => {
   .label-error-shift {
     transform: translateY(0px);
   }
-
 }
 @media (max-width: 500px) {
   .input-group:not(.no-wrap) {
