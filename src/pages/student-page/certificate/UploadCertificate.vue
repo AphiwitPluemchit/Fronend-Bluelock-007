@@ -3,22 +3,23 @@ import { computed, ref } from 'vue'
 import { api } from 'boot/axios'
 import { useCourseStore } from 'src/stores/course'
 import { useAuthStore } from 'src/stores/auth'
+import { useQuasar } from 'quasar'
 
 const courseStore = useCourseStore()
 const authStore = useAuthStore()
 const baseurl = api.defaults.baseURL
+const url = ref(
+  'https://learner.thaimooc.ac.th/credential-wallet/10793bb5-6e4f-4873-9309-f25f216a46c7/sahaphap.rit/public',
+)
+const $q = useQuasar()
 
 // ตั้งค่าเริ่มต้นให้แสดงเฉพาะคอร์สที่เปิดใช้งาน
 courseStore.params.isActive = true
-const selectedFile = ref<File | null>(null)
-const previewUrl = ref<string | null>(null)
-const isPDF = ref(false)
-const visible = ref(false)
-const fileInput = ref<HTMLInputElement | null>(null)
-const ocrResult = ref<OcrResult | null>(null)
 
 const selectedSource = ref('')
 const selectedTopic = ref<{ id: number; name: string } | null>(null)
+// ตัดหัวเรื่องไม่ให้ยาวเกินไป
+const topicDisplay = computed(() => selectedTopic.value?.name.slice(0, 90) + '...')
 
 const sourceOptions = [
   { value: 'buumooc', label: 'BUU MOOC' },
@@ -26,71 +27,6 @@ const sourceOptions = [
 ]
 
 const topicOptions = computed(() => courseStore.courses)
-
-interface OcrResult {
-  student_name: string
-  course_name: string
-  date: string
-  url?: string
-  verified?: boolean
-  verify_note?: string
-}
-
-function onInputChange(event: Event) {
-  const files = (event.target as HTMLInputElement).files
-  if (files && files.length > 0) {
-    selectedFile.value = files[0]!
-    onFileSelected(files[0]!)
-  }
-}
-
-function handleDrop(e: DragEvent) {
-  const files = e.dataTransfer?.files
-  if (files && files.length > 0) {
-    selectedFile.value = files[0]!
-    onFileSelected(files[0]!)
-  }
-}
-
-function onFileSelected(file: File | null) {
-  if (!file) return
-  isPDF.value = file.type === 'application/pdf'
-  previewUrl.value = URL.createObjectURL(file)
-}
-
-function clearFile() {
-  selectedFile.value = null
-  previewUrl.value = null
-  isPDF.value = false
-  ocrResult.value = null
-}
-
-async function uploadFile() {
-  if (!selectedFile.value) return
-  visible.value = true
-
-  const formData = new FormData()
-  formData.append('file', selectedFile.value)
-
-  try {
-    console.log('Student ID:', authStore.getUser?.id)
-    console.log('Course ID:', selectedTopic.value?.id)
-    const res = await api.post(baseurl + '/ocr/upload', formData, {
-      params: {
-        // get id of course
-        studentId: authStore.getUser?.id,
-        courseId: selectedTopic.value?.id,
-      },
-      headers: { 'Content-Type': 'multipart/form-data' },
-    })
-    const parsed = JSON.parse(res.data.data)
-    ocrResult.value = parsed.data
-  } catch (err) {
-    console.error('❌ Upload failed:', err)
-  } finally {
-    visible.value = false
-  }
-}
 
 function onSearch(val: string, update: (callback: () => void) => void) {
   courseStore.params.search = val
@@ -106,164 +42,118 @@ function onSearch(val: string, update: (callback: () => void) => void) {
 function setCourseFilter() {
   courseStore.params.type = selectedSource.value
   courseStore.params.isActive = true
-
   selectedTopic.value = null
-
-  courseStore
-    .fetchCourses()
-    .catch((err) => console.error('Course load failed:', err))
+  courseStore.fetchCourses().catch((err) => console.error('Course load failed:', err))
 }
 
+function openUrl(url: string) {
+  window.open(url, '_blank')
+}
+
+async function verifyUrl(url: string) {
+  console.log('verifyUrl', url)
+  try {
+    const res = await api.get(baseurl + '/certificate/url-verify', {
+      params: {
+        url: url,
+        studentId: authStore.getUser?.id,
+        courseId: selectedTopic.value?.id,
+      },
+    })
+    const { isVerified, isDuplicate } = res.data
+    if (isVerified && !isDuplicate) {
+      $q.notify({
+        type: 'positive',
+        message: 'อัปโหลดสำเร็จ',
+      })
+    } else if (isDuplicate) {
+      $q.notify({
+        type: 'negative',
+        message: 'ไม่สามารถรับชั่วโมงได้ เนื่องจากมีใบประกาศนียบัตรที่ซ้ำ',
+      })
+    } else {
+      $q.notify({
+        type: 'negative',
+        message: 'อัปโหลดไม่สำเร็จ เนื่องจากไม่พบใบประกาศนียบัตร',
+      })
+    }
+  } catch (err) {
+    console.error('❌ Upload failed:', err)
+    $q.notify({
+      type: 'negative',
+      message: 'อัปโหลดไม่สำเร็จ เกิดข้อผิดพลาด : ' + (err as Error).message,
+    })
+  }
+}
 </script>
 
 <template>
   <q-page class="q-pa-md">
     <div class="text-h5 q-mb-md">อัปโหลดใบประกาศนียบัตร</div>
 
-    <q-card
-      class="q-pa-md q-mt-md drop-area"
-      @dragover.prevent
-      @drop.prevent="handleDrop"
-      @click="fileInput?.click()"
-    >
-      <div class="column items-center justify-center">
-        <div v-if="previewUrl" class="relative-container full-width">
-          <q-btn
-            round
-            color="negative"
-            icon="close"
-            size="sm"
-            class="close-btn"
-            @click.stop="clearFile"
-          />
-          <iframe
-            v-if="isPDF"
-            class="preview-frame"
-            :src="previewUrl + '#toolbar=0&navpanes=0&scrollbar=0&view=FitH&zoom=page-fit'"
-          />
-          <q-img
-            v-else
-            :src="previewUrl"
-            style="max-width: 100%; max-height: 400px; object-fit: contain"
-            spinner-color="primary"
-          />
-        </div>
-
-        <div v-else class="text-subtitle1 text-grey text-center q-pa-md">
-          <q-icon name="cloud_upload" size="40px" class="q-mb-sm" />
-          <div>คลิกหรือลากไฟล์ของคุณมาที่นี่เพื่ออัปโหลด</div>
-          <input
-            type="file"
-            ref="fileInput"
-            class="hidden"
-            accept=".pdf,image/*"
-            @change="onInputChange"
-          />
-        </div>
-      </div>
-    </q-card>
-
     <!-- Dropdowns -->
-    <div class="column q-gutter-y-sm q-mt-md">
-      <q-select
-        v-model="selectedSource"
-        :options="sourceOptions"
-        label="แหล่งที่มา"
-        dense
-        outlined
-        emit-value
-        map-options
-        @update:model-value="setCourseFilter"
-      />
-      <q-select
-        v-model="selectedTopic"
-        :options="topicOptions"
-        option-label="name"
-        option-value="id"
-        label="หัวข้อ"
-        dense
-        outlined
-        :loading="courseStore.loading"
-        @filter="onSearch"
-        :disable="!selectedSource"
-        use-input
-        :debounce="300"
-      >
-        <template v-slot:hint>
-          แสดงเฉพาะหัวข้อที่เปิดใช้งานเท่านั้น
-        </template>
-      </q-select>
-    </div>
+    <div class="q-gutter-y-sm q-mt-md">
+      <div class="flex justify-left q-gutter-x-sm">
+        <div>
+          <q-select
+            v-model="selectedSource"
+            :options="sourceOptions"
+            label="แหล่งที่มา"
+            dense
+            outlined
+            emit-value
+            map-options
+            @update:model-value="setCourseFilter"
+          />
+        </div>
 
-    <!-- ปุ่มยืนยัน -->
-    <div class="row justify-end q-mt-md">
-      <q-btn
-        label="บันทึก"
-        class="btnconfirm"
-        :disable="!selectedFile || !selectedSource || !selectedTopic"
-        @click="uploadFile"
-      />
-    </div>
-
-    <!-- OCR Result -->
-    <q-card-section v-if="ocrResult" class="q-mt-lg">
-      <q-markup-table>
-        <tbody>
-          <tr>
-            <td><b>ชื่อนิสิต</b></td>
-            <td>{{ ocrResult.student_name }}</td>
-          </tr>
-          <tr>
-            <td><b>วิชา</b></td>
-            <td>{{ ocrResult.course_name }}</td>
-          </tr>
-          <tr>
-            <td><b>วันที่</b></td>
-            <td>{{ ocrResult.date }}</td>
-          </tr>
-          <tr v-if="ocrResult.url">
-            <td><b>ลิงก์ Certificate</b></td>
-            <td>
-              <a :href="ocrResult.url" target="_blank">{{ ocrResult.url }}</a>
-            </td>
-          </tr>
-        </tbody>
-      </q-markup-table>
-
-      <div class="q-mt-sm">
-        <q-banner
-          v-if="ocrResult.verified"
-          class="bg-green-2 text-green-9"
-          rounded
-          icon="check_circle"
-        >
-          ✔️ ข้อมูลในใบประกาศ <b>ตรงกับข้อมูลใน URL</b>
-        </q-banner>
-
-        <q-banner
-          v-else-if="ocrResult.url && !ocrResult.verified"
-          class="bg-orange-2 text-orange-10"
-          rounded
-          icon="warning"
-        >
-          ⚠️ ข้อมูลในใบที่อัปโหลด <b>ไม่ตรงกับใน URL</b>
-          <div v-if="ocrResult.verify_note" class="q-mt-xs text-caption">
-            หมายเหตุ: {{ ocrResult.verify_note }}
-          </div>
-        </q-banner>
-
-        <q-banner v-else class="bg-red-2 text-red-10" rounded icon="error">
-          ❌ ไม่สามารถตรวจสอบกับ URL ได้ (อาจไม่มี URL หรือลิงก์ไม่เปิด)
-        </q-banner>
+        <div style="width: 80%">
+          <q-select
+            v-model="selectedTopic"
+            :options="topicOptions"
+            option-label="name"
+            option-value="id"
+            label="หัวข้อ"
+            dense
+            outlined
+            :loading="courseStore.loading"
+            @filter="onSearch"
+            :disable="!selectedSource"
+            :display-value="topicDisplay"
+            use-input
+            :debounce="300"
+          >
+            <template v-slot:hint> แสดงเฉพาะหัวข้อที่เปิดใช้งานเท่านั้น </template>
+          </q-select>
+        </div>
       </div>
-    </q-card-section>
 
-    <q-inner-loading
-      :showing="visible"
-      label="กำลังอัปโหลด..."
-      label-class="text-primary"
-      label-style="font-size: 1.1em"
-    />
+      <div class="row q-gutter-x-sm q-mt-md">
+        <q-input
+          color="primary"
+          dense
+          outlined
+          v-model="url"
+          label="ลิ้งค์ ใบประกาศนียบัตร"
+          icon="link"
+          class="col"
+        >
+          <!-- <template v-slot:prepend>
+            <q-icon name="link" color="primary" />
+          </template> -->
+          <template v-slot:append>
+            <q-icon
+              v-if="url"
+              name="open_in_new"
+              color="primary"
+              class="cursor-pointer"
+              @click="openUrl(url)"
+            />
+          </template>
+        </q-input>
+        <q-btn label="อัปโหลด" color="primary" icon="upload" @click="verifyUrl(url)" />
+      </div>
+    </div>
   </q-page>
 </template>
 
