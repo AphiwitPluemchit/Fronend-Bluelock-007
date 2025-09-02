@@ -1,55 +1,9 @@
 <script setup lang="ts">
+import { type UploadCertificate } from 'src/services/certificate'
 import { ref, onMounted, onBeforeUnmount, watchEffect } from 'vue'
 
-interface UploadHistoryRow {
-  id: number
-  certName: string
-  skill: string
-  hour: number | null
-  status: 'รออนุมัติ' | 'อนุมัติ' | 'ไม่อนุมัติ'
-  note?: string
-  uploadDate: string
-}
-
 //mockUp
-const rows = ref<UploadHistoryRow[]>([
-  {
-    id: 4,
-    certName: 'ประกาศนียบัตร 2022',
-    skill: '',
-    hour: null,
-    status: 'รออนุมัติ',
-    note: '',
-    uploadDate: '10 พ.ค. 2568',
-  },
-  {
-    id: 3,
-    certName: 'ประกาศนียบัตร 2022',
-    skill: '',
-    hour: null,
-    status: 'รออนุมัติ',
-    note: '',
-    uploadDate: '10 พ.ค. 2568',
-  },
-  {
-    id: 2,
-    certName: 'ประกาศนียบัตร 2022',
-    skill: '',
-    hour: null,
-    status: 'ไม่อนุมัติ',
-    note: 'รูปไม่ชัดเจน',
-    uploadDate: '10 พ.ค. 2568',
-  },
-  {
-    id: 1,
-    certName: 'ประกาศนียบัตร 2022',
-    skill: 'hard',
-    hour: 16,
-    status: 'อนุมัติ',
-    note: '',
-    uploadDate: '10 พ.ค. 2568',
-  },
-])
+const rows = ref<UploadCertificate[]>([])
 
 const columns = [
   {
@@ -272,8 +226,8 @@ watchEffect(() => {
             <div class="row justify-between header-row-responsive">
               <!-- ซ้าย: ชื่อใบรับรอง -->
               <div class="ActivityNamelabel">
-                {{ truncateText(row.certName) }}
-                <q-tooltip>{{ row.certName }}</q-tooltip>
+                {{ truncateText(row.course.name) }}
+                <q-tooltip>{{ row.course.name }}</q-tooltip>
               </div>
 
               <!-- ขวา: Status Badge -->
@@ -296,19 +250,19 @@ watchEffect(() => {
             </div> -->
             <div class="q-mb-xs info-row">
               <div class="label">ประเภทกิจกรรม</div>
-              <div class="value">: {{ translateSkillType(row.skill) }}</div>
+              <div class="value">: {{ translateSkillType(row.course.type) }}</div>
             </div>
             <div class="q-mb-xs info-row">
               <div class="label">ชั่วโมงที่ได้รับ</div>
-              <div class="value">: {{ row.hour !== null ? row.hour : '-' }}</div>
+              <div class="value">: {{ row.course.hour !== null ? row.course.hour : '-' }}</div>
             </div>
             <div class="q-mb-xs info-row">
               <div class="label">วันที่อัปโหลด</div>
-              <div class="value">: {{ row.uploadDate }}</div>
+              <div class="value">: {{ row.uploadAt }}</div>
             </div>
-            <div class="info-row" v-if="row.note">
+            <div class="info-row" v-if="row.remark">
               <div class="label">หมายเหตุ</div>
-              <div class="value text-negative">: {{ row.note }}</div>
+              <div class="value text-negative">: {{ row.remark }}</div>
             </div>
           </q-card-section>
         </q-card>
@@ -456,7 +410,6 @@ watchEffect(() => {
     margin-top: 0; /* ไม่ต้องให้เลื่อนลงมา */
   }
 }
-
 
 @media (max-width: 450px) {
   .texttitle {

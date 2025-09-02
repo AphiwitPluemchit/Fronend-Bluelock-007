@@ -53,7 +53,7 @@ function openUrl(url: string) {
 async function verifyUrl(url: string) {
   console.log('verifyUrl', url)
   try {
-    const res = await api.get(baseurl + '/certificate/url-verify', {
+    const res = await api.get(baseurl + '/certificates/url-verify', {
       params: {
         url: url,
         studentId: authStore.getUser?.id,
@@ -107,7 +107,7 @@ async function verifyUrl(url: string) {
           />
         </div>
 
-        <div style="width: 80%">
+        <div>
           <q-select
             v-model="selectedTopic"
             :options="topicOptions"
