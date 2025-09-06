@@ -15,11 +15,11 @@ const showError = (message: string) => {
 }
 
 export interface UploadCertificate {
-  id: string
+  id?: string
   studentId: string
-  student: Student
+  student?: Student
   courseId: string
-  course: Course
+  course?: Course
   url: string
   nameMatch: number
   courseMatch: number
@@ -88,4 +88,52 @@ export class CertificateService {
       throw error
     }
   }
+}
+
+export function getStatus(row: StatusType) {
+  switch (row) {
+    case StatusType.PENDING:
+      return 'รออนุมัติ'
+    case StatusType.APPROVED:
+      return 'อนุมัติ'
+    case StatusType.REJECTED:
+      return 'ไม่อนุมัติ'
+    default:
+      return ''
+  }
+}
+
+export function getStatusClass(status: StatusType) {
+  switch (status) {
+    case StatusType.PENDING:
+      return 'status-waiting'
+    case StatusType.APPROVED:
+      return 'status-approved'
+    case StatusType.REJECTED:
+      return 'status-rejected'
+    default:
+      return ''
+  }
+}
+
+export function translateSkillType(isHardSkill: boolean) {
+  switch (isHardSkill) {
+    case true:
+      return 'ทักษะทางวิชาการ'
+    case false:
+      return 'เตรียมความพร้อม'
+    default:
+      return '-'
+  }
+}
+
+export const dateTime = (row: string) => {
+  return new Date(row).toLocaleString('th-TH', {
+    day: '2-digit',
+    month: '2-digit',
+    year: 'numeric',
+    // hour: '2-digit',
+    // minute: '2-digit',
+    // hour12: false,
+  })
 }

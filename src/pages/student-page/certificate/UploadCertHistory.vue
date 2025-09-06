@@ -2,6 +2,10 @@
 import {
   type CertificateQuery,
   CertificateService,
+  dateTime,
+  getStatus,
+  getStatusClass,
+  translateSkillType,
   type UploadCertificate,
 } from 'src/services/certificate'
 import { ref, onMounted, onBeforeUnmount, watchEffect } from 'vue'
@@ -41,7 +45,7 @@ const columns: QTableColumn<UploadCertificate>[] = [
   {
     name: 'courseName',
     label: 'ชื่อ',
-    field: (row) => row.course.name,
+    field: (row) => row.course?.name,
     align: 'left' as const,
     classes() {
       return 'ellipsis'
@@ -53,7 +57,7 @@ const columns: QTableColumn<UploadCertificate>[] = [
   {
     name: 'courseType',
     label: 'ประเภทกิจกรรม',
-    field: (row) => translateSkillType(row.course.isHardSkill || false),
+    field: (row) => translateSkillType(row.course?.isHardSkill || false),
     align: 'left' as const,
     sortable: true,
     style: 'width: 18%',
@@ -62,7 +66,7 @@ const columns: QTableColumn<UploadCertificate>[] = [
   {
     name: 'hour',
     label: 'ชั่วโมงที่ได้รับ',
-    field: (row) => row.course.hour,
+    field: (row) => row.course?.hour,
     align: 'center' as const,
     sortable: true,
     style: 'width: 15%',
@@ -71,7 +75,7 @@ const columns: QTableColumn<UploadCertificate>[] = [
   {
     name: 'uploadAt',
     label: 'วันที่อัปโหลด',
-    field: (row) => dateTime(row),
+    field: (row) => dateTime(row.uploadAt),
     align: 'left' as const,
     sortable: true,
     style: 'width: 12%',
@@ -96,54 +100,6 @@ const columns: QTableColumn<UploadCertificate>[] = [
   //   headerStyle: 'width: 5%; text-align: center;',
   // },
 ]
-
-function getStatus(row: string) {
-  switch (row) {
-    case 'pending':
-      return 'รออนุมัติ'
-    case 'approved':
-      return 'อนุมัติ'
-    case 'rejected':
-      return 'ไม่อนุมัติ'
-    default:
-      return ''
-  }
-}
-
-function getStatusClass(status: string) {
-  switch (status) {
-    case 'pending':
-      return 'status-waiting'
-    case 'approved':
-      return 'status-approved'
-    case 'rejected':
-      return 'status-rejected'
-    default:
-      return ''
-  }
-}
-
-function translateSkillType(isHardSkill: boolean) {
-  switch (isHardSkill) {
-    case true:
-      return 'ทักษะทางวิชาการ'
-    case false:
-      return 'เตรียมความพร้อม'
-    default:
-      return '-'
-  }
-}
-
-const dateTime = (row: UploadCertificate) => {
-  return new Date(row.uploadAt).toLocaleString('th-TH', {
-    day: '2-digit',
-    month: '2-digit',
-    year: 'numeric',
-    // hour: '2-digit',
-    // minute: '2-digit',
-    // hour12: false,
-  })
-}
 
 // Responsive variables
 const isMediumScreen = ref(false)
@@ -283,8 +239,8 @@ watchEffect(() => {
             <div class="row justify-between header-row-responsive">
               <!-- ซ้าย: ชื่อใบรับรอง -->
               <div class="ActivityNamelabel">
-                {{ row.course.name }}
-                <q-tooltip>{{ row.course.name }}</q-tooltip>
+                {{ row.course?.name }}
+                <q-tooltip>{{ row.course?.name }}</q-tooltip>
               </div>
 
               <!-- ขวา: Status Badge -->
@@ -307,15 +263,15 @@ watchEffect(() => {
             </div> -->
             <div class="q-mb-xs info-row">
               <div class="label">ประเภทกิจกรรม</div>
-              <div class="value">: {{ translateSkillType(row.course.isHardSkill || false) }}</div>
+              <div class="value">: {{ translateSkillType(row.course?.isHardSkill || false) }}</div>
             </div>
             <div class="q-mb-xs info-row">
               <div class="label">ชั่วโมงที่ได้รับ</div>
-              <div class="value">: {{ row.course.hour !== null ? row.course.hour : '-' }}</div>
+              <div class="value">: {{ row.course?.hour !== null ? row.course?.hour : '-' }}</div>
             </div>
             <div class="q-mb-xs info-row">
               <div class="label">วันที่อัปโหลด</div>
-              <div class="value">: {{ dateTime(row) }}</div>
+              <div class="value">: {{ dateTime(row.uploadAt) }}</div>
             </div>
             <div class="info-row" v-if="row.remark">
               <div class="label">หมายเหตุ</div>

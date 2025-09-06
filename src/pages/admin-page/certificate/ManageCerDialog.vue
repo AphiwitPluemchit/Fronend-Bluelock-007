@@ -1,20 +1,10 @@
 <script setup lang="ts">
+import { StatusType, type UploadCertificate } from 'src/services/certificate'
 import { ref, computed, watch } from 'vue'
-
-interface CertificateData {
-  code: string
-  name: string
-  certName: string
-  imageUrl: string
-  skill: string
-  hour: number
-  status: string
-  note: string
-}
 
 const props = defineProps<{
   modelValue: boolean
-  data: CertificateData
+  data: UploadCertificate
 }>()
 
 const emit = defineEmits(['update:modelValue', 'confirm'])
@@ -68,23 +58,26 @@ const confirm = () => {
       <div class="text-h5 q-mb-md">จัดการใบประกาศนียบัตร</div>
 
       <div class="q-mb-sm row">
-        <div class="col-6"><b>ชื่อ-สกุล :</b> {{ props.data.name }}</div>
-        <div class="col-6"><b>รหัสนิสิต : </b> {{ props.data.code }}</div>
+        <div class="col-6"><b>ชื่อ-สกุล :</b> {{ props.data.student?.name }}</div>
+        <div class="col-6"><b>รหัสนิสิต : </b> {{ props.data.student?.code }}</div>
       </div>
-      <div class="q-mb-sm cert-title"><b>หัวข้ออบรม : </b> {{ props.data.certName }}</div>
-      <div class="q-mb-sm"><b>ประเภทกิจกรรม : </b> {{ props.data.skill }}</div>
-      <div class="q-mb-sm"><b>จำนวนชั่วโมง : </b> {{ props.data.hour }} ชั่วโมง</div>
+      <div class="q-mb-sm cert-title"><b>หัวข้ออบรม : </b> {{ props.data.course?.name }}</div>
+      <div class="q-mb-sm">
+        <b>ประเภทกิจกรรม : </b>
+        {{ props.data.course?.isHardSkill ? 'ทักษะด้านวิชาการ' : 'เตรียมความพร้อม' }}
+      </div>
+      <div class="q-mb-sm"><b>จำนวนชั่วโมง : </b> {{ props.data.course?.hour }} ชั่วโมง</div>
       <div class="q-mb-sm"><b>รูปใบประกาศนียบัตร</b></div>
 
       <q-img
-        :src="props.data.imageUrl"
+        :src="props.data.url"
         style="border: 1px solid #333"
         class="q-my-md"
         spinner-color="primary"
       />
 
       <!-- รออนุมัติ -->
-      <template v-if="props.data.status === 'รออนุมัติ'">
+      <template v-if="props.data.status === StatusType.PENDING">
         <div class="row justify-center q-gutter-sm q-mb-md">
           <q-btn
             label="อนุมัติ"
@@ -114,10 +107,10 @@ const confirm = () => {
       </template>
 
       <!-- อนุมัติแล้ว -->
-      <template v-else-if="props.data.status === 'อนุมัติ'">
+      <template v-else-if="props.data.status === StatusType.APPROVED">
         <div class="row justify-center q-gutter-sm q-mb-md">
           <q-badge
-            v-if="props.data.status === 'อนุมัติ'"
+            v-if="props.data.status === StatusType.APPROVED"
             label="อนุมัติ"
             class="badge-approve"
             rounded
@@ -130,17 +123,17 @@ const confirm = () => {
       </template>
 
       <!-- ไม่อนุมัติแล้ว -->
-      <template v-else-if="props.data.status === 'ไม่อนุมัติ'">
+      <template v-else-if="props.data.status === StatusType.REJECTED">
         <div class="row justify-center q-gutter-sm q-mb-md">
           <q-badge
-            v-if="props.data.status === 'ไม่อนุมัติ'"
+            v-if="props.data.status === StatusType.REJECTED"
             label="ไม่อนุมัติ"
             class="badge-reject"
             rounded
           />
         </div>
         <div class="row q-col-gutter-md q-mb-md">
-          <div class="col-12"><b>หมายเหตุ : </b> {{ props.data.note }}</div>
+          <div class="col-12"><b>หมายเหตุ : </b> {{ props.data.remark }}</div>
         </div>
         <div class="row justify-end">
           <q-btn class="btnreject" @click="closeDialog">ปิด</q-btn>

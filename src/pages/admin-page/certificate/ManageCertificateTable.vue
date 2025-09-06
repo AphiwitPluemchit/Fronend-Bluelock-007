@@ -1,61 +1,77 @@
 <script setup lang="ts">
-import { ref, computed } from 'vue'
-import type { QTableProps } from 'quasar'
+import { ref, onMounted } from 'vue'
+import type { QTableColumn } from 'quasar'
 import FilterDialog from 'src/components/Dialog/FilterDialog.vue'
 import ManageCerDialog from './ManageCerDialog.vue'
+import {
+  type CertificateQuery,
+  CertificateService,
+  dateTime,
+  getStatus,
+  getStatusClass,
+  StatusType,
+  type UploadCertificate,
+} from 'src/services/certificate'
+import { type PaginationRequest } from 'src/types/pagination'
+import { seqNo } from 'src/utils/sequence'
 
-const search1 = ref('')
-const showFilterDialog1 = ref(false)
-const filterCategories1 = ref(['major', 'statusCertificate'])
-
-const filteredRows = computed(() =>
-  rows.value.filter((row) => row.name.includes(search.value) || row.code.includes(search.value)),
-)
-
-const columns: QTableProps['columns'] = [
-  { name: 'id', label: 'ลำดับ', field: 'id', align: 'left' },
-  { name: 'code', label: 'รหัสนิสิต', field: 'code', align: 'left' },
-  { name: 'name', label: 'ชื่อ-สกุล', field: 'name', align: 'left' },
-  { name: 'major', label: 'สาขา', field: 'major', align: 'left' },
-  { name: 'certName', label: 'ชื่อหัวข้อการอบรม', field: 'certName', align: 'left' },
-  { name: 'uploadDate', label: 'วันที่อัปโหลด', field: 'uploadDate', align: 'left' },
-  { name: 'status', label: 'สถานะ', field: 'status', align: 'center' },
-  { name: 'action', label: '', field: 'action', align: 'center' },
-]
-
-function getStatusClass(status: CertificateRow['status']) {
-  switch (status) {
-    case 'อนุมัติ':
-      return 'status-approved'
-    case 'รออนุมัติ':
-      return 'status-waiting'
-    case 'ไม่อนุมัติ':
-      return 'status-rejected'
-  }
-}
-
-const showDialog = ref(false)
-const selectedCert = ref({
-  code: '',
-  name: '',
-  certName: '',
-  imageUrl: '',
-  skill: '',
-  hour: 0,
-  status: '',
-  note: '',
+const showFilterDialog = ref(false)
+const filterCategories = ref(['major', 'statusCertificate'])
+const params = ref<CertificateQuery>({
+  page: 1,
+  limit: 15,
+  sortBy: 'uploadAt',
+  order: 'desc',
+})
+const loading = ref(false)
+const pagination = ref<PaginationRequest>({
+  descending: true,
+  page: 1,
+  rowsNumber: 0,
+  rowsPerPage: 15,
+  sortBy: 'uploadAt',
 })
 
-const openManageCer = (row: CertificateRow) => {
-  const found = certList.value.find((cert) => cert.code === row.code)
+const columns: QTableColumn<UploadCertificate>[] = [
+  { name: 'no', label: 'ลำดับ', field: () => '', align: 'left' },
+  { name: 'code', label: 'รหัสนิสิต', field: (row) => row.student?.code, align: 'left' },
+  { name: 'name', label: 'ชื่อ-สกุล', field: (row) => row.student?.name, align: 'left' },
+  { name: 'major', label: 'สาขา', field: (row) => row.student?.major, align: 'left' },
+  {
+    name: 'courseName',
+    label: 'ชื่อหัวข้อการอบรม',
+    field: (row) => row.course?.name,
+    align: 'left',
+  },
+  { name: 'uploadAt', label: 'วันที่อัปโหลด', field: (row) => row.uploadAt, align: 'left' },
+  { name: 'status', label: 'สถานะ', field: 'status', align: 'center' },
+  { name: 'action', label: '', field: (row) => row, align: 'center' },
+]
+
+const showDialog = ref(false)
+const selectedCert = ref<UploadCertificate>({
+  id: '',
+  studentId: '',
+  courseId: '',
+  url: '',
+  nameMatch: 0,
+  courseMatch: 0,
+  status: StatusType.PENDING,
+  isDuplicate: false,
+  uploadAt: '',
+  changedStatusAt: '',
+})
+
+const openManageCer = (row: UploadCertificate) => {
+  const found = rows.value.find((cert) => cert.id === row.id)
   if (found) {
     selectedCert.value = { ...found }
     showDialog.value = true
   }
 }
 
-const viewDetail = (row: CertificateRow) => {
-  const found = certList.value.find((cert) => cert.code === row.code)
+const viewDetail = (row: UploadCertificate) => {
+  const found = rows.value.find((cert) => cert.id === row.id)
   if (found) {
     selectedCert.value = { ...found }
     console.log(selectedCert.value)
@@ -66,130 +82,41 @@ const viewDetail = (row: CertificateRow) => {
 }
 
 const handleConfirm = (updated: typeof selectedCert.value & { status: string }) => {
-  const found = certList.value.find((c) => c.code === updated.code)
+  const found = rows.value.find((c) => c.id === updated.id)
   if (found) {
     found.status = updated.status
   }
 }
 
-interface CertificateRow {
-  id: number
-  code: string
-  name: string
-  major: string
-  certName: string
-  status: 'รออนุมัติ' | 'อนุมัติ' | 'ไม่อนุมัติ'
-  uploadDate: string
+//Mock up
+//Mock up
+const rows = ref<UploadCertificate[]>([])
+
+async function onRequest(props: {
+  pagination: { sortBy: string; descending: boolean; page: number; rowsPerPage: number }
+}) {
+  params.value.page = props.pagination.page
+  params.value.limit = props.pagination.rowsPerPage
+  params.value.sortBy = props.pagination.sortBy
+  params.value.order = props.pagination.descending ? 'desc' : 'asc'
+  await fetchCertificates()
 }
 
-const search = ref('')
+const fetchCertificates = async () => {
+  try {
+    const response = await CertificateService.getAll(params.value)
+    rows.value = response.data
+    pagination.value.rowsNumber = response.meta.total
+    pagination.value.page = response.meta.page
+    pagination.value.rowsPerPage = response.meta.limit
+  } catch (error) {
+    console.error('Error fetching certificates:', error)
+  }
+}
 
-//Mock up
-//Mock up
-const rows = ref<CertificateRow[]>([
-  {
-    id: 1,
-    code: '65160305',
-    name: 'ศิวะ รัตนวงศ์',
-    major: 'CS',
-    certName:
-      'จิตวิทยาประยุกต์ในการทํางาน เพื่อความสำเร็จ ความสุข และความมั่งคั่ง | Applied Psychology to Work through Success Happiness and Wealth',
-    status: 'รออนุมัติ',
-    uploadDate: '10 พ.ค. 2568',
-  },
-  {
-    id: 2,
-    code: '65160332',
-    name: 'กรณิษา ทองเยี่ยม',
-    major: 'CS',
-    certName:
-      'ประกาศนียบัตร 2022 ประกาศนียบัตร 2022 ประกาศนียบัตร 2022 ประกาศนียบัตร 2022 ประกาศนียบัตร 2022 ประกาศนีย',
-    status: 'รออนุมัติ',
-    uploadDate: '10 พ.ค. 2568',
-  },
-  {
-    id: 3,
-    code: '65160302',
-    name: 'อุดม เมธีสสสสสสสสสสสสสสสสสสสสสสสสสสสสสสสสสสสสสสส',
-    major: 'ITDI',
-    certName: 'ประกาศนียบัตร 2022',
-    status: 'รออนุมัติ',
-    uploadDate: '10 พ.ค. 2568',
-  },
-  {
-    id: 6,
-    code: '65160333',
-    name: 'กรรณา สีประสงค์',
-    major: 'CS',
-    certName: 'ประกาศนียบัตร 2022',
-    status: 'อนุมัติ',
-    uploadDate: '10 พ.ค. 2568',
-  },
-  {
-    id: 9,
-    code: '65160334',
-    name: 'กฤติภัค รัตน์โพธิ์โรจน์',
-    major: 'CS',
-    certName: 'ประกาศนียบัตร 2022',
-    status: 'ไม่อนุมัติ',
-    uploadDate: '10 พ.ค. 2568',
-  },
-])
-
-const certList = ref([
-  {
-    code: '65160333',
-    name: 'กรรณา สีประสงค์',
-    certName: 'ประกาศนียบัตร 2022',
-    status: 'อนุมัติ',
-    imageUrl: '/images/sample_cert.png',
-    skill: 'เตรียมความพร้อม',
-    hour: 3,
-    note: '',
-  },
-  {
-    code: '65160305',
-    name: 'ศิวะ รัตนวงศ์',
-    certName:
-      'จิตวิทยาประยุกต์ในการทํางาน เพื่อความสำเร็จ ความสุข และความมั่งคั่ง | Applied Psychology to Work through Success Happiness and Wealth',
-    status: 'รออนุมัติ',
-    imageUrl: '/images/sample_cert.png',
-    skill: '',
-    hour: 0,
-    note: '',
-  },
-  {
-    code: '65160332',
-    name: 'กรณิษา ทองเยี่ยม',
-    certName:
-      'ประกาศนียบัตร 2022 ประกาศนียบัตร 2022 ประกาศนียบัตร 2022 ประกาศนียบัตร 2022 ประกาศนียบัตร 2022 ประกาศนีย',
-    status: 'รออนุมัติ',
-    imageUrl: '/images/sample_cert.png',
-    skill: '',
-    hour: 0,
-    note: 'เอกสารไม่ถูกต้อง',
-  },
-  {
-    code: '65160302',
-    name: 'อุดม เมธีสสสสสสสสสสสสสสสสสสสสสสสสสสสสสสสสสสสสสสสสสสสสสสสสสสสสส',
-    certName: 'ประกาศนียบัตร 2022',
-    status: 'รออนุมัติ',
-    imageUrl: '/images/sample_cert.png',
-    skill: '',
-    hour: 0,
-    note: '',
-  },
-  {
-    code: '65160334',
-    name: 'กฤติภัค รัตน์โพธิ์โรจน์',
-    certName: 'ประกาศนียบัตร 2022',
-    status: 'ไม่อนุมัติ',
-    imageUrl: '/images/sample_cert.png',
-    skill: '',
-    hour: 0,
-    note: 'ชื่อไม่ตรงกับระบบ',
-  },
-])
+onMounted(async () => {
+  await fetchCertificates()
+})
 </script>
 <template>
   <q-page class="q-pa-md">
@@ -206,20 +133,18 @@ const certList = ref([
           <q-input
             dense
             outlined
-            v-model="search1"
+            v-model="params.search"
             label="ค้นหา ชื่อ รหัสนิสิต"
             class="q-mr-sm searchbox"
+            debounce="500"
+            @update:model-value="fetchCertificates"
             :style="{ boxShadow: 'none', border: 'none' }"
           >
             <template v-slot:append>
               <q-icon name="search" />
             </template>
           </q-input>
-          <FilterDialog
-            v-model="showFilterDialog1"
-            :categories="filterCategories1"
-            class="q-mr-sm"
-          />
+          <FilterDialog v-model="showFilterDialog" :categories="filterCategories" class="q-mr-sm" />
         </div>
       </div>
 
@@ -227,9 +152,11 @@ const certList = ref([
       <q-table
         bordered
         flat
-        :rows="filteredRows"
+        :rows="rows"
         :columns="columns"
-        :rows-per-page-options="[5, 7, 10, 15, 20]"
+        v-model:pagination="pagination"
+        :loading="loading"
+        @request="onRequest"
         row-key="id"
         class="q-mt-md my-sticky-header-table"
       >
@@ -245,8 +172,10 @@ const certList = ref([
         <!-- Body -->
         <template v-slot:body="props">
           <q-tr :props="props">
-            <q-td key="id">{{ props.row.id }}</q-td>
-            <q-td key="code">{{ props.row.code }}</q-td>
+            <q-td key="id">{{
+              seqNo(props.rowIndex, pagination.page, pagination.rowsPerPage)
+            }}</q-td>
+            <q-td key="code">{{ props.row.student?.code }}</q-td>
             <q-td
               key="name"
               style="
@@ -255,23 +184,23 @@ const certList = ref([
                 overflow: hidden;
                 text-overflow: ellipsis;
               "
-              >{{ props.row.name }}</q-td
+              >{{ props.row.student?.name }}</q-td
             >
-            <q-td key="major">{{ props.row.major }}</q-td>
+            <q-td key="major">{{ props.row.student?.major }}</q-td>
             <q-td
-              key="certName"
+              key="courseName"
               style="
                 max-width: 350px;
                 white-space: nowrap;
                 overflow: hidden;
                 text-overflow: ellipsis;
               "
-              >{{ props.row.certName }}</q-td
+              >{{ props.row.course?.name }}</q-td
             >
-            <q-td key="uploadDate">{{ props.row.uploadDate }}</q-td>
+            <q-td key="uploadAt">{{ dateTime(props.row.uploadAt) }}</q-td>
             <q-td key="status" class="text-center">
               <q-badge
-                :label="props.row.status"
+                :label="getStatus(props.row.status)"
                 class="status-badge"
                 :class="getStatusClass(props.row.status)"
               />
@@ -298,6 +227,10 @@ const certList = ref([
               </q-icon>
             </td>
           </q-tr>
+        </template>
+        <!-- no data -->
+        <template v-slot:no-data>
+          <div class="text-center q-pa-md text-grey-8">ไม่พบข้อมูล</div>
         </template>
       </q-table>
       <ManageCerDialog v-model="showDialog" :data="selectedCert" @confirm="handleConfirm" />
