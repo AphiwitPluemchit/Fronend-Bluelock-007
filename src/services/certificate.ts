@@ -36,7 +36,7 @@ export enum StatusType {
   REJECTED = 'rejected',
 }
 
-interface CertificateQuery extends Pagination {
+export interface CertificateQuery extends Pagination {
   studentId?: string
   courseId?: string
   status?: StatusType

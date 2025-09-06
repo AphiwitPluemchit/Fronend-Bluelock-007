@@ -1,33 +1,59 @@
 <script setup lang="ts">
-import { type UploadCertificate } from 'src/services/certificate'
+import {
+  type CertificateQuery,
+  CertificateService,
+  type UploadCertificate,
+} from 'src/services/certificate'
 import { ref, onMounted, onBeforeUnmount, watchEffect } from 'vue'
+import { useAuthStore } from 'src/stores/auth'
+import { type QTableColumn } from 'quasar'
+import { seqNo } from 'src/utils/sequence'
+import { type QTableRequest } from 'src/types/pagination'
 
-//mockUp
+const authStore = useAuthStore()
+
 const rows = ref<UploadCertificate[]>([])
+const params = ref<CertificateQuery>({
+  page: 1,
+  limit: 15,
+  sortBy: 'uploadAt',
+  order: 'desc',
+})
 
-const columns = [
+const pagination = ref({
+  rowsPerPage: 15,
+  page: 1,
+  rowsNumber: 0,
+  sortBy: 'uploadAt',
+  order: 'desc',
+})
+
+const columns: QTableColumn<UploadCertificate>[] = [
   {
-    name: 'id',
+    name: 'no',
     label: 'ลำดับ',
-    field: 'id',
+    field: () => '',
     align: 'left' as const,
     sortable: false,
     style: 'width: 8%',
     headerStyle: 'width: 8%; text-align: left;',
   },
   {
-    name: 'certName',
+    name: 'courseName',
     label: 'ชื่อ',
-    field: 'certName',
+    field: (row) => row.course.name,
     align: 'left' as const,
+    classes() {
+      return 'ellipsis'
+    },
     sortable: true,
     style: 'width: 25%; overflow: hidden; text-overflow: ellipsis;',
     headerStyle: 'width: 25%; text-align: left;',
   },
   {
-    name: 'skill',
+    name: 'courseType',
     label: 'ประเภทกิจกรรม',
-    field: 'skill',
+    field: (row) => translateSkillType(row.course.isHardSkill || false),
     align: 'left' as const,
     sortable: true,
     style: 'width: 18%',
@@ -36,16 +62,16 @@ const columns = [
   {
     name: 'hour',
     label: 'ชั่วโมงที่ได้รับ',
-    field: 'hour',
+    field: (row) => row.course.hour,
     align: 'center' as const,
     sortable: true,
     style: 'width: 15%',
     headerStyle: 'width: 15%; text-align: center;',
   },
   {
-    name: 'uploadDate',
+    name: 'uploadAt',
     label: 'วันที่อัปโหลด',
-    field: 'uploadDate',
+    field: (row) => dateTime(row),
     align: 'left' as const,
     sortable: true,
     style: 'width: 12%',
@@ -54,45 +80,69 @@ const columns = [
   {
     name: 'status',
     label: 'สถานะ',
-    field: 'status',
+    field: (row) => getStatus(row.status),
     align: 'center' as const,
     sortable: true,
     style: 'width: 12%',
     headerStyle: 'width: 12%; text-align: center;',
   },
-  {
-    name: 'note',
-    label: 'หมายเหตุ',
-    field: 'note',
-    align: 'center' as const,
-    sortable: false,
-    style: 'width: 10%',
-    headerStyle: 'width: 10%; text-align: center;',
-  },
+  // {
+  //   // detail
+  //   name: 'actions',
+  //   label: 'รายละเอียด',
+  //   field: (row) => row,
+  //   sortable: false,
+  //   style: 'width: 5%; text-align: center;',
+  //   headerStyle: 'width: 5%; text-align: center;',
+  // },
 ]
+
+function getStatus(row: string) {
+  switch (row) {
+    case 'pending':
+      return 'รออนุมัติ'
+    case 'approved':
+      return 'อนุมัติ'
+    case 'rejected':
+      return 'ไม่อนุมัติ'
+    default:
+      return ''
+  }
+}
 
 function getStatusClass(status: string) {
   switch (status) {
-    case 'รออนุมัติ':
+    case 'pending':
       return 'status-waiting'
-    case 'อนุมัติ':
+    case 'approved':
       return 'status-approved'
-    case 'ไม่อนุมัติ':
+    case 'rejected':
       return 'status-rejected'
     default:
       return ''
   }
 }
 
-function translateSkillType(skill: string) {
-  switch (skill) {
-    case 'hard':
+function translateSkillType(isHardSkill: boolean) {
+  switch (isHardSkill) {
+    case true:
       return 'ทักษะทางวิชาการ'
-    case 'soft':
+    case false:
       return 'เตรียมความพร้อม'
     default:
       return '-'
   }
+}
+
+const dateTime = (row: UploadCertificate) => {
+  return new Date(row.uploadAt).toLocaleString('th-TH', {
+    day: '2-digit',
+    month: '2-digit',
+    year: 'numeric',
+    // hour: '2-digit',
+    // minute: '2-digit',
+    // hour12: false,
+  })
 }
 
 // Responsive variables
@@ -105,27 +155,35 @@ const checkScreen = () => {
   isMediumScreen.value = width <= 850
 }
 
-function truncateText(text: string, maxLength = 30): string {
-  if (!text) return '-'
-
-  let dynamicMaxLength = maxLength
-  if (isSmallScreen.value) {
-    dynamicMaxLength = 45
-  } else if (isMediumScreen.value) {
-    dynamicMaxLength = 35
-  }
-
-  return text.length > dynamicMaxLength ? text.slice(0, dynamicMaxLength - 3) + '...' : text
+async function fetchData() {
+  await CertificateService.getAll(params.value).then((res) => {
+    rows.value = res.data
+    pagination.value.rowsNumber = res.meta.total
+  })
 }
 
-onMounted(() => {
+onMounted(async () => {
   checkScreen()
   window.addEventListener('resize', checkScreen)
+
+  if (authStore.isStudent && authStore.getUser?.id) {
+    params.value.studentId = authStore.getUser?.id
+  }
+
+  await fetchData()
 })
 
 onBeforeUnmount(() => {
   window.removeEventListener('resize', checkScreen)
 })
+
+async function onRequest(props: QTableRequest) {
+  params.value.page = props.pagination.page
+  params.value.limit = props.pagination.rowsPerPage
+  params.value.sortBy = props.pagination.sortBy
+  params.value.order = props.pagination.descending ? 'desc' : 'asc'
+  await fetchData()
+}
 
 watchEffect(() => {
   console.log('screen width changed →', {
@@ -148,10 +206,10 @@ watchEffect(() => {
           :rows="rows"
           :columns="columns"
           row-key="id"
-          class="my-sticky-header-table"
-          :pagination="{ rowsPerPage: 10 }"
+          :pagination="params"
+          @onRequest="onRequest"
         >
-          <!-- หัวตาราง Sticky -->
+          <!-- หัวตาราง Sticky
           <template v-slot:header="props">
             <q-tr :props="props">
               <q-th
@@ -169,36 +227,30 @@ watchEffect(() => {
                 </div>
               </q-th>
             </q-tr>
+          </template> -->
+
+          <!-- คอลัมน์ลำดับ -->
+          <template #body-cell-no="props">
+            <q-td :props="props">
+              {{ seqNo(props.rowIndex, params.page, params.limit) }}
+            </q-td>
           </template>
 
-          <!-- เนื้อหาตาราง -->
-          <template v-slot:body="props">
-            <q-tr :props="props">
-              <q-td key="id">{{ props.row.id }}</q-td>
-              <q-td key="certName">
-                <div class="ellipsis">
-                  {{ truncateText(props.row.certName) }}
-                  <q-tooltip>{{ props.row.certName }}</q-tooltip>
-                </div>
-              </q-td>
-              <q-td key="skill">{{ translateSkillType(props.row.skill) }}</q-td>
-              <q-td key="hour" class="text-center">{{
-                props.row.hour !== null ? props.row.hour : '-'
-              }}</q-td>
-              <q-td key="uploadDate">{{ props.row.uploadDate }}</q-td>
-              <q-td key="status">
-                <div class="row justify-center items-center full-width">
-                  <q-badge
-                    :label="props.row.status"
-                    :class="getStatusClass(props.row.status)"
-                    class="status-badge"
-                    rounded
-                    unelevated
-                  />
-                </div>
-              </q-td>
-              <q-td key="note" class="text-center">{{ props.row.note || '-' }}</q-td>
-            </q-tr>
+          <template #body-cell-status="props">
+            <q-td key="status">
+              <div class="row justify-center items-center full-width">
+                <q-badge
+                  :label="getStatus(props.row.status)"
+                  :class="getStatusClass(props.row.status)"
+                  class="status-badge"
+                  rounded
+                  unelevated
+                />
+              </div>
+            </q-td>
+            <!-- <q-td key="actions">
+              <q-btn flat round dense icon="info" color="primary" @click="showDetail(row)" />
+            </q-td> -->
           </template>
 
           <template v-slot:no-data>
@@ -226,14 +278,14 @@ watchEffect(() => {
             <div class="row justify-between header-row-responsive">
               <!-- ซ้าย: ชื่อใบรับรอง -->
               <div class="ActivityNamelabel">
-                {{ truncateText(row.course.name) }}
+                {{ row.course.name }}
                 <q-tooltip>{{ row.course.name }}</q-tooltip>
               </div>
 
               <!-- ขวา: Status Badge -->
               <div class="row q-gutter-sm action-section">
                 <q-badge
-                  :label="row.status"
+                  :label="getStatus(row.status)"
                   :class="getStatusClass(row.status)"
                   class="status-badge"
                 >
@@ -250,7 +302,7 @@ watchEffect(() => {
             </div> -->
             <div class="q-mb-xs info-row">
               <div class="label">ประเภทกิจกรรม</div>
-              <div class="value">: {{ translateSkillType(row.course.type) }}</div>
+              <div class="value">: {{ translateSkillType(row.course.isHardSkill || false) }}</div>
             </div>
             <div class="q-mb-xs info-row">
               <div class="label">ชั่วโมงที่ได้รับ</div>
@@ -258,7 +310,7 @@ watchEffect(() => {
             </div>
             <div class="q-mb-xs info-row">
               <div class="label">วันที่อัปโหลด</div>
-              <div class="value">: {{ row.uploadAt }}</div>
+              <div class="value">: {{ dateTime(row) }}</div>
             </div>
             <div class="info-row" v-if="row.remark">
               <div class="label">หมายเหตุ</div>

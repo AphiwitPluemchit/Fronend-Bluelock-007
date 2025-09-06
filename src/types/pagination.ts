@@ -36,3 +36,13 @@ export interface ErrorResponse {
   status: number
   message: string
 }
+
+export interface QTableRequest {
+  pagination: {
+    descending: boolean
+    page: number
+    rowsNumber: number
+    rowsPerPage: number
+    sortBy: string
+  }
+}
