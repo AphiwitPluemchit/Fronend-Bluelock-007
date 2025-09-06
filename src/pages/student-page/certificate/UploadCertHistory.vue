@@ -8,7 +8,6 @@ import { ref, onMounted, onBeforeUnmount, watchEffect } from 'vue'
 import { useAuthStore } from 'src/stores/auth'
 import { type QTableColumn } from 'quasar'
 import { seqNo } from 'src/utils/sequence'
-import { type QTableRequest } from 'src/types/pagination'
 
 const authStore = useAuthStore()
 
@@ -19,6 +18,7 @@ const params = ref<CertificateQuery>({
   sortBy: 'uploadAt',
   order: 'desc',
 })
+const loading = ref(false)
 
 const pagination = ref({
   rowsPerPage: 15,
@@ -156,10 +156,12 @@ const checkScreen = () => {
 }
 
 async function fetchData() {
+  loading.value = true
   await CertificateService.getAll(params.value).then((res) => {
     rows.value = res.data
     pagination.value.rowsNumber = res.meta.total
   })
+  loading.value = false
 }
 
 onMounted(async () => {
@@ -177,7 +179,9 @@ onBeforeUnmount(() => {
   window.removeEventListener('resize', checkScreen)
 })
 
-async function onRequest(props: QTableRequest) {
+async function onRequest(props: {
+  pagination: { sortBy: string; descending: boolean; page: number; rowsPerPage: number }
+}) {
   params.value.page = props.pagination.page
   params.value.limit = props.pagination.rowsPerPage
   params.value.sortBy = props.pagination.sortBy
@@ -206,8 +210,9 @@ watchEffect(() => {
           :rows="rows"
           :columns="columns"
           row-key="id"
-          :pagination="params"
-          @onRequest="onRequest"
+          v-model:pagination="pagination"
+          :loading="loading"
+          @request="onRequest"
         >
           <!-- หัวตาราง Sticky
           <template v-slot:header="props">
