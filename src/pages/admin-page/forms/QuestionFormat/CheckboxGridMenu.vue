@@ -7,22 +7,22 @@
         <div class="col-6">
           <div class="text-subtitle2">Rows</div>
           <div
-            v-for="(_, rowIndex) in localData.rows"
-            :key="'row-' + rowIndex"
+            v-for="(row, rowIndex) in localData.rows"
+            :key="row.id"
             class="row items-center q-gutter-sm q-my-sm"
           >
             <div>{{ rowIndex + 1 }}.</div>
-            <!-- ใช้ :model-value + setter กัน undefined -->
             <q-input
               dense
               outlined
-              :model-value="localData.rows?.[rowIndex]?.title ?? ''"
-              @update:model-value="val => setRowTitle(rowIndex, String(val ?? ''))"
+              :model-value="row.title"
+              @update:model-value="(val) => setRowTitle(rowIndex, String(val ?? ''))"
               placeholder="Row label"
               class="col"
             />
             <q-btn icon="close" color="negative" flat round dense @click="removeRow(rowIndex)" />
           </div>
+
           <q-btn flat dense icon="add" label="Add row" size="sm" @click="addRow" />
         </div>
 
@@ -30,46 +30,46 @@
         <div class="col-6">
           <div class="text-subtitle2">choices</div>
           <div
-            v-for="(_, colIndex) in localData.choices"
-            :key="'col-' + colIndex"
+            v-for="(col, colIndex) in localData.choices"
+            :key="col.id"
             class="row items-center q-gutter-sm q-my-sm"
           >
             <q-checkbox dense disable v-model="dummy[colIndex]" />
             <q-input
               dense
               outlined
-              :model-value="localData.choices?.[colIndex]?.title ?? ''"
-              @update:model-value="val => setColTitle(colIndex, String(val ?? ''))"
+              :model-value="col.title"
+              @update:model-value="(val) => setColTitle(colIndex, String(val ?? ''))"
               placeholder="Column label"
               class="col"
             />
             <q-btn icon="close" color="negative" flat round dense @click="removeColumn(colIndex)" />
           </div>
+
           <q-btn flat dense icon="add" label="Add column" size="sm" @click="addColumn" />
         </div>
       </div>
     </div>
 
     <!-- Footer -->
-    
   </q-card>
 </template>
 
 <script setup lang="ts">
-import { reactive, ref, watch } from 'vue'
+import { reactive, ref, watch, nextTick } from 'vue'
+import { v4 as uuidv4 } from 'uuid'
 
-type OptionRow = { title: string; sequence: number }
+type OptionRow = { id: string; title: string; sequence: number }
 
 const props = defineProps<{
   modelValue: {
-    
     questionText?: string
     title?: string
     description?: string
     isRequired: boolean
     type: string
-    rows: (string | OptionRow)[]
-    choices: (string | OptionRow)[]
+    rows: (string | Omit<OptionRow, 'id'> | Partial<OptionRow>)[]
+    choices: (string | Omit<OptionRow, 'id'> | Partial<OptionRow>)[]
     session?: number
   }
 }>()
@@ -89,28 +89,39 @@ const emit = defineEmits<{
 
 const dummy = ref<boolean[]>([])
 
-const toOptionArray = (arr: (string | OptionRow)[] | undefined): OptionRow[] =>
-  (arr ?? []).map((x, i) =>
-    typeof x === 'string'
-      ? { title: x, sequence: i + 1 }
-      : { title: x.title ?? '', sequence: x.sequence ?? i + 1 }
-  )
+// ---- helpers ----
+const toOptionArray = (arr: (string | Partial<OptionRow>)[] | undefined): OptionRow[] =>
+  (arr ?? []).map((x, i) => {
+    if (typeof x === 'string') {
+      return { id: uuidv4(), title: x, sequence: i + 1 }
+    }
+    return {
+      id: x.id ?? uuidv4(),
+      title: x.title ?? '',
+      sequence: typeof x.sequence === 'number' ? x.sequence : i + 1,
+    }
+  })
 
-/** เก็บสถานะภายในให้เป็น OptionRow[] เสมอ */
 const localData = reactive({
   questionText: '' as string,
   title: '' as string,
   description: '' as string,
   isRequired: false as boolean,
-  type: 'grid_checkbox' as string, // ชื่อ type ที่สอดคล้องฝั่ง Builder
+  type: 'grid_checkbox' as string,
   rows: [] as OptionRow[],
   choices: [] as OptionRow[],
   session: 1 as number,
 })
 
+// ====== anti-recursion guard ======
+let syncingFromProps = false
+
+// 1) props -> local (ไม่ emit)
 watch(
   () => props.modelValue,
-  (v) => {
+  async (v) => {
+    syncingFromProps = true
+
     localData.questionText = v?.questionText ?? ''
     localData.title = v?.title ?? ''
     localData.description = v?.description ?? ''
@@ -120,82 +131,92 @@ watch(
     localData.choices = toOptionArray(v?.choices ?? [])
     localData.session = v?.session ?? 1
 
+    // seed ถ้าว่าง
     if (localData.rows.length === 0) {
       localData.rows = [
-        { title: '', sequence: 1 },
-        { title: '', sequence: 2 },
-        { title: '', sequence: 3 },
+        { id: uuidv4(), title: '', sequence: 1 },
+        { id: uuidv4(), title: '', sequence: 2 },
+        { id: uuidv4(), title: '', sequence: 3 },
       ]
     }
     if (localData.choices.length === 0) {
-      // Likert 5→1 ตัวอย่าง
       localData.choices = [
-        { title: '5', sequence: 1 },
-        { title: '4', sequence: 2 },
-        { title: '3', sequence: 3 },
-        { title: '2', sequence: 4 },
-        { title: '1', sequence: 5 },
+        { id: uuidv4(), title: '5', sequence: 1 },
+        { id: uuidv4(), title: '4', sequence: 2 },
+        { id: uuidv4(), title: '3', sequence: 3 },
+        { id: uuidv4(), title: '2', sequence: 4 },
+        { id: uuidv4(), title: '1', sequence: 5 },
       ]
     }
 
-    // sync dummy ให้ยาวเท่ากับ choices
+    // sync dummy ให้ยาวเท่า choices
     dummy.value = Array.from({ length: localData.choices.length }, () => false)
 
-    emitUpdate()
+    await nextTick(() => { syncingFromProps = false })
   },
-  { immediate: true, deep: true }
+  { immediate: true } 
 )
 
-function emitUpdate() {
-  emit('update:modelValue', {
+// 2) local -> emit (เฉพาะเมื่อไม่ใช่ช่วง sync จาก props)
+watch(
+  () => ({
     questionText: localData.questionText,
     title: localData.title,
     description: localData.description,
     isRequired: localData.isRequired,
     type: localData.type,
-    rows: localData.rows.map((r, i) => ({ title: r.title ?? '', sequence: i + 1 })),
-    choices: localData.choices.map((c, i) => ({ title: c.title ?? '', sequence: i + 1 })),
-    session: localData.session, // ให้เป็น number เสมอ (กัน exactOptionalPropertyTypes)
-  })
-}
+    rows: localData.rows.map(r => ({ ...r })),        // shallow copy
+    choices: localData.choices.map(c => ({ ...c })),  // shallow copy
+    session: localData.session,
+  }),
+  () => {
+    if (syncingFromProps) return
+    emit('update:modelValue', {
+      questionText: localData.questionText,
+      title: localData.title,
+      description: localData.description,
+      isRequired: localData.isRequired,
+      type: localData.type,
+      rows: localData.rows.map((r, i) => ({ id: r.id, title: r.title ?? '', sequence: i + 1 })),
+      choices: localData.choices.map((c, i) => ({ id: c.id, title: c.title ?? '', sequence: i + 1 })),
+      session: localData.session,
+    })
+  },
+  { deep: true }
+)
 
-/** setters แบบปลอดภัย (กัน undefined) */
+// ---- setters ----
 function setRowTitle(index: number, val: string) {
   if (!localData.rows[index]) {
-    localData.rows[index] = { title: '', sequence: index + 1 }
+    localData.rows[index] = { id: uuidv4(), title: '', sequence: index + 1 }
   }
   localData.rows[index].title = val
-  emitUpdate()
 }
 
 function setColTitle(index: number, val: string) {
   if (!localData.choices[index]) {
-    localData.choices[index] = { title: '', sequence: index + 1 }
+    localData.choices[index] = { id: uuidv4(), title: '', sequence: index + 1 }
   }
   localData.choices[index].title = val
-  emitUpdate()
 }
 
-/** handlers */
+// ---- handlers ----
 function addRow() {
-  localData.rows.push({ title: '', sequence: localData.rows.length + 1 })
-  emitUpdate()
+  localData.rows.push({ id: uuidv4(), title: '', sequence: localData.rows.length + 1 })
 }
 function removeRow(index: number) {
   localData.rows.splice(index, 1)
   localData.rows.forEach((r, i) => (r.sequence = i + 1))
-  emitUpdate()
 }
 
 function addColumn() {
-  localData.choices.push({ title: '', sequence: localData.choices.length + 1 })
+  localData.choices.push({ id: uuidv4(), title: '', sequence: localData.choices.length + 1 })
   dummy.value.push(false)
-  emitUpdate()
 }
 function removeColumn(index: number) {
   localData.choices.splice(index, 1)
   dummy.value.splice(index, 1)
   localData.choices.forEach((c, i) => (c.sequence = i + 1))
-  emitUpdate()
 }
 </script>
+

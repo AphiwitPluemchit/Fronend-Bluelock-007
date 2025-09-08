@@ -11,7 +11,6 @@
             class="row items-center q-gutter-sm q-my-sm"
           >
             <div>{{ rowIndex + 1 }}.</div>
-            <!-- ❗อย่า v-model เข้าของที่อาจ undefined ใช้ :model-value + @update -->
             <q-input
               dense
               outlined
@@ -53,9 +52,9 @@
 </template>
 
 <script setup lang="ts">
-import { reactive, ref, watch } from 'vue'
+import { reactive, ref, watch, nextTick } from 'vue'
 
-type OptionRow = { title: string; sequence: number }
+type OptionRow = { id?: string; title: string; sequence: number }
 
 const props = defineProps<{
   modelValue: {
@@ -69,7 +68,6 @@ const props = defineProps<{
   }
 }>()
 
-/** ทำ session เป็น "required number" ใน payload ป้องกัน exactOptionalPropertyTypes */
 const emit = defineEmits<{
   (e: 'update:modelValue', v: {
     title?: string
@@ -98,19 +96,24 @@ const localData = reactive({
   type: 'grid_multiple_choice' as string,
   rows: [] as OptionRow[],
   choices: [] as OptionRow[],
-  session: 1 as number,            // ✅ ให้เป็นเลขแน่นอนตั้งแต่ต้น
+  session: 1 as number,
 })
 
+/** ===== แกนหลัก: ป้องกันลูป watch <-> emit ===== */
+let syncingFromProps = false
+
+// 1) ซิงก์จาก props -> local "อย่างเดียว" (ห้าม emit)
 watch(
   () => props.modelValue,
-  (v) => {
+  async (v) => {
+    syncingFromProps = true
     localData.title = v?.title ?? ''
     localData.description = v?.description ?? ''
     localData.isRequired = !!v?.isRequired
     localData.type = v?.type ?? 'grid_multiple_choice'
     localData.rows = toOptionArray(v?.rows ?? [])
     localData.choices = toOptionArray(v?.choices ?? [])
-    localData.session = (v?.session ?? 1)
+    localData.session = v?.session ?? 1
 
     // seed ถ้าว่าง
     if (localData.rows.length === 0) {
@@ -129,57 +132,59 @@ watch(
         { title: '1', sequence: 5 },
       ]
     }
-    update()
+
+    await nextTick(() => { syncingFromProps = false })
   },
   { immediate: true, deep: true }
 )
 
-function update() {
-  emit('update:modelValue', {
-    title: localData.title,
-    description: localData.description,
-    isRequired: localData.isRequired,
-    type: localData.type,
-    rows: localData.rows.map((r, i) => ({ title: r.title ?? '', sequence: i + 1 })),
-    choices: localData.choices.map((c, i) => ({ title: c.title ?? '', sequence: i + 1 })),
-    session: localData.session,     // ✅ เป็น number แน่นอน
-  })
-}
+// 2) เมื่อ local เปลี่ยน (จากการพิมพ์/กดปุ่ม) ค่อย emit ขึ้นไป
+watch(
+  () => ({ ...localData, rows: [...localData.rows], choices: [...localData.choices] }),
+  () => {
+    if (syncingFromProps) return // ถ้ากำลัง sync จาก props ห้าม emit กลับ
+    emit('update:modelValue', {
+      title: localData.title,
+      description: localData.description,
+      isRequired: localData.isRequired,
+      type: localData.type,
+      rows: localData.rows.map((r, i) => ({ title: r.title ?? '', sequence: i + 1 })),
+      choices: localData.choices.map((c, i) => ({ title: c.title ?? '', sequence: i + 1 })),
+      session: localData.session,
+    })
+  },
+  { deep: true }
+)
 
-/** safe setters สำหรับ input */
+/** ===== handlers ===== */
 function setRowTitle(index: number, val: string) {
   if (!localData.rows[index]) {
     localData.rows[index] = { title: '', sequence: index + 1 }
   }
   localData.rows[index].title = val
-  update()
 }
+
 function setColTitle(index: number, val: string) {
   if (!localData.choices[index]) {
     localData.choices[index] = { title: '', sequence: index + 1 }
   }
   localData.choices[index].title = val
-  update()
 }
 
-// Row / Column handlers
 function addRow() {
   localData.rows.push({ title: '', sequence: localData.rows.length + 1 })
-  update()
 }
 function removeRow(index: number) {
   localData.rows.splice(index, 1)
   localData.rows.forEach((r, i) => (r.sequence = i + 1))
-  update()
 }
 
 function addColumn() {
   localData.choices.push({ title: '', sequence: localData.choices.length + 1 })
-  update()
 }
 function removeColumn(index: number) {
   localData.choices.splice(index, 1)
   localData.choices.forEach((c, i) => (c.sequence = i + 1))
-  update()
 }
 </script>
+

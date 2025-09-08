@@ -1100,7 +1100,7 @@ onMounted(() => {
     <div class="btn-container" v-if="props.isEditing">
       <p class="label label_minWidth btn-label-empty"></p>
       <q-btn class="btnAddActivity" @click="addSubActivity" style="background-color: #3676f9">
-        <p class="label text-white">เพิ่มกิจกรรม</p>
+        <p class="label text-white">เพิ่มกิจกรรมย่อย</p>
       </q-btn>
     </div>
 
