@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed } from 'vue'
-import ActivityType from 'src/pages/student-page/activity/component/ActivityType.vue'
+import ProgramType from 'src/pages/student-page/program/component/programType.vue'
 import { useQuasar } from 'quasar'
 
 const $q = useQuasar()
@@ -16,7 +16,7 @@ interface Props {
 }
 const props = defineProps<Props>()
 
-// แปลง type เป็น skill format ที่ ActivityType ต้องการ
+// แปลง type เป็น skill format ที่ ProgramType ต้องการ
 const skillType = computed(() => (props.type === 'hard' ? 'hardSkill' : 'softSkill'))
 
 // ฟังก์ชันสำหรับคลิกการ์ด (เฉพาะ desktop)
@@ -39,7 +39,7 @@ const handleCardClick = () => {
         <!-- ปุ่มแสดงประเภทคอร์ส -->
         <div class="oc-title text-h6 text-bold ellipsis-2-lines q-mb-sm">{{ title }}</div>
         <div class="oc-type q-mb-sm">
-          <ActivityType :skill="skillType" />
+          <ProgramType :skill="skillType" />
         </div>
         <!-- <div class="text-subtitle2 q-mb-sm">รายละเอียด : {{ description ?? '-' }}</div> -->
         <div class="text-subtitle2 q-mb-sm"> <q-icon name="domain" class="q-mb-xs" /> แหล่งที่มา : {{ platformType }}</div>

@@ -19,13 +19,13 @@ export const useEnrollmentStore = defineStore('enrollment', () => {
     studentYear: [],
   })
 
-  // const fetchEnrollmentsByActivityID = async (
-  //   activityId: string,
-  //   // query: ActivityEnrollmentPagination,
+  // const fetchEnrollmentsByProgramID = async (
+  //   programId: string,
+  //   // query: ProgramEnrollmentPagination,
   // ) => {
   //   try {
   //     console.log('Query Params before API:', query)
-  //     const res = await EnrollmentService.getEnrollmentsByActivityID(activityId, query.value)
+  //     const res = await EnrollmentService.getEnrollmentsByProgramID(programId, query.value)
   //     studentEnrollments.value = res.data
   //     total.value = res.meta.total
   //     console.log('Fetched enrollments:', res)
@@ -47,7 +47,7 @@ export const useEnrollmentStore = defineStore('enrollment', () => {
     studentEnrollments,
     total,
     query,
-    // fetchEnrollmentsByActivityID,
+    // fetchEnrollmentsByProgramID,
     deleteEnrollmentById,
   }
 })

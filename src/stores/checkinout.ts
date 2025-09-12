@@ -11,13 +11,13 @@ export const useCheckinoutStore = defineStore('checkinout', () => {
   async function checkout(token: string) {
     await CheckinoutService.checkout(token)
   }
-  async function getStatus(studentId: string, activityId: string) {
-    const res = await CheckinoutService.getStatus(studentId, activityId)
+  async function getStatus(studentId: string, programId: string) {
+    const res = await CheckinoutService.getStatus(studentId, programId)
     return res
   }
-  async function getActivityForm(activityId: string) {
-    const res = await CheckinoutService.getActivityForm(activityId)
+  async function getProgramForm(programId: string) {
+    const res = await CheckinoutService.getProgramForm(programId)
     return res
   }
-  return { checkinout, checkin, checkout, getStatus, getActivityForm }
+  return { checkinout, checkin, checkout, getStatus, getProgramForm }
 })

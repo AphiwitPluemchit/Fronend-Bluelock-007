@@ -120,11 +120,11 @@ const originalCourseData = ref<Course | null>(null)
 //     if (isEditMode.value) localEditCourse.value.link = val
 //   },
 // })
-// const categoryActivityModel = computed({
+// const categoryProgramModel = computed({
 //   get: () =>
-//     isEditMode.value ? localEditCourse.value.categoryActivity : (course.value?.isHardSkill ?? ''),
+//     isEditMode.value ? localEditCourse.value.categoryProgram : (course.value?.isHardSkill ?? ''),
 //   set: (val: string) => {
-//     if (isEditMode.value) localEditCourse.value.categoryActivity = val
+//     if (isEditMode.value) localEditCourse.value.categoryProgram = val
 //   },
 // })
 // const hourModel = computed({

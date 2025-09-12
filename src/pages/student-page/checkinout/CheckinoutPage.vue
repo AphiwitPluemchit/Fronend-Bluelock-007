@@ -4,14 +4,14 @@ import Checkinpage from 'src/pages/student-page/checkinout/Checkin/CheckinPage.v
 import Checkoutpage from 'src/pages/student-page/checkinout/Checkout/CheckoutPage.vue'
 import { ref, onMounted } from 'vue'
 import CheckinoutService from 'src/services/checkinout'
-import { useStudentActivitystore } from 'src/stores/activity'
+import { useStudentProgramstore } from 'src/stores/program'
 
 const route = useRoute()
 const uuid = route.params.uuid?.toString() || ''
-const tokenInfo = ref<{ type: string; activityId: string; token: string } | null>(null)
+const tokenInfo = ref<{ type: string; programId: string; token: string } | null>(null)
 const loading = ref(true)
 const error = ref('')
-const activityStore = useStudentActivitystore()
+const programStore = useStudentProgramstore()
 
 /** ---------- Helpers ---------- */
 const isNotRegisteredErr = (msg: string) =>
@@ -24,9 +24,9 @@ const isInvalidQrErr = (msg: string) =>
   /qr\s*ไม่ถูกต้อง/i.test(msg) || /qr\s*ไม่ถูกต้องหรือหมดอายุ/i.test(msg)
 
 /** โหลดข้อมูลกิจกรรมแบบปลอดภัย */
-const loadActivitySafe = async (activityId: string) => {
+const loadProgramSafe = async (programId: string) => {
   try {
-    await activityStore.fetchOneData(activityId)
+    await programStore.fetchOneData(programId)
   } catch (e) {
     // ถ้าต้อง log ให้ใช้ logger กลาง แทน console ใน prod
     // console.error('โหลดข้อมูลกิจกรรมล้มเหลว:', e)
@@ -52,7 +52,7 @@ onMounted(async () => {
     }
 
     tokenInfo.value = res
-    await loadActivitySafe(res.activityId)
+    await loadProgramSafe(res.programId)
     return
   } catch (e: unknown) {
     // วิเคราะห์ error จาก getTokenInfo
@@ -72,7 +72,7 @@ onMounted(async () => {
 
       if (valid && valid.type) {
         tokenInfo.value = valid
-        await loadActivitySafe(valid.activityId)
+        await loadProgramSafe(valid.programId)
         return
       } else {
         error.value = 'QR ไม่ถูกต้องหรือหมดอายุ'
@@ -128,12 +128,12 @@ onMounted(async () => {
         <Checkinpage
           v-if="tokenInfo?.type === 'checkin'"
           :token="uuid"
-          :activity="activityStore.form"
+          :program="programStore.form"
         />
         <Checkoutpage
           v-else-if="tokenInfo?.type === 'checkout'"
           :token="uuid"
-          :activity="activityStore.form"
+          :program="programStore.form"
         />
         <div v-else class="text-negative">QR ไม่ถูกต้อง</div>
       </template>

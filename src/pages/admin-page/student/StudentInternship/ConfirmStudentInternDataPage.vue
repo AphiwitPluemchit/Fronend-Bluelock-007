@@ -160,7 +160,7 @@ const saveStudents = async () => {
       .map((code) => studentStore.students.find((s) => s.code === code)?.id)
       .filter(Boolean) as string[]
     if (studentIds.length === 0) return
-    await studentStore.updateStudentStatusByIDs(studentIds, 3)
+    await studentStore.updateStudentStatusByIDs(studentIds, 4)
     selectedStudents.value = []
     selectAll.value = false
     showAlertDialog('สำเร็จ', '✅ เพิ่มนิสิตฝึกงานสำเร็จ!')

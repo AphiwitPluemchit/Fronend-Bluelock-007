@@ -25,7 +25,7 @@ function formatThaiDate(dateStr: string) {
   })
 }
 
-// สี ของ card activity
+// สี ของ card program
 function getStatusColor(status: string): string {
   switch (status) {
     case 'กำลังวางแผน':
@@ -45,7 +45,7 @@ function getStatusColor(status: string): string {
 
 const goToPageDetail = async (id: string, disable: boolean) => {
   await router.push({
-    path: `/Admin/ActivitiesManagement/ActivityDetail/${id}`,
+    path: `/Admin/ProgramsManagement/ProgramDetail/${id}`,
     query: {
       disable: String(disable),
     },
@@ -73,16 +73,16 @@ const goToPageDetail = async (id: string, disable: boolean) => {
               flat
               bordered
               class="q-pa-md q-mb-sm clickable-card"
-              :style="`border-left: 5px solid ${getStatusColor(event.activityState)}`"
+              :style="`border-left: 5px solid ${getStatusColor(event.programState)}`"
               @click="emit('go-to-date', event.date)"
             >
               <div class="event-header-row">
-                <div class="event-title">{{ event.activityName }}</div>
+                <div class="event-title">{{ event.programName }}</div>
                 <div class="event-category">
                   {{ event.category === 'soft' ? 'Soft Skill' : 'Hard Skill' }}
                 </div>
               </div>
-              <div class="q-mt-xs">{{ event.activityItemName }}</div>
+              <div class="q-mt-xs">{{ event.programItemName }}</div>
               <div class="q-mt-xs">{{ event.time }}</div>
               <div class="q-mt-xs">จำนวนลงทะเบียน : {{ event.participants }}</div>
               <div class="event-footer-row">
@@ -126,16 +126,16 @@ const goToPageDetail = async (id: string, disable: boolean) => {
             flat
             bordered
             class="q-pa-md q-mb-sm"
-            :style="`border-left: 5px solid ${getStatusColor(event.activityState)}`"
+            :style="`border-left: 5px solid ${getStatusColor(event.programState)}`"
             @click="emit('go-to-date', event.date)"
           >
             <div class="event-header-row">
-              <div class="event-title">{{ event.activityName }}</div>
+              <div class="event-title">{{ event.programName }}</div>
               <div class="event-category">
                 {{ event.category === 'soft' ? 'Soft Skill' : 'Hard Skill' }}
               </div>
             </div>
-            <div class="q-mt-xs">{{ event.activityItemName }}</div>
+            <div class="q-mt-xs">{{ event.programItemName }}</div>
             <div class="q-mt-xs">{{ event.time }}</div>
             <div class="q-mt-xs">จำนวนลงทะเบียน : {{ event.participants }}</div>
             <div class="event-footer-row">

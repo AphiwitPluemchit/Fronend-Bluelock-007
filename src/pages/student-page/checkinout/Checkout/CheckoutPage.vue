@@ -4,7 +4,7 @@ import { useRouter } from 'vue-router'
 import { ref } from 'vue'
 import type { AxiosError } from 'axios'
 import type { ErrorResponse } from 'src/types/pagination'
-import type { Activity } from 'src/types/activity'
+import type { Program } from 'src/types/program'
 
 const checkinoutStore = useCheckinoutStore()
 const router = useRouter()
@@ -14,7 +14,7 @@ const errorMessage = ref('')
 const loading = ref(false)
 const props = defineProps<{
   token: string
-  activity?: Partial<Activity>
+  program?: Partial<Program>
 }>()
 
 async function goToForm() {
@@ -22,14 +22,14 @@ async function goToForm() {
   loading.value = true
 
   try {
-    // ดึงข้อมูล activity เพื่อหา formId
-    if (!props.activity?.id) {
+    // ดึงข้อมูล program เพื่อหา formId
+    if (!props.program?.id) {
       errorMessage.value = 'ไม่พบข้อมูลกิจกรรม'
       return
     }
 
     // ดึง formId จาก API
-    const formData = await checkinoutStore.getActivityForm(props.activity.id)
+    const formData = await checkinoutStore.getProgramForm(props.program.id)
     if (!formData?.formId) {
       errorMessage.value = 'กิจกรรมนี้ไม่มีแบบฟอร์มให้ทำ'
       return
@@ -41,7 +41,7 @@ async function goToForm() {
       params: { id: formData.formId },
       query: {
         checkoutToken: props.token,
-        activityId: props.activity.id
+        programId: props.program.id
       }
     })
   } catch (error: unknown) {
@@ -70,7 +70,7 @@ console.log('studentId:', props.token)
 <template>
   <div class="q-pa-md">
     <div>
-      <div v-if="props.activity?.name" class="q-mb-sm">กิจกรรม: {{ props.activity?.name }}</div>
+      <div v-if="props.program?.name" class="q-mb-sm">กิจกรรม: {{ props.program?.name }}</div>
       <div class="q-pa-md">
         <q-btn
           class="btnconfirm"

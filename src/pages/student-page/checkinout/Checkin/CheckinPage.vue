@@ -3,7 +3,7 @@ import { useCheckinoutStore } from 'src/stores/checkinout'
 import { ref } from 'vue'
 import type { AxiosError } from 'axios'
 import type { ErrorResponse } from 'src/types/pagination'
-import type { Activity } from 'src/types/activity'
+import type { Program } from 'src/types/program'
 
 const checkinoutStore = useCheckinoutStore()
 const errorMessage = ref('')
@@ -11,7 +11,7 @@ const isChecked = ref(false)
 const isSubmitted = ref(false)
 const props = defineProps<{
   token: string
-  activity?: Partial<Activity>
+  program?: Partial<Program>
 }>()
 async function checkin() {
   // reset state ก่อนทุกครั้ง
@@ -47,7 +47,7 @@ console.log('token:', props.token)
 <template>
   <div class="q-pa-md">
     <div>
-      <div v-if="props.activity?.name" class="q-mb-sm">กิจกรรม: {{ props.activity?.name }}</div>
+      <div v-if="props.program?.name" class="q-mb-sm">กิจกรรม: {{ props.program?.name }}</div>
       <div class="q-pa-md">
         <q-btn class="btnconfirm" @click="checkin">เช็คชื่อ</q-btn>
       </div>

@@ -10,11 +10,11 @@ const router = useRouter()
 const $q = useQuasar()
 const isSmallScreen = computed(() => !$q.screen.gt.xs)
 
-interface ActivityHistory {
-  activity: {
+interface ProgramHistory {
+  program: {
     name: string
     skill: 'soft' | 'hard'
-    activityItem: {
+    programItem: {
       id: string
       name: string
       description: string
@@ -26,14 +26,14 @@ interface ActivityHistory {
         etime: string
       }[]
     }
-    activityState: string
+    programState: string
     id: string
     type: string
   }
   registrationDate: string
 }
 
-interface ActivityDisplay {
+interface ProgramDisplay {
   id: string
   title: string
   type: 'academic' | 'preparation'
@@ -53,10 +53,10 @@ const studentData = ref({
 const academicData = ref({ current: 0, required: 12 })
 const prepData = ref({ current: 0, required: 30 })
 
-const activities = ref<ActivityDisplay[]>([])
-const showAllActivities = ref(false)
+const programs = ref<ProgramDisplay[]>([])
+const showAllPrograms = ref(false)
 
-const activityColors = {
+const programColors = {
   academic: {
     bgColor: '#D6E4FF',
     textColor: '#001780',
@@ -103,7 +103,7 @@ const getProgressValue = (data: { current: number; required: number }) =>
   data.required ? (data.current / data.required) * 100 : 0
 
 const onClick = async (id: string) => {
-  await router.push(`/Student/Activity/MyActivityDetail/${id}`)
+  await router.push(`/Student/Program/MyProgramDetail/${id}`)
 }
 
 onMounted(async () => {
@@ -123,11 +123,11 @@ onMounted(async () => {
     academicData.value.current = summary.hardSkill
     prepData.value.current = summary.softSkill
 
-    activities.value = Array.isArray(summary.history)
+    programs.value = Array.isArray(summary.history)
       ? (summary.history
-          .map((h: ActivityHistory) => {
-            const a = h.activity
-            const ai = a.activityItem
+          .map((h: ProgramHistory) => {
+            const a = h.program
+            const ai = a.programItem
             const d = ai.dates?.[0]
             if (!d) return null
 
@@ -145,7 +145,7 @@ onMounted(async () => {
               hours: ai.hour ?? 0,
             }
           })
-          .filter(Boolean) as ActivityDisplay[])
+          .filter(Boolean) as ProgramDisplay[])
       : []
   } catch (err) {
     console.error('โหลดข้อมูล student summary ไม่สำเร็จ', err)
@@ -191,8 +191,8 @@ onMounted(async () => {
           <q-card bordered class="rounded-borders shadow-2 full-height">
             <q-card-section class="bg-primary q-mb-md">
               <div class="text-h6 text-bold text-white">
-                <q-icon :name="activityColors.academic.icon" class="q-mr-sm" />
-                {{ activityColors.academic.label }}
+                <q-icon :name="programColors.academic.icon" class="q-mr-sm" />
+                {{ programColors.academic.label }}
               </div>
             </q-card-section>
 
@@ -250,8 +250,8 @@ onMounted(async () => {
           <q-card bordered class="rounded-borders shadow-2 full-height">
             <q-card-section class="bg-primary q-mb-md">
               <div class="text-h6 text-bold text-white">
-                <q-icon :name="activityColors.preparation.icon" class="q-mr-sm" />
-                {{ activityColors.preparation.label }}
+                <q-icon :name="programColors.preparation.icon" class="q-mr-sm" />
+                {{ programColors.preparation.label }}
               </div>
             </q-card-section>
 
@@ -306,7 +306,7 @@ onMounted(async () => {
         </div>
       </div>
 
-      <!-- Activity History -->
+      <!-- Program History -->
       <q-card bordered class="q-mb-md shadow-2 rounded-borders">
         <q-card-section class="bg-primary">
           <div class="row justify-between items-center">
@@ -315,13 +315,13 @@ onMounted(async () => {
               ประวัติการเข้ากิจกรรม
             </div>
             <q-btn
-              v-if="activities.length > 3"
+              v-if="programs.length > 3"
               flat
               dense
               color="white"
-              :icon="showAllActivities ? 'expand_less' : 'expand_more'"
-              :label="showAllActivities ? 'ดูน้อยลง' : 'ดูทั้งหมด'"
-              @click="showAllActivities = !showAllActivities"
+              :icon="showAllPrograms ? 'expand_less' : 'expand_more'"
+              :label="showAllPrograms ? 'ดูน้อยลง' : 'ดูทั้งหมด'"
+              @click="showAllPrograms = !showAllPrograms"
             />
           </div>
         </q-card-section>
@@ -331,22 +331,22 @@ onMounted(async () => {
         <q-card-section class="q-pa-none">
           <q-list>
             <q-item
-              v-for="(activity, index) in showAllActivities ? activities : activities.slice(0, 3)"
+              v-for="(program, index) in showAllPrograms ? programs : programs.slice(0, 3)"
               :key="index"
               clickable
               v-ripple
-              @click="onClick(activity.id)"
+              @click="onClick(program.id)"
             >
               <q-item-section avatar>
                 <q-avatar color="primary" text-color="white">
-                  <q-icon :name="activityColors[activity.type].icon" />
+                  <q-icon :name="programColors[program.type].icon" />
                 </q-avatar>
               </q-item-section>
 
               <q-item-section>
                 <!-- ✅ ชื่อกิจกรรม แสดงตลอด -->
-                <q-item-label class="text-weight-medium ellipsis" :title="activity.title">
-                  {{ activity.title }}
+                <q-item-label class="text-weight-medium ellipsis" :title="program.title">
+                  {{ program.title }}
                 </q-item-label>
 
                 <!-- ✅ แสดงวัน เวลา ชั่วโมงในจอใหญ่ และ label ในจอเล็ก -->
@@ -354,10 +354,10 @@ onMounted(async () => {
                   <div class="row items-center">
                     <template v-if="!isSmallScreen">
                       <q-icon name="event" size="xs" class="q-mr-xs" />
-                      {{ activity.date }}
+                      {{ program.date }}
                       <q-separator vertical spaced class="q-mx-sm" />
                       <q-icon name="schedule" size="xs" class="q-mr-xs" />
-                      {{ activity.hours }} ชั่วโมง
+                      {{ program.hours }} ชั่วโมง
                     </template>
 
                     <template v-else>
@@ -365,12 +365,12 @@ onMounted(async () => {
                       <q-badge
                         rounded
                         class="q-mt-xs q-px-sm q-py-xs text-weight-medium"
-                        :style="`background-color: ${activityColors[activity.type].bgColor}; color: ${activityColors[activity.type].textColor}; border: 1px solid ${
-                          activity.type === 'preparation'
-                            ? activityColors[activity.type].border
-                            : activityColors[activity.type].textColor
+                        :style="`background-color: ${programColors[program.type].bgColor}; color: ${programColors[program.type].textColor}; border: 1px solid ${
+                          program.type === 'preparation'
+                            ? programColors[program.type].border
+                            : programColors[program.type].textColor
                         };`"
-                        :label="activityColors[activity.type].label"
+                        :label="programColors[program.type].label"
                       />
                     </template>
                   </div>
@@ -382,12 +382,12 @@ onMounted(async () => {
                 <q-badge
                   rounded
                   class="q-px-sm q-py-xs text-weight-medium"
-                  :style="`background-color: ${activityColors[activity.type].bgColor}; color: ${activityColors[activity.type].textColor}; border: 1px solid ${
-                    activity.type === 'preparation'
-                      ? activityColors[activity.type].border
-                      : activityColors[activity.type].textColor
+                  :style="`background-color: ${programColors[program.type].bgColor}; color: ${programColors[program.type].textColor}; border: 1px solid ${
+                    program.type === 'preparation'
+                      ? programColors[program.type].border
+                      : programColors[program.type].textColor
                   };`"
-                  :label="activityColors[activity.type].label"
+                  :label="programColors[program.type].label"
                 />
               </q-item-section>
             </q-item>

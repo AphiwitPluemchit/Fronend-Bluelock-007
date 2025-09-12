@@ -1,0 +1,150 @@
+<script setup lang="ts">
+import type { Program, ProgramItem } from 'src/types/program'
+import dayjs from 'dayjs'
+import 'dayjs/locale/th'
+import buddhistEra from 'dayjs/plugin/buddhistEra'
+dayjs.locale('th')
+dayjs.extend(buddhistEra)
+
+function formatDateToThai(dateString: string): string {
+  if (!dateString) return '-'
+  return dayjs(dateString).format('D MMMM BBBB') // D = วัน, MMM = เดือน, BBBB = ปี พ.ศ.
+}
+
+defineProps<{ program: Program }>()
+
+// ฟังก์ชันดึงวันที่จาก `programItems`
+const getProgramdates = (programItems: ProgramItem[] | null | undefined): string => {
+  const firstItem = programItems?.find((item) => item.dates && item.dates.length > 0)
+  return firstItem?.dates
+    ? firstItem.dates.map((d) => formatDateToThai(d.date)).join(', ')
+    : 'ไม่ระบุ'
+}
+
+// ฟังก์ชันดึงเวลา
+const getProgramTime = (programItems: ProgramItem[] | null | undefined): string => {
+  const firstItem = programItems?.find((item) => item.dates && item.dates.length > 0)
+  return firstItem?.dates
+    ? firstItem.dates.map((d) => `${d.stime} - ${d.etime}`).join(', ')
+    : 'ไม่ระบุ'
+}
+</script>
+
+<template>
+  <div class="q-pa-sm">
+    <!-- ข้อมูลทั่วไป -->
+    <div class="field-pair">
+      <div class="field-label">ชื่อกิจกรรมหลัก : </div>
+      <div class="field-value">{{ program?.name ?? 'ไม่ระบุ' }}</div>
+    </div>
+    <div class="field-pair">
+      <div class="field-label">วันที่จัดกิจกรรม : </div>
+      <div class="field-value"> {{ getProgramdates(program?.programItems) }}</div>
+    </div>
+    <div class="field-pair">
+      <div class="field-label">เวลาที่จัดกิจกรรม : </div>
+      <div class="field-value">{{ getProgramTime(program?.programItems) }}</div>
+    </div>
+    <div class="field-pair">
+      <div class="field-label">ประเภทกิจกรรม : </div>
+      <div class="field-value">
+        {{
+          program?.skill === 'hard'
+            ? 'ชั่วโมงทักษะทางวิชาการ'
+            : program?.skill === 'soft'
+              ? 'ชั่วโมงทักษะเตรียมความพร้อม'
+              : 'ไม่ระบุประเภท'
+        }}
+      </div>
+    </div>
+    <div class="field-pair">
+      <div class="field-label">จำนวนกิจกรรม : </div>
+      <div class="field-value">{{ program.programItems?.length }} กิจกรรม</div>
+    </div>
+
+    <q-separator spaced />
+
+    <!-- รายการรอบกิจกรรม -->
+    <div v-for="item in program.programItems" :key="item.id || ''">
+      <div class="field-pair">
+        <div class="field-label">ชื่อกิจกรรมย่อย : </div>
+        <div class="field-value">{{ item.name ?? 'ไม่ระบุ' }}</div>
+      </div>
+      <div class="field-pair">
+        <div class="field-label">สถานที่จัดกิจกรรม : </div>
+        <div class="field-value">
+          {{ Array.isArray(item.rooms) ? item.rooms.join(', ') : (item.rooms ?? 'ไม่ระบุ') }}
+        </div>
+      </div>
+      <div class="field-pair">
+        <div class="field-label">จำนวนชั่วโมงที่ได้รับ : </div>
+        <div class="field-value">{{ item.hour ?? '-' }} ชั่วโมง</div>
+      </div>
+      <div class="field-pair">
+        <div class="field-label">จำนวนที่ลงทะเบียน : </div>
+        <div class="field-value">
+          {{ item.enrollmentCount ?? 'ไม่ระบุ' }}/{{ item.maxParticipants ?? 'ไม่ระบุ' }}
+        </div>
+      </div>
+      <div class="field-pair">
+        <div class="field-label">วิทยากร : </div>
+        <div class="field-value">{{ item.operator ?? 'ไม่ระบุ' }}</div>
+      </div>
+      <div class="field-pair">
+        <div class="field-label">รายละเอียดอื่น ๆ : </div>
+        <div class="field-value">{{ item.description ?? 'ไม่ระบุ' }}</div>
+      </div>
+      <q-separator spaced />
+    </div>
+  </div>
+</template>
+
+
+<style scoped>
+.field-pair {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 12px;
+}
+
+/* มือถือ: แสดงแนวตั้งเหมือนเดิม */
+.field-label {
+  font-weight: bold;
+  font-size: 16px;
+  color: #333;
+  margin-bottom: 4px;
+}
+
+.field-value {
+  font-size: 16px;
+  color: #555;
+  word-break: break-word;
+}
+
+/* แสดงแนวนอนเฉพาะตอนจอใหญ่ */
+@media (min-width: 768px) {
+  .field-pair {
+    flex-direction: row;
+    align-items: baseline;
+  }
+
+  .field-label {
+    width: 200px;
+    text-align: right;
+    margin-bottom: 0;
+    padding-right: 8px;
+    position: relative;
+  }
+
+  .field-label::after {
+    position: absolute;
+    right: 0;
+  }
+
+  .field-value {
+    text-align: left;
+    flex: 1;
+  }
+}
+</style>
+

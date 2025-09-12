@@ -3,7 +3,7 @@ import { ref, computed, onMounted, watch } from 'vue'
 import { useCourseStore } from 'src/stores/course'
 import { useQuasar } from 'quasar'
 import type { Course } from 'src/types/course'
-import ImageDetail from 'src/pages/admin-page/activity/ActivityDetail/ActivityDetail/ImageDetail.vue'
+import ImageDetail from 'src/pages/admin-page/program/ProgramDetail/ProgramDetail/ImageDetail.vue'
 const $q = useQuasar()
 const courseStore = useCourseStore()
 
@@ -196,7 +196,7 @@ function confirmCancel() {
                   :flat="!courseState.isHardSkill"
                   @click="setHardSkill(true)"
                   :disable="!isEditMode"
-                  class="activityType-btn"
+                  class="programType-btn"
                   :error="CategoryError !== ''"
                 >
                   ชั่วโมงทักษะทางวิชาการ
@@ -212,7 +212,7 @@ function confirmCancel() {
                   :flat="courseState.isHardSkill ? true : false"
                   @click="setHardSkill(false)"
                   :disable="!isEditMode"
-                  class="activityType-btn"
+                  class="programType-btn"
                   :error="CategoryError !== ''"
                 >
                   ชั่วโมงเตรียมความพร้อม
@@ -290,7 +290,7 @@ function confirmCancel() {
                   :flat="courseState.type !== 'thaimooc'"
                   @click="setType('thaimooc')"
                   :disable="!isEditMode"
-                  class="activityType-btn"
+                  class="programType-btn"
                   :error="typeError !== ''"
                 >
                   Thai MOOC
@@ -304,7 +304,7 @@ function confirmCancel() {
                   :flat="courseState.type !== 'buumooc'"
                   @click="setType('buumooc')"
                   :disable="!isEditMode"
-                  class="activityType-btn"
+                  class="programType-btn"
                   :error="typeError !== ''"
                 >
                   BUU MOOC
@@ -483,7 +483,7 @@ function confirmCancel() {
   color: white;
   border-radius: 10px;
 }
-.btnAddActivity {
+.btnAddProgram {
   background-color: #ffffff;
   border-radius: 20px;
   height: 40px;
@@ -857,7 +857,7 @@ function confirmCancel() {
     max-width: 800px;
   }
 }
-.activityType-btn {
+.programType-btn {
   width: 200px;
   height: 40px;
   border-radius: 50px;
@@ -867,7 +867,7 @@ function confirmCancel() {
 .active-btn {
   background-color: #d0e4ff !important;
 }
-.activityType-btn-group {
+.programType-btn-group {
   display: flex;
   flex-wrap: wrap;
   gap: 10px;
@@ -917,7 +917,7 @@ function confirmCancel() {
     margin-left: 0;
   }
 
-  .activityType-btn {
+  .programType-btn {
     width: 180px;
     height: 40px;
     border-radius: 50px;
@@ -926,13 +926,13 @@ function confirmCancel() {
   }
 }
 @media (max-width: 475px) {
-  .activityType-btn-group {
+  .programType-btn-group {
     display: grid;
     grid-template-columns: repeat(1, 1fr);
     gap: 10px 20px;
     width: 100%;
   }
-  .activityType-btn {
+  .programType-btn {
     width: 100%;
   }
 }

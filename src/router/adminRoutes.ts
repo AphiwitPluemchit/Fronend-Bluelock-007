@@ -4,27 +4,27 @@ import type { RouteRecordRaw } from 'vue-router'
 // adminRoutes.ts
 const adminChildren: RouteRecordRaw[] = [
   {
-    path: 'ActivitiesCalendar',
-    component: () => import('pages/admin-page/calendar/ActivitiesCalendarPage.vue'),
+    path: 'ProgramCalendar',
+    component: () => import('pages/admin-page/calendar/ProgramCalendarPage.vue'),
   },
   {
-    path: 'ActivitiesManagement',
-    component: () => import('pages/admin-page/activity/ActivitiesTablePage.vue'),
+    path: 'ProgramManagement',
+    component: () => import('pages/admin-page/program/programTablePage.vue'),
   },
   {
-    path: 'ActivitiesManagement/CreateActivityPage',
-    component: () => import('pages/admin-page/activity/CreateActivity/CreateActivityPage.vue'),
+    path: 'ProgramManagement/CreateProgramPage',
+    component: () => import('pages/admin-page/program/CreateProgram/createProgramPage.vue'),
   },
   {
-    path: 'ActivitiesManagement/ActivityDetail/:id/:tab?',
-    name: 'ActivityDetail',
-    component: () => import('src/pages/admin-page/activity/ActivityDetail/ActivityDetailPage.vue'),
+    path: 'ProgramManagement/ProgramDetail/:id/:tab?',
+    name: 'ProgramDetail',
+    component: () => import('src/pages/admin-page/program/ProgramDetail/programDetailPage.vue'),
   },
   {
-    path: '/ActivityCheckQR/:id/:type',
-    name: 'ActivityCheckQR',
+    path: '/ProgramCheckQR/:id/:type',
+    name: 'ProgramCheckQR',
     component: () =>
-      import('src/pages/admin-page/activity/ActivityDetail/Summary/CheckInOut/CheckInOutPage.vue'),
+      import('src/pages/admin-page/program/ProgramDetail/Summary/CheckInOut/CheckInOutPage.vue'),
   },
   {
     path: 'StudentManagement',
@@ -33,7 +33,7 @@ const adminChildren: RouteRecordRaw[] = [
   {
     path: 'StudentManagement/UploadStudent',
     component: () =>
-      import('pages/admin-page/student/StudentManagement/StudentDetail/UploadStudentPage.vue'),
+      import('src/pages/admin-page/student/StudentManagement/StudentDetail/uploadStudentPage.vue'),
   },
   {
     path: 'StudentStorage',
@@ -52,7 +52,7 @@ const adminChildren: RouteRecordRaw[] = [
   {
     path: 'StudentInternship/ConfirmStudentInternDataPage',
     component: () =>
-      import('src/pages/admin-page/student/StudentInternship/ConfirmStudentInternDataPage.vue'),
+      import('src/pages/admin-page/student/StudentInternship/confirmStudentInternDataPage.vue'),
   },
   {
     path: 'StudentManagement/StudentDetail/:code',

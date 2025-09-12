@@ -246,9 +246,9 @@ const handleLogin = async () => {
       const role = result.user?.role
       console.log('👤 User role:', role, '- using default redirect')
       if (role === EnumUserRole.ADMIN) {
-        await router.push(`/${EnumUserRole.ADMIN}/ActivitiesCalendar`)
+        await router.push(`/${EnumUserRole.ADMIN}/ProgramCalendar`)
       } else if (role === EnumUserRole.STUDENT) {
-        await router.push(`/${EnumUserRole.STUDENT}/ActivitiesCalendar`)
+        await router.push(`/${EnumUserRole.STUDENT}/ProgramCalendar`)
       } else {
         throw new Error('ไม่มีสิทธิ์เข้าใช้งาน')
       }

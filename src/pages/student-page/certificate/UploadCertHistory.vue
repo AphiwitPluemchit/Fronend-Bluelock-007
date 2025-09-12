@@ -238,7 +238,7 @@ watchEffect(() => {
           <q-card-section class="backgroundheader">
             <div class="row justify-between header-row-responsive">
               <!-- ซ้าย: ชื่อใบรับรอง -->
-              <div class="ActivityNamelabel">
+              <div class="ProgramNamelabel">
                 {{ row.course?.name }}
                 <q-tooltip>{{ row.course?.name }}</q-tooltip>
               </div>
@@ -329,7 +329,7 @@ watchEffect(() => {
   margin-top: 2px;
 }
 
-.ActivityNamelabel {
+.ProgramNamelabel {
   font-size: 18px;
   font-weight: 700;
   max-width: 100%;

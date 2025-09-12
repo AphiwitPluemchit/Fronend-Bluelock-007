@@ -5,7 +5,7 @@ export type Pagination = {
   sortBy?: string
   order?: string
   skill?: string[]
-  activityState?: string[]
+  programState?: string[]
   major?: string[]
   studentYear?: string[]
   studentStatus?: string[]

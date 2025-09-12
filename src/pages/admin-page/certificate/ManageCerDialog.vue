@@ -17,7 +17,7 @@ watch(
 watch(dialogVisible, (val) => emit('update:modelValue', val))
 
 const selectedAction = ref<'อนุมัติ' | 'ไม่อนุมัติ' | null>(null)
-const activityType = ref<string | null>(null)
+const programType = ref<string | null>(null)
 const hourCount = ref<number | null>(null)
 const rejectReason = ref<string>('')
 
@@ -33,7 +33,7 @@ const isConfirmDisabled = computed(() => {
 const closeDialog = () => {
   dialogVisible.value = false
   selectedAction.value = null
-  activityType.value = null
+  programType.value = null
   hourCount.value = null
   rejectReason.value = ''
 }
@@ -43,7 +43,7 @@ const confirm = () => {
     emit('confirm', {
       ...props.data,
       status: selectedAction.value,
-      skill: activityType.value || '',
+      skill: programType.value || '',
       hour: hourCount.value || 0,
       note: rejectReason.value || '',
     })

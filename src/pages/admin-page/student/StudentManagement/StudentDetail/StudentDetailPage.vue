@@ -6,11 +6,11 @@ import AppBreadcrumbs from 'src/components/AppBreadcrumbs.vue'
 import { useStudentStore } from 'src/stores/student'
 import type { Student } from 'src/types/student'
 import { EnrollmentService } from 'src/services/enrollment'
-import type { ActivityHistory } from 'src/types/activity'
+import type { ProgramHistory } from 'src/types/program'
 import type { Pagination } from 'src/types/pagination'
-import ActivityType from 'src/pages/student-page/activity/component/ActivityType.vue'
+import ProgramType from 'src/pages/student-page/program/component/programType.vue'
 import FilterDialog from 'src/components/Dialog/FilterDialog.vue'
-interface ActivityRow {
+interface ProgramRow {
   id: string
   name: string
   skill: string
@@ -25,7 +25,7 @@ const route = useRoute()
 const studentCode = ref(route.params.code as unknown as string)
 const studentStore = useStudentStore()
 
-const historyActivity = ref<ActivityHistory[]>([])
+const historyProgram = ref<ProgramHistory[]>([])
 
 const query = ref<Pagination>({
   page: 1,
@@ -34,7 +34,7 @@ const query = ref<Pagination>({
   sortBy: '_id',
   order: 'desc',
   skill: [],
-  activityState: [],
+  programState: [],
   major: [],
   studentYear: [],
 })
@@ -52,8 +52,8 @@ const showFilterDialog = ref(false)
 const selectedType = ref<string[]>([])
 const searchQuery = ref('')
 
-function applyFilters(selected: { categoryActivity: string[] }) {
-  selectedType.value = selected.categoryActivity
+function applyFilters(selected: { categoryProgram: string[] }) {
+  selectedType.value = selected.categoryProgram
   showFilterDialog.value = false
 }
 
@@ -79,10 +79,10 @@ const cancelEdit = () => {
   studentStore.student = { ...originalStudentData.value } as Student
   isEditMode.value = false
 }
-function mapHistoryToRows(data: ActivityHistory[]): ActivityRow[] {
-  const rows: ActivityRow[] = []
+function mapHistoryToRows(data: ProgramHistory[]): ProgramRow[] {
+  const rows: ProgramRow[] = []
   data.forEach((act) => {
-    act.activityItems?.forEach((item) => {
+    act.programItems?.forEach((item) => {
       // แปลง checkinoutRecord ให้เป็น string
       const checkinLogs =
         item.checkinoutRecord && item.checkinoutRecord.length > 0
@@ -114,7 +114,7 @@ function mapHistoryToRows(data: ActivityHistory[]): ActivityRow[] {
 }
 
 const filteredHistory = computed(() => {
-  let rows = historyActivity.value as unknown as ActivityRow[]
+  let rows = historyProgram.value as unknown as ProgramRow[]
 
   if (selectedType.value.length > 0) {
     rows = rows.filter((r) =>
@@ -140,7 +140,7 @@ onMounted(async () => {
   )
   console.log(response)
 
-  historyActivity.value = mapHistoryToRows(response.data) // ✅ แปลงก่อน
+  historyProgram.value = mapHistoryToRows(response.data) // ✅ แปลงก่อน
   show.value = true
 })
 
@@ -308,8 +308,8 @@ const columns = [
           <div class="filter-btn-wrapper">
             <FilterDialog
               :model-value="showFilterDialog"
-              :categories="['categoryActivity']"
-              :category-activities="selectedType"
+              :categories="['categoryProgram']"
+              :category-programs="selectedType"
               @apply="applyFilters"
             />
           </div>
@@ -325,7 +325,7 @@ const columns = [
             <!-- <q-td key="skill">{{ props.row.skill }}</q-td> -->
 
             <q-td key="skill" class="text-center">
-              <ActivityType
+              <ProgramType
                 v-if="props.row.skill === 'hard' || props.row.skill === 'soft'"
                 :skill="props.row.skill === 'hard' ? 'hardSkill' : 'softSkill'"
               />

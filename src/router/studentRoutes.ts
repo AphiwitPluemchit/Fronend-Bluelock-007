@@ -3,25 +3,25 @@ import type { RouteRecordRaw } from 'vue-router'
 
 const studentChildren: RouteRecordRaw[] = [
   {
-    path: 'ActivitiesCalendar',
-    component: () => import('pages/student-page/calendar/ActivitiesCalendarPage.vue'),
+    path: 'ProgramCalendar',
+    component: () => import('pages/student-page/calendar/ProgramCalendarPage.vue'),
   },
   {
-    path: 'ActivityTablePage',
-    component: () => import('pages/student-page/activity/ActivityTablePage.vue'),
+    path: 'ProgramTablePage',
+    component: () => import('pages/student-page/program/ProgramTablePage.vue'),
   },
   {
-    path: 'Activity/ActivityDetail/:id',
-    component: () => import('pages/student-page/activity/Detail/ActivityDetailPage.vue'),
+    path: 'Program/ProgramDetail/:id',
+    component: () => import('pages/student-page/program/Detail/programDetailPage.vue'),
   },
   {
-    path: 'MyActivitiesPage',
-    component: () => import('pages/student-page/myactivity/MyActivitiesPage.vue'),
+    path: 'MyProgramPage',
+    component: () => import('pages/student-page/myprogram/MyProgramPage.vue'),
   },
   {
-    path: 'Activity/MyActivityDetail/:id/:tab?',
-    name: 'MyActivityDetail',
-    component: () => import('pages/student-page/myactivity/Detail/ActivityDetailPage.vue'),
+    path: 'Program/MyProgramDetail/:id/:tab?',
+    name: 'MyProgramDetail',
+    component: () => import('pages/student-page/myprogram/Detail/programDetailPage.vue'),
   },
   {
     path: 'RecordPage',

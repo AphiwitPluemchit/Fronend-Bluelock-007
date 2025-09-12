@@ -37,10 +37,10 @@ export const canAccessResource = (resourceType: string): boolean => {
 
   // ตรวจสอบสิทธิ์ตาม resource type
   switch (resourceType) {
-    case 'activity':
-      // Admin สามารถเข้าถึงได้ทุก activity
+    case 'program':
+      // Admin สามารถเข้าถึงได้ทุก program
       if (authStore.isAdmin) return true
-      // Student สามารถเข้าถึงได้เฉพาะ activity ที่ตัวเองลงทะเบียน
+      // Student สามารถเข้าถึงได้เฉพาะ program ที่ตัวเองลงทะเบียน
       if (authStore.isStudent) return true // TODO: เพิ่มการตรวจสอบ enrollment
       break
 

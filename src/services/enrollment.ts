@@ -27,7 +27,7 @@ export class EnrollmentService {
     }
   }
 
-  static async getEnrollmentsByActivityID(activityItemId: string, params: Pagination) {
+  static async getEnrollmentsByProgramID(programItemId: string, params: Pagination) {
     const { studentStatus, major, studentYear, ...rest } = params
 
     const queryParams = {
@@ -42,17 +42,17 @@ export class EnrollmentService {
     try {
       console.log('Sending queryParams:', queryParams)
       const res = await api.get<PaginationResponse<StudentEnrollment>>(
-        `activitys/activityItems/${activityItemId}/enrollments`,
+        `programs/programItems/${programItemId}/enrollments`,
         { params: queryParams },
       )
       console.log('Fetched enrollments:', res.data)
       return res.data
     } catch (error) {
-      console.error(`Error fetching enrollments for activity ID: ${activityItemId}`, error)
+      console.error(`Error fetching enrollments for program ID: ${programItemId}`, error)
       throw error
     }
   }
-  static async getEnrollmentsByActivityIDs(activityId: string, params: Pagination) {
+  static async getEnrollmentsByProgramIDs(programId: string, params: Pagination) {
     const { studentStatus, major, studentYear, ...rest } = params
 
     const queryParams = {
@@ -67,24 +67,24 @@ export class EnrollmentService {
     try {
       console.log('Sending queryParams:', queryParams)
       const res = await api.get<PaginationResponse<StudentEnrollment>>(
-        `activitys/${activityId}/enrollments`,
+        `programs/${programId}/enrollments`,
         { params: queryParams },
       )
       console.log('Fetched enrollments:', res.data)
       return res.data
     } catch (error) {
-      console.error(`Error fetching enrollments for activity ID: ${activityId}`, error)
+      console.error(`Error fetching enrollments for program ID: ${programId}`, error)
       throw error
     }
   }
 
   static async getEnrollmentsByStudentID(studentId: string, params: Pagination) {
     try {
-      const { activityState, skill, ...rest } = params
+      const { programState, skill, ...rest } = params
       const queryParams = {
         ...rest,
-        ...(activityState && activityState.length > 0
-          ? { activityState: activityState.join(',') }
+        ...(programState && programState.length > 0
+          ? { programState: programState.join(',') }
           : {}),
         ...(skill && skill.length > 0 ? { skill: skill.join(',') } : {}),
       }
@@ -98,13 +98,13 @@ export class EnrollmentService {
     }
   }
 
-  static async checkEnrollmentByStudentIDAndActivityID(
+  static async checkEnrollmentByStudentIDAndProgramID(
     studentId: string,
-    activityId: string,
+    programId: string,
   ): Promise<EnrollmentCheckResponse> {
     try {
       const res = await api.get<EnrollmentCheckResponse>(
-        `${this.path}/student/${studentId}/activity/${activityId}/check`,
+        `${this.path}/student/${studentId}/program/${programId}/check`,
       )
       console.log('Fetched enrollment check:', res.data)
       return res.data
@@ -116,11 +116,11 @@ export class EnrollmentService {
 
   static async getEnrollmentsHistoryByStudentID(studentId: string, params: Pagination) {
     try {
-      const { activityState, skill, ...rest } = params
+      const { programState, skill, ...rest } = params
       const queryParams = {
         ...rest,
-        ...(activityState && activityState.length > 0
-          ? { activityState: activityState.join(',') }
+        ...(programState && programState.length > 0
+          ? { programState: programState.join(',') }
           : {}),
         ...(skill && skill.length > 0 ? { skill: skill.join(',') } : {}),
       }

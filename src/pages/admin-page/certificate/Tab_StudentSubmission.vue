@@ -153,7 +153,7 @@ const paginatedRows = computed(() => submissionHistory.value.slice(0, rowsPerPag
 .q-table table {
   table-layout: fixed;
 }
-.ActivityNamelabel {
+.ProgramNamelabel {
   font-size: 16px;
   font-weight: 600;
   max-width: 100%;
@@ -296,14 +296,14 @@ const paginatedRows = computed(() => submissionHistory.value.slice(0, rowsPerPag
   justify-content: space-between;
 }
 
-.ActivityNamelabel .student-name {
+.ProgramNamelabel .student-name {
   flex-grow: 1;
   min-width: 0;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
-.ActivityNamelabel .q-icon {
+.ProgramNamelabel .q-icon {
   margin-left: auto;
 }
 @media (max-width: 690px) {
@@ -337,7 +337,7 @@ const paginatedRows = computed(() => submissionHistory.value.slice(0, rowsPerPag
   }
 }
 @media (max-width: 450px) {
-  .ActivityNamelabel {
+  .ProgramNamelabel {
     font-size: 12px;
   }
 }

@@ -1,8 +1,8 @@
 export interface CalendarEvent {
   id: string
-  activityName: string        // ชื่อกิจกรรมหลัก
-  activityItemName: string    // ชื่อกิจกรรมย่อย
-  activityState: string
+  programName: string        // ชื่อกิจกรรมหลัก
+  programItemName: string    // ชื่อกิจกรรมย่อย
+  programState: string
   category: 'soft' | 'hard'
   date: string
   time: string

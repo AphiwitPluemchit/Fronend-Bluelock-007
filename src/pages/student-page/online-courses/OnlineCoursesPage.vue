@@ -55,7 +55,7 @@ const transformCourseData = (course: Course): OnlineCourse => ({
 
 const filteredCourses = computed(() => {
   const transformedCourses = courseStore.courses.map(transformCourseData)
-  
+
   // กรองตามประเภทที่เลือก
   let filtered = transformedCourses
   if (selectedType.value.length > 0) {
@@ -65,22 +65,22 @@ const filteredCourses = computed(() => {
       return false
     })
   }
-  
+
   // กรองตามคำค้นหา
   if (searchQuery.value.trim()) {
     const query = searchQuery.value.toLowerCase().trim()
-    filtered = filtered.filter((c) => 
+    filtered = filtered.filter((c) =>
       c.title.toLowerCase().includes(query) ||
       c.description.toLowerCase().includes(query) ||
       c.platformType.toLowerCase().includes(query)
     )
   }
-  
+
   return filtered
 })
 
-function applyFilters(selected: { categoryActivity: string[] }) {
-  selectedType.value = selected.categoryActivity
+function applyFilters(selected: { categoryProgram: string[] }) {
+  selectedType.value = selected.categoryProgram
   showFilterDialog.value = false
 }
 
@@ -119,8 +119,8 @@ onMounted(() => {
           <div class="filter-btn-wrapper">
             <FilterDialog
               :model-value="showFilterDialog"
-              :categories="['categoryActivity']"
-              :category-activities="selectedType"
+              :categories="['categoryProgram']"
+              :category-programs="selectedType"
               @apply="applyFilters"
             />
           </div>

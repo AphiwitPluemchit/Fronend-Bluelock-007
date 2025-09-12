@@ -14,9 +14,9 @@ const showError = (message: string) => {
 }
 
 class CheckinoutService {
-  static async getLink(activityId: string, type: string) {
+  static async getLink(programId: string, type: string) {
     try {
-      const res = await api.post('/checkInOuts/admin/qr-token', { activityId, type })
+      const res = await api.post('/checkInOuts/admin/qr-token', { programId, type })
       return res.data // { token, expiresAt, url, type }
     } catch (error) {
       showError('สร้างลิงค์ล้มเหลว')
@@ -27,7 +27,7 @@ class CheckinoutService {
   static async validateToken(token: string) {
     try {
       const res = await api.get(`/checkInOuts/student/validate/${token}`)
-      return res.data // { activityId, token, type }
+      return res.data // { programId, token, type }
     } catch (err) {
       let msg = 'ตรวจสอบ QR ล้มเหลว'
       if (axios.isAxiosError(err)) {
@@ -53,7 +53,7 @@ class CheckinoutService {
   static async getTokenInfo(token: string) {
     try {
       const res = await api.get(`/checkInOuts/student/qr/${token}`)
-      return res.data // { activityId, token, type }
+      return res.data // { programId, token, type }
     } catch (err) {
       let msg = 'ไม่พบข้อมูล QR'
       if (axios.isAxiosError(err)) {
@@ -135,12 +135,12 @@ class CheckinoutService {
   //     throw error
   //   }
   // }
-  static async getStatus(studentId: string, activityId: string) {
+  static async getStatus(studentId: string, programId: string) {
     try {
       const res = await api.get('/checkInOuts/status', {
         params: {
           studentId,
-          activityId,
+          programId,
         },
       })
       return res.data
@@ -150,9 +150,9 @@ class CheckinoutService {
     }
   }
 
-  static async getActivityForm(activityId: string) {
+  static async getProgramForm(programId: string) {
     try {
-      const res = await api.get(`/checkInOuts/student/activity/${activityId}/form`)
+      const res = await api.get(`/checkInOuts/student/program/${programId}/form`)
       return res.data // { formId }
     } catch (error) {
       showError('ดึงข้อมูลฟอร์มล้มเหลว')

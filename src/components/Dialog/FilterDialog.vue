@@ -10,8 +10,8 @@ const props = defineProps<{
   categories: string[]
   years?: string[]
   majors?: string[]
-  statusActivities?: string[]
-  categoryActivities?: string[]
+  statusPrograms?: string[]
+  categoryPrograms?: string[]
   studentStatus?: string[]
   statusCertificate?: string[]
 }>()
@@ -24,13 +24,13 @@ const options = {
   year: ['1', '2', '3', '4'],
   major: ['CS', 'SE', 'ITDI', 'AAI'],
   studentStatus: ['3', '2', '1','4'],
-  statusActivity: ['planning', 'open', 'close', 'success', 'cancel'],
-  categoryActivity: ['soft', 'hard'],
+  statusProgram: ['planning', 'open', 'close', 'success', 'cancel'],
+  categoryProgram: ['soft', 'hard'],
   statusCertificate: ['pending', 'approved', 'rejected'],
 }
 
 // 'ชั่วโมงเตรียมความพร้อม', 'ชั่วโมงทักษะทางวิชาการ'
-function activityStatusLebel(status: string) {
+function programStatusLebel(status: string) {
   switch (status) {
     case 'planning':
       return 'กำลังวางแผน'
@@ -45,7 +45,7 @@ function activityStatusLebel(status: string) {
   }
   return status
 }
-function activityCategoryLebel(category: string) {
+function programCategoryLebel(category: string) {
   switch (category) {
     case 'soft':
       return 'เตรียมความพร้อม'
@@ -88,8 +88,8 @@ const getStatusCertificateText = (status: string) => {
 const filters = ref({
   year: props.years ? props.years.map((y) => y.toString()) : ([] as string[]),
   major: props.majors ?? ([] as string[]),
-  statusActivity: props.statusActivities ?? ([] as string[]),
-  categoryActivity: props.categoryActivities ?? ([] as string[]),
+  statusProgram: props.statusPrograms ?? ([] as string[]),
+  categoryProgram: props.categoryPrograms ?? ([] as string[]),
   studentStatus: props.studentStatus ?? ([] as string[]),
   statusCertificate: props.statusCertificate ?? ([] as string[]),
 })
@@ -144,8 +144,8 @@ watch(
   () => ({
     years: props.years,
     majors: props.majors,
-    statusActivities: props.statusActivities,
-    categoryActivities: props.categoryActivities,
+    statusPrograms: props.statusPrograms,
+    categoryPrograms: props.categoryPrograms,
     studentStatus: props.studentStatus,
     statusCertificate: props.statusCertificate,
   }),
@@ -153,8 +153,8 @@ watch(
     // ✅ sync props -> filters ภายใน
     filters.value.year = (p.years ?? []).map(String)
     filters.value.major = p.majors ?? []
-    filters.value.statusActivity = p.statusActivities ?? []
-    filters.value.categoryActivity = p.categoryActivities ?? []
+    filters.value.statusProgram = p.statusPrograms ?? []
+    filters.value.categoryProgram = p.categoryPrograms ?? []
     filters.value.studentStatus = p.studentStatus ?? []
     filters.value.statusCertificate = p.statusCertificate ?? []
 
@@ -189,35 +189,35 @@ watch(
       >
         <q-card-section class="filter-section" style="max-height: 55vh; overflow-y: auto">
           <!-- ประเภทกิจกรรม -->
-          <div v-if="availableCategories.includes('categoryActivity')" class="q-mt-md">
+          <div v-if="availableCategories.includes('categoryProgram')" class="q-mt-md">
             <p class="q-mb-sm text-h6">ประเภทกิจกรรม</p>
             <div class="chip-container">
               <q-chip
-                v-for="categoryActivity in options.categoryActivity"
-                :key="categoryActivity"
+                v-for="categoryProgram in options.categoryProgram"
+                :key="categoryProgram"
                 clickable
-                :class="['medium-width-chip', getChipClass('categoryActivity', categoryActivity)]"
-                @click="toggleFilter('categoryActivity', categoryActivity)"
+                :class="['medium-width-chip', getChipClass('categoryProgram', categoryProgram)]"
+                @click="toggleFilter('categoryProgram', categoryProgram)"
               >
                 <div class="text-center full-width">
-                  {{ activityCategoryLebel(categoryActivity) }}
+                  {{ programCategoryLebel(categoryProgram) }}
                 </div>
               </q-chip>
             </div>
           </div>
 
           <!-- สถานะกิจกรรม -->
-          <div v-if="availableCategories.includes('statusActivity')" class="q-mt-md">
+          <div v-if="availableCategories.includes('statusProgram')" class="q-mt-md">
             <p class="q-mb-sm text-h6">สถานะกิจกรรม</p>
             <div class="chip-container">
               <q-chip
-                v-for="statusActivity in options.statusActivity"
-                :key="statusActivity"
+                v-for="statusProgram in options.statusProgram"
+                :key="statusProgram"
                 clickable
-                :class="['medium-width-chip', getChipClass('statusActivity', statusActivity)]"
-                @click="toggleFilter('statusActivity', statusActivity)"
+                :class="['medium-width-chip', getChipClass('statusProgram', statusProgram)]"
+                @click="toggleFilter('statusProgram', statusProgram)"
               >
-                <div class="text-center full-width">{{ activityStatusLebel(statusActivity) }}</div>
+                <div class="text-center full-width">{{ programStatusLebel(statusProgram) }}</div>
               </q-chip>
             </div>
           </div>

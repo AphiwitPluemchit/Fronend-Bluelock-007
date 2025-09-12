@@ -7,7 +7,7 @@ import { useCourseStore } from 'src/stores/course'
 import type { Course } from 'src/types/course'
 
 const showFilterDialog1 = ref(false)
-const filterCategories1 = ref(['categoryActivity'])
+const filterCategories1 = ref(['categoryProgram'])
 
 const courseStore = useCourseStore()
 const rows = computed(() => courseStore.courses ?? [])
@@ -50,8 +50,8 @@ const pagination = ref({
   rowsNumber: courseStore.meta.total || 0, // จำนวนข้อมูลรวม
 })
 
-const applyFilters = async (selectedFilters: { categoryActivity: string[] }) => {
-  const selected = selectedFilters.categoryActivity || []
+const applyFilters = async (selectedFilters: { categoryProgram: string[] }) => {
+  const selected = selectedFilters.categoryProgram || []
 
   if (selected.length === 0 || selected.length === 2) {
     // ไม่เลือก หรือเลือกทั้งคู่
@@ -70,7 +70,7 @@ const applyFilters = async (selectedFilters: { categoryActivity: string[] }) => 
 //   certName: string
 //   hour: number
 //   link: string
-//   categoryActivity: 'ทักษะทางวิชาการ' | 'เตรียมความพร้อม'
+//   categoryProgram: 'ทักษะทางวิชาการ' | 'เตรียมความพร้อม'
 // }
 const columns: QTableProps['columns'] = [
   { name: 'id', label: 'ลำดับ', field: 'id', align: 'left' },
@@ -278,7 +278,7 @@ function goToAddCourse() {
           >
             <!-- 🔷 HEADER -->
             <q-card-section class="backgroundheader">
-              <div class="ActivityNamelabel">
+              <div class="ProgramNamelabel">
                 {{ row.name }}
                 <q-tooltip>{{ row.name }}</q-tooltip>
               </div>
@@ -426,7 +426,7 @@ function goToAddCourse() {
   font-size: 16px;
   margin-top: 2px;
 }
-.ActivityNamelabel {
+.ProgramNamelabel {
   font-size: 18px;
   font-weight: 700;
   max-width: 100%;

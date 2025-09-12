@@ -10,9 +10,9 @@ const tab = ref<string>('certificate')
 
 // onMounted(async () => {
 //   const id = route.params.id as string
-//   const res = await ActivityService.getOne(id)
-//   console.log('📦 ได้ activity:', res)
-//   activity.value = res.data
+//   const res = await ProgramService.getOne(id)
+//   console.log('📦 ได้ program:', res)
+//   program.value = res.data
 // })
 </script>
 

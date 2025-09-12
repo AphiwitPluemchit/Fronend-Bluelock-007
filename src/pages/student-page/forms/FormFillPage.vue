@@ -496,7 +496,7 @@ function buildResponses(form: Form): SubmissionResponse[] {
 async function handleNext() {
   if (!validateSession(currentSession.value)) return
   currentSession.value++
-  await nextTick() // รอ DOM/reactivity อัปเดตให้เสร็จ
+  await nextTick() // รอ DOM/reprogram อัปเดตให้เสร็จ
   window.scrollTo({ top: 0, behavior: 'smooth' })
 }
 
@@ -535,9 +535,9 @@ async function handleSubmit() {
   try {
     // ตรวจสอบว่ามี checkout token หรือไม่ (มาจาก checkout page)
     const checkoutToken = route.query.checkoutToken as string
-    const activityId = route.query.activityId as string
+    const programId = route.query.programId as string
 
-    if (checkoutToken && activityId) {
+    if (checkoutToken && programId) {
       try {
         // เช็คชื่อออกหลังจากส่ง form สำเร็จ
         await checkinoutStore.checkout(checkoutToken)

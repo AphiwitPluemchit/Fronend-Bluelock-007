@@ -28,7 +28,7 @@ onMounted(() => {
   if (!authStore.isAdmin) {
     console.warn('Non-admin user trying to access admin layout, redirecting')
     if (authStore.isStudent) {
-      void router.replace('/Student/ActivitiesCalendar')
+      void router.replace('/Student/ProgramCalendar')
     } else {
       // ถ้าไม่มี role ที่ชัดเจน ให้ไปหน้า login
       void router.replace('/')

@@ -81,15 +81,15 @@ export default route(function () {
     if (!role) return { name: 'Login' }
 
     if (scope === 'admin' && role !== EnumUserRole.ADMIN) {
-      return { path: '/Admin/ActivitiesCalendar' }
+      return { path: '/Admin/ProgramCalendar' }
     }
     if (scope === 'student' && role !== EnumUserRole.STUDENT) {
-      return { path: '/Student/ActivitiesCalendar' }
+      return { path: '/Student/ProgramCalendar' }
     }
 
     // checkinout scope: any authenticated student allowed
     if (scope === 'checkinout' && role !== EnumUserRole.STUDENT) {
-      return { path: '/Student/ActivitiesCalendar' }
+      return { path: '/Student/ProgramCalendar' }
     }
 
     return true

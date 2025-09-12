@@ -14,6 +14,6 @@ export type CheckInOut = {
   type: string
   timestamp: string
   userId: string
-  activityItemId: string
+  programItemId: string
 }
 
