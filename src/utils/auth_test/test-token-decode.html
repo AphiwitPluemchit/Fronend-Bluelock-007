@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Token Decode</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .code {
+            background: #f1f3f4;
+            padding: 15px;
+            border-radius: 5px;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            white-space: pre-wrap;
+            margin: 10px 0;
+        }
+        .btn {
+            background: #4285f4;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        .success { background: #e8f5e8; padding: 10px; border-radius: 5px; }
+        .error { background: #fce8e6; padding: 10px; border-radius: 5px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔍 Test Token Decode</h1>
+        
+        <h3>Your JWT Token from Backend:</h3>
+        <div class="code" id="tokenDisplay">eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2OGMzMDg3MTY4Y2VmNDgzNjBiNjI2YjAiLCJlbWFpbCI6IjY1MTYwMzA5QGdvLmJ1dS5hYy50aCIsInJvbGUiOiJTdHVkZW50IiwiZXhwIjoxNzU3ODg3MzA0fQ.H2HYS0fwl9O9Iqh52jVezeyY6gkezvHt5u5v8YCUc68</div>
+        
+        <button class="btn" onclick="decodeToken()">Decode Token</button>
+        <button class="btn" onclick="testRedirectLogic()">Test Redirect Logic</button>
+        
+        <div id="result"></div>
+        
+        <h3>🎯 Expected Redirect Paths:</h3>
+        <div class="code">
+Admin Role: /Admin/ProgramCalendar
+Student Role: /Student/ProgramCalendar
+        </div>
+    </div>
+
+    <script>
+        const token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2OGMzMDg3MTY4Y2VmNDgzNjBiNjI2YjAiLCJlbWFpbCI6IjY1MTYwMzA5QGdvLmJ1dS5hYy50aCIsInJvbGUiOiJTdHVkZW50IiwiZXhwIjoxNzU3ODg3MzA0fQ.H2HYS0fwl9O9Iqh52jVezeyY6gkezvHt5u5v8YCUc68";
+        
+        function decodeToken() {
+            try {
+                const parts = token.split('.');
+                const payload = JSON.parse(atob(parts[1]));
+                
+                const resultDiv = document.getElementById('result');
+                resultDiv.innerHTML = `
+                    <div class="success">
+                        <h3>✅ Token Decoded Successfully</h3>
+                        <div class="code">${JSON.stringify(payload, null, 2)}</div>
+                        
+                        <h4>Key Information:</h4>
+                        <p><strong>User ID:</strong> ${payload.userId}</p>
+                        <p><strong>Email:</strong> ${payload.email}</p>
+                        <p><strong>Role:</strong> "${payload.role}"</p>
+                        <p><strong>Role Type:</strong> ${typeof payload.role}</p>
+                        <p><strong>Expires:</strong> ${new Date(payload.exp * 1000).toLocaleString()}</p>
+                    </div>
+                `;
+            } catch (error) {
+                document.getElementById('result').innerHTML = `
+                    <div class="error">
+                        <h3>❌ Decode Error</h3>
+                        <p>${error.message}</p>
+                    </div>
+                `;
+            }
+        }
+        
+        function testRedirectLogic() {
+            try {
+                const parts = token.split('.');
+                const payload = JSON.parse(atob(parts[1]));
+                
+                // Simulate frontend enum
+                const EnumUserRole = {
+                    ADMIN: 'Admin',
+                    STUDENT: 'Student'
+                };
+                
+                const userRole = payload.role;
+                
+                let redirectPath = '';
+                let explanation = '';
+                
+                if (userRole === EnumUserRole.ADMIN) {
+                    redirectPath = `/${EnumUserRole.ADMIN}/ProgramCalendar`;
+                    explanation = '✅ Should redirect to Admin dashboard';
+                } else if (userRole === EnumUserRole.STUDENT) {
+                    redirectPath = `/${EnumUserRole.STUDENT}/ProgramCalendar`;
+                    explanation = '✅ Should redirect to Student dashboard';
+                } else {
+                    redirectPath = '/login';
+                    explanation = '❌ Unknown role, would redirect to login';
+                }
+                
+                const resultDiv = document.getElementById('result');
+                resultDiv.innerHTML = `
+                    <div class="success">
+                        <h3>🎯 Redirect Logic Test</h3>
+                        
+                        <h4>Role Analysis:</h4>
+                        <p><strong>Token Role:</strong> "${userRole}"</p>
+                        <p><strong>Expected Admin:</strong> "${EnumUserRole.ADMIN}"</p>
+                        <p><strong>Expected Student:</strong> "${EnumUserRole.STUDENT}"</p>
+                        
+                        <h4>Comparisons:</h4>
+                        <p><strong>Is Admin:</strong> ${userRole === EnumUserRole.ADMIN}</p>
+                        <p><strong>Is Student:</strong> ${userRole === EnumUserRole.STUDENT}</p>
+                        
+                        <h4>Result:</h4>
+                        <p><strong>Redirect Path:</strong> <code>${redirectPath}</code></p>
+                        <p><strong>Explanation:</strong> ${explanation}</p>
+                        
+                        <div class="code">
+// Frontend Logic:
+if (userRole === EnumUserRole.ADMIN) {
+    // "${userRole}" === "${EnumUserRole.ADMIN}" = ${userRole === EnumUserRole.ADMIN}
+    redirectPath = "/${EnumUserRole.ADMIN}/ProgramCalendar"
+} else if (userRole === EnumUserRole.STUDENT) {
+    // "${userRole}" === "${EnumUserRole.STUDENT}" = ${userRole === EnumUserRole.STUDENT}
+    redirectPath = "/${EnumUserRole.STUDENT}/ProgramCalendar"
+} else {
+    redirectPath = "/login"
+}
+                        </div>
+                    </div>
+                `;
+            } catch (error) {
+                document.getElementById('result').innerHTML = `
+                    <div class="error">
+                        <h3>❌ Test Error</h3>
+                        <p>${error.message}</p>
+                    </div>
+                `;
+            }
+        }
+        
+        // Auto decode on load
+        window.onload = function() {
+            decodeToken();
+            setTimeout(testRedirectLogic, 1000);
+        };
+    </script>
+</body>
+</html>

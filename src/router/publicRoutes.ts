@@ -14,6 +14,12 @@ export const publicRoutes: RouteRecordRaw[] = [
         meta: { public: true },
       },
       {
+        path: '/auth/callback',
+        name: 'GoogleCallback',
+        component: () => import('pages/login-page/GoogleCallback.vue'),
+        meta: { public: true },
+      },
+      {
         path: '/unauthorized',
         component: () => import('pages/ErrorUnauthorized.vue'),
         meta: { public: true },

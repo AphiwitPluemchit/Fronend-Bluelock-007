@@ -30,6 +30,10 @@ export const useAuthStore = defineStore('auth', {
       return user ? JSON.parse(user) : null
     },
 
+    user(): Partial<User> | null {
+      return this.getUser
+    },
+
     getRole(): EnumUserRole | undefined {
       return this.getUser?.role
     },
@@ -255,6 +259,66 @@ export const useAuthStore = defineStore('auth', {
       return true
     },
 
+    // ✅ Login with Google OAuth token
+    loginWithToken(token: string): boolean {
+      try {
+        console.log('🔐 Starting Google token login process...')
+        console.log('🎫 Token received:', token.substring(0, 20) + '...')
+
+        // Decode JWT to get user info
+        const parts = token.split('.')
+        if (parts.length !== 3) {
+          throw new Error('Invalid token format')
+        }
+
+        const payload = JSON.parse(atob(parts[1] as string))
+        console.log('📋 Token payload:', payload)
+
+        // Check if token is expired
+        const expiry = payload.exp * 1000
+        if (Date.now() >= expiry) {
+          throw new Error('Token has expired')
+        }
+
+        // Create user object from token payload
+        const user: Partial<User> = {
+          id: payload.userId,
+          email: payload.email,
+          role: payload.role as EnumUserRole, // Ensure proper type casting
+          name: payload.name || payload.email,
+          // Add other fields as needed
+        }
+
+        console.log('✅ Google login successful:', user)
+        console.log('👤 User role:', user.role)
+        console.log(
+          '🔍 Role comparison - Expected Admin:',
+          EnumUserRole.ADMIN,
+          'Expected Student:',
+          EnumUserRole.STUDENT,
+        )
+
+        // Validate role
+        if (!Object.values(EnumUserRole).includes(user.role as EnumUserRole)) {
+          console.error('❌ Invalid user role:', user.role)
+          throw new Error(`Invalid user role: ${user.role}`)
+        }
+
+        // Store token and user data
+        localStorage.setItem('access_token', token)
+        localStorage.setItem('user', JSON.stringify(user))
+
+        console.log('💾 Data saved to localStorage')
+        console.log('🎯 Final user role for redirect:', user.role)
+
+        return true
+      } catch (err) {
+        console.error('❌ Google token login error:', err)
+        this.clearLocalStorage()
+        return false
+      }
+    },
+
     // ✅ สร้าง session security report
     getSecurityReport(): {
       isValid: boolean
@@ -289,7 +353,7 @@ export const useAuthStore = defineStore('auth', {
       return {
         isValid,
         issues,
-        recommendations
+        recommendations,
       }
     },
   },

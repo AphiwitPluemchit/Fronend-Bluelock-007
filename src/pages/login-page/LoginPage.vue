@@ -82,6 +82,40 @@
                   data-testid="login-submit"
                 />
 
+                <!-- Divider -->
+                <div class="text-center q-mb-md">
+                  <div class="divider-container">
+                    <div class="divider-line"></div>
+                    <span class="divider-text">หรือ</span>
+                    <div class="divider-line"></div>
+                  </div>
+                </div>
+
+                <!-- Google Login Button -->
+                <q-btn
+                  label="เข้าสู่ระบบด้วย Google"
+                  color="white"
+                  text-color="grey-8"
+                  class="full-width google-login-btn q-mb-md"
+                  unelevated
+                  no-caps
+                  :loading="isGoogleLoggingIn"
+                  :disable="isGoogleLoggingIn || isLoggingIn"
+                  @click="handleGoogleLogin"
+                  data-testid="google-login-submit"
+                >
+                  <template v-slot:default>
+                    <div class="row items-center no-wrap">
+                      <img 
+                        src="https://developers.google.com/identity/images/g-logo.png" 
+                        alt="Google" 
+                        class="google-icon q-mr-sm"
+                      />
+                      <!-- <span>เข้าสู่ระบบด้วย Google</span> -->
+                    </div>
+                  </template>
+                </q-btn>
+
                 <div class="text-right">
                   <q-btn
                     label="ลืมรหัสผ่าน?"
@@ -171,6 +205,40 @@
                 data-testid="mobile-login-submit"
               />
 
+              <!-- Mobile Divider -->
+              <div class="text-center q-mb-md">
+                <div class="divider-container">
+                  <div class="divider-line"></div>
+                  <span class="divider-text">หรือ</span>
+                  <div class="divider-line"></div>
+                </div>
+              </div>
+
+              <!-- Mobile Google Login Button -->
+              <q-btn
+                label="เข้าสู่ระบบด้วย Google"
+                color="white"
+                text-color="grey-8"
+                class="full-width google-login-btn q-mb-md"
+                unelevated
+                no-caps
+                :loading="isGoogleLoggingIn"
+                :disable="isGoogleLoggingIn || isLoggingIn"
+                @click="handleGoogleLogin"
+                data-testid="mobile-google-login-submit"
+              >
+                <template v-slot:default>
+                  <div class="row items-center no-wrap">
+                    <img 
+                      src="https://developers.google.com/identity/images/g-logo.png" 
+                      alt="Google" 
+                      class="google-icon q-mr-sm"
+                    />
+                    <span>เข้าสู่ระบบด้วย Google</span>
+                  </div>
+                </template>
+              </q-btn>
+
               <div class="text-right">
                 <q-btn
                   label="ลืมรหัสผ่าน?"
@@ -208,6 +276,7 @@ const route = useRoute()
 const isPwd = ref(true)
 const isResetPassword = ref(false)
 const isLoggingIn = ref(false)
+const isGoogleLoggingIn = ref(false)
 
 // Handle redirect query parameter on mount
 onMounted(() => {
@@ -226,6 +295,34 @@ onMounted(() => {
 
 function resetToLogin() {
   isResetPassword.value = false
+}
+
+// Google Login Handler
+const handleGoogleLogin = async () => {
+  try {
+    isGoogleLoggingIn.value = true
+    
+    // Get Google OAuth URL from backend
+    const response = await fetch('http://localhost:8888/auth/google')
+    const data = await response.json()
+    
+    if (data.url) {
+      // Redirect to Google OAuth
+      window.location.href = data.url
+    } else {
+      throw new Error('ไม่สามารถเชื่อมต่อกับ Google ได้')
+    }
+  } catch (error) {
+    console.error('Google login error:', error)
+    $q.notify({
+      color: 'negative',
+      message: 'เกิดข้อผิดพลาดในการเข้าสู่ระบบด้วย Google',
+      position: 'top',
+      timeout: 3000,
+    })
+  } finally {
+    isGoogleLoggingIn.value = false
+  }
 }
 const handleLogin = async () => {
   try {
@@ -511,6 +608,49 @@ const handleLogin = async () => {
 
 .forgot-password-btn:hover {
   text-decoration: underline;
+}
+
+/* Google Login Styles */
+.google-login-btn {
+  height: 48px;
+  border-radius: 8px;
+  font-weight: 500;
+  font-size: 16px;
+  border: 1px solid #dadce0;
+  background: #ffffff;
+  transition: all 0.2s ease;
+}
+
+.google-login-btn:hover {
+  background: #f8f9fa;
+  border-color: #c1c7cd;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.google-icon {
+  width: 20px;
+  height: 20px;
+}
+
+/* Divider Styles */
+.divider-container {
+  display: flex;
+  align-items: center;
+  width: 100%;
+}
+
+.divider-line {
+  flex: 1;
+  height: 1px;
+  background: #e0e0e0;
+}
+
+.divider-text {
+  padding: 0 16px;
+  color: #666;
+  font-size: 14px;
+  background: #ffffff;
 }
 
 /* ซ่อน Desktop Layout เมื่อจอกว้างระหว่าง 600px - 1024px */

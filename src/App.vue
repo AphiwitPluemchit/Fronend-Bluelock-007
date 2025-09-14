@@ -23,9 +23,9 @@ const { t } = useI18n()
 const token = ref()
 const handleToken = () => {
   const urlParams = new URLSearchParams(window.location.search)
-  token.value = urlParams.get('token')
+  token.value = urlParams.get('access_token')
   if (token.value) {
-    localStorage.setItem('token', token.value ?? '')
+    localStorage.setItem('access_token', token.value ?? '')
     window.location.replace('/')
   }
 }
