@@ -1,6 +1,6 @@
 <template>
   <q-layout view="hHh Lpr lFf">
-    <MenuNavbar @toggleSidebar="studentSidebar?.toggleSidebar" />
+    <!-- <MenuNavbar @toggleSidebar="studentSidebar?.toggleSidebar" /> -->
     <MenuStudentSidebar ref="studentSidebar" />
     <q-page-container>
       <div class="q-mx-auto" style="max-width: 1600px"><router-view /></div>
@@ -9,7 +9,7 @@
 </template>
 
 <script setup lang="ts">
-import MenuNavbar from 'src/components/menu/MenuNavbar.vue'
+// import MenuNavbar from 'src/components/menu/MenuNavbar.vue'
 import MenuStudentSidebar from 'src/components/menu/MenuStudentSidebar.vue'
 import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'

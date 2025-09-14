@@ -1,131 +1,74 @@
 <template>
-  <q-drawer
-    v-model="leftDrawerOpen"
-    show-if-above
-    :behavior="drawerBehavior"
-    side="left"
-    bordered
-    :width="260"
-    style="font-size: 18px; font-weight: 500; margin-right: 10px; background-color: #edf0f5"
-  >
-    <!-- ให้ q-list เต็มความสูง และแบ่งพื้นที่ระหว่างเมนู กับ Logout -->
-    <q-list padding style="" class="menu-list flex column justify-between full-height">
-      <div>
-        <router-link v-for="link in linksList" :key="link.title" :to="link.link" class="no-link">
-          <q-item
-            v-ripple
-            clickable
-            class="q-pa-md q-my-md q-mr-sm"
-            :class="{ 'active-menu': router.currentRoute.value.path.includes(link.link) }"
-          >
-            <q-item-section avatar>
-              <q-icon :name="link.icon" />
-            </q-item-section>
-            <q-item-section>
-              <q-item-label>{{ link.title }}</q-item-label>
-            </q-item-section>
-          </q-item>
-        </router-link>
+  <q-header class="bg-primary text-white shadow-2" elevated>
+    <q-toolbar class="justify-between">
+      <!-- เมนูหลัก -->
+      <div class="row items-center q-gutter-x-lg">
+        <!-- ปุ่มเมนูหลัก -->
+        <q-btn flat no-caps label="หน้าหลัก" to="/Student/Home" />
+
+        <!-- เมนูมีกิจกรรม (dropdown) -->
+        <q-btn flat no-caps label="กิจกรรม">
+          <q-menu fit>
+            <q-list style="min-width: 150px">
+              <q-item clickable v-ripple to="/Student/ProgramCalendar">
+                <q-item-section>ปฏิทิน</q-item-section>
+              </q-item>
+              <q-item clickable v-ripple to="/Student/ProgramTablePage">
+                <q-item-section>โครงการ</q-item-section>
+              </q-item>
+              <q-item clickable v-ripple to="/Student/OnlineCoursesPage">
+                <q-item-section>อบรมออนไลน์</q-item-section>
+              </q-item>
+            </q-list>
+          </q-menu>
+        </q-btn>
       </div>
 
-      <!-- q-space ดันปุ่ม Logout ไปด้านล่าง -->
-      <q-space />
-      <q-item clickable @click="logout" class="q-pa-md q-mr-sm logout-button">
-        <q-item-section avatar>
-          <q-icon name="exit_to_app" />
-        </q-item-section>
-        <q-item-section>
-          <q-item-label>ออกจากระบบ</q-item-label>
-        </q-item-section>
-      </q-item>
-    </q-list>
-  </q-drawer>
+      <!-- ข้อมูลผู้ใช้ + เมนู dropdown -->
+      <div class="row items-center">
+        <div class="text-right" v-show="$q.screen.gt.xs">
+          <div>{{ authStore.getName }}</div>
+          <div style="font-size: 13px">
+            {{ authStore.getRole === EnumUserRole.STUDENT ? 'นิสิต' : 'ผู้ดูแล' }}
+          </div>
+        </div>
+        <q-btn flat no-caps>
+          <q-avatar size="32px" class="bg-white text-primary">
+            <q-icon name="person" />
+          </q-avatar>
+
+          <q-menu anchor="bottom right" self="top right">
+            <q-list style="min-width: 150px">
+              <q-item clickable v-ripple to="/Student/RecordPage">
+                <q-item-section>ประวัติ</q-item-section>
+              </q-item>
+              <q-item clickable v-ripple @click="logout">
+                <q-item-section>ออกจากระบบ</q-item-section>
+              </q-item>
+            </q-list>
+          </q-menu>
+        </q-btn>
+      </div>
+    </q-toolbar>
+  </q-header>
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue'
 import { useRouter } from 'vue-router'
-import { useQuasar } from 'quasar'
 import { useAuthStore } from 'src/stores/auth'
-
+import { EnumUserRole } from 'src/data/roles'
+import { useQuasar } from 'quasar'
 const $q = useQuasar()
 const router = useRouter()
 const authStore = useAuthStore()
-const leftDrawerOpen = ref(false)
-
-const linksList = [
-  { title: 'ตารางกิจกรรม', icon: 'calendar_today', link: '/Student/ProgramCalendar' },
-  { title: 'กิจกรรมทั้งหมด', icon: 'today', link: '/Student/ProgramTablePage' },
-  { title: 'กิจกรรมของฉัน', icon: 'person_outline', link: '/Student/MyProgramPage' },
-  { title: 'บันทึกชั่วโมงอบรม', icon: 'schedule', link: '/Student/RecordPage' },
-  { title: 'ใบประกาศนียบัตร', icon: 'workspace_premium', link: '/Student/CertificatePage' },
-  { title: 'หัวข้ออบรมออนไลน์', icon: 'computer', link: '/Student/OnlineCoursesPage' },
-]
-
-const drawerBehavior = computed(() => {
-  return $q.screen.width < 1100 ? 'mobile' : 'desktop' // ถ้าหน้าจอเล็กกว่า lg (<1100px) ใช้ mobile
-})
 
 async function logout() {
   try {
     await authStore.logout()
-    // After logout, redirect to login page
     await router.push('/')
-  } catch (error) {
-    console.error('Logout error:', error)
-    // Even if logout fails, clear localStorage and redirect to login
+  } catch {
     authStore.clearLocalStorage()
     await router.push('/')
   }
 }
-
-// ฟังก์ชันเปิด/ปิด Sidebar
-const toggleSidebar = () => {
-  leftDrawerOpen.value = !leftDrawerOpen.value
-}
-
-// ให้ Layout เรียกใช้งานได้
-defineExpose({ toggleSidebar })
 </script>
-
-<style scoped>
-/* ปิดขีดเส้นใต้ของ router-link */
-.no-link {
-  text-decoration: none;
-  color: inherit;
-}
-
-/* ทำให้ Hover เปลี่ยนสี */
-.menu-list .q-item:hover {
-  background-color: rgba(236, 236, 236, 0.021);
-}
-
-/* ปุ่มที่ถูกเลือกให้เป็นสี primary */
-.active-menu {
-  background-color: var(--q-primary) !important;
-  color: white !important;
-}
-
-/* ปรับสีของไอคอนใน active menu */
-.active-menu .q-icon {
-  color: white !important;
-}
-
-/* ทำให้ปุ่ม Logout เปลี่ยนสีเป็นแดงเมื่อ Hover */
-.logout-button:hover {
-  background-color: #ff2222d7 !important; /* สีแดง */
-  color: white !important;
-  transition: background-color 0.3s ease;
-}
-
-/* ปรับสีไอคอนของ Logout เมื่อ Hover */
-.logout-button:hover .q-icon {
-  color: white !important;
-}
-</style>
-
-<style lang="sass" scoped>
-/* กำหนด Border Radius ให้ q-item */
-.menu-list .q-item
-  border-radius: 0 32px 32px 0
-</style>

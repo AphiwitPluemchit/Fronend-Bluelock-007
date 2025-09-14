@@ -1,47 +1,50 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
-import { useQuasar } from 'quasar'
+// import { useQuasar } from 'quasar'
 import { useAuthStore } from 'src/stores/auth'
 import { StudentService } from 'src/services/student'
+import { EnrollmentService } from 'src/services/enrollment'
+import type { Program } from 'src/types/program'
+import type{ Pagination } from 'src/types/pagination'
 
 const auth = useAuthStore()
 const router = useRouter()
-const $q = useQuasar()
-const isSmallScreen = computed(() => !$q.screen.gt.xs)
+// const $q = useQuasar()
+// const isSmallScreen = computed(() => !$q.screen.gt.xs)
+const allPrograms = ref<Program[]>([])
+// interface ProgramHistory {
+//   program: {
+//     name: string
+//     skill: 'soft' | 'hard'
+//     programItem: {
+//       id: string
+//       name: string
+//       description: string
+//       hour: number
+//       operator: string
+//       dates: {
+//         date: string
+//         stime: string
+//         etime: string
+//       }[]
+//     }
+//     programState: string
+//     id: string
+//     type: string
+//   }
+//   registrationDate: string
+// }
 
-interface ProgramHistory {
-  program: {
-    name: string
-    skill: 'soft' | 'hard'
-    programItem: {
-      id: string
-      name: string
-      description: string
-      hour: number
-      operator: string
-      dates: {
-        date: string
-        stime: string
-        etime: string
-      }[]
-    }
-    programState: string
-    id: string
-    type: string
-  }
-  registrationDate: string
-}
-
-interface ProgramDisplay {
-  id: string
-  title: string
-  type: 'academic' | 'preparation'
-  date: string
-  time: string
-  room: string
-  hours: number
-}
+// interface ProgramDisplay {
+//   id: string
+//   title: string
+//   type: 'academic' | 'preparation'
+//   date: string
+//   time: string
+//   room: string
+//   hours: number
+// }
 
 const studentData = ref({
   name: '',
@@ -49,12 +52,19 @@ const studentData = ref({
   email: '',
   studentId: '',
 })
-
+const query = ref<Pagination>({
+  page: 1,
+  limit: -1,
+  search: '',
+  sortBy: '_id',
+  order: 'desc',
+  skill: [],
+  programState: ['open', 'close'],
+  major: [],
+  studentYear: [],
+})
 const academicData = ref({ current: 0, required: 12 })
 const prepData = ref({ current: 0, required: 30 })
-
-const programs = ref<ProgramDisplay[]>([])
-const showAllPrograms = ref(false)
 
 const programColors = {
   academic: {
@@ -105,7 +115,16 @@ const getProgressValue = (data: { current: number; required: number }) =>
 const onClick = async (id: string) => {
   await router.push(`/Student/Program/MyProgramDetail/${id}`)
 }
-
+const fetchData = async () => {
+  try {
+    const studentId = `${auth.getUser?.id}`
+    const response = await EnrollmentService.getEnrollmentsByStudentID(studentId, query.value)
+    allPrograms.value = response.data
+    // programs.value = response.data
+  } catch (error) {
+    console.error('เกิดข้อผิดพลาดในการโหลดข้อมูลกิจกรรม:', error)
+  }
+}
 onMounted(async () => {
   const code = auth.getUser?.code
   if (!code) return
@@ -123,30 +142,7 @@ onMounted(async () => {
     academicData.value.current = summary.hardSkill
     prepData.value.current = summary.softSkill
 
-    programs.value = Array.isArray(summary.history)
-      ? (summary.history
-          .map((h: ProgramHistory) => {
-            const a = h.program
-            const ai = a.programItem
-            const d = ai.dates?.[0]
-            if (!d) return null
-
-            return {
-              id: a.id,
-              title: a.name || '-',
-              type: a.skill === 'soft' ? 'preparation' : 'academic',
-              date: new Date(d.date).toLocaleDateString('th-TH', {
-                year: 'numeric',
-                month: 'long',
-                day: 'numeric',
-              }),
-              time: `${d.stime} - ${d.etime}`,
-              room: !ai.operator || ai.operator.trim() === '-' ? 'ไม่ระบุ' : ai.operator,
-              hours: ai.hour ?? 0,
-            }
-          })
-          .filter(Boolean) as ProgramDisplay[])
-      : []
+    await fetchData()
   } catch (err) {
     console.error('โหลดข้อมูล student summary ไม่สำเร็จ', err)
   }
@@ -314,15 +310,15 @@ onMounted(async () => {
               <q-icon name="history" class="q-mr-sm" />
               ประวัติการเข้ากิจกรรม
             </div>
-            <q-btn
-              v-if="programs.length > 3"
+            <!-- <q-btn
+              v-if="allPrograms.length > 3"
               flat
               dense
               color="white"
               :icon="showAllPrograms ? 'expand_less' : 'expand_more'"
               :label="showAllPrograms ? 'ดูน้อยลง' : 'ดูทั้งหมด'"
               @click="showAllPrograms = !showAllPrograms"
-            />
+            /> -->
           </div>
         </q-card-section>
 
@@ -331,65 +327,31 @@ onMounted(async () => {
         <q-card-section class="q-pa-none">
           <q-list>
             <q-item
-              v-for="(program, index) in showAllPrograms ? programs : programs.slice(0, 3)"
+              v-for="(program, index) in allPrograms"
               :key="index"
               clickable
               v-ripple
-              @click="onClick(program.id)"
+              @click="onClick(program.id!)"
             >
-              <q-item-section avatar>
+              <!-- <q-item-section avatar>
                 <q-avatar color="primary" text-color="white">
                   <q-icon :name="programColors[program.type].icon" />
                 </q-avatar>
-              </q-item-section>
+              </q-item-section> -->
 
               <q-item-section>
                 <!-- ✅ ชื่อกิจกรรม แสดงตลอด -->
-                <q-item-label class="text-weight-medium ellipsis" :title="program.title">
-                  {{ program.title }}
+                <q-item-label class="text-weight-medium ellipsis" :title="program.name">
+                  {{ program.name }}
                 </q-item-label>
 
                 <!-- ✅ แสดงวัน เวลา ชั่วโมงในจอใหญ่ และ label ในจอเล็ก -->
                 <q-item-label caption>
-                  <div class="row items-center">
-                    <template v-if="!isSmallScreen">
-                      <q-icon name="event" size="xs" class="q-mr-xs" />
-                      {{ program.date }}
-                      <q-separator vertical spaced class="q-mx-sm" />
-                      <q-icon name="schedule" size="xs" class="q-mr-xs" />
-                      {{ program.hours }} ชั่วโมง
-                    </template>
 
-                    <template v-else>
-                      <!-- ✅ แสดงประเภทกิจกรรมในจอเล็ก -->
-                      <q-badge
-                        rounded
-                        class="q-mt-xs q-px-sm q-py-xs text-weight-medium"
-                        :style="`background-color: ${programColors[program.type].bgColor}; color: ${programColors[program.type].textColor}; border: 1px solid ${
-                          program.type === 'preparation'
-                            ? programColors[program.type].border
-                            : programColors[program.type].textColor
-                        };`"
-                        :label="programColors[program.type].label"
-                      />
-                    </template>
-                  </div>
                 </q-item-label>
               </q-item-section>
 
-              <!-- ✅ badge ซ่อนในจอเล็ก -->
-              <q-item-section side v-if="!isSmallScreen">
-                <q-badge
-                  rounded
-                  class="q-px-sm q-py-xs text-weight-medium"
-                  :style="`background-color: ${programColors[program.type].bgColor}; color: ${programColors[program.type].textColor}; border: 1px solid ${
-                    program.type === 'preparation'
-                      ? programColors[program.type].border
-                      : programColors[program.type].textColor
-                  };`"
-                  :label="programColors[program.type].label"
-                />
-              </q-item-section>
+
             </q-item>
           </q-list>
         </q-card-section>
