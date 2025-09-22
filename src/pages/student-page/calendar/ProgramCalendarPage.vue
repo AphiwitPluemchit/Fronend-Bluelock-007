@@ -8,8 +8,8 @@ import type { Pagination } from 'src/types/pagination'
 import { ProgramService } from 'src/services/program'
 import FilterDialog from 'src/components/Dialog/FilterDialog.vue'
 import type { CalendarEvent } from 'src/types/calendar'
-import CalendarMonthYearSelector from './CalendarComponents/calendarMonthYearSelector.vue'
-import CalendarEventPanel from './CalendarComponents/calendarEventPanel.vue'
+import CalendarMonthYearSelector from './CalendarComponents/CalendarMonthYearSelector.vue'
+import CalendarEventPanel from './CalendarComponents/CalendarEventPanel.vue'
 import { useQuasar } from 'quasar'
 
 const $q = useQuasar()
