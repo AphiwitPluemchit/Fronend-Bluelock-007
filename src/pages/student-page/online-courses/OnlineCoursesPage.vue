@@ -4,18 +4,6 @@ import { useQuasar } from 'quasar'
 import FilterDialog from 'src/components/Dialog/FilterDialog.vue'
 import OnlineCourseCard from './component/OnlineCoursesCard.vue'
 import { useCourseStore } from 'src/stores/course'
-import type { Course } from 'src/types/course'
-
-// Interface สำหรับ OnlineCourseCard
-interface OnlineCourse {
-  id: string
-  title: string
-  type: 'soft' | 'hard'
-  description: string
-  platformType: 'Buu Mooc' | 'Thai Mooc'
-  hours: number
-  link: string
-}
 
 const $q = useQuasar()
 const courseStore = useCourseStore()
@@ -42,26 +30,15 @@ const fetchCourses = async () => {
   }
 }
 
-// แปลงข้อมูลจาก API ให้เข้ากับ interface ของ OnlineCourseCard
-const transformCourseData = (course: Course): OnlineCourse => ({
-  id: course.id || '',
-  title: course.name,
-  type: course.isHardSkill ? 'hard' : 'soft',
-  description: course.description || '',
-  platformType: course.type === 'buumooc' ? 'Buu Mooc' : 'Thai Mooc',
-  hours: course.hour,
-  link: course.link,
-})
-
 const filteredCourses = computed(() => {
-  const transformedCourses = courseStore.courses.map(transformCourseData)
+  // เริ่มจาก courses ทั้งหมดจาก store
+  let filtered = courseStore.courses
 
   // กรองตามประเภทที่เลือก
-  let filtered = transformedCourses
   if (selectedType.value.length > 0) {
-    filtered = filtered.filter((c) => {
-      if (selectedType.value.includes('hard') && c.type === 'hard') return true
-      if (selectedType.value.includes('soft') && c.type === 'soft') return true
+    filtered = filtered.filter((course) => {
+      if (selectedType.value.includes('hard') && course.isHardSkill) return true
+      if (selectedType.value.includes('soft') && !course.isHardSkill) return true
       return false
     })
   }
@@ -69,10 +46,13 @@ const filteredCourses = computed(() => {
   // กรองตามคำค้นหา
   if (searchQuery.value.trim()) {
     const query = searchQuery.value.toLowerCase().trim()
-    filtered = filtered.filter((c) =>
-      c.title.toLowerCase().includes(query) ||
-      c.description.toLowerCase().includes(query) ||
-      c.platformType.toLowerCase().includes(query)
+    const platformType = (type: string) => (type === 'buumooc' ? 'Buu Mooc' : 'Thai Mooc')
+
+    filtered = filtered.filter(
+      (course) =>
+        course.name.toLowerCase().includes(query) ||
+        (course.description || '').toLowerCase().includes(query) ||
+        platformType(course.type).toLowerCase().includes(query),
     )
   }
 
@@ -138,23 +118,23 @@ onMounted(() => {
         <div class="text-center">
           <q-icon name="workspace_premium" size="100px" color="grey-4" />
           <div class="text-h6 q-mt-md text-grey-6">
-            {{ searchQuery.trim() || selectedType.length > 0 ? 'ไม่พบคอร์สที่ตรงกับเงื่อนไข' : 'ยังไม่มีคอร์สในระบบ' }}
+            {{
+              searchQuery.trim() || selectedType.length > 0
+                ? 'ไม่พบคอร์สที่ตรงกับเงื่อนไข'
+                : 'ยังไม่มีคอร์สในระบบ'
+            }}
           </div>
         </div>
       </div>
 
       <!-- การ์ด 2 ต่อแถว + ยืดเท่ากัน -->
       <div v-else class="row q-col-gutter-md items-stretch">
-        <div v-for="course in filteredCourses" :key="course.id" class="col-xs-12 col-sm-6 col-md-6">
-          <OnlineCourseCard
-            class="h-100"
-            :title="course.title"
-            :type="course.type"
-            :hours="course.hours"
-            :link="course.link"
-            :platform-type="course.platformType"
-            :description="course.description"
-          />
+        <div
+          v-for="course in filteredCourses"
+          :key="course.id || course.name"
+          class="col-xs-12 col-sm-6 col-md-6"
+        >
+          <OnlineCourseCard class="h-100" :course="course" />
         </div>
       </div>
     </div>

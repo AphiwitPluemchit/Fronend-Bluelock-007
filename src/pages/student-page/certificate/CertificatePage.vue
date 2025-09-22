@@ -1,19 +1,15 @@
 <script setup lang="ts">
 import { ref } from 'vue'
+import { useRoute } from 'vue-router'
 
 import UploadCertificate from './UploadCertificate.vue'
 import CertificateHistory from './UploadCertHistory.vue'
 
-// import { route } from 'quasar/wrappers';
-
+const route = useRoute()
 const tab = ref<string>('certificate')
 
-// onMounted(async () => {
-//   const id = route.params.id as string
-//   const res = await ProgramService.getOne(id)
-//   console.log('📦 ได้ program:', res)
-//   program.value = res.data
-// })
+// รับ courseId จาก route parameter
+const courseId = route.params.courseId as string
 </script>
 
 <template>
@@ -27,7 +23,7 @@ const tab = ref<string>('certificate')
     <!-- Tab Panels -->
     <q-tab-panels v-model="tab" animated class="custom-panels">
       <q-tab-panel name="certificate" class="q-my-md">
-        <UploadCertificate />
+        <UploadCertificate :courseId="courseId" />
       </q-tab-panel>
 
       <q-tab-panel name="history" class="q-my-md">

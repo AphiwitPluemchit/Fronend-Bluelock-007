@@ -2,29 +2,28 @@
 import { computed } from 'vue'
 import ProgramType from 'src/pages/student-page/program/component/programType.vue'
 import { useQuasar } from 'quasar'
+import { useRouter } from 'vue-router'
+import type { Course } from 'src/types/course'
 
 const $q = useQuasar()
+const router = useRouter()
 const isMobile = computed(() => $q.screen.lt.sm)
 
 interface Props {
-  title: string
-  type: 'soft' | 'hard'
-  description?: string
-  platformType: 'Buu Mooc' | 'Thai Mooc'
-  hours: number
-  link: string
+  course: Course
 }
 const props = defineProps<Props>()
 
-// แปลง type เป็น skill format ที่ ProgramType ต้องการ
-const skillType = computed(() => (props.type === 'hard' ? 'hardSkill' : 'softSkill'))
+// แปลง Course properties เป็นค่าที่ต้องใช้ใน template
+const title = computed(() => props.course.name)
+const skillType = computed(() => (props.course.isHardSkill ? 'hardSkill' : 'softSkill'))
+const platformType = computed(() => (props.course.type === 'buumooc' ? 'Buu Mooc' : 'Thai Mooc'))
+const hours = computed(() => props.course.hour)
+const link = computed(() => props.course.link)
 
-// ฟังก์ชันสำหรับคลิกการ์ด (เฉพาะ desktop)
-const handleCardClick = () => {
-  if (!isMobile.value) {
-    // เปิดลิงก์ในแท็บใหม่
-    window.open(props.link, '_blank')
-  }
+// ฟังก์ชันสำหรับไปยังหน้าอัปโหลดใบประกาศ
+const goToCertificatePage = () => {
+  void router.push(`/student/CertificatePage/${props.course.id}`)
 }
 </script>
 
@@ -32,7 +31,7 @@ const handleCardClick = () => {
   <q-card
     class="oc-card cursor-pointer"
     :class="{ 'clickable-card': !isMobile }"
-    @click="handleCardClick"
+    @click="goToCertificatePage"
   >
     <q-card-section class="outer-box">
       <div class="inner-box">
@@ -42,8 +41,12 @@ const handleCardClick = () => {
           <ProgramType :skill="skillType" />
         </div>
         <!-- <div class="text-subtitle2 q-mb-sm">รายละเอียด : {{ description ?? '-' }}</div> -->
-        <div class="text-subtitle2 q-mb-sm"> <q-icon name="domain" class="q-mb-xs" /> แหล่งที่มา : {{ platformType }}</div>
-        <div class="text-subtitle2 q-mb-sm"><q-icon name="schedule" class="q-mb-xs" /> จำนวนชั่วโมง : {{ hours }} ชั่วโมง</div>
+        <div class="text-subtitle2 q-mb-sm">
+          <q-icon name="domain" class="q-mb-xs" /> แหล่งที่มา : {{ platformType }}
+        </div>
+        <div class="text-subtitle2 q-mb-sm">
+          <q-icon name="schedule" class="q-mb-xs" /> จำนวนชั่วโมง : {{ hours }} ชั่วโมง
+        </div>
       </div>
 
       <q-btn
