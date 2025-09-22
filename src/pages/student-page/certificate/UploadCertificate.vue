@@ -14,14 +14,13 @@ const courseId = route.params.courseId as string
 const courseStore = useCourseStore()
 const authStore = useAuthStore()
 const baseurl = api.defaults.baseURL
-const url = ref('')
+const url = ref(
+  'https://learner.thaimooc.ac.th/credential-wallet/10793bb5-6e4f-4873-9309-f25f216a46c7/sahaphap.rit/public',
+)
 const $q = useQuasar()
 
 // Course information
 const selectedCourse = ref<Course | null>(null)
-
-// File upload state
-const uploadedFiles = ref<File[]>([])
 
 // Computed properties for course display
 const courseName = computed(() => selectedCourse.value?.name || '')
@@ -52,16 +51,6 @@ const loadCourseById = async () => {
 function openCourseUrl() {
   if (courseLink.value) {
     window.open(courseLink.value, '_blank')
-  }
-}
-
-// ฟังก์ชันสำหรับ upload file
-const handleFileUpload = (files: readonly File[]) => {
-  if (files.length > 0) {
-    uploadedFiles.value = [...files]
-    // จำลองการอัปโหลดไฟล์ - ในที่นี้เราจะใช้ URL แทน
-    // สามารถใช้ FormData เพื่ออัปโหลดไฟล์จริงได้
-    console.log('Files uploaded:', files)
   }
 }
 
@@ -127,116 +116,69 @@ onMounted(() => {
       </div>
     </div>
 
-    <!-- Course Information Card -->
-    <q-card class="course-info-card q-mb-md" v-if="selectedCourse">
-      <q-card-section>
-        <div class="course-title">{{ courseName }}</div>
-        <div class="course-details">
-          <div class="detail-item">
-            <span class="label">ผู้ให้ :</span>
-            <span class="value">{{ selectedCourse.issuer }}</span>
+    <!-- Main Certificate Upload Card -->
+    <q-card class="main-card" v-if="selectedCourse">
+      <q-card-section class="main-section">
+        <!-- Course Information Section -->
+        <div class="course-info-section">
+          <div class="course-title">{{ courseName }}</div>
+          <div class="course-details">
+            <div class="detail-item">
+              <span class="label">ผู้ให้ :</span>
+              <span class="value">{{ selectedCourse.issuer }}</span>
+            </div>
+            <div class="detail-item">
+              <span class="label">จำนวนชั่วโมง :</span>
+              <span class="value">{{ courseHours }}</span>
+            </div>
+            <div class="detail-item">
+              <span class="label">ลิงก์ออนไลน์ :</span>
+              <a :href="courseLink" target="_blank" class="course-link" @click="openCourseUrl">
+                {{ courseSource }} <q-icon name="open_in_new" size="xs" />
+              </a>
+            </div>
           </div>
-          <div class="detail-item">
-            <span class="label">จำนวนชั่วโมง :</span>
-            <span class="value">{{ courseHours }}</span>
-          </div>
-          <div class="detail-item">
-            <span class="label">ลิงก์ออนไลน์ :</span>
-            <a :href="courseLink" target="_blank" class="course-link" @click="openCourseUrl">
-              {{ courseSource }} <q-icon name="open_in_new" size="xs" />
-            </a>
+
+          <!-- Example Certificate Section -->
+          <div class="example-section">
+            <div class="section-title">ตัวอย่างใบประกาศนียบัตร</div>
+            <div class="example-content">
+              <q-img
+                src="https://i.pinimg.com/736x/ee/12/55/ee1255cd4f98b3282b02033cf58e3506.jpg"
+                alt="Certificate Example"
+                class="example-image"
+              />
+            </div>
           </div>
         </div>
-      </q-card-section>
-    </q-card>
 
-    <!-- Certificate Upload Section -->
-    <q-card class="upload-card">
-      <q-card-section class="upload-section">
-        <div class="upload-title">อัปโหลด Certificate</div>
+        <!-- Certificate Upload Section -->
+        <div class="upload-section">
+          <!-- URL Input Section -->
+          <div class="url-section">
+            <div class="section-title">ลิ้งค์ใบประกาศนียบัตร</div>
+            <q-input
+              v-model="url"
+              outlined
+              dense
+              placeholder="BUU IF001 Certificate | mooc.buu.ac.th"
+              class="input-url"
+            >
+              <template v-slot:prepend>
+                <q-icon name="link" />
+              </template>
+            </q-input>
 
-        <!-- File Upload Area -->
-        <div class="upload-area">
-          <q-uploader
-            ref="uploader"
-            :factory="() => ({ url: baseurl + '/certificates/upload' })"
-            accept=".pdf,image/*"
-            :max-files="1"
-            class="full-width"
-            @added="handleFileUpload"
-            hide-upload-btn
-            label="ลากไฟล์มาวาง หรือคลิกเพื่ออัปโหลด"
-            flat
-            bordered
-            style="max-height: 200px"
-          >
-            <template v-slot:header="scope">
-              <div class="row no-wrap items-center q-pa-sm q-gutter-xs">
-                <q-btn
-                  v-if="scope.queuedFiles.length > 0"
-                  icon="clear_all"
-                  @click="scope.removeQueuedFiles"
-                  round
-                  dense
-                  flat
-                >
-                  <q-tooltip>Remove All</q-tooltip>
-                </q-btn>
-                <q-btn
-                  v-if="scope.uploadedFiles.length > 0"
-                  icon="done_all"
-                  @click="scope.removeUploadedFiles"
-                  round
-                  dense
-                  flat
-                >
-                  <q-tooltip>Remove Uploaded Files</q-tooltip>
-                </q-btn>
-                <q-spinner v-if="scope.isUploading" class="q-uploader__spinner" />
-                <div class="col">
-                  <div class="q-uploader__title">อัปโหลดไฟล์ Certificate</div>
-                  <div class="q-uploader__subtitle">{{ scope.files.length }} file(s)</div>
-                </div>
-                <q-btn
-                  v-if="scope.canAddFiles"
-                  type="a"
-                  icon="add_box"
-                  @click="scope.pickFiles"
-                  round
-                  dense
-                  flat
-                >
-                  <q-uploader-add-trigger />
-                  <q-tooltip>Pick Files</q-tooltip>
-                </q-btn>
-              </div>
-            </template>
-          </q-uploader>
-        </div>
-
-        <!-- URL Input Section -->
-        <div class="url-section">
-          <div class="section-title">ลิ้งค์ใบประกาศนียบัตร</div>
-          <q-input
-            v-model="url"
-            outlined
-            placeholder="BUU IF001 Certificate | mooc.buu.ac.th"
-            class="url-input"
-          >
-            <template v-slot:prepend>
-              <q-icon name="link" />
-            </template>
-          </q-input>
-
-          <!-- Verify Button -->
-          <q-btn
-            label="ตรวจสอบ url ใบประกาศ"
-            color="positive"
-            class="verify-btn"
-            icon="check_circle"
-            @click="verifyUrl"
-            :loading="courseStore.loading"
-          />
+            <!-- Verify Button -->
+            <q-btn
+              label="ตรวจสอบ url ใบประกาศ"
+              color="positive"
+              class="verify-btn"
+              icon="check_circle"
+              @click="verifyUrl"
+              :loading="courseStore.loading"
+            />
+          </div>
         </div>
       </q-card-section>
     </q-card>
@@ -267,9 +209,14 @@ onMounted(() => {
   color: #1976d2;
 }
 
-.course-info-card {
+.main-card {
   border: 1px solid #e0e0e0;
-  border-radius: 8px;
+  border-radius: 16px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.main-section {
+  padding: 24px;
 }
 
 .course-title {
@@ -313,15 +260,6 @@ onMounted(() => {
   text-decoration: underline;
 }
 
-.upload-card {
-  border: 1px solid #e0e0e0;
-  border-radius: 8px;
-}
-
-.upload-section {
-  padding: 24px;
-}
-
 .upload-title {
   font-size: 16px;
   font-weight: 600;
@@ -332,7 +270,7 @@ onMounted(() => {
 .upload-area {
   margin-bottom: 24px;
   border: 2px dashed #e0e0e0;
-  border-radius: 8px;
+  border-radius: 16px;
   background-color: #fafafa;
 }
 
@@ -347,21 +285,37 @@ onMounted(() => {
   margin-bottom: 12px;
   color: #666;
 }
+.input-url {
+  margin-bottom: 24px;
+}
 
-.url-input {
-  margin-bottom: 16px;
+.input-url :deep(.q-field__control) {
+  border-radius: 12px !important;
+}
+
+.input-url :deep(.q-field__native) {
+  border-radius: 12px !important;
 }
 
 .verify-btn {
   width: 100%;
   height: 48px;
-  border-radius: 8px;
+  border-radius: 16px;
   font-weight: 600;
 }
 
 @media (max-width: 600px) {
   .upload-certificate-container {
     padding: 12px;
+  }
+
+  .main-section {
+    padding: 16px;
+  }
+
+  .course-info-section {
+    margin-bottom: 24px;
+    padding-bottom: 16px;
   }
 
   .course-details {
