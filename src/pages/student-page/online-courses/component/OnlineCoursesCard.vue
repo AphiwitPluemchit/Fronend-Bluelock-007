@@ -23,7 +23,7 @@ const link = computed(() => props.course.link)
 
 // ฟังก์ชันสำหรับไปยังหน้าอัปโหลดใบประกาศ
 const goToCertificatePage = () => {
-  void router.push(`/student/CertificatePage/${props.course.id}`)
+  void router.push(`/student/UploadCertificate/${props.course.id}`)
 }
 </script>
 

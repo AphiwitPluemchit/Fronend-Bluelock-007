@@ -28,8 +28,8 @@ const studentChildren: RouteRecordRaw[] = [
     component: () => import('pages/student-page/record/RecordPage.vue'),
   },
   {
-    path: 'CertificatePage/:courseId?',
-    component: () => import('pages/student-page/certificate/CertificatePage.vue'),
+    path: 'UploadCertificate/:courseId?',
+    component: () => import('pages/student-page/certificate/UploadCertificate.vue'),
   },
   {
     path: 'OnlineCoursesPage',

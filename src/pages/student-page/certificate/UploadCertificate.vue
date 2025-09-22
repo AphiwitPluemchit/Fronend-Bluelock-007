@@ -5,13 +5,12 @@ import { useCourseStore } from 'src/stores/course'
 import { useAuthStore } from 'src/stores/auth'
 import { useQuasar } from 'quasar'
 import type { Course } from 'src/types/course'
+import { useRoute } from 'vue-router'
 
-// Props
-interface Props {
-  courseId?: string
-}
-const props = defineProps<Props>()
+const route = useRoute()
 
+// รับ courseId จาก route parameter
+const courseId = route.params.courseId as string
 const courseStore = useCourseStore()
 const authStore = useAuthStore()
 const baseurl = api.defaults.baseURL
@@ -35,9 +34,9 @@ const courseLink = computed(() => selectedCourse.value?.link || '')
 
 // โหลดข้อมูลคอร์สจาก courseId
 const loadCourseById = async () => {
-  if (props.courseId) {
+  if (courseId) {
     try {
-      const course = await courseStore.getOneCourse(props.courseId)
+      const course = await courseStore.getOneCourse(courseId)
       selectedCourse.value = course
     } catch (error) {
       console.error('Error loading course:', error)
