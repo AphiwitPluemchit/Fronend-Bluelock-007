@@ -5,14 +5,15 @@ import { useRouter } from 'vue-router'
 import { useAuthStore } from 'src/stores/auth'
 import { StudentService } from 'src/services/student'
 import { EnrollmentService } from 'src/services/enrollment'
-import type { Program } from 'src/types/program'
+import type { ProgramHistory } from 'src/types/program'
+import type { CheckinoutRecord } from 'src/types/checkinout'
 import type{ Pagination } from 'src/types/pagination'
 
 const auth = useAuthStore()
 const router = useRouter()
 // const $q = useQuasar()
 // const isSmallScreen = computed(() => !$q.screen.gt.xs)
-const allPrograms = ref<Program[]>([])
+const allPrograms = ref<ProgramHistory[]>([])
 // interface ProgramHistory {
 //   program: {
 //     name: string
@@ -114,6 +115,36 @@ const getProgressValue = (data: { current: number; required: number }) =>
 
 const onClick = async (id: string) => {
   await router.push(`/Student/Program/MyProgramDetail/${id}`)
+}
+
+const getProgramItemStatus = (program: ProgramHistory): number => {
+  const status = program?.programItems?.[0]?.status;
+  return typeof status === 'number' ? status : 1;
+}
+
+const getStatusDotClass = (program: ProgramHistory) => {
+  const s = getProgramItemStatus(program)
+  if (s === 2) return 'status-dot--green'
+  if (s === 3) return 'status-dot--red'
+  return 'status-dot--yellow'
+}
+
+const getCheckinRecords = (program: ProgramHistory): CheckinoutRecord[] => {
+  const records = program?.programItems?.[0]?.checkinoutRecord
+  return Array.isArray(records) ? records : []
+}
+
+const formatDateTime = (iso?: string) => {
+  if (!iso) return '-'
+  const d = new Date(iso)
+  try {
+    return d.toLocaleString('th-TH', {
+      year: '2-digit', month: '2-digit', day: '2-digit',
+      hour: '2-digit', minute: '2-digit'
+    })
+  } catch {
+    return d.toISOString()
+  }
 }
 const fetchData = async () => {
   try {
@@ -333,6 +364,7 @@ onMounted(async () => {
               v-ripple
               @click="onClick(program.id!)"
             >
+              <div class="status-dot" :class="getStatusDotClass(program)"></div>
               <!-- <q-item-section avatar>
                 <q-avatar color="primary" text-color="white">
                   <q-icon :name="programColors[program.type].icon" />
@@ -347,7 +379,15 @@ onMounted(async () => {
 
                 <!-- ✅ แสดงวัน เวลา ชั่วโมงในจอใหญ่ และ label ในจอเล็ก -->
                 <q-item-label caption>
-
+                  <template v-if="getCheckinRecords(program).length">
+                    <div v-for="(r, i) in getCheckinRecords(program)" :key="i">
+                      <span>เช็คอิน: {{ formatDateTime(r.checkin) }}</span>
+                      <span v-if="r.checkout"> • เช็คเอาท์: {{ formatDateTime(r.checkout) }}</span>
+                    </div>
+                  </template>
+                  <template v-else>
+                    <span class="text-grey">ไม่มีข้อมูลเช็คชื่อ</span>
+                  </template>
                 </q-item-label>
               </q-item-section>
 
@@ -373,6 +413,17 @@ onMounted(async () => {
   text-overflow: ellipsis;
   white-space: nowrap;
 }
+
+.status-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  margin: 8px 12px 0 0;
+  box-shadow: 0 0 0 2px rgba(0,0,0,0.05);
+}
+.status-dot--yellow { background-color: #FFD740; }
+.status-dot--green  { background-color: #00C853; }
+.status-dot--red    { background-color: #FF3D00; }
 
 .field-pair {
   display: flex;

@@ -52,10 +52,17 @@ export type ProgramItemSum = {
 }
 export type ProgramHistory = {
   id?: string
+  formsId?: string
   name: string
+  type?: string
   programState?: string
+  endDateEnroll?: string
   skill?: string
+  file?: string
   programItems?: ProgramItemHistory[] | null
+  Foods?: Food[]
+  foodVotes?: FoodVote[]
+  EnrollmentSummary?: EnrollmentSummary
 }
 export type ProgramItemHistory = {
   id?: string
@@ -75,5 +82,6 @@ export type ProgramItemHistory = {
   studentYears?: number[]
   majors?: string[]
   enrollmentCount?: number
+  status?: number
   checkinoutRecord?: CheckinoutRecord[]
 }
