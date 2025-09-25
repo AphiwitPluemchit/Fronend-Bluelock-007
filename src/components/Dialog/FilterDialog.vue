@@ -188,9 +188,9 @@ watch(
         "
       >
         <q-card-section class="filter-section" style="max-height: 55vh; overflow-y: auto">
-          <!-- ประเภทกิจกรรม -->
+          <!-- ประเภทโครงการ -->
           <div v-if="availableCategories.includes('categoryProgram')" class="q-mt-md">
-            <p class="q-mb-sm text-h6">ประเภทกิจกรรม</p>
+            <p class="q-mb-sm text-h6">ประเภทโครงการ</p>
             <div class="chip-container">
               <q-chip
                 v-for="categoryProgram in options.categoryProgram"
@@ -206,9 +206,9 @@ watch(
             </div>
           </div>
 
-          <!-- สถานะกิจกรรม -->
+          <!-- สถานะโครงการ -->
           <div v-if="availableCategories.includes('statusProgram')" class="q-mt-md">
-            <p class="q-mb-sm text-h6">สถานะกิจกรรม</p>
+            <p class="q-mb-sm text-h6">สถานะโครงการ</p>
             <div class="chip-container">
               <q-chip
                 v-for="statusProgram in options.statusProgram"
@@ -318,12 +318,12 @@ watch(
   flex-wrap: wrap;
   justify-content: flex-start;
 }
-/* ปุ่มประเภทกิจกรรม */
+/* ปุ่มประเภทโครงการ */
 .category-chip {
   height: 35px;
   width: 170px;
 }
-/* ปุ่มสถานะกิจกรรม */
+/* ปุ่มสถานะโครงการ */
 .status-chip {
   height: 35px;
   width: 120px;
@@ -397,7 +397,7 @@ watch(
     padding-top: 0px !important; /* ปรับตามต้องการ เช่น 0px หรือ 4px */
   }
 
-  /* ปรับ margin-top หัวข้อ เช่น 'ประเภทกิจกรรม' */
+  /* ปรับ margin-top หัวข้อ เช่น 'ประเภทโครงการ' */
   .q-mt-md {
     margin-top: 3px !important; /* ลดจากค่า md ปกติ */
   }

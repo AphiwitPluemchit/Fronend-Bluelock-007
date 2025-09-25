@@ -56,7 +56,7 @@ const columns: QTableColumn<UploadCertificate>[] = [
   },
   {
     name: 'courseType',
-    label: 'ประเภทกิจกรรม',
+    label: 'ประเภทโครงการ',
     field: (row) => translateSkillType(row.course?.isHardSkill || false),
     align: 'left' as const,
     sortable: true,
@@ -262,7 +262,7 @@ watchEffect(() => {
               <div class="value">: {{ row.id }}</div>
             </div> -->
             <div class="q-mb-xs info-row">
-              <div class="label">ประเภทกิจกรรม</div>
+              <div class="label">ประเภทโครงการ</div>
               <div class="value">: {{ translateSkillType(row.course?.isHardSkill || false) }}</div>
             </div>
             <div class="q-mb-xs info-row">

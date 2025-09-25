@@ -187,7 +187,7 @@ const statusClass = computed(() => {
       return ''
   }
 })
-// ใช้กับปุ่มเพิ่มกิจกรรม
+// ใช้กับปุ่มเพิ่มโครงการ
 const addSubProgram = () => {
   const index = subPrograms.value.length
 
@@ -317,7 +317,7 @@ const thaiLocale = {
     'ธันวาคม',
   ],
 }
-//ลบกิจกรรมย่อย
+//ลบโครงการย่อย
 const removeSubProgram = (index: number) => {
   subPrograms.value.splice(index, 1)
 }
@@ -407,9 +407,9 @@ const validateBeforeOpen = async (): Promise<boolean> => {
   seatErrors.value = []
   roomErrors.value = []
 
-  // ✅ 1. ชื่อกิจกรรมหลัก
+  // ✅ 1. ชื่อโครงการหลัก
   if (!programName.value.trim()) {
-    programNameError.value = 'กรุณากรอกชื่อกิจกรรมหลัก'
+    programNameError.value = 'กรุณากรอกชื่อโครงการหลัก'
     hasError.value = true
     if (programNameRef.value?.$el) {
       scrollTargets.push(programNameRef.value.$el)
@@ -423,9 +423,9 @@ const validateBeforeOpen = async (): Promise<boolean> => {
   for (let i = 0; i < subPrograms.value.length; i++) {
     const sub = subPrograms.value[i]!
 
-    // 3.1 ชื่อกิจกรรม
+    // 3.1 ชื่อโครงการ
     // if (!sub.subProgramName?.trim()) {
-    //   subProgramNameErrors.value[i] = 'กรุณากรอกชื่อกิจกรรม'
+    //   subProgramNameErrors.value[i] = 'กรุณากรอกชื่อโครงการ'
     //   hasError.value = true
     //   if (subProgramNameRefs.value[i]?.$el) {
     //     scrollTargets.push(subProgramNameRefs.value[i]?.$el)
@@ -433,7 +433,7 @@ const validateBeforeOpen = async (): Promise<boolean> => {
     //   }
     // }
 
-    // 3.2 วันที่จัดกิจกรรม
+    // 3.2 วันที่จัดโครงการ
     await validateComponent(dateRefs.value[i], scrollTargets, hasError, isFirstErrorHandled)
 
     // 3.3 จำนวนชั่วโมง
@@ -698,7 +698,7 @@ const saveChanges = async () => {
     showSuccessDialog.value = true
     emit('update:isEditing', false)
   } catch (err) {
-    console.error('❌ ไม่สามารถอัปเดตกิจกรรมได้:', err)
+    console.error('❌ ไม่สามารถอัปเดตโครงการได้:', err)
   }
 }
 
@@ -887,7 +887,7 @@ onMounted(() => {
     <!-- FINISH -->
     <div class="input-group">
       <p class="label label_minWidth" :class="{ 'label-error-shift': programNameError !== '' }">
-        ชื่อกิจกรรมหลัก :
+        ชื่อโครงการหลัก :
       </p>
       <div class="input-container">
         <q-input
@@ -931,7 +931,7 @@ onMounted(() => {
         class="button-group"
         style="display: flex; justify-content: flex-end; margin-bottom: 20px"
       >
-        <q-btn class="btnreject" @click="removeSubProgram(index)">ลบกิจกรรมย่อย</q-btn>
+        <q-btn class="btnreject" @click="removeSubProgram(index)">ลบโครงการย่อย</q-btn>
       </div>
 
       <!-- SubProgram Name -->
@@ -944,7 +944,7 @@ onMounted(() => {
               subProgramNameErrors[index] !== undefined && subProgramNameErrors[index] !== '',
           }"
         >
-          ชื่อกิจกรรม :
+          ชื่อโครงการ :
         </p>
         <div class="input-container">
           <q-input
@@ -977,7 +977,7 @@ onMounted(() => {
       <!-- Time -->
       <!-- FINISH -->
       <div class="input-group">
-        <p class="label label_minWidth" style="align-self: flex-start">เวลาที่จัดกิจกรรม :</p>
+        <p class="label label_minWidth" style="align-self: flex-start">เวลาที่จัดโครงการ :</p>
         <div class="day-time-container">
           <q-checkbox
             class="checkbox-left"
@@ -1100,7 +1100,7 @@ onMounted(() => {
     <div class="btn-container" v-if="props.isEditing">
       <p class="label label_minWidth btn-label-empty"></p>
       <q-btn class="btnAddProgram" @click="addSubProgram" style="background-color: #3676f9">
-        <p class="label text-white">เพิ่มกิจกรรมย่อย</p>
+        <p class="label text-white">เพิ่มโครงการย่อย</p>
       </q-btn>
     </div>
 

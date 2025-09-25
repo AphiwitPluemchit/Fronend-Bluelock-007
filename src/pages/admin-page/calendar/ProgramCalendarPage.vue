@@ -357,7 +357,7 @@ watch(selectedDate, (val) => {
 <template>
   <q-page class="q-pa-md">
     <div class="row justify-between items-center q-mb-md" style="margin-top: 20px">
-      <div class="texttitle" style="margin-bottom: 20px">ตารางกิจกรรม</div>
+      <div class="texttitle" style="margin-bottom: 20px">ตารางโครงการ</div>
     </div>
 
     <div v-if="!isMobile">
@@ -380,7 +380,7 @@ watch(selectedDate, (val) => {
             dense
             outlined
             v-model="query1.search"
-            label="ค้นหา ชื่อกิจกรรม"
+            label="ค้นหา ชื่อโครงการ"
             class="q-mr-sm searchbox"
             :style="{ border: 'none', minWidth: '200px' }"
             @focus="searchBoxFocused = true"
@@ -403,7 +403,7 @@ watch(selectedDate, (val) => {
         </div>
       </div>
 
-      <!-- Layout แบ่งปฏิทิน (ซ้าย) และรายละเอียดกิจกรรม (ขวา) -->
+      <!-- Layout แบ่งปฏิทิน (ซ้าย) และรายละเอียดโครงการ (ขวา) -->
       <div class="row q-col-gutter-md calendar-wrapper">
         <div class="col-8">
           <q-calendar-month
@@ -446,7 +446,7 @@ watch(selectedDate, (val) => {
           </q-calendar-month>
         </div>
 
-        <!-- panel แสดงรายละเอียดกิจกรรม -->
+        <!-- panel แสดงรายละเอียดโครงการ -->
         <div class="col-4">
           <CalendarEventPanel
             :selected-date="selectedDate"
@@ -476,7 +476,7 @@ watch(selectedDate, (val) => {
           outlined
           class="col"
           v-model="query1.search"
-          label="ค้นหา ชื่อกิจกรรม"
+          label="ค้นหา ชื่อโครงการ"
           @focus="searchBoxFocused = true"
           @blur="searchBoxFocused = false"
         >
@@ -566,7 +566,7 @@ watch(selectedDate, (val) => {
       <!-- Dialog สำหรับ mobile -->
       <q-dialog v-model="dialog" full-width>
         <q-card class="q-dialog-card scroll-wrapper q-pa-sm">
-          <!-- Panel แสดงกิจกรรม -->
+          <!-- Panel แสดงโครงการ -->
           <CalendarEventPanel
             :selected-date="selectedDate"
             :selected-events="selectedEvents"

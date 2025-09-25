@@ -97,7 +97,7 @@ onMounted(async () => {
   <q-page class="q-pa-md">
     <!-- ชื่อหน้า -->
     <div class="row justify-between items-center q-mb-md" style="margin-top: 20px">
-      <div class="texttitle">กิจกรรมทั้งหมด</div>
+      <div class="texttitle">โครงการทั้งหมด</div>
     </div>
 
     <div class="row justify-between items-center q-mb-md search-filter-wrapper q-col-gutter-md">
@@ -107,7 +107,7 @@ onMounted(async () => {
           dense
           outlined
           v-model="searchQuery"
-          placeholder="ค้นหา ชื่อกิจกรรม"
+          placeholder="ค้นหา ชื่อโครงการ"
           class="q-mr-sm searchbox"
           :style="{ boxShadow: 'none' }"
           clearable
@@ -141,14 +141,14 @@ onMounted(async () => {
             selectedFilters.major.length > 0 ||
             selectedFilters.year.length > 0 ||
             selectedFilters.categoryProgram.length > 0
-              ? 'ไม่พบกิจกรรมที่ตรงกับเงื่อนไข'
-              : 'ยังไม่มีกิจกรรมในระบบ'
+              ? 'ไม่พบโครงการที่ตรงกับเงื่อนไข'
+              : 'ยังไม่มีโครงการในระบบ'
           }}
         </div>
       </div>
     </div>
 
-    <!-- แสดงกิจกรรม -->
+    <!-- แสดงโครงการ -->
     <div v-else class="row q-col-gutter-md items-stretch">
       <div
         class="col-xs-12 col-sm-6 col-md-4"

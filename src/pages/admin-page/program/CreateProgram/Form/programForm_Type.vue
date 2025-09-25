@@ -14,7 +14,7 @@ const updateProgramType = (type: string) => {
 
 <template>
   <div class="input-group">
-    <p class="label label_minWidth">ประเภทกิจกรรม :</p>
+    <p class="label label_minWidth">ประเภทโครงการ :</p>
     <div class="programType-btn-group">
     <q-btn
       :class="{ 'active-btn': modelValue === 'prep' }"

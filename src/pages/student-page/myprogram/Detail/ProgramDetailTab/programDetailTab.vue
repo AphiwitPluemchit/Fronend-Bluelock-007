@@ -105,9 +105,9 @@ onMounted(async () => {
 </script>
 <template>
   <q-page class="q-pa-none" v-if="screen">
-    <!-- กรอบข้อมูลกิจกรรม -->
+    <!-- กรอบข้อมูลโครงการ -->
     <q-card-section class="q-col-gutter-md row items-start q-mb-md">
-      <!-- ภาพกิจกรรม -->
+      <!-- ภาพโครงการ -->
       <div class="col-12 col-md-4 text-center">
         <q-img
           :src="
@@ -121,7 +121,7 @@ onMounted(async () => {
         />
       </div>
 
-      <!-- รายละเอียดกิจกรรม -->
+      <!-- รายละเอียดโครงการ -->
       <div class="col-12 col-md-8" v-if="program">
         <DetailOne
           v-if="Array.isArray(program?.programItems) && program.programItems.length > 1"

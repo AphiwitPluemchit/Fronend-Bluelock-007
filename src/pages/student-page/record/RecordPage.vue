@@ -153,7 +153,7 @@ const fetchData = async () => {
     allPrograms.value = response.data
     // programs.value = response.data
   } catch (error) {
-    console.error('เกิดข้อผิดพลาดในการโหลดข้อมูลกิจกรรม:', error)
+    console.error('เกิดข้อผิดพลาดในการโหลดข้อมูลโครงการ:', error)
   }
 }
 onMounted(async () => {
@@ -339,7 +339,7 @@ onMounted(async () => {
           <div class="row justify-between items-center">
             <div class="text-h6 text-bold text-white">
               <q-icon name="history" class="q-mr-sm" />
-              ประวัติการเข้ากิจกรรม
+              ประวัติการเข้าโครงการ
             </div>
             <!-- <q-btn
               v-if="allPrograms.length > 3"
@@ -372,7 +372,7 @@ onMounted(async () => {
               </q-item-section> -->
 
               <q-item-section>
-                <!-- ✅ ชื่อกิจกรรม แสดงตลอด -->
+                <!-- ✅ ชื่อโครงการ แสดงตลอด -->
                 <q-item-label class="text-weight-medium ellipsis" :title="program.name">
                   {{ program.name }}
                 </q-item-label>

@@ -4,7 +4,7 @@ import type { RouteRecordRaw } from 'vue-router'
 const studentChildren: RouteRecordRaw[] = [
   {
     path: 'Home',
-    component: () => import('pages/student-page/home/homePage.vue'),
+    component: () => import('pages/student-page/home/HomePage.vue'),
   },
   {
     path: 'ProgramCalendar',

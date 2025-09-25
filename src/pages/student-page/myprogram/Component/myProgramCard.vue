@@ -56,7 +56,7 @@ const getProgramRooms = (programItems: ProgramItem[] | null | undefined): string
     @click="!isMobile && onClick(myProgram.id!)"
   >
     <div class="row q-col-gutter-md items-start">
-      <!-- รูปกิจกรรม -->
+      <!-- รูปโครงการ -->
       <div :class="isMobile ? 'full-width' : 'col-4'">
         <q-img
           :src="baseurl + '/uploads/program/images/' + myProgram.file"
@@ -65,7 +65,7 @@ const getProgramRooms = (programItems: ProgramItem[] | null | undefined): string
         />
       </div>
 
-      <!-- ข้อมูลกิจกรรม -->
+      <!-- ข้อมูลโครงการ -->
       <div class="col-12 col-sm-8 column justify-between">
         <div>
           <div class="text-h6 text-bold program-name q-mb-sm">

@@ -208,7 +208,7 @@ onMounted(async () => {
         <div class="program-header">
           <div class="program-title">
             <q-icon name="event_note" size="32px" class="text-primary" />
-            <h1>กิจกรรมย่อย</h1>
+            <h1>โครงการย่อย</h1>
           </div>
         </div>
         <div
@@ -218,9 +218,9 @@ onMounted(async () => {
           @click="toggleExpanded(index)"
           style="cursor: pointer"
         >
-          <!-- Header: ชื่อกิจกรรมย่อย + จำนวน -->
+          <!-- Header: ชื่อโครงการย่อย + จำนวน -->
           <div class="row items-center justify-between q-gutter-sm">
-            <!-- ชื่อกิจกรรมย่อย -->
+            <!-- ชื่อโครงการย่อย -->
             <div class="text-h6 text-primary q-mb-xs">
               {{ row.program }}
             </div>
@@ -277,7 +277,7 @@ onMounted(async () => {
 
 <style scoped>
 .main-program-card {
-  margin-bottom: 48px; /* เพิ่ม margin-bottom ให้ช่องว่างก่อนกิจกรรมย่อย */
+  margin-bottom: 48px; /* เพิ่ม margin-bottom ให้ช่องว่างก่อนโครงการย่อย */
 }
 
 .program-header {

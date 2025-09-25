@@ -77,7 +77,7 @@ const validate = async () => {
 defineExpose({ validate })
 
 const handleEnter = async (e: KeyboardEvent) => {
- 
+
     console.log('✅ ENTER กดแล้ว blur input')
 
     e.preventDefault()
@@ -89,7 +89,7 @@ const handleEnter = async (e: KeyboardEvent) => {
     await nextTick()
 
     emit('enter')
-  
+
 }
 </script>
 
@@ -97,7 +97,7 @@ const handleEnter = async (e: KeyboardEvent) => {
 
 <template>
   <div class="input-group">
-    <p class="label label_minWidth" :class="{ 'label-error-shift': roomError !== '' }">ห้องที่จัดกิจกรรม :</p>
+    <p class="label label_minWidth" :class="{ 'label-error-shift': roomError !== '' }">ห้องที่จัดโครงการ :</p>
     <div class="input-container">
       <q-input
   outlined

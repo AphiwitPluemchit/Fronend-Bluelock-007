@@ -2,7 +2,6 @@
 import { onMounted, ref, computed } from 'vue'
 import { ProgramService } from 'src/services/program'
 import type { Program, ProgramItem } from 'src/types/program'
-import type { PaginationResponse } from 'src/types/pagination'
 
 const loading = ref(false)
 const programs = ref<Program[]>([])
@@ -62,8 +61,8 @@ async function fetchUpcoming() {
       programState: ['open', 'close'],
       major: [],
       studentYear: [],
-    } as any)
-    const payload = (res as PaginationResponse<Program>).data || []
+    } )
+    const payload = res.data || []
     programs.value = payload
   } finally {
     loading.value = false
@@ -78,8 +77,8 @@ onMounted(fetchUpcoming)
     <div class="container">
       <div class="hero">
         <div class="hero__text">
-          <h1>ข่าวสารและกิจกรรมใกล้เริ่ม</h1>
-          <p>ติดตาม 5 กิจกรรมที่กำลังจะเริ่ม เราอัปเดตให้อัตโนมัติ</p>
+          <h1>ข่าวสารและโครงการใกล้เริ่ม</h1>
+          <p>ติดตาม 5 โครงการที่กำลังจะเริ่ม เราอัปเดตให้อัตโนมัติ</p>
         </div>
       </div>
 
@@ -89,7 +88,7 @@ onMounted(fetchUpcoming)
         </q-inner-loading>
 
         <div v-if="!loading && !upcoming.length" class="empty">
-          ยังไม่มีกิจกรรมที่กำลังจะเริ่ม
+          ยังไม่มีโครงการที่กำลังจะเริ่ม
         </div>
 
         <q-carousel

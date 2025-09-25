@@ -63,7 +63,7 @@ const confirm = () => {
       </div>
       <div class="q-mb-sm cert-title"><b>หัวข้ออบรม : </b> {{ props.data.course?.name }}</div>
       <div class="q-mb-sm">
-        <b>ประเภทกิจกรรม : </b>
+        <b>ประเภทโครงการ : </b>
         {{ props.data.course?.isHardSkill ? 'ทักษะด้านวิชาการ' : 'เตรียมความพร้อม' }}
       </div>
       <div class="q-mb-sm"><b>จำนวนชั่วโมง : </b> {{ props.data.course?.hour }} ชั่วโมง</div>

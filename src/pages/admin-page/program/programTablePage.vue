@@ -152,7 +152,7 @@ const columns = [
   },
   {
     name: 'name',
-    label: 'ชื่อกิจกรรม',
+    label: 'ชื่อโครงการ',
     field: 'name',
     align: 'left' as const,
     sortable: true,
@@ -596,11 +596,11 @@ watchEffect(() => {
   <q-page class="q-pa-md">
     <!-- ชื่อหน้า -->
     <div class="row justify-between items-center q-mb-md" style="margin-top: 20px">
-      <div class="texttitle">จัดการกิจกรรม</div>
+      <div class="texttitle">จัดการโครงการ</div>
       <q-btn
         dense
         outlined
-        label="เพิ่มกิจกรรม"
+        label="เพิ่มโครงการ"
         class="btnadd"
         bo
         @click="goToPage()"
@@ -614,14 +614,14 @@ watchEffect(() => {
       <section class="q-mt-lg">
         <div class="row items-center justify-between program-section-header">
           <!-- หัวข้อ -->
-          <div class="textheader">กิจกรรมที่เปิดลงทะเบียนและปิดลงทะเบียน</div>
+          <div class="textheader">โครงการที่เปิดลงทะเบียนและปิดลงทะเบียน</div>
           <div class="row filter-row no-wrap q-mt-sm">
             <!-- 🔹 Search box -->
             <q-input
               dense
               outlined
               v-model="query1.search"
-              label="ค้นหา ชื่อกิจกรรม"
+              label="ค้นหา ชื่อโครงการ"
               class="searchbox"
               :style="{ border: 'none' }"
             >
@@ -744,7 +744,7 @@ watchEffect(() => {
             <q-tr v-if="expandedRows1.has(props.row.id)" class="expanded-row">
               <q-td colspan="9" class="expanded-content">
                 <div class="q-pa-sm">
-                  <div class="text-subtitle2 q-mb-sm">รายละเอียดกิจกรรมย่อย</div>
+                  <div class="text-subtitle2 q-mb-sm">รายละเอียดโครงการย่อย</div>
 
                   <div v-if="props.row.programItems && props.row.programItems.length > 0">
                     <div
@@ -753,9 +753,9 @@ watchEffect(() => {
                       class="q-mb-sm q-pa-xs"
                     >
                       <div class="row text-body2 items-start no-wrap">
-                        <!-- ชื่อกิจกรรม -->
+                        <!-- ชื่อโครงการ -->
                         <div class="label-pair">
-                          <span class="label-title">ชื่อกิจกรรม :</span>
+                          <span class="label-title">ชื่อโครงการ :</span>
                           <span class="label-value">{{ item.name || '-' }}</span>
                         </div>
 
@@ -789,14 +789,14 @@ watchEffect(() => {
                     </div>
                   </div>
 
-                  <div v-else class="text-grey-6">ไม่มีข้อมูลกิจกรรมย่อย</div>
+                  <div v-else class="text-grey-6">ไม่มีข้อมูลโครงการย่อย</div>
                 </div>
               </q-td>
             </q-tr>
           </template>
           <template v-slot:no-data>
             <div class="full-width text-center q-pa-md text-grey" style="font-size: 20px">
-              ไม่มีกิจกรรมที่เปิดลงทะเบียนและปิดลงทะเบียน
+              ไม่มีโครงการที่เปิดลงทะเบียนและปิดลงทะเบียน
             </div>
           </template>
         </q-table>
@@ -806,14 +806,14 @@ watchEffect(() => {
       <section class="q-mt-lg">
         <div class="row items-center justify-between program-section-header">
           <!-- หัวข้อ -->
-          <div class="textheader">กิจกรรมที่กำลังวางแผน</div>
+          <div class="textheader">โครงการที่กำลังวางแผน</div>
           <div class="row filter-row no-wrap q-mt-sm">
             <!-- 🔹 Search box -->
             <q-input
               dense
               outlined
               v-model="query2.search"
-              label="ค้นหา ชื่อกิจกรรม"
+              label="ค้นหา ชื่อโครงการ"
               class="searchbox"
               :style="{ border: 'none' }"
             >
@@ -937,7 +937,7 @@ watchEffect(() => {
             <q-tr v-if="expandedRows2.has(props.row.id)" class="expanded-row">
               <q-td colspan="9" class="expanded-content">
                 <div class="q-pa-sm">
-                  <div class="text-subtitle2 q-mb-sm">รายละเอียดกิจกรรมย่อย</div>
+                  <div class="text-subtitle2 q-mb-sm">รายละเอียดโครงการย่อย</div>
 
                   <div v-if="props.row.programItems && props.row.programItems.length > 0">
                     <div
@@ -946,9 +946,9 @@ watchEffect(() => {
                       class="q-mb-sm q-pa-xs"
                     >
                       <div class="row text-body2 items-start no-wrap">
-                        <!-- ชื่อกิจกรรม -->
+                        <!-- ชื่อโครงการ -->
                         <div class="label-pair">
-                          <span class="label-title">ชื่อกิจกรรม :</span>
+                          <span class="label-title">ชื่อโครงการ :</span>
                           <span class="label-value">{{ item.name || '-' }}</span>
                         </div>
 
@@ -964,14 +964,14 @@ watchEffect(() => {
                     </div>
                   </div>
 
-                  <div v-else class="text-grey-6">ไม่มีข้อมูลกิจกรรมย่อย</div>
+                  <div v-else class="text-grey-6">ไม่มีข้อมูลโครงการย่อย</div>
                 </div>
               </q-td>
             </q-tr>
           </template>
           <template v-slot:no-data>
             <div class="full-width text-center q-pa-md text-grey" style="font-size: 20px">
-              ไม่มีกิจกรรมที่เสร็จสิ้น
+              ไม่มีโครงการที่เสร็จสิ้น
             </div>
           </template>
         </q-table>
@@ -981,14 +981,14 @@ watchEffect(() => {
       <section class="q-mt-lg">
         <div class="row items-center justify-between program-section-header">
           <!-- หัวข้อ -->
-          <div class="textheader">กิจกรรมที่เสร็จสิ้น</div>
+          <div class="textheader">โครงการที่เสร็จสิ้น</div>
           <div class="row filter-row no-wrap q-mt-sm">
             <!-- 🔹 Search box -->
             <q-input
               dense
               outlined
               v-model="query3.search"
-              label="ค้นหา ชื่อกิจกรรม"
+              label="ค้นหา ชื่อโครงการ"
               class="searchbox"
               :style="{ border: 'none' }"
             >
@@ -1110,7 +1110,7 @@ watchEffect(() => {
             <q-tr v-if="expandedRows3.has(props.row.id)" class="expanded-row">
               <q-td colspan="9" class="expanded-content">
                 <div class="q-pa-sm">
-                  <div class="text-subtitle2 q-mb-sm">รายละเอียดกิจกรรมย่อย</div>
+                  <div class="text-subtitle2 q-mb-sm">รายละเอียดโครงการย่อย</div>
 
                   <div v-if="props.row.programItems && props.row.programItems.length > 0">
                     <div
@@ -1119,9 +1119,9 @@ watchEffect(() => {
                       class="q-mb-sm q-pa-xs"
                     >
                       <div class="row text-body2 items-start no-wrap">
-                        <!-- ชื่อกิจกรรม -->
+                        <!-- ชื่อโครงการ -->
                         <div class="label-pair">
-                          <span class="label-title">ชื่อกิจกรรม :</span>
+                          <span class="label-title">ชื่อโครงการ :</span>
                           <span class="label-value">{{ item.name || '-' }}</span>
                         </div>
 
@@ -1137,14 +1137,14 @@ watchEffect(() => {
                     </div>
                   </div>
 
-                  <div v-else class="text-grey-6">ไม่มีข้อมูลกิจกรรมย่อย</div>
+                  <div v-else class="text-grey-6">ไม่มีข้อมูลโครงการย่อย</div>
                 </div>
               </q-td>
             </q-tr>
           </template>
           <template v-slot:no-data>
             <div class="full-width text-center q-pa-md text-grey" style="font-size: 20px">
-              ไม่มีกิจกรรมที่เสร็จสิ้น
+              ไม่มีโครงการที่เสร็จสิ้น
             </div>
           </template>
         </q-table>
@@ -1154,14 +1154,14 @@ watchEffect(() => {
       <section class="q-mt-lg">
         <div class="row items-center justify-between program-section-header">
           <!-- หัวข้อ -->
-          <div class="textheader">กิจกรรมที่ยกเลิก</div>
+          <div class="textheader">โครงการที่ยกเลิก</div>
           <div class="row filter-row no-wrap q-mt-sm">
             <!-- 🔹 Search box -->
             <q-input
               dense
               outlined
               v-model="query4.search"
-              label="ค้นหา ชื่อกิจกรรม"
+              label="ค้นหา ชื่อโครงการ"
               class="searchbox"
               :style="{ border: 'none' }"
             >
@@ -1285,7 +1285,7 @@ watchEffect(() => {
             <q-tr v-if="expandedRows4.has(props.row.id)" class="expanded-row">
               <q-td colspan="9" class="expanded-content">
                 <div class="q-pa-sm">
-                  <div class="text-subtitle2 q-mb-sm">รายละเอียดกิจกรรมย่อย</div>
+                  <div class="text-subtitle2 q-mb-sm">รายละเอียดโครงการย่อย</div>
 
                   <div v-if="props.row.programItems && props.row.programItems.length > 0">
                     <div
@@ -1294,9 +1294,9 @@ watchEffect(() => {
                       class="q-mb-sm q-pa-xs"
                     >
                       <div class="row text-body2 items-start no-wrap">
-                        <!-- ชื่อกิจกรรม -->
+                        <!-- ชื่อโครงการ -->
                         <div class="label-pair">
-                          <span class="label-title">ชื่อกิจกรรม :</span>
+                          <span class="label-title">ชื่อโครงการ :</span>
                           <span class="label-value">{{ item.name || '-' }}</span>
                         </div>
 
@@ -1312,14 +1312,14 @@ watchEffect(() => {
                     </div>
                   </div>
 
-                  <div v-else class="text-grey-6">ไม่มีข้อมูลกิจกรรมย่อย</div>
+                  <div v-else class="text-grey-6">ไม่มีข้อมูลโครงการย่อย</div>
                 </div>
               </q-td>
             </q-tr>
           </template>
           <template v-slot:no-data>
             <div class="full-width text-center q-pa-md text-grey" style="font-size: 20px">
-              ไม่มีกิจกรรมที่ยกเลิก
+              ไม่มีโครงการที่ยกเลิก
             </div>
           </template>
         </q-table>
@@ -1341,13 +1341,13 @@ watchEffect(() => {
       <q-tab name="3" label="ยกเลิก" />
     </q-tabs>
 
-    <!-- ตารางกิจกรรมใน mobile (แสดงเฉพาะ tab ที่เลือก) -->
+    <!-- ตารางโครงการใน mobile (แสดงเฉพาะ tab ที่เลือก) -->
     <template v-if="isMediumScreen">
       <section v-show="tabIndex == 0">
         <!-- 🔹 Header: Search + Filter -->
         <div class="column program-section-header">
           <!-- 🔹 บรรทัดแรก -->
-          <div class="textheader q-mb-sm">กิจกรรมที่เปิดลงทะเบียนและปิดลงทะเบียน</div>
+          <div class="textheader q-mb-sm">โครงการที่เปิดลงทะเบียนและปิดลงทะเบียน</div>
 
           <!-- 🔸 บรรทัดที่สอง: Search + Filter -->
           <div class="row filter-row">
@@ -1356,7 +1356,7 @@ watchEffect(() => {
               style="flex: 1"
               outlined
               v-model="query1.search"
-              label="ค้นหา ชื่อกิจกรรม"
+              label="ค้นหา ชื่อโครงการ"
               class="searchbox q-mr-sm"
               :style="{ border: 'none' }"
             >
@@ -1389,7 +1389,7 @@ watchEffect(() => {
           <!-- 🔷 HEADER -->
           <q-card-section class="backgroundheader">
             <div class="row justify-between header-row-responsive">
-              <!-- 🔹 ซ้าย: ชื่อกิจกรรม -->
+              <!-- 🔹 ซ้าย: ชื่อโครงการ -->
               <div class="ProgramNamelabel">
                 {{ truncateText(row.name) }}
                 <q-tooltip>{{ row.name }}</q-tooltip>
@@ -1452,7 +1452,7 @@ watchEffect(() => {
         <!-- 🔹 Header: Search + Filter -->
         <div class="column program-section-header">
           <!-- 🔹 บรรทัดแรก -->
-          <div class="textheader q-mb-sm">กิจกรรมที่กำลังวางแผน</div>
+          <div class="textheader q-mb-sm">โครงการที่กำลังวางแผน</div>
 
           <!-- 🔸 บรรทัดที่สอง: Search + Filter -->
           <div class="row filter-row">
@@ -1461,7 +1461,7 @@ watchEffect(() => {
               style="flex: 1"
               outlined
               v-model="query1.search"
-              label="ค้นหา ชื่อกิจกรรม"
+              label="ค้นหา ชื่อโครงการ"
               class="searchbox q-mr-sm"
               :style="{ border: 'none' }"
             >
@@ -1494,7 +1494,7 @@ watchEffect(() => {
           <!-- 🔷 HEADER -->
           <q-card-section class="backgroundheader">
             <div class="row justify-between header-row-responsive">
-              <!-- 🔹 ซ้าย: ชื่อกิจกรรม -->
+              <!-- 🔹 ซ้าย: ชื่อโครงการ -->
               <div class="ProgramNamelabel">
                 {{ truncateText(row.name) }}
                 <q-tooltip>{{ row.name }}</q-tooltip>
@@ -1557,7 +1557,7 @@ watchEffect(() => {
         <!-- 🔹 Header: Search + Filter -->
         <div class="column program-section-header">
           <!-- 🔹 บรรทัดแรก -->
-          <div class="textheader q-mb-sm">กิจกรรมที่เสร็จสิ้น</div>
+          <div class="textheader q-mb-sm">โครงการที่เสร็จสิ้น</div>
 
           <!-- 🔸 บรรทัดที่สอง: Search + Filter -->
           <div class="row filter-row">
@@ -1566,7 +1566,7 @@ watchEffect(() => {
               style="flex: 1"
               outlined
               v-model="query3.search"
-              label="ค้นหา ชื่อกิจกรรม"
+              label="ค้นหา ชื่อโครงการ"
               class="searchbox q-mr-sm"
               :style="{ border: 'none' }"
             >
@@ -1599,7 +1599,7 @@ watchEffect(() => {
           <!-- 🔷 HEADER -->
           <q-card-section class="backgroundheader">
             <div class="row justify-between header-row-responsive">
-              <!-- 🔹 ซ้าย: ชื่อกิจกรรม -->
+              <!-- 🔹 ซ้าย: ชื่อโครงการ -->
               <div class="ProgramNamelabel">
                 {{ truncateText(row.name) }}
                 <q-tooltip>{{ row.name }}</q-tooltip>
@@ -1662,7 +1662,7 @@ watchEffect(() => {
         <!-- 🔹 Header: Search + Filter -->
         <div class="column program-section-header">
           <!-- 🔹 บรรทัดแรก -->
-          <div class="textheader q-mb-sm">กิจกรรมที่เสร็จสิ้น</div>
+          <div class="textheader q-mb-sm">โครงการที่เสร็จสิ้น</div>
 
           <!-- 🔸 บรรทัดที่สอง: Search + Filter -->
           <div class="row filter-row">
@@ -1671,7 +1671,7 @@ watchEffect(() => {
               style="flex: 1"
               outlined
               v-model="query1.search"
-              label="ค้นหา ชื่อกิจกรรม"
+              label="ค้นหา ชื่อโครงการ"
               class="searchbox q-mr-sm"
               :style="{ border: 'none' }"
             >
@@ -1704,7 +1704,7 @@ watchEffect(() => {
           <!-- 🔷 HEADER -->
           <q-card-section class="backgroundheader">
             <div class="row justify-between header-row-responsive">
-              <!-- 🔹 ซ้าย: ชื่อกิจกรรม -->
+              <!-- 🔹 ซ้าย: ชื่อโครงการ -->
               <div class="ProgramNamelabel">
                 {{ truncateText(row.name) }}
                 <q-tooltip>{{ row.name }}</q-tooltip>

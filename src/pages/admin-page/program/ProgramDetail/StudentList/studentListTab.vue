@@ -123,9 +123,9 @@ const programItemOptions = computed(() => {
     value: index, // index ปกติของรายการ
   }))
 
-  // ถ้า programItems > 2 ให้เติม "ทุกกิจกรรม" ไว้หัวรายการ
+  // ถ้า programItems > 2 ให้เติม "ทุกโครงการ" ไว้หัวรายการ
   if (items.length > 1) {
-    return [{ label: 'ทุกกิจกรรม', value: -1 }, ...opts]
+    return [{ label: 'ทุกโครงการ', value: -1 }, ...opts]
   }
   return opts
 })
@@ -319,7 +319,7 @@ onUnmounted(() => {
             outlined
             v-model="indexTab"
             :options="programItemOptions"
-            label="เลือกกิจกรรม"
+            label="เลือกโครงการ"
             option-label="label"
             option-value="value"
             emit-value

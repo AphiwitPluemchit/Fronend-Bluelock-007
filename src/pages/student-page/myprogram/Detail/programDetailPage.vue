@@ -35,9 +35,9 @@ const pushTabToRoute = async (nextTab: string) => {
 
 // ชื่อ breadcrumb
 const currentBreadcrumb = computed(() => {
-  if (tab.value === 'program') return 'รายละเอียดกิจกรรม'
-  if (tab.value === 'checkInOut') return 'เช็คชื่อเข้า/ออกกิจกรรม'
-  return 'รายละเอียดกิจกรรม'
+  if (tab.value === 'program') return 'รายละเอียดโครงการ'
+  if (tab.value === 'checkInOut') return 'เช็คชื่อเข้า/ออกโครงการ'
+  return 'รายละเอียดโครงการ'
 })
 
 // ลิงก์ breadcrumb (อ้างจากชื่อ route + params ให้ชัวร์)
@@ -50,7 +50,7 @@ const breadcrumbPath = computed(() => {
 })
 
 const breadcrumbs = computed(() => ({
-  previousPage: { title: 'กิจกรรมของฉัน', path: '/Student/MyProgramsPage' },
+  previousPage: { title: 'โครงการของฉัน', path: '/Student/MyProgramsPage' },
   currentPage: { title: currentBreadcrumb.value, path: breadcrumbPath.value },
   icon: 'description',
 }))
@@ -84,8 +84,8 @@ watch(
     <AppBreadcrumbs :breadcrumbs="breadcrumbs" />
 
     <q-tabs v-model="tab" align="right" class="custom-tabs" indicator-color="transparent">
-      <q-tab name="program" label="รายละเอียดกิจกรรม" />
-      <q-tab name="checkInOut" label="เช็คชื่อเข้า/ออกกิจกรรม" />
+      <q-tab name="program" label="รายละเอียดโครงการ" />
+      <q-tab name="checkInOut" label="เช็คชื่อเข้า/ออกโครงการ" />
     </q-tabs>
 
     <q-tab-panels v-model="tab" animated class="custom-panels">

@@ -8,8 +8,8 @@ import type { Pagination } from 'src/types/pagination'
 import { ProgramService } from 'src/services/program'
 import FilterDialog from 'src/components/Dialog/FilterDialog.vue'
 import type { CalendarEvent } from 'src/types/calendar'
-import CalendarMonthYearSelector from './CalendarComponents/CalendarMonthYearSelector.vue'
-import CalendarEventPanel from './CalendarComponents/CalendarEventPanel.vue'
+import CalendarMonthYearSelector from './CalendarComponents/calendarMonthYearSelector.vue'
+import CalendarEventPanel from './CalendarComponents/calendarEventPanel.vue'
 import { useQuasar } from 'quasar'
 
 const $q = useQuasar()
@@ -253,7 +253,7 @@ function parseToCalendarEvents(programs: Program[]): CalendarEvent[] {
     const category = program.skill === 'soft' ? 'soft' : 'hard'
     const programStateLabel = programStatusLabel(program.programState ?? '')
 
-    // ไม่แสดงสถานะกิจกรรม 'ยกเลิก' หรือ 'กำลังวางแผน'
+    // ไม่แสดงสถานะโครงการ 'ยกเลิก' หรือ 'กำลังวางแผน'
     if (['cancel', 'planning'].includes(program.programState ?? '')) return
 
     program.programItems?.forEach((item) => {
@@ -346,7 +346,7 @@ watch(selectedDate, (val) => {
 <template>
   <q-page class="q-pa-md">
     <div class="row justify-between items-center q-mb-md" style="margin-top: 20px">
-      <div class="texttitle" style="margin-bottom: 20px">ตารางกิจกรรม</div>
+      <div class="texttitle" style="margin-bottom: 20px">ตารางโครงการ</div>
     </div>
 
     <div v-if="!isMobile">
@@ -369,7 +369,7 @@ watch(selectedDate, (val) => {
             dense
             outlined
             v-model="query1.search"
-            label="ค้นหา ชื่อกิจกรรม"
+            label="ค้นหา ชื่อโครงการ"
             class="q-mr-sm searchbox"
             :style="{ border: 'none', minWidth: '200px' }"
             @focus="searchBoxFocused = true"
@@ -392,7 +392,7 @@ watch(selectedDate, (val) => {
         </div>
       </div>
 
-      <!-- Layout แบ่งปฏิทิน (ซ้าย) และรายละเอียดกิจกรรม (ขวา) -->
+      <!-- Layout แบ่งปฏิทิน (ซ้าย) และรายละเอียดโครงการ (ขวา) -->
       <div class="row q-col-gutter-md calendar-wrapper">
         <div class="col-8">
           <q-calendar-month
@@ -435,7 +435,7 @@ watch(selectedDate, (val) => {
           </q-calendar-month>
         </div>
 
-        <!-- panel แสดงรายละเอียดกิจกรรม -->
+        <!-- panel แสดงรายละเอียดโครงการ -->
         <div class="col-4">
           <CalendarEventPanel
             :selected-date="selectedDate"
@@ -465,7 +465,7 @@ watch(selectedDate, (val) => {
           outlined
           class="col"
           v-model="query1.search"
-          label="ค้นหา ชื่อกิจกรรม"
+          label="ค้นหา ชื่อโครงการ"
           @focus="searchBoxFocused = true"
           @blur="searchBoxFocused = false"
         >
@@ -555,7 +555,7 @@ watch(selectedDate, (val) => {
       <!-- Dialog สำหรับ mobile -->
       <q-dialog v-model="dialog" full-width>
         <q-card class="q-dialog-card scroll-wrapper q-pa-md">
-          <!-- Panel แสดงกิจกรรม -->
+          <!-- Panel แสดงโครงการ -->
           <CalendarEventPanel
             :selected-date="selectedDate"
             :selected-events="selectedEvents"

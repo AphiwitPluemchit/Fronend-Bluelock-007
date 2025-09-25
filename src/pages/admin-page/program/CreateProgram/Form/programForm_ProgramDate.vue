@@ -75,7 +75,7 @@ const formattedDateRange = computed(() => {
 })
 const validate = async () => {
   if (!internalDateRange.value.length) {
-    dateError.value = 'กรุณาเลือกวันที่จัดกิจกรรม'
+    dateError.value = 'กรุณาเลือกวันที่จัดโครงการ'
     await nextTick()
     inputRef.value?.$el?.scrollIntoView({ behavior: 'smooth', block: 'center' })
     return false
@@ -124,7 +124,7 @@ watch(
 <template>
   <div class="input-group" ref="inputRef">
     <p class="label label_minWidth" :class="{ 'label-error-shift': dateError !== '' }">
-      วันที่จัดกิจกรรม :
+      วันที่จัดโครงการ :
     </p>
     <div class="input-container">
       <q-input

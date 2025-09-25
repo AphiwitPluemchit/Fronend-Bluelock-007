@@ -157,7 +157,7 @@ watch(sameTimeForAll, (newValue) => {
   }
 })
 
-// ใช้กับปุ่มเพิ่มกิจกรรม
+// ใช้กับปุ่มเพิ่มโครงการ
 const addSubProgram = () => {
   const index = subProgram.value.length
 
@@ -239,7 +239,7 @@ const duplicateSelectedFormIfAny = async (): Promise<string | null> => {
 const submitProgram = async () => {
   programNameError.value = ''
   if (!programName.value.trim()) {
-    programNameError.value = 'กรุณากรอกชื่อกิจกรรมหลัก'
+    programNameError.value = 'กรุณากรอกชื่อโครงการหลัก'
     await nextTick()
     programNameInput.value?.$el?.scrollIntoView({ behavior: 'smooth', block: 'center' })
     return
@@ -342,7 +342,7 @@ onMounted(() => {
     <!-- Program Name -->
     <div class="input-group">
       <p class="label label_minWidth" :class="{ 'label-error-shift': programNameError !== '' }">
-        ชื่อกิจกรรมหลัก :
+        ชื่อโครงการหลัก :
       </p>
       <div class="input-container">
         <q-input
@@ -372,12 +372,12 @@ onMounted(() => {
         class="button-group"
         style="display: flex; justify-content: flex-end; margin-bottom: 20px"
       >
-        <q-btn class="btnreject" @click="removeSubProgram(index)">ลบกิจกรรมย่อย</q-btn>
+        <q-btn class="btnreject" @click="removeSubProgram(index)">ลบโครงการย่อย</q-btn>
       </div>
 
       <!-- SubProgram Name -->
       <div class="input-group">
-        <p class="label label_minWidth">ชื่อกิจกรรม :</p>
+        <p class="label label_minWidth">ชื่อโครงการ :</p>
         <q-input outlined v-model="subProgram.subProgramName" class="input-container" />
       </div>
 
@@ -390,7 +390,7 @@ onMounted(() => {
 
       <!-- Time -->
       <div class="input-group">
-        <p class="label label_minWidth" style="align-self: flex-start">เวลาที่จัดกิจกรรม :</p>
+        <p class="label label_minWidth" style="align-self: flex-start">เวลาที่จัดโครงการ :</p>
         <div>
           <q-checkbox v-model="sameTimeForAll" label="เวลาเดิมทุกวัน" class="tight-checkbox" />
 
@@ -441,7 +441,7 @@ onMounted(() => {
     <div class="btn-container">
       <p class="label label_minWidth btn-label-empty"></p>
       <q-btn class="btnAddProgram" @click="addSubProgram" style="background-color: #3676f9">
-        <p class="label text-white">เพิ่มกิจกรรมย่อย</p>
+        <p class="label text-white">เพิ่มโครงการย่อย</p>
       </q-btn>
     </div>
     <div class="button-group">

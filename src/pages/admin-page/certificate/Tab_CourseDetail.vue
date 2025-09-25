@@ -177,13 +177,13 @@ function confirmCancel() {
               </div>
             </div>
 
-            <!-- ประเภทกิจกรรม (isHardSkill) -->
+            <!-- ประเภทโครงการ (isHardSkill) -->
             <div class="input-group">
               <p
                 class="label label_minWidth"
                 :class="{ 'label-error-shift': CategoryError !== '' }"
               >
-                ประเภทกิจกรรม :
+                ประเภทโครงการ :
               </p>
               <div class="status-inline-group">
                 <q-btn

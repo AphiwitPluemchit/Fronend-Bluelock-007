@@ -34,19 +34,19 @@ const getProgramTime = (programItems: ProgramItem[] | null | undefined): string 
   <div class="q-pa-sm">
     <!-- ข้อมูลทั่วไป -->
     <div class="field-pair">
-      <div class="field-label">ชื่อกิจกรรมหลัก : </div>
+      <div class="field-label">ชื่อโครงการหลัก : </div>
       <div class="field-value">{{ program?.name ?? 'ไม่ระบุ' }}</div>
     </div>
     <div class="field-pair">
-      <div class="field-label">วันที่จัดกิจกรรม : </div>
+      <div class="field-label">วันที่จัดโครงการ : </div>
       <div class="field-value"> {{ getProgramdates(program?.programItems) }}</div>
     </div>
     <div class="field-pair">
-      <div class="field-label">เวลาที่จัดกิจกรรม : </div>
+      <div class="field-label">เวลาที่จัดโครงการ : </div>
       <div class="field-value">{{ getProgramTime(program?.programItems) }}</div>
     </div>
     <div class="field-pair">
-      <div class="field-label">ประเภทกิจกรรม : </div>
+      <div class="field-label">ประเภทโครงการ : </div>
       <div class="field-value">
         {{
           program?.skill === 'hard'
@@ -58,20 +58,20 @@ const getProgramTime = (programItems: ProgramItem[] | null | undefined): string 
       </div>
     </div>
     <div class="field-pair">
-      <div class="field-label">จำนวนกิจกรรม : </div>
-      <div class="field-value">{{ program.programItems?.length }} กิจกรรม</div>
+      <div class="field-label">จำนวนโครงการ : </div>
+      <div class="field-value">{{ program.programItems?.length }} โครงการ</div>
     </div>
 
     <q-separator spaced />
 
-    <!-- รายการรอบกิจกรรม -->
+    <!-- รายการรอบโครงการ -->
     <div v-for="item in program.programItems" :key="item.id || ''">
       <div class="field-pair">
-        <div class="field-label">ชื่อกิจกรรมย่อย : </div>
+        <div class="field-label">ชื่อโครงการย่อย : </div>
         <div class="field-value">{{ item.name ?? 'ไม่ระบุ' }}</div>
       </div>
       <div class="field-pair">
-        <div class="field-label">สถานที่จัดกิจกรรม : </div>
+        <div class="field-label">สถานที่จัดโครงการ : </div>
         <div class="field-value">
           {{ Array.isArray(item.rooms) ? item.rooms.join(', ') : (item.rooms ?? 'ไม่ระบุ') }}
         </div>

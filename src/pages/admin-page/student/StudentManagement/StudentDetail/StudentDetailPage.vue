@@ -146,7 +146,7 @@ onMounted(async () => {
 
 const columns = [
   { name: 'index', label: 'ลำดับ', field: 'index', align: 'left' as const },
-  { name: 'name', label: 'ชื่อกิจกรรม', field: 'name', align: 'left' as const },
+  { name: 'name', label: 'ชื่อโครงการ', field: 'name', align: 'left' as const },
   { name: 'skill', label: 'ประเภท', field: 'skill', align: 'center' as const },
   { name: 'hour', label: 'จำนวนชั่วโมง', field: 'hour', align: 'center' as const },
   {

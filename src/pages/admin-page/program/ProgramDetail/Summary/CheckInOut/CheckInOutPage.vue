@@ -19,7 +19,7 @@ const fetchProgram = async () => {
     const res = await ProgramService.getOne(programId)
     programName.value = res.data?.name || ''
   } catch (err) {
-    console.error('โหลดข้อมูลกิจกรรมล้มเหลว:', err)
+    console.error('โหลดข้อมูลโครงการล้มเหลว:', err)
   }
 }
 
@@ -56,7 +56,7 @@ const copyQRLink = () => {
       <div class="text-center">
         <div class="column items-center text-center q-mb-lg">
           <div class="text-h4 text-primary">
-            {{ qrType === 'checkin' ? 'เช็คชื่อเข้ากิจกรรม' : 'เช็คชื่อออกกิจกรรม' }}
+            {{ qrType === 'checkin' ? 'เช็คชื่อเข้าโครงการ' : 'เช็คชื่อออกโครงการ' }}
           </div>
         </div>
         <div class="text-h6 q-mb-md" v-if="programName">
@@ -96,7 +96,7 @@ const copyQRLink = () => {
     <q-card v-else class="q-pa-lg shadow-3" style="width: 90%; max-width: 500px; max-height: 90vh">
       <div class="column items-center text-center q-my-sm">
         <div class="text-h4 text-primary q-mb-sm">
-          {{ qrType === 'checkin' ? 'เช็คชื่อเข้ากิจกรรม' : 'เช็คชื่อออกกิจกรรม' }}
+          {{ qrType === 'checkin' ? 'เช็คชื่อเข้าโครงการ' : 'เช็คชื่อออกโครงการ' }}
         </div>
         <div class="text-h6 q-mb-md" v-if="programName">
           {{ programName }}

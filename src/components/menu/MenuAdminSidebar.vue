@@ -83,8 +83,8 @@ const authStore = useAuthStore()
 const leftDrawerOpen = ref(false)
 
 const linksList = [
-  { title: 'ตารางกิจกรรม', icon: 'calendar_today', link: '/Admin/ProgramCalendar' },
-  { title: 'จัดการกิจกรรม', icon: 'edit_calendar', link: '/Admin/ProgramManagement' },
+  { title: 'ตารางโครงการ', icon: 'calendar_today', link: '/Admin/ProgramCalendar' },
+  { title: 'จัดการโครงการ', icon: 'edit_calendar', link: '/Admin/ProgramManagement' },
   {
     title: 'จัดการนิสิต',
     icon: 'people',
@@ -107,8 +107,8 @@ const linksList = [
 ]
 
 // const linksList = [
-//   { title: 'ตารางกิจกรรม', icon: 'event', link: '/Admin/ProgramCalendar' },
-//   { title: 'จัดการกิจกรรม', icon: 'event_note', link: '/Admin/ProgramManagement' },
+//   { title: 'ตารางโครงการ', icon: 'event', link: '/Admin/ProgramCalendar' },
+//   { title: 'จัดการโครงการ', icon: 'event_note', link: '/Admin/ProgramManagement' },
 //   {
 //     title: 'จัดการนิสิต',
 //     icon: 'people',

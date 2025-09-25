@@ -11,12 +11,12 @@
 
       <q-card-section>
         <div v-if="programItems.length > 1">
-          <div class="text-h6">เลือกกิจกรรม</div>
+          <div class="text-h6">เลือกโครงการ</div>
           <!-- <q-option-group
             v-model="selectedItemId"
             :options="itemOptions"
             type="radio"
-            label="เลือกรอบกิจกรรม"
+            label="เลือกรอบโครงการ"
           /> -->
 
           <div class="q-gutter-sm row items-center">
@@ -35,7 +35,7 @@
         </div>
         <div v-else>
           <q-item-label>
-            <div class="text-h6">ชื่อกิจกรรม</div>
+            <div class="text-h6">ชื่อโครงการ</div>
             {{ programItems[0]?.name }} ({{ programItems[0]?.hour }} ชม.)</q-item-label
           >
         </div>
@@ -47,7 +47,7 @@
             v-model="selectedFood"
             :options="foodOptions"
             type="radio"
-            label="เลือกรอบกิจกรรม"
+            label="เลือกรอบโครงการ"
           /> -->
           <div class="q-gutter-sm row items-center">
             <q-chip

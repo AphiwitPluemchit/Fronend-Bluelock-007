@@ -55,7 +55,7 @@ const goToPageDetail = async (id: string, disable: boolean) => {
 
 <template>
   <div class="event-panel">
-    <!-- ค้นหากิจกรรม -->
+    <!-- ค้นหาโครงการ -->
     <div v-if="searchQuery">
       <template v-if="groupedSearchResults && Object.keys(groupedSearchResults).length > 0">
         <div v-for="date in Object.keys(groupedSearchResults).sort()" :key="date">
@@ -113,10 +113,10 @@ const goToPageDetail = async (id: string, disable: boolean) => {
         </div>
       </template>
 
-      <div v-else class="text-grey">ไม่พบกิจกรรมที่ตรงกับคำค้นหา</div>
+      <div v-else class="text-grey">ไม่พบโครงการที่ตรงกับคำค้นหา</div>
     </div>
 
-    <!-- แสดงกิจกรรมตามวันที่เลือก -->
+    <!-- แสดงโครงการตามวันที่เลือก -->
     <div v-else>
       <div class="text-h6 q-mb-sm">{{ formatThaiDate(selectedDate) }}</div>
 
@@ -165,7 +165,7 @@ const goToPageDetail = async (id: string, disable: boolean) => {
         </div>
       </template>
 
-      <div v-else class="text-grey">ไม่มีข้อมูลกิจกรรมในวันนี้</div>
+      <div v-else class="text-grey">ไม่มีข้อมูลโครงการในวันนี้</div>
     </div>
   </div>
 </template>

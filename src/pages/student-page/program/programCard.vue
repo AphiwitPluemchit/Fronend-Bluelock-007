@@ -58,7 +58,7 @@ function enrollmentSummary(programItems: ProgramItem[]) {
  shadow-3 >
     <q-card-section class="outer-box">
       <div class="inner-box">
-        <!-- รูปกิจกรรม -->
+        <!-- รูปโครงการ -->
         <div class="program-image-container">
           <q-img
             :src="baseurl + '/uploads/program/images/' + program.file"
@@ -67,7 +67,7 @@ function enrollmentSummary(programItems: ProgramItem[]) {
           />
         </div>
 
-        <!-- รายละเอียดกิจกรรม -->
+        <!-- รายละเอียดโครงการ -->
         <div class="program-content ">
           <div class="text-h6 text-bold ellipsis-2-lines q-mb-sm">
             {{ program.name }}

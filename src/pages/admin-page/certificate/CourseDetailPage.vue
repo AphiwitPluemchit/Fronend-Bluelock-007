@@ -22,7 +22,7 @@ const courseId = route.params.id as string // ส่ง id ให้แท็บ
 
 const tabOptions = [
   { label: 'รายละเอียดหัวข้อการอบรม', value: 'course' },
-  { label: 'ประวัติการส่งหัวข้อกิจกรรม', value: 'submission' },
+  { label: 'ประวัติการส่งหัวข้อโครงการ', value: 'submission' },
 ]
 const courseStore = useCourseStore()
 const course = ref<Course | null>(null)
@@ -197,7 +197,7 @@ const originalCourseData = ref<Course | null>(null)
           indicator-color="transparent"
         >
           <q-tab name="course" label="รายละเอียดหัวข้ออบรม" />
-          <q-tab name="submission" label="ประวัติการส่งหัวข้อกิจกรรม" />
+          <q-tab name="submission" label="ประวัติการส่งหัวข้อโครงการ" />
         </q-tabs>
 
         <!-- ✅ จอเล็ก: ใช้ q-select dropdown -->

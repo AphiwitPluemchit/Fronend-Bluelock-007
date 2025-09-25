@@ -39,7 +39,7 @@ function formatDateToThai(dateString: string): string {
 const getProgramHours = (programItems: ProgramItem[] | null | undefined): string => {
   return programItems?.reduce((total, item) => total + (item.hour ?? 0), 0).toString() ?? '0'
 }
-// ฟังก์ชันดึงรายชื่อห้องกิจกรรม
+// ฟังก์ชันดึงรายชื่อห้องโครงการ
 const getProgramRooms = (programItems: ProgramItem[] | null | undefined): string => {
   if (!programItems || programItems.length === 0) return 'ไม่ระบุ'
   const rooms = programItems[0]?.rooms
@@ -66,22 +66,22 @@ const getProgramDetail = (programItems: ProgramItem[] | null | undefined): strin
 <template>
   <q-list dense>
     <div class="field-pair">
-      <div class="field-label">ชื่อกิจกรรม : </div>
+      <div class="field-label">ชื่อโครงการ : </div>
       <div class="field-value">{{ program?.name ?? 'ไม่ระบุ' }}</div>
     </div>
 
     <div class="field-pair">
-      <div class="field-label">วันที่จัดกิจกรรม : </div>
+      <div class="field-label">วันที่จัดโครงการ : </div>
       <div class="field-value">{{ getProgramdates(program?.programItems) }}</div>
     </div>
 
     <div class="field-pair">
-      <div class="field-label">เวลาที่จัดกิจกรรม : </div>
+      <div class="field-label">เวลาที่จัดโครงการ : </div>
       <div class="field-value">{{ getProgramTime(program?.programItems) }}</div>
     </div>
 
     <div class="field-pair">
-      <div class="field-label">ประเภทกิจกรรม : </div>
+      <div class="field-label">ประเภทโครงการ : </div>
       <div class="field-value">
         {{
           program?.skill === 'hard'
@@ -94,7 +94,7 @@ const getProgramDetail = (programItems: ProgramItem[] | null | undefined): strin
     </div>
 
     <div class="field-pair">
-      <div class="field-label">สถานที่จัดกิจกรรม : </div>
+      <div class="field-label">สถานที่จัดโครงการ : </div>
       <div class="field-value">{{ getProgramRooms(program?.programItems) }}</div>
     </div>
 

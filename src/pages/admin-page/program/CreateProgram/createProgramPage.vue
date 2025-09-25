@@ -11,8 +11,8 @@ const handleFileSelected = (file: File) => {
   selectedImageFile.value = file
 }
 const breadcrumbs = ref({
-  previousPage: { title: 'จัดการกิจกรรม', path: '/Admin/ProgramManagement' },
-  currentPage: { title: 'สร้างกิจกรรม', path: '/Admin/ProgramManagement/CreateProgramPage' },
+  previousPage: { title: 'จัดการโครงการ', path: '/Admin/ProgramManagement' },
+  currentPage: { title: 'สร้างโครงการ', path: '/Admin/ProgramManagement/CreateProgramPage' },
   icon: 'edit_calendar',
 })
 </script>

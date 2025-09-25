@@ -28,8 +28,8 @@ const enrollment = ref<Enroll>({ isEnrolled: false, enrollmentId: '' })
 const screen = ref(false)
 const auth = useAuthStore()
 const breadcrumbs = ref({
-  previousPage: { title: 'กิจกรรมทั้งหมด', path: '/Student/ProgramTablePage' },
-  currentPage: { title: 'รายละเอียดกิจกรรม', path: `/Student/ProgramTablePage/ProgramDetail` },
+  previousPage: { title: 'โครงการทั้งหมด', path: '/Student/ProgramTablePage' },
+  currentPage: { title: 'รายละเอียดโครงการ', path: `/Student/ProgramTablePage/ProgramDetail` },
   icon: 'description',
 })
 
@@ -100,7 +100,7 @@ onMounted(async () => {
     <AppBreadcrumbs :breadcrumbs="breadcrumbs" />
     <div class="program-detail-card">
       <q-card-section class="q-col-gutter-md row items-start q-mb-md">
-        <!-- ภาพกิจกรรม -->
+        <!-- ภาพโครงการ -->
         <div class="col-12 col-md-4 text-center">
           <q-img
             :src="baseurl + '/uploads/program/images/' + program?.file"

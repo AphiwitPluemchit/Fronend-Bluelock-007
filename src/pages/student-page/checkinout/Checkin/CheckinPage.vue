@@ -47,7 +47,7 @@ console.log('token:', props.token)
 <template>
   <div class="q-pa-md">
     <div>
-      <div v-if="props.program?.name" class="q-mb-sm">กิจกรรม: {{ props.program?.name }}</div>
+      <div v-if="props.program?.name" class="q-mb-sm">โครงการ: {{ props.program?.name }}</div>
       <div class="q-pa-md">
         <q-btn class="btnconfirm" @click="checkin">เช็คชื่อ</q-btn>
       </div>

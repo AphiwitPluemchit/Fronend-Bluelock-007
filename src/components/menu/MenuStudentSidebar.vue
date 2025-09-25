@@ -6,8 +6,8 @@
         <!-- ปุ่มเมนูหลัก -->
         <q-btn flat no-caps label="หน้าหลัก" to="/Student/Home" />
 
-        <!-- เมนูมีกิจกรรม (dropdown) -->
-        <q-btn flat no-caps label="กิจกรรม">
+        <!-- เมนูมีโครงการ (dropdown) -->
+        <q-btn flat no-caps label="โครงการ">
           <q-menu fit>
             <q-list style="min-width: 150px">
               <q-item clickable v-ripple to="/Student/ProgramCalendar">

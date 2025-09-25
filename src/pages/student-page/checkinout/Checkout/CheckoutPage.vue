@@ -24,14 +24,14 @@ async function goToForm() {
   try {
     // ดึงข้อมูล program เพื่อหา formId
     if (!props.program?.id) {
-      errorMessage.value = 'ไม่พบข้อมูลกิจกรรม'
+      errorMessage.value = 'ไม่พบข้อมูลโครงการ'
       return
     }
 
     // ดึง formId จาก API
     const formData = await checkinoutStore.getProgramForm(props.program.id)
     if (!formData?.formId) {
-      errorMessage.value = 'กิจกรรมนี้ไม่มีแบบฟอร์มให้ทำ'
+      errorMessage.value = 'โครงการนี้ไม่มีแบบฟอร์มให้ทำ'
       return
     }
 
@@ -70,7 +70,7 @@ console.log('studentId:', props.token)
 <template>
   <div class="q-pa-md">
     <div>
-      <div v-if="props.program?.name" class="q-mb-sm">กิจกรรม: {{ props.program?.name }}</div>
+      <div v-if="props.program?.name" class="q-mb-sm">โครงการ: {{ props.program?.name }}</div>
       <div class="q-pa-md">
         <q-btn
           class="btnconfirm"

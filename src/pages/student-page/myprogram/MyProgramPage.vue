@@ -71,7 +71,7 @@ const fetchData = async () => {
     allPrograms.value = response.data
     programs.value = response.data
   } catch (error) {
-    console.error('เกิดข้อผิดพลาดในการโหลดข้อมูลกิจกรรม:', error)
+    console.error('เกิดข้อผิดพลาดในการโหลดข้อมูลโครงการ:', error)
   } finally {
     loading.value = false
   }
@@ -86,7 +86,7 @@ onMounted(async () => {
   <q-page class="q-pa-md">
     <!-- ชื่อหน้า -->
     <div class="q-mb-md" style="margin-top: 20px">
-      <div class="texttitle">กิจกรรมของฉัน</div>
+      <div class="texttitle">โครงการของฉัน</div>
     </div>
 
     <!-- ค้นหา + ฟิลเตอร์ -->
@@ -97,7 +97,7 @@ onMounted(async () => {
         dense
         outlined
         v-model="searchQuery"
-        placeholder="ค้นหา ชื่อกิจกรรม"
+        placeholder="ค้นหา ชื่อโครงการ"
         class="q-mr-sm searchbox"
         :style="{ boxShadow: 'none' }"
         clearable
@@ -132,12 +132,12 @@ onMounted(async () => {
       <div class="text-center">
         <q-icon name="person_outline" size="100px" color="grey-4" />
         <div class="text-h6 q-mt-md text-grey-6">
-          {{ (searchQuery.trim() || selectedFilters.categoryProgram.length > 0) ? 'ไม่พบกิจกรรมที่ตรงกับเงื่อนไข' : 'ยังไม่มีกิจกรรมที่ลงทะเบียน' }}
+          {{ (searchQuery.trim() || selectedFilters.categoryProgram.length > 0) ? 'ไม่พบโครงการที่ตรงกับเงื่อนไข' : 'ยังไม่มีโครงการที่ลงทะเบียน' }}
         </div>
       </div>
     </div>
 
-    <!-- แสดงกิจกรรม -->
+    <!-- แสดงโครงการ -->
     <div v-else>
       <div
         class="q-mb-md"

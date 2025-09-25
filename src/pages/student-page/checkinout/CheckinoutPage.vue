@@ -23,14 +23,14 @@ const isExpiredErr = (msg: string) =>
 const isInvalidQrErr = (msg: string) =>
   /qr\s*ไม่ถูกต้อง/i.test(msg) || /qr\s*ไม่ถูกต้องหรือหมดอายุ/i.test(msg)
 
-/** โหลดข้อมูลกิจกรรมแบบปลอดภัย */
+/** โหลดข้อมูลโครงการแบบปลอดภัย */
 const loadProgramSafe = async (programId: string) => {
   try {
     await programStore.fetchOneData(programId)
   } catch (e) {
     // ถ้าต้อง log ให้ใช้ logger กลาง แทน console ใน prod
-    // console.error('โหลดข้อมูลกิจกรรมล้มเหลว:', e)
-    error.value = 'ไม่สามารถโหลดข้อมูลกิจกรรมได้'
+    // console.error('โหลดข้อมูลโครงการล้มเหลว:', e)
+    error.value = 'ไม่สามารถโหลดข้อมูลโครงการได้'
     throw e
   }
 }
@@ -60,7 +60,7 @@ onMounted(async () => {
 
     // กรณีสำคัญ: ไม่ได้ลงทะเบียน → จบที่นี่ ไม่ไป validate ต่อ
     if (isNotRegisteredErr(msg)) {
-      error.value = 'คุณไม่ได้ลงทะเบียนกิจกรรมนี้'
+      error.value = 'คุณไม่ได้ลงทะเบียนโครงการนี้'
       loading.value = false
       return
     }
@@ -84,7 +84,7 @@ onMounted(async () => {
 
       // map ข้อความ error จาก validate ให้เหมาะสม
       if (isNotRegisteredErr(vmsg)) {
-        error.value = 'คุณไม่ได้ลงทะเบียนกิจกรรมนี้'
+        error.value = 'คุณไม่ได้ลงทะเบียนโครงการนี้'
       } else if (isExpiredErr(vmsg)) {
         error.value = 'QR Code หมดอายุแล้ว'
       } else if (isInvalidQrErr(vmsg)) {
@@ -117,11 +117,11 @@ onMounted(async () => {
             ? 'เช็คชื่อเข้า'
             : tokenInfo?.type === 'checkout'
               ? 'เช็คชื่อออก'
-              : 'เช็คชื่อเข้ากิจกรรม'
+              : 'เช็คชื่อเข้าโครงการ'
         }}
       </div>
 
-      <!-- <div class="text-h6 q-mt-md">เช็คชื่อเข้ากิจกรรม</div> -->
+      <!-- <div class="text-h6 q-mt-md">เช็คชื่อเข้าโครงการ</div> -->
       <div v-if="loading" class="q-mt-md">กำลังโหลด...</div>
       <div v-else-if="error" class="text-negative q-mt-md">{{ error }}</div>
       <template v-else>

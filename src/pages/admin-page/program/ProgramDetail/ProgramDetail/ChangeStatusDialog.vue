@@ -77,7 +77,7 @@ const confirmStatusChange = () => {
   <q-dialog v-model="showDialog" persistent>
     <q-card class="dialog-box">
       <q-card-section>
-        <div class="label">เปลี่ยนสถานะกิจกรรม</div>
+        <div class="label">เปลี่ยนสถานะโครงการ</div>
       </q-card-section>
 
       <q-card-section class="status-section">

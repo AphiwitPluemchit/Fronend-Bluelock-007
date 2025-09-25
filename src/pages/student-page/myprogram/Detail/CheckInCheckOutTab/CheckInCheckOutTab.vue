@@ -95,7 +95,7 @@ onMounted(async () => {
   screen.value = true
 })
 
-// ถ้า id ใน path เปลี่ยน ให้โหลดใหม่ (รองรับการสลับกิจกรรม)
+// ถ้า id ใน path เปลี่ยน ให้โหลดใหม่ (รองรับการสลับโครงการ)
 watch(
   () => route.params.id,
   async () => {
