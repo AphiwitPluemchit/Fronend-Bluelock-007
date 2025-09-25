@@ -12,9 +12,9 @@ import { useRouter } from 'vue-router'
 const router = useRouter()
 const auth = useAuthStore()
 const allPrograms = ref<ProgramHistory[]>([])
-  const showFilterDialog = ref(false)
-  const filterCategories = ref(['categoryProgram'])
-  const selectedFilters = ref({
+const showFilterDialog = ref(false)
+const filterCategories = ref(['categoryProgram'])
+const selectedFilters = ref({
   categoryProgram: [] as string[],
 })
 const query = ref<Pagination>({
@@ -93,84 +93,83 @@ onMounted(async () => {
 </script>
 <template>
   <!-- Program History -->
-    <div class="row justify-between items-right q-mb-md search-filter-wrapper q-col-gutter-md">
-      <div class="text-h6"></div>
-      <div class="row search-filter-inner items-center no-wrap">
-        <q-input
-          dense
-          outlined
-          v-model="query.search"
-          placeholder="ค้นหา ชื่อโครงการ"
-          class="q-mr-sm searchbox"
-          :style="{ boxShadow: 'none' }"
-          clearable
-        >
-          <template v-slot:append>
-            <q-icon name="search" />
-          </template>
-        </q-input>
+  <div class="row justify-between items-right q-mb-md search-filter-wrapper q-col-gutter-md">
+    <div class="text-h6"></div>
+    <div class="row search-filter-inner items-center no-wrap">
+      <q-input
+        dense
+        outlined
+        v-model="query.search"
+        placeholder="ค้นหา ชื่อโครงการ"
+        class="q-mr-sm searchbox"
+        :style="{ boxShadow: 'none' }"
+        clearable
+      >
+        <template v-slot:append>
+          <q-icon name="search" />
+        </template>
+      </q-input>
 
-        <div class="filter-btn-wrapper">
-          <FilterDialog
-            :model-value="showFilterDialog"
-            :categories="filterCategories"
-            @apply="applyFilters"
-            :years="query.studentYear || []"
-            :majors="query.major || []"
-            :status-programs="query.programState || []"
-            :category-programs="selectedFilters.categoryProgram"
-          />
-        </div>
+      <div class="filter-btn-wrapper">
+        <FilterDialog
+          :model-value="showFilterDialog"
+          :categories="filterCategories"
+          @apply="applyFilters"
+          :years="query.studentYear || []"
+          :majors="query.major || []"
+          :status-programs="query.programState || []"
+          :category-programs="selectedFilters.categoryProgram"
+        />
       </div>
     </div>
-    <div class="column q-gutter-md">
-      <!-- การ์ดต่อกิจกรรม -->
-      <q-card
-        v-for="(program, idx) in allPrograms"
-        :key="idx"
-        class="program-card cursor-pointer"
-        flat
-        bordered
-        @click="onClick(program.id!)"
-      >
-        <div class="program-card__stripe" :class="typeStripeClass(program)"></div>
+  </div>
+  <div class="column q-gutter-md">
+    <!-- การ์ดต่อกิจกรรม -->
+    <q-card
+      v-for="(program, idx) in allPrograms"
+      :key="idx"
+      class="program-card cursor-pointer"
+      flat
+      bordered
+      @click="onClick(program.id!)"
+    >
+      <div class="program-card__stripe" :class="typeStripeClass(program)"></div>
 
-        <q-card-section class="q-pt-md q-pb-sm">
-          <!-- แถวบน: สถานะซ้าย / ทักษะขวา -->
-          <div class="row items-center justify-between q-mb-sm">
-            <div class="row items-center q-gutter-xs">
-              <EnrollmentType :status="getProgramItemStatus(program)" />
-            </div>
-            <ProgramType
-              v-if="program.skill === 'hard' || program.skill === 'soft'"
-              :skill="program.skill === 'hard' ? 'hardSkill' : 'softSkill'"
-            />
+      <q-card-section class="q-pt-md q-pb-sm">
+        <!-- แถวบน: สถานะซ้าย / ทักษะขวา -->
+        <div class="row items-center justify-between q-mb-sm">
+          <div class="row items-center q-gutter-xs">
+            <EnrollmentType :status="getProgramItemStatus(program)" />
           </div>
+          <ProgramType
+            v-if="program.skill === 'hard' || program.skill === 'soft'"
+            :skill="program.skill === 'hard' ? 'hardSkill' : 'softSkill'"
+          />
+        </div>
 
-          <!-- ชื่อกิจกรรม -->
-          <div
-            class="text-weight-medium text-body1 ellipsis-2 q-mb-xs q-mb-sm"
-            :title="program.name"
-          >
-            {{ program.name }}
-          </div>
+        <!-- ชื่อกิจกรรม -->
+        <div class="text-weight-medium text-body1 ellipsis-2 q-mb-xs q-mb-sm" :title="program.name">
+          {{ program.name }}
+        </div>
 
-          <!-- รายละเอียดวันที่อนุมัติ / ชั่วโมง -->
-          <div class="row text-weight-medium text-body1 ellipsis-2 q-mb-xs q-mb-sm">
-            <q-icon name="event" size="18px" />
-            <div class="text-body2">
-              วันที่อนุมัติ:
-              {{ getApprovedAt(program) ? formatDateTime(getApprovedAt(program)!) : '-' }}
-            </div>
+        <!-- รายละเอียดวันที่อนุมัติ / ชั่วโมง -->
+        <div class="row text-weight-medium text-body1 ellipsis-2 q-mb-xs q-mb-sm">
+          <q-icon name="event" size="18px" />
+          <div class="text-body2">
+            วันที่อนุมัติ :
+            {{ getApprovedAt(program) ? formatDateTime(getApprovedAt(program)!) : '-' }}
           </div>
+        </div>
 
-          <div class="row text-weight-medium text-body1 ellipsis-2 q-mb-xs q-mb-sm">
-            <q-icon name="schedule" size="18px" />
-            <div class="text-body2">จำนวนชั่วโมง : {{ getHours(program) ?? '-' }}</div>
+        <div class="row text-weight-medium text-body1 ellipsis-2 q-mb-xs q-mb-sm">
+          <q-icon name="schedule" size="18px" />
+          <div class="text-body2">
+            จำนวนชั่วโมง : {{ getApprovedAt(program) ? getHours(program) : '-' }}
           </div>
-        </q-card-section>
-      </q-card>
-    </div>
+        </div>
+      </q-card-section>
+    </q-card>
+  </div>
 </template>
 <style scoped>
 .search-filter-wrapper {
