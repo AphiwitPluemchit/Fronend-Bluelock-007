@@ -1,29 +1,36 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, onMounted } from 'vue'
 import EvaluationTable from './evaluationTable.vue'
 import checkInOutDialog from './CheckInOut/checkInOutDialog.vue'
 import type { EnrollmentSummary } from 'src/types/program'
 
+// ตัวอย่าง type ของแถว (ให้ตรงกับที่ EvaluationTable ใช้)
+interface ProgramRow {
+  _id: string
+  name: string
+  formId?: string | null
+  // ...field อื่นๆตามจริง
+}
+
 const isDialogOpen = ref(false)
 const enrollmentSummary = ref<EnrollmentSummary | null>(null)
 
-// เปิด dialog → รีเซตค่า
-const showCreateQR_CodeDialog = () => {
-  isDialogOpen.value = true
-}
+// ✅ เตรียม rows ให้ตาราง
+const rows = ref<ProgramRow[]>([])
 
-// ยกเลิก → ปิด + รีเซตค่า
-const cancelCreateQR_Code = () => {
-  isDialogOpen.value = false
-}
+onMounted(() => {
+  // TODO: โหลดข้อมูลจริงจาก API ของคุณ แล้วเซ็ตให้ rows.value
+   rows.value = [
+     { _id: '1', name: 'อบรมความรู้พื้นฐานด้าน AI', formId: '68d454e6db8ab09a41f75c55' },
+     { _id: '2', name: 'Workshop Vue + Quasar', formId: null },
+   ]
+})
 
-// ยืนยัน
-const confirmCreateQR_Code = () => {
-  console.log('QR-Code เช็คชื่อถูกสร้างแล้ว!')
-  // isDialogOpen.value = false
-  // selectedCheckType.value = ''
-}
+const showCreateQR_CodeDialog = () => { isDialogOpen.value = true }
+const cancelCreateQR_Code = () => { isDialogOpen.value = false }
+const confirmCreateQR_Code = () => { console.log('QR-Code เช็คชื่อถูกสร้างแล้ว!') }
 </script>
+
 
 <template>
   <div>
@@ -98,7 +105,7 @@ const confirmCreateQR_Code = () => {
       </div>
       <!-- ตารางผลการประเมิน -->
       <div class="evaluation-container">
-        <EvaluationTable />
+        <EvaluationTable :rows="rows" />
       </div>
     </div>
   </div>
