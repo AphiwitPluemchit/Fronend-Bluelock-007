@@ -1,69 +1,22 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
-import { useRouter } from 'vue-router'
 // import { useQuasar } from 'quasar'
 import { useAuthStore } from 'src/stores/auth'
 import { StudentService } from 'src/services/student'
-import { EnrollmentService } from 'src/services/enrollment'
-import type { ProgramHistory } from 'src/types/program'
-import type { CheckinoutRecord } from 'src/types/checkinout'
-import type{ Pagination } from 'src/types/pagination'
+// import type { CheckinoutRecord } from 'src/types/checkinout'
+import ProgramHistory from 'src/pages/student-page/record/programHistory.vue'
 
 const auth = useAuthStore()
-const router = useRouter()
 // const $q = useQuasar()
 // const isSmallScreen = computed(() => !$q.screen.gt.xs)
-const allPrograms = ref<ProgramHistory[]>([])
-// interface ProgramHistory {
-//   program: {
-//     name: string
-//     skill: 'soft' | 'hard'
-//     programItem: {
-//       id: string
-//       name: string
-//       description: string
-//       hour: number
-//       operator: string
-//       dates: {
-//         date: string
-//         stime: string
-//         etime: string
-//       }[]
-//     }
-//     programState: string
-//     id: string
-//     type: string
-//   }
-//   registrationDate: string
-// }
-
-// interface ProgramDisplay {
-//   id: string
-//   title: string
-//   type: 'academic' | 'preparation'
-//   date: string
-//   time: string
-//   room: string
-//   hours: number
-// }
-
+const tab = ref('program')
 const studentData = ref({
   name: '',
   major: '',
   email: '',
   studentId: '',
 })
-const query = ref<Pagination>({
-  page: 1,
-  limit: -1,
-  search: '',
-  sortBy: '_id',
-  order: 'desc',
-  skill: [],
-  programState: ['open', 'close'],
-  major: [],
-  studentYear: [],
-})
+
 const academicData = ref({ current: 0, required: 12 })
 const prepData = ref({ current: 0, required: 30 })
 
@@ -113,49 +66,6 @@ const calculateMissingHours = (data: { current: number; required: number }) =>
 const getProgressValue = (data: { current: number; required: number }) =>
   data.required ? (data.current / data.required) * 100 : 0
 
-const onClick = async (id: string) => {
-  await router.push(`/Student/Program/MyProgramDetail/${id}`)
-}
-
-const getProgramItemStatus = (program: ProgramHistory): number => {
-  const status = program?.programItems?.[0]?.status;
-  return typeof status === 'number' ? status : 1;
-}
-
-const getStatusDotClass = (program: ProgramHistory) => {
-  const s = getProgramItemStatus(program)
-  if (s === 2) return 'status-dot--green'
-  if (s === 3) return 'status-dot--red'
-  return 'status-dot--yellow'
-}
-
-const getCheckinRecords = (program: ProgramHistory): CheckinoutRecord[] => {
-  const records = program?.programItems?.[0]?.checkinoutRecord
-  return Array.isArray(records) ? records : []
-}
-
-const formatDateTime = (iso?: string) => {
-  if (!iso) return '-'
-  const d = new Date(iso)
-  try {
-    return d.toLocaleString('th-TH', {
-      year: '2-digit', month: '2-digit', day: '2-digit',
-      hour: '2-digit', minute: '2-digit'
-    })
-  } catch {
-    return d.toISOString()
-  }
-}
-const fetchData = async () => {
-  try {
-    const studentId = `${auth.getUser?.id}`
-    const response = await EnrollmentService.getEnrollmentsByStudentID(studentId, query.value)
-    allPrograms.value = response.data
-    // programs.value = response.data
-  } catch (error) {
-    console.error('เกิดข้อผิดพลาดในการโหลดข้อมูลโครงการ:', error)
-  }
-}
 onMounted(async () => {
   const code = auth.getUser?.code
   if (!code) return
@@ -172,8 +82,6 @@ onMounted(async () => {
 
     academicData.value.current = summary.hardSkill
     prepData.value.current = summary.softSkill
-
-    await fetchData()
   } catch (err) {
     console.error('โหลดข้อมูล student summary ไม่สำเร็จ', err)
   }
@@ -182,7 +90,10 @@ onMounted(async () => {
 
 <template>
   <q-page class="q-pa-md">
-    <div class="container q-mx-auto q-px-sm q=mb-md" style="max-width: 1000px">
+    <div class="container q-mx-auto q-px-sm q-mb-md" style="max-width: 1024px">
+      <div class="row justify-between items-center q-mb-md" style="margin-top: 20px">
+        <div class="texttitle">ประวัติของฉัน</div>
+      </div>
       <!-- Student Profile Card -->
       <q-card bordered class="q-mb-md shadow-3 rounded-borders">
         <q-card-section class="bg-primary">
@@ -332,70 +243,34 @@ onMounted(async () => {
           </q-card>
         </div>
       </div>
+      <div class="q-mb-md q-mt-xl">
+        <!-- <q-card bordered class="rounded-borders shadow-2 full-height"> -->
+        <div class="row justify-between items-center q-mb-sm" style="margin-top: 20px">
+          <div class="textsubtitle">ประวัติการอบรม</div>
+        </div>
 
-      <!-- Program History -->
-      <q-card bordered class="q-mb-md shadow-2 rounded-borders">
-        <q-card-section class="bg-primary">
-          <div class="row justify-between items-center">
+        <!-- <q-card-section class="bg-primary q-mb-md">
             <div class="text-h6 text-bold text-white">
-              <q-icon name="history" class="q-mr-sm" />
-              ประวัติการเข้าโครงการ
-            </div>
-            <!-- <q-btn
-              v-if="allPrograms.length > 3"
-              flat
-              dense
-              color="white"
-              :icon="showAllPrograms ? 'expand_less' : 'expand_more'"
-              :label="showAllPrograms ? 'ดูน้อยลง' : 'ดูทั้งหมด'"
-              @click="showAllPrograms = !showAllPrograms"
-            /> -->
-          </div>
-        </q-card-section>
+                <q-icon :name="programColors.academic.icon" class="q-mr-sm" />
+                ประวัติการอบรม
+              </div>
+            </q-card-section> -->
 
-        <q-separator />
+        <div>
+          <q-tabs v-model="tab" align="right" class="custom-tabs" indicator-color="transparent">
+            <q-tab name="program" label="โครงการ" />
+            <q-tab name="certificate" label="ใบรับรอง" />
+          </q-tabs>
 
-        <q-card-section class="q-pa-none">
-          <q-list>
-            <q-item
-              v-for="(program, index) in allPrograms"
-              :key="index"
-              clickable
-              v-ripple
-              @click="onClick(program.id!)"
-            >
-              <div class="status-dot" :class="getStatusDotClass(program)"></div>
-              <!-- <q-item-section avatar>
-                <q-avatar color="primary" text-color="white">
-                  <q-icon :name="programColors[program.type].icon" />
-                </q-avatar>
-              </q-item-section> -->
-
-              <q-item-section>
-                <!-- ✅ ชื่อโครงการ แสดงตลอด -->
-                <q-item-label class="text-weight-medium ellipsis" :title="program.name">
-                  {{ program.name }}
-                </q-item-label>
-
-                <!-- ✅ แสดงวัน เวลา ชั่วโมงในจอใหญ่ และ label ในจอเล็ก -->
-                <q-item-label caption>
-                  <template v-if="getCheckinRecords(program).length">
-                    <div v-for="(r, i) in getCheckinRecords(program)" :key="i">
-                      <span>เช็คอิน: {{ formatDateTime(r.checkin) }}</span>
-                      <span v-if="r.checkout"> • เช็คเอาท์: {{ formatDateTime(r.checkout) }}</span>
-                    </div>
-                  </template>
-                  <template v-else>
-                    <span class="text-grey">ไม่มีข้อมูลเช็คชื่อ</span>
-                  </template>
-                </q-item-label>
-              </q-item-section>
-
-
-            </q-item>
-          </q-list>
-        </q-card-section>
-      </q-card>
+          <q-tab-panels v-model="tab" animated class="custom-panels">
+            <q-tab-panel name="program" class="q-my-none">
+              <ProgramHistory />
+            </q-tab-panel>
+            <q-tab-panel name="certificate" class="q-my-none"> ประวัติการยื่นใบเซอร์ </q-tab-panel>
+          </q-tab-panels>
+        </div>
+        <!-- </q-card> -->
+      </div>
     </div>
   </q-page>
 </template>
@@ -419,11 +294,8 @@ onMounted(async () => {
   height: 10px;
   border-radius: 50%;
   margin: 8px 12px 0 0;
-  box-shadow: 0 0 0 2px rgba(0,0,0,0.05);
+  box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.05);
 }
-.status-dot--yellow { background-color: #FFD740; }
-.status-dot--green  { background-color: #00C853; }
-.status-dot--red    { background-color: #FF3D00; }
 
 .field-pair {
   display: flex;
@@ -440,5 +312,15 @@ onMounted(async () => {
 .field-value {
   flex: 1;
   color: #000000;
+}
+.custom-tabs .q-tab--active,
+.custom-tabs .q-tab:hover {
+  background-color: #edf0f5 !important;
+  border-radius: 12px 12px 0 0;
+}
+.custom-panels {
+  background-color: #edf0f5;
+  height: 700px;
+  overflow: hidden;
 }
 </style>

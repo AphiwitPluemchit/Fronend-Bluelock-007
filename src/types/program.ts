@@ -84,4 +84,5 @@ export type ProgramItemHistory = {
   enrollmentCount?: number
   status?: number
   checkinoutRecord?: CheckinoutRecord[]
+  approvedAt?: string
 }

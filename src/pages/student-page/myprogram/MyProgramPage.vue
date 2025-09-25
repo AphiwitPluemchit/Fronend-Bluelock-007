@@ -14,7 +14,7 @@ const loading = ref(false)
 const showFilterDialog = ref(false)
 const searchQuery = ref('')
 const selectedFilters = ref({
-  categoryProgram: [] as string[]
+  categoryProgram: [] as string[],
 })
 
 interface SelectedFilters {
@@ -29,18 +29,17 @@ const filteredPrograms = computed(() => {
   // กรองตามคำค้นหา
   if (searchQuery.value.trim()) {
     const query = searchQuery.value.toLowerCase().trim()
-    filtered = filtered.filter((program) =>
-      program.name?.toLowerCase().includes(query) ||
-      program.programItems?.some(item =>
-        item.description?.toLowerCase().includes(query)
-      )
+    filtered = filtered.filter(
+      (program) =>
+        program.name?.toLowerCase().includes(query) ||
+        program.programItems?.some((item) => item.description?.toLowerCase().includes(query)),
     )
   }
 
   // กรองตาม skill
   if (selectedFilters.value.categoryProgram.length > 0) {
-    filtered = filtered.filter((program) =>
-      program.skill && selectedFilters.value.categoryProgram.includes(program.skill)
+    filtered = filtered.filter(
+      (program) => program.skill && selectedFilters.value.categoryProgram.includes(program.skill),
     )
   }
 
@@ -90,36 +89,36 @@ onMounted(async () => {
     </div>
 
     <!-- ค้นหา + ฟิลเตอร์ -->
-    <div class="row justify-between items-right  q-mb-md search-filter-wrapper q-col-gutter-md">
+    <div class="row justify-between items-right q-mb-md search-filter-wrapper q-col-gutter-md">
       <div class="text-h6"></div>
       <div class="row search-filter-inner items-center no-wrap">
-      <q-input
-        dense
-        outlined
-        v-model="searchQuery"
-        placeholder="ค้นหา ชื่อโครงการ"
-        class="q-mr-sm searchbox"
-        :style="{ boxShadow: 'none' }"
-        clearable
-      >
-        <template v-slot:append>
-          <q-icon name="search" />
-        </template>
-      </q-input>
+        <q-input
+          dense
+          outlined
+          v-model="searchQuery"
+          placeholder="ค้นหา ชื่อโครงการ"
+          class="q-mr-sm searchbox"
+          :style="{ boxShadow: 'none' }"
+          clearable
+        >
+          <template v-slot:append>
+            <q-icon name="search" />
+          </template>
+        </q-input>
 
-            <div class="filter-btn-wrapper">
-              <FilterDialog
-                :model-value="showFilterDialog"
-                :categories="filterCategories"
-                @apply="applyFilters"
-                :years="query.studentYear || []"
-                :majors="query.major || []"
-                :status-programs="query.programState || []"
-                :category-programs="selectedFilters.categoryProgram"
-              />
-            </div>
-          </div>
+        <div class="filter-btn-wrapper">
+          <FilterDialog
+            :model-value="showFilterDialog"
+            :categories="filterCategories"
+            @apply="applyFilters"
+            :years="query.studentYear || []"
+            :majors="query.major || []"
+            :status-programs="query.programState || []"
+            :category-programs="selectedFilters.categoryProgram"
+          />
         </div>
+      </div>
+    </div>
 
     <!-- Loading State -->
     <!-- <div v-if="loading" class="row justify-center q-pa-lg">
@@ -132,18 +131,18 @@ onMounted(async () => {
       <div class="text-center">
         <q-icon name="person_outline" size="100px" color="grey-4" />
         <div class="text-h6 q-mt-md text-grey-6">
-          {{ (searchQuery.trim() || selectedFilters.categoryProgram.length > 0) ? 'ไม่พบโครงการที่ตรงกับเงื่อนไข' : 'ยังไม่มีโครงการที่ลงทะเบียน' }}
+          {{
+            searchQuery.trim() || selectedFilters.categoryProgram.length > 0
+              ? 'ไม่พบโครงการที่ตรงกับเงื่อนไข'
+              : 'ยังไม่มีโครงการที่ลงทะเบียน'
+          }}
         </div>
       </div>
     </div>
 
     <!-- แสดงโครงการ -->
     <div v-else>
-      <div
-        class="q-mb-md"
-        v-for="program in filteredPrograms"
-        :key="program.id || ''"
-      >
+      <div class="q-mb-md" v-for="program in filteredPrograms" :key="program.id || ''">
         <MyProgramCard :myProgram="program" />
       </div>
     </div>

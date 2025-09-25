@@ -6,7 +6,7 @@ import 'dayjs/locale/th'
 import buddhistEra from 'dayjs/plugin/buddhistEra'
 import { useQuasar } from 'quasar'
 import { computed } from 'vue'
-import ProgramType from './component/programType.vue'
+import ProgramType from 'src/components/programType.vue'
 
 const baseurl = api.defaults.baseURL
 const $q = useQuasar()
