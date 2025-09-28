@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, watch, ref } from 'vue'
+import { computed, watch, ref, watchEffect } from 'vue'
 import { useFormStore } from 'src/stores/forms'
 import { useSubmissionStore } from 'src/stores/submission'
 import type { BlockCountItem } from 'src/services/submission'
@@ -32,16 +32,37 @@ const loadingAnalytics = ref(false)
 function hasStringId(f: Form): f is Form & { id: string } {
   return typeof f.id === 'string' && f.id.length > 0
 }
+function isHex24(s: string) {
+  return /^[0-9a-fA-F]{24}$/.test(s)
+}
+
 const neededFormIds = computed(() =>
   Array.from(
     new Set(
       (props.rows ?? [])
         .map((r) => (r.formId ?? '').trim())
-        .filter((s): s is string => s.length > 0),
+        .filter((s): s is string => s.length > 0 && isHex24(s)), // ✅ กรอง 24-hex
     ),
   ),
 )
+watchEffect(() => {
+  // rows ดิบ
+  console.log('[rows]', JSON.parse(JSON.stringify(props.rows)))
 
+  // map row -> formId
+  console.log(
+    '[rows→formIds]',
+    (props.rows ?? []).map((r) => ({ row: r._id, formId: (r.formId ?? '').trim() })),
+  )
+
+  // ids ที่จะใช้จริง (unique + 24-hex)
+  console.log('[neededFormIds (unique)]', neededFormIds.value)
+
+  // แจ้งเตือนถ้าทุกกิจกรรมชี้ฟอร์มเดียวกัน
+  if (neededFormIds.value.length === 1 && (props.rows?.length ?? 0) > 1) {
+    console.warn('[Evaluation] All rows point to the same formId:', neededFormIds.value[0])
+  }
+})
 const relatedForms = computed(() =>
   formStore.forms.filter((f) => hasStringId(f) && neededFormIds.value.includes(f.id)),
 )
@@ -65,10 +86,10 @@ async function preloadFormAnalytics(formIds: string[]) {
   try {
     await Promise.all(formIds.map((fid) => submissionStore.fetchFormBlocksAnalytics(fid)))
     formIds.forEach((fid) => {
-      console.log('[Evaluation] analytics data for', fid, submissionStore.getFormAnalytics(fid))
+      const items = submissionStore.getFormAnalytics(fid)
+      console.log('[Evaluation] analytics data for', fid, JSON.parse(JSON.stringify(items))) // ✅ ดูค่าจริง
+      console.log('[len]', items.length)
     })
-  } catch (e) {
-    console.error('[Evaluation] analytics failed', e)
   } finally {
     loadingAnalytics.value = false
   }
@@ -128,15 +149,77 @@ function buildGridChart(block: Block, items: BlockCountItem[]): ChartPayload {
 
 function chartFor(formId: string, block: Block): ChartPayload {
   const analytics = submissionStore.getFormAnalytics(formId)
-  const items = analytics.filter(a => a.blockId === block.id)
+  const items = analytics.filter((a) => a.blockId === block.id)
   return !block?.rows?.length ? buildSingleChoiceChart(block, items) : buildGridChart(block, items)
-  
 }
 // helper ดึง blocks จาก Form แบบไม่ใช้ any
 function getBlocksFromForm(f: Form): Block[] {
   const maybe = (f as unknown as { blocks?: unknown }).blocks
   return Array.isArray(maybe) ? (maybe as Block[]) : []
 }
+const rowFormIds = computed(() =>
+  (props.rows ?? []).map(r => ({
+    rowId: r._id,
+    name: r.name,
+    formId: (r.formId ?? '').trim(),
+    valid: isHex24((r.formId ?? '').trim()),
+  }))
+)
+async function preloadPerRow() {
+  const valid = rowFormIds.value.filter(x => x.valid)
+
+  // โหลดฟอร์มเฉพาะที่ยังไม่มีใน store
+  const existing = new Set(formStore.forms.map(f => f.id).filter(Boolean) as string[])
+  const missingFormIds = valid.map(x => x.formId)
+    .filter(id => !existing.has(id))
+
+  if (missingFormIds.length) {
+    loadingForms.value = true
+    try {
+      await Promise.all(missingFormIds.map(id => formStore.fetchFormById(id)))
+    } finally {
+      loadingForms.value = false
+    }
+  }
+
+  // โหลด analytics ต่อ formId ที่ valid
+  if (valid.length) {
+    loadingAnalytics.value = true
+    try {
+      await Promise.all(
+        Array.from(new Set(valid.map(x => x.formId)))
+          .map(fid => submissionStore.fetchFormBlocksAnalytics(fid))
+      )
+    } finally {
+      loadingAnalytics.value = false
+    }
+  }
+}
+
+function makeStubFromAnalytics(formId: string): Form {
+  const items = submissionStore.getFormAnalytics(formId)
+  const blockIds = Array.from(new Set(items.map(a => a.blockId).filter(Boolean)))
+  const blocks = blockIds.map((bid, i) => ({
+    id: bid, title: `Block ${i + 1}`, session: 0, type: 'multiple_choice',
+    description: '', isRequired: false, sequence: i, choices: [], rows: []
+  }))
+  return {
+    id: formId,
+    title: '(ฟอร์มไม่พบในระบบ)',
+    description: '',
+    isOrigin: false,
+    blocks
+  }
+}
+
+function getFormForId(formId: string | null | undefined): Form | null {
+  if (!formId || !isHex24(formId)) return null
+  const f = formStore.forms.find(x => x.id === formId)
+  if (f) return f
+  const items = submissionStore.getFormAnalytics(formId)
+  return items.length ? makeStubFromAnalytics(formId) : null
+}
+watch(() => props.rows, async () => { await preloadPerRow() }, { immediate: true })
 
 watch(
   neededFormIds,
@@ -151,12 +234,10 @@ watch(
       if (!hasStringId(f)) continue
 
       const blocks = getBlocksFromForm(f)
-        .map(b => b.id)
+        .map((b) => b.id)
         .filter((id): id is string => typeof id === 'string' && id.length > 0)
 
-      const analyticsIds = submissionStore
-        .getFormAnalytics(f.id)
-        .map(a => a.blockId)
+      const analyticsIds = submissionStore.getFormAnalytics(f.id).map((a) => a.blockId)
 
       console.log('[DEBUG] form blocks:', blocks)
       console.log('[DEBUG] analytics blockIds:', Array.from(new Set<string>(analyticsIds)))
@@ -164,7 +245,6 @@ watch(
   },
   { immediate: true },
 )
-
 </script>
 
 <template>
@@ -175,59 +255,53 @@ watch(
     </div>
 
     <div class="q-pa-md">
-      <div
-        v-for="(form, formIndex) in relatedForms"
-        :key="form.id || `form-${formIndex}`"
-        class="q-mb-xl"
-      >
-        <h3 class="evaluation-title">ผลการประเมิน {{ form.title || '—' }}</h3>
+      <div v-for="(r, rIndex) in rowFormIds" :key="r.rowId || rIndex" class="q-mb-xl">
+        <h3 class="evaluation-title">ผลการประเมิน ({{ r.name }})</h3>
 
-        <div
-          v-for="(block, blockIndex) in (form as any).blocks || []"
-          :key="block.id || `block-${blockIndex}`"
-          class="q-mb-lg"
-        >
-          <!-- title block: สูง 80px ไม่มีกราฟ -->
-          <q-card v-if="block.type === 'title'" class="answer-card title-block">
-            <q-card-section class="q-py-sm">
-              <div class="text-h6 q-mb-none">{{ block.title || '—' }}</div>
-            </q-card-section>
-          </q-card>
+        <div v-if="!r.valid" class="text-grey-7">กิจกรรมนี้ยังไม่มีฟอร์มที่ผูกไว้</div>
 
-          <!-- อื่น ๆ: แสดงกราฟ -->
-          <q-card v-else class="answer-card">
-            <q-card-section class="q-pb-sm">
-              <div class="text-h6">{{ block.title || '—' }}</div>
-              <div v-if="block.description" class="text-caption text-grey-7 q-mt-xs">
-                {{ block.description }}
-              </div>
-            </q-card-section>
+        <template v-else>
+          <div v-if="!getFormForId(r.formId)" class="text-grey-7">
+            ไม่พบฟอร์มหรือยังไม่มีข้อมูลการประเมิน (formId: {{ r.formId }})
+          </div>
 
-            <q-separator />
+          <template v-else>
+            <div
+              v-for="(block, bIndex) in getFormForId(r.formId)?.blocks || []"
+              :key="block.id || `block-${bIndex}`"
+              class="q-mb-lg"
+            >
+              <q-card class="answer-card">
+                <q-card-section class="q-pb-sm">
+                  <div class="text-h6">{{ block.title || '—' }}</div>
+                  <div v-if="block.description" class="text-caption text-grey-7 q-mt-xs">
+                    {{ block.description }}
+                  </div>
+                </q-card-section>
 
-            <q-card-section>
-              <div v-if="!block.id" class="text-grey-7">
-                บล็อกนี้ไม่มีรหัส (id) จึงไม่สามารถแสดงกราฟได้
-              </div>
+                <q-separator />
 
-              <div v-else-if="!block.choices && !block.rows" class="text-grey-7">
-                ไม่มีกราฟสำหรับบล็อกประเภทนี้
-              </div>
-
-              <template v-else>
-                <BarChart
-                  v-slot="{}"
-                  :key="`${form.id}-${block.id}`"
-                  v-bind="chartFor(form.id as string, block)"
-                >
-                </BarChart>
-                <div v-if="chartFor(form.id as string, block).empty" class="text-grey-7 q-mt-sm">
-                  ยังไม่มีคำตอบสำหรับบล็อกนี้
-                </div>
-              </template>
-            </q-card-section>
-          </q-card>
-        </div>
+                <q-card-section>
+                  <template v-if="block.id">
+                    <BarChart
+                      :key="`${r.formId}-${block.id}`"
+                      v-bind="chartFor(r.formId as string, block)"
+                    />
+                    <div
+                      v-if="chartFor(r.formId as string, block).empty"
+                      class="text-grey-7 q-mt-sm"
+                    >
+                      ยังไม่มีคำตอบสำหรับบล็อกนี้
+                    </div>
+                  </template>
+                  <div v-else class="text-grey-7">
+                    บล็อกนี้ไม่มีรหัส (id) จึงไม่สามารถแสดงกราฟได้
+                  </div>
+                </q-card-section>
+              </q-card>
+            </div>
+          </template>
+        </template>
       </div>
     </div>
   </div>

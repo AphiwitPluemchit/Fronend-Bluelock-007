@@ -1,5 +1,6 @@
 import { api } from 'boot/axios'
 import { Notify } from 'quasar'
+import axios from 'axios'
 import type { Form } from 'src/types/form'
 
 // 🔔 แสดงข้อความ error
@@ -43,15 +44,22 @@ export class FormService {
   static async getFormById(id: string): Promise<Form | null> {
     try {
       const res = await api.get<Form>(`${this.path}/${id}`)
-      console.log('✅ Form loaded (service):', res.data) 
       return res.data
-    } catch (error) {
-      showError('ไม่พบฟอร์มที่ต้องการ')
-      console.error('GetFormById error:', error)
+    } catch (error: unknown) {
+      if (axios.isAxiosError(error)) {
+        if (error.response?.status === 404) {
+          return null
+        }
+        // error อื่นจาก axios
+        showError('ไม่พบฟอร์มที่ต้องการ')
+        console.error('GetFormById axios error:', error.message, error.response)
+      } else {
+        // non-axios error (เช่น runtime อื่น)
+        console.error('GetFormById unknown error:', error)
+      }
       return null
     }
   }
-
   /** ลบฟอร์ม */
   static async deleteForm(id: string): Promise<boolean> {
     try {

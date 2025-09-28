@@ -26,12 +26,9 @@ const pickOriginId = (v: unknown): string | null =>
     ? v['originId']
     : null
 
-const normalizeTitle = (s: unknown): string =>
-  typeof s === 'string' ? s.trim() : ''
+const normalizeTitle = (s: unknown): string => (typeof s === 'string' ? s.trim() : '')
 
-const unwrapMaybeWrapped = (
-  raw: unknown,
-): { payload: unknown; idHint?: string } => {
+const unwrapMaybeWrapped = (raw: unknown): { payload: unknown; idHint?: string } => {
   if (!isIndexable(raw)) return { payload: raw }
   if ('form' in raw) {
     const inner = raw['form']
@@ -54,10 +51,7 @@ const normalizeForm = (f: unknown): Form | null => {
 }
 
 const normalizeForms = (arr: unknown): Form[] =>
-  Array.isArray(arr)
-    ? arr.map(normalizeForm).filter((x): x is Form => x !== null)
-    : []
-
+  Array.isArray(arr) ? arr.map(normalizeForm).filter((x): x is Form => x !== null) : []
 
 export const useFormStore = defineStore('forms', () => {
   const forms = ref<Form[]>([])
@@ -83,7 +77,7 @@ export const useFormStore = defineStore('forms', () => {
   }
 
   const resolveOriginId = async (id: string): Promise<string | null> => {
-    const f = forms.value.find(x => x.id === id) ?? (await fetchFormById(id))
+    const f = forms.value.find((x) => x.id === id) ?? (await fetchFormById(id))
     if (!f) return null
 
     const formId = pickId(f)
@@ -101,7 +95,7 @@ export const useFormStore = defineStore('forms', () => {
     const title = normalizeTitle(f.title)
     if (title) {
       const origin = forms.value.find(
-        x =>
+        (x) =>
           (x as unknown as { isOrigin?: boolean }).isOrigin === true &&
           normalizeTitle(x.title) === title,
       )
@@ -117,13 +111,14 @@ export const useFormStore = defineStore('forms', () => {
     error.value = null
     try {
       const res = await FormService.getFormById(id)
-      const form = normalizeForm(res)
+      const form = normalizeForm(res) // res อาจเป็น null -> normalizeForm จะได้ null
       currentForm.value = form
       return form
     } catch (e) {
+      // (ปกติจะไม่เข้าเพราะ service คืน null แล้ว)
       error.value = e
       currentForm.value = null
-      throw e
+      return null
     } finally {
       loading.value = false
     }
@@ -155,40 +150,39 @@ export const useFormStore = defineStore('forms', () => {
     return ok
   }
 
-// stores/forms.ts
-const duplicateForm = async (originFormId: string): Promise<Form> => {
-  console.log('[dup][store] originFormId =', originFormId)
+  // stores/forms.ts
+  const duplicateForm = async (originFormId: string): Promise<Form> => {
+    console.log('[dup][store] originFormId =', originFormId)
 
-  const origin =
-    forms.value.find(f => f.id === originFormId) ?? (await fetchFormById(originFormId))
-  console.log('[dup][store] origin =', origin)
+    const origin =
+      forms.value.find((f) => f.id === originFormId) ?? (await fetchFormById(originFormId))
+    console.log('[dup][store] origin =', origin)
 
-  if (!origin) throw new Error('Origin form not found')
+    if (!origin) throw new Error('Origin form not found')
 
-  const body = JSON.parse(JSON.stringify(origin)) as Record<string, unknown>
-  delete body['id']
-  delete body['_id']
+    const body = JSON.parse(JSON.stringify(origin)) as Record<string, unknown>
+    delete body['id']
+    delete body['_id']
 
-  type FormWithoutId = Omit<Form, 'id'>
-  const toCreate: Form = { ...(body as unknown as FormWithoutId), isOrigin: false }
+    type FormWithoutId = Omit<Form, 'id'>
+    const toCreate: Form = { ...(body as unknown as FormWithoutId), isOrigin: false }
 
-  const created = await createForm(toCreate)
-  console.log('[dup][store] created (raw) =', created)
+    const created = await createForm(toCreate)
+    console.log('[dup][store] created (raw) =', created)
 
-  if (!created) throw new Error('Create duplicated form failed')
+    if (!created) throw new Error('Create duplicated form failed')
 
-  const id = pickId(created)
-  console.log('[dup][store] normalized new id =', id)
+    const id = pickId(created)
+    console.log('[dup][store] normalized new id =', id)
 
-  if (!id) throw new Error('Create duplicated form failed (no id)')
+    if (!id) throw new Error('Create duplicated form failed (no id)')
 
-  const normalized: Form = { ...created, id }
-  console.log('[dup][store] normalized new form =', normalized)
+    const normalized: Form = { ...created, id }
+    console.log('[dup][store] normalized new form =', normalized)
 
-  forms.value = [normalized, ...forms.value]
-  return normalized
-}
-
+    forms.value = [normalized, ...forms.value]
+    return normalized
+  }
 
   return {
     forms,
@@ -201,6 +195,6 @@ const duplicateForm = async (originFormId: string): Promise<Form> => {
     updateForm,
     deleteForm,
     duplicateForm,
-    resolveOriginId
+    resolveOriginId,
   }
 })
