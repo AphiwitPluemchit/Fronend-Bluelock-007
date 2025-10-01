@@ -84,7 +84,7 @@ export default route(function () {
       return { path: '/Admin/ProgramCalendar' }
     }
     if (scope === 'student' && role !== EnumUserRole.STUDENT) {
-      return { path: '/Student/ProgramCalendar' }
+      return { path: '/Student/Home' }
     }
 
     // checkinout scope: any authenticated student allowed

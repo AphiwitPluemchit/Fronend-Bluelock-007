@@ -69,7 +69,7 @@ const currentBreadcrumb = computed(() => {
 const breadcrumbs = computed(() => {
   const id = route.params.id as string
   return {
-    previousPage: { title: 'จัดการกิจกรรม', path: '/Admin/ProgramsManagement' },
+    previousPage: { title: 'จัดการกิจกรรม', path: '/Admin/ProgramManagement' },
     currentPage: {
       title: currentBreadcrumb.value,
       path: `/Admin/ProgramsManagement/ProgramDetail/${id}/${tab.value}`,
