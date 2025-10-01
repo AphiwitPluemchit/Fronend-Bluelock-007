@@ -1,10 +1,10 @@
 <template>
   <q-badge :class="buttonClass" rounded>
     <div class="status-container">
-      <span class="status-dot" ></span>
+      <span class="status-dot"></span>
       <span class="status-label">{{ buttonLabel }}</span>
     </div>
-    </q-badge>
+  </q-badge>
 </template>
 
 <script setup lang="ts">
@@ -34,6 +34,8 @@ const buttonClass = computed(() => {
   align-items: center;
   gap: 6px;
   font-weight: 500;
+  width: 100%;
+  height: 20px;
 }
 
 .status-dot {
@@ -45,13 +47,13 @@ const buttonClass = computed(() => {
 }
 
 .status-dot--yellow {
-  background-color: #ffd740;
+  background-color: #ffc107;
 }
 .status-dot--green {
-  background-color: #00c853;
+  background-color: #4caf50;
 }
 .status-dot--red {
-  background-color: #ff3d00;
+  background-color: #f44336;
 }
 
 .status-label {

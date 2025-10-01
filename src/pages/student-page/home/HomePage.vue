@@ -57,6 +57,17 @@ const startAutoSlide = () => {
   }, 5000)
 }
 
+// const visibleActivities = computed(() => {
+//   if (activities.value.length === 0) return []
+  
+//   const current = slide.value
+  
+//   return [
+//     { activity: activities.value[current], position: 'current', index: current }
+//   ]
+// })
+
+
 const visibleActivities = computed(() => {
   if (activities.value.length === 0) return []
   
@@ -70,6 +81,8 @@ const visibleActivities = computed(() => {
     { activity: activities.value[next], position: 'next', index: next }
   ]
 })
+
+
 
 const nextSlide = () => {
   slide.value = (slide.value + 1) % activities.value.length
@@ -106,16 +119,6 @@ onMounted(async () => {
       
       <div class="q-mt-md activity-carousel">
         <div class="carousel-container">
-          <!-- ปุ่มเลื่อนซ้าย -->
-          <q-btn
-            flat
-            round
-            dense
-            icon="chevron_left"
-            class="nav-btn left"
-            @click="prevSlide"
-          />
-
           <!-- Cards Container -->
           <div class="cards-container">
             <transition-group name="card-slide" tag="div" class="cards-wrapper">
@@ -123,7 +126,7 @@ onMounted(async () => {
                 v-for="item in visibleActivities"
                 :key="`card-${item.index}`"
                 :class="['activity-card', item.position]"
-                @click="item.activity && (item.position === 'current' ? goToDetail(item.activity.id) : goToSlide(item.index))"
+                @click="item.activity && goToDetail(item.activity.id)"
               >
                 <q-card :class="['my-card', { 'active-card': item.position === 'current' }]">
                   <div class="image-wrapper">
@@ -131,12 +134,11 @@ onMounted(async () => {
                       :src="item.activity ? api.defaults.baseURL + '/uploads/program/images/' + item.activity.file : ''"
                       class="activity-image"
                     />
-                    <div v-if="item.position !== 'current'" class="overlay"></div>
                   </div>
 
                   <q-card-section>
                     <div class="row items-center q-gutter-sm justify-between">
-                      <div class="text-h6 q-mb-none">{{ item.activity?.name }}</div>
+                      <div class="text-h6 q-mb-sm">{{ item.activity?.name }}</div>
                       <ProgramType
                         style="align-items: end"
                         v-if="item.activity && (item.activity.skill === 'hard' || item.activity.skill === 'soft')"
@@ -183,16 +185,6 @@ onMounted(async () => {
               </div>
             </transition-group>
           </div>
-
-          <!-- ปุ่มเลื่อนขวา -->
-          <q-btn
-            flat
-            round
-            dense
-            icon="chevron_right"
-            class="nav-btn right"
-            @click="nextSlide"
-          />
         </div>
 
         <!-- Indicators -->
@@ -247,11 +239,13 @@ onMounted(async () => {
 </template>
 
 <style scoped>
-.container {
+/* Base styles */
+.page-wrap {
   width: 100%;
-  max-width: 1150px;
+  max-width: 1200px;
   margin: 0 auto;
-  padding: 20px;
+  padding: 0 16px;
+  overflow-x: hidden;
 }
 
 .activity-carousel {
@@ -292,6 +286,8 @@ onMounted(async () => {
   flex-shrink: 0;
 }
 
+
+
 .activity-card.prev,
 .activity-card.next {
   transform: scale(0.85) translateY(20px);
@@ -324,13 +320,25 @@ onMounted(async () => {
   opacity: 0.8;
 }
 
+
+.activity-card.current {
+  transform: scale(1) translateY(0);
+  opacity: 1;
+  z-index: 10;
+  filter: brightness(1);
+}
+
+.activity-card:hover.current {
+  transform: scale(1.02) translateY(-5px);
+}
+
 .my-card {
   width: 900px;
-  /* max-width: 1000px; */
   height: 100%;
   transition: all 0.4s ease;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
-  border-radius: 8px;
+  border-radius: 12px;
+  overflow: hidden;
 }
 
 .my-card.active-card {
@@ -348,7 +356,7 @@ onMounted(async () => {
   height: 300px;
   width: 100%;
   object-fit: cover;
-  border-radius: 5px;
+  border-radius: 8px;
 }
 
 .overlay {
@@ -374,35 +382,15 @@ onMounted(async () => {
   align-items: center;
   gap: 4px;
   font-size: 13px;
+  color: #6b7280;
 }
 
 .info-block q-icon {
   font-size: 18px;
+  color: #3b82f6;
 }
 
-.nav-btn {
-  position: absolute;
-  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.15);
-  z-index: 20;
-  transition: all 0.3s ease;
-  font-size: 28px;
-  background: white;
-  width: 50px;
-  height: 50px;
-}
-
-.nav-btn:hover {
-  background: #e0e7ff;
-  transform: scale(1.1);
-}
-
-.nav-btn.left {
-  left: 20px;
-}
-
-.nav-btn.right {
-  right: 20px;
-}
+/* Navigation buttons removed - no manual sliding */
 
 .carousel-indicators {
   display: flex;
@@ -447,80 +435,268 @@ onMounted(async () => {
   transform: translateX(-100px) scale(0.8);
 }
 
+.menu {
+  margin-top: 40px;
+}
+
 .menu-title {
   font-size: 20px;
   font-weight: bold;
   text-align: left;
   margin-bottom: 20px;
+  color: #1f2937;
 }
 
 .menu-row {
-  display: flex;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 20px;
   justify-content: start;
-  gap: 30px;
-  flex-wrap: wrap;
 }
 
 .menu-card {
-  width: 350px;
+  width: 100%;
   height: 150px;
   padding: 20px;
   text-align: left;
+  border-radius: 12px;
+  transition: all 0.3s ease;
+  border: 1px solid #e5e7eb;
+  background: white;
 }
 
 .menu-card:hover {
   cursor: pointer;
-  transform: scale(1.05);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+  border-color: #3b82f6;
 }
 
 .label {
   font-size: 14px;
   margin: 0;
+  color: #6b7280;
+  line-height: 1.4;
 }
 
 .label-title {
   font-size: 16px;
   font-weight: bold;
   margin: 15px 0 4px 0;
+  color: #1f2937;
 }
 
 .icon {
   font-size: 35px;
+  color: #3b82f6;
 }
 
-/* Responsive */
-@media (max-width: 1200px) {
-  .cards-wrapper {
-    gap: 15px;
+/* Tablet styles */
+@media (max-width: 1024px) {
+  .page-wrap {
+    padding: 0 20px;
   }
   
   .my-card {
-    width: 380px;
-    max-width: 380px;
+    width: 700px;
   }
   
   .activity-image {
     height: 250px;
   }
+  
+  .menu-row {
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 16px;
+  }
+  
+  .menu-card {
+    height: 140px;
+    padding: 16px;
+  }
 }
 
+/* Mobile styles */
 @media (max-width: 768px) {
-  .activity-card.prev,
-  .activity-card.next {
-    display: none;
+  .page-wrap {
+    padding: 0 16px;
+  }
+  
+  .texttitle {
+    font-size: 20px;
+    margin-bottom: 16px;
+  }
+  
+  .activity-carousel {
+    margin-bottom: 30px;
+  }
+  
+  .carousel-container {
+    padding: 20px 0;
+    min-height: 400px;
   }
   
   .my-card {
-    width: 100%;
-    max-width: 500px;
+  width: 450px;
+  height: 100%;  
+    margin: 0 auto;
   }
   
-  .nav-btn.left {
-    left: 10px;
+  .activity-image {
+    height: 200px;
   }
   
-  .nav-btn.right {
-    right: 10px;
+  /* Navigation buttons removed */
+  
+  .menu {
+    margin-top: 30px;
+  }
+  
+  .menu-title {
+    font-size: 18px;
+    margin-bottom: 16px;
+  }
+  
+  .menu-row {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+  
+  .menu-card {
+    height: auto;
+    min-height: 120px;
+    padding: 16px;
+  }
+  
+  .label-title {
+    font-size: 15px;
+    margin: 12px 0 4px 0;
+  }
+  
+  .label {
+    font-size: 13px;
+  }
+  
+  .icon {
+    font-size: 30px;
+  }
+  
+  .activity-info {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+  
+  .info-block {
+    font-size: 12px;
+  }
+}
+
+/* Small mobile styles */
+@media (max-width: 480px) {
+  .page-wrap {
+    padding: 0 12px;
+  }
+  
+  .texttitle {
+    font-size: 18px;
+  }
+  
+  .carousel-container {
+    padding: 16px 0;
+    min-height: 350px;
+  }
+  
+  .my-card {
+  width: 350px;
+  height: 100%;  
+  }
+  
+  .activity-image {
+    height: 180px;
+  }
+  
+  /* Navigation buttons removed */
+  
+  .menu-title {
+    font-size: 16px;
+    margin-bottom: 12px;
+  }
+  
+  .menu-card {
+    min-height: 100px;
+    padding: 12px;
+  }
+  
+  .label-title {
+    font-size: 14px;
+    margin: 10px 0 3px 0;
+  }
+  
+  .label {
+    font-size: 12px;
+  }
+  
+  .icon {
+    font-size: 28px;
+  }
+  
+  .activity-info {
+    gap: 6px;
+  }
+  
+  .info-block {
+    font-size: 11px;
+  }
+  
+  .info-block q-icon {
+    font-size: 16px;
+  }
+  
+  .indicator {
+    width: 8px;
+    height: 8px;
+  }
+  
+  .indicator.active {
+    width: 20px;
+  }
+}
+
+/* Extra small screens */
+@media (max-width: 360px) {
+  .page-wrap {
+    padding: 0 8px;
+  }
+  
+  .texttitle {
+    font-size: 16px;
+  }
+
+  .my-card {
+  width: 200px;
+  height: 100%;  
+  }
+  
+  
+  .activity-image {
+    height: 160px;
+  }
+  
+  .menu-card {
+    padding: 10px;
+  }
+  
+  .label-title {
+    font-size: 13px;
+  }
+  
+  .label {
+    font-size: 11px;
+  }
+  
+  .icon {
+    font-size: 24px;
   }
 }
 </style>
