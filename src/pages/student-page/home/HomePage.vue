@@ -6,7 +6,7 @@ import type { Program } from 'src/types/program'
 import ProgramType from 'src/components/programType.vue'
 import { useAuthStore } from 'src/stores/auth'
 const router = useRouter()
-const authStore = useAuthStore() 
+const authStore = useAuthStore()
 
 defineProps<{ program: Program }>()
 
@@ -26,7 +26,7 @@ const gotoProgramTablePage = async () => {
 const OnlineCoursesPage = async () => {
   await router.push('/Student/OnlineCoursesPage')
 }
-const goToDetail = async(id?: string) => {
+const goToDetail = async (id?: string) => {
   await router.push(`/Student/Program/ProgramDetail/${id}`)
 }
 
@@ -59,40 +59,37 @@ const startAutoSlide = () => {
 
 // const visibleActivities = computed(() => {
 //   if (activities.value.length === 0) return []
-  
+
 //   const current = slide.value
-  
+
 //   return [
 //     { activity: activities.value[current], position: 'current', index: current }
 //   ]
 // })
 
-
 const visibleActivities = computed(() => {
   if (activities.value.length === 0) return []
-  
+
   const prev = (slide.value - 1 + activities.value.length) % activities.value.length
   const current = slide.value
   const next = (slide.value + 1) % activities.value.length
-  
+
   return [
     { activity: activities.value[prev], position: 'prev', index: prev },
     { activity: activities.value[current], position: 'current', index: current },
-    { activity: activities.value[next], position: 'next', index: next }
+    { activity: activities.value[next], position: 'next', index: next },
   ]
 })
 
+// const nextSlide = () => {
+//   slide.value = (slide.value + 1) % activities.value.length
+//   startAutoSlide()
+// }
 
-
-const nextSlide = () => {
-  slide.value = (slide.value + 1) % activities.value.length
-  startAutoSlide()
-}
-
-const prevSlide = () => {
-  slide.value = (slide.value - 1 + activities.value.length) % activities.value.length
-  startAutoSlide()
-}
+// const prevSlide = () => {
+//   slide.value = (slide.value - 1 + activities.value.length) % activities.value.length
+//   startAutoSlide()
+// }
 
 const goToSlide = (index: number) => {
   slide.value = index
@@ -110,129 +107,134 @@ onMounted(async () => {
 </script>
 
 <template>
-  <q-page class="q-pa-md">
-    <div class="page-wrap">
-      <!-- ชื่อหน้า -->
-      <div class="row justify-between items-center q-mb-md" style="margin-top: 20px">
-        <div class="texttitle">สวัสดี, {{ authStore.getName }}</div>
-      </div>
-      
-      <div class="q-mt-md activity-carousel">
-        <div class="carousel-container">
-          <!-- Cards Container -->
-          <div class="cards-container">
-            <transition-group name="card-slide" tag="div" class="cards-wrapper">
-              <div
-                v-for="item in visibleActivities"
-                :key="`card-${item.index}`"
-                :class="['activity-card', item.position]"
-                @click="item.activity && goToDetail(item.activity.id)"
-              >
-                <q-card :class="['my-card', { 'active-card': item.position === 'current' }]">
-                  <div class="image-wrapper">
-                    <q-img
-                      :src="item.activity ? api.defaults.baseURL + '/uploads/program/images/' + item.activity.file : ''"
-                      class="activity-image"
+  <q-page class="q-pa-md page-wrap">
+    <div class="row justify-between items-center q-mb-md" style="margin-top: 20px">
+      <div class="texttitle">สวัสดี, {{ authStore.getName }}</div>
+    </div>
+    <div class="q-mt-md activity-carousel">
+      <div class="carousel-container">
+        <!-- Cards Container -->
+        <div class="cards-container">
+          <transition-group name="card-slide" tag="div" class="cards-wrapper">
+            <div
+              v-for="item in visibleActivities"
+              :key="`card-${item.index}`"
+              :class="['activity-card', item.position]"
+              @click="item.activity && goToDetail(item.activity.id)"
+            >
+              <q-card :class="['my-card', { 'active-card': item.position === 'current' }]">
+                <div class="image-wrapper">
+                  <q-img
+                    :src="
+                      item.activity
+                        ? api.defaults.baseURL + '/uploads/program/images/' + item.activity.file
+                        : ''
+                    "
+                    class="activity-image"
+                  />
+                </div>
+
+                <q-card-section>
+                  <div class="row items-center q-gutter-sm justify-between">
+                    <div class="text-h6 q-mb-sm">{{ item.activity?.name }}</div>
+                    <ProgramType
+                      style="align-items: end"
+                      v-if="
+                        item.activity &&
+                        (item.activity.skill === 'hard' || item.activity.skill === 'soft')
+                      "
+                      :skill="
+                        item.activity && item.activity.skill === 'hard' ? 'hardSkill' : 'softSkill'
+                      "
                     />
                   </div>
 
-                  <q-card-section>
-                    <div class="row items-center q-gutter-sm justify-between">
-                      <div class="text-h6 q-mb-sm">{{ item.activity?.name }}</div>
-                      <ProgramType
-                        style="align-items: end"
-                        v-if="item.activity && (item.activity.skill === 'hard' || item.activity.skill === 'soft')"
-                        :skill="item.activity && item.activity.skill === 'hard' ? 'hardSkill' : 'softSkill'"
-                      />
-                    </div>
+                  <!-- ข้อมูลวันที่ / เวลา / จำนวน -->
+                  <div
+                    class="text-subtitle2 q-mt-xs activity-info"
+                    v-if="item.activity && item.activity.programItems?.[0]?.dates?.[0]"
+                  >
+                    <span class="info-block">
+                      <q-icon name="calendar_today" />
+                      วันที่จัด:
+                      {{
+                        new Date(item.activity.programItems[0].dates[0].date).toLocaleDateString(
+                          'th-TH',
+                          {
+                            year: 'numeric',
+                            month: 'short',
+                            day: 'numeric',
+                          },
+                        )
+                      }}
+                    </span>
 
-                    <!-- ข้อมูลวันที่ / เวลา / จำนวน -->
-                    <div
-                      class="text-subtitle2 q-mt-xs activity-info"
-                      v-if="item.activity && item.activity.programItems?.[0]?.dates?.[0]"
-                    >
-                      <span class="info-block">
-                        <q-icon name="calendar_today" />
-                        วันที่จัด:
-                        {{
-                          new Date(item.activity.programItems[0].dates[0].date).toLocaleDateString(
-                            'th-TH',
-                            {
-                              year: 'numeric',
-                              month: 'short',
-                              day: 'numeric',
-                            },
-                          )
-                        }}
-                      </span>
+                    <span class="info-block">
+                      <q-icon name="access_time" />
+                      เวลา:
+                      {{ item.activity.programItems[0].dates[0].stime }} -
+                      {{ item.activity.programItems[0].dates[0].etime }}
+                    </span>
 
-                      <span class="info-block">
-                        <q-icon name="access_time" />
-                        เวลา:
-                        {{ item.activity.programItems[0].dates[0].stime }} -
-                        {{ item.activity.programItems[0].dates[0].etime }}
-                      </span>
-
-                      <span class="info-block">
-                        <q-icon name="weekend" />
-                        จำนวนที่รับ:
-                        {{ item.activity.programItems[0].enrollmentCount }}/
-                        {{ item.activity.programItems[0].maxParticipants }}
-                      </span>
-                    </div>
-                  </q-card-section>
-                </q-card>
-              </div>
-            </transition-group>
-          </div>
-        </div>
-
-        <!-- Indicators -->
-        <div class="carousel-indicators">
-          <div
-            v-for="(activity, index) in activities"
-            :key="`indicator-${index}`"
-            :class="['indicator', { active: index === slide }]"
-            @click="goToSlide(index)"
-          ></div>
+                    <span class="info-block">
+                      <q-icon name="weekend" />
+                      จำนวนที่รับ:
+                      {{ item.activity.programItems[0].enrollmentCount }}/
+                      {{ item.activity.programItems[0].maxParticipants }}
+                    </span>
+                  </div>
+                </q-card-section>
+              </q-card>
+            </div>
+          </transition-group>
         </div>
       </div>
 
-      <div class="menu">
-        <p class="menu-title">เมนู</p>
-        <div class="menu-row">
-          <!-- calendar -->
-          <q-card class="menu-card" @click="gotoCalendarPage">
-            <q-icon name="calendar_today" class="icon" />
-            <p class="label-title">ตารางโครงการ</p>
-            <p class="label">ตรวจสอบโครงการทั้งหมด</p>
-            <p class="label">เพื่อลงทะเบียนเข้าร่วม</p>
-          </q-card>
+      <!-- Indicators -->
+      <div class="carousel-indicators">
+        <div
+          v-for="(activity, index) in activities"
+          :key="`indicator-${index}`"
+          :class="['indicator', { active: index === slide }]"
+          @click="goToSlide(index)"
+        ></div>
+      </div>
+    </div>
 
-          <!-- activity -->
-          <q-card class="menu-card" @click="gotoProgramTablePage">
-            <q-icon name="event" class="icon" />
-            <p class="label-title">โครงการทั้งหมด</p>
-            <p class="label">ตรวจสอบกิจกรรมทั้งหมด</p>
-            <p class="label">เพื่อลงทะเบียนเข้าร่วม</p>
-          </q-card>
+    <div class="menu">
+      <p class="menu-title">เมนู</p>
+      <div class="menu-row">
+        <!-- calendar -->
+        <q-card class="menu-card" @click="gotoCalendarPage">
+          <q-icon name="calendar_today" class="icon" />
+          <p class="label-title">ตารางโครงการ</p>
+          <p class="label">ตรวจสอบโครงการทั้งหมด</p>
+          <p class="label">เพื่อลงทะเบียนเข้าร่วม</p>
+        </q-card>
 
-          <!-- course -->
-          <q-card class="menu-card" @click="OnlineCoursesPage">
-            <q-icon name="book" class="icon" />
-            <p class="label-title">หลักสูตรทั้งหมด</p>
-            <p class="label">ตรวจสอบหลักสูตรทั้งหมด</p>
-            <p class="label">เพื่อเข้าเรียนและขออนุมัติชั่วโมง</p>
-          </q-card>
+        <!-- activity -->
+        <q-card class="menu-card" @click="gotoProgramTablePage">
+          <q-icon name="event" class="icon" />
+          <p class="label-title">โครงการทั้งหมด</p>
+          <p class="label">ตรวจสอบกิจกรรมทั้งหมด</p>
+          <p class="label">เพื่อลงทะเบียนเข้าร่วม</p>
+        </q-card>
 
-          <!-- profile -->
-          <q-card class="menu-card" @click="gotoProfile">
-            <q-icon name="account_circle" class="icon" />
-            <p class="label-title">โปรไฟล์</p>
-            <p class="label">ตรวจสอบจำนวนชั่วโมง</p>
-            <p class="label">และโครงการที่ลงทะเบียน และใบรับรองที่ขออนุมัติ</p>
-          </q-card>
-        </div>
+        <!-- course -->
+        <q-card class="menu-card" @click="OnlineCoursesPage">
+          <q-icon name="book" class="icon" />
+          <p class="label-title">หลักสูตรทั้งหมด</p>
+          <p class="label">ตรวจสอบหลักสูตรทั้งหมด</p>
+          <p class="label">เพื่อเข้าเรียนและขออนุมัติชั่วโมง</p>
+        </q-card>
+
+        <!-- profile -->
+        <q-card class="menu-card" @click="gotoProfile">
+          <q-icon name="account_circle" class="icon" />
+          <p class="label-title">โปรไฟล์</p>
+          <p class="label">ตรวจสอบจำนวนชั่วโมง</p>
+          <p class="label">และโครงการที่ลงทะเบียน และใบรับรองที่ขออนุมัติ</p>
+        </q-card>
       </div>
     </div>
   </q-page>
@@ -242,10 +244,11 @@ onMounted(async () => {
 /* Base styles */
 .page-wrap {
   width: 100%;
-  max-width: 1200px;
+  max-width: 1800px;
   margin: 0 auto;
   padding: 0 16px;
   overflow-x: hidden;
+  overflow-y: visible;
 }
 
 .activity-carousel {
@@ -286,8 +289,6 @@ onMounted(async () => {
   flex-shrink: 0;
 }
 
-
-
 .activity-card.prev,
 .activity-card.next {
   transform: scale(0.85) translateY(20px);
@@ -319,7 +320,6 @@ onMounted(async () => {
   transform: scale(0.88) translateY(15px);
   opacity: 0.8;
 }
-
 
 .activity-card.current {
   transform: scale(1) translateY(0);
@@ -459,7 +459,7 @@ onMounted(async () => {
   height: 150px;
   padding: 20px;
   text-align: left;
-  border-radius: 12px;
+  border-radius: 8px;
   transition: all 0.3s ease;
   border: 1px solid #e5e7eb;
   background: white;
@@ -496,20 +496,20 @@ onMounted(async () => {
   .page-wrap {
     padding: 0 20px;
   }
-  
+
   .my-card {
     width: 700px;
   }
-  
+
   .activity-image {
     height: 250px;
   }
-  
+
   .menu-row {
     grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
     gap: 16px;
   }
-  
+
   .menu-card {
     height: 140px;
     padding: 16px;
@@ -521,72 +521,72 @@ onMounted(async () => {
   .page-wrap {
     padding: 0 16px;
   }
-  
+
   .texttitle {
     font-size: 20px;
     margin-bottom: 16px;
   }
-  
+
   .activity-carousel {
     margin-bottom: 30px;
   }
-  
+
   .carousel-container {
     padding: 20px 0;
     min-height: 400px;
   }
-  
+
   .my-card {
-  width: 450px;
-  height: 100%;  
+    width: 450px;
+    height: 100%;
     margin: 0 auto;
   }
-  
+
   .activity-image {
     height: 200px;
   }
-  
+
   /* Navigation buttons removed */
-  
+
   .menu {
     margin-top: 30px;
   }
-  
+
   .menu-title {
     font-size: 18px;
     margin-bottom: 16px;
   }
-  
+
   .menu-row {
     grid-template-columns: 1fr;
     gap: 12px;
   }
-  
+
   .menu-card {
     height: auto;
     min-height: 120px;
     padding: 16px;
   }
-  
+
   .label-title {
     font-size: 15px;
     margin: 12px 0 4px 0;
   }
-  
+
   .label {
     font-size: 13px;
   }
-  
+
   .icon {
     font-size: 30px;
   }
-  
+
   .activity-info {
     flex-direction: column;
     align-items: flex-start;
     gap: 8px;
   }
-  
+
   .info-block {
     font-size: 12px;
   }
@@ -597,67 +597,67 @@ onMounted(async () => {
   .page-wrap {
     padding: 0 12px;
   }
-  
+
   .texttitle {
     font-size: 18px;
   }
-  
+
   .carousel-container {
     padding: 16px 0;
     min-height: 350px;
   }
-  
+
   .my-card {
-  width: 350px;
-  height: 100%;  
+    width: 350px;
+    height: 100%;
   }
-  
+
   .activity-image {
     height: 180px;
   }
-  
+
   /* Navigation buttons removed */
-  
+
   .menu-title {
     font-size: 16px;
     margin-bottom: 12px;
   }
-  
+
   .menu-card {
     min-height: 100px;
     padding: 12px;
   }
-  
+
   .label-title {
     font-size: 14px;
     margin: 10px 0 3px 0;
   }
-  
+
   .label {
     font-size: 12px;
   }
-  
+
   .icon {
     font-size: 28px;
   }
-  
+
   .activity-info {
     gap: 6px;
   }
-  
+
   .info-block {
     font-size: 11px;
   }
-  
+
   .info-block q-icon {
     font-size: 16px;
   }
-  
+
   .indicator {
     width: 8px;
     height: 8px;
   }
-  
+
   .indicator.active {
     width: 20px;
   }
@@ -668,33 +668,32 @@ onMounted(async () => {
   .page-wrap {
     padding: 0 8px;
   }
-  
+
   .texttitle {
     font-size: 16px;
   }
 
   .my-card {
-  width: 200px;
-  height: 100%;  
+    width: 200px;
+    height: 100%;
   }
-  
-  
+
   .activity-image {
     height: 160px;
   }
-  
+
   .menu-card {
     padding: 10px;
   }
-  
+
   .label-title {
     font-size: 13px;
   }
-  
+
   .label {
     font-size: 11px;
   }
-  
+
   .icon {
     font-size: 24px;
   }
