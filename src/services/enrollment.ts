@@ -42,7 +42,7 @@ export class EnrollmentService {
     try {
       console.log('Sending queryParams:', queryParams)
       const res = await api.get<PaginationResponse<StudentEnrollment>>(
-        `programs/programItems/${programItemId}/enrollments`,
+        `${this.path}/programItems/${programItemId}/enrollments`,
         { params: queryParams },
       )
       console.log('Fetched enrollments:', res.data)
@@ -67,7 +67,7 @@ export class EnrollmentService {
     try {
       console.log('Sending queryParams:', queryParams)
       const res = await api.get<PaginationResponse<StudentEnrollment>>(
-        `programs/${programId}/enrollments`,
+        `${this.path}/${programId}/enrollments`,
         { params: queryParams },
       )
       console.log('Fetched enrollments:', res.data)
