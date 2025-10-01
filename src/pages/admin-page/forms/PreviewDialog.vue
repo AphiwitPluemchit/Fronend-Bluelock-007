@@ -315,7 +315,7 @@ const getRows = (block: GridBlockLite) => normList(block.rows)
 }
 
 .grid-table .row-header {
-  width: 70%;         /* คอลัมน์แรก (ข้อความ row) */
+  width: 70%;         
   text-align: left;
   padding: 6px 10px;
 }

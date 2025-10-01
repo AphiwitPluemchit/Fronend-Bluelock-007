@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed } from 'vue'
-import ProgramType from 'src/pages/student-page/program/component/programType.vue'
+import ProgramType from 'src/components/programType.vue'
 import { useQuasar } from 'quasar'
 import { useRouter } from 'vue-router'
 import type { Course } from 'src/types/course'
