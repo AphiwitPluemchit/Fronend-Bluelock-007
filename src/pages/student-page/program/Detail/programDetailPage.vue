@@ -30,7 +30,7 @@ const auth = useAuthStore()
 const breadcrumbs = ref({
   previousPage: { title: 'โครงการทั้งหมด', path: '/Student/ProgramTablePage' },
   currentPage: { title: 'รายละเอียดโครงการ', path: `/Student/ProgramTablePage/ProgramDetail` },
-  icon: 'description',
+  icon: 'event',
 })
 
 // ฟังก์ชันลงทะเบียน
@@ -95,10 +95,11 @@ onMounted(async () => {
 })
 </script>
 <template>
-  <q-page class="q-pa-md" v-if="screen">
-    <!-- Breadcrumbs -->
-    <AppBreadcrumbs :breadcrumbs="breadcrumbs" />
-    <div class="program-detail-card">
+  <q-page class="q-pa-md">
+    <div style="margin-top: 20px;">
+    <AppBreadcrumbs :breadcrumbs="breadcrumbs"/>
+
+    <div class="program-detail-card q-mt-md" v-if="screen">
       <q-card-section class="q-col-gutter-md row items-start q-mb-md">
         <!-- ภาพโครงการ -->
         <div class="col-12 col-md-4 text-center">
@@ -150,6 +151,8 @@ onMounted(async () => {
     />
     <registerFailDialog v-model="showFailDialog" />
     <unRegisterDialog v-model="showUnRegisterDialog" @confirm="unRegister" />
+        </div>
+
   </q-page>
 </template>
 
@@ -158,7 +161,7 @@ onMounted(async () => {
   background-color: #edf0f5; /*f5f7fa */
   padding: 16px;
   font-size: 18px;
-  border-radius: 12px;
+  border-radius: 5px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
 }
 

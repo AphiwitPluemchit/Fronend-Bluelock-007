@@ -6,6 +6,7 @@ import { useAuthStore } from 'src/stores/auth'
 import { useQuasar } from 'quasar'
 import type { Course } from 'src/types/course'
 import { useRoute } from 'vue-router'
+import AppBreadcrumbs from 'src/components/AppBreadcrumbs.vue'
 
 const route = useRoute()
 
@@ -21,6 +22,14 @@ const $q = useQuasar()
 
 // Course information
 const selectedCourse = ref<Course | null>(null)
+const screen = ref(false)
+
+// Breadcrumb configuration
+const breadcrumbs = ref({
+  previousPage: { title: 'คอร์สทั้งหมด', path: '/Student/OnlineCoursesPage' },
+  currentPage: { title: 'อัปโหลดใบประกาศนียบัตร', path: `/Student/CourseTablePage/UploadCertificate` },
+  icon: 'book',
+})
 
 // Computed properties for course display
 const courseName = computed(() => selectedCourse.value?.name || '')
@@ -100,152 +109,160 @@ async function verifyUrl() {
 }
 
 // เรียกใช้เมื่อ component mount
-onMounted(() => {
-  void loadCourseById()
+onMounted(async () => {
+  await loadCourseById()
+  screen.value = true
 })
 </script>
 
 <template>
-  <div class="upload-certificate-container">
-    <!-- Header -->
-    <div class="breadcrumb-section">
-      <div class="breadcrumb">
-        <span>ใบประกาศนียบัตร</span>
-        <q-icon name="chevron_right" size="xs" />
-        <span class="current">รายชื่อหัวข้อในประกาศนียบัตร</span>
-      </div>
-    </div>
+  <q-page class="q-pa-md">
+    <div style="margin-top: 20px;">
+      <AppBreadcrumbs :breadcrumbs="breadcrumbs" />
 
-    <!-- Main Certificate Upload Card -->
-    <q-card class="main-card" v-if="selectedCourse">
-      <q-card-section class="main-section">
-        <!-- Course Information Section -->
-        <div class="course-info-section">
-          <div class="course-title">{{ courseName }}</div>
-          <div class="course-details">
-            <div class="detail-item">
-              <span class="label">ผู้ให้ :</span>
-              <span class="value">{{ selectedCourse.issuer }}</span>
-            </div>
-            <div class="detail-item">
-              <span class="label">จำนวนชั่วโมง :</span>
-              <span class="value">{{ courseHours }}</span>
-            </div>
-            <div class="detail-item">
-              <span class="label">ลิงก์ออนไลน์ :</span>
-              <a :href="courseLink" target="_blank" class="course-link" @click="openCourseUrl">
-                {{ courseSource }} <q-icon name="open_in_new" size="xs" />
-              </a>
-            </div>
+      <div class="certificate-upload-card q-mt-md" v-if="screen && selectedCourse">
+        <q-card-section class="q-col-gutter-md row items-start q-mb-md">
+          <!-- Course Image/Icon -->
+          <div class="col-12 col-md-4 text-center">
+            <q-img
+              src="https://i.pinimg.com/736x/ee/12/55/ee1255cd4f98b3282b02033cf58e3506.jpg"
+              alt="Certificate Example"
+              class="course-img"
+              error-src="/default-placeholder.jpg"
+            />
           </div>
 
-          <!-- Example Certificate Section -->
-          <div class="example-section">
-            <div class="section-title">ตัวอย่างใบประกาศนียบัตร</div>
-            <div class="example-content">
-              <q-img
-                src="https://i.pinimg.com/736x/ee/12/55/ee1255cd4f98b3282b02033cf58e3506.jpg"
-                alt="Certificate Example"
-                class="example-image"
-              />
-            </div>
+          <!-- Course Details -->
+          <div class="col-12 col-md-8" v-if="selectedCourse">
+            <q-list dense>
+              <div class="field-pair">
+                <div class="field-label">ชื่อคอร์ส :</div>
+                <div class="field-value">{{ courseName }}</div>
+              </div>
+
+              <div class="field-pair">
+                <div class="field-label">ผู้ให้ :</div>
+                <div class="field-value">{{ selectedCourse.issuer }}</div>
+              </div>
+
+              <div class="field-pair">
+                <div class="field-label">จำนวนชั่วโมงที่ได้รับ :</div>
+                <div class="field-value">{{ courseHours }} ชั่วโมง</div>
+              </div>
+
+              <div class="field-pair">
+                <div class="field-label">ลิงก์เข้าเรียน :</div>
+                <div class="field-value">
+                  <a :href="courseLink" target="_blank" class="course-link" @click="openCourseUrl">
+                    {{ courseSource }} <q-icon name="open_in_new" size="xs" />
+                  </a>
+                </div>
+              </div>
+            </q-list>
           </div>
-        </div>
+          
+        </q-card-section>
 
         <!-- Certificate Upload Section -->
-        <div class="upload-section">
-          <!-- URL Input Section -->
-          <div class="url-section">
-            <div class="section-title">ลิ้งค์ใบประกาศนียบัตร</div>
-            <q-input
-              v-model="url"
-              outlined
-              dense
-              placeholder="BUU IF001 Certificate | mooc.buu.ac.th"
-              class="input-url"
-            >
-              <template v-slot:prepend>
-                <q-icon name="link" />
-              </template>
-            </q-input>
+        <div class="upload-section q-mt-md">
+          <q-list dense>
+            <div class="field-pair">
+              <div class="field-label">ลิงก์ใบประกาศนียบัตร :</div>
+              <div class="field-value">
+                <q-input
+                  v-model="url"
+                  outlined
+                  dense
+                  placeholder="BUU IF001 Certificate | mooc.buu.ac.th"
+                  class="input-url"
+                >
+                </q-input>
+              </div>
+            </div>
+          </q-list>
 
-            <!-- Verify Button -->
+          <!-- Verify Button -->
+          <div class="q-mt-md q-mb-md row justify-center q-gutter-sm">
             <q-btn
-              label="ตรวจสอบ url ใบประกาศ"
+              label="ขออนุมัติ"
               color="positive"
-              class="verify-btn"
-              icon="check_circle"
+              class="btnconfirm"
               @click="verifyUrl"
               :loading="courseStore.loading"
+              unelevated
+              rounded
             />
           </div>
         </div>
-      </q-card-section>
-    </q-card>
-  </div>
+      </div>
+    </div>
+  </q-page>
 </template>
 
 <style scoped>
-.upload-certificate-container {
+.certificate-upload-card {
+  background-color: #edf0f5;
   padding: 16px;
-  max-width: 800px;
+  font-size: 18px;
+  border-radius: 5px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.course-img {
+  width: 100%;
+  max-width: 430px;
+  height: auto;
+  aspect-ratio: 4 / 3;
+  background-color: #d9d9d9;
+  border-radius: 12px;
+  object-fit: cover;
   margin: 0 auto;
 }
 
-.breadcrumb-section {
-  margin-bottom: 20px;
-}
-
-.breadcrumb {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  font-size: 14px;
-  color: #666;
-}
-
-.breadcrumb .current {
-  font-weight: 600;
-  color: #1976d2;
-}
-
-.main-card {
-  border: 1px solid #e0e0e0;
-  border-radius: 16px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-}
-
-.main-section {
-  padding: 24px;
-}
-
-.course-title {
-  font-size: 18px;
-  font-weight: 600;
-  margin-bottom: 16px;
-  color: #1a1a1a;
-}
-
-.course-details {
+.field-pair {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  margin-bottom: 12px;
 }
 
-.detail-item {
-  display: flex;
-  align-items: center;
-  gap: 8px;
+/* มือถือ: แสดงแนวตั้งเหมือนเดิม */
+.field-label {
+  font-weight: bold;
+  font-size: 16px;
+  color: #333;
+  margin-bottom: 4px;
 }
 
-.detail-item .label {
-  font-weight: 500;
-  color: #666;
-  min-width: 100px;
+.field-value {
+  font-size: 16px;
+  color: #555;
+  word-break: break-word;
 }
 
-.detail-item .value {
-  color: #1a1a1a;
+/* แสดงแนวนอนเฉพาะตอนจอใหญ่ */
+@media (min-width: 768px) {
+  .field-pair {
+    flex-direction: row;
+    align-items: baseline;
+  }
+
+  .field-label {
+    width: 200px;
+    text-align: right;
+    margin-bottom: 0;
+    padding-right: 8px;
+    position: relative;
+  }
+
+  .field-label::after {
+    position: absolute;
+    right: 0;
+  }
+
+  .field-value {
+    text-align: left;
+    flex: 1;
+  }
 }
 
 .course-link {
@@ -260,33 +277,15 @@ onMounted(() => {
   text-decoration: underline;
 }
 
-.upload-title {
+.section-title {
   font-size: 16px;
   font-weight: 600;
-  margin-bottom: 20px;
+  margin-bottom: 12px;
   color: #1a1a1a;
 }
 
-.upload-area {
-  margin-bottom: 24px;
-  border: 2px dashed #e0e0e0;
-  border-radius: 16px;
-  background-color: #fafafa;
-}
-
-.url-section {
-  border-top: 1px solid #e0e0e0;
-  padding-top: 24px;
-}
-
-.section-title {
-  font-size: 14px;
-  font-weight: 500;
-  margin-bottom: 12px;
-  color: #666;
-}
 .input-url {
-  margin-bottom: 24px;
+  width: 100%;
 }
 
 .input-url :deep(.q-field__control) {
@@ -297,38 +296,15 @@ onMounted(() => {
   border-radius: 12px !important;
 }
 
-.verify-btn {
-  width: 100%;
-  height: 48px;
-  border-radius: 16px;
-  font-weight: 600;
-}
+
 
 @media (max-width: 600px) {
-  .upload-certificate-container {
+  .certificate-upload-card {
     padding: 12px;
   }
 
-  .main-section {
-    padding: 16px;
-  }
-
-  .course-info-section {
-    margin-bottom: 24px;
-    padding-bottom: 16px;
-  }
-
-  .course-details {
-    gap: 12px;
-  }
-
-  .detail-item {
-    flex-direction: column;
-    align-items: flex-start;
-  }
-
-  .detail-item .label {
-    min-width: auto;
+  .btnconfirm {
+    width: 100%;
   }
 }
 </style>

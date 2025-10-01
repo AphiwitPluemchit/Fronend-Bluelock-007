@@ -79,7 +79,7 @@ const goToPageDetail = async (id: string, disable: boolean) => {
               <div class="event-header-row">
                 <div class="event-title">{{ event.programName }}</div>
                 <div class="event-category">
-                  {{ event.category === 'soft' ? 'Soft Skill' : 'Hard Skill' }}
+                  {{ event.category === 'soft' ? 'ทักษะเตรียมความพร้อม' : 'ทักษะทางวิชาการ' }}
                 </div>
               </div>
               <div class="q-mt-xs">{{ event.programItemName }}</div>
@@ -131,9 +131,9 @@ const goToPageDetail = async (id: string, disable: boolean) => {
           >
             <div class="event-header-row">
               <div class="event-title">{{ event.programName }}</div>
-              <div class="event-category">
-                {{ event.category === 'soft' ? 'Soft Skill' : 'Hard Skill' }}
-              </div>
+                <div class="event-category">
+                  {{ event.category === 'soft' ? 'ทักษะเตรียมความพร้อม' : 'ทักษะทางวิชาการ' }}
+                </div>
             </div>
             <div class="q-mt-xs">{{ event.programItemName }}</div>
             <div class="q-mt-xs">{{ event.time }}</div>

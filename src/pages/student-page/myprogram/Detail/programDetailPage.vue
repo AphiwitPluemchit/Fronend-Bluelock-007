@@ -81,7 +81,8 @@ watch(
 
 <template>
   <q-page class="q-pa-md">
-    <AppBreadcrumbs :breadcrumbs="breadcrumbs" />
+    <div style="margin-top: 20px;">
+    <AppBreadcrumbs :breadcrumbs="breadcrumbs"/>
 
     <q-tabs v-model="tab" align="right" class="custom-tabs" indicator-color="transparent">
       <q-tab name="program" label="รายละเอียดโครงการ" />
@@ -96,14 +97,16 @@ watch(
         <CheckInCheckOutTab />
       </q-tab-panel>
     </q-tab-panels>
+    </div>
   </q-page>
 </template>
 
 <style scoped>
 .custom-tabs .q-tab--active,
 .custom-tabs .q-tab:hover {
-  background-color: #edf0f5 !important;
+  background-color: #283393 !important;
   border-radius: 12px 12px 0 0;
+  color: white;
 }
 .custom-panels {
   background-color: #edf0f5;
