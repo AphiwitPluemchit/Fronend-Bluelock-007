@@ -61,7 +61,7 @@ const validateAppAccess = () => {
     if (role === EnumUserRole.ADMIN) {
       void router.replace('/Admin/ActivitiesCalendar')
     } else if (role === EnumUserRole.STUDENT) {
-      void router.replace('/Student/ActivitiesCalendar')
+      void router.replace('/Student/Home')
     } else {
       void router.replace('/')
     }

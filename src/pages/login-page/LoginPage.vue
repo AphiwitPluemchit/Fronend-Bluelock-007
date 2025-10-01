@@ -345,7 +345,7 @@ const handleLogin = async () => {
       if (role === EnumUserRole.ADMIN) {
         await router.push(`/${EnumUserRole.ADMIN}/ProgramCalendar`)
       } else if (role === EnumUserRole.STUDENT) {
-        await router.push(`/${EnumUserRole.STUDENT}/ProgramCalendar`)
+        await router.push(`/${EnumUserRole.STUDENT}/Home`)
       } else {
         throw new Error('ไม่มีสิทธิ์เข้าใช้งาน')
       }
