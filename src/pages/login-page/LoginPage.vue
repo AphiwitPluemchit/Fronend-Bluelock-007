@@ -106,10 +106,10 @@
                 >
                   <template v-slot:default>
                     <div class="row items-center no-wrap">
-                      <img 
-                        src="https://developers.google.com/identity/images/g-logo.png" 
-                        alt="Google" 
-                        class="google-icon q-mr-sm"
+                      <img
+                        src="https://upload.wikimedia.org/wikipedia/commons/thumb/c/c1/Google_%22G%22_logo.svg/768px-Google_%22G%22_logo.svg.png"
+                        alt="Google"
+                        class="google-icon q-ml-sm"
                       />
                       <!-- <span>เข้าสู่ระบบด้วย Google</span> -->
                     </div>
@@ -229,9 +229,9 @@
               >
                 <template v-slot:default>
                   <div class="row items-center no-wrap">
-                    <img 
-                      src="https://developers.google.com/identity/images/g-logo.png" 
-                      alt="Google" 
+                    <img
+                      src="https://developers.google.com/identity/images/g-logo.png"
+                      alt="Google"
                       class="google-icon q-mr-sm"
                     />
                     <span>เข้าสู่ระบบด้วย Google</span>
@@ -268,6 +268,7 @@ import { useAuthStore } from 'src/stores/auth'
 import { EnumUserRole } from 'src/data/roles'
 import RecoverPassword from './RecoverPassword.vue'
 import { useQuasar } from 'quasar'
+import AuthService from 'src/services/auth'
 
 const $q = useQuasar()
 const auth = useAuthStore()
@@ -301,25 +302,8 @@ function resetToLogin() {
 const handleGoogleLogin = async () => {
   try {
     isGoogleLoggingIn.value = true
-    
-    // Get Google OAuth URL from backend
-    const response = await fetch('http://localhost:8888/auth/google')
-    const data = await response.json()
-    
-    if (data.url) {
-      // Redirect to Google OAuth
-      window.location.href = data.url
-    } else {
-      throw new Error('ไม่สามารถเชื่อมต่อกับ Google ได้')
-    }
-  } catch (error) {
-    console.error('Google login error:', error)
-    $q.notify({
-      color: 'negative',
-      message: 'เกิดข้อผิดพลาดในการเข้าสู่ระบบด้วย Google',
-      position: 'top',
-      timeout: 3000,
-    })
+
+    await AuthService.loginWithGoogle()
   } finally {
     isGoogleLoggingIn.value = false
   }
@@ -345,7 +329,7 @@ const handleLogin = async () => {
       if (role === EnumUserRole.ADMIN) {
         await router.push(`/${EnumUserRole.ADMIN}/ProgramCalendar`)
       } else if (role === EnumUserRole.STUDENT) {
-        await router.push(`/${EnumUserRole.STUDENT}/Home`)
+        await router.push(`/${EnumUserRole.STUDENT}/ProgramCalendar`)
       } else {
         throw new Error('ไม่มีสิทธิ์เข้าใช้งาน')
       }
@@ -663,5 +647,7 @@ const handleLogin = async () => {
     display: flex !important;
   }
 }
-.q-field__bottom--animated { transition: none !important; }
+.q-field__bottom--animated {
+  transition: none !important;
+}
 </style>

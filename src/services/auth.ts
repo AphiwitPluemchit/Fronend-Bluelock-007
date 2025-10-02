@@ -26,7 +26,10 @@ const showSuccess = (message: string) => {
 class AuthService {
   static async login(email: string, password: string): Promise<Auth | null> {
     try {
-      console.log('🚀 AuthService.login called with:', { email, passwordLength: password?.length || 0 })
+      console.log('🚀 AuthService.login called with:', {
+        email,
+        passwordLength: password?.length || 0,
+      })
       console.log('🌐 API URL:', import.meta.env.VITE_API_URL)
 
       const res = await api.post<Auth>('/auth/login', { email, password })
@@ -42,7 +45,11 @@ class AuthService {
       console.error('💥 AuthService login error:', error)
 
       // Handle specific error codes from backend
-      const axiosError = error as AxiosError<{ code: string; error: string; remainingTime?: number }>
+      const axiosError = error as AxiosError<{
+        code: string
+        error: string
+        remainingTime?: number
+      }>
       if (axiosError.response?.data?.code) {
         const errorCode = axiosError.response.data.code
         const errorMessage = axiosError.response.data.error || 'เกิดข้อผิดพลาด'
@@ -76,6 +83,23 @@ class AuthService {
 
       console.error('Login failed:', error)
       return null
+    }
+  }
+
+  // google OAuth login handled separately in LoginPage.vue
+  static async loginWithGoogle(): Promise<void> {
+    try {
+      const res = await api.get<{ url: string }>('/auth/google')
+
+      if (res.data?.url) {
+        window.location.href = res.data.url
+      } else {
+        showError('ไม่สามารถรับ URL สำหรับเข้าสู่ระบบด้วย Google ได้')
+        console.error('No URL in response data:', res.data)
+      }
+    } catch (error) {
+      console.error('💥 AuthService loginWithGoogle error:', error)
+      showError('เข้าสู่ระบบด้วย Google ล้มเหลว กรุณาตรวจสอบการเชื่อมต่อ')
     }
   }
 
