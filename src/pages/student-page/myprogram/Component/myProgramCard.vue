@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { useRouter } from 'vue-router'
 import { api } from 'boot/axios'
-import ProgramType from 'src/pages/student-page/program/component/programType.vue'
+import ProgramType from 'src/components/programType.vue'
 import type { Program, ProgramItem } from 'src/types/program'
 import dayjs from 'dayjs'
 import 'dayjs/locale/th'
@@ -113,7 +113,10 @@ const getProgramRooms = (programItems: ProgramItem[] | null | undefined): string
   border-radius: 16px;
   /* box-shadow: 0 6px 18px rgba(0, 0, 0, 0.08); */
   background-color: #fff; /* สีปกติ */
-  transition: background-color 0.3s ease, transform 0.2s ease, box-shadow 0.2s ease;
+  transition:
+    background-color 0.3s ease,
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
 }
 
 .clickable-card:hover {

@@ -5,8 +5,8 @@ WORKDIR /app
 # 1. คัดลอกเฉพาะไฟล์ที่จำเป็นสำหรับการ install dependencies
 COPY package.json package-lock.json ./
 
-# 2. ติดตั้ง dependencies (โดยไม่รัน postinstall script)
-RUN npm install --ignore-scripts
+# 2. ติดตั้ง dependencies (โดยไม่รัน postinstall script และใช้ legacy-peer-deps)
+RUN npm install --ignore-scripts --legacy-peer-deps
 
 # 3. คัดลอกไฟล์ทั้งหมดที่เหลือ (รวมถึง quasar.config.js)
 COPY . .

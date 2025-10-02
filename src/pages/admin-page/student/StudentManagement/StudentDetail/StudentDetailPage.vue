@@ -8,7 +8,7 @@ import type { Student } from 'src/types/student'
 import { EnrollmentService } from 'src/services/enrollment'
 import type { ProgramHistory } from 'src/types/program'
 import type { Pagination } from 'src/types/pagination'
-import ProgramType from 'src/pages/student-page/program/component/programType.vue'
+import ProgramType from 'src/components/programType.vue'
 import FilterDialog from 'src/components/Dialog/FilterDialog.vue'
 interface ProgramRow {
   id: string
@@ -287,11 +287,11 @@ const columns = [
     <div class="q-pa-md">
       <div class="header-container q-mb-md" style="margin-top: 12px">
         <div class="text-h6 q-mt-lg text-center">ประวัติการอบรม</div>
-      <!-- ค้นหา/ฟิลเตอร์ -->
-      <div class="row justify-between items-center q-mb-md search-filter-wrapper q-col-gutter-md">
-        <div class="text-h6"></div>
-        <div class="row search-filter-inner items-center no-wrap">
-          <!-- <q-input
+        <!-- ค้นหา/ฟิลเตอร์ -->
+        <div class="row justify-between items-center q-mb-md search-filter-wrapper q-col-gutter-md">
+          <div class="text-h6"></div>
+          <div class="row search-filter-inner items-center no-wrap">
+            <!-- <q-input
             dense
             outlined
             v-model="searchQuery"
@@ -305,16 +305,16 @@ const columns = [
             </template>
           </q-input> -->
 
-          <div class="filter-btn-wrapper">
-            <FilterDialog
-              :model-value="showFilterDialog"
-              :categories="['categoryProgram']"
-              :category-programs="selectedType"
-              @apply="applyFilters"
-            />
+            <div class="filter-btn-wrapper">
+              <FilterDialog
+                :model-value="showFilterDialog"
+                :categories="['categoryProgram']"
+                :category-programs="selectedType"
+                @apply="applyFilters"
+              />
+            </div>
           </div>
         </div>
-      </div>
       </div>
 
       <q-table :columns="columns" :rows="filteredHistory" row-key="id" bordered flat>
