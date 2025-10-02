@@ -33,7 +33,7 @@ const adminChildren: RouteRecordRaw[] = [
   {
     path: 'StudentManagement/UploadStudent',
     component: () =>
-      import('src/pages/admin-page/student/StudentManagement/StudentDetail/UploadStudentPage.vue')
+      import('src/pages/admin-page/student/StudentManagement/StudentDetail/uploadStudentPage.vue')
   },
   {
     path: 'StudentStorage',
