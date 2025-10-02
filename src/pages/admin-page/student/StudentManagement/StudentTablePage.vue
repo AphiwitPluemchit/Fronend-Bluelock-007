@@ -209,6 +209,11 @@ onMounted(async () => {
             >
           </q-tr>
         </template>
+        <template v-slot:no-data>
+          <div class="full-width text-center q-pa-md text-grey" style="font-size: 20px">
+            ไม่มีรายชื่อนิสิต
+          </div>
+        </template>
       </q-table>
     </section>
   </q-page>

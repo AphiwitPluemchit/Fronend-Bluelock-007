@@ -22,7 +22,7 @@
         flat
         bordered
         :loading="formStore.loading"
-        no-data-label="ยังไม่มีฟอร์ม"
+        no-data-label="ไม่มีฟอร์มประเมิน"
         style="height: 700px"
       >
         <template v-slot:header="props">

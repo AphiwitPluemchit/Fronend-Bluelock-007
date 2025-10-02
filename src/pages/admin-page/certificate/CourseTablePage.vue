@@ -235,6 +235,11 @@ function goToAddCourse() {
               </q-td>
             </q-tr>
           </template>
+          <template v-slot:no-data>
+            <div class="full-width text-center q-pa-md text-grey" style="font-size: 20px">
+              ไม่มีหัวข้อการอบรม
+            </div>
+          </template>
         </q-table>
       </template>
       <template v-else>

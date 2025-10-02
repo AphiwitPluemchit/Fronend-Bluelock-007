@@ -106,7 +106,6 @@ const paginatedRows = computed(() => submissionHistory.value.slice(0, rowsPerPag
           bordered
           flat
           class="tableHisAct q-mt-md"
-          no-data-label="ไม่พบข้อมูล"
         >
           <template v-slot:body="props">
             <q-tr :props="props" class="sticky-header">
@@ -116,6 +115,11 @@ const paginatedRows = computed(() => submissionHistory.value.slice(0, rowsPerPag
               <q-td key="studentName">{{ props.row.studentName }}</q-td>
               <q-td key="major">{{ props.row.major }}</q-td>
             </q-tr>
+          </template>
+          <template v-slot:no-data>
+            <div class="full-width text-center q-pa-md text-grey" style="font-size: 20px">
+              ไม่มีรายชื่ิอนิสิต
+            </div>
           </template>
         </q-table>
 

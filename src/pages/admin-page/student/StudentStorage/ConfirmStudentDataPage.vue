@@ -352,6 +352,11 @@ onMounted(async () => {
             </q-td>
           </q-tr>
         </template>
+        <template v-slot:no-data>
+            <div class="full-width text-center q-pa-md text-grey" style="font-size: 20px">
+              ไม่มีรายชื่อนิสิต
+            </div>
+          </template>
       </q-table>
 
       <!-- ตารางแสดงรายชื่อนิสิตที่จัดเก็บ -->
@@ -390,6 +395,11 @@ onMounted(async () => {
             </q-td>
           </q-tr>
         </template>
+        <template v-slot:no-data>
+            <div class="full-width text-center q-pa-md text-grey" style="font-size: 20px">
+              ไม่มีรายชื่อนิสิต
+            </div>
+          </template>
       </q-table>
 
       <div class="row justify-end q-mt-md">

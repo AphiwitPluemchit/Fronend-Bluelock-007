@@ -971,7 +971,7 @@ watchEffect(() => {
           </template>
           <template v-slot:no-data>
             <div class="full-width text-center q-pa-md text-grey" style="font-size: 20px">
-              ไม่มีโครงการที่เสร็จสิ้น
+              ไม่มีโครงการที่กำลังวางแผน
             </div>
           </template>
         </q-table>
