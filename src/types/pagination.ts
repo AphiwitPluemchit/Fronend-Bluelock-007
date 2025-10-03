@@ -10,6 +10,7 @@ export type Pagination = {
   studentYear?: string[]
   studentStatus?: string[]
   studentCode?: string[]
+  date?: string
 }
 export type PaginationRequest = {
   descending: boolean

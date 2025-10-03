@@ -17,18 +17,21 @@ export type Enrollment = {
 }
 export type StudentEnrollment = {
   id: string
+  studentId: string
   code: string
   name: string
-  food?: string
   engName: string
   major: string
-  status: string
+  status: number
   hardSkill: number
   softSkill: number
   registrationDate: string
-  checkInOut?: CheckInOut
   enrollmentId: string
+  food?: string
+  checkInOut: CheckInOut[]
+  checkInStatus: string
 }
+
 export type EnrollmentResponse = {
   id: string;
   registrationDate: string;
@@ -37,6 +40,7 @@ export type EnrollmentResponse = {
   food?: string;
   program: Partial<Program>
 }
+
 export type EnrollmentCheckResponse = {
   isEnrolled: boolean;
   program?: Program;

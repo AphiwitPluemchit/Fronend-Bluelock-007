@@ -23,8 +23,9 @@ const enrollmentStore = useEnrollmentStore()
 const programId = route.params.id as string
 
 const filterCategories1 = ref(['year', 'major', 'studentStatus'])
-const allTab = ref<Program | null>(null)
-const indexTab = ref(-1)
+const program = ref<Program | null>(null)
+const selectProgramItem = ref(-1)
+const selectProgramItemDate = ref(-1)
 const query = ref<Pagination>({
   page: 1,
   limit: 5,
@@ -117,7 +118,7 @@ const removeStudentFromProgram = async (studentId: string) => {
   }
 }
 const programItemOptions = computed(() => {
-  const items = allTab.value?.programItems ?? []
+  const items = program.value?.programItems ?? []
   const opts = items.map((item, index) => ({
     label: item.name,
     value: index, // index ปกติของรายการ
@@ -126,6 +127,25 @@ const programItemOptions = computed(() => {
   // ถ้า programItems > 2 ให้เติม "ทุกโครงการ" ไว้หัวรายการ
   if (items.length > 1) {
     return [{ label: 'ทุกโครงการ', value: -1 }, ...opts]
+  }
+  return opts
+})
+
+const programItemDatesOptions = computed(() => {
+  const items = program.value?.programItems ?? []
+
+  // รวมวันที่จากทุก item → flatten → filter → unique → sort
+  const dates = items.flatMap(it => (it.dates ?? []).map(d => d.date).filter(Boolean))
+  const uniq = Array.from(new Set(dates)).sort()
+
+  // แปลง uniq -> options (label, value)
+  const opts = uniq.map(d => ({
+    label: d, // หรือจะ format เป็นไทยก็ได้ เช่น dayjs(d).format('D MMM YYYY')
+    value: d,
+  }))
+
+  if (items.length > 1) {
+    return [{ label: 'ทุกวัน', value: -1 }, ...opts]
   }
   return opts
 })
@@ -217,39 +237,49 @@ function handleResize() {
 }
 
 // Add helper methods for checkin/checkout filtering for QTable rows and card layout
-function getRowCheckins(row: { checkInOut?: unknown }): CheckInOut[] {
-  return Array.isArray(row.checkInOut)
-    ? (row.checkInOut as CheckInOut[]).filter((rec) => rec.type === 'checkin')
-    : []
+// ✅ คืน array ของ string (ISO in Asia/Bangkok) สำหรับ "เข้า"
+function getRowCheckins(row: { checkInOut?: unknown }): string[] {
+  if (!Array.isArray(row.checkInOut)) return []
+  return (row.checkInOut as CheckInOut[])
+    .map((r) => r.checkin)
+    .filter((v): v is string => !!v)
 }
-function getRowCheckouts(row: { checkInOut?: unknown }): CheckInOut[] {
-  return Array.isArray(row.checkInOut)
-    ? (row.checkInOut as CheckInOut[]).filter((rec) => rec.type === 'checkout')
-    : []
+
+function getRowCheckouts(row: { checkInOut?: unknown }): string[] {
+  if (!Array.isArray(row.checkInOut)) return []
+  return (row.checkInOut as CheckInOut[]).map((r) => r.checkout).filter((v): v is string => !!v)
 }
-function getStudentCheckins(student: { checkInOut?: unknown }): CheckInOut[] {
-  return Array.isArray(student.checkInOut)
-    ? (student.checkInOut as CheckInOut[]).filter((rec) => rec.type === 'checkin')
-    : []
+
+function getStudentCheckins(student: { checkInOut?: unknown }): string[] {
+  if (!Array.isArray(student.checkInOut)) return []
+  return (student.checkInOut as CheckInOut[]).map((r) => r.checkin).filter((v): v is string => !!v)
 }
-function getStudentCheckouts(student: { checkInOut?: unknown }): CheckInOut[] {
-  return Array.isArray(student.checkInOut)
-    ? (student.checkInOut as CheckInOut[]).filter((rec) => rec.type === 'checkout')
-    : []
+
+function getStudentCheckouts(student: { checkInOut?: unknown }): string[] {
+  if (!Array.isArray(student.checkInOut)) return []
+  return (student.checkInOut as CheckInOut[]).map((r) => r.checkout).filter((v): v is string => !!v)
 }
+
 const fetchStudents = async () => {
   enrollmentStore.studentEnrollments = []
 
   const res = await ProgramService.getOne(programId)
-  allTab.value = res.data
+  program.value = res.data
 
   if (
-    allTab.value &&
-    Array.isArray(allTab.value.programItems) &&
-    allTab.value.programItems.length > 0
+    program.value &&
+    Array.isArray(program.value.programItems) &&
+    program.value.programItems.length > 0
   ) {
-    // แตกแขนงตามค่า indexTab (จะเข้ามาทาง -1 ครั้งแรกโดยอัตโนมัติ)
-    if (indexTab.value === -1) {
+    if (selectProgramItemDate.value === -1) {
+      console.log("date = ''");
+      query.value.date = ''
+    } else {
+      console.log("date = ", selectProgramItemDate.value);
+      query.value.date = selectProgramItemDate.value.toString()
+    } 
+    // แตกแขนงตามค่า selectProgramItem (จะเข้ามาทาง -1 ครั้งแรกโดยอัตโนมัติ)
+    if (selectProgramItem.value === -1) {
       const data = await EnrollmentService.getEnrollmentsByProgramIDs(programId, query.value)
 
       pagination.value.page = query.value.page || 1
@@ -261,7 +291,7 @@ const fetchStudents = async () => {
       enrollmentStore.studentEnrollments = data.data
       enrollmentStore.total = data.meta.total
     } else {
-      const programItemId = allTab.value.programItems[indexTab.value]!.id!
+      const programItemId = program.value.programItems[selectProgramItem.value]!.id!
       const data = await EnrollmentService.getEnrollmentsByProgramID(programItemId, query.value)
 
       pagination.value.page = query.value.page || 1
@@ -314,10 +344,27 @@ onUnmounted(() => {
         <!-- Row 2 -->
         <div class="select-filter-row">
           <q-select
+            v-if="programItemDatesOptions.length > 1"
+            dense
+            outlined
+            v-model="selectProgramItemDate"
+            :options="programItemDatesOptions"
+            label="เลือกโครงการ"
+            option-label="label"
+            option-value="value"
+            emit-value
+            map-options
+            @update:model-value="fetchStudents"
+            class="dropdown"
+            popup-content-class="dropdown-menu"
+            :style="{ border: 'none' }"
+            behavior="menu"
+          />
+          <q-select
             v-if="programItemOptions.length > 1"
             dense
             outlined
-            v-model="indexTab"
+            v-model="selectProgramItem"
             :options="programItemOptions"
             label="เลือกโครงการ"
             option-label="label"
@@ -387,9 +434,10 @@ onUnmounted(() => {
           <q-td :props="props">
             <div v-if="getRowCheckins(props.row).length">
               <div v-for="(rec, idx) in getRowCheckins(props.row)" :key="idx">
-                {{ formatDate(rec.timestamp) }} {{ formatTime(rec.timestamp) }}
+                {{ formatDate(rec) }} {{ formatTime(rec) }}
               </div>
             </div>
+
             <div v-else>-</div>
           </q-td>
         </template>
@@ -397,7 +445,7 @@ onUnmounted(() => {
           <q-td :props="props">
             <div v-if="getRowCheckouts(props.row).length">
               <div v-for="(rec, idx) in getRowCheckouts(props.row)" :key="idx">
-                {{ formatDate(rec.timestamp) }} {{ formatTime(rec.timestamp) }}
+                {{ formatDate(rec) }} {{ formatTime(rec) }}
               </div>
             </div>
             <div v-else>-</div>
@@ -452,7 +500,7 @@ onUnmounted(() => {
               <div class="value">
                 <template v-if="getStudentCheckins(student).length">
                   <div v-for="(rec, idx) in getStudentCheckins(student)" :key="idx">
-                    {{ formatDate(rec.timestamp) }} {{ formatTime(rec.timestamp) }}
+                    {{ formatDate(rec) }} {{ formatTime(rec) }}
                   </div>
                 </template>
                 <div v-else>-</div>
@@ -463,7 +511,7 @@ onUnmounted(() => {
               <div class="value">
                 <template v-if="getStudentCheckouts(student).length">
                   <div v-for="(rec, idx) in getStudentCheckouts(student)" :key="idx">
-                    {{ formatDate(rec.timestamp) }} {{ formatTime(rec.timestamp) }}
+                    {{ formatDate(rec) }} {{ formatTime(rec) }}
                   </div>
                 </template>
                 <div v-else>-</div>

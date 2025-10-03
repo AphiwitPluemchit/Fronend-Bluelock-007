@@ -9,11 +9,10 @@ export type CheckinoutRecord = {
   checkin: string
   checkout?: string
 }
+
 export type CheckInOut = {
-  id: string
-  type: string
-  timestamp: string
-  userId: string
-  programItemId: string
+  checkin: string | null
+  checkout: string | null
+  participation: string
 }
 
