@@ -135,11 +135,11 @@ const programItemDatesOptions = computed(() => {
   const items = program.value?.programItems ?? []
 
   // รวมวันที่จากทุก item → flatten → filter → unique → sort
-  const dates = items.flatMap(it => (it.dates ?? []).map(d => d.date).filter(Boolean))
+  const dates = items.flatMap((it) => (it.dates ?? []).map((d) => d.date).filter(Boolean))
   const uniq = Array.from(new Set(dates)).sort()
 
   // แปลง uniq -> options (label, value)
-  const opts = uniq.map(d => ({
+  const opts = uniq.map((d) => ({
     label: d, // หรือจะ format เป็นไทยก็ได้ เช่น dayjs(d).format('D MMM YYYY')
     value: d,
   }))
@@ -240,9 +240,7 @@ function handleResize() {
 // ✅ คืน array ของ string (ISO in Asia/Bangkok) สำหรับ "เข้า"
 function getRowCheckins(row: { checkInOut?: unknown }): string[] {
   if (!Array.isArray(row.checkInOut)) return []
-  return (row.checkInOut as CheckInOut[])
-    .map((r) => r.checkin)
-    .filter((v): v is string => !!v)
+  return (row.checkInOut as CheckInOut[]).map((r) => r.checkin).filter((v): v is string => !!v)
 }
 
 function getRowCheckouts(row: { checkInOut?: unknown }): string[] {
@@ -272,12 +270,12 @@ const fetchStudents = async () => {
     program.value.programItems.length > 0
   ) {
     if (selectProgramItemDate.value === -1) {
-      console.log("date = ''");
+      console.log("date = ''")
       query.value.date = ''
     } else {
-      console.log("date = ", selectProgramItemDate.value);
+      console.log('date = ', selectProgramItemDate.value)
       query.value.date = selectProgramItemDate.value.toString()
-    } 
+    }
     // แตกแขนงตามค่า selectProgramItem (จะเข้ามาทาง -1 ครั้งแรกโดยอัตโนมัติ)
     if (selectProgramItem.value === -1) {
       const data = await EnrollmentService.getEnrollmentsByProgramIDs(programId, query.value)

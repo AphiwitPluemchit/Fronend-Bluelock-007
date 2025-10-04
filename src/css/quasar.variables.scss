@@ -148,7 +148,7 @@ $dark-page: #121212;
 .dropdown {
   width: 200px;
   height: 40px;
-  border-radius: 15px;
+  border-radius: 8px !important;
   background-color: white;
   border: 1px solid #000000;
   white-space: nowrap;
@@ -157,13 +157,13 @@ $dark-page: #121212;
 
   /* ปรับ style ของ q-field ภายใน */
   ::v-deep(.q-field__control) {
-    border-radius: 15px !important;
+    border-radius: 8px !important;
   }
 
   ::v-deep(.q-field__control:hover) {
     background-color: #f0f0f0;
     border-color: #000000;
-    border-radius: 15px !important;
+    border-radius: 8px !important;
   }
 
   /* ✅ ตัดข้อความในช่อง selected */
@@ -290,6 +290,7 @@ $dark-page: #121212;
 .q-input {
   height: 40px;
 }
+
 @media (max-width: 1100px) {
   .custom-drawer-wrapper .q-drawer {
     top: 64px !important;
