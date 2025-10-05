@@ -19,7 +19,6 @@ const title = computed(() => props.course.name)
 const skillType = computed(() => (props.course.isHardSkill ? 'hardSkill' : 'softSkill'))
 const platformType = computed(() => (props.course.type === 'buumooc' ? 'Buu Mooc' : 'Thai Mooc'))
 const hours = computed(() => props.course.hour)
-const link = computed(() => props.course.link)
 
 // ฟังก์ชันสำหรับไปยังหน้าอัปโหลดใบประกาศ
 const goToCertificatePage = () => {
@@ -36,28 +35,30 @@ const goToCertificatePage = () => {
     <q-card-section class="outer-box">
       <div class="inner-box">
         <!-- ปุ่มแสดงประเภทคอร์ส -->
-        <div class="oc-title text-h6 text-bold ellipsis-2-lines q-mb-sm">{{ title }}</div>
-        <div class="oc-type q-mb-sm">
+        <div class="oc-title text-h6 text-bold ellipsis-2-lines q-mb-md">{{ title }}</div>
+        <div class="oc-type q-mb-md">
           <ProgramType :skill="skillType" />
         </div>
+        <div class="text-subtitle2 q-mt-sm label">
+          <q-icon name="domain" class="q-mb-xs" />
+          แหล่งที่มา : {{ platformType }}
+        </div>
+        <div class="text-subtitle2 q-mt-sm label">
+          <q-icon name="schedule" class="q-mb-xs" />
+          จำนวนชั่วโมง : {{ hours }} ชั่วโมง
+        </div>
         <!-- <div class="text-subtitle2 q-mb-sm">รายละเอียด : {{ description ?? '-' }}</div> -->
-        <div class="text-subtitle2 q-mb-sm">
-          <q-icon name="domain" class="q-mb-xs" /> แหล่งที่มา : {{ platformType }}
-        </div>
-        <div class="text-subtitle2 q-mb-sm">
-          <q-icon name="schedule" class="q-mb-xs" /> จำนวนชั่วโมง : {{ hours }} ชั่วโมง
-        </div>
       </div>
 
       <q-btn
         v-if="isMobile"
         class="oc-cta q-mt-auto"
-        :href="link"
         target="_blank"
-        label="ไปยังหน้าอบรม"
+        label="รายละเอียด"
         text-color="white"
         no-caps
         unelevated
+        @click="goToCertificatePage"
       />
     </q-card-section>
   </q-card>
@@ -67,7 +68,7 @@ const goToCertificatePage = () => {
 .oc-card {
   height: 100%;
   border-radius: 16px;
-  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.08);
+  /* box-shadow: 0 6px 18px rgba(0, 0, 0, 0.08); */
   background-color: #fff; /* สีปกติ */
   transition:
     background-color 0.3s ease,
@@ -107,5 +108,13 @@ const goToCertificatePage = () => {
   width: 100%;
   border-radius: 10px;
   height: 44px;
+}
+
+.label {
+  color: #6b7280;
+}
+
+.label .q-icon {
+  color: #3c4556;
 }
 </style>

@@ -68,27 +68,27 @@ function enrollmentSummary(programItems: ProgramItem[]) {
         </div>
 
         <!-- รายละเอียดโครงการ -->
-        <div class="program-content ">
-          <div class="text-h6 text-bold ellipsis-2-lines q-mb-sm">
+        <div class="program-content">
+          <div class="text-h6 text-bold ellipsis-2-lines q-mb-md">
             {{ program.name }}
           </div>
 
-          <div class="q-mb-sm">
+          <div class="q-mb-md">
             <ProgramType
               v-if="program.skill === 'hard' || program.skill === 'soft'"
               :skill="program.skill === 'hard' ? 'hardSkill' : 'softSkill'"
             />
           </div>
 
-          <div class="text-subtitle2 q-mt-sm">
+          <div class="text-subtitle2 q-mt-sm label">
             <q-icon name="today" class="q-mb-xs" />
             วันที่จัด : {{ getProgramDate(program.programItems) }}
           </div>
-          <div class="text-subtitle2 q-mt-sm">
+          <div class="text-subtitle2 q-mt-sm label">
             <q-icon name="schedule" class="q-mb-xs" />
             เวลาที่จัด : {{ getProgramTime(program.programItems) }}
           </div>
-          <div class="text-subtitle2 q-mt-sm">
+          <div class="text-subtitle2 q-mt-sm label">
             <q-icon name="chair" class="q-mb-xs" />
             จำนวนที่รับ : {{ enrollmentSummary(program.programItems ?? []) }}
           </div>
@@ -159,6 +159,14 @@ function enrollmentSummary(programItems: ProgramItem[]) {
 .program-button {
   margin-top: auto;
   padding-top: 16px;
+}
+
+.label {
+  color: #6b7280;
+}
+
+.label .q-icon {
+  color: #3c4556;
 }
 
 @media (max-width: 600px) {

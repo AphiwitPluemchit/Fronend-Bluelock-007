@@ -231,7 +231,7 @@ onMounted(async () => {
         <!-- profile -->
         <q-card class="menu-card" @click="gotoProfile">
           <q-icon name="account_circle" class="icon" />
-          <p class="label-title">โปรไฟล์</p>
+          <p class="label-title">ประวัติของฉัน</p>
           <p class="label">ตรวจสอบจำนวนชั่วโมง</p>
           <p class="label">และโครงการที่ลงทะเบียน และใบรับรองที่ขออนุมัติ</p>
         </q-card>

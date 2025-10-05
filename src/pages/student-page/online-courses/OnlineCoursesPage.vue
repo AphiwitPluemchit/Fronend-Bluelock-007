@@ -75,7 +75,7 @@ onMounted(() => {
     <div class="page-wrap">
       <!-- ชื่อหน้า -->
       <div class="row justify-between items-center q-mb-md" style="margin-top: 20px">
-        <div class="texttitle">หัวข้ออบรมออนไลน์</div>
+        <div class="texttitle">หลักสูตรทั้งหมด</div>
       </div>
 
       <!-- ค้นหา/ฟิลเตอร์ -->

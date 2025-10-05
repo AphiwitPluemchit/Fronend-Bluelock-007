@@ -17,7 +17,7 @@
                 <q-item-section>โครงการ</q-item-section>
               </q-item>
               <q-item clickable v-ripple to="/Student/OnlineCoursesPage">
-                <q-item-section>อบรมออนไลน์</q-item-section>
+                <q-item-section>หลักสูตร</q-item-section>
               </q-item>
             </q-list>
           </q-menu>
@@ -38,11 +38,18 @@
           </q-avatar>
 
           <q-menu anchor="bottom right" self="top right">
-            <q-list style="min-width: 150px">
-              <q-item clickable v-ripple to="/Student/RecordPage">
-                <q-item-section>ประวัติ</q-item-section>
+            <q-list style="min-width: 180px">
+              <q-item clickable v-ripple tag="router-link" to="/Student/RecordPage">
+                <q-item-section avatar>
+                  <q-icon name="person"  color="indigo-10"/>
+                </q-item-section>
+                <q-item-section>ประวัติของฉัน</q-item-section>
               </q-item>
+
               <q-item clickable v-ripple @click="logout">
+                <q-item-section avatar>
+                  <q-icon name="logout" color="red" />
+                </q-item-section>
                 <q-item-section>ออกจากระบบ</q-item-section>
               </q-item>
             </q-list>

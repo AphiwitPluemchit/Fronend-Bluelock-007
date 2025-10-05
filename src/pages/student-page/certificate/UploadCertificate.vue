@@ -26,8 +26,8 @@ const screen = ref(false)
 
 // Breadcrumb configuration
 const breadcrumbs = ref({
-  previousPage: { title: 'คอร์สทั้งหมด', path: '/Student/OnlineCoursesPage' },
-  currentPage: { title: 'อัปโหลดใบประกาศนียบัตร', path: `/Student/CourseTablePage/UploadCertificate` },
+  previousPage: { title: 'หลักสูตรทั้งหมด', path: '/Student/OnlineCoursesPage' },
+  currentPage: { title: 'รายละเอียดหลักสูตร', path: `/Student/CourseTablePage/UploadCertificate` },
   icon: 'book',
 })
 
