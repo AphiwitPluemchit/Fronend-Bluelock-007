@@ -148,24 +148,20 @@ onMounted(async () => {
         </div>
 
         <!-- ชื่อกิจกรรม -->
-        <div class="text-weight-medium text-body1 ellipsis-2 q-mb-xs q-mb-sm" :title="program.name">
+        <div class="text-weight-medium text-body1 ellipsis-2  q-mb-sm" :title="program.name">
           {{ program.name }}
         </div>
 
         <!-- รายละเอียดวันที่อนุมัติ / ชั่วโมง -->
-        <div class="row text-weight-medium text-body1 ellipsis-2 q-mb-xs q-mb-sm">
-          <q-icon name="event" size="18px" />
-          <div class="text-body2">
+        <div class="text-weight-medium text-subtitle2 ellipsis-2 q-mb-xs label">
+          <q-icon name="event" size="18px" /> 
             วันที่อนุมัติ :
             {{ getApprovedAt(program) ? formatDateTime(getApprovedAt(program)!) : '-' }}
-          </div>
         </div>
 
-        <div class="row text-weight-medium text-body1 ellipsis-2 q-mb-xs q-mb-sm">
+        <div class="text-weight-medium text-subtitle2 ellipsis-2 q-mb-xs  label">
           <q-icon name="schedule" size="18px" />
-          <div class="text-body2">
             จำนวนชั่วโมง : {{ getApprovedAt(program) ? getHours(program) : '-' }}
-          </div>
         </div>
       </q-card-section>
     </q-card>
@@ -178,6 +174,14 @@ onMounted(async () => {
 .searchbox {
   flex-grow: 1;
   min-width: 0;
+}
+
+.label {
+  color: #6b7280;
+}
+
+.label .q-icon {
+  color: #3c4556;
 }
 
 @media (max-width: 600px) {
