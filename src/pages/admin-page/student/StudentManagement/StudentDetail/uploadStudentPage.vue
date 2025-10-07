@@ -227,7 +227,7 @@ const clearFile = () => {
 
         <template v-slot:no-data>
           <div class="full-width text-center q-pa-md text-grey" style="font-size: 20px">
-            ไม่มีนิสิตที่อัพโหลด
+            ไม่มีรายชื่อนิสิต
           </div>
         </template>
       </q-table>

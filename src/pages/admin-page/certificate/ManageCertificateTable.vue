@@ -230,8 +230,10 @@ onMounted(async () => {
         </template>
         <!-- no data -->
         <template v-slot:no-data>
-          <div class="text-center q-pa-md text-grey-8">ไม่พบข้อมูล</div>
-        </template>
+            <div class="full-width text-center q-pa-md text-grey" style="font-size: 20px">
+              ไม่มีรายชื่อนิสิตที่อัปโหลดใบประกาศนียบัตร
+            </div>
+          </template>
       </q-table>
       <ManageCerDialog v-model="showDialog" :data="selectedCert" @confirm="handleConfirm" />
     </section>
