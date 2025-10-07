@@ -2,6 +2,7 @@
 //import
 import { computed, onMounted, onUnmounted, ref } from 'vue'
 import { useQuasar } from 'quasar'
+import type { QTableColumn } from 'quasar'
 import { useRoute } from 'vue-router'
 import RemoveStudent from './RemoveStudent.vue'
 import { ProgramService } from 'src/services/program'
@@ -45,12 +46,10 @@ const formatTime = (iso: string): string => {
   return dayjs(iso).format('HH:mm น.')
 }
 const visibleColumns = computed(() => {
-  const hasFood = students.value.some((s) => !!s.food && s.food.trim() !== '')
-  return columns.filter((col) => {
-    if (col.name === 'food') return hasFood
-    return true
-  })
+  const hasFood = students.value.some(s => !!s.food && s.food.trim() !== '')
+  return columns.value.filter(col => (col.name === 'food' ? hasFood : true))
 })
+
 const pagination = ref({
   sortBy: query.value.sortBy || '',
   descending: query.value.order === 'desc',
@@ -150,74 +149,38 @@ const programItemDatesOptions = computed(() => {
   return opts
 })
 
-const columns = [
-  {
-    name: 'index',
-    label: 'ลำดับ',
-    align: 'left' as const,
-    field: 'index',
-    style: 'width: 7%;',
-    headerStyle: 'width: 7%;',
-  },
-  {
-    name: 'code',
-    label: 'รหัสนิสิต',
-    field: 'code',
-    align: 'left' as const,
-    style: 'width: 12%;',
-    headerStyle: 'width: 12%;',
-  },
-  {
-    name: 'name',
-    label: 'ชื่อ-สกุล',
-    field: 'name',
-    align: 'left' as const,
-    style: 'width: 20%;',
-    headerStyle: 'width: 19.5%;',
-    classes: 'ellipsis-cell',
-  },
-  {
-    name: 'major',
-    label: 'สาขา',
-    field: 'major',
-    align: 'left' as const,
-    style: 'width: 7%;',
-    headerStyle: 'width: 7.5%;',
-  },
-  {
-    name: 'food',
-    label: 'อาหาร',
-    field: 'food',
-    align: 'left' as const,
-    style: 'width: 7%;',
-    headerStyle: 'width: 7.5%;',
-  },
-  {
-    name: 'checkIn',
-    label: 'เช็คชื่อเข้า',
-    field: 'checkIn',
-    align: 'center' as const,
-    style: 'width: 15%;',
-    headerStyle: 'width: 14%;',
-  },
-  {
-    name: 'checkOut',
-    label: 'เช็คชื่อออก',
-    field: 'checkOut',
-    align: 'center' as const,
-    style: 'width: 15%;',
-    headerStyle: 'width: 16%;',
-  },
-  {
-    name: 'status',
-    label: 'สถานะ',
-    field: 'status',
-    align: 'center' as const,
-    style: 'width: 13%;',
-    headerStyle: 'width: 12%;',
-  },
+const baseColumns: QTableColumn[] = [
+  { name: 'index', label: 'ลำดับ', align: 'left' as const, field: 'index', style: 'width: 7%;', headerStyle: 'width: 7%;' },
+  { name: 'code',  label: 'รหัสนิสิต', field: 'code', align: 'left' as const, style: 'width: 12%;', headerStyle: 'width: 12%;' },
+  { name: 'name',  label: 'ชื่อ-สกุล', field: 'name', align: 'left' as const, style: 'width: 20%;', headerStyle: 'width: 19.5%;', classes: 'ellipsis-cell' },
+  { name: 'major', label: 'สาขา', field: 'major', align: 'left' as const, style: 'width: 7%;', headerStyle: 'width: 7.5%;' },
+  { name: 'food',  label: 'อาหาร', field: 'food', align: 'left' as const, style: 'width: 7%;', headerStyle: 'width: 7.5%;' },
+  { name: 'checkIn',  label: 'เช็คชื่อเข้า', field: 'checkIn', align: 'center' as const, style: 'width: 15%;', headerStyle: 'width: 14%;' },
+  { name: 'checkOut', label: 'เช็คชื่อออก', field: 'checkOut', align: 'center' as const, style: 'width: 15%;', headerStyle: 'width: 16%;' },
   { name: 'actions', label: '', field: 'actions', align: 'center' as const },
 ]
+
+const participationCol: QTableColumn = {
+  name: 'participation',
+  label: 'สถานะเช็คชื่อ',
+  field: 'participation',
+  align: 'center',
+  style: 'width: 15%;',
+  headerStyle: 'width: 16%;',
+}
+
+const showParticipation = computed(() => selectProgramItemDate.value !== -1)
+
+const columns = computed<QTableColumn[]>(() => {
+  // สำเนา base ก่อน
+  const cols = [...baseColumns]
+  if (showParticipation.value) {
+    // แทรกหลัง 'checkOut'
+    const afterCheckOut = cols.findIndex(c => c.name === 'checkOut') + 1
+    cols.splice(afterCheckOut, 0, participationCol)
+  }
+  return cols
+})
 
 const expanded = ref<{ [key: string]: boolean }>({})
 
@@ -449,6 +412,12 @@ onUnmounted(() => {
             <div v-else>-</div>
           </q-td>
         </template>
+        <template v-slot:body-cell-participation="props">
+          <q-td :props="props">
+            {{ props.row.checkInOut[0]?.participation }}
+          </q-td>
+        </template>
+
         <template v-slot:no-data>
           <div class="full-width text-center q-pa-md text-grey" style="font-size: 20px">
             ไม่มีนิสิตที่ลงทะเบียน
@@ -515,6 +484,7 @@ onUnmounted(() => {
                 <div v-else>-</div>
               </div>
             </div>
+
             <RemoveStudent
               :id="student.id"
               @removeStudent="() => removeStudentFromProgram(student.id)"
