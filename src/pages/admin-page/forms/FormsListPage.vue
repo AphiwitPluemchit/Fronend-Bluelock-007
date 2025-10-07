@@ -67,11 +67,11 @@
                 </q-icon>
                 <q-icon
                   clickable
-                  name="quiz"
+                  name="content_copy"
                   class="bg-green text-white q-pa-xs rounded-borders"
-                  @click="startForm(props.row)"
+                  @click="copyForm(props.row)"
                 >
-                  <q-tooltip>ทำแบบประเมิน</q-tooltip>
+                  <q-tooltip>คัดลอก</q-tooltip>
                 </q-icon>
               </template>
 
@@ -83,20 +83,23 @@
         </template>
       </q-table>
     </div>
-    
+
     <!-- Preview Dialog -->
-    <PreviewDialog
-      v-model="showPreviewDialog"
-      :form="selectedForm"
-      v-if="selectedForm"
+    <PreviewDialog v-model="showPreviewDialog" :form="selectedForm" v-if="selectedForm" />
+
+    <CopyDialog
+      v-model="showCopyDialog"
+      :form-title="selectedForm?.title || ''"
+      @confirm="handleCopyForm"
     />
-    
+
     <RemoveFormDailog v-model="showRemoveDialog" @confirm="deleteForm(pendingDeleteId)" />
   </q-page>
 </template>
 
 <script setup lang="ts">
 import RemoveFormDailog from './RemoveFormDailog.vue'
+import CopyDialog from 'src/components/Dialog/CopyDialog.vue'
 import PreviewDialog from './PreviewDialog.vue'
 import { useFormStore } from 'src/stores/forms'
 import type { Form } from 'src/types/form'
@@ -110,9 +113,14 @@ const $q = useQuasar()
 
 const showRemoveDialog = ref(false)
 const showPreviewDialog = ref(false)
+const showCopyDialog = ref(false)
+
 const pendingDeleteId = ref<string | null>(null)
 const selectedForm = ref<Form | null>(null)
-
+const copyForm = (form: Form) => {
+  selectedForm.value = form
+  showCopyDialog.value = true
+}
 const createForm = async () => {
   await router.push('/Admin/forms/builder')
 }
@@ -154,10 +162,6 @@ const editForm = async (form: Form) => {
   await router.push(`/Admin/forms/builder?id=${form.id}`)
 }
 
-const startForm = async (form: Form) => {
-  await router.push(`/Admin/forms/preview/${form.id}`)
-}
-
 onMounted(async () => {
   await formStore.fetchForms()
 })
@@ -181,10 +185,19 @@ async function deleteForm(id: string | null) {
     pendingDeleteId.value = null
   }
 }
+const handleCopyForm = async () => {
+  if (!selectedForm.value?.id) return
+  try {
+    await formStore.duplicateOriginForm(selectedForm.value.id)
+    await formStore.fetchForms()   
+    showCopyDialog.value =false
+  } catch (error) {
+    console.error('Error copying form:', error)
+  }
+}
 </script>
 
 <style scoped>
-/* บังคับให้แถวสุดท้ายมีเส้นขีดล่าง */
 .q-table__middle tbody tr:last-child td {
   border-bottom: 1px solid var(--q-border-color, rgba(0, 0, 0, 0.12));
 }

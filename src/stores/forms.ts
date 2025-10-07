@@ -128,7 +128,6 @@ export const useFormStore = defineStore('forms', () => {
   const createForm = async (form: Form) => {
     const createdRaw = await FormService.createForm(form)
     const created = normalizeForm(createdRaw)
-    if (created) forms.value.push(created)
     return created
   }
 
@@ -184,6 +183,27 @@ export const useFormStore = defineStore('forms', () => {
     return normalized
   }
 
+  const duplicateOriginForm = async (originFormId: string): Promise<Form> => {
+
+    const origin =
+      forms.value.find((f) => f.id === originFormId) ?? (await fetchFormById(originFormId))
+
+    if (!origin) throw new Error('Origin form not found')
+
+    const body = JSON.parse(JSON.stringify(origin)) as Record<string, unknown>
+    delete body['id']
+    delete body['_id']
+
+    type FormWithoutId = Omit<Form, 'id'>
+    const toCreate: Form = { ...(body as unknown as FormWithoutId)}
+    const created = await createForm(toCreate)    
+    if (!created) throw new Error('Create duplicated form failed')
+    const id = pickId(created)
+    if (!id) throw new Error('Create duplicated form failed (no id)')
+    const normalized: Form = { ...created, id }
+    return normalized   
+  }
+
   return {
     forms,
     currentForm,
@@ -196,5 +216,6 @@ export const useFormStore = defineStore('forms', () => {
     deleteForm,
     duplicateForm,
     resolveOriginId,
+    duplicateOriginForm,
   }
 })
