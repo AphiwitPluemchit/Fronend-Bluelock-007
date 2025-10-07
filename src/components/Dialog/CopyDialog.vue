@@ -5,6 +5,7 @@
   >
     <q-card class="cancel-card">
       <q-card-section>
+        <div class="text-h6">คัดลอกฟอร์มประเมิน</div>
       </q-card-section>
       <q-card-section>
         หากคุณกดยืนยัน โครงการนี้จะถูกคัดลอก
