@@ -3,8 +3,8 @@ import { ref, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import type { Program } from 'src/types/program'
 import { ProgramService } from 'src/services/program'
-import ImageDetail from './ImageDetail.vue'
-import FormMultipleDetail from './FormMultipleDetail.vue'
+import ImageDetail from './imageDetail.vue'
+import FormMultipleDetail from './formMultipleDetail.vue'
 
 const route = useRoute()
 const selectedImageFile = ref<File | null>(null)

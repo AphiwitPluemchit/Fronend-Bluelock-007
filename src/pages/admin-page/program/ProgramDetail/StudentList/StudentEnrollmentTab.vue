@@ -4,7 +4,9 @@ import { computed, onMounted, onUnmounted, ref } from 'vue'
 import { useQuasar } from 'quasar'
 import type { QTableColumn } from 'quasar'
 import { useRoute } from 'vue-router'
-import RemoveStudent from './RemoveStudent.vue'
+import RemoveStudentEnrollment from './removeStudentDialog.vue'
+import EditStudentEnrollmentDialog from './editStudentEnrollmantDialog.vue'
+
 import { ProgramService } from 'src/services/program'
 import { useEnrollmentStore } from 'src/stores/enrollment'
 import { useStudentStore } from 'src/stores/student'
@@ -15,6 +17,8 @@ import type { Pagination } from 'src/types/pagination'
 import dayjs from 'dayjs'
 import type { CheckInOut } from 'src/types/checkinout'
 import 'dayjs/locale/th'
+import type { StudentEnrollment } from 'src/types/enrollment'
+
 dayjs.locale('th')
 const $q = useQuasar()
 const isMobile = computed(() => $q.screen.width <= 600)
@@ -23,10 +27,14 @@ const route = useRoute()
 const enrollmentStore = useEnrollmentStore()
 const programId = route.params.id as string
 
+const removeDialog = ref(false)
+const editDialog = ref(false)
+
 const filterCategories1 = ref(['year', 'major', 'studentStatus'])
 const program = ref<Program | null>(null)
 const selectProgramItem = ref(-1)
 const selectProgramItemDate = ref(-1)
+const selectedStudent = ref<StudentEnrollment | null>(null)
 const query = ref<Pagination>({
   page: 1,
   limit: 5,
@@ -46,8 +54,8 @@ const formatTime = (iso: string): string => {
   return dayjs(iso).format('HH:mm น.')
 }
 const visibleColumns = computed(() => {
-  const hasFood = students.value.some(s => !!s.food && s.food.trim() !== '')
-  return columns.value.filter(col => (col.name === 'food' ? hasFood : true))
+  const hasFood = students.value.some((s) => !!s.food && s.food.trim() !== '')
+  return columns.value.filter((col) => (col.name === 'food' ? hasFood : true))
 })
 
 const pagination = ref({
@@ -106,15 +114,14 @@ const search1 = computed({
 const students = computed(() => {
   return enrollmentStore.studentEnrollments || []
 })
-
-const removeStudentFromProgram = async (studentId: string) => {
-  try {
-    await enrollmentStore.deleteEnrollmentById(studentId)
-    // ลบเสร็จ → Refresh ตาราง
-    await fetchStudents()
-  } catch (error) {
-    console.error('Failed to delete student:', error)
-  }
+const editCheckinout = (row: StudentEnrollment) => {
+  selectedStudent.value = row
+  editDialog.value = true
+}
+const removeStudentFromProgram = (id: string) => {
+  const row = students.value.find((s) => s.id === id) || null
+  selectedStudent.value = row
+  removeDialog.value = true
 }
 const programItemOptions = computed(() => {
   const items = program.value?.programItems ?? []
@@ -150,13 +157,63 @@ const programItemDatesOptions = computed(() => {
 })
 
 const baseColumns: QTableColumn[] = [
-  { name: 'index', label: 'ลำดับ', align: 'left' as const, field: 'index', style: 'width: 7%;', headerStyle: 'width: 7%;' },
-  { name: 'code',  label: 'รหัสนิสิต', field: 'code', align: 'left' as const, style: 'width: 12%;', headerStyle: 'width: 12%;' },
-  { name: 'name',  label: 'ชื่อ-สกุล', field: 'name', align: 'left' as const, style: 'width: 20%;', headerStyle: 'width: 19.5%;', classes: 'ellipsis-cell' },
-  { name: 'major', label: 'สาขา', field: 'major', align: 'left' as const, style: 'width: 7%;', headerStyle: 'width: 7.5%;' },
-  { name: 'food',  label: 'อาหาร', field: 'food', align: 'left' as const, style: 'width: 7%;', headerStyle: 'width: 7.5%;' },
-  { name: 'checkIn',  label: 'เช็คชื่อเข้า', field: 'checkIn', align: 'center' as const, style: 'width: 15%;', headerStyle: 'width: 14%;' },
-  { name: 'checkOut', label: 'เช็คชื่อออก', field: 'checkOut', align: 'center' as const, style: 'width: 15%;', headerStyle: 'width: 16%;' },
+  {
+    name: 'index',
+    label: 'ลำดับ',
+    align: 'left' as const,
+    field: 'index',
+    style: 'width: 7%;',
+    headerStyle: 'width: 7%;',
+  },
+  {
+    name: 'code',
+    label: 'รหัสนิสิต',
+    field: 'code',
+    align: 'left' as const,
+    style: 'width: 12%;',
+    headerStyle: 'width: 12%;',
+  },
+  {
+    name: 'name',
+    label: 'ชื่อ-สกุล',
+    field: 'name',
+    align: 'left' as const,
+    style: 'width: 20%;',
+    headerStyle: 'width: 19.5%;',
+    classes: 'ellipsis-cell',
+  },
+  {
+    name: 'major',
+    label: 'สาขา',
+    field: 'major',
+    align: 'left' as const,
+    style: 'width: 7%;',
+    headerStyle: 'width: 7.5%;',
+  },
+  {
+    name: 'food',
+    label: 'อาหาร',
+    field: 'food',
+    align: 'left' as const,
+    style: 'width: 7%;',
+    headerStyle: 'width: 7.5%;',
+  },
+  {
+    name: 'checkIn',
+    label: 'เช็คชื่อเข้า',
+    field: 'checkIn',
+    align: 'center' as const,
+    style: 'width: 15%;',
+    headerStyle: 'width: 14%;',
+  },
+  {
+    name: 'checkOut',
+    label: 'เช็คชื่อออก',
+    field: 'checkOut',
+    align: 'center' as const,
+    style: 'width: 15%;',
+    headerStyle: 'width: 16%;',
+  },
   { name: 'actions', label: '', field: 'actions', align: 'center' as const },
 ]
 
@@ -176,7 +233,7 @@ const columns = computed<QTableColumn[]>(() => {
   const cols = [...baseColumns]
   if (showParticipation.value) {
     // แทรกหลัง 'checkOut'
-    const afterCheckOut = cols.findIndex(c => c.name === 'checkOut') + 1
+    const afterCheckOut = cols.findIndex((c) => c.name === 'checkOut') + 1
     cols.splice(afterCheckOut, 0, participationCol)
   }
   return cols
@@ -384,11 +441,23 @@ onUnmounted(() => {
 
         <!-- ปุ่มลบ -->
         <template v-slot:body-cell-actions="props">
-          <q-td :props="props">
-            <RemoveStudent
-              :id="props.row.id"
-              @removeStudent="() => removeStudentFromProgram(props.row.enrollmentId)"
-            />
+          <q-td class="q-gutter-x-sm" key="action">
+            <q-icon
+              clickable
+              name="edit"
+              @click.stop="editCheckinout(props.row)"
+              class="bg-primary text-white q-pa-xs rounded-borders q-mr-sm"
+            >
+              <q-tooltip>แก้ไข</q-tooltip>
+            </q-icon>
+            <q-icon
+              clickable
+              name="delete"
+              @click.stop="removeStudentFromProgram(props.row.id)"
+              class="bg-red-7 text-white q-pa-xs rounded-borders q-mr-sm"
+            >
+              <q-tooltip>ลบ</q-tooltip></q-icon
+            >
           </q-td>
         </template>
         <template v-slot:body-cell-checkIn="props">
@@ -484,11 +553,6 @@ onUnmounted(() => {
                 <div v-else>-</div>
               </div>
             </div>
-
-            <RemoveStudent
-              :id="student.id"
-              @removeStudent="() => removeStudentFromProgram(student.id)"
-            />
           </q-card-section>
         </q-card>
         <div
@@ -501,6 +565,13 @@ onUnmounted(() => {
       </div>
     </div>
   </div>
+  <RemoveStudentEnrollment v-model="removeDialog" :student="selectedStudent" @removed="fetchStudents" />
+
+  <EditStudentEnrollmentDialog
+    v-model="editDialog"
+    :student="selectedStudent"
+    @updated="fetchStudents"
+  />
 </template>
 
 <style lang="scss" scoped>

@@ -3,10 +3,10 @@ import { computed, ref, onMounted, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import type { Program } from 'src/types/program'
 import { ProgramService } from 'src/services/program'
-import summaryTab from './Summary/summaryTab.vue'
-import studentListTab from './StudentList/studentListTab.vue'
-import enrollmentDetailTab from './EnrollmentDetail/enrollmentTab.vue'
-import programDetailTab from './ProgramDetail/programDetailTab.vue'
+import SummaryTab from './Summary/SummaryTab.vue'
+import StudentEnrollmentTab from './StudentList/StudentEnrollmentTab.vue'
+import EnrollmentSummaryTab from './EnrollmentDetail/EnrollmentSummaryTab.vue'
+import ProgramDetailTab from './ProgramDetail/ProgramDetailTab.vue'
 import AppBreadcrumbs from 'src/components/AppBreadcrumbs.vue'
 
 const route = useRoute()
@@ -179,7 +179,7 @@ const tabOptions = computed(() => [
 
       <q-tab-panels v-model="tab" animated class="custom-panels">
         <q-tab-panel name="program" class="q-my-md">
-          <programDetailTab
+          <ProgramDetailTab
             v-if="program"
             :program="program"
             @update-program="(updated) => (program = updated)"
@@ -187,15 +187,15 @@ const tabOptions = computed(() => [
         </q-tab-panel>
 
         <q-tab-panel name="registration" class="q-my-md">
-          <enrollmentDetailTab :program="program" />
+          <EnrollmentSummaryTab :program="program" />
         </q-tab-panel>
 
         <q-tab-panel name="students" class="q-my-md">
-          <studentListTab :search="search" :program="program" />
+          <StudentEnrollmentTab :search="search" :program="program" />
         </q-tab-panel>
 
         <q-tab-panel name="summary" class="q-my-md">
-          <summaryTab :program="program" />
+          <SummaryTab :program="program" />
         </q-tab-panel>
       </q-tab-panels>
     </div>

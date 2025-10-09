@@ -11,6 +11,7 @@ export type CheckinoutRecord = {
 }
 
 export type CheckInOut = {
+  id: string
   checkin: string | null
   checkout: string | null
   participation: string

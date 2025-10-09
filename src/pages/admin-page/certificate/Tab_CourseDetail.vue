@@ -3,7 +3,7 @@ import { ref, computed, onMounted, watch } from 'vue'
 import { useCourseStore } from 'src/stores/course'
 import { useQuasar } from 'quasar'
 import type { Course } from 'src/types/course'
-import ImageDetail from 'src/pages/admin-page/program/ProgramDetail/ProgramDetail/ImageDetail.vue'
+import ImageDetail from 'src/pages/admin-page/program/ProgramDetail/ProgramDetail/imageDetail.vue'
 const $q = useQuasar()
 const courseStore = useCourseStore()
 
