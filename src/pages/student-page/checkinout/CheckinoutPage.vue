@@ -82,7 +82,6 @@ onMounted(async () => {
     } catch (ve: unknown) {
       const vmsg = ve instanceof Error ? ve.message : String(ve)
 
-      // map ข้อความ error จาก validate ให้เหมาะสม
       if (isNotRegisteredErr(vmsg)) {
         error.value = 'คุณไม่ได้ลงทะเบียนโครงการนี้'
       } else if (isExpiredErr(vmsg)) {
@@ -97,7 +96,6 @@ onMounted(async () => {
     }
   } finally {
 
-      // ป้องกันค้างโหลดหากไม่มี error/set อื่น ๆ
       loading.value = false
   }
 })
@@ -110,7 +108,6 @@ onMounted(async () => {
       <div>
         <q-icon name="how_to_reg" size="64px" color="primary" />
       </div>
-      <!-- <div class="text-h6 text-green-7 q-mt-md">QR {{ tokenInfo?.type }}</div> -->
       <div class="text-h6 q-mt-md" :class="tokenInfo?.type === 'checkin' ? 'text-green' : tokenInfo?.type === 'checkout' ? 'text-brown' : ''">
         {{
           tokenInfo?.type === 'checkin'

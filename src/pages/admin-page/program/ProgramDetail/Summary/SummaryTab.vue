@@ -63,9 +63,6 @@ async function setDefaultDate() {
 }
 
 const fetchSamaryEnrollment = async () => {
-
-
-  // ส่ง date ตรง ๆ (ไม่มี -1/ค่าว่างแล้ว)
   query.value.date = selectProgramItemDate.value
 
   const resSum = await SammaryReportService.getSamaryEnrollment(programId, query.value.date)
@@ -73,14 +70,11 @@ const fetchSamaryEnrollment = async () => {
 }
 
 onMounted(async () => {
-  // ตั้ง default แค่ตอนเปิด/หลังโหลด (ไม่ไปยุ่ง flow อื่น)
+ 
   await setDefaultDate()
   await fetchSamaryEnrollment()
-  // TODO: โหลดข้อมูลจริงจาก API ของคุณ แล้วเซ็ตให้ rows.value
-  rows.value = [
-    { _id: '1', name: 'อบรมความรู้พื้นฐานด้าน AI', formId: '68d454e6db8ab09a41f75c55' },
-    { _id: '2', name: 'Workshop Vue + Quasar', formId: null },
-  ]
+
+
 })
 </script>
 
