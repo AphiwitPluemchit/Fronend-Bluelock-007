@@ -177,6 +177,60 @@ export const useAuthStore = defineStore('auth', {
       }
     },
 
+    // ✅ ตรวจสอบว่า access token ใกล้หมดอายุหรือไม่ (ภายใน 5 นาที)
+    isTokenExpiringSoon(): boolean {
+      const token = this.getAccessToken
+      if (!token) return true
+      try {
+        const parts = token.split('.')
+        if (parts.length !== 3) return true
+        const payload = JSON.parse(atob(parts[1] as string))
+        const expiry = payload.exp * 1000
+        const now = Date.now()
+        const fiveMinutes = 5 * 60 * 1000
+        return expiry - now < fiveMinutes
+      } catch {
+        return true
+      }
+    },
+
+    // ✅ พยายาม refresh token ก่อนเข้าถึง protected route
+    async ensureAuthenticated(): Promise<boolean> {
+      try {
+        console.log('🔐 Ensuring authentication...')
+
+        // ตรวจสอบว่ามี refresh token หรือไม่
+        const refreshToken = this.getRefreshToken
+        if (!refreshToken) {
+          console.warn('⚠️ No refresh token found')
+          return false
+        }
+
+        // ถ้า access token ยังไม่หมดอายุ ให้ผ่านไป
+        if (!this.isTokenExpired()) {
+          console.log('✅ Access token is still valid')
+          return true
+        }
+
+        console.log('🔄 Access token expired, attempting to refresh...')
+
+        // พยายาม refresh token
+        const result = await AuthService.refreshToken()
+        if (result?.accessToken && result?.refreshToken) {
+          console.log('✅ Token refreshed successfully')
+          localStorage.setItem('access_token', result.accessToken)
+          localStorage.setItem('refresh_token', result.refreshToken)
+          return true
+        }
+
+        console.warn('⚠️ Token refresh failed')
+        return false
+      } catch (err) {
+        console.error('❌ ensureAuthenticated error:', err)
+        return false
+      }
+    },
+
     // ✅ เพิ่ม method ใหม่เพื่อตรวจสอบสิทธิ์การเข้าถึง path
     canAccessPath(path: string): boolean {
       const role = this.getRole

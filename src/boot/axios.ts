@@ -64,14 +64,16 @@ function extractBackendMessage(err: AxiosError): string {
 /* ------------------ Response Interceptor ------------------ */
 let isHandling401 = false
 let isRefreshing = false
-let refreshSubscribers: Array<(token: string) => void> = []
+let refreshPromise: Promise<string | null> | null = null
+let refreshSubscribers: Array<(token: string | null) => void> = []
 
-function onRefreshed(token: string) {
+function onRefreshed(token: string | null) {
   refreshSubscribers.forEach((callback) => callback(token))
   refreshSubscribers = []
+  refreshPromise = null
 }
 
-function addRefreshSubscriber(callback: (token: string) => void) {
+function addRefreshSubscriber(callback: (token: string | null) => void) {
   refreshSubscribers.push(callback)
 }
 
@@ -129,88 +131,104 @@ export default boot(({ app, router }) => {
         if (!isRefreshing) {
           isRefreshing = true
 
-          try {
-            const refreshToken = localStorage.getItem('refresh_token')
-            if (!refreshToken) {
-              throw new Error('No refresh token')
-            }
-
-            console.log('🔄 Attempting to refresh token...')
-
-            // Call refresh token endpoint
-            const refreshResponse = await api.post<{ accessToken: string; refreshToken: string }>(
-              '/auth/refresh',
-              { refreshToken },
-              {
-                headers: {
-                  'X-Skip-Loading': 'true',
-                  'X-Skip-Auth-Redirect': 'true',
-                },
-              },
-            )
-
-            if (refreshResponse.data?.accessToken) {
-              const newAccessToken = refreshResponse.data.accessToken
-              const newRefreshToken = refreshResponse.data.refreshToken
-
-              console.log('✅ Token refreshed successfully')
-
-              // Update tokens in localStorage
-              localStorage.setItem('access_token', newAccessToken)
-              if (newRefreshToken) {
-                localStorage.setItem('refresh_token', newRefreshToken)
-              }
-
-              // Notify all waiting requests
-              onRefreshed(newAccessToken)
-
-              // Retry original request with new token
-              if (cfg.headers) {
-                cfg.headers.Authorization = `Bearer ${newAccessToken}`
-              }
-
-              isRefreshing = false
-              return api(cfg)
-            }
-
-            throw new Error('Token refresh failed')
-          } catch (refreshError) {
-            console.error('❌ Token refresh failed:', refreshError)
-            isRefreshing = false
-            refreshSubscribers = []
-
-            // Clear tokens and redirect to login
-            if (isHandling401) return Promise.reject(error)
-            isHandling401 = true
+          refreshPromise = (async () => {
             try {
-              const auth = useAuthStore()
-              const isOnLogin = router.currentRoute.value.name === 'Login'
-              auth.clearLocalStorage()
-              if (!isOnLogin) {
-                const redirect = router.currentRoute.value.fullPath
+              const refreshToken = localStorage.getItem('refresh_token')
+              if (!refreshToken) {
+                console.warn('⚠️ No refresh token found')
+                throw new Error('No refresh token')
+              }
+
+              console.log('🔄 Attempting to refresh token...')
+
+              // Call refresh token endpoint
+              const refreshResponse = await api.post<{
+                accessToken: string
+                refreshToken: string
+              }>(
+                '/auth/refresh',
+                { refreshToken },
+                {
+                  headers: {
+                    'X-Skip-Loading': 'true',
+                    'X-Skip-Auth-Redirect': 'true',
+                  },
+                },
+              )
+
+              if (refreshResponse.data?.accessToken) {
+                const newAccessToken = refreshResponse.data.accessToken
+                const newRefreshToken = refreshResponse.data.refreshToken
+
+                console.log('✅ Token refreshed successfully')
+
+                // Update tokens in localStorage
+                localStorage.setItem('access_token', newAccessToken)
+                if (newRefreshToken) {
+                  localStorage.setItem('refresh_token', newRefreshToken)
+                }
+
+                // Notify all waiting requests
+                onRefreshed(newAccessToken)
+
+                return newAccessToken
+              }
+
+              throw new Error('Token refresh failed - no access token in response')
+            } catch (refreshError) {
+              console.error('❌ Token refresh failed:', refreshError)
+
+              // Notify all waiting requests that refresh failed
+              onRefreshed(null)
+
+              // Clear tokens and redirect to login
+              if (!isHandling401) {
+                isHandling401 = true
                 try {
-                  await router.replace({ name: 'Login', query: { redirect } })
-                } catch {
-                  try {
-                    await router.replace({ path: '/', query: { redirect } })
-                  } catch {
-                    await router.replace('/')
+                  const auth = useAuthStore()
+                  const isOnLogin = router.currentRoute.value.name === 'Login'
+                  auth.clearLocalStorage()
+                  if (!isOnLogin) {
+                    const redirect = router.currentRoute.value.fullPath
+                    try {
+                      await router.replace({ name: 'Login', query: { redirect } })
+                    } catch {
+                      try {
+                        await router.replace({ path: '/', query: { redirect } })
+                      } catch {
+                        await router.replace('/')
+                      }
+                    }
                   }
+                } finally {
+                  isHandling401 = false
                 }
               }
+
+              return null
             } finally {
-              isHandling401 = false
+              isRefreshing = false
             }
-            return Promise.reject(error)
+          })()
+
+          const newToken = await refreshPromise
+
+          if (newToken && cfg.headers) {
+            cfg.headers.Authorization = `Bearer ${newToken}`
+            return api(cfg)
           }
+
+          return Promise.reject(error)
         } else {
           // Token is already being refreshed, wait for it
-          return new Promise((resolve) => {
-            addRefreshSubscriber((token: string) => {
-              if (cfg.headers) {
+          return new Promise((resolve, reject) => {
+            addRefreshSubscriber((token: string | null) => {
+              if (token && cfg.headers) {
                 cfg.headers.Authorization = `Bearer ${token}`
+                resolve(api(cfg))
+              } else {
+                reject(error)
               }
-              resolve(api(cfg))
             })
           })
         }

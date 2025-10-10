@@ -204,7 +204,16 @@ class AuthService {
       console.log('🔄 AuthService.refreshToken called')
       console.log('🎫 Refresh token exists:', !!refreshToken)
 
-      const res = await api.post<Auth>('/auth/refresh', { refreshToken })
+      const res = await api.post<Auth>(
+        '/auth/refresh',
+        { refreshToken },
+        {
+          headers: {
+            'X-Skip-Loading': 'true',
+            'X-Skip-Auth-Redirect': 'true',
+          },
+        },
+      )
       console.log('📡 Refresh Token API Response:', res)
       console.log('📊 Response data:', res.data)
 
@@ -243,7 +252,8 @@ class AuthService {
             localStorage.removeItem('user')
             break
           default:
-            showError(errorMessage)
+            // ไม่ต้อง showError เพราะ interceptor จะจัดการ
+            console.error('Refresh token error:', errorMessage)
         }
       }
 
