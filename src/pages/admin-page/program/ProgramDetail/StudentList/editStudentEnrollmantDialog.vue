@@ -129,6 +129,7 @@ import { computed, reactive, ref, watch } from 'vue'
 import { useQuasar } from 'quasar'
 import dayjs from 'dayjs'
 import type { StudentEnrollment } from 'src/types/enrollment'
+import { useEnrollmentStore } from 'src/stores/enrollment'
 // แนะนำให้มีเมธอดนี้ใน service:
 //   EnrollmentService.updateCheckRecord(payload: { recordId: string; checkin: string; checkout: string })
 
@@ -147,7 +148,7 @@ const emit = defineEmits<{
 const $q = useQuasar()
 const loading = ref(false)
 const errorMessage = ref('')
-
+const store = useEnrollmentStore()
 // v-model proxy
 const dialog = computed({
   get: () => props.modelValue,
@@ -264,7 +265,7 @@ function close() {
 
 // ===== Save: ส่งเป็น payload ต่อ 1 วัน =====
 // ถ้ามีหลายวัน จะ loop ยิงหลายครั้ง (ทีละแถว)
- function onSave() {
+ async function onSave() {
   if (!props.student?.id) {
     errorMessage.value = 'ไม่พบบันทึกการลงทะเบียนของนิสิต'
     return
@@ -294,12 +295,12 @@ function close() {
       if (noChange) continue
 
       const payload = {
-        recordId: r.recordId,
+        id: r.recordId,
         checkin: checkinISO,
         checkout: checkoutISO,
       }
       console.log(payload);
-
+      await store.updateEnrollmentCheckinCheckout(props.student.enrollmentId, payload)
       // 🔧 ปรับให้ตรงกับ service ของโปรเจกต์
       // await EnrollmentService.updateCheckRecord(payload)
     }

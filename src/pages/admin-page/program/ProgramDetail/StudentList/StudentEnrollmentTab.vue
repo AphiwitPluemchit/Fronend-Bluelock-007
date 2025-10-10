@@ -290,7 +290,7 @@ const fetchStudents = async () => {
     program.value.programItems.length > 0
   ) {
     if (selectProgramItemDate.value === -1) {
-      console.log("date = ''")
+      console.log('date = ', selectProgramItemDate.value)
       query.value.date = ''
     } else {
       console.log('date = ', selectProgramItemDate.value)
@@ -565,7 +565,11 @@ onUnmounted(() => {
       </div>
     </div>
   </div>
-  <RemoveStudentEnrollment v-model="removeDialog" :student="selectedStudent" @removed="fetchStudents" />
+  <RemoveStudentEnrollment
+    v-model="removeDialog"
+    :student="selectedStudent"
+    @removed="fetchStudents"
+  />
 
   <EditStudentEnrollmentDialog
     v-model="editDialog"

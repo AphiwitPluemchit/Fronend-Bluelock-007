@@ -14,11 +14,9 @@ const error = ref('')
 const programStore = useStudentProgramstore()
 
 /** ---------- Helpers ---------- */
-const isNotRegisteredErr = (msg: string) =>
-  /ไม่ได้ลงทะเบียน/i.test(msg)
+const isNotRegisteredErr = (msg: string) => /ไม่ได้ลงทะเบียน/i.test(msg)
 
-const isExpiredErr = (msg: string) =>
-  /หมดอายุ/i.test(msg)
+const isExpiredErr = (msg: string) => /หมดอายุ/i.test(msg)
 
 const isInvalidQrErr = (msg: string) =>
   /qr\s*ไม่ถูกต้อง/i.test(msg) || /qr\s*ไม่ถูกต้องหรือหมดอายุ/i.test(msg)
@@ -95,20 +93,35 @@ onMounted(async () => {
       return
     }
   } finally {
-
-      loading.value = false
+    loading.value = false
   }
 })
 </script>
 
-
 <template>
   <q-page class="flex flex-center q-pa-md checkinout-page">
     <q-card class="q-pa-xl text-center checkinout-container">
+      <q-btn
+        flat
+        class="text-primary q-mb-md under-line"
+        style="text-decoration: underline"
+        label="กลับไปหน้าหลัก"
+        to="/home"
+        align="left"
+      />
       <div>
         <q-icon name="how_to_reg" size="64px" color="primary" />
       </div>
-      <div class="text-h6 q-mt-md" :class="tokenInfo?.type === 'checkin' ? 'text-green' : tokenInfo?.type === 'checkout' ? 'text-brown' : ''">
+      <div
+        class="text-h6 q-mt-md"
+        :class="
+          tokenInfo?.type === 'checkin'
+            ? 'text-green'
+            : tokenInfo?.type === 'checkout'
+              ? 'text-brown'
+              : ''
+        "
+      >
         {{
           tokenInfo?.type === 'checkin'
             ? 'เช็คชื่อเข้า'

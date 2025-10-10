@@ -1,8 +1,27 @@
 import { api } from 'boot/axios'
-
+import { Notify } from 'quasar'
+import type { CheckInOut } from 'src/types/checkinout'
 import type { StudentEnrollment, EnrollmentCheckResponse } from 'src/types/enrollment'
 import type { Pagination, PaginationResponse } from 'src/types/pagination'
 
+const showError = (message: string) => {
+  Notify.create({
+    message,
+    type: 'negative',
+    position: 'bottom',
+    timeout: 3000,
+  })
+}
+
+// 🔔 แสดงข้อความ success
+const showSuccess = (message: string) => {
+  Notify.create({
+    message,
+    type: 'positive',
+    position: 'bottom',
+    timeout: 3000,
+  })
+}
 export class EnrollmentService {
   static path = 'enrollments'
 
@@ -10,18 +29,33 @@ export class EnrollmentService {
     try {
       console.log('Creating enrollment:', obj)
       const res = await api.post(this.path, obj)
+      showSuccess('')
       return res.status
     } catch (error) {
+      showError('')
       console.error('Error creating enrollment:', error)
       throw error
+    }
+  }
+
+  static async updateOne(enrollmentId: string, data: Partial<CheckInOut>) {
+    try {
+      const res = await api.patch(`${this.path}/${enrollmentId}/checkinout`, data)
+      showSuccess('')
+      return res.data
+    } catch (error) {
+      showError('')
+      console.error(`Error update enrollment ID: ${enrollmentId}`, error)
     }
   }
 
   static async removeOne(id: string) {
     try {
       const res = await api.delete(`${this.path}/${id}`)
+      showSuccess('')
       return res.status
     } catch (error) {
+      showError('')
       console.error(`Error deleting enrollment ID: ${id}`, error)
       throw error
     }
@@ -125,7 +159,9 @@ export class EnrollmentService {
         ...(skill && skill.length > 0 ? { skill: skill.join(',') } : {}),
       }
       console.log('Sending params:', queryParams)
-      const res = await api.get(`${this.path}/history/student/${studentId}`, { params: queryParams })
+      const res = await api.get(`${this.path}/history/student/${studentId}`, {
+        params: queryParams,
+      })
       console.log('Fetched enrollments:', res.data)
       return res.data
     } catch (error) {

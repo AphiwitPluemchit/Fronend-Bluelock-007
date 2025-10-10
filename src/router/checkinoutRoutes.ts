@@ -31,11 +31,6 @@ const protectedStudentRoutes: RouteRecordRaw[] = [
     meta: { role: EnumUserRole.STUDENT },
     children: [
       {
-        path: '',
-        name: 'student-forms-list',
-        component: () => import('pages/student-page/forms/FormsListPage.vue'),
-      },
-      {
         path: ':id',
         name: 'student-form-fill',
         component: () => import('pages/student-page/forms/FormFillPage.vue'),
