@@ -33,7 +33,9 @@ const error = ref('')
 
 onMounted(async () => {
   try {
-    const token = route.query.token as string
+    // Prefer accessToken param; fallback to legacy 'token'
+    const accessTokenParam = (route.query.accessToken as string) || (route.query.token as string)
+    const refreshTokenParam = route.query.refreshToken as string
     const errorParam = route.query.error as string
 
     // 1. Handle error from backend
@@ -42,14 +44,19 @@ onMounted(async () => {
     }
 
     // 2. Validate token
-    if (!token) {
+    if (!accessTokenParam) {
       throw new Error('ไม่พบ token จากการเข้าสู่ระบบ')
     }
 
     // 3. Store token and parse JWT
-    const success = auth.loginWithToken(token)
+    const success = auth.loginWithToken(accessTokenParam)
     if (!success) {
       throw new Error('ไม่สามารถประมวลผล token ได้')
+    }
+
+    // 3.a store refresh token if provided
+    if (refreshTokenParam) {
+      localStorage.setItem('refresh_token', refreshTokenParam)
     }
 
     // 4. Fetch full user profile from API
