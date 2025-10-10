@@ -191,6 +191,65 @@ class AuthService {
   static async fetchProfile(): Promise<Auth | null> {
     return this.getProfile()
   }
+
+  // ✅ Refresh access token using refresh token
+  static async refreshToken(): Promise<Auth | null> {
+    try {
+      const refreshToken = localStorage.getItem('refresh_token')
+      if (!refreshToken) {
+        console.warn('⚠️ No refresh token found')
+        return null
+      }
+
+      console.log('🔄 AuthService.refreshToken called')
+      console.log('🎫 Refresh token exists:', !!refreshToken)
+
+      const res = await api.post<Auth>('/auth/refresh', { refreshToken })
+      console.log('📡 Refresh Token API Response:', res)
+      console.log('📊 Response data:', res.data)
+
+      if (res.data?.accessToken && res.data?.refreshToken) {
+        console.log('✅ Token refresh successful')
+        console.log('🎫 New Access Token:', res.data.accessToken.substring(0, 20) + '...')
+        console.log('🔄 New Refresh Token:', res.data.refreshToken.substring(0, 20) + '...')
+
+        // Update tokens in localStorage
+        localStorage.setItem('access_token', res.data.accessToken)
+        localStorage.setItem('refresh_token', res.data.refreshToken)
+
+        return res.data
+      }
+
+      console.warn('⚠️ Refresh token response incomplete:', res.data)
+      return null
+    } catch (error) {
+      console.error('💥 AuthService refreshToken error:', error)
+
+      const axiosError = error as AxiosError<{ code: string; error: string }>
+      if (axiosError.response?.data?.code) {
+        const errorCode = axiosError.response.data.code
+        const errorMessage = axiosError.response.data.error || 'เกิดข้อผิดพลาด'
+
+        console.log('🚨 Refresh error code:', errorCode, 'Message:', errorMessage)
+
+        switch (errorCode) {
+          case 'INVALID_TOKEN':
+          case 'TOKEN_NOT_FOUND':
+          case 'USER_NOT_FOUND':
+            console.warn('⚠️ Token refresh failed - user needs to login again')
+            // Clear tokens and redirect to login
+            localStorage.removeItem('access_token')
+            localStorage.removeItem('refresh_token')
+            localStorage.removeItem('user')
+            break
+          default:
+            showError(errorMessage)
+        }
+      }
+
+      return null
+    }
+  }
 }
 
 export default AuthService
