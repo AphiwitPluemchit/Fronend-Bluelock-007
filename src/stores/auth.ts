@@ -319,6 +319,30 @@ export const useAuthStore = defineStore('auth', {
       }
     },
 
+    // ✅ ดึงข้อมูลโปรไฟล์ผู้ใช้จาก API /auth/me
+    async fetchProfile(): Promise<boolean> {
+      try {
+        console.log('🔍 Fetching user profile from API...')
+
+        const response = await AuthService.getProfile()
+        if (!response || !response.user) {
+          console.error('❌ No user data in response')
+          return false
+        }
+
+        console.log('✅ Profile fetched successfully:', response.user)
+
+        // อัปเดต localStorage ด้วยข้อมูลล่าสุด
+        localStorage.setItem('user', JSON.stringify(response.user))
+
+        console.log('💾 User data updated in localStorage')
+        return true
+      } catch (err) {
+        console.error('❌ fetchProfile error:', err)
+        return false
+      }
+    },
+
     // ✅ สร้าง session security report
     getSecurityReport(): {
       isValid: boolean

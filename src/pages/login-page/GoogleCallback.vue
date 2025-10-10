@@ -70,6 +70,16 @@ onMounted(async () => {
     if (success) {
       console.log('✅ Google login successful')
       
+      // ✅ ดึงข้อมูล user ล่าสุดจาก API
+      console.log('🔄 Fetching user profile from API...')
+      const profileSuccess = await auth.fetchProfile()
+      
+      if (!profileSuccess) {
+        console.warn('⚠️ Failed to fetch profile, using token data')
+      } else {
+        console.log('✅ User profile updated from API')
+      }
+      
       // Get fresh user data after login
       const userRole = auth.getRole
       const userName = auth.getName

@@ -314,7 +314,20 @@ const handleLogin = async () => {
     const result = await auth.login()
 
     if (result) {
-      console.log('✅ Login successful, checking for redirect...')
+      console.log('✅ Login successful')
+      
+      // ✅ ดึงข้อมูล user ล่าสุดจาก API (Optional - login already returns full data)
+      // แต่ถ้าต้องการให้ consistent กับ Google login ก็เรียกได้
+      console.log('🔄 Fetching user profile from API...')
+      const profileSuccess = await auth.fetchProfile()
+      
+      if (!profileSuccess) {
+        console.warn('⚠️ Failed to fetch profile, using login response data')
+      } else {
+        console.log('✅ User profile refreshed from API')
+      }
+      
+      console.log('Checking for redirect...')
       const redirect = localStorage.getItem('redirectAfterLogin')
       if (redirect) {
         console.log('🔄 Redirecting to stored path:', redirect)

@@ -161,15 +161,35 @@ class AuthService {
     }
   }
 
-  static async fetchProfile(): Promise<Auth | null> {
+  // ✅ ดึงข้อมูลโปรไฟล์ผู้ใช้จาก /auth/me
+  static async getProfile(): Promise<Auth | null> {
     try {
-      const { data } = await api.get<Auth>('/auth/profile')
-      return data || null
-    } catch (err) {
-      showError('ไม่สามารถโหลดข้อมูลผู้ใช้ได้')
-      console.error('Fetch profile failed:', err)
+      console.log('🔍 AuthService.getProfile called')
+      console.log('🎫 Token exists:', !!localStorage.getItem('access_token'))
+
+      const res = await api.get<Auth>('/auth/me')
+      console.log('📡 Profile API Response:', res)
+      console.log('📊 Profile data:', res.data)
+
+      return res.data || null
+    } catch (error) {
+      console.error('💥 AuthService getProfile error:', error)
+
+      const axiosError = error as AxiosError<{ status: number }>
+      if (axiosError.response?.status === 401) {
+        console.warn('⚠️ Unauthorized - token may be invalid or expired')
+        // ไม่ต้อง showError เพราะ interceptor จะจัดการ
+      } else {
+        showError('ไม่สามารถโหลดข้อมูลผู้ใช้ได้')
+      }
+
       return null
     }
+  }
+
+  // Deprecated: ใช้ getProfile() แทน
+  static async fetchProfile(): Promise<Auth | null> {
+    return this.getProfile()
   }
 }
 
