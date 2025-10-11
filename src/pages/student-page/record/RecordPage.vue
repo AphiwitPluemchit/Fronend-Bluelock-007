@@ -5,6 +5,7 @@ import { useAuthStore } from 'src/stores/auth'
 import { StudentService } from 'src/services/student'
 // import type { CheckinoutRecord } from 'src/types/checkinout'
 import ProgramHistory from 'src/pages/student-page/record/programHistory.vue'
+import CertificateHistory from 'src/pages/student-page/record/CertificateHistory.vue'
 
 const auth = useAuthStore()
 // const $q = useQuasar()
@@ -248,14 +249,6 @@ onMounted(async () => {
         <div class="row justify-between items-center q-mb-sm" style="margin-top: 20px">
           <div class="textsubtitle">ประวัติการอบรม</div>
         </div>
-
-        <!-- <q-card-section class="bg-primary q-mb-md">
-            <div class="text-h6 text-bold text-white">
-                <q-icon :name="programColors.academic.icon" class="q-mr-sm" />
-                ประวัติการอบรม
-              </div>
-            </q-card-section> -->
-
         <div>
           <q-tabs v-model="tab" align="right" class="custom-tabs" indicator-color="transparent">
             <q-tab name="program" label="โครงการ" />
@@ -266,10 +259,11 @@ onMounted(async () => {
             <q-tab-panel name="program" class="q-my-none">
               <ProgramHistory />
             </q-tab-panel>
-            <q-tab-panel name="certificate" class="q-my-none"> ประวัติการยื่นใบเซอร์ </q-tab-panel>
+            <q-tab-panel name="certificate" class="q-my-none">
+              <CertificateHistory />
+            </q-tab-panel>
           </q-tab-panels>
         </div>
-        <!-- </q-card> -->
       </div>
     </div>
   </q-page>
