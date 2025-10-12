@@ -81,11 +81,10 @@ const viewDetail = (row: UploadCertificate) => {
   console.log(row)
 }
 
-const handleConfirm = (updated: typeof selectedCert.value & { status: string }) => {
-  const found = rows.value.find((c) => c.id === updated.id)
-  if (found) {
-    found.status = updated.status
-  }
+const handleConfirm = async () => {
+  // Refresh ข้อมูลหลังจากอัปเดตสถานะสำเร็จ
+  await fetchCertificates()
+  showDialog.value = false
 }
 
 //Mock up
@@ -230,10 +229,10 @@ onMounted(async () => {
         </template>
         <!-- no data -->
         <template v-slot:no-data>
-            <div class="full-width text-center q-pa-md text-grey" style="font-size: 20px">
-              ไม่มีรายชื่อนิสิตที่อัปโหลดใบประกาศนียบัตร
-            </div>
-          </template>
+          <div class="full-width text-center q-pa-md text-grey" style="font-size: 20px">
+            ไม่มีรายชื่อนิสิตที่อัปโหลดใบประกาศนียบัตร
+          </div>
+        </template>
       </q-table>
       <ManageCerDialog v-model="showDialog" :data="selectedCert" @confirm="handleConfirm" />
     </section>
