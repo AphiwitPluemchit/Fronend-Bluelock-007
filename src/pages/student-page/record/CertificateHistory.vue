@@ -31,8 +31,8 @@ const formatDateTime = (iso?: string) => {
       year: '2-digit',
       month: '2-digit',
       day: '2-digit',
-      hour: '2-digit',
-      minute: '2-digit',
+      // hour: '2-digit',
+      // minute: '2-digit',
     })
   } catch {
     return d.toISOString()
@@ -169,13 +169,13 @@ onMounted(async () => {
           <div class="text-weight-medium text-subtitle2 ellipsis-2 q-mb-xs label">
             <q-icon name="event" size="18px" />
             วันที่อนุมัติ :
-            {{ history.status === HC_STATUS.APPROVED ? formatDateTime(history.changeAt) : '-' }}
+            {{ formatDateTime(history.changeAt) }}
           </div>
 
           <div class="text-weight-medium text-subtitle2 ellipsis-2 q-mb-xs label">
             <q-icon name="schedule" size="18px" />
             จำนวนชั่วโมง :
-            {{ history.status === HC_STATUS.APPROVED ? history.hourChange : '-' }}
+            {{ history.hourChange }}
           </div>
 
           <!-- หมายเหตุ (ถ้ามี) -->
