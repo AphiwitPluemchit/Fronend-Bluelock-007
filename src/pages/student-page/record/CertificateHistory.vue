@@ -1,8 +1,7 @@
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, watch, onUnmounted } from 'vue'
 import { useAuthStore } from 'src/stores/auth'
 import { useHourHistoryStore } from 'src/stores/hourHistory'
-import { HC_STATUS } from 'src/types/hourHistory'
 import type { HourChangeHistory } from 'src/types/hourHistory'
 import CertificateStatusType from 'src/components/CertificateStatusType.vue'
 import ProgramType from 'src/components/programType.vue'
@@ -62,6 +61,32 @@ const onSearch = async () => {
   hourHistoryStore.params.page = 1
   await fetchCertificateHistory()
 }
+
+// Debounce typing: perform search after 300ms of inactivity
+let searchTimer: ReturnType<typeof setTimeout> | null = null
+const DEBOUNCE_MS = 600
+
+watch(searchText, () => {
+  // clear previous timer
+  if (searchTimer) {
+    clearTimeout(searchTimer)
+    searchTimer = null
+  }
+
+  // schedule new search
+  searchTimer = setTimeout(async () => {
+    // only run if searchText changed (still same behavior as onSearch)
+    await onSearch()
+    searchTimer = null
+  }, DEBOUNCE_MS)
+})
+
+onUnmounted(() => {
+  if (searchTimer) {
+    clearTimeout(searchTimer)
+    searchTimer = null
+  }
+})
 
 // Apply filters from dialog
 const applyFilters = async (filters: { skillType: string[]; status: string[] }) => {
