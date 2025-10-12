@@ -42,15 +42,29 @@ export const useHourHistoryStore = defineStore('hourHistory', () => {
   /**
    * ดึงข้อมูล program history
    */
-  const fetchProgramHistories = async (studentId?: string) => {
+  /**
+   * ดึงข้อมูล program history
+   * @param studentId - optional student id
+   * @param paramsOverride - optional local params to avoid mutating the shared store.params
+   */
+  const fetchProgramHistories = async (
+    studentId?: string,
+    paramsOverride?: Partial<HourHistoryParams>,
+  ) => {
     loading.value = true
     try {
+      // Merge defaults from store params with any local overrides provided by the caller
+      const merged: HourHistoryParams = {
+        ...(params.value || {}),
+        ...(paramsOverride || {}),
+      }
+
       const queryParams: Record<string, string | number> = {}
 
-      if (params.value.page) queryParams.page = params.value.page
-      if (params.value.limit) queryParams.limit = params.value.limit
-      if (params.value.search) queryParams.search = params.value.search
-      if (params.value.status) queryParams.status = params.value.status
+      if (merged.page) queryParams.page = merged.page
+      if (merged.limit) queryParams.limit = merged.limit
+      if (merged.search) queryParams.search = merged.search
+      if (merged.status) queryParams.status = merged.status
       if (studentId) queryParams.studentId = studentId
 
       const res = await HourHistoryService.getProgramHistory(queryParams)

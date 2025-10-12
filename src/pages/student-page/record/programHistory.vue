@@ -1,44 +1,24 @@
 <script setup lang="ts">
 import EnrollmentType from 'src/components/enrollmentType.vue'
 import ProgramType from 'src/components/programType.vue'
-import FilterDialog from 'src/components/Dialog/FilterDialog.vue'
+import HourChangeFilterDialog from 'src/components/Dialog/HourChangeFilterDialog.vue'
 
-import { EnrollmentService } from 'src/services/enrollment'
 import { useAuthStore } from 'src/stores/auth'
-import type { Pagination } from 'src/types/pagination'
-import type { ProgramHistory } from 'src/types/program'
-import { onMounted, ref } from 'vue'
+import { useHourHistoryStore } from 'src/stores/hourHistory'
+import type { HourChangeHistory } from 'src/types/hourHistory'
+import { ref, computed, onMounted, watch, onUnmounted } from 'vue'
 import { useRouter } from 'vue-router'
+
 const router = useRouter()
 const auth = useAuthStore()
-const allPrograms = ref<ProgramHistory[]>([])
-const showFilterDialog = ref(false)
-const filterCategories = ref(['categoryProgram'])
-const selectedFilters = ref({
-  categoryProgram: [] as string[],
-})
-const query = ref<Pagination>({
-  page: 1,
-  limit: -1,
-  search: '',
-  sortBy: '_id',
-  order: 'desc',
-  skill: [],
-  programState: ['open', 'close'],
-  major: [],
-  studentYear: [],
-})
-interface SelectedFilters {
-  categoryProgram: string[]
-}
-const onClick = async (id: string) => {
-  await router.push(`/Student/Program/MyProgramDetail/${id}`)
-}
+const hourHistoryStore = useHourHistoryStore()
 
-const getProgramItemStatus = (program: ProgramHistory): number => {
-  const status = program?.programItems?.[0]?.status
-  return typeof status === 'number' ? status : 1
-}
+// Simple, shared-like state similar to CertificateHistory
+const searchText = ref('')
+const selectedFilters = ref({ skillType: [] as string[], status: [] as string[] })
+
+const histories = computed(() => hourHistoryStore.histories)
+const loading = computed(() => hourHistoryStore.loading)
 
 const formatDateTime = (iso?: string) => {
   if (!iso) return '-'
@@ -48,47 +28,80 @@ const formatDateTime = (iso?: string) => {
       year: '2-digit',
       month: '2-digit',
       day: '2-digit',
-      hour: '2-digit',
-      minute: '2-digit',
+      // hour: '2-digit',
+      // minute: '2-digit',
     })
   } catch {
     return d.toISOString()
   }
 }
-const getApprovedAt = (program: ProgramHistory): string | undefined => {
-  const item = program?.programItems?.[0]
-  if (!item) return '-'
 
-  // 1) ถ้า Backend ส่งมาเป็นฟิลด์ตรง ๆ เลย
-  if (item.approvedAt) return item.approvedAt
+const typeStripeClass = (history: HourChangeHistory) => {
+  return history.skillType === 'hard' ? 'stripe--blue' : 'stripe--green'
 }
 
-// สีแถบซ้ายตามประเภทกิจกรรม
-const typeStripeClass = (p: ProgramHistory) => {
-  const t = p.type === 'academic' || p?.skill === 'hard' ? 'stripe--blue' : 'stripe--green'
-  return t
+const onClick = async (id: string) => {
+  await router.push(`/Student/Program/MyProgramDetail/${id}`)
 }
 
-// ชั่วโมง (เอาจาก programItems[0].hour)
-const getHours = (p: ProgramHistory): number | undefined => {
-  const h = p?.programItems?.[0]?.hour
-  return typeof h === 'number' ? h : undefined
+// Search & debounce
+const onSearch = async () => {
+  hourHistoryStore.params.search = searchText.value
+  hourHistoryStore.params.page = 1
+  await fetchProgramHistory()
 }
-const applyFilters = (filters: SelectedFilters) => {
-  selectedFilters.value = filters
-}
-const fetchData = async () => {
-  try {
-    const studentId = `${auth.getUser?.id}`
-    const response = await EnrollmentService.getEnrollmentsByStudentID(studentId, query.value)
-    allPrograms.value = response.data
-    // programs.value = response.data
-  } catch (error) {
-    console.error('เกิดข้อผิดพลาดในการโหลดข้อมูลโครงการ:', error)
+
+let searchTimer: ReturnType<typeof setTimeout> | null = null
+const DEBOUNCE_MS = 300
+
+watch(searchText, () => {
+  if (searchTimer) {
+    clearTimeout(searchTimer)
+    searchTimer = null
   }
+  searchTimer = setTimeout(() => {
+    void onSearch()
+    searchTimer = null
+  }, DEBOUNCE_MS)
+})
+
+onUnmounted(() => {
+  if (searchTimer) {
+    clearTimeout(searchTimer)
+    searchTimer = null
+  }
+})
+
+// Apply filters from dialog
+const applyFilters = async (filters: { skillType: string[]; status: string[] }) => {
+  selectedFilters.value = filters
+
+  if (filters.status.length > 0) {
+    hourHistoryStore.params.status = filters.status.join(',')
+  } else {
+    delete hourHistoryStore.params.status
+  }
+
+  hourHistoryStore.params.page = 1
+  await fetchProgramHistory()
 }
+
+// Frontend skillType filter (if backend doesn't support it)
+const filteredHistories = computed(() => {
+  if (!selectedFilters.value.skillType || selectedFilters.value.skillType.length === 0)
+    return histories.value
+  return histories.value.filter((h) => selectedFilters.value.skillType.includes(h.skillType))
+})
+
+// Fetch program histories (wrapper)
+const fetchProgramHistory = async () => {
+  const studentId = auth.getUser?.id
+  if (!studentId) return
+  await hourHistoryStore.fetchProgramHistories(studentId)
+}
+
 onMounted(async () => {
-  await fetchData()
+  await fetchProgramHistory()
 })
 </script>
 <template>
@@ -99,11 +112,12 @@ onMounted(async () => {
       <q-input
         dense
         outlined
-        v-model="query.search"
+        v-model="searchText"
         placeholder="ค้นหา ชื่อโครงการ"
         class="q-mr-sm searchbox"
         :style="{ boxShadow: 'none' }"
         clearable
+        @keyup.enter="onSearch"
       >
         <template v-slot:append>
           <q-icon name="search" />
@@ -111,60 +125,65 @@ onMounted(async () => {
       </q-input>
 
       <div class="filter-btn-wrapper">
-        <FilterDialog
-          :model-value="showFilterDialog"
-          :categories="filterCategories"
-          @apply="applyFilters"
-          :years="query.studentYear || []"
-          :majors="query.major || []"
-          :status-programs="query.programState || []"
-          :category-programs="selectedFilters.categoryProgram"
-        />
+        <HourChangeFilterDialog @apply="applyFilters" />
       </div>
     </div>
   </div>
+
   <div class="column q-gutter-md">
+    <!-- Loading -->
+    <div v-if="loading" class="row justify-center q-my-lg">
+      <q-spinner color="primary" size="3em" />
+    </div>
+
     <!-- การ์ดต่อกิจกรรม -->
-    <q-card
-      v-for="(program, idx) in allPrograms"
-      :key="idx"
-      class="program-card cursor-pointer"
-      flat
-      bordered
-      @click="onClick(program.id!)"
-    >
-      <div class="program-card__stripe" :class="typeStripeClass(program)"></div>
+    <template v-else-if="filteredHistories && filteredHistories.length > 0">
+      <q-card
+        v-for="history in filteredHistories"
+        :key="history.id"
+        class="program-card"
+        flat
+        bordered
+        @click="onClick(history.sourceId)"
+      >
+        <div class="program-card__stripe" :class="typeStripeClass(history)"></div>
 
-      <q-card-section class="q-pt-md q-pb-sm">
-        <!-- แถวบน: สถานะซ้าย / ทักษะขวา -->
-        <div class="row items-center justify-between q-mb-sm">
-          <div class="row items-center q-gutter-xs">
-            <EnrollmentType :status="getProgramItemStatus(program)" />
+        <q-card-section class="q-pt-md q-pb-sm">
+          <div class="row items-center justify-between q-mb-sm">
+            <div class="row items-center q-gutter-xs">
+              <EnrollmentType :status="/* map to numeric if needed */ 1" />
+            </div>
+            <ProgramType
+              v-if="history.skillType === 'hard' || history.skillType === 'soft'"
+              :skill="history.skillType === 'hard' ? 'hardSkill' : 'softSkill'"
+            />
           </div>
-          <ProgramType
-            v-if="program.skill === 'hard' || program.skill === 'soft'"
-            :skill="program.skill === 'hard' ? 'hardSkill' : 'softSkill'"
-          />
-        </div>
 
-        <!-- ชื่อกิจกรรม -->
-        <div class="text-weight-medium text-body1 ellipsis-2  q-mb-sm" :title="program.name">
-          {{ program.name }}
-        </div>
+          <div class="text-weight-medium text-body1 ellipsis-2 q-mb-sm" :title="history.title">
+            {{ history.title }}
+          </div>
 
-        <!-- รายละเอียดวันที่อนุมัติ / ชั่วโมง -->
-        <div class="text-weight-medium text-subtitle2 ellipsis-2 q-mb-xs label">
-          <q-icon name="event" size="18px" /> 
-            วันที่อนุมัติ :
-            {{ getApprovedAt(program) ? formatDateTime(getApprovedAt(program)!) : '-' }}
-        </div>
+          <div class="text-weight-medium text-subtitle2 ellipsis-2 q-mb-xs label">
+            <q-icon name="event" size="18px" />
+            วันที่อนุมัติ : {{ history.changeAt ? formatDateTime(history.changeAt) : '-' }}
+          </div>
 
-        <div class="text-weight-medium text-subtitle2 ellipsis-2 q-mb-xs  label">
-          <q-icon name="schedule" size="18px" />
-            จำนวนชั่วโมง : {{ getApprovedAt(program) ? getHours(program) : '-' }}
-        </div>
-      </q-card-section>
-    </q-card>
+          <div class="text-weight-medium text-subtitle2 ellipsis-2 q-mb-xs label">
+            <q-icon name="schedule" size="18px" />
+            จำนวนชั่วโมง : {{ history.hourChange }}
+          </div>
+        </q-card-section>
+      </q-card>
+    </template>
+
+    <!-- Empty State -->
+    <div v-else class="row justify-center q-my-lg">
+      <div class="text-center">
+        <q-icon name="assignment" size="4em" color="grey-5" />
+        <div class="text-h6 text-grey-6 q-mt-md">ไม่พบประวัติโครงการ</div>
+        <div class="text-caption text-grey-5">ยังไม่มีการบันทึกโครงการในระบบ</div>
+      </div>
+    </div>
   </div>
 </template>
 <style scoped>

@@ -73,10 +73,9 @@ watch(searchText, () => {
     searchTimer = null
   }
 
-  // schedule new search
-  searchTimer = setTimeout(async () => {
-    // only run if searchText changed (still same behavior as onSearch)
-    await onSearch()
+  // schedule new search (call async onSearch but don't return its Promise to setTimeout)
+  searchTimer = setTimeout(() => {
+    void onSearch()
     searchTimer = null
   }, DEBOUNCE_MS)
 })
