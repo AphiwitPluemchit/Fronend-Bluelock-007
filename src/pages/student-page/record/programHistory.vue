@@ -141,7 +141,7 @@ onMounted(async () => {
       <q-card
         v-for="history in filteredHistories"
         :key="history.id"
-        class="program-card"
+        class="program-card cursor-pointer"
         flat
         bordered
         @click="onClick(history.sourceId)"
