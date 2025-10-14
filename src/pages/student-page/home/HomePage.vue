@@ -126,9 +126,9 @@ onMounted(async () => {
                 <div class="image-wrapper">
                   <q-img
                     :src="
-                      item.activity
-                        ? api.defaults.baseURL + '/uploads/program/images/' + item.activity.file
-                        : ''
+                      item?.activity && item.activity.file
+                        ? `${api.defaults.baseURL}/uploads/program/images/${item.activity.file}`
+                        : `${api.defaults.baseURL}/uploads/no-image.jpg`
                     "
                     class="activity-image"
                   />

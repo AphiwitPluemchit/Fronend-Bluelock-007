@@ -59,7 +59,11 @@ const getProgramRooms = (programItems: ProgramItem[] | null | undefined): string
       <!-- รูปโครงการ -->
       <div :class="isMobile ? 'full-width' : 'col-4'">
         <q-img
-          :src="baseurl + '/uploads/program/images/' + myProgram.file"
+          :src="
+            myProgram?.file
+              ? `${baseurl}/uploads/program/images/${myProgram.file}`
+              : `${baseurl}/uploads/no-image.jpg`
+          "
           :ratio="4 / 3"
           class="program-img"
         />
