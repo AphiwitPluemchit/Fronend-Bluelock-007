@@ -1,5 +1,6 @@
 import { api } from 'boot/axios'
 import { Notify } from 'quasar'
+import type { AxiosError } from 'axios'
 import type { CheckInOut } from 'src/types/checkinout'
 import type { StudentEnrollment, EnrollmentCheckResponse } from 'src/types/enrollment'
 import type { Pagination, PaginationResponse } from 'src/types/pagination'
@@ -22,91 +23,105 @@ const showSuccess = (message: string) => {
     timeout: 3000,
   })
 }
+const getErrorMessage = (error: unknown, defaultMessage: string): string => {
+  if (typeof error === 'object' && error !== null && 'response' in error) {
+    const axiosErr = error as AxiosError<{ message?: string }>
+    return axiosErr.response?.data?.message ?? defaultMessage
+  }
+  return defaultMessage
+}
 export class EnrollmentService {
   static path = 'enrollments'
 
-  static async enrollment(obj: object) {
+  static async enrollment(obj: object): Promise<number> {
     try {
-      console.log('Creating enrollment:', obj)
       const res = await api.post(this.path, obj)
-      showSuccess('')
+      showSuccess('ลงทะเบียนสำเร็จ')
       return res.status
-    } catch (error) {
-      showError('')
+    } catch (error: unknown) {
+      const message = getErrorMessage(error, 'ลงทะเบียนไม่สำเร็จ')
+      showError(message)
       console.error('Error creating enrollment:', error)
       throw error
     }
   }
-
-  static async updateOne(enrollmentId: string, data: Partial<CheckInOut>) {
+  // 🔹 อัปเดต CheckInOut
+  static async updateOne(enrollmentId: string, data: Partial<CheckInOut>): Promise<unknown> {
     try {
       const res = await api.patch(`${this.path}/${enrollmentId}/checkinout`, data)
-      showSuccess('')
+      showSuccess('อัปเดตสถานะการเช็คชื่อสำเร็จ')
       return res.data
-    } catch (error) {
-      showError('')
+    } catch (error: unknown) {
+      const message = getErrorMessage(error, 'อัปเดตสถานะไม่สำเร็จ')
+      showError(message)
       console.error(`Error update enrollment ID: ${enrollmentId}`, error)
-    }
-  }
-
-  static async removeOne(id: string) {
-    try {
-      const res = await api.delete(`${this.path}/${id}`)
-      showSuccess('')
-      return res.status
-    } catch (error) {
-      showError('')
-      console.error(`Error deleting enrollment ID: ${id}`, error)
       throw error
     }
   }
 
-  static async getEnrollmentsByProgramID(programItemId: string, params: Pagination) {
-    const { studentStatus, major, studentYear, ...rest } = params
+// 🔹 ยกเลิกการลงทะเบียน
+static async removeOne(id: string): Promise<number> {
+  try {
+    const res = await api.delete(`${this.path}/${id}`)
+    showSuccess('ยกเลิกลงทะเบียนสำเร็จ')
+    return res.status
+  } catch (error: unknown) {
+    const message = getErrorMessage(error, 'ยกเลิกลงทะเบียนไม่สำเร็จ')
+    showError(message)
+    console.error(`Error deleting enrollment ID: ${id}`, error)
+    throw error
+  }
+}
 
+  // 🔹 ดึงรายชื่อนักศึกษาตาม ProgramItem
+  static async getEnrollmentsByProgramID(
+    programItemId: string,
+    params: Pagination,
+  ): Promise<PaginationResponse<StudentEnrollment>> {
+    const { studentStatus, major, studentYear, ...rest } = params
     const queryParams = {
       ...rest,
-      ...(studentStatus && studentStatus.length > 0
-        ? { studentStatus: studentStatus.join(',') }
-        : {}),
-      ...(major && major.length > 0 ? { major: major.join(',') } : {}),
-      ...(studentYear && studentYear.length > 0 ? { studentYear: studentYear.join(',') } : {}),
+      ...(studentStatus?.length ? { studentStatus: studentStatus.join(',') } : {}),
+      ...(major?.length ? { major: major.join(',') } : {}),
+      ...(studentYear?.length ? { studentYear: studentYear.join(',') } : {}),
     }
 
     try {
-      console.log('Sending queryParams:', queryParams)
       const res = await api.get<PaginationResponse<StudentEnrollment>>(
         `${this.path}/programItems/${programItemId}/enrollments`,
         { params: queryParams },
       )
-      console.log('Fetched enrollments:', res.data)
       return res.data
-    } catch (error) {
-      console.error(`Error fetching enrollments for program ID: ${programItemId}`, error)
+    } catch (error: unknown) {
+      const message = getErrorMessage(error, 'ไม่สามารถดึงข้อมูลการลงทะเบียนได้')
+      showError(message)
+      console.error(`Error fetching enrollments for programItem ID: ${programItemId}`, error)
       throw error
     }
   }
-  static async getEnrollmentsByProgramIDs(programId: string, params: Pagination) {
-    const { studentStatus, major, studentYear, ...rest } = params
 
+  // 🔹 ดึงรายชื่อนักศึกษาตาม Program
+  static async getEnrollmentsByProgramIDs(
+    programId: string,
+    params: Pagination,
+  ): Promise<PaginationResponse<StudentEnrollment>> {
+    const { studentStatus, major, studentYear, ...rest } = params
     const queryParams = {
       ...rest,
-      ...(studentStatus && studentStatus.length > 0
-        ? { studentStatus: studentStatus.join(',') }
-        : {}),
-      ...(major && major.length > 0 ? { major: major.join(',') } : {}),
-      ...(studentYear && studentYear.length > 0 ? { studentYear: studentYear.join(',') } : {}),
+      ...(studentStatus?.length ? { studentStatus: studentStatus.join(',') } : {}),
+      ...(major?.length ? { major: major.join(',') } : {}),
+      ...(studentYear?.length ? { studentYear: studentYear.join(',') } : {}),
     }
 
     try {
-      console.log('Sending queryParams:', queryParams)
       const res = await api.get<PaginationResponse<StudentEnrollment>>(
         `${this.path}/${programId}/enrollments`,
         { params: queryParams },
       )
-      console.log('Fetched enrollments:', res.data)
       return res.data
-    } catch (error) {
+    } catch (error: unknown) {
+      const message = getErrorMessage(error, 'ไม่สามารถดึงข้อมูลการลงทะเบียนได้')
+      showError(message)
       console.error(`Error fetching enrollments for program ID: ${programId}`, error)
       throw error
     }
@@ -147,6 +162,7 @@ export class EnrollmentService {
       throw error
     }
   }
+  
 
   // static async getEnrollmentsHistoryByStudentID(studentId: string, params: Pagination) {
   //   try {
