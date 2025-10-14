@@ -23,7 +23,7 @@ const showFilterDialog = ref(false)
 const options = {
   year: ['1', '2', '3', '4'],
   major: ['CS', 'SE', 'ITDI', 'AAI'],
-  studentStatus: ['3', '2', '1','4'],
+  studentStatus: ['3', '2', '1', '4'],
   statusProgram: ['planning', 'open', 'close', 'success', 'cancel'],
   categoryProgram: ['soft', 'hard'],
   statusCertificate: ['pending', 'approved', 'rejected'],
@@ -163,13 +163,13 @@ watch(
       tempFilters.value = cloneDeep(filters.value)
     }
   },
-  { immediate: true, deep: true }
+  { immediate: true, deep: true },
 )
 </script>
 
 <template>
-  <q-btn class="btnfilter"  :style="{ border: '1px solid #ccc' }">
-   <q-icon name="filter_list_alt"></q-icon>
+  <q-btn class="btnfilter" :style="{ border: '1px solid #ccc' }">
+    <q-icon name="filter_list_alt"></q-icon>
     <q-menu
       v-model="showFilterDialog"
       :transition-show="'jump-down'"
@@ -274,16 +274,16 @@ watch(
           <div v-if="availableCategories.includes('statusCertificate')" class="q-mt-md">
             <p class="q-mb-sm text-h6">สถานะใบรับรอง</p>
             <div class="chip-container">
-            <q-chip
-              v-for="statusCertificate in options.statusCertificate"
-              :key="statusCertificate"
-              clickable
-              :class="{ selected: filters.statusCertificate.includes(statusCertificate) }"
-              @click="toggleFilter('statusCertificate', statusCertificate)"
-              style="height: 35px; width: 120px"
-            >
-              <div style="margin: auto">{{ getStatusCertificateText(statusCertificate) }}</div>
-            </q-chip>
+              <q-chip
+                v-for="statusCertificate in options.statusCertificate"
+                :key="statusCertificate"
+                clickable
+                :class="['medium-width-chip', getChipClass('statusCertificate', statusCertificate)]"
+                @click="toggleFilter('statusCertificate', statusCertificate)"
+                style="height: 35px; width: 120px"
+              >
+                <div style="margin: auto">{{ getStatusCertificateText(statusCertificate) }}</div>
+              </q-chip>
             </div>
           </div>
         </q-card-section>

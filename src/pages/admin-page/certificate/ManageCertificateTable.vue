@@ -22,6 +22,8 @@ const params = ref<CertificateQuery>({
   limit: 15,
   sortBy: 'uploadAt',
   order: 'desc',
+  // default to show pending certificates
+  status: 'pending',
 })
 const loading = ref(false)
 const pagination = ref<PaginationRequest>({
@@ -176,6 +178,7 @@ onMounted(async () => {
           <FilterDialog
             v-model="showFilterDialog"
             :categories="filterCategories"
+            :statusCertificate="['pending']"
             class="q-mr-sm"
             @apply="onFilterApply"
           />
