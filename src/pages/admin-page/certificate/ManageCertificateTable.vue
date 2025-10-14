@@ -113,6 +113,36 @@ const fetchCertificates = async () => {
   }
 }
 
+// Handle filters applied from FilterDialog
+type DialogFilters = {
+  year?: string[]
+  major?: string[]
+  statusProgram?: string[]
+  categoryProgram?: string[]
+  studentStatus?: string[]
+  statusCertificate?: string[]
+}
+
+async function onFilterApply(filters: DialogFilters) {
+  // Map majors -> backend expects comma-separated string
+  if (filters.major && filters.major.length > 0) {
+    params.value.major = filters.major
+  } else {
+    delete params.value.major
+  }
+
+  // Map certificate statuses -> backend accepts comma-separated statuses
+  if (filters.statusCertificate && filters.statusCertificate.length > 0) {
+    params.value.status = filters.statusCertificate.join(',')
+  } else {
+    delete params.value.status
+  }
+
+  // Reset to first page on filter change
+  params.value.page = 1
+  await fetchCertificates()
+}
+
 onMounted(async () => {
   await fetchCertificates()
 })
@@ -143,7 +173,12 @@ onMounted(async () => {
               <q-icon name="search" />
             </template>
           </q-input>
-          <FilterDialog v-model="showFilterDialog" :categories="filterCategories" class="q-mr-sm" />
+          <FilterDialog
+            v-model="showFilterDialog"
+            :categories="filterCategories"
+            class="q-mr-sm"
+            @apply="onFilterApply"
+          />
         </div>
       </div>
 

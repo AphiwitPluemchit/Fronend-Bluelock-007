@@ -39,7 +39,7 @@ export enum StatusType {
 export interface CertificateQuery extends Pagination {
   studentId?: string
   courseId?: string
-  status?: StatusType
+  status?: string | string[]
 }
 
 export class CertificateService {
