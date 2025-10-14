@@ -110,14 +110,10 @@
       </q-card-section>
 
       <q-card-actions align="right">
-        <q-btn flat color="grey-8" label="ยกเลิก" :disable="loading" @click="close" />
-        <q-btn
-          unelevated
-          color="primary"
-          label="บันทึก"
-          :loading="loading"
-          @click="onSave"
-        />
+        <q-card-actions align="right">
+          <q-btn label="ยกเลิก" class="btnreject" @click="close" />
+          <q-btn label="ยืนยัน" class="btnconfirm" @click="onSave" />
+        </q-card-actions>
       </q-card-actions>
     </q-card>
   </q-dialog>
@@ -167,10 +163,10 @@ const display = reactive({
 // รับมาจาก student.checkInOut ต่อ 1 วัน จะต้องมี recordId (id ของ check record)
 type Row = {
   recordId: string
-  dateISO: string           // วันที่ (อิงจาก checkin/checkout เดิม) ไว้ประกอบผลลัพธ์
-  dateLabel: string         // วันที่เพื่อแสดง UI (D MMM YYYY)
-  checkinTime: string       // "HH:mm"
-  checkoutTime: string      // "HH:mm"
+  dateISO: string // วันที่ (อิงจาก checkin/checkout เดิม) ไว้ประกอบผลลัพธ์
+  dateLabel: string // วันที่เพื่อแสดง UI (D MMM YYYY)
+  checkinTime: string // "HH:mm"
+  checkoutTime: string // "HH:mm"
   // เก็บต้นฉบับไว้เช็คว่าเปลี่ยนไหม (optional)
   _origCheckin: string
   _origCheckout: string
@@ -197,24 +193,26 @@ watch(
       const list = Array.isArray(props.student.checkInOut) ? props.student.checkInOut : []
 
       // สร้าง row ต่อ check record
-      rows.value = list.map((r) => {
-        const checkinISO = r.checkin ?? ''
-        const checkoutISO = r.checkout ?? ''
-        // ใช้วันที่จาก checkin ถ้าไม่มีให้ใช้จาก checkout
-        const baseISO = checkinISO || checkoutISO
-        const dateISO = dayjs(baseISO).format('YYYY-MM-DD') // ใช้ local TZ (+07:00 env)
-        const dateLabel = dayjs(baseISO).format('D MMM YYYY')
+      rows.value = list
+        .map((r) => {
+          const checkinISO = r.checkin ?? ''
+          const checkoutISO = r.checkout ?? ''
+          // ใช้วันที่จาก checkin ถ้าไม่มีให้ใช้จาก checkout
+          const baseISO = checkinISO || checkoutISO
+          const dateISO = dayjs(baseISO).format('YYYY-MM-DD') // ใช้ local TZ (+07:00 env)
+          const dateLabel = dayjs(baseISO).format('D MMM YYYY')
 
-        return {
-          recordId: (r).id  || '', // รองรับทั้ง id/_id
-          dateISO,
-          dateLabel,
-          checkinTime: checkinISO ? dayjs(checkinISO).format('HH:mm') : '',
-          checkoutTime: checkoutISO ? dayjs(checkoutISO).format('HH:mm') : '',
-          _origCheckin: checkinISO,
-          _origCheckout: checkoutISO,
-        }
-      }).filter(r => !!r.recordId) // ต้องมี recordId เสมอ
+          return {
+            recordId: r.id || '', // รองรับทั้ง id/_id
+            dateISO,
+            dateLabel,
+            checkinTime: checkinISO ? dayjs(checkinISO).format('HH:mm') : '',
+            checkoutTime: checkoutISO ? dayjs(checkoutISO).format('HH:mm') : '',
+            _origCheckin: checkinISO,
+            _origCheckout: checkoutISO,
+          }
+        })
+        .filter((r) => !!r.recordId) // ต้องมี recordId เสมอ
 
       rowErrors.value = rows.value.map(() => ({}))
       errorMessage.value = ''
@@ -245,7 +243,7 @@ function validateRows(): boolean {
 
     // ถ้ามีทั้งสองเวลา ตรวจให้ออกหลังเข้า
     if (r.checkinTime && r.checkoutTime) {
-      const inDT  = dayjs(`${r.dateISO}T${r.checkinTime}:00+07:00`)
+      const inDT = dayjs(`${r.dateISO}T${r.checkinTime}:00+07:00`)
       const outDT = dayjs(`${r.dateISO}T${r.checkoutTime}:00+07:00`)
       if (outDT.isBefore(inDT)) {
         errs.out = 'เวลาออกต้องหลังเวลาเข้า'
@@ -265,7 +263,7 @@ function close() {
 
 // ===== Save: ส่งเป็น payload ต่อ 1 วัน =====
 // ถ้ามีหลายวัน จะ loop ยิงหลายครั้ง (ทีละแถว)
- async function onSave() {
+async function onSave() {
   if (!props.student?.id) {
     errorMessage.value = 'ไม่พบบันทึกการลงทะเบียนของนิสิต'
     return
@@ -282,15 +280,19 @@ function close() {
     for (const r of rows.value) {
       // สร้าง ISO พร้อม timezone +07:00 จากวันที่เดิม + เวลาใหม่
       // (หากเวลาใดว่าง ให้ส่งเป็นค่าว่างหรือไม่ส่ง ขึ้นกับสเปค API — ที่นี่ส่งเป็นค่าว่าง)
-      const checkinISO  = r.checkinTime  ? `${r.dateISO}T${r.checkinTime}:00+07:00`  : ''
+      const checkinISO = r.checkinTime ? `${r.dateISO}T${r.checkinTime}:00+07:00` : ''
       const checkoutISO = r.checkoutTime ? `${r.dateISO}T${r.checkoutTime}:00+07:00` : ''
 
       // ถ้าไม่มีการเปลี่ยนแปลงเวลาเลย ข้ามได้ (optional)
       const noChange =
-        (!!r._origCheckin === !!checkinISO) &&
-        (!!r._origCheckout === !!checkoutISO) &&
-        (!r._origCheckin || dayjs(r._origCheckin).format("YYYY-MM-DDTHH:mm:ssZZ") === dayjs(checkinISO).format("YYYY-MM-DDTHH:mm:ssZZ")) &&
-        (!r._origCheckout || dayjs(r._origCheckout).format("YYYY-MM-DDTHH:mm:ssZZ") === dayjs(checkoutISO).format("YYYY-MM-DDTHH:mm:ssZZ"))
+        !!r._origCheckin === !!checkinISO &&
+        !!r._origCheckout === !!checkoutISO &&
+        (!r._origCheckin ||
+          dayjs(r._origCheckin).format('YYYY-MM-DDTHH:mm:ssZZ') ===
+            dayjs(checkinISO).format('YYYY-MM-DDTHH:mm:ssZZ')) &&
+        (!r._origCheckout ||
+          dayjs(r._origCheckout).format('YYYY-MM-DDTHH:mm:ssZZ') ===
+            dayjs(checkoutISO).format('YYYY-MM-DDTHH:mm:ssZZ'))
 
       if (noChange) continue
 
@@ -299,7 +301,7 @@ function close() {
         checkin: checkinISO,
         checkout: checkoutISO,
       }
-      console.log(payload);
+      console.log(payload)
       await store.updateEnrollmentCheckinCheckout(props.student.enrollmentId, payload)
       // 🔧 ปรับให้ตรงกับ service ของโปรเจกต์
       // await EnrollmentService.updateCheckRecord(payload)
@@ -308,7 +310,7 @@ function close() {
     $q.notify({ type: 'positive', message: 'บันทึกเวลาเช็คชื่อสำเร็จ' })
     emit('updated', { id: props.student.id })
     close()
-  } catch  {
+  } catch {
     errorMessage.value = 'บันทึกไม่สำเร็จ กรุณาลองอีกครั้ง'
   } finally {
     loading.value = false
