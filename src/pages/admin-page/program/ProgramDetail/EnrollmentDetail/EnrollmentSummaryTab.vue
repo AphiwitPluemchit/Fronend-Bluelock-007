@@ -2,21 +2,21 @@
 import { computed, onMounted, ref } from 'vue'
 import { useRoute } from 'vue-router'
 import { ProgramService } from 'src/services/program'
-import type { Program, EnrollmentSummary } from 'src/types/program'
+import type { Program, EnrollmentDetail } from 'src/types/program'
 
 const route = useRoute()
 const programId = route.params.id as string
-// const expandedIndices = ref<number[]>([])
+const expandedIndices = ref<number[]>([])
 
-// const toggleExpanded = (index: number) => {
-//   if (expandedIndices.value.includes(index)) {
-//     expandedIndices.value = expandedIndices.value.filter((i) => i !== index)
-//   } else {
-//     expandedIndices.value.push(index)
-//   }
-// }
+const toggleExpanded = (index: number) => {
+  if (expandedIndices.value.includes(index)) {
+    expandedIndices.value = expandedIndices.value.filter((i) => i !== index)
+  } else {
+    expandedIndices.value.push(index)
+  }
+}
 
-const enrollmentSummary = ref<EnrollmentSummary | null>(null)
+const enrollmentSummary = ref<EnrollmentDetail | null>(null)
 
 const majorList = [
   { majorName: 'CS', fullName: 'สาขาวิชาวิทยาการคอมพิวเตอร์', color: '#2563eb', theme: 'blue' },
@@ -35,37 +35,37 @@ const majorList = [
   },
 ]
 
-// const registrationRows = computed(() => {
-//   const itemSums = enrollmentSummary.value?.programItemSums ?? []
-//   const programItems = programDetail.value?.programItems ?? []
+const registrationRows = computed(() => {
+  const itemSums = enrollmentSummary.value?.programItemSums ?? []
+  const programItems = programDetail.value?.programItems ?? []
 
-//   return itemSums.map((sum) => {
-//     const matchedItem = programItems.find((it) => it?.name === sum.programItemName) ?? null
-//     const max = matchedItem?.maxParticipants ?? 0
-//     const enrolled = (sum.registeredByMajor ?? []).reduce((acc, cur) => acc + cur.count, 0)
+  return itemSums.map((sum) => {
+    const matchedItem = programItems.find((it) => it?.name === sum.programItemName) ?? null
+    const max = matchedItem?.maxParticipants ?? 0
+    const enrolled = (sum.registeredByMajor ?? []).reduce((acc, cur) => acc + cur.count, 0)
 
-//     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-//     const baseRow: Record<string, any> = {
-//       program: sum.programItemName || matchedItem?.name || '-',
-//       max,
-//       enrolled,
-//       remaining: Math.max(max - enrolled, 0),
-//     }
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const baseRow: Record<string, any> = {
+      program: sum.programItemName || matchedItem?.name || '-',
+      max,
+      enrolled,
+      remaining: Math.max(max - enrolled, 0),
+    }
 
-//     majorList.forEach((m) => {
-//       baseRow[m.majorName] =
-//         sum.registeredByMajor?.find((x) => x.majorName === m.majorName)?.count || 0
-//     })
+    majorList.forEach((m) => {
+      baseRow[m.majorName] =
+        sum.registeredByMajor?.find((x) => x.majorName === m.majorName)?.count || 0
+    })
 
-//     return baseRow
-//   })
-// })
+    return baseRow
+  })
+})
 
 const foodRows = computed(() => programDetail.value?.foodVotes ?? [])
 
-const fetchEnrollmentSummary = async () => {
+const fetchEnrollmentDetail = async () => {
   try {
-    const response = await ProgramService.getEnrollmentSummary(programId)
+    const response = await ProgramService.getEnrollmentDetail(programId)
     enrollmentSummary.value = response
   } catch (error) {
     console.error('Error fetching enrollment summary:', error)
@@ -89,19 +89,19 @@ const totalByMajor = computed(() => {
     result[m.majorName] = 0
   })
 
-  // enrollmentSummary.value?.programItemSums?.forEach((item) => {
-  //   if (Array.isArray(item.registeredByMajor)) {
-  //     item.registeredByMajor.forEach((major) => {
-  //       result[major.majorName] = (result[major.majorName] ?? 0) + major.count
-  //     })
-  //   }
-  // })
+  enrollmentSummary.value?.programItemSums?.forEach((item) => {
+    if (Array.isArray(item.registeredByMajor)) {
+      item.registeredByMajor.forEach((major) => {
+        result[major.majorName] = (result[major.majorName] ?? 0) + major.count
+      })
+    }
+  })
 
   return result
 })
 
 onMounted(async () => {
-  await fetchEnrollmentSummary()
+  await fetchEnrollmentDetail()
   await fetchProgramDetail()
 })
 </script>
@@ -116,7 +116,6 @@ onMounted(async () => {
           <h1>{{ programDetail?.name || 'Loading...' }}</h1>
         </div>
       </div>
-
       <!-- Main Statistics Cards -->
       <div class="stats-grid">
         <q-card class="stat-card capacity-card">
@@ -125,7 +124,7 @@ onMounted(async () => {
               <q-icon name="group" size="40px" />
             </div>
             <div class="stat-details">
-              <!-- <div class="stat-number">{{ enrollmentSummary?.maxParticipants || 0 }} คน</div> -->
+              <div class="stat-number">{{ enrollmentSummary?.maxParticipants || 0 }} คน</div>
               <div class="stat-label">จำนวนที่รับ</div>
             </div>
           </q-card-section>
@@ -137,7 +136,7 @@ onMounted(async () => {
               <q-icon name="how_to_reg" size="40px" />
             </div>
             <div class="stat-details">
-              <!-- <div class="stat-number">{{ enrollmentSummary?.totalRegistered || 0 }} คน</div> -->
+              <div class="stat-number">{{ enrollmentSummary?.totalRegistered || 0 }} คน</div>
               <div class="stat-label">จำนวนนิสิตที่ลงทะเบียน</div>
             </div>
           </q-card-section>
@@ -149,7 +148,7 @@ onMounted(async () => {
               <q-icon name="event_seat" size="40px" />
             </div>
             <div class="stat-details">
-              <!-- <div class="stat-number">{{ enrollmentSummary?.remainingSlots || 0 }} คน</div> -->
+              <div class="stat-number">{{ enrollmentSummary?.remainingSlots || 0 }} คน</div>
               <div class="stat-label">จำนวนที่ว่าง</div>
             </div>
           </q-card-section>
@@ -211,7 +210,7 @@ onMounted(async () => {
             <h1>โครงการย่อย</h1>
           </div>
         </div>
-        <!-- <div
+        <div
           v-for="(row, index) in registrationRows"
           :key="index"
           class="q-mb-md q-pa-md bg-white rounded-borders shadow-1"
@@ -265,7 +264,7 @@ onMounted(async () => {
               </div>
             </div>
           </q-slide-transition>
-        </div> -->
+        </div>
       </div>
     </div>
   </div>

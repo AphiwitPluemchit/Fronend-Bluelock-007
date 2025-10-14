@@ -1,7 +1,7 @@
 import { api } from 'boot/axios'
 import { Notify } from 'quasar'
 import type { Pagination, PaginationResponse } from 'src/types/pagination'
-import type { EnrollmentSummary } from 'src/types/program'
+import type { EnrollmentDetail } from 'src/types/program'
 import { type Program } from 'src/types/program'
 
 // ⛑️ Utility สำหรับแสดง Error
@@ -117,9 +117,9 @@ export class ProgramService {
     }
   }
 
-  static async getEnrollmentSummary(programId: string) {
+  static async getEnrollmentDetail(programId: string) {
     try {
-      const res = await api.get<EnrollmentSummary>(`${this.path}/${programId}/enrollment-summary`)
+      const res = await api.get<EnrollmentDetail>(`${this.path}/${programId}/enrollment-summary`)
       return res.data
     } catch (error) {
       showError('ไม่สามารถโหลดสรุปข้อมูลการลงทะเบียนได้')

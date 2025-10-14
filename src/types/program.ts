@@ -36,6 +36,13 @@ export type ProgramItem = {
   enrollmentCount?: number
 }
 
+export type EnrollmentDetail = {
+  maxParticipants: number
+  totalRegistered: number
+  remainingSlots: number
+  programItemSums: ProgramItemSum[]
+}
+
 export type EnrollmentSummary = {
   id?: string
   programId?: string
