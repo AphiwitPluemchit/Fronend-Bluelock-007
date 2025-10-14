@@ -46,7 +46,7 @@ export default route(function () {
     scrollBehavior: () => ({ left: 0, top: 0 }),
   })
 
-  Router.beforeEach((to) => {
+  Router.beforeEach(async (to) => {
     const authStore = useAuthStore()
 
     // Basic query safety
@@ -68,8 +68,8 @@ export default route(function () {
     // Public and checkinout routes are allowed to load; checkinout may require auth on page logic
     if (scope === 'public') return true
 
-    // If not authenticated, redirect to login and preserve intended path
-    const isAuthed = authStore.getIsAuthenticated
+    // Try to ensure authentication (will refresh token if needed)
+    const isAuthed = await authStore.ensureAuthenticated()
     if (!isAuthed) {
       const redirect = to.fullPath
       localStorage.setItem('redirectAfterLogin', redirect)

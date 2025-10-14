@@ -23,6 +23,7 @@ export const useAuthStore = defineStore('auth', {
 
   getters: {
     getAccessToken: (): string | null => localStorage.getItem('access_token'),
+    getRefreshToken: (): string | null => localStorage.getItem('refresh_token'),
 
     getUser: (): Partial<User> | null => {
       const user = localStorage.getItem('user')
@@ -91,11 +92,13 @@ export const useAuthStore = defineStore('auth', {
         const data = await AuthService.login(this.form.email, this.form.password)
         console.log('📡 AuthService response:', data)
 
-        if (data?.token && data?.user) {
+        if (data?.accessToken && data?.refreshToken && data?.user) {
           console.log('✅ Login successful:', data.user)
-          console.log('🎫 Token received:', data.token.substring(0, 20) + '...')
+          console.log('🎫 Access Token received:', data.accessToken.substring(0, 20) + '...')
+          console.log('🔄 Refresh Token received:', data.refreshToken.substring(0, 20) + '...')
 
-          localStorage.setItem('access_token', data.token)
+          localStorage.setItem('access_token', data.accessToken)
+          localStorage.setItem('refresh_token', data.refreshToken)
           localStorage.setItem('user', JSON.stringify(data.user))
 
           console.log('💾 Data saved to localStorage')
@@ -146,6 +149,7 @@ export const useAuthStore = defineStore('auth', {
 
     clearLocalStorage(): void {
       localStorage.removeItem('access_token')
+      localStorage.removeItem('refresh_token')
       localStorage.removeItem('user')
       localStorage.removeItem('redirectAfterLogin')
     },
@@ -170,6 +174,60 @@ export const useAuthStore = defineStore('auth', {
         return Date.now() >= expiry
       } catch {
         return true
+      }
+    },
+
+    // ✅ ตรวจสอบว่า access token ใกล้หมดอายุหรือไม่ (ภายใน 5 นาที)
+    isTokenExpiringSoon(): boolean {
+      const token = this.getAccessToken
+      if (!token) return true
+      try {
+        const parts = token.split('.')
+        if (parts.length !== 3) return true
+        const payload = JSON.parse(atob(parts[1] as string))
+        const expiry = payload.exp * 1000
+        const now = Date.now()
+        const fiveMinutes = 5 * 60 * 1000
+        return expiry - now < fiveMinutes
+      } catch {
+        return true
+      }
+    },
+
+    // ✅ พยายาม refresh token ก่อนเข้าถึง protected route
+    async ensureAuthenticated(): Promise<boolean> {
+      try {
+        console.log('🔐 Ensuring authentication...')
+
+        // ตรวจสอบว่ามี refresh token หรือไม่
+        const refreshToken = this.getRefreshToken
+        if (!refreshToken) {
+          console.warn('⚠️ No refresh token found')
+          return false
+        }
+
+        // ถ้า access token ยังไม่หมดอายุ ให้ผ่านไป
+        if (!this.isTokenExpired()) {
+          console.log('✅ Access token is still valid')
+          return true
+        }
+
+        console.log('🔄 Access token expired, attempting to refresh...')
+
+        // พยายาม refresh token
+        const result = await AuthService.refreshToken()
+        if (result?.accessToken && result?.refreshToken) {
+          console.log('✅ Token refreshed successfully')
+          localStorage.setItem('access_token', result.accessToken)
+          localStorage.setItem('refresh_token', result.refreshToken)
+          return true
+        }
+
+        console.warn('⚠️ Token refresh failed')
+        return false
+      } catch (err) {
+        console.error('❌ ensureAuthenticated error:', err)
+        return false
       }
     },
 
@@ -315,6 +373,30 @@ export const useAuthStore = defineStore('auth', {
       } catch (err) {
         console.error('❌ Google token login error:', err)
         this.clearLocalStorage()
+        return false
+      }
+    },
+
+    // ✅ ดึงข้อมูลโปรไฟล์ผู้ใช้จาก API /auth/me
+    async fetchProfile(): Promise<boolean> {
+      try {
+        console.log('🔍 Fetching user profile from API...')
+
+        const response = await AuthService.getProfile()
+        if (!response || !response.user) {
+          console.error('❌ No user data in response')
+          return false
+        }
+
+        console.log('✅ Profile fetched successfully:', response.user)
+
+        // อัปเดต localStorage ด้วยข้อมูลล่าสุด
+        localStorage.setItem('user', JSON.stringify(response.user))
+
+        console.log('💾 User data updated in localStorage')
+        return true
+      } catch (err) {
+        console.error('❌ fetchProfile error:', err)
         return false
       }
     },

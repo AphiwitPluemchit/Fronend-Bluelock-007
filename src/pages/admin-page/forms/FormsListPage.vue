@@ -59,19 +59,19 @@
                 </q-icon>
                 <q-icon
                   clickable
+                  name="content_copy"
+                  class="bg-green text-white q-pa-xs  rounded-borders q-mr-sm"
+                  @click="copyForm(props.row)"
+                >
+                  <q-tooltip>คัดลอก</q-tooltip>
+                </q-icon>
+                <q-icon
+                  clickable
                   name="delete"
                   class="bg-red text-white q-pa-xs rounded-borders q-mr-sm"
                   @click="askRemove(props.row)"
                 >
                   <q-tooltip>ลบ</q-tooltip>
-                </q-icon>
-                <q-icon
-                  clickable
-                  name="content_copy"
-                  class="bg-green text-white q-pa-xs rounded-borders"
-                  @click="copyForm(props.row)"
-                >
-                  <q-tooltip>คัดลอก</q-tooltip>
                 </q-icon>
               </template>
 
@@ -152,7 +152,6 @@ const columns = computed(() => [
     sortable: false,
   },
 ])
-
 const openPreview = (form: Form) => {
   selectedForm.value = form
   showPreviewDialog.value = true

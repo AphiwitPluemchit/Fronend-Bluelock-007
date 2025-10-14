@@ -1,6 +1,7 @@
 <script setup lang="ts">
-import { StatusType, type UploadCertificate } from 'src/services/certificate'
+import { CertificateService, StatusType, type UploadCertificate } from 'src/services/certificate'
 import { ref, computed, watch } from 'vue'
+import { useQuasar } from 'quasar'
 
 const props = defineProps<{
   modelValue: boolean
@@ -9,45 +10,72 @@ const props = defineProps<{
 
 const emit = defineEmits(['update:modelValue', 'confirm'])
 
+const $q = useQuasar()
 const dialogVisible = ref(props.modelValue)
+const isLoading = ref(false)
+
 watch(
   () => props.modelValue,
-  (val) => (dialogVisible.value = val),
+  (val) => {
+    dialogVisible.value = val
+    if (val) {
+      // Reset ค่าทุกครั้งที่เปิด dialog
+      selectedAction.value = null
+      rejectReason.value = ''
+    }
+  },
 )
 watch(dialogVisible, (val) => emit('update:modelValue', val))
 
 const selectedAction = ref<'อนุมัติ' | 'ไม่อนุมัติ' | null>(null)
-const programType = ref<string | null>(null)
-const hourCount = ref<number | null>(null)
 const rejectReason = ref<string>('')
 
 const isConfirmDisabled = computed(() => {
   if (selectedAction.value === 'อนุมัติ') {
-    return !selectedAction.value
+    return false // อนุมัติไม่ต้องใส่เหตุผล
   } else if (selectedAction.value === 'ไม่อนุมัติ') {
-    return !rejectReason.value.trim()
+    return !rejectReason.value.trim() // ไม่อนุมัติต้องใส่เหตุผล
   }
-  return true
+  return true // ยังไม่ได้เลือกอะไร
 })
 
 const closeDialog = () => {
   dialogVisible.value = false
   selectedAction.value = null
-  programType.value = null
-  hourCount.value = null
   rejectReason.value = ''
 }
 
-const confirm = () => {
-  if (!isConfirmDisabled.value) {
-    emit('confirm', {
-      ...props.data,
-      status: selectedAction.value,
-      skill: programType.value || '',
-      hour: hourCount.value || 0,
-      note: rejectReason.value || '',
+const confirm = async () => {
+  if (isConfirmDisabled.value || !props.data.id) return
+
+  try {
+    isLoading.value = true
+
+    // แปลงจากภาษาไทยเป็น StatusType
+    const status = selectedAction.value === 'อนุมัติ' ? StatusType.APPROVED : StatusType.REJECTED
+
+    // เรียก API
+    await CertificateService.updateStatus(props.data.id, {
+      status,
+      remark: rejectReason.value || '', // ส่ง remark ไป (ถ้าอนุมัติจะเป็นค่าว่าง)
     })
+
+    // แจ้งเตือนสำเร็จ
+    $q.notify({
+      message: `${selectedAction.value === 'อนุมัติ' ? 'อนุมัติ' : 'ปฏิเสธ'}ใบประกาศนียบัตรเรียบร้อยแล้ว`,
+      type: 'positive',
+      position: 'bottom',
+      timeout: 2000,
+    })
+
+    // ปิด dialog และส่งสัญญาณกลับไปให้ parent component
+    emit('confirm')
     closeDialog()
+  } catch (error) {
+    console.error('Error updating certificate status:', error)
+    // Error notification จะถูกจัดการใน CertificateService แล้ว
+  } finally {
+    isLoading.value = false
   }
 }
 </script>
@@ -101,8 +129,15 @@ const confirm = () => {
         </div>
 
         <div class="row justify-end q-gutter-sm">
-          <q-btn class="btnreject" @click="closeDialog">ยกเลิก</q-btn>
-          <q-btn class="btnconfirm" :disable="isConfirmDisabled" @click="confirm">ยืนยัน</q-btn>
+          <q-btn class="btnreject" :disable="isLoading" @click="closeDialog">ยกเลิก</q-btn>
+          <q-btn
+            class="btnconfirm"
+            :disable="isConfirmDisabled"
+            :loading="isLoading"
+            @click="confirm"
+          >
+            ยืนยัน
+          </q-btn>
         </div>
       </template>
 

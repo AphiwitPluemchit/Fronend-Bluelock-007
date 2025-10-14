@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { useCheckinoutStore } from 'src/stores/checkinout'
-import { useRouter } from 'vue-router'
-import { ref } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
+import { ref, onMounted, watch } from 'vue'
 import type { AxiosError } from 'axios'
 import type { ErrorResponse } from 'src/types/pagination'
 import type { Program } from 'src/types/program'
@@ -9,13 +9,25 @@ import type { Program } from 'src/types/program'
 const checkinoutStore = useCheckinoutStore()
 const router = useRouter()
 const errorMessage = ref('')
-// const isChecked = ref(false)
-// const isSubmitted = ref(false)
 const loading = ref(false)
+const route = useRoute()
+const formSubmitted = ref(route.query.formSubmitted === 'true')
+
+// Watch for route changes
+watch(() => route.query.formSubmitted, (newVal) => {
+  formSubmitted.value = newVal === 'true'
+}, { immediate: true })
 const props = defineProps<{
   token: string
   program?: Partial<Program>
 }>()
+
+onMounted(() => {
+  if (localStorage.getItem('formSubmissionSuccess') === 'true') {
+    formSubmitted.value = true
+    localStorage.removeItem('formSubmissionSuccess')
+  }
+})
 
 async function goToForm() {
   errorMessage.value = ''
@@ -41,8 +53,8 @@ async function goToForm() {
       params: { id: formData.formId },
       query: {
         checkoutToken: props.token,
-        programId: props.program.id
-      }
+        programId: props.program.id,
+      },
     })
   } catch (error: unknown) {
     console.error(error)
@@ -64,21 +76,30 @@ async function goToForm() {
   }
 }
 
-console.log('studentId:', props.token)
+async function goHome() {
+  if (props.program?.id) {
+    await router.push(`/Student/Program/MyProgramDetail/${props.program.id}/checkInOut`)
+  } else {
+    await router.push('/Student/Home')
+  }
+}
 </script>
 
 <template>
   <div class="q-pa-md">
     <div>
       <div v-if="props.program?.name" class="q-mb-sm">โครงการ: {{ props.program?.name }}</div>
+      <div v-if="formSubmitted" class="text-positive q-mb-md">
+        เช็คชื่อออกและส่งแบบประเมินสำเร็จ
+      </div>
       <div class="q-pa-md">
         <q-btn
           class="btnconfirm"
-          @click="goToForm"
+          @click="formSubmitted ? goHome() : goToForm()"
           :loading="loading"
           :disable="loading"
         >
-          ทำแบบฟอร์ม
+          {{ formSubmitted ? 'กลับหน้าหลัก' : 'ทำแบบฟอร์ม' }}
         </q-btn>
       </div>
       <div v-if="errorMessage" class="text-negative q-mt-md">{{ errorMessage }}</div>

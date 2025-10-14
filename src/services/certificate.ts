@@ -78,6 +78,29 @@ export class CertificateService {
     }
   }
 
+  static async updateStatus(
+    id: string,
+    payload: { status: StatusType; remark?: string },
+  ): Promise<UploadCertificate> {
+    try {
+      const res = await api.put(`${this.path}/${id}/status`, payload)
+      Notify.create({
+        message: 'อัปเดตสถานะเรียบร้อยแล้ว',
+        type: 'positive',
+        position: 'bottom',
+        timeout: 2000,
+      })
+      return res.data.data
+    } catch (error: unknown) {
+      const message =
+        (error as { response?: { data?: { error?: string } } })?.response?.data?.error ||
+        'ไม่สามารถอัปเดตสถานะได้'
+      showError(message)
+      console.error('Error updating certificate status', error)
+      throw error
+    }
+  }
+
   static async deleteOne(id: string) {
     try {
       const res = await api.delete(`${this.path}/${id}`)

@@ -1,23 +1,28 @@
 <script setup lang="ts">
 import { useCheckinoutStore } from 'src/stores/checkinout'
 import { ref } from 'vue'
+import { useRouter } from 'vue-router'
 import type { AxiosError } from 'axios'
 import type { ErrorResponse } from 'src/types/pagination'
 import type { Program } from 'src/types/program'
 
+const router = useRouter()
 const checkinoutStore = useCheckinoutStore()
 const errorMessage = ref('')
 const isChecked = ref(false)
 const isSubmitted = ref(false)
+
 const props = defineProps<{
   token: string
   program?: Partial<Program>
 }>()
+
 async function checkin() {
   // reset state ก่อนทุกครั้ง
   errorMessage.value = ''
   isChecked.value = false
   isSubmitted.value = false
+
   try {
     await checkinoutStore.checkin(props.token)
     isChecked.value = true
@@ -41,6 +46,15 @@ async function checkin() {
     isSubmitted.value = true
   }
 }
+
+async function goHome() {
+  if (props.program?.id) {
+    await router.push(`/Student/Program/MyProgramDetail/${props.program.id}/checkInOut`)
+  } else {
+    await router.push('/Student/Home')
+  }
+}
+
 console.log('token:', props.token)
 </script>
 
@@ -48,13 +62,24 @@ console.log('token:', props.token)
   <div class="q-pa-md">
     <div>
       <div v-if="props.program?.name" class="q-mb-sm">โครงการ: {{ props.program?.name }}</div>
+
       <div class="q-pa-md">
-        <q-btn class="btnconfirm" @click="checkin">เช็คชื่อ</q-btn>
+        <!-- 🔹 ปุ่มเปลี่ยนตามสถานะ -->
+        <q-btn
+          v-if="!isChecked"
+          class="btnconfirm"
+          label="เช็คชื่อ"
+          color="primary"
+          @click="checkin"
+        />
+        <q-btn v-else class="btnconfirm" label="กลับหน้าหลัก" color="secondary" @click="goHome" />
       </div>
+
       <div v-if="isSubmitted">
         <div v-if="isChecked" class="text-positive">เช็คชื่อเข้าสำเร็จ</div>
         <div v-else-if="errorMessage" class="text-negative q-mt-md">{{ errorMessage }}</div>
       </div>
     </div>
   </div>
+  
 </template>

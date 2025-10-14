@@ -315,18 +315,22 @@ const handleLogin = async () => {
     const result = await auth.login()
 
     if (result) {
-      console.log('✅ Login successful, checking for redirect...')
-      const redirect = localStorage.getItem('redirectAfterLogin')
-      if (redirect) {
-        console.log('🔄 Redirecting to stored path:', redirect)
-        localStorage.removeItem('redirectAfterLogin')
-        await router.push(redirect)
-        return // Exit early after redirect
+      // ✅ ดึงข้อมูล user ล่าสุดจาก API (Optional - login already returns full data)
+      const profileSuccess = await auth.fetchProfile()
+      if (!profileSuccess) {
+        console.warn('⚠️ Failed to fetch profile, using login response data')
       }
 
-      // Default redirects if no stored redirect
+      // Check for stored redirect
+      const redirect = localStorage.getItem('redirectAfterLogin')
+      if (redirect) {
+        localStorage.removeItem('redirectAfterLogin')
+        await router.push(redirect)
+        return
+      }
+
+      // Default redirects based on role
       const role = result.user?.role
-      console.log('👤 User role:', role, '- using default redirect')
       if (role === EnumUserRole.ADMIN) {
         await router.push(`/${EnumUserRole.ADMIN}/ProgramCalendar`)
       } else if (role === EnumUserRole.STUDENT) {

@@ -161,13 +161,102 @@ class AuthService {
     }
   }
 
-  static async fetchProfile(): Promise<Auth | null> {
+  // ✅ ดึงข้อมูลโปรไฟล์ผู้ใช้จาก /auth/me
+  static async getProfile(): Promise<Auth | null> {
     try {
-      const { data } = await api.get<Auth>('/auth/profile')
-      return data || null
-    } catch (err) {
-      showError('ไม่สามารถโหลดข้อมูลผู้ใช้ได้')
-      console.error('Fetch profile failed:', err)
+      console.log('🔍 AuthService.getProfile called')
+      console.log('🎫 Token exists:', !!localStorage.getItem('access_token'))
+
+      const res = await api.get<Auth>('/auth/me')
+      console.log('📡 Profile API Response:', res)
+      console.log('📊 Profile data:', res.data)
+
+      return res.data || null
+    } catch (error) {
+      console.error('💥 AuthService getProfile error:', error)
+
+      const axiosError = error as AxiosError<{ status: number }>
+      if (axiosError.response?.status === 401) {
+        console.warn('⚠️ Unauthorized - token may be invalid or expired')
+        // ไม่ต้อง showError เพราะ interceptor จะจัดการ
+      } else {
+        showError('ไม่สามารถโหลดข้อมูลผู้ใช้ได้')
+      }
+
+      return null
+    }
+  }
+
+  // Deprecated: ใช้ getProfile() แทน
+  static async fetchProfile(): Promise<Auth | null> {
+    return this.getProfile()
+  }
+
+  // ✅ Refresh access token using refresh token
+  static async refreshToken(): Promise<Auth | null> {
+    try {
+      const refreshToken = localStorage.getItem('refresh_token')
+      if (!refreshToken) {
+        console.warn('⚠️ No refresh token found')
+        return null
+      }
+
+      console.log('🔄 AuthService.refreshToken called')
+      console.log('🎫 Refresh token exists:', !!refreshToken)
+
+      const res = await api.post<Auth>(
+        '/auth/refresh',
+        { refreshToken },
+        {
+          headers: {
+            'X-Skip-Loading': 'true',
+            'X-Skip-Auth-Redirect': 'true',
+          },
+        },
+      )
+      console.log('📡 Refresh Token API Response:', res)
+      console.log('📊 Response data:', res.data)
+
+      if (res.data?.accessToken && res.data?.refreshToken) {
+        console.log('✅ Token refresh successful')
+        console.log('🎫 New Access Token:', res.data.accessToken.substring(0, 20) + '...')
+        console.log('🔄 New Refresh Token:', res.data.refreshToken.substring(0, 20) + '...')
+
+        // Update tokens in localStorage
+        localStorage.setItem('access_token', res.data.accessToken)
+        localStorage.setItem('refresh_token', res.data.refreshToken)
+
+        return res.data
+      }
+
+      console.warn('⚠️ Refresh token response incomplete:', res.data)
+      return null
+    } catch (error) {
+      console.error('💥 AuthService refreshToken error:', error)
+
+      const axiosError = error as AxiosError<{ code: string; error: string }>
+      if (axiosError.response?.data?.code) {
+        const errorCode = axiosError.response.data.code
+        const errorMessage = axiosError.response.data.error || 'เกิดข้อผิดพลาด'
+
+        console.log('🚨 Refresh error code:', errorCode, 'Message:', errorMessage)
+
+        switch (errorCode) {
+          case 'INVALID_TOKEN':
+          case 'TOKEN_NOT_FOUND':
+          case 'USER_NOT_FOUND':
+            console.warn('⚠️ Token refresh failed - user needs to login again')
+            // Clear tokens and redirect to login
+            localStorage.removeItem('access_token')
+            localStorage.removeItem('refresh_token')
+            localStorage.removeItem('user')
+            break
+          default:
+            // ไม่ต้อง showError เพราะ interceptor จะจัดการ
+            console.error('Refresh token error:', errorMessage)
+        }
+      }
+
       return null
     }
   }
