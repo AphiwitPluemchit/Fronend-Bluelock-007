@@ -38,7 +38,7 @@ const isNumber = (event: KeyboardEvent) => {
 }
 
 const validate = async (): Promise<boolean> => {
-   if (!localHours.value || localHours.value < 0) {
+  if (!localHours.value || localHours.value < 0) {
     hoursError.value = 'กรุณากรอกจำนวนชั่วโมง'
     await nextTick()
 
@@ -120,9 +120,9 @@ defineExpose({ validate, focus })
   text-align: right;
 }
 .input-container {
-    max-width: 220px;
-    width: 100%;
-  }
+  max-width: 220px;
+  width: 100%;
+}
 ::v-deep(input[type='number'])::-webkit-inner-spin-button,
 ::v-deep(input[type='number'])::-webkit-outer-spin-button {
   -webkit-appearance: none;
@@ -132,17 +132,17 @@ defineExpose({ validate, focus })
 ::v-deep(input[type='number']) {
   -moz-appearance: textfield;
 }
-@media(max-width: 1880px){
+@media (max-width: 1880px) {
   .input-container {
     width: 200px;
     max-width: 100%;
   }
   .label_minWidth {
-    min-width: 180px!important;
+    min-width: 180px !important;
   }
 }
 @media (max-width: 860px) {
-   .input-group:not(.no-wrap) {
+  .input-group:not(.no-wrap) {
     flex-direction: column;
     align-items: flex-start;
     margin-bottom: 10px !important;
@@ -163,20 +163,19 @@ defineExpose({ validate, focus })
 @media (max-width: 550px) {
   .input-container {
     width: 170px;
-    max-width: 100%; 
+    max-width: 100%;
   }
-
 }
 @media (max-width: 500px) {
   .input-group {
     flex-direction: column;
     align-items: flex-start;
     margin-bottom: 10px !important;
-    gap: 5px !important; 
+    gap: 5px !important;
   }
 
-   .label {
-    justify-content: flex-start; 
+  .label {
+    justify-content: flex-start;
   }
 
   .label_minWidth {
@@ -190,9 +189,8 @@ defineExpose({ validate, focus })
     width: 100%;
     max-width: 100%;
   }
-   .label-error-shift {
+  .label-error-shift {
     transform: translateY(0px);
   }
 }
-
 </style>

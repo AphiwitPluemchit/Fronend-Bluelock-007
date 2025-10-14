@@ -128,7 +128,6 @@ const removeMenuItem = async (name: string) => {
   }
 }
 
-
 onMounted(async () => {
   try {
     const foods: Food[] = await FoodService.getAll()
@@ -149,8 +148,6 @@ onMounted(async () => {
 const enableEditMode = () => {
   isEditMode.value = true
 }
-
-
 </script>
 
 <template>

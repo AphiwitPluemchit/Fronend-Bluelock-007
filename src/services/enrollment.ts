@@ -148,25 +148,25 @@ export class EnrollmentService {
     }
   }
 
-  static async getEnrollmentsHistoryByStudentID(studentId: string, params: Pagination) {
-    try {
-      const { programState, skill, ...rest } = params
-      const queryParams = {
-        ...rest,
-        ...(programState && programState.length > 0
-          ? { programState: programState.join(',') }
-          : {}),
-        ...(skill && skill.length > 0 ? { skill: skill.join(',') } : {}),
-      }
-      console.log('Sending params:', queryParams)
-      const res = await api.get(`${this.path}/history/student/${studentId}`, {
-        params: queryParams,
-      })
-      console.log('Fetched enrollments:', res.data)
-      return res.data
-    } catch (error) {
-      console.error(`Error fetching enrollments for student ID: ${studentId}`, error)
-      throw error
-    }
-  }
+  // static async getEnrollmentsHistoryByStudentID(studentId: string, params: Pagination) {
+  //   try {
+  //     const { programState, skill, ...rest } = params
+  //     const queryParams = {
+  //       ...rest,
+  //       ...(programState && programState.length > 0
+  //         ? { programState: programState.join(',') }
+  //         : {}),
+  //       ...(skill && skill.length > 0 ? { skill: skill.join(',') } : {}),
+  //     }
+  //     console.log('Sending params:', queryParams)
+  //     const res = await api.get(`${this.path}/history/student/${studentId}`, {
+  //       params: queryParams,
+  //     })
+  //     console.log('Fetched enrollments:', res.data)
+  //     return res.data
+  //   } catch (error) {
+  //     console.error(`Error fetching enrollments for student ID: ${studentId}`, error)
+  //     throw error
+  //   }
+  // }
 }

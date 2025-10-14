@@ -52,21 +52,23 @@ defineExpose({ validate, focus })
 
 <template>
   <div class="input-group">
-    <p class="label label_minWidth" :class="{ 'label-error-shift': seatsError !== '' }">จำนวนที่รับ :</p>
-    <div  class="input-container">
-    <q-input
-      ref="inputRef"
-      outlined
-      class="fix-q-input-height"
-      v-model="localSeats"
-      type="number"
-      @keypress="isNumber($event)"
-      :disable="disable"
-      :error="seatsError !== ''" 
-    />
-     <div v-if="seatsError" class="text-negative text-subtitle2 q-mt-xs">
-      {{ seatsError }}
-    </div>
+    <p class="label label_minWidth" :class="{ 'label-error-shift': seatsError !== '' }">
+      จำนวนที่รับ :
+    </p>
+    <div class="input-container">
+      <q-input
+        ref="inputRef"
+        outlined
+        class="fix-q-input-height"
+        v-model="localSeats"
+        type="number"
+        @keypress="isNumber($event)"
+        :disable="disable"
+        :error="seatsError !== ''"
+      />
+      <div v-if="seatsError" class="text-negative text-subtitle2 q-mt-xs">
+        {{ seatsError }}
+      </div>
     </div>
   </div>
 </template>
@@ -149,7 +151,7 @@ defineExpose({ validate, focus })
     padding-left: 0;
     margin-left: 0;
   }
-     .label-error-shift {
+  .label-error-shift {
     transform: translateY(0px);
   }
 }
@@ -158,7 +160,7 @@ defineExpose({ validate, focus })
     width: 170px;
     max-width: 100%;
   }
-   .label-error-shift {
+  .label-error-shift {
     transform: translateY(0px);
   }
 }
@@ -185,7 +187,7 @@ defineExpose({ validate, focus })
     max-width: 100%;
     width: 100%;
   }
-   .label-error-shift {
+  .label-error-shift {
     transform: translateY(0px);
   }
 }

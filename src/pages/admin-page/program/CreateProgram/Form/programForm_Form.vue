@@ -58,16 +58,16 @@ const coerceToOriginId = (id: string | null): string | null => {
   if (!id) return null
   const list = ensureWithId(allForms.value)
 
-  const selected = list.find(f => f.id === id)
+  const selected = list.find((f) => f.id === id)
   if (!selected) return null
 
-  if (selected.isOrigin === true) return selected.id 
+  if (selected.isOrigin === true) return selected.id
 
   const originId = (selected as { originId?: string }).originId
   if (typeof originId === 'string' && originId) return originId
 
   const origin = list.find(
-    f => f.isOrigin === true && (f.title ?? '').trim() === (selected.title ?? '').trim()
+    (f) => f.isOrigin === true && (f.title ?? '').trim() === (selected.title ?? '').trim(),
   )
   return origin?.id ?? null
 }

@@ -294,7 +294,7 @@ watch(
     width: 100%;
   }
   .label-error-shift {
-  transform: translateY(-12px);
-}
+    transform: translateY(-12px);
+  }
 }
 </style>

@@ -1,43 +1,25 @@
 <script setup lang="ts">
-import { onMounted, ref, computed } from 'vue'
+import { computed, onMounted, onUnmounted, ref, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import AppBreadcrumbs from 'src/components/AppBreadcrumbs.vue'
-// import FilterDialog from 'src/components/Dialog/FilterDialog.vue'
 import { useStudentStore } from 'src/stores/student'
 import type { Student } from 'src/types/student'
-import { EnrollmentService } from 'src/services/enrollment'
-import type { ProgramHistory } from 'src/types/program'
-import type { Pagination } from 'src/types/pagination'
 import ProgramType from 'src/components/programType.vue'
-import FilterDialog from 'src/components/Dialog/FilterDialog.vue'
-interface ProgramRow {
-  id: string
-  name: string
-  skill: string
-  hour: number
-  checkinoutRecord: string // แสดงเป็นข้อความ เช่น "13/08/2025 20:44 -"
-}
-const majorOptions = ['CS', 'AAI', 'IT', 'SE']
+import { useHourHistoryStore } from 'src/stores/hourHistory'
+import type { HourChangeHistory } from 'src/types/hourHistory'
+import HourChangeFilterDialog from 'src/components/Dialog/HourChangeFilterDialog.vue'
 
+const majorOptions = ['CS', 'AAI', 'IT', 'SE']
+const hourHistoryStore = useHourHistoryStore()
 const originalStudentData = ref<Student | null>(null)
 const show = ref(false)
 const route = useRoute()
 const studentCode = ref(route.params.code as unknown as string)
 const studentStore = useStudentStore()
-
-const historyProgram = ref<ProgramHistory[]>([])
-
-const query = ref<Pagination>({
-  page: 1,
-  limit: 99,
-  search: '',
-  sortBy: '_id',
-  order: 'desc',
-  skill: [],
-  programState: [],
-  major: [],
-  studentYear: [],
-})
+const searchText = ref('')
+const histories = computed(() => hourHistoryStore.histories)
+const loading = computed(() => hourHistoryStore.loading)
+const selectedFilters = ref({ skillType: [] as string[], status: [] as string[] })
 
 const breadcrumbs = ref({
   previousPage: { title: 'จัดการข้อมูลนิสิต', path: '/Admin/StudentManagement' },
@@ -50,13 +32,16 @@ const breadcrumbs = ref({
 
 const showFilterDialog = ref(false)
 const selectedType = ref<string[]>([])
-const searchQuery = ref('')
 
 function applyFilters(selected: { categoryProgram: string[] }) {
   selectedType.value = selected.categoryProgram
   showFilterDialog.value = false
 }
-
+const filteredHistories = computed(() => {
+  if (!selectedFilters.value.skillType || selectedFilters.value.skillType.length === 0)
+    return histories.value
+  return histories.value.filter((h) => selectedFilters.value.skillType.includes(h.skillType))
+})
 const isEditMode = ref(false)
 const enableEditMode = () => {
   isEditMode.value = true
@@ -79,90 +64,70 @@ const cancelEdit = () => {
   studentStore.student = { ...originalStudentData.value } as Student
   isEditMode.value = false
 }
-function mapHistoryToRows(data: ProgramHistory[]): ProgramRow[] {
-  const rows: ProgramRow[] = []
-  data.forEach((act) => {
-    act.programItems?.forEach((item) => {
-      // แปลง checkinoutRecord ให้เป็น string
-      const checkinLogs =
-        item.checkinoutRecord && item.checkinoutRecord.length > 0
-          ? item.checkinoutRecord
-              .map(
-                (r) =>
-                  `${new Date(r.checkin).toLocaleString('th-TH', {
-                    dateStyle: 'short',
-                    timeStyle: 'short',
-                  })} - ${
-                    r.checkout
-                      ? new Date(r.checkout).toLocaleTimeString('th-TH', { timeStyle: 'short' })
-                      : 'ยังไม่ออก'
-                  }`,
-              )
-              .join('\n')
-          : '-'
-
-      rows.push({
-        id: item.id || '',
-        name: act.name,
-        skill: act.skill || '',
-        hour: item.hour || 0,
-        checkinoutRecord: checkinLogs,
-      })
+const formatDateTime = (iso?: string) => {
+  if (!iso) return '-'
+  const d = new Date(iso)
+  try {
+    return d.toLocaleString('th-TH', {
+      year: '2-digit',
+      month: '2-digit',
+      day: '2-digit',
+      // hour: '2-digit',
+      // minute: '2-digit',
     })
-  })
-  return rows
+  } catch {
+    return d.toISOString()
+  }
+}
+const typeStripeClass = (history: HourChangeHistory) => {
+  return history.skillType === 'hard' ? 'stripe--blue' : 'stripe--green'
+}
+const onSearch = async () => {
+  hourHistoryStore.params.search = searchText.value
+  hourHistoryStore.params.page = 1
+  await fetchProgramHistory()
+}
+async function fetchProgramHistory() {
+  await hourHistoryStore.fetchProgramHistories(studentStore.student.id || '')
 }
 
-const filteredHistory = computed(() => {
-  let rows = historyProgram.value as unknown as ProgramRow[]
+let searchTimer: ReturnType<typeof setTimeout> | null = null
+const DEBOUNCE_MS = 300
 
-  if (selectedType.value.length > 0) {
-    rows = rows.filter((r) =>
-      selectedType.value.includes(r.skill === 'hard' ? 'hard' : r.skill === 'soft' ? 'soft' : ''),
-    )
+watch(searchText, () => {
+  if (searchTimer) {
+    clearTimeout(searchTimer)
+    searchTimer = null
   }
+  searchTimer = setTimeout(() => {
+    void onSearch()
+    searchTimer = null
+  }, DEBOUNCE_MS)
+})
 
-  const query = searchQuery.value.trim().toLowerCase()
-  if (query) {
-    rows = rows.filter((r) => r.name.toLowerCase().includes(query))
+onUnmounted(() => {
+  if (searchTimer) {
+    clearTimeout(searchTimer)
+    searchTimer = null
   }
-
-  return rows
 })
 onMounted(async () => {
   show.value = false
   if (!studentCode.value) return
   await studentStore.getStudentByCode(studentCode.value)
   originalStudentData.value = { ...studentStore.student }
-  const response = await EnrollmentService.getEnrollmentsHistoryByStudentID(
-    studentStore.student.id || '',
-    query.value,
-  )
-  console.log(response)
+  await fetchProgramHistory()
 
-  historyProgram.value = mapHistoryToRows(response.data) // ✅ แปลงก่อน
+  console.log(hourHistoryStore.histories)
+
   show.value = true
 })
-
-const columns = [
-  { name: 'index', label: 'ลำดับ', field: 'index', align: 'left' as const },
-  { name: 'name', label: 'ชื่อโครงการ', field: 'name', align: 'left' as const },
-  { name: 'skill', label: 'ประเภท', field: 'skill', align: 'center' as const },
-  { name: 'hour', label: 'จำนวนชั่วโมง', field: 'hour', align: 'center' as const },
-  {
-    name: 'checkinoutRecord',
-    label: 'การเช็คชื่อ',
-    field: 'checkinoutRecord',
-    align: 'left' as const,
-  },
-]
 </script>
 
 <template>
   <div class="q-pa-md">
     <!-- Breadcrumbs -->
     <div><AppBreadcrumbs :breadcrumbs="breadcrumbs" /></div>
-
     <div class="q-mx-lg">
       <div class="text-h6 q-mt-lg">ข้อมูลนิสิต</div>
       <q-card flat class="q-mt-md">
@@ -175,6 +140,7 @@ const columns = [
                 v-model="studentStore.student.name"
                 :readonly="!isEditMode"
                 :class="isEditMode ? 'editable' : 'readonly'"
+                class="qinput"
                 borderless
                 dense
               />
@@ -185,6 +151,7 @@ const columns = [
                 v-model="studentStore.student.email"
                 :readonly="!isEditMode"
                 :class="isEditMode ? 'editable' : 'readonly'"
+                class="qinput"
                 borderless
                 dense
               />
@@ -196,7 +163,7 @@ const columns = [
             <div class="col-4">
               <q-input
                 v-model="studentStore.student.code"
-                class="readonly"
+                class="readonly qinput"
                 readonly
                 borderless
                 dense
@@ -210,6 +177,7 @@ const columns = [
                 v-model="studentStore.student.softSkill"
                 :readonly="!isEditMode"
                 :class="isEditMode ? 'editable' : 'readonly'"
+                class="qinput"
                 borderless
                 dense
                 type="number"
@@ -219,25 +187,7 @@ const columns = [
 
           <div class="col-12 row items-center q-pa-sm">
             <div class="col-1 text-right q-pr-md"><p class="q-my-none">สาขา :</p></div>
-            <!-- <div class="col-4"> -->
-            <!-- รอแก้ -->
-            <!-- <q-input
-                v-model="studentYear"
-                :readonly="!isEditMode"
-                :class="isEditMode ? 'editable' : 'readonly'"
-                borderless
-                dense
-              />
-            </div> -->
-            <!-- <div class="col-4">
-              <q-input
-                v-model="studentStore.student.major"
-                :readonly="!isEditMode"
-                :class="isEditMode ? 'editable' : 'readonly'"
-                borderless
-                dense
-              />
-            </div> -->
+
             <div class="col-4">
               <q-select
                 v-if="isEditMode"
@@ -245,6 +195,7 @@ const columns = [
                 :options="majorOptions"
                 dense
                 outlined
+                class="qinput"
                 emit-value
                 map-options
               />
@@ -252,7 +203,7 @@ const columns = [
                 v-else
                 v-model="studentStore.student.major"
                 readonly
-                class="readonly"
+                class="readonly qinput"
                 borderless
                 dense
               />
@@ -265,89 +216,124 @@ const columns = [
                 v-model="studentStore.student.hardSkill"
                 :readonly="!isEditMode"
                 :class="isEditMode ? 'editable' : 'readonly'"
+                class="qinput"
                 borderless
                 dense
                 type="number"
               />
             </div>
           </div>
-
-          <!-- สาขา -->
-          <!-- <div class="col-12 row items-center q-pa-sm">
-            <div class="col-1 text-right q-pr-md">
-              <p class="q-my-none">สาขา :</p>
-            </div> -->
-
-          <!-- </div> -->
         </div>
       </q-card>
-    </div>
 
-    <!-- ส่วนประวัติการอบรม -->
-    <div class="q-pa-md">
-      <div class="header-container q-mb-md" style="margin-top: 12px">
-        <div class="text-h6 q-mt-lg text-center">ประวัติการอบรม</div>
-        <!-- ค้นหา/ฟิลเตอร์ -->
-        <div class="row justify-between items-center q-mb-md search-filter-wrapper q-col-gutter-md">
-          <div class="text-h6"></div>
-          <div class="row search-filter-inner items-center no-wrap">
-            <!-- <q-input
-            dense
-            outlined
-            v-model="searchQuery"
-            placeholder="ค้นหา ชื่อคอร์ส"
-            class="q-mr-sm searchbox"
-            :style="{ boxShadow: 'none' }"
-            clearable
+      <q-card flat class="q-mt-md q-mx-md">
+        <!-- ส่วนประวัติการอบรม -->
+        <div class="q-pa-md">
+          <div class="header-container q-mb-md" style="margin-top: 12px">
+            <div class="text-h6 q-mt-lg text-center">ประวัติการอบรม</div>
+            <!-- ค้นหา/ฟิลเตอร์ -->
+          </div>
+
+          <div
+            class="row justify-between items-right q-mb-md search-filter-wrapper q-col-gutter-md"
           >
-            <template v-slot:append>
-              <q-icon name="search" />
-            </template>
-          </q-input> -->
+            <div class="text-h6"></div>
+            <div class="row search-filter-inner items-center no-wrap">
+              <q-input
+                dense
+                outlined
+                v-model="searchText"
+                placeholder="ค้นหา ชื่อโครงการ"
+                class="q-mr-sm searchbox"
+                :style="{ boxShadow: 'none' }"
+                clearable
+                @keyup.enter="onSearch"
+              >
+                <template v-slot:append>
+                  <q-icon name="search" />
+                </template>
+              </q-input>
 
-            <div class="filter-btn-wrapper">
-              <FilterDialog
-                :model-value="showFilterDialog"
-                :categories="['categoryProgram']"
-                :category-programs="selectedType"
-                @apply="applyFilters"
-              />
+              <div class="filter-btn-wrapper">
+                <HourChangeFilterDialog @apply="applyFilters" />
+              </div>
+            </div>
+          </div>
+
+          <div class="column q-gutter-md">
+            <!-- Loading -->
+            <div v-if="loading" class="row justify-center q-my-lg">
+              <q-spinner color="primary" size="3em" />
+            </div>
+
+            <!-- การ์ดต่อกิจกรรม -->
+            <template v-else-if="filteredHistories && filteredHistories.length > 0">
+              <q-card
+                v-for="history in filteredHistories"
+                :key="history.id"
+                class="program-card cursor-pointer"
+                flat
+                bordered
+              >
+                <div class="program-card__stripe" :class="typeStripeClass(history)"></div>
+
+                <q-card-section class="q-pt-md q-pb-sm">
+                  <div class="row items-center justify-between q-mb-sm">
+                    <div class="row items-center q-gutter-xs">
+                      <EnrollmentType :status="/* map to numeric if needed */ 1" />
+                    </div>
+                    <ProgramType
+                      v-if="history.skillType === 'hard' || history.skillType === 'soft'"
+                      :skill="history.skillType === 'hard' ? 'hardSkill' : 'softSkill'"
+                    />
+                  </div>
+
+                  <div
+                    class="text-weight-medium text-body1 ellipsis-2 q-mb-sm"
+                    :title="history.title"
+                  >
+                    {{ history.title }}
+                  </div>
+
+                  <div class="text-weight-medium text-subtitle2 ellipsis-2 q-mb-xs label">
+                    <q-icon name="event" size="18px" />
+                    วันที่อนุมัติ : {{ history.changeAt ? formatDateTime(history.changeAt) : '-' }}
+                  </div>
+
+                  <div class="text-weight-medium text-subtitle2 ellipsis-2 q-mb-xs label">
+                    <q-icon name="schedule" size="18px" />
+                    จำนวนชั่วโมง : {{ history.hourChange }}
+                  </div>
+                </q-card-section>
+              </q-card>
+            </template>
+
+            <!-- Empty State -->
+            <div v-else class="row justify-center q-my-lg">
+              <div class="text-center">
+                <q-icon name="assignment" size="4em" color="grey-5" />
+                <div class="text-h6 text-grey-6 q-mt-md">ไม่พบประวัติโครงการ</div>
+                <div class="text-caption text-grey-5">ยังไม่มีการบันทึกโครงการในระบบ</div>
+              </div>
             </div>
           </div>
         </div>
-      </div>
-
-      <q-table :columns="columns" :rows="filteredHistory" row-key="id" bordered flat>
-        <template v-slot:body="props">
-          <q-tr :props="props">
-            <q-td key="index">{{ props.rowIndex + 1 }}</q-td>
-            <q-td key="name">{{ props.row.name }}</q-td>
-            <!-- <q-td key="skill">{{ props.row.skill }}</q-td> -->
-
-            <q-td key="skill" class="text-center">
-              <ProgramType
-                v-if="props.row.skill === 'hard' || props.row.skill === 'soft'"
-                :skill="props.row.skill === 'hard' ? 'hardSkill' : 'softSkill'"
-              />
-              <span v-else>-</span>
-            </q-td>
-            <q-td key="hour" class="text-center">{{ props.row.hour }}</q-td>
-            <q-td key="checkinoutRecord">
-              <pre style="white-space: pre-line">{{ props.row.checkinoutRecord }}</pre>
-            </q-td>
-          </q-tr>
-        </template>
-      </q-table>
-    </div>
-
-    <div class="q-mt-md q-pa-md text-right">
-      <template v-if="!isEditMode">
-        <q-btn label="แก้ไข" class="btnedit" unelevated rounded @click="enableEditMode" />
-      </template>
-      <template v-else>
-        <q-btn label="ยกเลิก" class="btnreject q-mr-md" unelevated rounded @click="confirmCancel" />
-        <q-btn label="บันทึก" class="btnconfirm" unelevated rounded @click="saveChanges" />
-      </template>
+        <div class="q-mt-md q-pa-md text-right">
+          <template v-if="!isEditMode">
+            <q-btn label="แก้ไข" class="btnedit" unelevated rounded @click="enableEditMode" />
+          </template>
+          <template v-else>
+            <q-btn
+              label="ยกเลิก"
+              class="btnreject q-mr-md"
+              unelevated
+              rounded
+              @click="confirmCancel"
+            />
+            <q-btn label="บันทึก" class="btnconfirm" unelevated rounded @click="saveChanges" />
+          </template>
+        </div>
+      </q-card>
     </div>
 
     <!-- Dialog -->
@@ -388,16 +374,28 @@ const columns = [
   justify-content: flex-end;
   margin-bottom: 16px;
 }
-.q-input {
+.qinput {
   border: 1px solid #757575;
   border-radius: 5px;
   padding-left: 10px;
 }
+
 .readonly {
   background-color: #e4e4e4;
   color: #757575;
 }
 .editable {
   background-color: white;
+}
+
+@media (max-width: 600px) {
+  .search-filter-wrapper {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .searchbox {
+    width: 100%;
+  }
 }
 </style>

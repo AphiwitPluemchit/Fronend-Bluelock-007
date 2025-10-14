@@ -140,7 +140,7 @@ watch(
   .label {
     justify-content: flex-start;
   }
- 
+
   .label_minWidth {
     min-width: unset !important;
     width: 100% !important;
@@ -148,10 +148,9 @@ watch(
     padding-left: 0;
     margin-left: 0;
   }
-   .text-negative {
+  .text-negative {
     margin-left: 0px;
   }
-
 }
 @media (max-width: 540px) {
   .input-group {

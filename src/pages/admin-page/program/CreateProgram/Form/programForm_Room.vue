@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed, nextTick} from 'vue'
+import { ref, computed, nextTick } from 'vue'
 import { QInput } from 'quasar'
 
 const inputRef = ref<InstanceType<typeof QInput> | null>(null)
@@ -24,12 +24,34 @@ const selectedRoom = computed({
   set: (val: string[]) => emit('update:modelValue', val),
 })
 
-const allRooms = computed(() => props.rooms ?? [
-  'Online','11M280', '5M210', '4M210', '3M210', '7T05', '6T05',
-  '5T05', '6T01', '6T02', '6T03', '6T04', '5T01', '5T02',
-  '5T03', '5T04', 'Lab 4C01', 'Lab 4C02', 'Lab 4C03',
-  'Lab 3C01', 'Lab 3C02', 'Lab 3C03', 'Lab 3C04',
-])
+const allRooms = computed(
+  () =>
+    props.rooms ?? [
+      'Online',
+      '11M280',
+      '5M210',
+      '4M210',
+      '3M210',
+      '7T05',
+      '6T05',
+      '5T05',
+      '6T01',
+      '6T02',
+      '6T03',
+      '6T04',
+      '5T01',
+      '5T02',
+      '5T03',
+      '5T04',
+      'Lab 4C01',
+      'Lab 4C02',
+      'Lab 4C03',
+      'Lab 3C01',
+      'Lab 3C02',
+      'Lab 3C03',
+      'Lab 3C04',
+    ],
+)
 
 const displayText = computed({
   get: () => selectedRoom.value.join(', '),
@@ -77,70 +99,67 @@ const validate = async () => {
 defineExpose({ validate })
 
 const handleEnter = async (e: KeyboardEvent) => {
+  console.log('✅ ENTER กดแล้ว blur input')
 
-    console.log('✅ ENTER กดแล้ว blur input')
+  e.preventDefault()
 
-    e.preventDefault()
+  // 👉 Blur ออกจาก input เพื่อให้ q-menu ปิดอัตโนมัติ
+  const input = inputRef.value?.$el?.querySelector('input') as HTMLInputElement | null
+  input?.blur()
 
-    // 👉 Blur ออกจาก input เพื่อให้ q-menu ปิดอัตโนมัติ
-    const input = inputRef.value?.$el?.querySelector('input') as HTMLInputElement | null
-    input?.blur()
+  await nextTick()
 
-    await nextTick()
-
-    emit('enter')
-
+  emit('enter')
 }
 </script>
 
-
-
 <template>
   <div class="input-group">
-    <p class="label label_minWidth" :class="{ 'label-error-shift': roomError !== '' }">ห้องที่จัดโครงการ :</p>
+    <p class="label label_minWidth" :class="{ 'label-error-shift': roomError !== '' }">
+      ห้องที่จัดโครงการ :
+    </p>
     <div class="input-container">
       <q-input
-  outlined
-  ref="inputRef"
-  v-model="displayText"
-  :disable="props.disable"
-  class="full-width fix-q-input-height"
-  @focus="onFocus"
-  @input="filterRooms"
-  :error="roomError !== ''"
->
-  <q-menu
-    v-if="!props.disable"
-    v-model="showSuggestions"
-    anchor="bottom left"
-    self="top left"
-    :fit="true"
-    @enter="handleEnter"
-    :cover="false"
-  >
-    <q-list class="scroll dropdown-list">
-      <q-item
-        v-for="(room, index) in filteredRooms"
-        :key="index"
-        clickable
-        @mousedown.prevent
-        @click="selectRoom(room)"
-        :class="{ 'selected-item': selectedRoom.includes(room) }"
+        outlined
+        ref="inputRef"
+        v-model="displayText"
+        :disable="props.disable"
+        class="full-width fix-q-input-height"
+        @focus="onFocus"
+        @input="filterRooms"
+        :error="roomError !== ''"
       >
-        <q-item-section>
-          {{ room }}
-        </q-item-section>
-      </q-item>
-    </q-list>
-  </q-menu>
-</q-input>
+        <q-menu
+          v-if="!props.disable"
+          v-model="showSuggestions"
+          anchor="bottom left"
+          self="top left"
+          :fit="true"
+          @enter="handleEnter"
+          :cover="false"
+        >
+          <q-list class="scroll dropdown-list">
+            <q-item
+              v-for="(room, index) in filteredRooms"
+              :key="index"
+              clickable
+              @mousedown.prevent
+              @click="selectRoom(room)"
+              :class="{ 'selected-item': selectedRoom.includes(room) }"
+            >
+              <q-item-section>
+                {{ room }}
+              </q-item-section>
+            </q-item>
+          </q-list>
+        </q-menu>
+      </q-input>
       <div v-if="roomError" class="text-negative text-subtitle2 q-mt-xs">
         {{ roomError }}
       </div>
     </div>
   </div>
 </template>
-
 
 <style scoped>
 .fix-q-input-height ::v-deep(.q-icon) {

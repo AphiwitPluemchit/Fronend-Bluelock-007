@@ -51,7 +51,7 @@ watch(
     if (newVal.length > 0) {
       error.value = ''
     }
-  }
+  },
 )
 </script>
 
@@ -76,14 +76,12 @@ watch(
 </template>
 
 <style scoped>
-
 .department-btn {
   width: 80px;
   height: 40px;
   border-radius: 50px;
   box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.2);
   background-color: #ffffff;
-
 }
 .active-btn {
   background-color: #d0e4ff !important;
@@ -110,20 +108,20 @@ watch(
   flex-wrap: wrap;
   gap: 25px;
 }
-@media(max-width: 1880px){
+@media (max-width: 1880px) {
   .input-container {
     width: 500px;
     max-width: 100%;
   }
   .label_minWidth {
-   min-width: 180px !important;
+    min-width: 180px !important;
   }
-  .text-negative{
+  .text-negative {
     margin-left: 200px;
   }
 }
 @media (max-width: 860px) {
-   .input-group:not(.no-wrap) {
+  .input-group:not(.no-wrap) {
     flex-direction: column;
     align-items: flex-start;
     margin-bottom: 10px !important;
@@ -131,12 +129,12 @@ watch(
   }
   .input-container {
     width: 470px;
-    max-width: 100%; 
+    max-width: 100%;
   }
   .label {
     justify-content: flex-start;
   }
- .text-negative{
+  .text-negative {
     margin-left: 0px;
   }
   .label_minWidth {
@@ -152,11 +150,11 @@ watch(
     flex-direction: column;
     align-items: flex-start;
     margin-bottom: 10px !important;
-    gap: 5px !important; 
+    gap: 5px !important;
   }
 
-   .label {
-    justify-content: flex-start; 
+  .label {
+    justify-content: flex-start;
   }
 
   .label_minWidth {
@@ -166,7 +164,7 @@ watch(
     padding-left: 0;
     margin-left: 0;
   }
-  .department-btn-group{
+  .department-btn-group {
     gap: 10px;
   }
 }
@@ -181,6 +179,4 @@ watch(
     width: 100%;
   }
 }
-
-
 </style>

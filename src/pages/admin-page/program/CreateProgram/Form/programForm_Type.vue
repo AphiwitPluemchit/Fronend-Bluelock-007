@@ -16,26 +16,25 @@ const updateProgramType = (type: string) => {
   <div class="input-group">
     <p class="label label_minWidth">ประเภทโครงการ :</p>
     <div class="programType-btn-group">
-    <q-btn
-      :class="{ 'active-btn': modelValue === 'prep' }"
-      @click="updateProgramType('prep')"
-      label="ชั่วโมงเตรียมความพร้อม"
-      class="programType-btn"
-      :disable="disable"
-    />
-    <q-btn
-      :class="{ 'active-btn': modelValue === 'academic' }"
-      @click="updateProgramType('academic')"
-      label="ชั่วโมงทักษะทางวิชาการ"
-      class="programType-btn"
-      :disable="disable"
-    />
-  </div>
+      <q-btn
+        :class="{ 'active-btn': modelValue === 'prep' }"
+        @click="updateProgramType('prep')"
+        label="ชั่วโมงเตรียมความพร้อม"
+        class="programType-btn"
+        :disable="disable"
+      />
+      <q-btn
+        :class="{ 'active-btn': modelValue === 'academic' }"
+        @click="updateProgramType('academic')"
+        label="ชั่วโมงทักษะทางวิชาการ"
+        class="programType-btn"
+        :disable="disable"
+      />
+    </div>
   </div>
 </template>
 
 <style scoped>
-
 .programType-btn {
   width: 200px;
   height: 40px;
@@ -63,12 +62,12 @@ const updateProgramType = (type: string) => {
   line-height: normal;
   text-align: right;
 }
-.programType-btn-group{
+.programType-btn-group {
   display: flex;
   flex-wrap: wrap;
   gap: 10px;
 }
-@media(max-width: 1880px){
+@media (max-width: 1880px) {
   .input-container {
     width: 500px;
     max-width: 100%;
@@ -92,7 +91,6 @@ const updateProgramType = (type: string) => {
     padding-left: 0;
     margin-left: 0;
   }
-
 }
 @media (max-width: 540px) {
   .input-group {
@@ -102,7 +100,7 @@ const updateProgramType = (type: string) => {
     gap: 5px !important;
   }
 
-   .label {
+  .label {
     justify-content: flex-start;
   }
 
@@ -115,23 +113,22 @@ const updateProgramType = (type: string) => {
   }
 
   .programType-btn {
-  width: 180px;
-  height: 40px;
-  border-radius: 50px;
-  box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.2);
-  background-color: #ffffff;
-}
+    width: 180px;
+    height: 40px;
+    border-radius: 50px;
+    box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.2);
+    background-color: #ffffff;
+  }
 }
 @media (max-width: 475px) {
-  .programType-btn-group{
+  .programType-btn-group {
     display: grid;
     grid-template-columns: repeat(1, 1fr);
     gap: 10px 20px;
     width: 100%;
   }
   .programType-btn {
-     width: 100%;
+    width: 100%;
   }
 }
-
 </style>
