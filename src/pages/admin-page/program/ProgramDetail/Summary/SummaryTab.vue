@@ -36,7 +36,6 @@ const programItemDatesOptions = computed(() => {
   const uniq = Array.from(new Set(dates)).sort()
   return uniq.map((d) => ({ label: d, value: d }))
 })
-
 const showCreateQR_CodeDialog = () => {
   isDialogOpen.value = true
 }
@@ -46,6 +45,14 @@ const cancelCreateQR_Code = () => {
 const confirmCreateQR_Code = () => {
   console.log('QR-Code เช็คชื่อถูกสร้างแล้ว!')
 }
+const canShowCheckInBtn = computed(() => {
+  const today = dayjs().format('YYYY-MM-DD')
+  return programItemDatesOptions.value.some((o) => {
+    // กันกรณีค่ามาเป็น ISO/มีเวลา ตัดให้เหลือ YYYY-MM-DD เทียบเสมอ
+    const v = dayjs(String(o.value)).format('YYYY-MM-DD')
+    return v === today
+  })
+})
 async function setDefaultDate() {
   const res = await ProgramService.getOne(programId)
   program.value = res.data
@@ -70,11 +77,8 @@ const fetchSamaryEnrollment = async () => {
 }
 
 onMounted(async () => {
- 
   await setDefaultDate()
   await fetchSamaryEnrollment()
-
-
 })
 </script>
 
@@ -169,6 +173,7 @@ onMounted(async () => {
 
       <div class="image-section">
         <q-btn
+          v-if="canShowCheckInBtn"
           label="สร้าง QR-Code เช็คชื่อ"
           @click="showCreateQR_CodeDialog"
           class="check-in-btn"
