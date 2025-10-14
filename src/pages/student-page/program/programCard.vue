@@ -38,14 +38,8 @@ function getProgramTime(programItems: ProgramItem[] | null | undefined): string 
 
 function enrollmentSummary(programItems: ProgramItem[]) {
   if (!programItems || programItems.length === 0) return '-'
-  const totalEnrolled = programItems.reduce(
-    (total, item) => total + (item.enrollmentCount || 0),
-    0,
-  )
-  const totalAccepted = programItems.reduce(
-    (total, item) => total + (item.maxParticipants ?? 0),
-    0,
-  )
+  const totalEnrolled = programItems.reduce((total, item) => total + (item.enrollmentCount || 0), 0)
+  const totalAccepted = programItems.reduce((total, item) => total + (item.maxParticipants ?? 0), 0)
   return `${totalEnrolled}/${totalAccepted}`
 }
 </script>
@@ -55,13 +49,18 @@ function enrollmentSummary(programItems: ProgramItem[]) {
     class="program-card cursor-pointer shadow-3"
     :class="{ 'clickable-card': !isMobile }"
     @click="!isMobile && $router.push(`/Student/Program/ProgramDetail/${program.id}`)"
- shadow-3 >
+    shadow-3
+  >
     <q-card-section class="outer-box">
       <div class="inner-box">
         <!-- รูปโครงการ -->
         <div class="program-image-container">
           <q-img
-            :src="baseurl + '/uploads/program/images/' + program.file"
+            :src="
+              program?.file
+                ? `${baseurl}/uploads/program/images/${program.file}`
+                : `${baseurl}/uploads/no-image.jpg`
+            "
             class="program-img"
             :ratio="4 / 3"
           />
@@ -116,7 +115,10 @@ function enrollmentSummary(programItems: ProgramItem[]) {
   border-radius: 16px;
   /* box-shadow: 0 6px 18px rgba(0, 0, 0, 0.08); */
   background-color: #fff; /* สีปกติ */
-  transition: background-color 0.3s ease, transform 0.2s ease, box-shadow 0.2s ease;
+  transition:
+    background-color 0.3s ease,
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
 }
 
 .clickable-card:hover {
