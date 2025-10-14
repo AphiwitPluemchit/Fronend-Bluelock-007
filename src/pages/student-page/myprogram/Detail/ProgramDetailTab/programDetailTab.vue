@@ -113,7 +113,7 @@ onMounted(async () => {
           :src="
             program?.file
               ? baseurl + '/uploads/program/images/' + program.file
-              : '/default-placeholder.jpg'
+              : baseurl + '/uploads/no-image.jpg'
           "
           class="program-img"
           :ratio="4 / 3"

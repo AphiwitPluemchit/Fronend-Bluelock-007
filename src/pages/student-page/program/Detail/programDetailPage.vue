@@ -104,7 +104,11 @@ onMounted(async () => {
         <!-- ภาพโครงการ -->
         <div class="col-12 col-md-4 text-center">
           <q-img
-            :src="baseurl + '/uploads/program/images/' + program?.file"
+            :src="
+            program?.file
+              ? baseurl + '/uploads/program/images/' + program.file
+              : baseurl + '/uploads/no-image.jpg'
+          "
             class="program-img"
             error-src="/default-placeholder.jpg"
           />
