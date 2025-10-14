@@ -39,7 +39,6 @@ const applyFilters = async (selectedFilters: SelectedFilters) => {
 }
 
 const data = async () => {
-  studentStore.query.studentStatus = ['1', '2', '3', '4']
   await studentStore.getStudents() // ✅ เรียกจาก store
 
   // อัปเดต pagination ให้ sync
