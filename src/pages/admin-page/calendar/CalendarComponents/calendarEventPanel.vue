@@ -45,7 +45,7 @@ function getStatusColor(status: string): string {
 
 const goToPageDetail = async (id: string, disable: boolean) => {
   await router.push({
-    path: `/Admin/ProgramsManagement/ProgramDetail/${id}`,
+    path: `/Admin/ProgramManagement/ProgramDetail/${id}`,
     query: {
       disable: String(disable),
     },
