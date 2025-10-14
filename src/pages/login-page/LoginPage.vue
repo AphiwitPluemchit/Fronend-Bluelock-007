@@ -24,7 +24,8 @@
         <!-- ขวา: ฟอร์ม -->
         <div class="col-6 right-side flex flex-center">
           <div class="login-form-container">
-            <div v-if="!isResetPassword">
+            <!-- <div v-if="!isResetPassword"> -->
+            <div>
               <div class="text-h5 text-primary text-center q-mb-lg login-title">เข้าสู่ระบบ</div>
               <div class="login-divider q-mb-lg"></div>
 
@@ -116,7 +117,7 @@
                   </template>
                 </q-btn>
 
-                <div class="text-right">
+                <!-- <div class="text-right">
                   <q-btn
                     label="ลืมรหัสผ่าน?"
                     flat
@@ -127,12 +128,12 @@
                     no-caps
                     data-testid="login-forgot-password"
                   />
-                </div>
+                </div> -->
               </q-form>
             </div>
-            <div v-else>
+            <!-- <div v-else>
               <RecoverPassword @backToLogin="resetToLogin" />
-            </div>
+            </div> -->
           </div>
         </div>
       </div>
@@ -234,12 +235,12 @@
                       alt="Google"
                       class="google-icon q-mr-sm"
                     />
-                    <span>เข้าสู่ระบบด้วย Google</span>
+                    <!-- <span>เข้าสู่ระบบด้วย Google</span> -->
                   </div>
                 </template>
               </q-btn>
 
-              <div class="text-right">
+              <!-- <div class="text-right">
                 <q-btn
                   label="ลืมรหัสผ่าน?"
                   flat
@@ -249,7 +250,7 @@
                   no-caps
                   @click="isResetPassword = true"
                 />
-              </div>
+              </div> -->
             </q-form>
           </div>
           <div v-else>
@@ -266,7 +267,7 @@ import { ref, onMounted } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { useAuthStore } from 'src/stores/auth'
 import { EnumUserRole } from 'src/data/roles'
-import RecoverPassword from './RecoverPassword.vue'
+// import RecoverPassword from './RecoverPassword.vue'
 import { useQuasar } from 'quasar'
 import AuthService from 'src/services/auth'
 
@@ -294,9 +295,9 @@ onMounted(() => {
   }
 })
 
-function resetToLogin() {
-  isResetPassword.value = false
-}
+// function resetToLogin() {
+//   isResetPassword.value = false
+// }
 
 // Google Login Handler
 const handleGoogleLogin = async () => {
