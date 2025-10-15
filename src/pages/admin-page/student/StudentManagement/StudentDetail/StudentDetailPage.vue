@@ -9,7 +9,7 @@ import { useHourHistoryStore } from 'src/stores/hourHistory'
 import type { HourChangeHistory } from 'src/types/hourHistory'
 import HourChangeFilterDialog from 'src/components/Dialog/HourChangeFilterDialog.vue'
 
-const majorOptions = ['CS', 'AAI', 'IT', 'SE']
+const majorOptions = ['CS', 'AAI', 'ITDI', 'SE']
 const hourHistoryStore = useHourHistoryStore()
 const originalStudentData = ref<Student | null>(null)
 const show = ref(false)
@@ -195,7 +195,7 @@ onMounted(async () => {
                 :options="majorOptions"
                 dense
                 outlined
-                class="qinput"
+               
                 emit-value
                 map-options
               />
