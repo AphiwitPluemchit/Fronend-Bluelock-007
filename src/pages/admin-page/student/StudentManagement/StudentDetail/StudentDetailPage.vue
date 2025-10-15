@@ -15,6 +15,7 @@ const originalStudentData = ref<Student | null>(null)
 const show = ref(false)
 const route = useRoute()
 const studentCode = ref(route.params.code as unknown as string)
+const isEditMode = ref(route.query.edit === 'true')
 const studentStore = useStudentStore()
 const searchText = ref('')
 const histories = computed(() => hourHistoryStore.histories)
@@ -42,7 +43,6 @@ const filteredHistories = computed(() => {
     return histories.value
   return histories.value.filter((h) => selectedFilters.value.skillType.includes(h.skillType))
 })
-const isEditMode = ref(false)
 const enableEditMode = () => {
   isEditMode.value = true
   originalStudentData.value = { ...studentStore.student }

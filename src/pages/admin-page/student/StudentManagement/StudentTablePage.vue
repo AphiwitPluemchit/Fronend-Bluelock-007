@@ -9,8 +9,11 @@ const router = useRouter()
 const show = ref(false)
 const students = computed(() => studentStore.students ?? [])
 
-const goToDetail = (code: string) => {
-  void router.push(`/Admin/StudentManagement/StudentDetail/${code}`)
+const goToDetail = (code: string, editMode: boolean = false) => {
+  void router.push({
+    path: `/Admin/StudentManagement/StudentDetail/${code}`,
+    query: { edit: editMode ? 'true' : 'false' },
+  })
 }
 interface SelectedFilters {
   year: string[]
@@ -59,7 +62,6 @@ const pagination = ref({
 })
 // const manageDialogRef = ref<InstanceType<typeof ManageStudentDialog> | null>(null)
 
-// ฟังก์ชันเปิด ManageStudentDialog
 const goToUplaodPage = () => {
   void router.push('/Admin/StudentManagement/UploadStudent')
 }
@@ -114,7 +116,15 @@ onMounted(async () => {
     <!-- ชื่อหน้า -->
     <div class="row justify-between items-center" style="margin-top: 20px">
       <div class="texttitle">จัดการข้อมูลนิสิต</div>
-      <q-btn v-if="show" dense outlined label="เพิ่มนิสิต" @click="goToUplaodPage" class="btnadd" style="width: 130px;">
+      <q-btn
+        v-if="show"
+        dense
+        outlined
+        label="เพิ่มนิสิต"
+        @click="goToUplaodPage"
+        class="btnadd"
+        style="width: 130px"
+      >
       </q-btn>
     </div>
 
@@ -153,7 +163,6 @@ onMounted(async () => {
         :rows="students"
         :columns="columns"
         v-model:pagination="pagination"
-
         @request="onRequest"
         row-key="id"
         class="q-mt-md my-table"
@@ -199,13 +208,22 @@ onMounted(async () => {
               <q-btn
                 flat
                 dense
+                icon="edit"
+                class="bg-primary text-white q-pa-xs rounded-borders q-mr-sm"
+                @click="goToDetail(props.row.code, true)"
+              >
+                <q-tooltip>แก้ไข</q-tooltip>
+              </q-btn>
+              <q-btn
+                flat
+                dense
                 icon="visibility"
-                class="bg-black text-white q-pa-xs rounded-borders"
+                class="bg-black text-white q-pa-xs rounded-borders q-mr-sm"
                 @click="goToDetail(props.row.code)"
               >
                 <q-tooltip>ดูรายละเอียด</q-tooltip>
-              </q-btn></q-td
-            >
+              </q-btn>
+            </q-td>
           </q-tr>
         </template>
         <template v-slot:no-data>
