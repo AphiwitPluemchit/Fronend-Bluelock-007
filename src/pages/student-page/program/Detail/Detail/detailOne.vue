@@ -57,10 +57,38 @@ const getProgramOperator = (programItems: ProgramItem[] | null | undefined): str
   return firstItem?.operator || 'ไม่ระบุ'
 }
 
-const getProgramDetail = (programItems: ProgramItem[] | null | undefined): string => {
-  const firstItem = programItems?.[0]
-  return firstItem?.description || 'ไม่มีรายละเอียดเพิ่มเติม'
+const URL_REGEX = /((https?:\/\/|www\.)[^\s<]+)/gi
+const EMAIL_REGEX = /\b[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}\b/gi
+
+function escapeHtml(s: string) {
+  return s
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;')
 }
+
+function toAbsolute(url: string) {
+  return url.startsWith('http') ? url : `https://${url}`
+}
+
+function linkify(text: string) {
+  const escaped = escapeHtml(text)
+  const withUrls = escaped.replace(URL_REGEX, (m) => {
+    const href = toAbsolute(m)
+    return `<a href="${href}" target="_blank" rel="noopener noreferrer">${m}</a>`
+  })
+  const withEmails = withUrls.replace(EMAIL_REGEX, (m) => `<a href="mailto:${m}">${m}</a>`)
+  return withEmails.replace(/\n/g, '<br>')
+}
+
+const getProgramDetailHtml = (programItems: ProgramItem[] | null | undefined): string => {
+  const firstItem = programItems?.[0]
+  const text = firstItem?.description || 'ไม่มีรายละเอียดเพิ่มเติม'
+  return linkify(text)
+}
+
 </script>
 
 <template>
@@ -115,7 +143,7 @@ const getProgramDetail = (programItems: ProgramItem[] | null | undefined): strin
 
     <div class="field-pair">
       <div class="field-label">รายละเอียดอื่น ๆ : </div>
-      <div class="field-value">{{ getProgramDetail(program?.programItems) }}</div>
+      <div class="field-value" v-html="getProgramDetailHtml(program?.programItems)"></div>
     </div>
   </q-list>
 </template>
