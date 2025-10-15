@@ -177,7 +177,7 @@ const clearFile = () => {
           @update:model-value="handleFileChange"
         >
           <template v-slot:append>
-            <q-btn dense flat icon="delete" @click="clearFile" />
+            <q-btn color="red"  dense flat icon="delete" @click="clearFile" /> <q-tooltip>ลบข้อมูลไฟล์</q-tooltip>
           </template>
         </q-file>
 
@@ -236,10 +236,8 @@ const clearFile = () => {
         <q-btn
           dense
           outlined
-          icon="save"
-          color="primary"
-          label="ยืนยันอัปโหลด"
-          class="btnadd"
+          label="บันทึก"
+          class="btnconfirm"
           @click="uploadFile"
         />
       </div>

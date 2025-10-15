@@ -105,12 +105,12 @@ onMounted(async () => {
   <q-page class="q-pa-md">
     <!-- ชื่อหน้า -->
     <div class="row justify-between items-center" style="margin-top: 20px">
-      <div class="texttitle">จัดการฝึกงานนิสิต</div>
+      <div class="texttitle">จัดการนิสิตฝึกสหกิจ</div>
       <q-btn
         v-if="show"
         dense
         outlined
-        label="เพิ่มนิสิตฝึกงาน"
+        label="เพิ่มนิสิตฝึกสหกิจ"
         @click="goToConfirmStudentInternDataPage"
         class="btnadd"
         style="width: 130px"

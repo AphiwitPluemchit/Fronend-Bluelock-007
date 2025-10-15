@@ -90,7 +90,7 @@ async function goHome() {
     <div>
       <div v-if="props.program?.name" class="q-mb-sm">โครงการ: {{ props.program?.name }}</div>
       <div v-if="formSubmitted" class="text-positive q-mb-md">
-        เช็คชื่อออกและส่งแบบประเมินสำเร็จ
+        เช็คชื่อออกและทำแบบประเมินสำเร็จ
       </div>
       <div class="q-pa-md">
         <q-btn
@@ -99,7 +99,7 @@ async function goHome() {
           :loading="loading"
           :disable="loading"
         >
-          {{ formSubmitted ? 'กลับหน้าหลัก' : 'ทำแบบฟอร์ม' }}
+          {{ formSubmitted ? 'ดูรายละเอียด' : 'ทำแบบประเมิน' }}
         </q-btn>
       </div>
       <div v-if="errorMessage" class="text-negative q-mt-md">{{ errorMessage }}</div>

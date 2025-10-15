@@ -147,15 +147,15 @@ const confirmSave = () => {
     message: 'ต้องการจัดเก็บนิสิตหรือไม่?',
     cancel: {
       label: 'ยกเลิก',
-      color: "red",
+      color: 'red',
     },
     ok: {
       label: 'ยืนยัน',
       color: 'primary',
     },
     persistent: true,
-    class: 'my-dialog',     // << ใส่คลาสที่นี่
-    seamless: false         // ถ้าอยากให้มี backdrop ปกติ
+    class: 'my-dialog', // << ใส่คลาสที่นี่
+    seamless: false, // ถ้าอยากให้มี backdrop ปกติ
   }).onOk(() => {
     void saveStudents()
   })
@@ -216,7 +216,6 @@ onMounted(async () => {
   }
   await data()
   show.value = true
-
 })
 </script>
 
@@ -353,10 +352,10 @@ onMounted(async () => {
           </q-tr>
         </template>
         <template v-slot:no-data>
-            <div class="full-width text-center q-pa-md text-grey" style="font-size: 20px">
-              ไม่มีรายชื่อนิสิต
-            </div>
-          </template>
+          <div class="full-width text-center q-pa-md text-grey" style="font-size: 20px">
+            ไม่มีรายชื่อนิสิต
+          </div>
+        </template>
       </q-table>
 
       <!-- ตารางแสดงรายชื่อนิสิตที่จัดเก็บ -->
@@ -396,21 +395,19 @@ onMounted(async () => {
           </q-tr>
         </template>
         <template v-slot:no-data>
-            <div class="full-width text-center q-pa-md text-grey" style="font-size: 20px">
-              ไม่มีรายชื่อนิสิต
-            </div>
-          </template>
+          <div class="full-width text-center q-pa-md text-grey" style="font-size: 20px">
+            ไม่มีรายชื่อนิสิต
+          </div>
+        </template>
       </q-table>
 
       <div class="row justify-end q-mt-md">
         <q-btn
           dense
           outlined
-          icon="save"
-          color="primary"
-          label="จัดเก็บนิสิต"
-          class="btnadd"
-        	@click="confirmSave"
+          label="บันทึก"
+          class="btnconfirm"
+          @click="confirmSave"
           :disable="selectedStudents.length === 0"
         />
       </div>

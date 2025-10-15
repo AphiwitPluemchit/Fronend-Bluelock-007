@@ -76,7 +76,7 @@ console.log('token:', props.token)
       </div>
 
       <div v-if="isSubmitted">
-        <div v-if="isChecked" class="text-positive">เช็คชื่อเข้าสำเร็จ</div>
+        <div v-if="isChecked" class="text-positive">เช็คชื่อเข้าร่วมสำเร็จ</div>
         <div v-else-if="errorMessage" class="text-negative q-mt-md">{{ errorMessage }}</div>
       </div>
     </div>

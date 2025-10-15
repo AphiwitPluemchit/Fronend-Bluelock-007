@@ -23,9 +23,9 @@ function showAlertDialog(title: string, message: string) {
 }
 
 const breadcrumbs = ref({
-  previousPage: { title: 'จัดการฝึกงานนิสิต', path: '/Admin/StudentInternship' },
+  previousPage: { title: 'จัดการนิสิตฝึกสหกิจ', path: '/Admin/StudentInternship' },
   currentPage: {
-    title: 'ยืนยันการจัดเก็บข้อมูลนิสิต',
+    title: 'ยืนยันการจัดเก็บข้อมูลนิสิตฝึกสหกิจ',
     path: '/Admin/StudentInternship/ConfirmStudentInternDataPage',
   },
   icon: 'people',
@@ -397,10 +397,8 @@ onMounted(async () => {
         <q-btn
           dense
           outlined
-          icon="save"
-          color="primary"
-          label="เพิ่มนิสิตฝึกงาน"
-          class="btnadd"
+          label="บันทึก"
+          class="btnconfirm"
           @click="confirmSave"
           :disable="selectedStudents.length === 0"
         />
