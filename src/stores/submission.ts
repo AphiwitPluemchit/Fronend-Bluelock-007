@@ -61,9 +61,6 @@ export const useSubmissionStore = defineStore('submission', {
       }
     },
 
-    /**
-     * ดึง submissions ของฟอร์ม (รองรับ limit/sort) + cache
-     */
     async fetchSubmissionsByForm(
       formId: string,
       opts?: { limit?: number; sort?: string },

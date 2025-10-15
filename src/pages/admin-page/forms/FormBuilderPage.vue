@@ -5,15 +5,6 @@
       <div class="texttitle">สร้างฟอร์มประเมิน</div>
       <div class="header-actions">
         <q-btn
-          color="primary"
-          label="Export"
-          icon="download"
-          @click="exportToXlsx"
-          :disable="!formData.title || formData.blocks?.length === 0"
-          class="q-mr-md export-btn"
-        />
-
-        <q-btn
           color="secondary"
           label="ดูตัวอย่าง"
           icon="visibility"
@@ -204,8 +195,6 @@
 <script setup lang="ts">
 import { ref, reactive, onMounted, computed, watch, onActivated } from 'vue'
 import { useQuasar } from 'quasar'
-import * as XLSX from 'xlsx'
-import dayjs from 'dayjs'
 import { useFormStore } from 'src/stores/forms'
 import type { Form } from 'src/types/form'
 import draggable from 'vuedraggable'
@@ -224,71 +213,6 @@ import MultipleChoicegridMenu from './QuestionFormat/MultipleChoicegridMenu.vue'
 import CheckboxGridMenu from './QuestionFormat/CheckboxGridMenu.vue'
 import { useRouter, useRoute } from 'vue-router'
 
-// ใช่สำหรับ export ให้ excel
-interface ExportRow {
-  Title: string
-  Type: string
-  Description: string
-  IsRequired: string // "yes"/"no"
-  Session: number
-  Choices: string // คั่นด้วย ;
-  Rows: string // คั่นด้วย ;
-}
-interface OptionRow {
-  title: string
-  sequence: number
-}
-function exportToXlsx() {
-  // แปลง blocks -> rows
-  const rows: ExportRow[] = (formData.blocks ?? []).map((b) => {
-    // แปลง boolean เป็นข้อความ
-    const isReq = b.isRequired ? 'yes' : 'no'
-
-    // choices และ rows รองรับทั้ง string[] และ {title:string}[]
-    const toTitles = (list?: OptionRow[]): string =>
-      (list ?? [])
-        .map((it) => it.title)
-        .filter((t) => t.trim().length > 0)
-        .join(';')
-
-    const choices = toTitles(b.choices)
-    const rowsStr = toTitles(b.rows)
-
-    return {
-      Title: b.title ?? '',
-      Type: b.type ?? 'short_answer',
-      Description: b.description ?? '',
-      IsRequired: isReq,
-      Session: Number(b.session ?? 1),
-      Choices: choices,
-      Rows: rowsStr,
-    }
-  })
-
-  if (rows.length === 0) {
-    $q.notify({ type: 'warning', message: 'ยังไม่มีบล็อกคำถามให้ส่งออก' })
-    return
-  }
-
-  // สร้าง worksheet และ workbook
-  const ws = XLSX.utils.json_to_sheet(rows, {
-    header: ['Title', 'Type', 'Description', 'IsRequired', 'Session', 'Choices', 'Rows'],
-    skipHeader: false,
-  })
-  const wb = XLSX.utils.book_new()
-  XLSX.utils.book_append_sheet(wb, ws, 'Form')
-
-  // ตั้งชื่อไฟล์: <Title>-yyyyMMDD-HHmm.xlsx (fallback เป็น Form)
-  const safeTitle = (formData.title || 'Form').replace(/[\\/:*?"<>|]/g, '_').slice(0, 80)
-  const ts = dayjs().format('YYYYMMDD-HHmm')
-  const filename = `${safeTitle}-${ts}.xlsx`
-
-  // บันทึกไฟล์
-  XLSX.writeFile(wb, filename)
-
-  $q.notify({ type: 'positive', message: `ส่งออกไฟล์ ${filename} สำเร็จ` })
-}
-
 const route = useRoute()
 const router = useRouter()
 const showPreview = ref(false)
@@ -304,7 +228,6 @@ const formData = reactive<Form>({
 const currentSession = ref(1)
 
 function addSessionDivider() {
-  // Find the highest session number
   const maxSession =
     formData.blocks.length > 0 ? Math.max(...formData.blocks.map((b) => b.session || 1)) : 1
 
@@ -359,14 +282,12 @@ function onTypeSelected(index: number, type: { label: string; value: string; ico
   const block = formData.blocks?.[index]
   if (!block) return
 
-  // Only update if type is different
   if (block.type === type.value) return
 
-  // Create a new block with the new type
   const newBlock = {
     ...block,
     type: type.value,
-    id: uuidv4(), // Ensure new ID for the block
+    id: uuidv4(), 
   }
 
   // Initialize based on question type
@@ -390,7 +311,6 @@ function onTypeSelected(index: number, type: { label: string; value: string; ico
     newBlock.rows = []
   }
 
-  // Update the block in the array
   formData.blocks[index] = newBlock
 }
 
@@ -474,12 +394,11 @@ const formId = computed<string | undefined>(
   () =>
     (route.query.id as string | undefined) ||
     (route.params.id as string | undefined) ||
-    (route.params.formId as string | undefined), // ถ้าเคยตั้งชื่อ param ว่า formId
+    (route.params.formId as string | undefined), 
 )
-const isEdit = computed(() => !!formId.value) // มี id = โหมดแก้ไข
+const isEdit = computed(() => !!formId.value) 
 
 function buildPayload() {
-  // รวม logic จัด shape ให้ backend ทีเดียว
   const blocks = formData.blocks.map((block, index) => ({
     title: block.title,
     type: block.type,
@@ -508,27 +427,22 @@ function buildPayload() {
 async function saveForm() {
   try {
     const payload = buildPayload()
-    console.log('Saving form with data:', payload)
     if (isEdit.value && formId.value) {
-      // UPDATE
       const updated = await formStore.updateForm(formId.value, payload)
       if (!updated) throw new Error('Update failed')
-      $q.notify({ type: 'positive', message: 'อัปเดตฟอร์มเรียบร้อยแล้ว' })
     } else {
       const created = await formStore.createForm(payload)
       if (!created) throw new Error('Create failed')
-      $q.notify({ type: 'positive', message: 'ฟอร์มถูกบันทึกแล้ว!' })
+
     }
     await router.push('/Admin/Forms')
   } catch (err) {
     console.error(err)
-    $q.notify({ type: 'negative', message: 'เกิดข้อผิดพลาดในการบันทึกฟอร์ม' })
   }
 }
 
 async function loadFormIfAny(id?: string) {
   if (!id) {
-    console.log('[Builder] create mode (no id)')
     return
   }
   const form = await formStore.fetchFormById(id)
@@ -545,7 +459,6 @@ async function loadFormIfAny(id?: string) {
 
 onMounted(() => loadFormIfAny(formId.value))
 
-// กรณีเปลี่ยน id ระหว่างอยู่หน้าเดิม
 watch(formId, (newId, oldId) => {
   if (newId && newId !== oldId) void loadFormIfAny(newId)
 })
@@ -553,7 +466,6 @@ watch(formId, (newId, oldId) => {
 onActivated(() => loadFormIfAny(formId.value))
 
 function deleteSession(sessionNumber: number) {
-  // 1) หา range ของ session ที่ต้องการลบ (divider + คำถามใน session นั้น)
   const start = formData.blocks.findIndex(
     (b) => b.type === 'session' && b.session === sessionNumber,
   )
@@ -562,19 +474,15 @@ function deleteSession(sessionNumber: number) {
   let end = formData.blocks.findIndex((b, i) => i > start && b.type === 'session')
   if (end === -1) end = formData.blocks.length
 
-  // ลบทั้ง session
   formData.blocks.splice(start, end - start)
 
-  // 2) ลดเลข session ของ "บล็อกที่เหลือทั้งหมด" ที่มี session > sessionNumber
   for (const b of formData.blocks) {
     const s = b.session ?? 1
     if (s > sessionNumber) b.session = s - 1
   }
 
-  // 3) รีซีเคว้นซ์ให้สวยงาม
   formData.blocks.forEach((b, idx) => (b.sequence = idx + 1))
 
-  // 4) ปรับ currentSession ให้ไม่เกินจำนวน session สูงสุดที่เหลือ
   const remainingSessions = formData.blocks
     .filter((b) => b.type === 'session')
     .map((b) => b.session ?? 1)
@@ -599,10 +507,7 @@ function updateBlocks() {
   let currentSession = 1
 
   formData.blocks.forEach((block, index) => {
-    // Update sequence number
     block.sequence = index + 1
-
-    // Update session based on the nearest session divider
     if (block.type === 'session') {
       currentSession = block.session
     } else {

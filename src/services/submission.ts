@@ -32,18 +32,15 @@ export type BlockCountItem = {
   count: number
 }
 
-// ทั้งฟอร์ม
 export async function getFormBlocksAnalytics(formId: string) {
   const { data } = await api.get<BlockCountItem[]>(
-    `/analytics/forms/${formId}/blocks`
+    `/submissions/analytics/forms/${formId}/blocks`
   )
   return data
 }
-
-// บล็อกเดียว
 export async function getBlockAnalytics(formId: string, blockId: string) {
   const { data } = await api.get<BlockCountItem[]>(
-    `/analytics/forms/${formId}/blocks/${blockId}`
+    `/submissions/analytics/forms/${formId}/blocks/${blockId}`
   )
   return data
 }

@@ -66,7 +66,6 @@ export const useStudentProgramstore = defineStore('program', {
       const status = await ProgramService.updateOne(this.form)
       if (status === 200) {
         // await this.fetchData()
-        this.notifySuccess('อัปเดตกิจกรรมสำเร็จ')
         this.dialogState = false
         this.resetForm()
       }
@@ -80,9 +79,7 @@ export const useStudentProgramstore = defineStore('program', {
       this.form = {}
     },
 
-    notifySuccess(message: string) {
-      Notify.create({ type: 'positive', message })
-    },
+   
 
     notifyError(message: string) {
       Notify.create({ type: 'negative', message })

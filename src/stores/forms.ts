@@ -10,16 +10,43 @@ type RawForm = Partial<Form> & { _id?: string }
 const isIndexable = (v: unknown): v is Record<string, unknown> =>
   v !== null && typeof v === 'object'
 
+
 const pickId = (obj: unknown): string | null => {
   if (!isIndexable(obj)) return null
+
+  // helper: ดึง hex 24 จาก unknown
+  const toHex24 = (v: unknown): string | null => {
+    if (typeof v === 'string') {
+      const m = v.match(/[0-9a-fA-F]{24}/)
+      return m ? m[0] : null
+    }
+    if (isIndexable(v) && typeof v['$oid'] === 'string') {
+      const m = v['$oid'].match(/[0-9a-fA-F]{24}/)   // ✅ ไม่ต้อง cast แล้ว
+      return m ? m[0] : null
+    }
+    return null
+  }
+
+  // 1) id, _id, insertedId เป็น string ปกติ
   const idVal = obj['id']
   if (typeof idVal === 'string' && idVal) return idVal
+
   const mongoIdVal = obj['_id']
   if (typeof mongoIdVal === 'string' && mongoIdVal) return mongoIdVal
+
   const insertedIdVal = obj['insertedId']
   if (typeof insertedIdVal === 'string' && insertedIdVal) return insertedIdVal
-  return null
+
+  // 2) กรณีเป็น object {$oid:'...'} หรือสตริง "ObjectId('...')"
+  return (
+    toHex24(idVal) ??
+    toHex24(mongoIdVal) ??
+    toHex24(insertedIdVal) ??
+    null
+  )
 }
+
+
 
 const pickOriginId = (v: unknown): string | null =>
   isIndexable(v) && typeof v['originId'] === 'string' && v['originId'].length > 0
@@ -46,9 +73,11 @@ const normalizeForm = (f: unknown): Form | null => {
   if (!isIndexable(payload)) return null
   const rf = payload as RawForm
   const id = idHint ?? pickId(rf)
-  const out: Form = { ...(rf as Form), ...(id ? { id } : {}) }
+  if (!id) return null
+  const out: Form = { ...(rf as Form), id }
   return out
 }
+
 
 const normalizeForms = (arr: unknown): Form[] =>
   Array.isArray(arr) ? arr.map(normalizeForm).filter((x): x is Form => x !== null) : []
@@ -105,17 +134,23 @@ export const useFormStore = defineStore('forms', () => {
     return null
   }
 
-  /** โหลดฟอร์มตาม id */
   const fetchFormById = async (id: string): Promise<Form | null> => {
     loading.value = true
     error.value = null
     try {
       const res = await FormService.getFormById(id)
-      const form = normalizeForm(res) // res อาจเป็น null -> normalizeForm จะได้ null
+      const form = normalizeForm(res) // อาจเป็น null ถ้า service ไม่มี
       currentForm.value = form
+  
+      // ⬇️ upsert เข้า forms[]
+      if (form) {
+        const i = forms.value.findIndex((f) => f.id === form.id)
+        if (i >= 0) forms.value.splice(i, 1, form)
+        else forms.value.push(form)
+      }
+  
       return form
     } catch (e) {
-      // (ปกติจะไม่เข้าเพราะ service คืน null แล้ว)
       error.value = e
       currentForm.value = null
       return null
@@ -123,6 +158,7 @@ export const useFormStore = defineStore('forms', () => {
       loading.value = false
     }
   }
+  
 
   /** สร้างฟอร์มใหม่ */
   const createForm = async (form: Form) => {

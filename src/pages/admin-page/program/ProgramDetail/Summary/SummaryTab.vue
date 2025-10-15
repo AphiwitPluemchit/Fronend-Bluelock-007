@@ -56,6 +56,7 @@ const canShowCheckInBtn = computed(() => {
 async function setDefaultDate() {
   const res = await ProgramService.getOne(programId)
   program.value = res.data
+  buildRows()
   const opts = programItemDatesOptions.value
   if (!opts.length) return
 
@@ -74,6 +75,14 @@ const fetchSamaryEnrollment = async () => {
 
   const resSum = await SammaryReportService.getSamaryEnrollment(programId, query.value.date)
   enrollmentSummary.value = resSum.data
+}
+const buildRows = () => {
+  const items = program.value?.programItems ?? []
+  rows.value = items.map((it) => ({
+    _id: it.id || crypto.randomUUID(),
+    name: it.name || '—',
+    formId: program.value?.formsId ?? null,  
+  }))
 }
 
 onMounted(async () => {
@@ -181,7 +190,7 @@ onMounted(async () => {
       </div>
       <!-- ตารางผลการประเมิน -->
       <div class="evaluation-container">
-        <EvaluationTable :rows="rows" />
+        <EvaluationTable v-if="program" :program="program" />
       </div>
     </div>
   </div>
