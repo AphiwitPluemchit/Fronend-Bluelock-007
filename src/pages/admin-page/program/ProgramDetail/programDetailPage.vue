@@ -154,9 +154,9 @@ const tabOptions = computed(() => [
           indicator-color="transparent"
         >
           <q-tab name="program" label="รายละเอียดกิจกรรม" />
-          <q-tab name="registration" label="รายละเอียดการลงทะเบียน" :disable="isDisabled" />
-          <q-tab name="students" label="รายชื่อนิสิต" :disable="isDisabled" />
-          <q-tab name="summary" label="สรุปผลกิจกรรม" :disable="isDisabled" />
+          <q-tab name="registration" label="รายละเอียดการลงทะเบียน"  />
+          <q-tab name="students" label="รายชื่อนิสิต" />
+          <q-tab name="summary" label="สรุปผลกิจกรรม"/>
         </q-tabs>
 
         <!-- จอเล็ก -->

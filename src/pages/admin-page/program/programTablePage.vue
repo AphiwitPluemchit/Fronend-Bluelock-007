@@ -1865,7 +1865,7 @@ watchEffect(() => {
   background-color: #edf0f5;
 }
 .my-sticky-header-table {
-  min-height: 340px; /* หรือแล้วแต่ต้องการ */
+  min-height: 363px; /* หรือแล้วแต่ต้องการ */
   overflow-y: auto;
   border: 1px solid #ccc;
   border-radius: 8px;
