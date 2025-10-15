@@ -1,6 +1,8 @@
 <script setup lang="ts">
 import { ref } from 'vue'
+import { api } from 'boot/axios'
 
+const baseurl = api.defaults.baseURL
 const selectedFile = ref<File | null>(null)
 const fileInput = ref<HTMLInputElement | null>(null)
 const previewUrl = ref<string | null>(null)
@@ -33,16 +35,14 @@ defineExpose({ selectedFile })
         @change="onFileChange"
       />
       <q-img
-        v-if="previewUrl"
-        :src="previewUrl"
+        :src="previewUrl || `${baseurl}/uploads/no-image.jpg`"
         class="preview-img"
         :ratio="430 / 330"
         contain
         alt="Image preview"
       />
-      <q-icon v-else name="image" size="50px" />
     </q-card>
-     <p class="image-size-text">*ขนาดรูป 430x330 px</p>
+    <p class="image-size-text">*ขนาดรูป 430x330 px</p>
   </div>
 </template>
 
@@ -82,21 +82,21 @@ defineExpose({ selectedFile })
 }
 
 @media (max-width: 500px) {
-.upload-box {
-  width: 330px;
-  height: 230px;
-}
-.image-size-text {
+  .upload-box {
+    width: 330px;
+    height: 230px;
+  }
+  .image-size-text {
     max-width: 330px;
   }
 }
 @media (max-width: 400px) {
-.upload-box {
-  width: 300px;
-  height: 200px;
-}
-.image-size-text {
+  .upload-box {
+    width: 300px;
+    height: 200px;
+  }
+  .image-size-text {
     max-width: 300px;
-}
+  }
 }
 </style>

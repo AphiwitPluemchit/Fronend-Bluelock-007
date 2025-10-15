@@ -1,7 +1,9 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue'
+import { api } from 'boot/axios'
 
 const fileInput = ref<HTMLInputElement | null>(null)
+const baseurl = api.defaults.baseURL
 const previewUrl = ref<string | null>(null)
 const selectedFileName = ref<string | null>(null)
 const props = defineProps<{
@@ -34,7 +36,7 @@ const selectedFile = ref<File | null>(null)
 defineExpose({
   resetPreview,
   getSelectedFileName,
-  getSelectedFile: () => selectedFile.value
+  getSelectedFile: () => selectedFile.value,
 })
 
 const onFileChange = (event: Event) => {
@@ -67,19 +69,16 @@ const onFileChange = (event: Event) => {
       />
 
       <q-img
-        v-if="imageSrc"
-        :src="imageSrc"
+        :src="imageSrc || `${baseurl}/uploads/no-image.jpg`"
         alt="Image preview"
         class="preview-img"
         :ratio="430 / 330"
         contain
       />
-      <q-icon v-else name="image" size="50px" />
     </q-card>
     <p class="image-size-text">*ขนาดรูป 430x330 px</p>
   </div>
 </template>
-
 
 <style scoped>
 .upload-box {
@@ -120,22 +119,21 @@ const onFileChange = (event: Event) => {
   opacity: 0.6;
 }
 @media (max-width: 500px) {
-.upload-box {
-  width: 330px;
-  height: 230px;
-}
-.image-size-text {
+  .upload-box {
+    width: 330px;
+    height: 230px;
+  }
+  .image-size-text {
     max-width: 330px;
   }
 }
 @media (max-width: 400px) {
-.upload-box {
-  width: 300px;
-  height: 200px;
-}
-.image-size-text {
+  .upload-box {
+    width: 300px;
+    height: 200px;
+  }
+  .image-size-text {
     max-width: 300px;
+  }
 }
-}
-
 </style>

@@ -195,7 +195,6 @@ onMounted(async () => {
                 :options="majorOptions"
                 dense
                 outlined
-               
                 emit-value
                 map-options
               />
