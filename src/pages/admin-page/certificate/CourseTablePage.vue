@@ -74,9 +74,9 @@ const applyFilters = async (selectedFilters: { categoryProgram: string[] }) => {
 // }
 const columns: QTableProps['columns'] = [
   { name: 'id', label: 'ลำดับ', field: 'id', align: 'left' },
-  { name: 'name', label: 'ชื่อหัวข้อการอบรม', field: 'name', align: 'left' },
-  { name: 'hour', label: 'ชั่วโมง', field: 'hour', align: 'center' },
-  { name: 'link', label: 'Link สมัครเรียน (Short URL)', field: 'link', align: 'left' },
+  { name: 'name', label: 'ชื่อหลักสูตร', field: 'name', align: 'left' },
+  { name: 'hour', label: 'จำนวนชั่วโมง', field: 'hour', align: 'center' },
+  { name: 'link', label: 'Link เข้าเรียน', field: 'link', align: 'left' },
   {
     name: 'isHardSkill',
     label: 'ประเภท',
@@ -117,9 +117,9 @@ function goToAddCourse() {
   <q-page class="q-pa-md">
     <!-- ชื่อหน้า -->
     <div class="row justify-between items-center q-mb-md" style="margin-top: 20px">
-      <div class="texttitle">จัดการหัวข้อการอบรม</div>
+      <div class="texttitle">จัดการหลักสูตร</div>
       <!-- ปุ่มเพื่อการเพิ่มข้อมูล -->
-      <q-btn dense outlined label="เพิ่มหัวข้อการอบรม" class="btnadd" @click="goToAddCourse" />
+      <q-btn dense outlined label="เพิ่มหลักสูตร" class="btnadd" @click="goToAddCourse" />
     </div>
     <section class="q-mt-lg">
       <template v-if="$q.screen.gt.sm">

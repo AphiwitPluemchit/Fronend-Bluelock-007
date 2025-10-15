@@ -114,9 +114,10 @@ const submit = async () => {
 </script>
 
 <template>
-  <div class="q-pa-md">
-    <!-- Breadcrumbs -->
-    <AppBreadcrumbs :breadcrumbs="breadcrumbs" />
+  <q-page class="q-pa-md">
+    <div style="margin-top: 20px">
+      <AppBreadcrumbs :breadcrumbs="breadcrumbs" />
+    </div>
 
     <div class="q-mx-lg">
       <q-card class="q-mt-md full-width" flat>
@@ -301,7 +302,7 @@ const submit = async () => {
         </q-form>
       </q-card>
     </div>
-  </div>
+  </q-page>
 </template>
 
 <style scoped>

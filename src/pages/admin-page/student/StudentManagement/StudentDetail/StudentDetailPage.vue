@@ -125,12 +125,12 @@ onMounted(async () => {
 </script>
 
 <template>
-  <div class="q-pa-md">
-    <!-- Breadcrumbs -->
-    <div><AppBreadcrumbs :breadcrumbs="breadcrumbs" /></div>
-    <div class="q-mx-lg">
-      <div class="text-h6 q-mt-lg">ข้อมูลนิสิต</div>
-      <q-card flat class="q-mt-md">
+  <q-page class="q-pa-md">
+    <div style="margin-top: 20px">
+      <AppBreadcrumbs :breadcrumbs="breadcrumbs" />
+    </div>
+    <div class="q-mb-lg">
+      <q-card flat class="q-mt-lg">
         <div v-if="show" class="row q-col-gutter-md">
           <!-- แถวข้อมูลนิสิต -->
           <div class="col-12 row items-center q-pa-sm">
@@ -357,7 +357,7 @@ onMounted(async () => {
         </q-card-actions>
       </q-card>
     </q-dialog>
-  </div>
+  </q-page>
 </template>
 
 <style scoped>
