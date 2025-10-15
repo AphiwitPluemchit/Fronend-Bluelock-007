@@ -13,11 +13,16 @@ export interface HourChangeHistory {
 }
 
 // Status constants
+// For Program: upcoming, participating, attended, absent
+// For Certificate: pending, approved, rejected
 export const HC_STATUS = {
-  PENDING: 'pending',
+  // Program statuses
+  UPCOMING: 'upcoming',
+  PARTICIPATING: 'participating',
   ATTENDED: 'attended',
-  PARTIAL: 'partial',
   ABSENT: 'absent',
+  // Certificate statuses
+  PENDING: 'pending',
   APPROVED: 'approved',
   REJECTED: 'rejected',
 } as const
