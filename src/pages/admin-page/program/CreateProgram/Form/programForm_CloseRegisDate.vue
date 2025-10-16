@@ -136,6 +136,7 @@ defineExpose({ validate, focus })
       <q-input
         ref="inputRef"
         outlined
+        readonly
         :model-value="formattedCloseRegisDate"
         :disable="disable"
         :error="closedateError !== ''"

@@ -130,7 +130,8 @@ watch(
       <q-input
         ref="inputRef"
         outlined
-        v-model="formattedDateRange"
+        readonly
+        :model-value="formattedDateRange"
         class="fix-q-input-height"
         :disable="disable"
         :error="dateError !== ''"
@@ -146,8 +147,8 @@ watch(
             @click="datePopupRef?.show()"
           />
         </template>
+      </q-input>
 
-        <!-- ✅ ย้าย QMenu มาที่นี่ เพื่อ anchor ถูกต้อง -->
         <q-menu ref="datePopupRef" anchor="bottom left" self="top left" :cover="false">
           <q-date
             v-model="internalDateRange"
@@ -164,7 +165,7 @@ watch(
             @update:model-value="onDateRangeChange"
           />
         </q-menu>
-      </q-input>
+
 
       <div v-if="dateError" class="text-negative text-subtitle2 q-mt-xs">
         {{ dateError }}

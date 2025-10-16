@@ -103,7 +103,7 @@ const handleEnter = async (e: KeyboardEvent) => {
 
   e.preventDefault()
 
-  // 👉 Blur ออกจาก input เพื่อให้ q-menu ปิดอัตโนมัติ
+
   const input = inputRef.value?.$el?.querySelector('input') as HTMLInputElement | null
   input?.blur()
 
@@ -129,6 +129,7 @@ const handleEnter = async (e: KeyboardEvent) => {
         @input="filterRooms"
         :error="roomError !== ''"
       >
+    </q-input>
         <q-menu
           v-if="!props.disable"
           v-model="showSuggestions"
@@ -145,7 +146,7 @@ const handleEnter = async (e: KeyboardEvent) => {
               clickable
               @mousedown.prevent
               @click="selectRoom(room)"
-              :class="{ 'selected-item': selectedRoom.includes(room) }"
+              :class="{ 'selectcvfed-item': selectedRoom.includes(room) }"
             >
               <q-item-section>
                 {{ room }}
@@ -153,7 +154,7 @@ const handleEnter = async (e: KeyboardEvent) => {
             </q-item>
           </q-list>
         </q-menu>
-      </q-input>
+  
       <div v-if="roomError" class="text-negative text-subtitle2 q-mt-xs">
         {{ roomError }}
       </div>
