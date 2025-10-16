@@ -33,6 +33,12 @@ const breadcrumbs = ref({
 
 // Computed properties for course display
 const courseName = computed(() => selectedCourse.value?.name || '')
+const certificateName = computed(
+  () => selectedCourse.value?.certificateName || selectedCourse.value?.name || '',
+)
+const certificateNameEng = computed(
+  () => selectedCourse.value?.certificateNameEng || selectedCourse.value?.name || '',
+)
 const courseHours = computed(() => selectedCourse.value?.hour || 0)
 const courseSource = computed(() => {
   if (!selectedCourse.value) return ''
@@ -117,7 +123,7 @@ onMounted(async () => {
 
 <template>
   <q-page class="q-pa-md">
-    <div style="margin-top: 20px;">
+    <div style="margin-top: 20px">
       <AppBreadcrumbs :breadcrumbs="breadcrumbs" />
 
       <div class="certificate-upload-card q-mt-md" v-if="screen && selectedCourse">
@@ -141,6 +147,16 @@ onMounted(async () => {
               </div>
 
               <div class="field-pair">
+                <div class="field-label">ชื่อในใบประกาศ (ไทย) :</div>
+                <div class="field-value">{{ certificateName }}</div>
+              </div>
+
+              <div class="field-pair">
+                <div class="field-label">ชื่อในใบประกาศ (อังกฤษ) :</div>
+                <div class="field-value">{{ certificateNameEng }}</div>
+              </div>
+
+              <div class="field-pair">
                 <div class="field-label">ผู้ให้ :</div>
                 <div class="field-value">{{ selectedCourse.issuer }}</div>
               </div>
@@ -160,7 +176,6 @@ onMounted(async () => {
               </div>
             </q-list>
           </div>
-          
         </q-card-section>
 
         <!-- Certificate Upload Section -->
@@ -295,8 +310,6 @@ onMounted(async () => {
 .input-url :deep(.q-field__native) {
   border-radius: 12px !important;
 }
-
-
 
 @media (max-width: 600px) {
   .certificate-upload-card {

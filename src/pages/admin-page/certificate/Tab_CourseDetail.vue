@@ -14,6 +14,8 @@ watch(() => props.id, loadCourse)
 const defaultCourse = (): Course => ({
   id: '',
   name: '',
+  certificateName: '',
+  certificateNameEng: '',
   link: '',
   isHardSkill: null, // หรือ false ถ้าอยากบังคับเป็น boolean
   isActive: false,
@@ -174,6 +176,34 @@ function confirmCancel() {
                 <div v-if="nameError" class="text-negative text-subtitle2 q-mt-xs">
                   {{ nameError }}
                 </div>
+              </div>
+            </div>
+
+            <!-- ชื่อในใบประกาศ (ไทย) -->
+            <div class="input-group">
+              <p class="label label_minWidth">ชื่อในใบประกาศ (ไทย) :</p>
+              <div class="input-container">
+                <q-input
+                  outlined
+                  v-model="courseState.certificateName"
+                  class="fix-q-input-height"
+                  :readonly="!isEditMode"
+                  :class="{ readonly: !isEditMode }"
+                />
+              </div>
+            </div>
+
+            <!-- ชื่อในใบประกาศ (อังกฤษ) -->
+            <div class="input-group">
+              <p class="label label_minWidth">ชื่อในใบประกาศ (อังกฤษ) :</p>
+              <div class="input-container">
+                <q-input
+                  outlined
+                  v-model="courseState.certificateNameEng"
+                  class="fix-q-input-height"
+                  :readonly="!isEditMode"
+                  :class="{ readonly: !isEditMode }"
+                />
               </div>
             </div>
 

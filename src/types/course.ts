@@ -1,6 +1,8 @@
 export interface Course {
   id?: string
   name: string
+  certificateName?: string
+  certificateNameEng?: string
   link: string
   isHardSkill: boolean | null
   isActive: boolean

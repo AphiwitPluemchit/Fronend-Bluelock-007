@@ -14,6 +14,8 @@ const courseStore = useCourseStore()
 const course = ref<Course>({
   id: '',
   name: '',
+  certificateName: '',
+  certificateNameEng: '',
   link: '',
   issuer: '',
   type: '',
@@ -127,7 +129,7 @@ const submit = async () => {
             <!-- Name Field -->
             <div class="col-12 row items-center q-pa-sm">
               <div class="col-xs-12 col-md-1 text-right q-pr-md">
-                <p class="q-my-none">ชื่อหัวข้อ <span class="text-red">*</span>:</p>
+                <p class="q-my-none">ชื่อหัวข้อ (ไทย) <span class="text-red">*</span>:</p>
               </div>
               <div class="col-xs-12 col-md-11">
                 <q-input
@@ -137,6 +139,26 @@ const submit = async () => {
                   outlined
                   dense
                 />
+              </div>
+            </div>
+
+            <!-- Certificate Name Field -->
+            <div class="col-12 row items-center q-pa-sm">
+              <div class="col-xs-12 col-md-1 text-right q-pr-md">
+                <p class="q-my-none">ชื่อในใบประกาศ (ไทย):</p>
+              </div>
+              <div class="col-xs-12 col-md-11">
+                <q-input v-model="course.certificateName" outlined dense />
+              </div>
+            </div>
+
+            <!-- Certificate Name EN Field -->
+            <div class="col-12 row items-center q-pa-sm">
+              <div class="col-xs-12 col-md-1 text-right q-pr-md">
+                <p class="q-my-none">ชื่อในใบประกาศ (อังกฤษ):</p>
+              </div>
+              <div class="col-xs-12 col-md-11">
+                <q-input v-model="course.certificateNameEng" outlined dense />
               </div>
             </div>
 
