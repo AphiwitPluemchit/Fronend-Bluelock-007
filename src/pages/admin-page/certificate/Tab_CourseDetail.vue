@@ -39,14 +39,20 @@ const courseState = ref<Course>(defaultCourse())
 
 const selectedImageFile = ref<File | null>(null)
 
-const isEditing = computed(() => props.isEditing ?? true)
+// `isEditMode` (local) is used to control editability in the UI.
+// If external prop `isEditing` is needed later we can wire it, but currently it's unused.
 
 const statusText = computed(() => (courseState.value.isActive ? 'เปิดใช้งาน' : 'ปิดชั่วคราว'))
 const statusClass = computed(() => (courseState.value.isActive ? 'status-open ' : 'status-closed '))
 
 const nameError = computed(() => (courseState.value.name.trim() ? '' : 'กรุณากรอกชื่อหัวข้อ'))
 const linkError = computed(() => (courseState.value.link.trim() ? '' : 'กรุณากรอกลิงค์'))
-const CategoryError = computed(() => (courseState.value.isHardSkill ? '' : 'กรุณากรอกผู้ให้'))
+// show error only when isHardSkill is null/undefined (unset)
+const CategoryError = computed(() =>
+  courseState.value.isHardSkill === null || courseState.value.isHardSkill === undefined
+    ? 'กรุณาเลือกประเภทโครงการ'
+    : '',
+)
 const hourError = computed(() => (courseState.value.hour ? '' : 'กรุณากรอกชั่วโมง'))
 const typeError = computed(() => (courseState.value.type ? '' : 'กรุณากรอกประเภท'))
 
@@ -61,12 +67,14 @@ function handleFileSelected(file: File) {
 // }
 
 function setHardSkill(v: boolean) {
-  if (!isEditing.value) return
+  // use local edit mode toggle so enabling edit in UI allows changes
+  if (!isEditMode.value) return
   courseState.value.isHardSkill = v
 }
 
 function setType(v: 'thaimooc' | 'buumooc' | 'lms') {
-  if (!isEditing.value) return
+  // use local edit mode toggle so enabling edit in UI allows changes
+  if (!isEditMode.value) return
   courseState.value.type = v
 }
 
@@ -212,14 +220,14 @@ function confirmCancel() {
                 ประเภทโครงการ :
               </p>
               <div class="status-inline-group">
+                <!-- Always render both buttons so user can switch; active one gets 'active-btn', inactive gets 'bg-grey-3' -->
                 <q-btn
-                  v-if="courseState.isHardSkill"
                   :class="[
                     'q-px-md q-py-xs',
-                    courseState.isHardSkill ? 'active-btn' : 'bg-grey-3',
+                    courseState.isHardSkill === true ? 'active-btn' : 'bg-grey-3',
                     'rounded-borders',
                   ]"
-                  :flat="!courseState.isHardSkill"
+                  :flat="courseState.isHardSkill !== true"
                   @click="setHardSkill(true)"
                   :disable="!isEditMode"
                   class="programType-btn"
@@ -229,13 +237,12 @@ function confirmCancel() {
                 </q-btn>
 
                 <q-btn
-                  v-if="!courseState.isHardSkill"
                   :class="[
                     'q-px-md q-py-xs',
-                    !courseState.isHardSkill ? 'active-btn' : 'bg-grey-3',
+                    courseState.isHardSkill === false ? 'active-btn' : 'bg-grey-3',
                     'rounded-borders',
                   ]"
-                  :flat="courseState.isHardSkill ? true : false"
+                  :flat="courseState.isHardSkill !== false"
                   @click="setHardSkill(false)"
                   :disable="!isEditMode"
                   class="programType-btn"
@@ -307,8 +314,8 @@ function confirmCancel() {
                 ประเภท :
               </p>
               <div class="status-inline-group">
+                <!-- Always render both MOOC type buttons so user can change selection -->
                 <q-btn
-                  v-if="courseState.type === 'thaimooc'"
                   :class="[
                     'q-px-md q-py-xs',
                     courseState.type === 'thaimooc' ? 'active-btn' : 'bg-grey-3',
@@ -322,7 +329,6 @@ function confirmCancel() {
                   Thai MOOC
                 </q-btn>
                 <q-btn
-                  v-if="courseState.type === 'buumooc'"
                   :class="[
                     'q-px-md q-py-xs',
                     courseState.type === 'buumooc' ? 'active-btn' : 'bg-grey-3',
