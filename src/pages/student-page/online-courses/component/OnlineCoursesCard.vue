@@ -16,7 +16,7 @@ const props = defineProps<Props>()
 
 // แปลง Course properties เป็นค่าที่ต้องใช้ใน template
 // แสดงชื่อใบประกาศถ้ามี ถ้าไม่มีให้แสดงชื่อหลักสูตรปกติ
-const title = computed(() => props.course.certificateName || props.course.name)
+const title = computed(() => props.course.name)
 const skillType = computed(() => (props.course.isHardSkill ? 'hardSkill' : 'softSkill'))
 const platformType = computed(() => (props.course.type === 'buumooc' ? 'Buu Mooc' : 'Thai Mooc'))
 const hours = computed(() => props.course.hour)
