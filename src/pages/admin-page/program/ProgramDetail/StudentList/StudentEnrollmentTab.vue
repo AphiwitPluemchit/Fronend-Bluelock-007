@@ -139,18 +139,16 @@ const programItemOptions = computed(() => {
 
 const programItemDatesOptions = computed(() => {
   const items = program.value?.programItems ?? []
-
-  // รวมวันที่จากทุก item → flatten → filter → unique → sort
   const dates = items.flatMap((it) => (it.dates ?? []).map((d) => d.date).filter(Boolean))
   const uniq = Array.from(new Set(dates)).sort()
 
-  // แปลง uniq -> options (label, value)
   const opts = uniq.map((d) => ({
-    label: d, // หรือจะ format เป็นไทยก็ได้ เช่น dayjs(d).format('D MMM YYYY')
+    label: d, // หรือ dayjs(d).format('D MMM YYYY')
     value: d,
   }))
 
-  if (items.length > 1) {
+  // ✅ ถ้าวันมากกว่า 1 วัน ให้มีตัวเลือก "ทุกวัน" (value:-1)
+  if (uniq.length > 1) {
     return [{ label: 'ทุกวัน', value: -1 }, ...opts]
   }
   return opts
@@ -367,7 +365,7 @@ onUnmounted(() => {
             outlined
             v-model="selectProgramItemDate"
             :options="programItemDatesOptions"
-            label="เลือกโครงการ"
+            label="เลือกวัน"
             option-label="label"
             option-value="value"
             emit-value
