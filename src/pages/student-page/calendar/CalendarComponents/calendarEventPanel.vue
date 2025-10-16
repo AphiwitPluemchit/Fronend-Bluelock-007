@@ -119,7 +119,7 @@ const goToPageDetail = async (id: string, disable: boolean) => {
             <div class="q-mt-xs">{{ event.programItemName }}</div>
             <div class="q-mt-sm event-info"><q-icon name="schedule" /> เวลา : {{ event.time }}</div>
             <div class="q-mt-sm event-info">
-              <q-icon name="people" /> จำนวนลงทะเบียน : {{ event.participants }} คน
+              <q-icon name="chair" /> จำนวนลงทะเบียน : {{ event.participants }} คน
             </div>
             <div class="q-mt-sm event-info event-footer-row">
               <div><q-icon name="place" /> สถานที่ : {{ event.location }}</div>
