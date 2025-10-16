@@ -1,28 +1,20 @@
 <template>
   <q-dialog v-model="dialog" persistent>
-    <q-card style="min-width: 720px; max-width: 960px">
-      <q-card-section class="row items-center q-gutter-sm">
-        <q-icon name="edit" color="primary" size="md" />
-        <div class="text-h6">แก้ไขเวลาเช็คชื่อ (ต่อวัน)</div>
-      </q-card-section>
-
-      <q-separator />
+    <q-card
+      style="width: 90vw; max-width: 650px; max-height: 80vh; overflow-y: auto; border-radius: 10px"
+    >
+    
 
       <q-card-section class="q-gutter-y-md">
-        <div class="text-subtitle2">ข้อมูลนิสิต</div>
-        <div class="row q-col-gutter-md">
-          <div class="col-12 col-sm-4">
-            <q-input v-model="display.studentCode" label="รหัสนิสิต" outlined dense disable />
-          </div>
-          <div class="col-12 col-sm-8">
-            <q-input v-model="display.studentName" label="ชื่อ-สกุล" outlined dense disable />
-          </div>
+        <div class="q-mb-sm text-h6">ข้อมูลการเช็คชื่อนิสิต</div>
+        <div class="row q-ma-sm ">
+          <div class="col-12 q-mt-sm">{{ display.studentCode }} {{ display.studentName }}</div>
         </div>
 
         <q-separator class="q-mt-md" />
 
-        <div class="row items-center justify-between q-mt-sm">
-          <div class="text-subtitle2">รายการเช็คชื่อรายวัน</div>
+        <div class="row q-mt-md">
+          <div class="q-mb-sm text-h6">รายการเช็คชื่อรายวัน</div>
         </div>
 
         <div class="q-table__container q-table--flat q-table--bordered">
