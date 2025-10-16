@@ -5,15 +5,10 @@
 <script setup lang="ts">
 import { onMounted, onBeforeUnmount, ref, watch, computed } from 'vue'
 import {
-  Chart,
-  BarController,
-  BarElement,
-  CategoryScale,
-  LinearScale,
-  Tooltip,
-  Legend,
+  Chart, BarController, BarElement, CategoryScale, LinearScale, Tooltip, Legend,
 } from 'chart.js'
 import ChartDataLabels from 'chartjs-plugin-datalabels'
+import type { Context as DataLabelsContext } from 'chartjs-plugin-datalabels'
 
 Chart.register(
   BarController,
@@ -49,23 +44,32 @@ function render() {
     chart = null
   }
 
-  const blue = '#2196f3'
+
+  const totalAll = props.datasets.reduce((sum, ds) => {
+    return sum + ds.data.reduce((s, v) => {
+      const n = Number(v ?? 0)
+      return s + (Number.isFinite(n) ? n : 0)
+    }, 0)
+  }, 0)
+
   const datasets = props.datasets.map((ds) => ({
-  ...ds,
-  backgroundColor: blue,
-  borderColor: blue,
-  borderWidth: 1,
-  datalabels: {
-    anchor: 'end' as const,
-    align: 'top' as const,
-    formatter: (value: number) => (Number.isInteger(value) ? value.toString() : ''),
-    color: '#000',
-    font: {
-      weight: 'bold' as const,
-      size: 15, 
-    },
-  }
-}))
+    ...ds,
+    backgroundColor: '#1A237E',
+    borderColor: '#1A237E',
+    borderWidth: 1,
+    datalabels: {
+  anchor: 'end' as const,
+  align: 'top' as const,
+  color: '#000',
+  font: { weight: 'bold' as const, size: 20 },
+  formatter: (value: number, context: DataLabelsContext) => {
+    void context 
+    const pct = totalAll > 0 ? (Number(value) / totalAll) * 100 : 0
+    const pctStr = (Math.round(pct * 10) / 10).toString().replace(/\.0$/, '')
+    return `${Number(value) || 0} (${pctStr}%)`
+  },
+},
+  }))
 
   chart = new Chart(cv.value, {
     type: 'bar',
@@ -73,26 +77,15 @@ function render() {
     options: {
       responsive: true,
       plugins: {
-        legend: {
-          display: props.stacked ? true : props.datasets.length > 1,
-        },
-        datalabels: {
-          display: true,
-        },
+        legend: { display: props.stacked ? true : props.datasets.length > 1 },
+        datalabels: { display: true },
       },
       scales: {
         x: {
-        stacked: !!props.stacked,
-        grid: {
-          display: false,
+          stacked: !!props.stacked,
+          grid: { display: false },
+          ticks: { font: { size: 10, weight: 'bold' } },
         },
-        ticks: {
-          font: {
-            size: 10, // Adjust the font size for X-axis labels
-            weight: 'bold' // Optional: make the text bold
-          }
-        }
-      },
         y: {
           stacked: !!props.stacked,
           beginAtZero: true,
@@ -100,28 +93,17 @@ function render() {
           ticks: {
             precision: 0,
             stepSize: 1,
-            font: {
-            size: 16, 
-             weight: 'bold'
-            
-          },
-            callback: function (value: string | number) {
-              const numValue = typeof value === 'string' ? parseFloat(value) : value
-              if (Number.isInteger(numValue)) {
-                return numValue.toString()
-              }
-              return ''
+            font: { size: 16, weight: 'bold' },
+            callback(value) {
+              const n = typeof value === 'string' ? parseFloat(value) : value
+              return Number.isInteger(n) ? String(n) : ''
             },
           },
-          grid: {
-            drawOnChartArea: false,
-            drawTicks: false,
-          },
-          
-          },
+          grid: { drawOnChartArea: false, drawTicks: false },
+        },
       },
     },
-    plugins: [ChartDataLabels], // Add the plugin to the chart instance
+    plugins: [ChartDataLabels],
   })
 }
 

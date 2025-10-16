@@ -5,17 +5,39 @@ import type { Block as FormBlock } from 'src/types/form'
 import type { Form } from 'src/types/form'
 import { useFormStore } from 'src/stores/forms'
 import { useSubmissionStore } from 'src/stores/submission'
-import BarChart from 'src/components/chart/BarChart.vue'
 import type { BlockCountItem } from 'src/services/submission'
 import type { Submission } from 'src/types/submission'
 import type { Choice } from 'src/types/form'
+import type { Component } from 'vue'
+// Chart
+import BarChart from 'src/components/chart/BarChart.vue'
+import PieChart from 'src/components/chart/PieChart.vue'
 
 const props = defineProps<{ program: Program | null | undefined }>()
+
+const viewModes = ref<Record<string, 'bar' | 'pie' | 'table'>>({})
+
+function changeViewMode(blockId: string, mode: 'bar' | 'pie' | 'table') {
+  viewModes.value[blockId] = mode
+}
+
+const chartMap: Record<'bar' | 'pie', Component> = {
+  bar: BarChart,
+  pie: PieChart,
+}
+
+// default = 'bar'; ถ้าได้ 'table' ให้ fallback -> BarChart ไปก่อน
+function resolveChart(blockId?: string): Component {
+  const mode = (blockId ? viewModes.value[blockId] : undefined) ?? 'bar'
+  const safeMode: 'bar' | 'pie' = mode === 'pie' ? 'pie' : 'bar'
+  return chartMap[safeMode]
+}
 
 const loadingForm = ref(false)
 const checkedOnce = ref(false)
 const formStore = useFormStore()
 const submissionStore = useSubmissionStore()
+
 
 const submissionsForCurrentForm = computed<Submission[]>(() => {
   const id = formIdHex.value
@@ -31,7 +53,6 @@ type GridBlockLite = Partial<FormBlock> & {
 }
 
 const isObj = (v: unknown): v is Record<string, unknown> => v !== null && typeof v === 'object'
-
 
 const toTitle = (v: unknown): string => {
   if (typeof v === 'number') return String(v)
@@ -74,7 +95,6 @@ function getProp<T>(obj: unknown, key: string): T | null {
   }
   return null
 }
-
 const currentForm = computed<Form | null>(() => {
   const id = formIdHex.value
   if (!id) return null
@@ -153,7 +173,7 @@ const textAnswersByBlock = computed<Record<string, string[]>>(() => {
     for (const r of sub.responses ?? []) {
       // เฉพาะคำตอบข้อความ
       if (r.blockId && typeof r.answerText === 'string' && r.answerText.trim() !== '') {
-        ;(out[r.blockId] ??= []).push(r.answerText.trim())
+        ; (out[r.blockId] ??= []).push(r.answerText.trim())
       }
     }
   }
@@ -248,6 +268,15 @@ watch(
   },
   { immediate: true },
 )
+watch(
+  () => safeBlocks.value.map(b => b.id).filter(Boolean),
+  (ids) => {
+    for (const id of ids as string[]) {
+      if (!viewModes.value[id]) viewModes.value[id] = 'bar'
+    }
+  },
+  { immediate: true },
+)
 </script>
 
 <template>
@@ -258,11 +287,7 @@ watch(
     </div>
 
     <div class="answer-cards-container">
-      <div
-        v-for="(block, bIndex) in safeBlocks"
-        :key="block.id || `block-${bIndex}`"
-        class="q-mb-lg"
-      >
+      <div v-for="(block, bIndex) in safeBlocks" :key="block.id || `block-${bIndex}`" class="q-mb-lg">
         <q-card class="answer-card">
           <q-card-section>
             <!-- Title Card -->
@@ -277,9 +302,8 @@ watch(
               </div>
             </template>
 
-            <!-- Short Answer -->
-            <!-- success -->
-            <template v-else-if="block.type === 'short_answer'">
+            <!-- Short Answer and Paragraph -->
+            <template v-else-if="['short_answer', 'paragraph'].includes(block.type)">
               <div class="textQuestion">
                 {{ block.title }}
                 <span v-if="block.isRequired" class="text-red" style="margin-left: 2px">*</span>
@@ -287,34 +311,7 @@ watch(
 
               <div v-if="block.id && textAnswersByBlock[block.id]?.length" class="answer-container">
                 <div class="answer-wrapper">
-                  <div
-                    v-for="(ans, idx) in textAnswersByBlock[block.id]"
-                    :key="idx"
-                    class="answer-item"
-                  >
-                    <span class="bullet">-</span>
-                    <div class="answer-text">{{ ans }}</div>
-                  </div>
-                </div>
-              </div>
-              <div v-else class="text-grey-6 text-italic">ยังไม่มีคำตอบ</div>
-            </template>
-
-            <!-- Paragraph -->
-            <!-- success -->
-            <template v-else-if="block.type === 'paragraph'">
-              <div class="textQuestion">
-                {{ block.title }}
-                <span v-if="block.isRequired" class="text-red" style="margin-left: 2px">*</span>
-              </div>
-
-              <div v-if="block.id && textAnswersByBlock[block.id]?.length" class="answer-container">
-                <div class="answer-wrapper">
-                  <div
-                    v-for="(ans, idx) in textAnswersByBlock[block.id]"
-                    :key="idx"
-                    class="answer-item"
-                  >
+                  <div v-for="(ans, idx) in textAnswersByBlock[block.id]" :key="idx" class="answer-item">
                     <span class="bullet">-</span>
                     <div class="answer-text">{{ ans }}</div>
                   </div>
@@ -324,16 +321,25 @@ watch(
             </template>
 
             <!-- multiple_choice, checkbox, dropdown, rating -->
-            <template
-              v-else-if="['multiple_choice', 'checkbox', 'dropdown', 'rating'].includes(block.type)"
-            >
+            <template v-else-if="['multiple_choice', 'checkbox', 'dropdown', 'rating'].includes(block.type)">
               <div class="textQuestion">
-                {{ block.title }}
-                <span v-if="block.isRequired" class="text-red" style="margin-left: 2px">*</span>
+                <div class="row items-center justify-between">
+                  <div>
+                    {{ block.title }}
+                    <span v-if="block.isRequired" class="text-red" style="margin-left: 2px">*</span>
+                  </div>
+
+                  <q-select v-model="viewModes[block.id || '']" :options="[
+                    { label: 'กราฟแท่ง', value: 'bar' },
+                    { label: 'กราฟวงกลม', value: 'pie' },
+                  ]" option-label="label" option-value="value" emit-value map-options outlined dense options-dense
+                    label="เลือกกราฟ" placeholder="เลือกรูปแบบ" class="q-ml-sm" style="min-width: 180px"
+                    @update:model-value="val => block.id && changeViewMode(block.id, val)" />
+
+                </div>
               </div>
 
-              <!-- กราฟ -->
-              <BarChart v-bind="buildChoiceChart(block)" />
+              <component :is="resolveChart(block.id)" v-bind="buildChoiceChart(block)" />
 
               <!-- กรณีไม่มีคำตอบ -->
               <div v-if="buildChoiceChart(block).empty" class="text-grey-6 text-italic q-mt-sm">
@@ -421,6 +427,7 @@ watch(
 .answer-cards-container {
   width: 100%;
 }
+
 .answer-container {
   width: 100%;
   margin-bottom: 16px;
@@ -434,6 +441,7 @@ watch(
   max-height: 200px;
   overflow-y: auto;
 }
+
 .answer-wrapper::-webkit-scrollbar {
   width: 6px;
 }
@@ -451,6 +459,7 @@ watch(
 .answer-wrapper::-webkit-scrollbar-thumb:hover {
   background: #555;
 }
+
 .answer-item {
   display: flex;
   align-items: flex-start;
@@ -467,12 +476,14 @@ watch(
   flex: 1;
   font-size: 16px;
 }
+
 .textQuestion {
   flex: 1;
   font-size: 18px;
   font-weight: 500;
   margin-bottom: 10px;
 }
+
 .textTitle {
   flex: 1;
   font-size: 18px;
