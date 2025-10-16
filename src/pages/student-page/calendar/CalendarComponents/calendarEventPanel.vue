@@ -112,15 +112,17 @@ const goToPageDetail = async (id: string, disable: boolean) => {
           >
             <div class="event-header-row">
               <div class="event-title">{{ event.programName }}</div>
-                <div class="event-category">
-                  {{ event.category === 'soft' ? 'ทักษะเตรียมความพร้อม' : 'ทักษะทางวิชาการ' }}
-                </div>
+              <div class="event-category">
+                {{ event.category === 'soft' ? 'ทักษะเตรียมความพร้อม' : 'ทักษะทางวิชาการ' }}
+              </div>
             </div>
             <div class="q-mt-xs">{{ event.programItemName }}</div>
-            <div class="q-mt-xs">{{ event.time }}</div>
-            <div class="q-mt-xs">จำนวนลงทะเบียน : {{ event.participants }}</div>
-            <div class="event-footer-row">
-              <div>สถานที่ : {{ event.location }}</div>
+            <div class="q-mt-sm event-info"><q-icon name="schedule" /> เวลา : {{ event.time }}</div>
+            <div class="q-mt-sm event-info">
+              <q-icon name="people" /> จำนวนลงทะเบียน : {{ event.participants }} คน
+            </div>
+            <div class="q-mt-sm event-info event-footer-row">
+              <div><q-icon name="place" /> สถานที่ : {{ event.location }}</div>
               <div class="action-buttons">
                 <q-icon
                   clickable
@@ -197,7 +199,7 @@ const goToPageDetail = async (id: string, disable: boolean) => {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-top: 1px;
+  margin-top: small;
 }
 
 .action-buttons {
@@ -225,4 +227,19 @@ const goToPageDetail = async (id: string, disable: boolean) => {
     max-height: 70vh;
   }
 }
+/* สีข้อความ (label) โทนเทาอ่อนกว่า */
+.event-info {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 15px;
+  color: #666; /* สีของ labels */
+}
+
+/* สีไอคอนให้เข้มกว่า labels */
+.event-info :deep(.q-icon) {
+  color: rgba(0,0,0,0.87); /* หรือใช้ #212121 ก็ได้ */
+}
+
+
 </style>

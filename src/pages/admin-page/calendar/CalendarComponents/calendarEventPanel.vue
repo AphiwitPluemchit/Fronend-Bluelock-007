@@ -136,8 +136,8 @@ const goToPageDetail = async (id: string, disable: boolean) => {
                 </div>
             </div>
             <div class="q-mt-xs">{{ event.programItemName }}</div>
-            <div class="q-mt-xs">{{ event.time }}</div>
-            <div class="q-mt-xs">จำนวนลงทะเบียน : {{ event.participants }}</div>
+            <div class="q-mt-xs">เวลา : {{ event.time }}</div>
+            <div class="q-mt-xs">จำนวนลงทะเบียน : {{ event.participants }} คน</div>
             <div class="event-footer-row">
               <div>สถานที่ : {{ event.location }}</div>
               <div class="action-buttons">
