@@ -9,6 +9,5 @@ export interface Course {
   issuer: string
   hour: number
   type: string
-  description: string
   file?: string
 }

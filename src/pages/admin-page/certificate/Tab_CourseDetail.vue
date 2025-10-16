@@ -22,7 +22,6 @@ const defaultCourse = (): Course => ({
   issuer: '',
   hour: 0,
   type: '',
-  description: '',
   file: '',
 })
 
@@ -50,9 +49,6 @@ const linkError = computed(() => (courseState.value.link.trim() ? '' : 'กร�
 const CategoryError = computed(() => (courseState.value.isHardSkill ? '' : 'กรุณากรอกผู้ให้'))
 const hourError = computed(() => (courseState.value.hour ? '' : 'กรุณากรอกชั่วโมง'))
 const typeError = computed(() => (courseState.value.type ? '' : 'กรุณากรอกประเภท'))
-const descriptionError = computed(() =>
-  courseState.value.description ? '' : 'กรุณากรอกรายละเอียด',
-)
 
 function handleFileSelected(file: File) {
   selectedImageFile.value = file
@@ -350,24 +346,6 @@ function confirmCancel() {
                 >
                   LMS
                 </q-btn> -->
-              </div>
-            </div>
-
-            <!-- รายละเอียด -->
-            <div class="input-group">
-              <p style="align-self: flex-start" class="label label_minWidth">รายละเอียด :</p>
-              <q-input
-                type="textarea"
-                rows="10"
-                outlined
-                v-model="courseState.description"
-                class="input-container"
-                :readonly="!isEditMode"
-                :class="{ readonly: !isEditMode }"
-                :error="descriptionError !== ''"
-              />
-              <div v-if="descriptionError" class="text-negative text-subtitle2 q-mt-xs">
-                {{ descriptionError }}
               </div>
             </div>
 

@@ -51,7 +51,6 @@ const filteredCourses = computed(() => {
     filtered = filtered.filter(
       (course) =>
         course.name.toLowerCase().includes(query) ||
-        (course.description || '').toLowerCase().includes(query) ||
         platformType(course.type).toLowerCase().includes(query),
     )
   }

@@ -18,7 +18,6 @@ export const useCourseStore = defineStore('course', () => {
     issuer: '',
     hour: 0,
     type: '',
-    description: '',
   })
 
   const params = ref<CourseQuery>({

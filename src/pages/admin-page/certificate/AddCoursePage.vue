@@ -5,6 +5,7 @@ import { useQuasar } from 'quasar'
 import { useCourseStore } from 'src/stores/course'
 import type { Course } from 'src/types/course'
 import AppBreadcrumbs from 'src/components/AppBreadcrumbs.vue'
+import ImageDetail from 'src/pages/admin-page/program/ProgramDetail/ProgramDetail/imageDetail.vue'
 
 const $q = useQuasar()
 const router = useRouter()
@@ -22,15 +23,10 @@ const course = ref<Course>({
   hour: 0,
   isHardSkill: null as boolean | null,
   isActive: true,
-  description: '',
+  file: '',
 })
 
-// File upload
-const uploadedFiles = ref<File[]>([])
-const previewUrl = ref<string | null>(null)
-
-// Form validation
-const errors = ref<Record<string, string>>({})
+const selectedImageFile = ref<File | null>(null)
 
 // Breadcrumbs
 const breadcrumbs = ref({
@@ -39,72 +35,62 @@ const breadcrumbs = ref({
   icon: 'school',
 })
 
-// Validation functions
-const validateForm = () => {
-  errors.value = {}
+// Computed for validation errors
+const nameError = computed(() => (course.value.name.trim() ? '' : 'กรุณากรอกชื่อหัวข้อ'))
+const linkError = computed(() => (course.value.link.trim() ? '' : 'กรุณากรอกลิงค์'))
+const issuerError = computed(() => (course.value.issuer.trim() ? '' : 'กรุณากรอกหน่วยงานผู้ออก'))
+const hourError = computed(() => (course.value.hour > 0 ? '' : 'กรุณากรอกชั่วโมง'))
+const typeError = computed(() => (course.value.type ? '' : 'กรุณากรอกประเภท'))
+const categoryError = computed(() =>
+  course.value.isHardSkill !== null ? '' : 'กรุณาเลือกประเภทหัวข้อ',
+)
 
-  if (!course.value.name.trim()) errors.value.name = 'กรุณากรอกชื่อหลักสูตร'
-  if (!course.value.link.trim()) {
-    errors.value.link = 'กรุณากรอกลิงก์'
-  } else if (!isValidUrl(course.value.link)) {
-    errors.value.link = 'กรุณากรอกลิงก์ให้ถูกต้อง'
-  }
-  if (!course.value.issuer.trim()) errors.value.issuer = 'กรุณากรอกหน่วยงานผู้ออก'
-  if (!course.value.type.trim()) errors.value.type = 'กรุณากรอกประเภท'
-  if (!Number.isInteger(course.value.hour) || course.value.hour <= 0) {
-    errors.value.hour = 'กรุณากรอกจำนวนชั่วโมงให้ถูกต้อง'
-  }
-  if (course.value.isHardSkill === null) {
-    errors.value.isHardSkill = 'กรุณาเลือกประเภทหัวข้อ'
-  }
+const statusText = computed(() => (course.value.isActive ? 'เปิดใช้งาน' : 'ปิดชั่วคราว'))
+const statusClass = computed(() => (course.value.isActive ? 'status-open' : 'status-closed'))
 
-  return Object.keys(errors.value).length === 0
+function handleFileSelected(file: File) {
+  selectedImageFile.value = file
 }
 
-const isValidUrl = (urlString: string) => {
-  try {
-    new URL(urlString)
-    return true
-  } catch {
-    return false
-  }
+function setHardSkill(v: boolean) {
+  course.value.isHardSkill = v
 }
 
-// ฟังก์ชันเมื่ออัปโหลดไฟล์
-const handleFileUpload = (files: readonly File[]) => {
-  uploadedFiles.value = [...files]
-  if (files.length > 0 && files[0]) {
-    previewUrl.value = URL.createObjectURL(files[0])
-  }
+function setType(v: 'thaimooc' | 'buumooc') {
+  course.value.type = v
 }
 
-// ลบไฟล์
-const removeFile = () => {
-  uploadedFiles.value = []
-  previewUrl.value = null
+const showChangeStatusDialog = ref(false)
+const selectedStatus = ref<'เปิดใช้งาน' | 'ปิดชั่วคราว'>('เปิดใช้งาน')
+
+function closeDialog() {
+  showChangeStatusDialog.value = false
 }
 
-// Computed property to check if file is an image
-const isImageFile = computed(() => {
-  if (uploadedFiles.value.length === 0 || !uploadedFiles.value[0]) return false
-  const file = uploadedFiles.value[0]
-  return file.type.startsWith('image/')
-})
+function confirmStatusChange() {
+  course.value.isActive = selectedStatus.value === 'เปิดใช้งาน'
+  closeDialog()
+}
 
 const cancel = () => {
   void router.push('/admin/CourseTablePage')
 }
 
 const submit = async () => {
-  console.log('Submit clicked')
-
-  if (!validateForm()) {
-    console.log('Validation failed', errors.value)
+  // Validate
+  if (
+    nameError.value ||
+    linkError.value ||
+    issuerError.value ||
+    hourError.value ||
+    typeError.value ||
+    categoryError.value
+  ) {
+    $q.notify({ message: 'กรุณากรอกข้อมูลให้ครบถ้วน', type: 'negative' })
     return
   }
 
   try {
-    console.log('Saving course...', course.value)
     await courseStore.addCourse(course.value)
     $q.notify({ message: 'บันทึกข้อมูลสำเร็จ', type: 'positive' })
     void router.push('/admin/CourseTablePage')
@@ -121,226 +107,509 @@ const submit = async () => {
       <AppBreadcrumbs :breadcrumbs="breadcrumbs" />
     </div>
 
-    <div class="q-mx-lg">
-      <q-card class="q-mt-md full-width" flat>
-        <q-form @submit.prevent="submit">
-          <!-- Form Fields -->
-          <div class="row q-col-gutter-md q-pa-md">
-            <!-- Name Field -->
-            <div class="col-12 row items-center q-pa-sm">
-              <div class="col-xs-12 col-md-1 text-right q-pr-md">
-                <p class="q-my-none">ชื่อหัวข้อ (ไทย) <span class="text-red">*</span>:</p>
+    <div class="wrapper">
+      <div class="container">
+        <div class="image-section">
+          <ImageDetail
+            ref="imageRef"
+            :imageFileName="course.file"
+            :disable="false"
+            @file-selected="handleFileSelected"
+          />
+        </div>
+
+        <div class="form-section">
+          <q-page class="q-pa-md">
+            <!-- สถานะ -->
+            <div class="input-group no-wrap status-group">
+              <p class="label label_minWidth">สถานะ :</p>
+              <div class="status-inline-group">
+                <q-badge :class="statusClass" class="status-btn">
+                  <div align="center" class="status-text" style="font-size: 18px">
+                    {{ statusText }}
+                  </div>
+                </q-badge>
+
+                <q-btn
+                  class="btnchange"
+                  label="เปลี่ยน"
+                  @click="showChangeStatusDialog = true"
+                  flat
+                  unelevated
+                  style="min-width: unset; width: auto"
+                />
               </div>
-              <div class="col-xs-12 col-md-11">
+            </div>
+
+            <!-- ชื่อหัวข้อ (ไทย) -->
+            <div class="input-group">
+              <p class="label label_minWidth" :class="{ 'label-error-shift': nameError !== '' }">
+                ชื่อหัวข้อ (ไทย) <span class="text-red">*</span> :
+              </p>
+              <div class="input-container">
                 <q-input
+                  outlined
                   v-model="course.name"
-                  :error="!!errors.name"
-                  :error-message="errors.name"
-                  outlined
-                  dense
+                  class="fix-q-input-height"
+                  :error="nameError !== ''"
+                  hide-bottom
                 />
-              </div>
-            </div>
-
-            <!-- Certificate Name Field -->
-            <div class="col-12 row items-center q-pa-sm">
-              <div class="col-xs-12 col-md-1 text-right q-pr-md">
-                <p class="q-my-none">ชื่อในใบประกาศ (ไทย):</p>
-              </div>
-              <div class="col-xs-12 col-md-11">
-                <q-input v-model="course.certificateName" outlined dense />
-              </div>
-            </div>
-
-            <!-- Certificate Name EN Field -->
-            <div class="col-12 row items-center q-pa-sm">
-              <div class="col-xs-12 col-md-1 text-right q-pr-md">
-                <p class="q-my-none">ชื่อในใบประกาศ (อังกฤษ):</p>
-              </div>
-              <div class="col-xs-12 col-md-11">
-                <q-input v-model="course.certificateNameEng" outlined dense />
-              </div>
-            </div>
-
-            <!-- Link Field -->
-            <div class="col-12 row items-center q-pa-sm">
-              <div class="col-xs-12 col-md-1 text-right q-pr-md">
-                <p class="q-my-none">ลิงก์ <span class="text-red">*</span>:</p>
-              </div>
-              <div class="col-xs-12 col-md-11">
-                <q-input
-                  v-model="course.link"
-                  :error="!!errors.link"
-                  :error-message="errors.link"
-                  outlined
-                  dense
-                  placeholder="https://example.com"
-                />
-              </div>
-            </div>
-
-            <!-- Hour Field -->
-            <div class="col-12 row items-center q-pa-sm">
-              <div class="col-xs-12 col-md-1 text-right q-pr-md">
-                <p class="q-my-none">จำนวนชั่วโมง <span class="text-red">*</span>:</p>
-              </div>
-              <div class="col-xs-12 col-md-11">
-                <q-input
-                  v-model.number="course.hour"
-                  :error="!!errors.hour"
-                  :error-message="errors.hour"
-                  outlined
-                  dense
-                  type="number"
-                  min="1"
-                />
-              </div>
-            </div>
-
-            <!-- ประเภทหัวข้อ -->
-            <div class="col-12 row items-center q-pa-sm">
-              <div class="col-xs-12 col-md-1 text-right q-pr-md">
-                <p class="q-my-none">ประเภทหัวข้อ <span class="text-red">*</span>:</p>
-              </div>
-              <div class="col-xs-12 col-md-11">
-                <q-select
-                  v-model="course.isHardSkill"
-                  :options="[
-                    { label: 'ทักษะทางวิชาการ', value: true },
-                    { label: 'เตรียมความพร้อม', value: false },
-                  ]"
-                  dense
-                  outlined
-                  emit-value
-                  map-options
-                />
-              </div>
-            </div>
-
-            <!-- Issuer Field -->
-            <div class="col-12 row items-center q-pa-sm">
-              <div class="col-xs-12 col-md-1 text-right q-pr-md">
-                <p class="q-my-none">หน่วยงานผู้ออก <span class="text-red">*</span>:</p>
-              </div>
-              <div class="col-xs-12 col-md-11">
-                <q-input
-                  v-model="course.issuer"
-                  :error="!!errors.issuer"
-                  :error-message="errors.issuer"
-                  outlined
-                  dense
-                />
-              </div>
-            </div>
-
-            <!-- Type Field -->
-            <div class="col-12 row items-center q-pa-sm">
-              <div class="col-xs-12 col-md-1 text-right q-pr-md">
-                <p class="q-my-none">ประเภท <span class="text-red">*</span>:</p>
-              </div>
-              <div class="col-xs-12 col-md-11">
-                <q-select
-                  v-model="course.type"
-                  :options="[
-                    { label: 'Buu Mooc', value: 'buumooc' },
-                    { label: 'Thai Mooc', value: 'thaimooc' },
-                  ]"
-                  dense
-                  outlined
-                  emit-value
-                  map-options
-                />
-              </div>
-            </div>
-            <div class="col-12 row items-center q-pa-sm">
-              <div class="col-xs-12 col-md-1 text-right q-pr-md">
-                <p class="q-my-none align-self: flex-start">รายละเอียด:</p>
-              </div>
-              <div class="col-xs-12 col-md-11">
-                <q-input v-model="course.description" outlined dense type="textarea" />
-              </div>
-            </div>
-
-            <!-- isActive Toggle -->
-            <div class="col-12 row items-center q-pa-sm">
-              <div class="col-xs-12 col-md-1 text-right q-pr-md">
-                <p class="q-my-none">สถานะการใช้งาน:</p>
-              </div>
-              <div class="col-xs-12 col-md-11">
-                <q-toggle
-                  v-model="course.isActive"
-                  :label="course.isActive ? 'เปิดใช้งาน' : 'ปิดใช้งาน'"
-                  color="primary"
-                />
-              </div>
-            </div>
-
-            <!-- File Upload Section -->
-            <!-- File upload -->
-            <div class="col-xs-12 col-md-12">
-              <q-card flat bordered class="q-pa-md">
-                <div class="text-subtitle2 q-mb-sm">อัปโหลดตัวอย่างใบประกาศ</div>
-                <q-uploader
-                  label="ลากไฟล์มาวาง หรือคลิกเพื่ออัปโหลด"
-                  accept=".pdf,image/*"
-                  :auto-upload="false"
-                  :max-files="1"
-                  @added="handleFileUpload"
-                />
-
-                <!-- Preview file -->
-                <div v-if="previewUrl" class="q-mt-md">
-                  <div v-if="isImageFile" class="q-mb-sm">
-                    <img
-                      :src="previewUrl"
-                      alt="Preview"
-                      class="q-mb-sm"
-                      style="max-width: 100%; border: 1px solid #ccc; border-radius: 8px"
-                    />
-                  </div>
-                  <div v-else>
-                    <q-icon name="insert_drive_file" size="lg" class="q-mr-sm" />
-                    <span>{{ uploadedFiles[0]?.name }}</span>
-                  </div>
-                  <q-btn
-                    dense
-                    flat
-                    icon="delete"
-                    color="negative"
-                    label="ลบไฟล์"
-                    class="q-mt-sm"
-                    @click="removeFile"
-                  />
+                <div v-if="nameError" class="text-negative text-subtitle2 q-mt-xs">
+                  {{ nameError }}
                 </div>
-              </q-card>
+              </div>
             </div>
-          </div>
 
-          <!-- Form Actions -->
-          <div class="q-mt-md q-pa-md flex justify-end q-gutter-sm form-actions">
-            <q-btn label="ยกเลิก" class="btnreject" unelevated rounded @click="cancel" />
-            <q-btn label="บันทึก" class="btnconfirm" unelevated rounded type="submit" />
-          </div>
-        </q-form>
-      </q-card>
+            <!-- ชื่อในใบประกาศ (ไทย) -->
+            <div class="input-group">
+              <p class="label label_minWidth">ชื่อในใบประกาศ (ไทย) :</p>
+              <div class="input-container">
+                <q-input outlined v-model="course.certificateName" class="fix-q-input-height" />
+              </div>
+            </div>
+
+            <!-- ชื่อในใบประกาศ (อังกฤษ) -->
+            <div class="input-group">
+              <p class="label label_minWidth">ชื่อในใบประกาศ (อังกฤษ) :</p>
+              <div class="input-container">
+                <q-input outlined v-model="course.certificateNameEng" class="fix-q-input-height" />
+              </div>
+            </div>
+
+            <!-- ประเภทโครงการ (isHardSkill) -->
+            <div class="input-group">
+              <p
+                class="label label_minWidth"
+                :class="{ 'label-error-shift': categoryError !== '' }"
+              >
+                ประเภทโครงการ <span class="text-red">*</span> :
+              </p>
+              <div class="status-inline-group">
+                <q-btn
+                  :class="[
+                    'q-px-md q-py-xs',
+                    course.isHardSkill === true ? 'active-btn' : 'bg-grey-3',
+                    'rounded-borders',
+                  ]"
+                  :flat="course.isHardSkill !== true"
+                  @click="setHardSkill(true)"
+                  class="programType-btn"
+                >
+                  ชั่วโมงทักษะทางวิชาการ
+                </q-btn>
+
+                <q-btn
+                  :class="[
+                    'q-px-md q-py-xs',
+                    course.isHardSkill === false ? 'active-btn' : 'bg-grey-3',
+                    'rounded-borders',
+                  ]"
+                  :flat="course.isHardSkill !== false"
+                  @click="setHardSkill(false)"
+                  class="programType-btn"
+                >
+                  ชั่วโมงเตรียมความพร้อม
+                </q-btn>
+              </div>
+              <div v-if="categoryError" class="text-negative text-subtitle2 q-mt-xs">
+                {{ categoryError }}
+              </div>
+            </div>
+
+            <!-- ลิงก์คอร์ส -->
+            <div class="input-group">
+              <p class="label label_minWidth" :class="{ 'label-error-shift': linkError !== '' }">
+                ลิงก์ <span class="text-red">*</span> :
+              </p>
+              <div class="input-container">
+                <q-input
+                  outlined
+                  v-model="course.link"
+                  class="fix-q-input-height"
+                  placeholder="https://..."
+                  :error="linkError !== ''"
+                />
+                <div v-if="linkError" class="text-negative text-subtitle2 q-mt-xs">
+                  {{ linkError }}
+                </div>
+              </div>
+            </div>
+
+            <!-- จำนวนชั่วโมง -->
+            <div class="input-group">
+              <p class="label label_minWidth" :class="{ 'label-error-shift': hourError !== '' }">
+                จำนวนชั่วโมง <span class="text-red">*</span> :
+              </p>
+              <div class="input-container">
+                <q-input
+                  type="number"
+                  outlined
+                  v-model.number="course.hour"
+                  class="fix-q-input-height"
+                  min="0"
+                  :error="hourError !== ''"
+                />
+                <div v-if="hourError" class="text-negative text-subtitle2 q-mt-xs">
+                  {{ hourError }}
+                </div>
+              </div>
+            </div>
+
+            <!-- หน่วยงานผู้ออก -->
+            <div class="input-group">
+              <p class="label label_minWidth" :class="{ 'label-error-shift': issuerError !== '' }">
+                หน่วยงานผู้ออก <span class="text-red">*</span> :
+              </p>
+              <div class="input-container">
+                <q-input outlined v-model="course.issuer" class="fix-q-input-height" />
+                <div v-if="issuerError" class="text-negative text-subtitle2 q-mt-xs">
+                  {{ issuerError }}
+                </div>
+              </div>
+            </div>
+
+            <!-- ประเภทแพลตฟอร์ม (type)-->
+            <div class="input-group">
+              <p class="label label_minWidth" :class="{ 'label-error-shift': typeError !== '' }">
+                ประเภท <span class="text-red">*</span> :
+              </p>
+              <div class="status-inline-group">
+                <q-btn
+                  :class="[
+                    'q-px-md q-py-xs',
+                    course.type === 'thaimooc' ? 'active-btn' : 'bg-grey-3',
+                  ]"
+                  :flat="course.type !== 'thaimooc'"
+                  @click="setType('thaimooc')"
+                  class="programType-btn"
+                >
+                  Thai MOOC
+                </q-btn>
+                <q-btn
+                  :class="[
+                    'q-px-md q-py-xs',
+                    course.type === 'buumooc' ? 'active-btn' : 'bg-grey-3',
+                  ]"
+                  :flat="course.type !== 'buumooc'"
+                  @click="setType('buumooc')"
+                  class="programType-btn"
+                >
+                  BUU MOOC
+                </q-btn>
+              </div>
+              <div v-if="typeError" class="text-negative text-subtitle2 q-mt-xs">
+                {{ typeError }}
+              </div>
+            </div>
+
+            <!-- ปุ่มบันทึก/ยกเลิก -->
+            <div class="button-group">
+              <q-btn class="btnreject" label="ยกเลิก" @click="cancel" />
+              <q-btn class="btnsecces" label="บันทึก" @click="submit" />
+            </div>
+          </q-page>
+        </div>
+      </div>
     </div>
+
+    <!-- Dialog เปลี่ยนสถานะ -->
+    <q-dialog v-model="showChangeStatusDialog" persistent>
+      <q-card class="dialog-box">
+        <q-card-section>
+          <div class="label-changeStatus">เปลี่ยนสถานะหัวข้อการอบรม</div>
+        </q-card-section>
+
+        <q-card-section class="status-section">
+          <q-btn
+            label="เปิดใช้งาน"
+            class="status-btn"
+            :class="{
+              'status-open': true,
+              'active-status': selectedStatus === 'เปิดใช้งาน',
+            }"
+            @click="selectedStatus = 'เปิดใช้งาน'"
+          />
+          <q-btn
+            label="ปิดชั่วคราว"
+            class="status-btn"
+            :class="{
+              'status-closed': true,
+              'active-status': selectedStatus === 'ปิดชั่วคราว',
+            }"
+            @click="selectedStatus = 'ปิดชั่วคราว'"
+          />
+        </q-card-section>
+
+        <q-card-actions align="right">
+          <q-btn class="btnreject" label="ยกเลิก" @click="closeDialog" />
+          <q-btn class="btnconfirm" label="ยืนยัน" @click="confirmStatusChange" />
+        </q-card-actions>
+      </q-card>
+    </q-dialog>
   </q-page>
 </template>
 
 <style scoped>
-.form-actions {
-  flex-wrap: wrap;
+.text-red {
+  color: red;
 }
 
-@media (max-width: 600px) {
-  .form-actions {
-    justify-content: center;
+.status-section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 15px;
+  margin-bottom: 10px;
+}
+.label-changeStatus {
+  font-size: 20px;
+  font-weight: normal;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 40px;
+}
+
+.status-group {
+  align-items: flex-start;
+}
+.status-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 40px;
+  width: 200px;
+  font-size: 20px;
+  border-radius: 50px;
+  padding: 0 16px;
+  text-align: center;
+}
+.status-inline-group {
+  display: flex;
+  flex-direction: row;
+  gap: 10px;
+  align-items: center;
+  flex-wrap: nowrap;
+}
+
+.btnchange {
+  min-width: auto !important;
+  width: auto !important;
+  padding: 4px 12px;
+  font-size: 14px;
+  background-color: #000;
+  color: white;
+  border-radius: 10px;
+}
+
+::v-deep(.q-field__control) {
+  height: auto;
+  background-color: white;
+}
+
+::v-deep(.q-icon) {
+  font-size: 18px;
+}
+
+.fix-q-input-height ::v-deep(.q-icon) {
+  font-size: 16px;
+}
+.fix-q-input-height ::v-deep(.q-field__control) {
+  height: 40px !important;
+  min-height: 40px !important;
+  padding-top: 0 !important;
+  padding-bottom: 0 !important;
+  display: flex;
+  align-items: center;
+}
+
+.fix-q-input-height ::v-deep(.q-field__append) {
+  align-items: center;
+  display: flex;
+}
+
+.input-group p {
+  margin: 0;
+  line-height: normal;
+  text-align: left;
+}
+.label-error-shift {
+  transform: translateY(-12px);
+}
+.no-wrap {
+  flex-wrap: nowrap !important;
+  white-space: nowrap;
+}
+.input-group {
+  display: flex;
+  align-items: center;
+  gap: 25px;
+  margin-bottom: 20px;
+  width: 100%;
+  flex-wrap: wrap;
+}
+.label {
+  font-size: 18px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  line-height: 40px;
+  margin: 0;
+}
+.label_minWidth {
+  min-width: 200px;
+}
+.input-container {
+  width: 660px;
+  max-width: 100%;
+}
+
+.button-group {
+  display: flex;
+  justify-content: flex-end;
+  gap: 25px;
+}
+
+.dialog-box {
+  width: 400px;
+  padding: 20px;
+  border-radius: 12px;
+}
+
+.status-open {
+  color: #009812;
+  background-color: #d0ffc5;
+  border: 2px solid #00bb16;
+}
+.status-open.active-status {
+  background-color: #00bb16;
+  color: #ffffff;
+}
+.status-closed {
+  color: #000000;
+  background-color: #dadada;
+  border: 2px solid #575656;
+}
+.status-closed.active-status {
+  background-color: #575656;
+  color: #ffffff;
+}
+
+/* Media */
+@media (max-width: 1880px) {
+  .input-container {
+    width: 530px;
+    max-width: 100%;
+  }
+  .label_minWidth {
+    min-width: 180px !important;
+  }
+}
+@media (max-width: 860px) {
+  .input-group.no-wrap {
+    flex-direction: row !important;
+    align-items: center !important;
+    gap: 20px !important;
+    margin-bottom: 10px !important;
   }
 
-  .form-actions .q-btn {
-    width: 100%;
-    max-width: 250px;
+  .input-group:not(.no-wrap) {
+    flex-direction: column;
+    align-items: flex-start;
+    margin-bottom: 10px !important;
+    gap: 5px !important;
   }
+  .input-container {
+    width: 470px;
+    max-width: 100%;
+  }
+  .label {
+    justify-content: flex-start;
+  }
+
+  .label_minWidth {
+    min-width: auto !important;
+    width: auto !important;
+    flex-shrink: 0;
+  }
+  .label-error-shift {
+    transform: translateY(0px);
+  }
+}
+@media (max-width: 500px) {
+  .input-group:not(.no-wrap) {
+    flex-direction: column;
+    align-items: flex-start;
+    margin-bottom: 10px !important;
+    gap: 5px !important;
+  }
+  .label {
+    justify-content: flex-start;
+  }
+  .label-error-shift {
+    transform: translateY(0px);
+  }
+  .label_minWidth {
+    min-width: unset;
+    width: 100%;
+    text-align: left;
+    padding-left: 0;
+    margin-left: 0;
+  }
+
+  .button-group {
+    flex-direction: column;
+    justify-content: center;
+    align-items: stretch;
+    width: 100%;
+    gap: 10px;
+    margin-top: 40px;
+  }
+
+  .button-group .btnreject,
+  .button-group .btnsecces {
+    width: 100%;
+  }
+
+  .no-wrap .label_minWidth {
+    min-width: unset !important;
+    width: auto !important;
+    flex-shrink: 0;
+  }
+}
+@media (max-width: 445px) {
+  .input-group.no-wrap.status-group {
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    gap: 8px !important;
+  }
+
+  .status-group .label_minWidth {
+    min-width: unset !important;
+    width: 100% !important;
+    text-align: left !important;
+  }
+
+  .status-group .status-btn,
+  .status-group .btnchange {
+    margin-left: 0 !important;
+  }
+  .btnchange {
+    padding: 2px 10px;
+    font-size: 14px;
+    background-color: #000;
+    color: white;
+    border-radius: 10px;
+  }
+}
+.wrapper {
+  display: flex;
+  align-items: flex-start;
+  column-gap: 150px;
+  padding: 0px 50px;
+  flex-wrap: wrap;
+  background-color: #edf0f5;
 }
 .container {
   display: flex;
@@ -348,14 +617,167 @@ const submit = async () => {
   width: 100%;
   flex-wrap: wrap;
 }
-.text-red {
-  color: red;
+.image-section {
+  align-items: flex-start;
+  width: 100%;
+  flex: 1;
+  margin-left: 80px;
 }
 
-.q-card {
-  background-color: #edf0f5;
-  border-radius: 10px;
-  padding: 20px;
+.form-section {
+  flex-grow: 1;
+  overflow-x: hidden;
+  overflow-y: auto;
+}
+
+.form-section::-webkit-scrollbar {
+  width: 8px;
+}
+
+@media (max-width: 1880px) {
+  .wrapper {
+    gap: 0px;
+    padding: 0px;
+  }
+  .container {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .image-section {
+    margin-left: 0;
+    width: 100%;
+    max-width: 430px;
+  }
+
+  .form-section {
+    margin-right: 0;
+    max-height: unset;
+    width: 100%;
+    max-width: 770px;
+  }
+}
+@media (max-width: 860px) {
+  .container {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .image-section {
+    margin-left: 0;
+    width: 100%;
+    max-width: 430px;
+  }
+
+  .form-section {
+    margin-right: 0;
+    max-height: unset;
+    width: 100%;
+    max-width: 500px;
+  }
+}
+@media (max-width: 500px) {
+  .wrapper {
+    flex-direction: column;
+    gap: 30px;
+    padding: 5px;
+  }
+
+  .container {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .image-section {
+    margin-left: 0;
+    width: 100%;
+    max-width: 430px;
+  }
+
+  .form-section {
+    margin-right: 0;
+    max-height: unset;
+    width: 100%;
+    max-width: 800px;
+  }
+}
+.programType-btn {
+  width: 200px;
+  height: 40px;
+  border-radius: 50px;
   box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.2);
+  background-color: #ffffff;
+}
+.active-btn {
+  background-color: #d0e4ff !important;
+}
+.programType-btn-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+@media (max-width: 1880px) {
+  .input-container {
+    width: 500px;
+    max-width: 100%;
+  }
+  .label_minWidth {
+    min-width: 180px !important;
+  }
+}
+@media (max-width: 860px) {
+  .input-container {
+    width: 470px;
+    max-width: 100%;
+  }
+  .label {
+    justify-content: flex-start;
+  }
+  .label_minWidth {
+    min-width: unset !important;
+    width: 100% !important;
+    text-align: left;
+    padding-left: 0;
+    margin-left: 0;
+  }
+}
+@media (max-width: 540px) {
+  .input-group {
+    flex-direction: column;
+    align-items: flex-start;
+    margin-bottom: 10px !important;
+    gap: 5px !important;
+  }
+
+  .label {
+    justify-content: flex-start;
+  }
+
+  .label_minWidth {
+    min-width: unset;
+    width: 100%;
+    text-align: left;
+    padding-left: 0;
+    margin-left: 0;
+  }
+
+  .programType-btn {
+    width: 180px;
+    height: 40px;
+    border-radius: 50px;
+    box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.2);
+    background-color: #ffffff;
+  }
+}
+@media (max-width: 475px) {
+  .programType-btn-group {
+    display: grid;
+    grid-template-columns: repeat(1, 1fr);
+    gap: 10px 20px;
+    width: 100%;
+  }
+  .programType-btn {
+    width: 100%;
+  }
 }
 </style>
