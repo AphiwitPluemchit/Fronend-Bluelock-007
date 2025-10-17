@@ -213,7 +213,7 @@
             <q-btn
               v-if="totalSessions === 1 || currentSession === totalSessions"
               flat
-              label="ส่ง"
+              label="ปิด"
               class="btnsecces"
               @click="emit('update:modelValue', false)"
             />

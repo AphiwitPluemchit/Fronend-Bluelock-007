@@ -16,13 +16,13 @@
               :disable="!formData.title || formData.blocks?.length === 0"
               class="preview-btn"
             />
-            <q-btn
+            <!-- <q-btn
               class="btnconfirm"
               label="บันทึก"
               icon="save"
               @click="saveForm"
               :disable="!formData.title || formData.blocks?.length === 0"
-            />
+            /> -->
           </div>
         </div>
       </div>
@@ -170,6 +170,14 @@
               </q-card>
             </template>
           </draggable>
+          <div class="btn-container">
+            <q-btn
+              class="btnconfirm"
+              label="บันทึก"
+              @click="saveForm"
+              :disable="!formData.title || formData.blocks?.length === 0"
+            />
+          </div>
         </div>
 
         <!-- ปุ่มลอยด้านขวา -->
@@ -530,9 +538,8 @@ function handleDragEnd() {
   display: flex;
   justify-content: center;
   padding: 30px;
-  background-color: #EDF0F5;
+  background-color: #edf0f5;
   min-height: 650px;
-
 
   align-items: flex-start;
 }
@@ -573,20 +580,20 @@ function handleDragEnd() {
   max-width: 1000px;
   width: 100%;
   height: 150px;
-  border-radius: 15px;
+  border-radius: 8px;
   border: 1px solid #e0e0e0;
   margin-bottom: 30px;
 }
 .title-card {
   max-width: 1000px;
   width: 100%;
-  border-radius: 15px;
+  border-radius: 8px;
   border: 1px solid #e0e0e0;
 }
 .question-card {
   max-width: 1000px;
   width: 100%;
-  border-radius: 15px;
+  border-radius: 8px;
   border: 1px solid #e0e0e0;
 }
 
@@ -625,5 +632,10 @@ function handleDragEnd() {
 
 .sortable-chosen {
   cursor: grabbing;
+}
+
+.btn-container {
+  display: flex;
+  justify-content: flex-end; /* ดันปุ่มไปขวา */
 }
 </style>
