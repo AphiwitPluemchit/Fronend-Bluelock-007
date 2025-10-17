@@ -103,7 +103,7 @@ const linksList = [
       { title: 'รายการใบประกาศนียบัตร', link: '/Admin/ManageCertificateTable' },
     ],
   },
-  { title: 'จัดการฟอร์ม', icon: 'edit_document', link: '/Admin/Forms' },
+  { title: 'จัดการแบบประเมิน', icon: 'edit_document', link: '/Admin/Forms' },
 ]
 
 // const linksList = [

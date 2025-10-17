@@ -12,6 +12,7 @@ import type { Component } from 'vue'
 // Chart
 import BarChart from 'src/components/chart/BarChart.vue'
 import PieChart from 'src/components/chart/PieChart.vue'
+import TableChart from 'src/components/chart/TableChart.vue'
 
 const props = defineProps<{ program: Program | null | undefined }>()
 
@@ -21,15 +22,15 @@ function changeViewMode(blockId: string, mode: 'bar' | 'pie' | 'table') {
   viewModes.value[blockId] = mode
 }
 
-const chartMap: Record<'bar' | 'pie', Component> = {
+const chartMap: Record<'bar' | 'pie' | 'table', Component> = {
   bar: BarChart,
   pie: PieChart,
+  table: TableChart,
 }
 
-// default = 'bar'; ถ้าได้ 'table' ให้ fallback -> BarChart ไปก่อน
 function resolveChart(blockId?: string): Component {
   const mode = (blockId ? viewModes.value[blockId] : undefined) ?? 'bar'
-  const safeMode: 'bar' | 'pie' = mode === 'pie' ? 'pie' : 'bar'
+  const safeMode: 'bar' | 'pie' | 'table' = mode === 'pie' ? 'pie' : mode === 'table' ? 'table' : 'bar'
   return chartMap[safeMode]
 }
 
@@ -332,6 +333,7 @@ watch(
                   <q-select v-model="viewModes[block.id || '']" :options="[
                     { label: 'กราฟแท่ง', value: 'bar' },
                     { label: 'กราฟวงกลม', value: 'pie' },
+                    { label: 'ตาราง', value: 'table' },
                   ]" option-label="label" option-value="value" emit-value map-options outlined dense options-dense
                     label="เลือกกราฟ" placeholder="เลือกรูปแบบ" class="q-ml-sm" style="min-width: 180px"
                     @update:model-value="val => block.id && changeViewMode(block.id, val)" />

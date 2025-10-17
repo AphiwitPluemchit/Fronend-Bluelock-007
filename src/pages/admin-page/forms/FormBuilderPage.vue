@@ -4,7 +4,7 @@
       <AppBreadcrumbs :breadcrumbs="breadcrumbs" class="q-mb-md" />
 
       <!-- Header -->
-      <div class="row items-center q-mb-md">
+      <div class="row items-center" style="margin-bottom: 20px">
         <div class="col"></div>
         <div class="col-auto">
           <div class="row items-center q-gutter-sm">
@@ -34,8 +34,8 @@
           <!-- Header card -->
           <q-card class="header-card">
             <q-card-section>
-              <q-input v-model="formData.title" placeholder="Form Title" class="q-mb-md" />
-              <q-input v-model="formData.description" placeholder="Form Description" />
+              <q-input v-model="formData.title" placeholder="ชื่อแบบประเมิน" class="q-mb-md" />
+              <q-input v-model="formData.description" placeholder="คำอธิบายเพิ่มเติม" />
             </q-card-section>
           </q-card>
 
@@ -214,8 +214,8 @@ import CheckboxGridMenu from './QuestionFormat/CheckboxGridMenu.vue'
 import { useRouter, useRoute } from 'vue-router'
 import AppBreadcrumbs from 'src/components/AppBreadcrumbs.vue'
 const breadcrumbs = ref({
-  previousPage: { title: 'จัดการฟอร์มประเมิน', path: '/Admin/Forms' },
-  currentPage: { title: 'สร้างฟอร์มประเมิน', path: '/Admin/forms/builder' },
+  previousPage: { title: 'จัดการแบบประเมิน', path: '/Admin/Forms' },
+  currentPage: { title: 'สร้างแบบประเมิน', path: '/Admin/forms/builder' },
   icon: 'edit_document',
 })
 const route = useRoute()
@@ -457,7 +457,7 @@ async function loadFormIfAny(id?: string) {
     formData.isOrigin = form.isOrigin
     formData.blocks = JSON.parse(JSON.stringify(form.blocks || []))
   } else {
-    $q.notify({ type: 'negative', message: 'ไม่พบฟอร์มที่ต้องการแก้ไข' })
+    $q.notify({ type: 'negative', message: 'ไม่พบแบบประเมินที่ต้องการแก้ไข' })
   }
 }
 
@@ -529,6 +529,12 @@ function handleDragEnd() {
 .centered {
   display: flex;
   justify-content: center;
+  padding: 30px;
+  background-color: #EDF0F5;
+  min-height: 650px;
+
+
+  align-items: flex-start;
 }
 
 .content-wrap {

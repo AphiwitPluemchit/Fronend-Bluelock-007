@@ -555,7 +555,7 @@ async function handleSubmit() {
   }
 
   if (!form.value?.id) {
-    $q.notify({ type: 'negative', message: 'ไม่พบแบบฟอร์ม' })
+    $q.notify({ type: 'negative', message: 'ไม่พบแบบประเมิน' })
     return
   }
 

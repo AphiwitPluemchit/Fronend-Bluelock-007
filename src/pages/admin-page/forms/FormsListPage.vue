@@ -4,13 +4,13 @@
       <!-- Header -->
       <div class="q-mb-md" style="margin-top: 20px">
         <div class="row justify-between items-center q-mb-md">
-          <div class="texttitle">จัดการฟอร์มประเมิน</div>
+          <div class="texttitle">จัดการแบบประเมิน</div>
           <div class="header-actions">
             <q-btn
               color="primary"
-              label="เพิ่มฟอร์ม"
+              label="เพิ่มแบบประเมิน"
               class="btnadd"
-              style="width: 130px"
+              style="width: 150px"
               @click="createForm"
             />
           </div>
@@ -20,7 +20,7 @@
             dense
             outlined
             v-model="search"
-            label="ค้นหา ชื่อฟอร์ม"
+            label="ค้นหา ชื่อแบบประเมิน"
             class="searchbox"
             :style="{ border: 'none' }"
           >
@@ -38,7 +38,7 @@
         flat
         bordered
         :loading="formStore.loading"
-        no-data-label="ไม่มีฟอร์มประเมิน"
+        no-data-label="ไม่มีแบบประเมิน"
         style="height: 700px"
       >
         <template v-slot:header="props">
@@ -163,7 +163,7 @@ const columns = computed(() => [
   },
   {
     name: 'title',
-    label: 'ชื่อฟอร์ม',
+    label: 'ชื่อแบบประเมิน',
     field: 'title',
     align: 'left' as const,
     sortable: true,
@@ -196,13 +196,13 @@ function askRemove(row: Form) {
 
 async function deleteForm(id: string | null) {
   try {
-    if (!id) throw new Error('ไม่มีฟอร์ม ID')
+    if (!id) throw new Error('ไม่มีแบบประเมิน ID')
     await formStore.deleteForm(id)
     await formStore.fetchForms()
-    $q.notify({ type: 'positive', message: 'ลบฟอร์มเรียบร้อยแล้ว' })
+    $q.notify({ type: 'positive', message: 'ลบแบบประเมินเรียบร้อยแล้ว' })
   } catch (error) {
     console.error(error)
-    $q.notify({ type: 'negative', message: 'ลบฟอร์มไม่สำเร็จ' })
+    $q.notify({ type: 'negative', message: 'ลบแบบประเมินไม่สำเร็จ' })
   } finally {
     showRemoveDialog.value = false
     pendingDeleteId.value = null
