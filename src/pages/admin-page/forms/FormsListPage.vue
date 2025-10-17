@@ -2,16 +2,32 @@
   <q-page class="q-pa-md">
     <div>
       <!-- Header -->
-      <div class="row justify-between items-center q-mb-md" style="margin-top: 20px">
-        <div class="texttitle">จัดการฟอร์มประเมิน</div>
-        <div class="header-actions">
-          <q-btn
-            color="primary"
-            label="เพิ่มฟอร์ม"
-            class="btnadd"
-            style="width: 130px"
-            @click="createForm"
-          />
+      <div class="q-mb-md" style="margin-top: 20px">
+        <div class="row justify-between items-center q-mb-md">
+          <div class="texttitle">จัดการฟอร์มประเมิน</div>
+          <div class="header-actions">
+            <q-btn
+              color="primary"
+              label="เพิ่มฟอร์ม"
+              class="btnadd"
+              style="width: 130px"
+              @click="createForm"
+            />
+          </div>
+        </div>
+        <div class="row justify-end">
+          <q-input
+            dense
+            outlined
+            v-model="search"
+            label="ค้นหา ชื่อฟอร์ม"
+            class="searchbox"
+            :style="{ border: 'none' }"
+          >
+            <template v-slot:append>
+              <q-icon name="search" />
+            </template>
+          </q-input>
         </div>
       </div>
 
@@ -41,15 +57,7 @@
               </template>
 
               <template v-else-if="col.name === 'actions'">
-                <q-icon
-                  clickable
-                  name="visibility"
-                  class="bg-secondary text-white q-pa-xs rounded-borders q-mr-sm"
-                  @click="openPreview(props.row)"
-                >
-                  <q-tooltip>ดูตัวอย่าง</q-tooltip>
-                </q-icon>
-                <q-icon
+                 <q-icon
                   clickable
                   name="edit"
                   class="bg-primary text-white q-pa-xs rounded-borders q-mr-sm"
@@ -59,9 +67,18 @@
                 </q-icon>
                 <q-icon
                   clickable
+                  name="visibility"
+                  class="bg-black text-white q-pa-xs rounded-borders q-mr-sm"
+                  @click="openPreview(props.row)"
+                >
+                  <q-tooltip>ดูตัวอย่าง</q-tooltip>
+                </q-icon>
+                <q-icon
+                  clickable
                   name="content_copy"
-                  class="bg-green text-white q-pa-xs  rounded-borders q-mr-sm"
+                  class="text-white q-pa-xs rounded-borders q-mr-sm"
                   @click="copyForm(props.row)"
+                  style="background-color: #00BCD4"
                 >
                   <q-tooltip>คัดลอก</q-tooltip>
                 </q-icon>
@@ -110,6 +127,7 @@ import { useQuasar } from 'quasar'
 const formStore = useFormStore()
 const router = useRouter()
 const $q = useQuasar()
+const search = ref('')
 
 const showRemoveDialog = ref(false)
 const showPreviewDialog = ref(false)
@@ -125,9 +143,15 @@ const createForm = async () => {
   await router.push('/Admin/forms/builder')
 }
 
-const filteredForms = computed<Form[]>(() =>
-  (formStore.forms ?? []).filter((f) => f?.isOrigin === true),
-)
+const filteredForms = computed<Form[]>(() => {
+  const forms = formStore.forms ?? []
+  const filtered = forms.filter((f) => f?.isOrigin === true)
+
+  if (!search.value.trim()) return filtered
+
+  const searchTerm = search.value.toLowerCase().trim()
+  return filtered.filter((form) => form.title?.toLowerCase().includes(searchTerm))
+})
 
 const columns = computed(() => [
   {
@@ -188,8 +212,8 @@ const handleCopyForm = async () => {
   if (!selectedForm.value?.id) return
   try {
     await formStore.duplicateOriginForm(selectedForm.value.id)
-    await formStore.fetchForms()   
-    showCopyDialog.value =false
+    await formStore.fetchForms()
+    showCopyDialog.value = false
   } catch (error) {
     console.error('Error copying form:', error)
   }

@@ -1,194 +1,194 @@
 <template>
   <q-page class="q-pa-md">
-    <!-- Header -->
-    <div class="row justify-between items-center q-mb-md">
-      <div class="texttitle">สร้างฟอร์มประเมิน</div>
-      <div class="header-actions">
-        <q-btn
-          color="secondary"
-          label="ดูตัวอย่าง"
-          icon="visibility"
-          @click="showPreview = true"
-          :disable="!formData.title || formData.blocks?.length === 0"
-          class="q-mr-md preview-btn"
-        />
-        <q-btn
-          class="btnconfirm"
-          label="บันทึก"
-          icon="save"
-          @click="saveForm"
-          :disable="!formData.title || formData.blocks?.length === 0"
-        />
+    <div style="margin-top: 20px">
+      <AppBreadcrumbs :breadcrumbs="breadcrumbs" class="q-mb-md" />
+
+      <!-- Header -->
+      <div class="row items-center q-mb-md">
+        <div class="col"></div>
+        <div class="col-auto">
+          <div class="row items-center q-gutter-sm">
+            <q-btn
+              color="black"
+              label="ดูตัวอย่าง"
+              icon="visibility"
+              @click="showPreview = true"
+              :disable="!formData.title || formData.blocks?.length === 0"
+              class="preview-btn"
+            />
+            <q-btn
+              class="btnconfirm"
+              label="บันทึก"
+              icon="save"
+              @click="saveForm"
+              :disable="!formData.title || formData.blocks?.length === 0"
+            />
+          </div>
+        </div>
       </div>
-    </div>
-    <!-- Form Title / Description -->
-    <div class="justify-center">
-      <q-card class="header-card q-mx-auto">
-        <q-card-section>
-          <q-input v-model="formData.title" placeholder="Form Title" class="q-mb-md" />
-          <q-input v-model="formData.description" placeholder="Form Description" />
-        </q-card-section>
-      </q-card>
-    </div>
 
-    <!-- คำถามทั้งหมด -->
-    <div class="flex justify-center q-mt-md">
-      <div style="width: 1000px">
-        <draggable
-          v-model="formData.blocks"
-          item-key="id"
-          group="blocks"
-          class="draggable-container"
-          @start="onDragStart"
-          @end="handleDragEnd"
-        >
-          <template #item="{ element: block, index }">
-            <div v-if="block.type === 'session'" class="session-divider row items-center q-mb-lg">
-              <div class="col">
-                <q-separator />
-              </div>
-              <div class="text-center text-grey-7 q-px-md">Session {{ block.session }}</div>
-              <div class="col">
-                <q-separator />
-              </div>
-              <q-btn
-                flat
-                round
-                dense
-                icon="close"
-                size="sm"
-                class="q-ml-sm"
-                @click.stop="deleteSession(block.session)"
-              />
-            </div>
+      <!-- คำถามทั้งหมด -->
+      <div class="centered">
+        <!-- content column -->
+        <div class="content-wrap">
+          <!-- Header card -->
+          <q-card class="header-card">
+            <q-card-section>
+              <q-input v-model="formData.title" placeholder="Form Title" class="q-mb-md" />
+              <q-input v-model="formData.description" placeholder="Form Description" />
+            </q-card-section>
+          </q-card>
 
-            <q-card
-              v-else
-              :key="block.id"
-              :class="[
-                'q-pa-md q-mb-md relative-position cursor-move',
-                block.type === 'title' ? 'title-card' : 'question-card',
-                { 'is-dragging': isDragging && draggedBlockId === block.id },
-              ]"
-            >
-              <div v-if="block.type === 'title'">
-                <div class="row justify-between items-start q-mb-sm">
-                  <q-input
-                    v-model="block.title"
-                    placeholder="หัวข้อ"
-                    dense
-                    outlined
-                    class="col-grow"
-                  />
-                  <div class="q-gutter-sm q-ml-sm">
-                    <q-btn
-                      flat
-                      round
-                      dense
-                      icon="content_copy"
-                      class="bg-blue text-white q-pa-xs rounded-borders"
-                      @click="copyBlock(index)"
-                    />
-                    <q-btn
-                      flat
-                      round
-                      dense
-                      icon="delete"
-                      class="bg-red text-white q-pa-xs rounded-borders"
-                      @click="removeBlock(index)"
-                    />
-                  </div>
+          <draggable
+            v-model="formData.blocks"
+            item-key="id"
+            group="blocks"
+            class="draggable-container"
+            @start="onDragStart"
+            @end="handleDragEnd"
+          >
+            <template #item="{ element: block, index }">
+              <div v-if="block.type === 'session'" class="session-divider row items-center q-mb-lg">
+                <div class="col">
+                  <q-separator />
                 </div>
-                <q-input
-                  v-model="block.description"
-                  placeholder="คำอธิบายเพิ่มเติม (ไม่จำเป็น)"
-                  dense
-                  outlined
-                />
-              </div>
-
-              <div v-else>
-                <div class="row items-start q-gutter-md q-mb-md">
-                  <q-input
-                    v-model="block.title"
-                    placeholder="คำถาม"
-                    outlined
-                    dense
-                    style="max-width: 610px; width: 100%"
-                  />
-                  <q-btn
-                    outline
-                    :icon="getIcon(block.type)"
-                    :label="getLabel(block.type)"
-                    style="border-radius: 8px; max-width: 230px; width: 100%"
-                  >
-                    <q-menu>
-                      <QuestionTypeMenu @selected="(type) => onTypeSelected(index, type)" />
-                    </q-menu>
-                  </q-btn>
-                  <q-btn
-                    flat
-                    round
-                    dense
-                    icon="content_copy"
-                    class="bg-blue text-white q-pa-xs rounded-borders"
-                    @click="copyBlock(index)"
-                  />
-                  <q-btn
-                    icon="delete"
-                    flat
-                    round
-                    dense
-                    class="bg-red text-white q-pa-xs rounded-borders"
-                    @click="removeBlock(index)"
-                  />
+                <div class="text-center text-grey-7 q-px-md">Session {{ block.session }}</div>
+                <div class="col">
+                  <q-separator />
                 </div>
-
-                <component
+                <q-btn
                   flat
-                  :is="getComponent(block.type)"
-                  :model-value="block"
-                  @update:model-value="formData.blocks[findBlockIndex(block.id)] = $event"
+                  round
+                  dense
+                  icon="close"
+                  size="sm"
+                  class="q-ml-sm"
+                  @click.stop="deleteSession(block.session)"
                 />
+              </div>
 
-                <q-separator spaced />
-
-                <!-- Footer -->
-                <div class="row justify-between items-center">
-                  <div class="row items-center q-gutter-sm">
-                    <q-toggle
-                      v-model="block.isRequired"
-                      label="Required"
-                      left-label
+              <q-card
+                v-else
+                :key="block.id"
+                :class="[
+                  'q-pa-md q-mb-md relative-position cursor-move',
+                  block.type === 'title' ? 'title-card' : 'question-card',
+                  { 'is-dragging': isDragging && draggedBlockId === block.id },
+                ]"
+              >
+                <!-- 🟩 Title Card -->
+                <div v-if="block.type === 'title'">
+                  <div class="row items-center q-gutter-sm q-mb-sm">
+                    <q-input
+                      v-model="block.title"
+                      placeholder="หัวข้อ"
                       dense
-                      @update:model-value="
-                        console.log('isRequired updated:', $event, 'for block:', block)
-                      "
+                      outlined
+                      class="col-grow"
+                      style="flex: 1"
                     />
+                    <div class="row q-gutter-sm no-wrap">
+                      <q-btn
+                        flat
+                        round
+                        dense
+                        icon="content_copy"
+                        class="bg-blue text-white rounded-borders"
+                        @click="copyBlock(index)"
+                      />
+                      <q-btn
+                        flat
+                        round
+                        dense
+                        icon="delete"
+                        class="bg-red text-white rounded-borders"
+                        @click="removeBlock(index)"
+                      />
+                    </div>
+                  </div>
+                  <q-input
+                    v-model="block.description"
+                    placeholder="คำอธิบายเพิ่มเติม (ไม่จำเป็น)"
+                    dense
+                    outlined
+                  />
+                </div>
+
+                <!-- 🟦 Question Card -->
+                <div v-else>
+                  <div class="row items-center q-gutter-sm q-mb-sm">
+                    <q-input
+                      v-model="block.title"
+                      placeholder="คำถาม"
+                      outlined
+                      dense
+                      class="col-grow"
+                      style="flex: 1"
+                    />
+                    <q-btn
+                      outline
+                      :icon="getIcon(block.type)"
+                      :label="getLabel(block.type)"
+                      style="border-radius: 8px; width: 230px"
+                    >
+                      <q-menu>
+                        <QuestionTypeMenu @selected="(type) => onTypeSelected(index, type)" />
+                      </q-menu>
+                    </q-btn>
+                    <div class="row q-gutter-sm no-wrap">
+                      <q-btn
+                        flat
+                        round
+                        dense
+                        icon="content_copy"
+                        class="bg-blue text-white rounded-borders"
+                        @click="copyBlock(index)"
+                      />
+                      <q-btn
+                        icon="delete"
+                        flat
+                        round
+                        dense
+                        class="bg-red text-white rounded-borders"
+                        @click="removeBlock(index)"
+                      />
+                    </div>
+                  </div>
+
+                  <component
+                    flat
+                    :is="getComponent(block.type)"
+                    :model-value="block"
+                    @update:model-value="formData.blocks[findBlockIndex(block.id)] = $event"
+                  />
+
+                  <q-separator spaced />
+                  <div class="row justify-between items-center">
+                    <q-toggle v-model="block.isRequired" label="Required" left-label dense />
                   </div>
                 </div>
-              </div>
-            </q-card>
-          </template>
-        </draggable>
+              </q-card>
+            </template>
+          </draggable>
+        </div>
+
+        <!-- ปุ่มลอยด้านขวา -->
+        <div class="sidebar">
+          <q-btn round color="primary" icon="add" size="15px" @click="addQuestion">
+            <q-tooltip>เพิ่มคำถาม</q-tooltip>
+          </q-btn>
+          <q-btn round color="black" icon="horizontal_split" size="15px" @click="addSessionDivider">
+            <q-tooltip>แบ่ง Session</q-tooltip>
+          </q-btn>
+          <q-btn round color="grey-7" icon="title" size="15px" @click="addTitleCard">
+            <q-tooltip>เพิ่มหัวข้อ</q-tooltip>
+          </q-btn>
+        </div>
       </div>
-    </div>
 
-    <!-- ปุ่มลอยด้านขวา -->
-    <div class="floating-sidebar">
-      <q-btn round color="primary" icon="add" size="15px" @click="addQuestion">
-        <q-tooltip>เพิ่มคำถาม</q-tooltip>
-      </q-btn>
-      <q-btn round color="grey-7" icon="title" size="15px" @click="addTitleCard">
-        <q-tooltip>เพิ่มหัวข้อ</q-tooltip>
-      </q-btn>
-      <q-btn round color="purple-7" icon="horizontal_split" size="15px" @click="addSessionDivider">
-        <q-tooltip>แบ่ง Session</q-tooltip>
-      </q-btn>
+      <!-- Preview Dialog -->
+      <PreviewDialog v-model="showPreview" :form="formData" />
     </div>
-
-    <!-- Preview Dialog -->
-    <PreviewDialog v-model="showPreview" :form="formData" />
   </q-page>
 </template>
 
@@ -212,7 +212,12 @@ import RatingMenu from './QuestionFormat/RatingMenu.vue'
 import MultipleChoicegridMenu from './QuestionFormat/MultipleChoicegridMenu.vue'
 import CheckboxGridMenu from './QuestionFormat/CheckboxGridMenu.vue'
 import { useRouter, useRoute } from 'vue-router'
-
+import AppBreadcrumbs from 'src/components/AppBreadcrumbs.vue'
+const breadcrumbs = ref({
+  previousPage: { title: 'จัดการฟอร์มประเมิน', path: '/Admin/Forms' },
+  currentPage: { title: 'สร้างฟอร์มประเมิน', path: '/Admin/forms/builder' },
+  icon: 'edit_document',
+})
 const route = useRoute()
 const router = useRouter()
 const showPreview = ref(false)
@@ -287,7 +292,7 @@ function onTypeSelected(index: number, type: { label: string; value: string; ico
   const newBlock = {
     ...block,
     type: type.value,
-    id: uuidv4(), 
+    id: uuidv4(),
   }
 
   // Initialize based on question type
@@ -394,9 +399,9 @@ const formId = computed<string | undefined>(
   () =>
     (route.query.id as string | undefined) ||
     (route.params.id as string | undefined) ||
-    (route.params.formId as string | undefined), 
+    (route.params.formId as string | undefined),
 )
-const isEdit = computed(() => !!formId.value) 
+const isEdit = computed(() => !!formId.value)
 
 function buildPayload() {
   const blocks = formData.blocks.map((block, index) => ({
@@ -433,7 +438,6 @@ async function saveForm() {
     } else {
       const created = await formStore.createForm(payload)
       if (!created) throw new Error('Create failed')
-
     }
     await router.push('/Admin/Forms')
   } catch (err) {
@@ -518,11 +522,31 @@ function updateBlocks() {
 function handleDragEnd() {
   isDragging.value = false
   draggedBlockId.value = null
-
 }
 </script>
 
 <style scoped>
+.centered {
+  display: flex;
+  justify-content: center;
+}
+
+.content-wrap {
+  width: 100%;
+  max-width: 1000px;
+  margin: 0 20px;
+}
+
+.sidebar {
+  position: sticky;
+  top: 180px;
+  align-self: flex-start;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  z-index: 10;
+}
+
 .session-divider {
   display: flex;
   align-items: center;
@@ -545,6 +569,7 @@ function handleDragEnd() {
   height: 150px;
   border-radius: 15px;
   border: 1px solid #e0e0e0;
+  margin-bottom: 30px;
 }
 .title-card {
   max-width: 1000px;
@@ -552,16 +577,6 @@ function handleDragEnd() {
   border-radius: 15px;
   border: 1px solid #e0e0e0;
 }
-.floating-sidebar {
-  position: fixed;
-  top: 180px;
-  right: 30px;
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-  z-index: 1000;
-}
-
 .question-card {
   max-width: 1000px;
   width: 100%;
@@ -569,6 +584,18 @@ function handleDragEnd() {
   border: 1px solid #e0e0e0;
 }
 
+.builder {
+  max-width: 1000px;
+  width: 100%;
+}
+
+.sidebar {
+  position: sticky;
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  z-index: 10;
+}
 .draggable-container {
   min-height: 100px;
 }
@@ -585,8 +612,6 @@ function handleDragEnd() {
   cursor: move;
   user-select: none;
 }
-
-/* Add smooth transition for drag and drop */
 .sortable-ghost {
   opacity: 0.5;
   background: #e0e0e0;
