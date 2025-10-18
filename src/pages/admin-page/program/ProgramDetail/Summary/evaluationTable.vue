@@ -13,14 +13,23 @@ import type { Component } from 'vue'
 import BarChart from 'src/components/chart/BarChart.vue'
 import PieChart from 'src/components/chart/PieChart.vue'
 import TableChart from 'src/components/chart/TableChart.vue'
+import GridBarChart from 'src/components/chart/GridBarChart.vue'
+import GridPieChart from 'src/components/chart/GridPieChart.vue'
+import GridTableChart from 'src/components/chart/GridTableChart.vue'
 
+type GridItem = { id: string; title: string; sequence: number }
+
+function isGrid(block: FormBlock) {
+  return block.type === 'grid_multiple_choice' || block.type === 'grid_checkbox'
+}
 const props = defineProps<{ program: Program | null | undefined }>()
-
 const viewModes = ref<Record<string, 'bar' | 'pie' | 'table'>>({})
 
-function changeViewMode(blockId: string, mode: 'bar' | 'pie' | 'table') {
-  viewModes.value[blockId] = mode
-}
+const loadingForm = ref(false)
+const checkedOnce = ref(false)
+const formStore = useFormStore()
+const submissionStore = useSubmissionStore()
+const safeBlocks = computed(() => currentForm.value?.blocks ?? [])
 
 const chartMap: Record<'bar' | 'pie' | 'table', Component> = {
   bar: BarChart,
@@ -28,53 +37,22 @@ const chartMap: Record<'bar' | 'pie' | 'table', Component> = {
   table: TableChart,
 }
 
-function resolveChart(blockId?: string): Component {
-  const mode = (blockId ? viewModes.value[blockId] : undefined) ?? 'bar'
-  const safeMode: 'bar' | 'pie' | 'table' = mode === 'pie' ? 'pie' : mode === 'table' ? 'table' : 'bar'
-  return chartMap[safeMode]
+function changeViewMode(blockId: string, mode: 'bar' | 'pie' | 'table') {
+  viewModes.value[blockId] = mode
 }
 
-const loadingForm = ref(false)
-const checkedOnce = ref(false)
-const formStore = useFormStore()
-const submissionStore = useSubmissionStore()
-
+function resolveChart(blockId?: string): Component {
+  const mode = (blockId ? viewModes.value[blockId] : undefined) ?? 'bar'
+  const safeMode: 'bar' | 'pie' | 'table' =
+    mode === 'pie' ? 'pie' : mode === 'table' ? 'table' : 'bar'
+  return chartMap[safeMode]
+}
 
 const submissionsForCurrentForm = computed<Submission[]>(() => {
   const id = formIdHex.value
   if (!id) return []
   return submissionStore.getFormSubmissions(id)
 })
-type MaybeItem = string | number | { id?: string; title?: unknown; label?: unknown; name?: unknown }
-
-type GridBlockLite = Partial<FormBlock> & {
-  rows?: MaybeItem[]
-  choices?: MaybeItem[]
-  columns?: MaybeItem[]
-}
-
-const isObj = (v: unknown): v is Record<string, unknown> => v !== null && typeof v === 'object'
-
-const toTitle = (v: unknown): string => {
-  if (typeof v === 'number') return String(v)
-  if (typeof v === 'string') return v.trim()
-  if (isObj(v)) {
-    const t = v.title
-    const l = v.label
-    const n = v.name
-    if (typeof t === 'string') return t.trim()
-    if (typeof l === 'string') return l.trim()
-    if (typeof n === 'string') return n.trim()
-  }
-  return ''
-}
-
-const normList = (arr?: MaybeItem[]) =>
-  Array.isArray(arr) ? arr.map((x) => ({ title: toTitle(x) })).filter((o) => o.title !== '') : []
-
-const getCols = (block: GridBlockLite) =>
-  normList((block.choices && block.choices.length ? block.choices : block.columns) ?? [])
-const getRows = (block: GridBlockLite) => normList(block.rows)
 
 function pickHex24(v: unknown): string | null {
   if (typeof v === 'string') {
@@ -101,8 +79,86 @@ const currentForm = computed<Form | null>(() => {
   if (!id) return null
   return formStore.forms.find((f) => typeof f.id === 'string' && f.id === id) ?? null
 })
+function isGridItemFull(x: unknown): x is GridItem {
+  if (!x || typeof x !== 'object') return false
+  const r = x as Record<string, unknown>
+  return typeof r.id === 'string' && typeof r.title === 'string' && typeof r.sequence === 'number'
+}
 
-const safeBlocks = computed(() => currentForm.value?.blocks ?? [])
+function pickArray(obj: Record<string, unknown>, key: string): unknown[] {
+  const v = obj[key]
+  return Array.isArray(v) ? v : []
+}
+type GridDataset = {
+  label: string
+  data: number[]
+  backgroundColor?: string | string[]
+  borderColor?: string | string[]
+}
+function buildGridBarChart(block: FormBlock) {
+  const formId = formIdHex.value
+  if (!formId || !block?.id) {
+    return {
+      labels: [] as string[],
+      datasets: [] as GridDataset[],
+      stacked: false,
+      empty: true,
+    }
+  }
+  const dict = block as unknown as Record<string, unknown>
+
+  const rawRows = pickArray(dict, 'rows')
+  const rawChoices = pickArray(dict, 'choices')
+  const rawColumns = pickArray(dict, 'columns')
+
+  const rows = rawRows.filter(isGridItemFull).sort((a, b) => a.sequence - b.sequence)
+  // ใช้ choices ก่อน ถ้าไม่มีค่อย fallback เป็น columns
+  const cols = (rawChoices.length ? rawChoices : rawColumns)
+    .filter(isGridItemFull)
+    .sort((a, b) => a.sequence - b.sequence)
+
+  if (!rows.length || !cols.length) {
+    return {
+      labels: [] as string[],
+      datasets: [] as GridDataset[],
+      stacked: false,
+      empty: true,
+    }
+  }
+
+  const items = analyticsForCurrentForm.value.filter((a) => a.blockId === block.id)
+  const labels = rows.map((r) => r.title)
+
+  const palette = [
+    '#2E3192',
+    '#6A36B0',
+    '#A34FD6',
+    '#D474F0',
+    '#F29CF9',
+    '#7E57C2',
+    '#26A69A',
+    '#42A5F5',
+    '#FF7043',
+  ]
+
+  const datasets: GridDataset[] = cols.map((c, ci) => {
+    const data = rows.map((r) => {
+      const it = items.find((x) => x.rowId === r.id && x.choiceId === c.id)
+      return it?.count ?? 0
+    })
+    // ✅ ให้เป็น string ชัดเจน ไม่ใช่ string | undefined
+    const color: string = palette[ci % palette.length] ?? '#1A237E'
+    return {
+      label: c.title,
+      data,
+      backgroundColor: color,
+      borderColor: color,
+    }
+  })
+
+  const empty = datasets.every((ds) => ds.data.every((v) => v === 0))
+  return { labels, datasets, stacked: false, empty }
+}
 
 const formIdHex = computed(() => {
   const p = toRaw(props.program)
@@ -112,58 +168,12 @@ const formIdHex = computed(() => {
   return pickHex24(raw)
 })
 
-
-watch(
-  formIdHex,
-  async (id) => {
-    checkedOnce.value = false
-    if (!id) return
-    const exists = formStore.forms.some((f: Form) => typeof f.id === 'string' && f.id === id)
-    if (!exists) {
-      loadingForm.value = true
-      try {
-        await formStore.fetchFormById(id)
-      } finally {
-        loadingForm.value = false
-        checkedOnce.value = true
-      }
-    } else {
-      checkedOnce.value = true
-    }
-  },
-  { immediate: true },
-)
-
 const formTitle = computed(() => {
   const id = formIdHex.value
   if (!id) return ''
   const f = formStore.forms.find((x: Form) => typeof x.id === 'string' && x.id === id)
   return f?.title ?? ''
 })
-
-watch(
-  () => props.program,
-  (p) => {
-    const items = getProp<ProgramItem[]>(p, 'programItems') ?? []
-    console.log(
-      '[EvaluationTable] programItems:',
-      items.map((x) => x.name),
-    )
-  },
-  { immediate: true },
-)
-watch(
-  formIdHex,
-  async (id) => {
-    if (!id) return
-    await Promise.all([
-      submissionStore.fetchSubmissionsByForm(id, { limit: 500 }),
-      submissionStore.fetchFormBlocksAnalytics(id),
-    ])
-  },
-  { immediate: true }
-)
-
 
 const textAnswersByBlock = computed<Record<string, string[]>>(() => {
   const id = formIdHex.value
@@ -174,31 +184,26 @@ const textAnswersByBlock = computed<Record<string, string[]>>(() => {
     for (const r of sub.responses ?? []) {
       // เฉพาะคำตอบข้อความ
       if (r.blockId && typeof r.answerText === 'string' && r.answerText.trim() !== '') {
-        ; (out[r.blockId] ??= []).push(r.answerText.trim())
+        ;(out[r.blockId] ??= []).push(r.answerText.trim())
       }
     }
   }
   return out
 })
-// ดึง analytics ของฟอร์มนี้ (อ่านจาก cache ของ store)
+
 const analyticsForCurrentForm = computed<BlockCountItem[]>(() => {
   const id = formIdHex.value
   if (!id) return []
-  return submissionStore.getFormAnalytics(id) // ต้องแน่ใจว่าที่อื่นมีเรียก fetchFormBlocksAnalytics แล้ว หรือจะเรียกที่นี่ก็ได้
+  return submissionStore.getFormAnalytics(id)
 })
 
-// helper: ตรวจว่าข้อมูลเป็นศูนย์หมดไหม
 function isAllZero(arr: number[]) {
   return arr.length === 0 || arr.every((v) => v === 0)
 }
 function isChoiceFull(c: unknown): c is Choice & { id: string } {
   if (!c || typeof c !== 'object') return false
   const r = c as Partial<Choice>
-  return (
-    typeof r.id === 'string' &&
-    typeof r.title === 'string' &&
-    typeof r.sequence === 'number'
-  )
+  return typeof r.id === 'string' && typeof r.title === 'string' && typeof r.sequence === 'number'
 }
 
 function buildChoiceChart(block: FormBlock) {
@@ -261,6 +266,24 @@ function buildChoiceChart(block: FormBlock) {
     empty: isAllZero(counts),
   }
 }
+const gridCache = new Map<
+  string,
+  { labels: string[]; datasets: GridDataset[]; stacked: boolean; empty: boolean }
+>()
+
+function getGridData(block: FormBlock) {
+  const id = block.id
+  if (!id) return { labels: [], datasets: [], stacked: false, empty: true }
+
+  const cached = gridCache.get(id)
+  if (cached) return cached
+
+  const built = buildGridBarChart(block)
+  gridCache.set(id, built)
+  return built
+}
+
+watch(analyticsForCurrentForm, () => gridCache.clear())
 watch(
   formIdHex,
   async (id) => {
@@ -270,10 +293,52 @@ watch(
   { immediate: true },
 )
 watch(
-  () => safeBlocks.value.map(b => b.id).filter(Boolean),
+  () => safeBlocks.value.map((b) => b.id).filter(Boolean),
   (ids) => {
     for (const id of ids as string[]) {
       if (!viewModes.value[id]) viewModes.value[id] = 'bar'
+    }
+  },
+  { immediate: true },
+)
+watch(
+  () => props.program,
+  (p) => {
+    const items = getProp<ProgramItem[]>(p, 'programItems') ?? []
+    console.log(
+      '[EvaluationTable] programItems:',
+      items.map((x) => x.name),
+    )
+  },
+  { immediate: true },
+)
+watch(
+  formIdHex,
+  async (id) => {
+    if (!id) return
+    await Promise.all([
+      submissionStore.fetchSubmissionsByForm(id, { limit: 500 }),
+      submissionStore.fetchFormBlocksAnalytics(id),
+    ])
+  },
+  { immediate: true },
+)
+watch(
+  formIdHex,
+  async (id) => {
+    checkedOnce.value = false
+    if (!id) return
+    const exists = formStore.forms.some((f: Form) => typeof f.id === 'string' && f.id === id)
+    if (!exists) {
+      loadingForm.value = true
+      try {
+        await formStore.fetchFormById(id)
+      } finally {
+        loadingForm.value = false
+        checkedOnce.value = true
+      }
+    } else {
+      checkedOnce.value = true
     }
   },
   { immediate: true },
@@ -288,11 +353,14 @@ watch(
     </div>
 
     <div class="answer-cards-container">
-      <div v-for="(block, bIndex) in safeBlocks" :key="block.id || `block-${bIndex}`" class="q-mb-lg">
+      <div
+        v-for="(block, bIndex) in safeBlocks"
+        :key="block.id || `block-${bIndex}`"
+        class="q-mb-lg"
+      >
         <q-card class="answer-card">
           <q-card-section>
             <!-- Title Card -->
-            <!-- success -->
             <template v-if="block.type === 'title'">
               <div class="textTitle">
                 {{ block.title }}
@@ -312,7 +380,11 @@ watch(
 
               <div v-if="block.id && textAnswersByBlock[block.id]?.length" class="answer-container">
                 <div class="answer-wrapper">
-                  <div v-for="(ans, idx) in textAnswersByBlock[block.id]" :key="idx" class="answer-item">
+                  <div
+                    v-for="(ans, idx) in textAnswersByBlock[block.id]"
+                    :key="idx"
+                    class="answer-item"
+                  >
                     <span class="bullet">-</span>
                     <div class="answer-text">{{ ans }}</div>
                   </div>
@@ -322,7 +394,9 @@ watch(
             </template>
 
             <!-- multiple_choice, checkbox, dropdown, rating -->
-            <template v-else-if="['multiple_choice', 'checkbox', 'dropdown', 'rating'].includes(block.type)">
+            <template
+              v-else-if="['multiple_choice', 'checkbox', 'dropdown', 'rating'].includes(block.type)"
+            >
               <div class="textQuestion">
                 <div class="row items-center justify-between">
                   <div>
@@ -330,14 +404,26 @@ watch(
                     <span v-if="block.isRequired" class="text-red" style="margin-left: 2px">*</span>
                   </div>
 
-                  <q-select v-model="viewModes[block.id || '']" :options="[
-                    { label: 'กราฟแท่ง', value: 'bar' },
-                    { label: 'กราฟวงกลม', value: 'pie' },
-                    { label: 'ตาราง', value: 'table' },
-                  ]" option-label="label" option-value="value" emit-value map-options outlined dense options-dense
-                    label="เลือกกราฟ" placeholder="เลือกรูปแบบ" class="q-ml-sm" style="min-width: 180px"
-                    @update:model-value="val => block.id && changeViewMode(block.id, val)" />
-
+                  <q-select
+                    v-model="viewModes[block.id || '']"
+                    :options="[
+                      { label: 'กราฟแท่ง', value: 'bar' },
+                      { label: 'กราฟวงกลม', value: 'pie' },
+                      { label: 'ตาราง', value: 'table' },
+                    ]"
+                    option-label="label"
+                    option-value="value"
+                    emit-value
+                    map-options
+                    outlined
+                    dense
+                    options-dense
+                    label="เลือกกราฟ"
+                    placeholder="เลือกรูปแบบ"
+                    class="q-ml-sm"
+                    style="min-width: 180px"
+                    @update:model-value="(val) => block.id && changeViewMode(block.id, val)"
+                  />
                 </div>
               </div>
 
@@ -349,56 +435,53 @@ watch(
               </div>
             </template>
 
-            <!-- Grid: Multiple Choice -->
-            <template v-else-if="block.type === 'grid_multiple_choice'">
-              <div class="text-subtitle1 q-mb-sm">
-                {{ block.title }}
-                <span v-if="block.isRequired" class="text-red" style="margin-left: 2px">*</span>
-              </div>
-              <q-markup-table flat bordered dense class="grid-table">
-                <thead>
-                  <tr>
-                    <th class="row-header"></th>
-                    <th v-for="(col, i) in getCols(block)" :key="i" class="col-choice">
-                      {{ col.title }}
-                    </th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr v-for="(row, r) in getRows(block)" :key="r">
-                    <td class="row-header">{{ row.title }}</td>
-                    <td v-for="(col, c) in getCols(block)" :key="c" class="col-choice">
-                      <q-radio :val="col.title" :model-value="undefined" disable />
-                    </td>
-                  </tr>
-                </tbody>
-              </q-markup-table>
-            </template>
+            <!-- Grid: Multiple Choice / Checkbox -->
+            <template v-else-if="isGrid(block)">
+              <div class="textQuestion">
+                <div class="row items-center justify-between">
+                  <div>
+                    {{ block.title }}
+                    <span v-if="block.isRequired" class="text-red" style="margin-left: 2px">*</span>
+                  </div>
 
-            <!-- Grid: Checkbox -->
-            <template v-else-if="block.type === 'grid_checkbox'">
-              <div class="text-subtitle1 q-mb-sm">
-                {{ block.title }}
-                <span v-if="block.isRequired" class="text-red" style="margin-left: 2px">*</span>
+                  <q-select
+                    v-model="viewModes[block.id || '']"
+                    :options="[
+                      { label: 'กราฟแท่ง', value: 'bar' },
+                      { label: 'กราฟวงกลม', value: 'pie' },
+                      { label: 'ตาราง', value: 'table' },
+                    ]"
+                    option-label="label"
+                    option-value="value"
+                    emit-value
+                    map-options
+                    outlined
+                    dense
+                    options-dense
+                    label="เลือกกราฟ"
+                    class="q-ml-sm"
+                    style="min-width: 180px"
+                    @update:model-value="(val) => block.id && changeViewMode(block.id, val)"
+                  />
+                </div>
               </div>
-              <q-markup-table flat bordered dense class="grid-table">
-                <thead>
-                  <tr>
-                    <th class="row-header"></th>
-                    <th v-for="(col, i) in getCols(block)" :key="i" class="col-choice">
-                      {{ col.title }}
-                    </th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr v-for="(row, r) in getRows(block)" :key="r">
-                    <td class="row-header">{{ row.title }}</td>
-                    <td v-for="(col, c) in getCols(block)" :key="c" class="col-choice">
-                      <q-checkbox :val="col.title" :model-value="undefined" disable />
-                    </td>
-                  </tr>
-                </tbody>
-              </q-markup-table>
+
+              <GridBarChart
+                v-if="viewModes[block.id || ''] === 'bar'"
+                v-bind="getGridData(block)"
+              />
+              <GridPieChart
+                v-else-if="viewModes[block.id || ''] === 'pie'"
+                v-bind="getGridData(block)"
+              />
+              <GridTableChart
+                v-else-if="viewModes[block.id || ''] === 'table'"
+                v-bind="getGridData(block)"
+              />
+
+              <div v-if="buildGridBarChart(block).empty" class="text-grey-6 text-italic q-mt-sm">
+                ยังไม่มีคำตอบ
+              </div>
             </template>
           </q-card-section>
         </q-card>

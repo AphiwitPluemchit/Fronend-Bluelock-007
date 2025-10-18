@@ -34,9 +34,8 @@ function combineData(labels: string[], datasets: { label: string; data: number[]
     return sums
 }
 
-
 function makeColors(n: number) {
-    const baseColor = [26, 35, 126] // RGB ของ #1A237E
+    const baseColor = [26, 35, 126]
     const colors: string[] = []
     for (let i = 0; i < n; i++) {
         const factor = Math.pow(0.55 + (0.45 * i) / Math.max(1, n - 1), 1.2)

@@ -29,7 +29,6 @@ const props = defineProps<{
 const cv = ref<HTMLCanvasElement | null>(null)
 let chart: Chart | null = null
 
-// Calculate the next multiple of 5 for the Y-axis max
 const yAxisMax = computed(() => {
   if (!props.datasets?.length) return 5
   const maxValue = Math.max(...props.datasets.flatMap((dataset) => dataset.data))
