@@ -38,6 +38,7 @@ async function loadCourse() {
 
 const courseState = ref<Course>(defaultCourse())
 
+const imageRef = ref<InstanceType<typeof ImageDetail> | null>(null)
 const selectedImageFile = ref<File | null>(null)
 
 // `isEditMode` (local) is used to control editability in the UI.
@@ -92,7 +93,12 @@ async function saveChanges() {
       $q.notify({ message: 'ไม่พบรหัสคอร์ส', type: 'negative' })
       return
     }
-    await courseStore.updateCourse(c.id, { ...c }) // ส่ง plain object
+    
+    // Log the data being sent
+    console.log('Course data being updated:', c)
+    
+    // Send course data directly (without image for now)
+    await courseStore.updateCourse(c.id, { ...c })
     originalCourseData.value = { ...c }
     isEditMode.value = false
     $q.notify({ message: 'แก้ไขข้อมูลสำเร็จ', type: 'positive' })
@@ -129,8 +135,8 @@ function confirmCancel() {
   <q-page>
     <div class="wrapper">
       <div class="container">
-        <!-- Image section is now optional for courses -->
-        <div class="image-section" v-if="false">
+        <!-- Image section -->
+        <div class="image-section">
           <ImageDetail
             ref="imageRef"
             :imageFileName="courseState.file"
@@ -792,8 +798,9 @@ function confirmCancel() {
 .wrapper {
   display: flex;
   align-items: flex-start;
-  column-gap: 150px;
-  padding: 0px 50px;
+  gap: 150px;
+  padding: 30px;
+  margin-top: 20px;
   flex-wrap: wrap;
   background-color: #edf0f5;
 }
@@ -807,17 +814,19 @@ function confirmCancel() {
   align-items: flex-start;
   width: 100%;
   flex: 1;
-  margin-left: 80px;
+  margin-left: 100px;
 }
 
 .form-section {
   flex-grow: 1;
   overflow-x: hidden;
   overflow-y: auto;
+  margin-right: 50px;
 }
 
 .form-section::-webkit-scrollbar {
   width: 8px;
+  margin-right: 50px;
 }
 .Font {
   color: #ffffff;
@@ -826,8 +835,8 @@ function confirmCancel() {
 }
 @media (max-width: 1880px) {
   .wrapper {
-    gap: 0px;
-    padding: 0px;
+    gap: 30px;
+    padding: 20px;
   }
   .container {
     flex-direction: column;
@@ -842,12 +851,15 @@ function confirmCancel() {
 
   .form-section {
     margin-right: 0;
-    max-height: unset;
     width: 100%;
     max-width: 770px;
   }
 }
 @media (max-width: 860px) {
+  .wrapper {
+    gap: 30px;
+    padding: 20px;
+  }
   .container {
     flex-direction: column;
     align-items: center;
@@ -870,7 +882,7 @@ function confirmCancel() {
   .wrapper {
     flex-direction: column;
     gap: 30px;
-    padding: 5px;
+    padding: 20px;
   }
 
   .container {

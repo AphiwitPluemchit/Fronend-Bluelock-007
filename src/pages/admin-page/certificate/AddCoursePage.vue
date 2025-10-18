@@ -27,6 +27,7 @@ const course = ref<Course>({
   videoUrl: '',
 })
 
+const imageRef = ref<InstanceType<typeof ImageDetail> | null>(null)
 const selectedImageFile = ref<File | null>(null)
 
 // Breadcrumbs
@@ -90,8 +91,8 @@ const submit = async () => {
 
     <div class="wrapper">
       <div class="container">
-        <!-- Image section is now optional for courses -->
-        <div class="image-section" v-if="false">
+        <!-- Image section -->
+        <div class="image-section">
           <ImageDetail
             ref="imageRef"
             :imageFileName="course.file"
@@ -582,8 +583,9 @@ const submit = async () => {
 .wrapper {
   display: flex;
   align-items: flex-start;
-  column-gap: 150px;
-  padding: 0px 50px;
+  gap: 150px;
+  padding: 30px;
+  margin-top: 20px;
   flex-wrap: wrap;
   background-color: #edf0f5;
 }
@@ -597,23 +599,25 @@ const submit = async () => {
   align-items: flex-start;
   width: 100%;
   flex: 1;
-  margin-left: 80px;
+  margin-left: 100px;
 }
 
 .form-section {
   flex-grow: 1;
   overflow-x: hidden;
   overflow-y: auto;
+  margin-right: 50px;
 }
 
 .form-section::-webkit-scrollbar {
   width: 8px;
+  margin-right: 50px;
 }
 
 @media (max-width: 1880px) {
   .wrapper {
-    gap: 0px;
-    padding: 0px;
+    gap: 30px;
+    padding: 20px;
   }
   .container {
     flex-direction: column;
@@ -628,12 +632,15 @@ const submit = async () => {
 
   .form-section {
     margin-right: 0;
-    max-height: unset;
     width: 100%;
     max-width: 770px;
   }
 }
 @media (max-width: 860px) {
+  .wrapper {
+    gap: 30px;
+    padding: 20px;
+  }
   .container {
     flex-direction: column;
     align-items: center;
@@ -656,7 +663,7 @@ const submit = async () => {
   .wrapper {
     flex-direction: column;
     gap: 30px;
-    padding: 5px;
+    padding: 20px;
   }
 
   .container {

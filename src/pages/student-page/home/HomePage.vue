@@ -5,12 +5,32 @@ import { api } from 'boot/axios'
 import type { Program } from 'src/types/program'
 import ProgramType from 'src/components/programType.vue'
 import { useAuthStore } from 'src/stores/auth'
+
+// Types for courses
+interface Course {
+  id: string
+  name: string
+  description?: string
+  file?: string
+  status: string
+  skill?: string
+  programItems?: Array<{
+    dates?: Array<{
+      date: string
+      stime: string
+      etime: string
+    }>
+    enrollmentCount: number
+    maxParticipants: number
+  }>
+}
 const router = useRouter()
 const authStore = useAuthStore()
 
-defineProps<{ program: Program }>()
+// defineProps<{ program: Program }>() // Remove required prop
 
 const activities = ref<Program[]>([])
+const courses = ref<Course[]>([])
 const slide = ref(0)
 let slideTimer: number | null = null
 
@@ -30,6 +50,29 @@ const goToDetail = async (id?: string) => {
   await router.push(`/Student/Program/ProgramDetail/${id}`)
 }
 
+const goToCourseDetail = async (id?: string) => {
+  await router.push(`/student/UploadCertificate/${id}`)
+}
+
+const getCourseImageUrl = (course: Course) => {
+  // Check if course has file field and it's not empty
+  if (!course.file || course.file === '' || course.file === 'undefined') {
+    return `${api.defaults.baseURL}/uploads/no-image.jpg`
+  }
+  
+  // Try different possible paths for course images
+  const possiblePaths = [
+    `/uploads/course/images/${course.file}`,
+    `/uploads/program/images/${course.file}`,
+    `/uploads/${course.file}`,
+    course.file // In case it's already a full URL
+  ]
+  
+  // Return the first possible path, or fallback to no-image
+  const imagePath = possiblePaths[0]
+  return `${api.defaults.baseURL}${imagePath}`
+}
+
 const fetchActivities = async () => {
   try {
     const response = await api.get('/programs', {
@@ -47,6 +90,28 @@ const fetchActivities = async () => {
   }
 }
 
+const fetchCourses = async () => {
+  try {
+    const response = await api.get('/courses', {
+      params: {
+        status: 'open',
+        limit: 10,
+      },
+    })
+    courses.value = response.data.data
+    console.log('Fetched courses:', courses.value)
+    // Debug: Check first course structure
+    if (courses.value.length > 0) {
+      const firstCourse = courses.value[0]!
+      console.log('First course structure:', firstCourse)
+      console.log('First course file field:', firstCourse.file)
+      console.log('First course all fields:', Object.keys(firstCourse))
+    }
+  } catch (error) {
+    console.error('Error fetching courses:', error)
+  }
+}
+
 const startAutoSlide = () => {
   if (slideTimer) {
     clearInterval(slideTimer)
@@ -56,6 +121,7 @@ const startAutoSlide = () => {
     slide.value = (slide.value + 1) % activities.value.length
   }, 5000)
 }
+
 
 // const visibleActivities = computed(() => {
 //   if (activities.value.length === 0) return []
@@ -96,8 +162,10 @@ const goToSlide = (index: number) => {
   startAutoSlide()
 }
 
+
 onMounted(async () => {
   await fetchActivities()
+  await fetchCourses()
   return () => {
     if (slideTimer) {
       clearInterval(slideTimer)
@@ -112,8 +180,10 @@ onMounted(async () => {
       <div class="texttitle">สวัสดี, {{ authStore.getName }}</div>
     </div>
     <div class="q-mt-md activity-carousel">
+      <p class="head-title">โครงการ</p>
       <div class="carousel-container">
         <!-- Cards Container -->
+
         <div class="cards-container">
           <transition-group name="card-slide" tag="div" class="cards-wrapper">
             <div
@@ -201,6 +271,141 @@ onMounted(async () => {
       </div>
     </div>
 
+<!-- Courses Carousel - แบบใหม่ -->
+<div class="q-mt-md course-carousel">
+  <p class="head-title">หลักสูตร</p>
+
+  <div class="course-carousel-container">
+    <!-- Grid Layout for Courses -->
+    <div class="courses-grid">
+      <transition-group name="course-item" tag="div" class="grid-wrapper">
+        <div
+          v-for="(course, index) in courses"
+          :key="`course-${index}`"
+          class="course-grid-item"
+          @click="goToCourseDetail(course.id)"
+        >
+          <div class="course-card-modern">
+            <!-- Badge -->
+            <div class="course-badge" v-if="course.skill">
+              {{ course.skill === 'hard' ? 'Hard Skill' : 'Soft Skill' }}
+            </div>
+
+            <!-- Image Section -->
+            <div class="course-image-section">
+              <q-img
+                :src="getCourseImageUrl(course)"
+                class="course-image-modern"
+                @error="console.log('Image error for course:', course.name, 'file:', course.file)"
+                loading="lazy"
+              >
+                <template v-slot:error>
+                  <div class="absolute-full flex flex-center bg-grey-3 text-grey-8">
+                    <q-icon name="image_not_supported" size="48px" />
+                  </div>
+                </template>
+              </q-img>
+              <div class="image-overlay"></div>
+            </div>
+
+            <!-- Content Section -->
+            <div class="course-content">
+              <!-- Title -->
+              <h3 class="course-title">{{ course.name }}</h3>
+
+              <!-- Description with truncation -->
+              <p class="course-desc" v-if="course.description">
+                {{ course.description }}
+              </p>
+
+              <!-- Info Grid -->
+              <div class="info-grid">
+                <!-- Date -->
+                <div class="info-item" v-if="course.programItems?.[0]?.dates?.[0]">
+                  <div class="info-icon">
+                    <q-icon name="calendar_today" />
+                  </div>
+                  <div class="info-text">
+                    <span class="info-label">วันที่จัด</span>
+                    <span class="info-value">
+                      {{
+                        new Date(
+                          course.programItems[0].dates[0].date,
+                        ).toLocaleDateString('th-TH', {
+                          month: 'short',
+                          day: 'numeric',
+                        })
+                      }}
+                    </span>
+                  </div>
+                </div>
+
+                <!-- Time -->
+                <div class="info-item" v-if="course.programItems?.[0]?.dates?.[0]">
+                  <div class="info-icon">
+                    <q-icon name="schedule" />
+                  </div>
+                  <div class="info-text">
+                    <span class="info-label">เวลา</span>
+                    <span class="info-value">
+                      {{ course.programItems[0].dates[0].stime.substring(0, 5) }}
+                    </span>
+                  </div>
+                </div>
+
+                <!-- Seats -->
+                <div class="info-item" v-if="course.programItems?.[0]">
+                  <div class="info-icon">
+                    <q-icon name="people_alt" />
+                  </div>
+                  <div class="info-text">
+                    <span class="info-label">ที่นั่ง</span>
+                    <span class="info-value">
+                      {{ course.programItems[0].enrollmentCount }}/
+                      {{ course.programItems[0].maxParticipants }}
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Progress Bar -->
+              <div class="progress-section" v-if="course.programItems?.[0]">
+                <div class="progress-bar">
+                  <div
+                    class="progress-fill"
+                    :style="{
+                      width:
+                        (course.programItems[0].enrollmentCount /
+                          course.programItems[0].maxParticipants) *
+                        100 +
+                        '%',
+                    }"
+                  ></div>
+                </div>
+                <span class="progress-text">
+                  {{
+                    Math.round(
+                      (course.programItems[0].enrollmentCount /
+                        course.programItems[0].maxParticipants) *
+                        100,
+                    )
+                  }}%
+                  เต็มแล้ว
+                </span>
+              </div>
+
+              <!-- CTA Button -->
+              <button class="course-cta-btn">ลงทะเบียนเข้าเรียน</button>
+            </div>
+          </div>
+        </div>
+      </transition-group>
+    </div>
+  </div>
+</div>
+
+
+
     <div class="menu">
       <p class="menu-title">เมนู</p>
       <div class="menu-row">
@@ -255,20 +460,24 @@ onMounted(async () => {
   margin-bottom: 40px;
 }
 
+.course-carousel {
+  margin-bottom: 40px;
+}
+
 .carousel-container {
   position: relative;
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 40px 0;
-  min-height: 550px;
+  /* padding: 40px 0; */
+  /* min-height: 550px; */
 }
 
 .cards-container {
   flex: 1;
   display: flex;
-  justify-content: center;
-  align-items: center;
+  /* justify-content: center; */
+  /* align-items: center; */
   overflow: visible;
   perspective: 1500px;
 }
@@ -283,53 +492,51 @@ onMounted(async () => {
   max-width: 1400px;
 }
 
-.activity-card {
+.activity-card,
+.course-card {
   transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
   cursor: pointer;
   flex-shrink: 0;
 }
 
 .activity-card.prev,
-.activity-card.next {
+.activity-card.next,
+.course-card.prev,
+.course-card.next {
   transform: scale(0.85) translateY(20px);
   opacity: 0.6;
   filter: brightness(0.7);
 }
 
-.activity-card.prev {
+.activity-card.prev,
+.course-card.prev {
   transform: scale(0.85) translateY(20px) translateX(30px);
 }
 
-.activity-card.next {
+.activity-card.next,
+.course-card.next {
   transform: scale(0.85) translateY(20px) translateX(-30px);
 }
 
-.activity-card.current {
+.activity-card.current,
+.course-card.current {
   transform: scale(1) translateY(0);
   opacity: 1;
   z-index: 10;
   filter: brightness(1);
 }
 
-.activity-card:hover.current {
+.activity-card:hover.current,
+.course-card:hover.current {
   transform: scale(1.02) translateY(-5px);
 }
 
 .activity-card:hover.prev,
-.activity-card:hover.next {
+.activity-card:hover.next,
+.course-card:hover.prev,
+.course-card:hover.next {
   transform: scale(0.88) translateY(15px);
   opacity: 0.8;
-}
-
-.activity-card.current {
-  transform: scale(1) translateY(0);
-  opacity: 1;
-  z-index: 10;
-  filter: brightness(1);
-}
-
-.activity-card:hover.current {
-  transform: scale(1.02) translateY(-5px);
 }
 
 .my-card {
@@ -352,7 +559,8 @@ onMounted(async () => {
   padding: 10px 10px 0 10px;
 }
 
-.activity-image {
+.activity-image,
+.course-image {
   height: 300px;
   width: 100%;
   object-fit: cover;
@@ -388,6 +596,20 @@ onMounted(async () => {
 .info-block q-icon {
   font-size: 18px;
   color: #3b82f6;
+}
+
+.course-description {
+  margin-bottom: 10px;
+}
+
+.description-text {
+  color: #6b7280;
+  font-size: 14px;
+  line-height: 1.5;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
 }
 
 /* Navigation buttons removed - no manual sliding */
@@ -501,7 +723,8 @@ onMounted(async () => {
     width: 700px;
   }
 
-  .activity-image {
+  .activity-image,
+  .course-image {
     height: 250px;
   }
 
@@ -542,7 +765,8 @@ onMounted(async () => {
     margin: 0 auto;
   }
 
-  .activity-image {
+  .activity-image,
+  .course-image {
     height: 200px;
   }
 
@@ -612,7 +836,8 @@ onMounted(async () => {
     height: 100%;
   }
 
-  .activity-image {
+  .activity-image,
+  .course-image {
     height: 180px;
   }
 
@@ -678,7 +903,8 @@ onMounted(async () => {
     height: 100%;
   }
 
-  .activity-image {
+  .activity-image,
+  .course-image {
     height: 160px;
   }
 
@@ -696,6 +922,352 @@ onMounted(async () => {
 
   .icon {
     font-size: 24px;
+  }
+}
+
+.head-title {
+  font-size: 20px;
+  font-weight: bold;
+  text-align: left;
+  /* margin-bottom: 20px; */
+  color: #1f2937;
+}
+
+.course-carousel {
+  margin-bottom: 40px;
+}
+
+.course-carousel-container {
+  width: 100%;
+}
+
+.courses-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 24px;
+  padding: 20px 0;
+}
+
+.grid-wrapper {
+  display: contents;
+}
+
+.course-grid-item {
+  cursor: pointer;
+  animation: slideIn 0.5s ease-out;
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.course-card-modern {
+  position: relative;
+  height: 100%;
+  background: white;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  display: flex;
+  flex-direction: column;
+  border: 1px solid #f0f0f0;
+}
+
+.course-card-modern:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.12);
+  border-color: #3b82f6;
+}
+
+/* Badge */
+.course-badge {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  z-index: 10;
+  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+  color: white;
+  font-size: 11px;
+  font-weight: 600;
+  padding: 6px 12px;
+  border-radius: 20px;
+  letter-spacing: 0.5px;
+}
+
+/* Image Section */
+.course-image-section {
+  position: relative;
+  width: 100%;
+  height: 200px;
+  overflow: hidden;
+}
+
+.course-image-modern {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.4s ease;
+}
+
+.course-card-modern:hover .course-image-modern {
+  transform: scale(1.08);
+}
+
+.image-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(180deg, rgba(0, 0, 0, 0) 0%, rgba(0, 0, 0, 0.1) 100%);
+}
+
+/* Content Section */
+.course-content {
+  padding: 20px;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.course-title {
+  font-size: 18px;
+  font-weight: 700;
+  margin: 0;
+  color: #1f2937;
+  line-height: 1.3;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.course-desc {
+  font-size: 13px;
+  color: #6b7280;
+  margin: 0;
+  line-height: 1.4;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* Info Grid */
+.info-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin: 8px 0;
+}
+
+.info-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 8px;
+  background: #f9fafb;
+  border-radius: 8px;
+}
+
+.info-icon {
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+  border-radius: 6px;
+  flex-shrink: 0;
+}
+
+.info-icon q-icon {
+  color: white;
+  font-size: 16px;
+}
+
+.info-text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.info-label {
+  font-size: 11px;
+  color: #9ca3af;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.info-value {
+  font-size: 13px;
+  font-weight: 600;
+  color: #1f2937;
+}
+
+/* Progress Section */
+.progress-section {
+  margin-top: 8px;
+}
+
+.progress-bar {
+  width: 100%;
+  height: 6px;
+  background: #e5e7eb;
+  border-radius: 3px;
+  overflow: hidden;
+  margin-bottom: 6px;
+}
+
+.progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #3b82f6 0%, #2563eb 100%);
+  border-radius: 3px;
+  transition: width 0.3s ease;
+}
+
+.progress-text {
+  font-size: 11px;
+  color: #6b7280;
+  font-weight: 500;
+}
+
+/* CTA Button */
+.course-cta-btn {
+  width: 100%;
+  padding: 10px;
+  margin-top: auto;
+  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  letter-spacing: 0.5px;
+}
+
+.course-cta-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 16px rgba(59, 130, 246, 0.3);
+}
+
+.course-cta-btn:active {
+  transform: translateY(0);
+}
+
+/* Animations */
+.course-item-enter-active,
+.course-item-leave-active {
+  transition: all 0.3s ease;
+}
+
+.course-item-enter-from {
+  opacity: 0;
+  transform: scale(0.9);
+}
+
+.course-item-leave-to {
+  opacity: 0;
+  transform: scale(0.9);
+}
+
+/* Tablet */
+@media (max-width: 1024px) {
+  .courses-grid {
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 20px;
+  }
+
+  .course-image-section {
+    height: 180px;
+  }
+
+  .course-content {
+    padding: 16px;
+    gap: 10px;
+  }
+}
+
+/* Mobile */
+@media (max-width: 768px) {
+  .courses-grid {
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 16px;
+    padding: 16px 0;
+  }
+
+  .course-image-section {
+    height: 160px;
+  }
+
+  .course-title {
+    font-size: 16px;
+  }
+
+  .course-desc {
+    font-size: 12px;
+  }
+
+  .info-grid {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+
+  .course-content {
+    padding: 14px;
+    gap: 8px;
+  }
+
+  .course-cta-btn {
+    padding: 9px;
+    font-size: 13px;
+  }
+}
+
+/* Small Mobile */
+@media (max-width: 480px) {
+  .courses-grid {
+    grid-template-columns: 1fr;
+    gap: 12px;
+    padding: 12px 0;
+  }
+
+  .course-image-section {
+    height: 150px;
+  }
+
+  .course-title {
+    font-size: 15px;
+  }
+
+  .course-badge {
+    font-size: 10px;
+    padding: 5px 10px;
+  }
+
+  .info-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .info-item {
+    padding: 6px;
+  }
+
+  .course-content {
+    padding: 12px;
   }
 }
 </style>
