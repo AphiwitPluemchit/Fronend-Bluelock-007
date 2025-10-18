@@ -37,6 +37,26 @@ const loading = computed(() => certificateStore.loading)
 const meta = computed(() => certificateStore.meta)
 const query = computed(() => certificateStore.query)
 
+// Table pagination state
+const tablePagination = ref({
+  sortBy: 'uploadAt',
+  descending: true,
+  page: 1,
+  rowsPerPage: 10,
+  rowsNumber: 0,
+})
+
+// Watch meta changes to update pagination
+watch(
+  meta,
+  (newMeta) => {
+    tablePagination.value.page = newMeta.page
+    tablePagination.value.rowsPerPage = newMeta.limit
+    tablePagination.value.rowsNumber = newMeta.total
+  },
+  { deep: true },
+)
+
 // Format date
 const formatDate = (dateString: string) => {
   return dayjs(dateString).format('DD MMM YYYY')
@@ -119,6 +139,10 @@ const onRequest = (props: { pagination: { page: number; rowsPerPage: number } })
 // Initialize data
 onMounted(async () => {
   await certificateStore.fetchCertificates()
+  // Initialize pagination from meta
+  tablePagination.value.page = meta.value.page
+  tablePagination.value.rowsPerPage = meta.value.limit
+  tablePagination.value.rowsNumber = meta.value.total
 })
 </script>
 
@@ -126,30 +150,26 @@ onMounted(async () => {
   <div class="q-mb-sm student-container">
     <div class="student-table-wrapper">
       <!-- Search and Filter Row -->
-      <div class="row q-col-gutter-sm form-toolbar">
-        <div class="col-12 col-md-6">
-          <q-input
-            v-model="searchText"
-            placeholder="ค้นหารหัสนิสิต, ชื่อ-สกุล, หรือชื่อคอร์ส..."
-            outlined
-            dense
-            clearable
-            class="searchbox"
-          >
-            <template v-slot:prepend>
-              <q-icon name="search" />
-            </template>
-          </q-input>
-        </div>
-        <div class="col-12 col-md-6 select-filter-row">
-          <FilterDialog
-            :categories="filterCategories"
-            :majors="(Array.isArray(query.major) ? query.major : []) as string[]"
-            :years="(Array.isArray(query.year) ? query.year : []) as string[]"
-            :statusCertificate="(Array.isArray(query.status) ? query.status : []) as string[]"
-            @apply="handleFilterApply"
-          />
-        </div>
+      <div class="row justify-end items-center q-mb-md">
+        <q-input
+          v-model="searchText"
+          placeholder="ค้นหารหัสนิสิต, ชื่อ-สกุล, หรือชื่อคอร์ส..."
+          outlined
+          dense
+          clearable
+          class="q-mr-sm searchbox"
+        >
+          <template v-slot:prepend>
+            <q-icon name="search" />
+          </template>
+        </q-input>
+        <FilterDialog
+          :categories="filterCategories"
+          :majors="(Array.isArray(query.major) ? query.major : []) as string[]"
+          :years="(Array.isArray(query.year) ? query.year : []) as string[]"
+          :statusCertificate="(Array.isArray(query.status) ? query.status : []) as string[]"
+          @apply="handleFilterApply"
+        />
       </div>
 
       <div>
@@ -163,11 +183,8 @@ onMounted(async () => {
           bordered
           flat
           class="tableHisAct q-mt-md"
-          :pagination="{
-            page: meta.page,
-            rowsPerPage: meta.limit,
-            rowsNumber: meta.total,
-          }"
+          v-model:pagination="tablePagination"
+          :rows-per-page-options="[10, 20, 50, 100]"
           @request="onRequest"
         >
           <template v-slot:body="props">
@@ -242,12 +259,29 @@ onMounted(async () => {
 
 <style lang="scss" scoped>
 .student-container {
-  height: 680px;
   width: 100%;
 }
+
+.student-table-wrapper {
+  padding: 16px;
+}
+
 .q-table table {
   table-layout: fixed;
 }
+
+.searchbox {
+  max-width: 100%;
+  min-width: 300px;
+}
+
+.text-right {
+  text-align: right;
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+}
+
 .ProgramNamelabel {
   font-size: 16px;
   font-weight: 600;
@@ -256,6 +290,7 @@ onMounted(async () => {
   text-overflow: ellipsis;
   white-space: nowrap;
 }
+
 .my-sticky-header-table thead th {
   position: sticky;
   top: 0;
@@ -296,16 +331,19 @@ onMounted(async () => {
     }
   }
 }
+
 .label {
   font-weight: 600;
   font-size: 16px;
   min-width: 200px;
   margin-top: 2px;
 }
+
 .value {
   font-size: 16px;
   margin-top: 2px;
 }
+
 .ellipsis-cell {
   white-space: nowrap;
   overflow: hidden;
@@ -343,6 +381,7 @@ onMounted(async () => {
   padding: 3px 30px;
   width: 130px;
 }
+
 .status-graduated {
   background-color: #d4edda;
   color: #155724;
@@ -350,6 +389,7 @@ onMounted(async () => {
   padding: 3px 30px;
   width: 130px;
 }
+
 .status-badge {
   height: 32px;
   padding: 0 12px;
@@ -377,25 +417,7 @@ onMounted(async () => {
   color: #ff0000;
   border: 1px solid #f32323;
 }
-.form-toolbar {
-  display: flex;
-  flex-direction: row;
-  flex-wrap: wrap;
-  gap: 8px;
-  justify-content: flex-end;
-  align-items: center;
-}
 
-.select-filter-row {
-  display: flex;
-  gap: 8px;
-  align-items: center;
-}
-.dropdown-menu {
-  max-width: 300px !important;
-  width: 100% !important;
-  box-sizing: border-box;
-}
 .backgroundheader {
   background-color: #90b2ee;
 }
@@ -404,6 +426,7 @@ onMounted(async () => {
   flex-direction: column !important;
   align-items: stretch !important;
 }
+
 .student-header-actions {
   margin-top: 10px !important;
   justify-content: space-between;
@@ -416,39 +439,46 @@ onMounted(async () => {
   text-overflow: ellipsis;
   white-space: nowrap;
 }
+
 .ProgramNamelabel .q-icon {
   margin-left: auto;
 }
-@media (max-width: 690px) {
-  .form-toolbar {
-    flex-direction: column;
-    align-items: stretch;
-  }
 
-  .searchbox {
-    width: 100% !important;
-  }
-
-  .select-filter-row {
-    width: 100%;
-    display: flex;
-    justify-content: space-between;
-  }
-
-  .dropdown {
-    width: 90% !important;
+@media (max-width: 1024px) {
+  .text-right {
+    text-align: left;
+    justify-content: flex-start;
+    margin-top: 8px;
   }
 }
 
 @media (max-width: 600px) {
   .student-table-wrapper {
-    padding: 0;
+    padding: 8px;
   }
+
   .student-card {
     margin-bottom: 12px;
     font-size: 16px;
   }
+
+  .text-right {
+    width: 100%;
+    justify-content: flex-start;
+  }
+
+  .searchbox {
+    min-width: 100%;
+    margin-right: 0 !important;
+    margin-bottom: 8px;
+  }
+
+  .row.justify-end {
+    flex-direction: column;
+    align-items: stretch !important;
+  }
 }
+
 @media (max-width: 450px) {
   .ProgramNamelabel {
     font-size: 12px;
