@@ -22,12 +22,15 @@ export interface UploadCertificate {
   course?: Course
   url: string
   nameMatch: number
+  nameEngMatch?: number
   courseMatch: number
+  courseEngMatch?: number
   status: StatusType
   isDuplicate: boolean
   remark?: string
   uploadAt: string
-  changedStatusAt: string
+  changedStatusAt?: string
+  useOcr?: boolean
 }
 
 export enum StatusType {
@@ -39,19 +42,67 @@ export enum StatusType {
 export interface CertificateQuery extends Pagination {
   studentId?: string
   courseId?: string
-  status?: string | string[]
+  status?: string[] | string
+  year?: string[] | string
 }
 
 export class CertificateService {
   static path = 'certificates'
 
+  /**
+   * ดึงรายการ certificate uploads พร้อม pagination และ filters
+   */
   static async getAll(params?: CertificateQuery): Promise<PaginationResponse<UploadCertificate>> {
     try {
       const res = await api.get(this.path, { params })
       return res.data
     } catch (error) {
-      showError('ไม่สามารถดึงรายการประวัติการอัปโหลดได้')
-      console.error('Error getting all Certificate', error)
+      showError('ไม่สามารถดึงรายการการอัปโหลดใบรับรองได้')
+      console.error('Error getting certificate uploads:', error)
+      throw error
+    }
+  }
+
+  /**
+   * ดึง certificate upload ของนิสิตคนใดคนหนึ่ง
+   */
+  static async getByStudent(
+    studentId: string,
+    params?: Omit<CertificateQuery, 'studentId'>,
+  ): Promise<PaginationResponse<UploadCertificate>> {
+    try {
+      const res = await api.get(this.path, {
+        params: {
+          ...params,
+          studentId,
+        },
+      })
+      return res.data
+    } catch (error) {
+      showError('ไม่สามารถดึงรายการการอัปโหลดของนิสิตได้')
+      console.error('Error getting student certificate uploads:', error)
+      throw error
+    }
+  }
+
+  /**
+   * ดึง certificate upload ของ course
+   */
+  static async getByCourse(
+    courseId: string,
+    params?: Omit<CertificateQuery, 'courseId'>,
+  ): Promise<PaginationResponse<UploadCertificate>> {
+    try {
+      const res = await api.get(this.path, {
+        params: {
+          ...params,
+          courseId,
+        },
+      })
+      return res.data
+    } catch (error) {
+      showError('ไม่สามารถดึงรายการการอัปโหลดของคอร์สได้')
+      console.error('Error getting course certificate uploads:', error)
       throw error
     }
   }
@@ -129,7 +180,7 @@ export function getStatus(row: StatusType) {
 export function getStatusClass(status: StatusType) {
   switch (status) {
     case StatusType.PENDING:
-      return 'status-waiting'
+      return 'status-pending'
     case StatusType.APPROVED:
       return 'status-approved'
     case StatusType.REJECTED:

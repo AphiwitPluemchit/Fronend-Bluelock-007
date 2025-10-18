@@ -5,7 +5,7 @@ import { useRoute } from 'vue-router'
 import { useCourseStore } from 'src/stores/course'
 import type { Course } from 'src/types/course'
 import Tab_CourseDetail from './Tab_CourseDetail.vue'
-import Tab_StudentSubmission from './Tab_StudentSubmission.vue'
+import Tab_StudentSubmission from './Tab_StudentUpload.vue'
 const route = useRoute()
 const id = route.params.id as string
 const isSmallScreen = ref(false)

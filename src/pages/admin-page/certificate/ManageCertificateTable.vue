@@ -23,7 +23,7 @@ const params = ref<CertificateQuery>({
   sortBy: 'uploadAt',
   order: 'desc',
   // default to show pending certificates
-  status: 'pending',
+  status: ['pending'],
 })
 const loading = ref(false)
 const pagination = ref<PaginationRequest>({
@@ -135,7 +135,7 @@ async function onFilterApply(filters: DialogFilters) {
 
   // Map certificate statuses -> backend accepts comma-separated statuses
   if (filters.statusCertificate && filters.statusCertificate.length > 0) {
-    params.value.status = filters.statusCertificate.join(',')
+    params.value.status = filters.statusCertificate
   } else {
     delete params.value.status
   }
