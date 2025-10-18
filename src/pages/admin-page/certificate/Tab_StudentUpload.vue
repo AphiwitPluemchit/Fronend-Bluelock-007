@@ -1,14 +1,22 @@
 <script setup lang="ts">
 import { computed, ref, onMounted, watch } from 'vue'
 import { useQuasar } from 'quasar'
+import { useRoute } from 'vue-router'
 import FilterDialog from 'src/components/Dialog/FilterDialog.vue'
+import ManageCerDialog from './ManageCerDialog.vue'
 import { useCertificateStore } from 'src/stores/certificate'
-import { getStatus, getStatusClass, type UploadCertificate } from 'src/services/certificate'
+import {
+  getStatus,
+  getStatusClass,
+  StatusType,
+  type UploadCertificate,
+} from 'src/services/certificate'
 import dayjs from 'dayjs'
 import 'dayjs/locale/th'
 
 dayjs.locale('th')
 const $q = useQuasar()
+const route = useRoute()
 const isMobile = computed(() => $q.screen.width <= 600)
 
 // Store
@@ -17,6 +25,9 @@ const certificateStore = useCertificateStore()
 // Filter categories for FilterDialog
 const filterCategories = ref(['year', 'major', 'statusCertificate'])
 
+// Get courseId from route params
+const courseId = computed(() => route.params.id as string)
+
 // Table columns
 const submissionColumns = [
   { name: 'index', label: 'ลำดับ', field: 'index', align: 'left' as const },
@@ -24,8 +35,8 @@ const submissionColumns = [
   { name: 'studentCode', label: 'รหัสนิสิต', field: 'studentCode', align: 'left' as const },
   { name: 'studentName', label: 'ชื่อ-สกุล', field: 'studentName', align: 'left' as const },
   { name: 'major', label: 'สาขา', field: 'major', align: 'left' as const },
-  { name: 'courseTitle', label: 'คอร์ส', field: 'courseTitle', align: 'left' as const },
   { name: 'status', label: 'สถานะ', field: 'status', align: 'center' as const },
+  { name: 'action', label: '', field: 'action', align: 'center' as const },
 ]
 
 // Search
@@ -80,12 +91,23 @@ const getStudentMajor = (certificate: UploadCertificate) => {
   return certificate.student?.major || '-'
 }
 
-// Get course title
-const getCourseTitle = (certificate: UploadCertificate) => {
-  if (certificate.course) {
-    return certificate.course.name || '-'
-  }
-  return '-'
+// Manage certificate dialog
+const showManageDialog = ref(false)
+const selectedCertificate = ref<UploadCertificate>({
+  id: '',
+  studentId: '',
+  courseId: '',
+  url: '',
+  nameMatch: 0,
+  courseMatch: 0,
+  status: StatusType.PENDING,
+  isDuplicate: false,
+  uploadAt: '',
+})
+
+const openViewDialog = (certificate: UploadCertificate) => {
+  selectedCertificate.value = { ...certificate }
+  showManageDialog.value = true
 }
 
 // Handle filter apply
@@ -138,7 +160,14 @@ const onRequest = (props: { pagination: { page: number; rowsPerPage: number } })
 
 // Initialize data
 onMounted(async () => {
-  await certificateStore.fetchCertificates()
+  // Check if we should fetch by courseId or all certificates
+  if (courseId.value) {
+    // Fetch certificates for specific course
+    await certificateStore.fetchCertificatesByCourse(courseId.value)
+  } else {
+    // Fetch all certificates
+    await certificateStore.fetchCertificates()
+  }
   // Initialize pagination from meta
   tablePagination.value.page = meta.value.page
   tablePagination.value.rowsPerPage = meta.value.limit
@@ -196,12 +225,23 @@ onMounted(async () => {
               <q-td key="studentCode">{{ getStudentCode(props.row) }}</q-td>
               <q-td key="studentName">{{ getStudentName(props.row) }}</q-td>
               <q-td key="major">{{ getStudentMajor(props.row) }}</q-td>
-              <q-td key="courseTitle">{{ getCourseTitle(props.row) }}</q-td>
               <q-td key="status">
                 <q-badge
                   :class="['status-badge', getStatusClass(props.row.status)]"
                   :label="getStatus(props.row.status)"
                 />
+              </q-td>
+              <q-td key="action">
+                <q-btn
+                  flat
+                  round
+                  dense
+                  icon="visibility"
+                  color="primary"
+                  @click="openViewDialog(props.row)"
+                >
+                  <q-tooltip>ดูรายละเอียด</q-tooltip>
+                </q-btn>
               </q-td>
             </q-tr>
           </template>
@@ -230,12 +270,21 @@ onMounted(async () => {
               <div class="text-caption">รหัสนิสิต: {{ getStudentCode(certificate) }}</div>
               <div class="text-caption">วันที่อัปโหลด: {{ formatDate(certificate.uploadAt) }}</div>
               <div class="text-caption">สาขา: {{ getStudentMajor(certificate) }}</div>
-              <div class="text-caption">คอร์ส: {{ getCourseTitle(certificate) }}</div>
               <div class="text-caption">
                 สถานะ:
                 <q-badge
                   :class="['status-badge', getStatusClass(certificate.status)]"
                   :label="getStatus(certificate.status)"
+                />
+              </div>
+              <div class="q-mt-sm">
+                <q-btn
+                  flat
+                  dense
+                  color="primary"
+                  icon="visibility"
+                  label="ดูรายละเอียด"
+                  @click="openViewDialog(certificate)"
                 />
               </div>
             </q-card-section>
@@ -254,6 +303,13 @@ onMounted(async () => {
         </div>
       </div>
     </div>
+
+    <!-- Manage Certificate Dialog -->
+    <ManageCerDialog
+      v-model="showManageDialog"
+      :data="selectedCertificate"
+      @confirm="handleSearch"
+    />
   </div>
 </template>
 
