@@ -24,6 +24,7 @@ const course = ref<Course>({
   isHardSkill: null as boolean | null,
   isActive: true,
   file: '',
+  videoUrl: '',
 })
 
 const selectedImageFile = ref<File | null>(null)
@@ -35,15 +36,8 @@ const breadcrumbs = ref({
   icon: 'school',
 })
 
-// Computed for validation errors
-const nameError = computed(() => (course.value.name.trim() ? '' : 'กรุณากรอกชื่อหัวข้อ'))
-const linkError = computed(() => (course.value.link.trim() ? '' : 'กรุณากรอกลิงค์'))
-const issuerError = computed(() => (course.value.issuer.trim() ? '' : 'กรุณากรอกหน่วยงานผู้ออก'))
-const hourError = computed(() => (course.value.hour > 0 ? '' : 'กรุณากรอกชั่วโมง'))
-const typeError = computed(() => (course.value.type ? '' : 'กรุณากรอกประเภท'))
-const categoryError = computed(() =>
-  course.value.isHardSkill !== null ? '' : 'กรุณาเลือกประเภทหัวข้อ',
-)
+// Validation errors removed - form will submit without client-side validation
+// Server-side validation will handle any required field validation
 
 const statusText = computed(() => (course.value.isActive ? 'เปิดใช้งาน' : 'ปิดชั่วคราว'))
 const statusClass = computed(() => (course.value.isActive ? 'status-open' : 'status-closed'))
@@ -77,19 +71,6 @@ const cancel = () => {
 }
 
 const submit = async () => {
-  // Validate
-  if (
-    nameError.value ||
-    linkError.value ||
-    issuerError.value ||
-    hourError.value ||
-    typeError.value ||
-    categoryError.value
-  ) {
-    $q.notify({ message: 'กรุณากรอกข้อมูลให้ครบถ้วน', type: 'negative' })
-    return
-  }
-
   try {
     await courseStore.addCourse(course.value)
     $q.notify({ message: 'บันทึกข้อมูลสำเร็จ', type: 'positive' })
@@ -109,7 +90,8 @@ const submit = async () => {
 
     <div class="wrapper">
       <div class="container">
-        <div class="image-section">
+        <!-- Image section is now optional for courses -->
+        <div class="image-section" v-if="false">
           <ImageDetail
             ref="imageRef"
             :imageFileName="course.file"
@@ -143,20 +125,16 @@ const submit = async () => {
 
             <!-- ชื่อหัวข้อ (ไทย) -->
             <div class="input-group">
-              <p class="label label_minWidth" :class="{ 'label-error-shift': nameError !== '' }">
-                ชื่อหัวข้อ (ไทย) <span class="text-red">*</span> :
+              <p class="label label_minWidth">
+                ชื่อหัวข้อ (ไทย) :
               </p>
               <div class="input-container">
                 <q-input
                   outlined
                   v-model="course.name"
                   class="fix-q-input-height"
-                  :error="nameError !== ''"
                   hide-bottom
                 />
-                <div v-if="nameError" class="text-negative text-subtitle2 q-mt-xs">
-                  {{ nameError }}
-                </div>
               </div>
             </div>
 
@@ -178,11 +156,8 @@ const submit = async () => {
 
             <!-- ประเภทโครงการ (isHardSkill) -->
             <div class="input-group">
-              <p
-                class="label label_minWidth"
-                :class="{ 'label-error-shift': categoryError !== '' }"
-              >
-                ประเภทโครงการ <span class="text-red">*</span> :
+              <p class="label label_minWidth">
+                ประเภทโครงการ :
               </p>
               <div class="status-inline-group">
                 <q-btn
@@ -211,15 +186,12 @@ const submit = async () => {
                   ชั่วโมงเตรียมความพร้อม
                 </q-btn>
               </div>
-              <div v-if="categoryError" class="text-negative text-subtitle2 q-mt-xs">
-                {{ categoryError }}
-              </div>
             </div>
 
             <!-- ลิงก์คอร์ส -->
             <div class="input-group">
-              <p class="label label_minWidth" :class="{ 'label-error-shift': linkError !== '' }">
-                ลิงก์ <span class="text-red">*</span> :
+              <p class="label label_minWidth">
+                ลิงก์ :
               </p>
               <div class="input-container">
                 <q-input
@@ -227,18 +199,14 @@ const submit = async () => {
                   v-model="course.link"
                   class="fix-q-input-height"
                   placeholder="https://..."
-                  :error="linkError !== ''"
                 />
-                <div v-if="linkError" class="text-negative text-subtitle2 q-mt-xs">
-                  {{ linkError }}
-                </div>
               </div>
             </div>
 
             <!-- จำนวนชั่วโมง -->
             <div class="input-group">
-              <p class="label label_minWidth" :class="{ 'label-error-shift': hourError !== '' }">
-                จำนวนชั่วโมง <span class="text-red">*</span> :
+              <p class="label label_minWidth">
+                จำนวนชั่วโมง :
               </p>
               <div class="input-container">
                 <q-input
@@ -247,31 +215,24 @@ const submit = async () => {
                   v-model.number="course.hour"
                   class="fix-q-input-height"
                   min="0"
-                  :error="hourError !== ''"
                 />
-                <div v-if="hourError" class="text-negative text-subtitle2 q-mt-xs">
-                  {{ hourError }}
-                </div>
               </div>
             </div>
 
             <!-- หน่วยงานผู้ออก -->
             <div class="input-group">
-              <p class="label label_minWidth" :class="{ 'label-error-shift': issuerError !== '' }">
-                หน่วยงานผู้ออก <span class="text-red">*</span> :
+              <p class="label label_minWidth">
+                หน่วยงานผู้ออก :
               </p>
               <div class="input-container">
                 <q-input outlined v-model="course.issuer" class="fix-q-input-height" />
-                <div v-if="issuerError" class="text-negative text-subtitle2 q-mt-xs">
-                  {{ issuerError }}
-                </div>
               </div>
             </div>
 
             <!-- ประเภทแพลตฟอร์ม (type)-->
             <div class="input-group">
-              <p class="label label_minWidth" :class="{ 'label-error-shift': typeError !== '' }">
-                ประเภท <span class="text-red">*</span> :
+              <p class="label label_minWidth">
+                ประเภท :
               </p>
               <div class="status-inline-group">
                 <q-btn
@@ -297,8 +258,23 @@ const submit = async () => {
                   BUU MOOC
                 </q-btn>
               </div>
-              <div v-if="typeError" class="text-negative text-subtitle2 q-mt-xs">
-                {{ typeError }}
+            </div>
+
+            <!-- วิดีโอสอนการขอใบประกาศ -->
+            <div class="input-group">
+              <p class="label label_minWidth">
+                วิดีโอสอนการขอใบประกาศ :
+              </p>
+              <div class="input-container">
+                <q-input
+                  outlined
+                  v-model="course.videoUrl"
+                  class="fix-q-input-height"
+                  placeholder="https://www.youtube.com/watch?v=example"
+                />
+                <div class="text-caption text-grey-6 q-mt-xs">
+                  ลิงก์ YouTube สำหรับสอนนักเรียนวิธีการขอใบประกาศนียบัตร (ไม่บังคับ)
+                </div>
               </div>
             </div>
 

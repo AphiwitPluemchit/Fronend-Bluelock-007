@@ -23,6 +23,7 @@ const defaultCourse = (): Course => ({
   hour: 0,
   type: '',
   file: '',
+  videoUrl: '',
 })
 
 const originalCourseData = ref<Course>(defaultCourse()) // <-- ไม่ใช่ null/Partial อีกต่อไป
@@ -128,7 +129,8 @@ function confirmCancel() {
   <q-page>
     <div class="wrapper">
       <div class="container">
-        <div class="image-section">
+        <!-- Image section is now optional for courses -->
+        <div class="image-section" v-if="false">
           <ImageDetail
             ref="imageRef"
             :imageFileName="courseState.file"
@@ -352,6 +354,24 @@ function confirmCancel() {
                 >
                   LMS
                 </q-btn> -->
+              </div>
+            </div>
+
+            <!-- วิดีโอสอนการขอใบประกาศ -->
+            <div class="input-group">
+              <p class="label label_minWidth">วิดีโอสอนการขอใบประกาศ :</p>
+              <div class="input-container">
+                <q-input
+                  outlined
+                  v-model="courseState.videoUrl"
+                  class="fix-q-input-height"
+                  :readonly="!isEditMode"
+                  placeholder="https://www.youtube.com/watch?v=example"
+                  :class="{ readonly: !isEditMode }"
+                />
+                <div class="text-caption text-grey-6 q-mt-xs">
+                  ลิงก์ YouTube สำหรับสอนนักเรียนวิธีการขอใบประกาศนียบัตร (ไม่บังคับ)
+                </div>
               </div>
             </div>
 

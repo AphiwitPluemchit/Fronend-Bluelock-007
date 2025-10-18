@@ -114,6 +114,21 @@ async function verifyUrl() {
   }
 }
 
+// Convert YouTube URL to embed format
+function getEmbedUrl(url: string): string {
+  if (!url) return ''
+
+  // YouTube URL conversion
+  const youtubeRegex = /(?:youtube\.com\/watch\?v=|youtu\.be\/)([^&\n?#]+)/
+  const youtubeMatch = url.match(youtubeRegex)
+  if (youtubeMatch) {
+    return `https://www.youtube.com/embed/${youtubeMatch[1]}`
+  }
+
+  // Return original URL if not YouTube (fallback)
+  return url
+}
+
 // เรียกใช้เมื่อ component mount
 onMounted(async () => {
   await loadCourseById()
@@ -177,6 +192,29 @@ onMounted(async () => {
             </q-list>
           </div>
         </q-card-section>
+
+        <!-- Tutorial Video Section -->
+        <div v-if="selectedCourse?.videoUrl" class="tutorial-section q-mt-md q-mb-md">
+          <div class="section-title">วิดีโอสอนการขอใบประกาศนียบัตร</div>
+          <div class="video-container">
+            <iframe
+              :src="getEmbedUrl(selectedCourse.videoUrl)"
+              frameborder="0"
+              allowfullscreen
+              class="tutorial-video"
+            ></iframe>
+          </div>
+        </div>
+
+        <!-- No Tutorial Message -->
+        <div v-else class="no-tutorial-section q-mt-md q-mb-md">
+          <q-banner class="bg-grey-2 text-grey-7">
+            <template v-slot:avatar>
+              <q-icon name="info" color="grey-6" />
+            </template>
+            ไม่มีวิดีโอสอนการขอใบประกาศนียบัตรสำหรับคอร์สนี้
+          </q-banner>
+        </div>
 
         <!-- Certificate Upload Section -->
         <div class="upload-section q-mt-md">
@@ -311,6 +349,36 @@ onMounted(async () => {
   border-radius: 12px !important;
 }
 
+/* Tutorial Video Styles */
+.tutorial-section {
+  background-color: #f8f9fa;
+  padding: 16px;
+  border-radius: 8px;
+  border: 1px solid #e9ecef;
+}
+
+.video-container {
+  position: relative;
+  width: 100%;
+  height: 0;
+  padding-bottom: 56.25%; /* 16:9 aspect ratio */
+  overflow: hidden;
+  border-radius: 8px;
+}
+
+.tutorial-video {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  border-radius: 8px;
+}
+
+.no-tutorial-section {
+  margin: 16px 0;
+}
+
 @media (max-width: 600px) {
   .certificate-upload-card {
     padding: 12px;
@@ -318,6 +386,10 @@ onMounted(async () => {
 
   .btnconfirm {
     width: 100%;
+  }
+
+  .tutorial-section {
+    padding: 12px;
   }
 }
 </style>

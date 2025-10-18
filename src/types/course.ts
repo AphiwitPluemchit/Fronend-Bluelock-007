@@ -10,4 +10,5 @@ export interface Course {
   hour: number
   type: string
   file?: string
+  videoUrl?: string // Tutorial video URL for certificate claiming
 }
