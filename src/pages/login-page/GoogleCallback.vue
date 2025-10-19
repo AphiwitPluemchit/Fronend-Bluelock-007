@@ -87,9 +87,9 @@ onMounted(async () => {
 
     // 8. Default redirects based on role
     if (userRole === EnumUserRole.ADMIN) {
-      await router.push(`/${EnumUserRole.ADMIN}/home`)
+      await router.push(`/${EnumUserRole.ADMIN}/ProgramCalendar`)
     } else if (userRole === EnumUserRole.STUDENT) {
-      await router.push(`/${EnumUserRole.STUDENT}/home`)
+      await router.push(`/${EnumUserRole.STUDENT}/Home`)
     } else {
       console.error('Unknown role:', userRole)
       await router.push('/login')
