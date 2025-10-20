@@ -20,6 +20,11 @@ const url = ref(
 )
 const $q = useQuasar()
 
+// Button states for background verification UX
+const isLoading = ref(false) // shows spinner for 2s
+const isChecking = ref(false) // after initial loading, show "กำลังตรวจสอบ"
+const buttonLabel = computed(() => (isChecking.value ? 'กำลังตรวจสอบ' : 'ขออนุมัติ'))
+
 // Course information
 const selectedCourse = ref<Course | null>(null)
 const screen = ref(false)
@@ -80,8 +85,16 @@ async function verifyUrl() {
   }
 
   console.log('verifyUrl', url.value)
+  // Prevent repeated clicks when already in checking state
+  if (isChecking.value) return
+
+  isLoading.value = true
+
+  // Start API call and a minimum spinner delay (2s) in parallel
+  const delay = new Promise((res) => setTimeout(res, 2000))
+  let res: any = null
   try {
-    const res = await api.get(baseurl + '/certificates/url-verify', {
+    const apiPromise = api.get(baseurl + '/certificates/url-verify', {
       params: {
         url: url.value,
         studentId: authStore.getUser?.id,
@@ -89,32 +102,42 @@ async function verifyUrl() {
       },
     })
 
-    // If server returns 202 Accepted it means verification runs in background
-    if (res.status === 202) {
-      $q.notify({
-        type: 'info',
-        message: 'ระบบได้รับคำขอแล้ว กำลังตรวจสอบในเบื้องหลัง คุณจะได้รับผลลัพธ์เมื่อเสร็จ',
-      })
-      return
-    }
-
-    const { isVerified, isDuplicate } = res.data
-    if (isVerified && !isDuplicate) {
-      $q.notify({ type: 'positive', message: 'อัปโหลดสำเร็จ' })
-    } else if (isDuplicate) {
-      $q.notify({
-        type: 'negative',
-        message: 'ไม่สามารถรับชั่วโมงได้ เนื่องจากมีใบประกาศนียบัตรที่ซ้ำ',
-      })
-    } else {
-      $q.notify({ type: 'negative', message: 'อัปโหลดไม่สำเร็จ เนื่องจากไม่พบใบประกาศนียบัตร' })
-    }
+    // wait for both the API call and the UI delay
+    const [apiRes] = await Promise.all([apiPromise, delay])
+    res = apiRes
   } catch (err) {
+    // ensure we still wait the delay before hiding spinner
+    await delay
+    isLoading.value = false
     console.error('❌ Upload failed:', err)
     $q.notify({
       type: 'negative',
       message: 'อัปโหลดไม่สำเร็จ เกิดข้อผิดพลาด : ' + (err as Error).message,
     })
+    return
+  }
+
+  // hide the initial spinner
+  isLoading.value = false
+
+  // If server returns 202 Accepted it means verification runs in background
+  if (res && res.status === 202) {
+    // switch the button to a persistent checking state
+    isChecking.value = true
+    return
+  }
+
+  // synchronous response handling (when not backgrounded)
+  const { isVerified, isDuplicate } = res.data
+  if (isVerified && !isDuplicate) {
+    $q.notify({ type: 'positive', message: 'อัปโหลดสำเร็จ' })
+  } else if (isDuplicate) {
+    $q.notify({
+      type: 'negative',
+      message: 'ไม่สามารถรับชั่วโมงได้ เนื่องจากมีใบประกาศนียบัตรที่ซ้ำ',
+    })
+  } else {
+    $q.notify({ type: 'negative', message: 'อัปโหลดไม่สำเร็จ เนื่องจากไม่พบใบประกาศนียบัตร' })
   }
 }
 
@@ -245,11 +268,12 @@ onMounted(async () => {
           <!-- Verify Button -->
           <div class="q-mt-md q-mb-md row justify-center q-gutter-sm">
             <q-btn
-              label="ขออนุมัติ"
+              :label="buttonLabel"
               color="positive"
               class="btnconfirm"
               @click="verifyUrl"
-              :loading="courseStore.loading"
+              :loading="isLoading"
+              :disable="isChecking"
               unelevated
               rounded
             />
