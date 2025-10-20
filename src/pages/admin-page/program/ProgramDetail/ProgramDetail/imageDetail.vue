@@ -9,17 +9,18 @@ const selectedFileName = ref<string | null>(null)
 const props = defineProps<{
   imageFileName?: string | null | undefined
   disable?: boolean
+  folder?: 'program' | 'course'
 }>()
 
 const emit = defineEmits<{
   (e: 'file-selected', file: File): void
 }>()
 
-const serverImageUrl = computed(() =>
-  props.imageFileName
-    ? `${import.meta.env.VITE_API_URL}/uploads/program/images/${props.imageFileName}`
-    : null,
-)
+const serverImageUrl = computed(() => {
+  if (!props.imageFileName) return null
+  const folder = props.folder ?? 'program'
+  return `${import.meta.env.VITE_API_URL}/uploads/${folder}/images/${props.imageFileName}`
+})
 const imageSrc = computed(() => {
   return previewUrl.value ?? serverImageUrl.value ?? undefined
 })

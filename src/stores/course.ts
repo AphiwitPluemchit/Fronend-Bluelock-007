@@ -80,6 +80,33 @@ export const useCourseStore = defineStore('course', () => {
     return Promise.resolve()
   }
 
+  // Create course and optionally upload image file
+  const createCourseWithImage = async (courseData: Course, file?: File | null) => {
+    loading.value = true
+    try {
+      const created = await CourseService.createCourse(courseData)
+      // If file provided, upload and refresh
+      if (file && created && created.id) {
+        await CourseService.uploadImage(created.id, file)
+      }
+      await fetchCourses()
+      return created
+    } finally {
+      loading.value = false
+    }
+  }
+
+  const uploadCourseImage = async (courseId: string, file: File, oldFileName?: string) => {
+    loading.value = true
+    try {
+      const res = await CourseService.uploadImage(courseId, file, oldFileName)
+      // refresh single course cache if needed
+      return res
+    } finally {
+      loading.value = false
+    }
+  }
+
   const getOneCourse = async (id: string) => {
     const course = await CourseService.getOne(id)
     return course
@@ -121,5 +148,7 @@ export const useCourseStore = defineStore('course', () => {
     changeLimit,
     search,
     params,
+    createCourseWithImage,
+    uploadCourseImage,
   }
 })

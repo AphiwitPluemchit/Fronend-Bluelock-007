@@ -93,13 +93,32 @@ async function saveChanges() {
       $q.notify({ message: 'ไม่พบรหัสคอร์ส', type: 'negative' })
       return
     }
-    
     // Log the data being sent
     console.log('Course data being updated:', c)
-    
-    // Send course data directly (without image for now)
+
+    const previousFile = c.file
+
+    // Update course metadata first
     await courseStore.updateCourse(c.id, { ...c })
-    originalCourseData.value = { ...c }
+
+    // If a new image file was selected, upload it and replace old
+    if (selectedImageFile.value) {
+      try {
+        await courseStore.uploadCourseImage(
+          c.id,
+          selectedImageFile.value,
+          previousFile || undefined,
+        )
+        // refresh course state to pick up new filename saved by backend
+        const fresh = await courseStore.getOneCourse(c.id)
+        courseState.value = { ...courseState.value, ...fresh }
+      } catch (uploadErr) {
+        console.error('Failed to upload image:', uploadErr)
+        $q.notify({ message: 'อัปโหลดรูปไม่สำเร็จ', type: 'negative' })
+      }
+    }
+
+    originalCourseData.value = { ...courseState.value }
     isEditMode.value = false
     $q.notify({ message: 'แก้ไขข้อมูลสำเร็จ', type: 'positive' })
   } catch (err) {
@@ -140,6 +159,7 @@ function confirmCancel() {
           <ImageDetail
             ref="imageRef"
             :imageFileName="courseState.file"
+            folder="course"
             :disable="!isEditMode"
             @file-selected="handleFileSelected"
           />

@@ -2,6 +2,7 @@
 import { ref, onMounted, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { api } from 'boot/axios'
+import { CourseService } from 'src/services/course'
 import type { Program } from 'src/types/program'
 import ProgramType from 'src/components/programType.vue'
 import { useAuthStore } from 'src/stores/auth'
@@ -59,15 +60,15 @@ const getCourseImageUrl = (course: Course) => {
   if (!course.file || course.file === '' || course.file === 'undefined') {
     return `${api.defaults.baseURL}/uploads/no-image.jpg`
   }
-  
+
   // Try different possible paths for course images
   const possiblePaths = [
     `/uploads/course/images/${course.file}`,
     `/uploads/program/images/${course.file}`,
     `/uploads/${course.file}`,
-    course.file // In case it's already a full URL
+    course.file, // In case it's already a full URL
   ]
-  
+
   // Return the first possible path, or fallback to no-image
   const imagePath = possiblePaths[0]
   return `${api.defaults.baseURL}${imagePath}`
@@ -92,21 +93,8 @@ const fetchActivities = async () => {
 
 const fetchCourses = async () => {
   try {
-    const response = await api.get('/courses', {
-      params: {
-        status: 'open',
-        limit: 10,
-      },
-    })
-    courses.value = response.data.data
-    console.log('Fetched courses:', courses.value)
-    // Debug: Check first course structure
-    if (courses.value.length > 0) {
-      const firstCourse = courses.value[0]!
-      console.log('First course structure:', firstCourse)
-      console.log('First course file field:', firstCourse.file)
-      console.log('First course all fields:', Object.keys(firstCourse))
-    }
+    const res = await CourseService.getAll({ page: 1, limit: 10, isActive: true })
+    courses.value = res.data as unknown as Course[]
   } catch (error) {
     console.error('Error fetching courses:', error)
   }
@@ -121,7 +109,6 @@ const startAutoSlide = () => {
     slide.value = (slide.value + 1) % activities.value.length
   }, 5000)
 }
-
 
 // const visibleActivities = computed(() => {
 //   if (activities.value.length === 0) return []
@@ -161,7 +148,6 @@ const goToSlide = (index: number) => {
   slide.value = index
   startAutoSlide()
 }
-
 
 onMounted(async () => {
   await fetchActivities()
@@ -271,140 +257,140 @@ onMounted(async () => {
       </div>
     </div>
 
-<!-- Courses Carousel - แบบใหม่ -->
-<div class="q-mt-md course-carousel">
-  <p class="head-title">หลักสูตร</p>
+    <!-- Courses Carousel - แบบใหม่ -->
+    <div class="q-mt-md course-carousel">
+      <p class="head-title">หลักสูตร</p>
 
-  <div class="course-carousel-container">
-    <!-- Grid Layout for Courses -->
-    <div class="courses-grid">
-      <transition-group name="course-item" tag="div" class="grid-wrapper">
-        <div
-          v-for="(course, index) in courses"
-          :key="`course-${index}`"
-          class="course-grid-item"
-          @click="goToCourseDetail(course.id)"
-        >
-          <div class="course-card-modern">
-            <!-- Badge -->
-            <div class="course-badge" v-if="course.skill">
-              {{ course.skill === 'hard' ? 'Hard Skill' : 'Soft Skill' }}
-            </div>
+      <div class="course-carousel-container">
+        <!-- Grid Layout for Courses -->
+        <div class="courses-grid">
+          <transition-group name="course-item" tag="div" class="grid-wrapper">
+            <div
+              v-for="(course, index) in courses"
+              :key="`course-${index}`"
+              class="course-grid-item"
+              @click="goToCourseDetail(course.id)"
+            >
+              <div class="course-card-modern">
+                <!-- Badge -->
+                <div class="course-badge" v-if="course.skill">
+                  {{ course.skill === 'hard' ? 'Hard Skill' : 'Soft Skill' }}
+                </div>
 
-            <!-- Image Section -->
-            <div class="course-image-section">
-              <q-img
-                :src="getCourseImageUrl(course)"
-                class="course-image-modern"
-                @error="console.log('Image error for course:', course.name, 'file:', course.file)"
-                loading="lazy"
-              >
-                <template v-slot:error>
-                  <div class="absolute-full flex flex-center bg-grey-3 text-grey-8">
-                    <q-icon name="image_not_supported" size="48px" />
+                <!-- Image Section -->
+                <div class="course-image-section">
+                  <q-img
+                    :src="getCourseImageUrl(course)"
+                    class="course-image-modern"
+                    @error="
+                      console.log('Image error for course:', course.name, 'file:', course.file)
+                    "
+                    loading="lazy"
+                  >
+                    <template v-slot:error>
+                      <div class="absolute-full flex flex-center bg-grey-3 text-grey-8">
+                        <q-icon name="image_not_supported" size="48px" />
+                      </div>
+                    </template>
+                  </q-img>
+                  <div class="image-overlay"></div>
+                </div>
+
+                <!-- Content Section -->
+                <div class="course-content">
+                  <!-- Title -->
+                  <h3 class="course-title">{{ course.name }}</h3>
+
+                  <!-- Description with truncation -->
+                  <p class="course-desc" v-if="course.description">
+                    {{ course.description }}
+                  </p>
+
+                  <!-- Info Grid -->
+                  <div class="info-grid">
+                    <!-- Date -->
+                    <div class="info-item" v-if="course.programItems?.[0]?.dates?.[0]">
+                      <div class="info-icon">
+                        <q-icon name="calendar_today" />
+                      </div>
+                      <div class="info-text">
+                        <span class="info-label">วันที่จัด</span>
+                        <span class="info-value">
+                          {{
+                            new Date(course.programItems[0].dates[0].date).toLocaleDateString(
+                              'th-TH',
+                              {
+                                month: 'short',
+                                day: 'numeric',
+                              },
+                            )
+                          }}
+                        </span>
+                      </div>
+                    </div>
+
+                    <!-- Time -->
+                    <div class="info-item" v-if="course.programItems?.[0]?.dates?.[0]">
+                      <div class="info-icon">
+                        <q-icon name="schedule" />
+                      </div>
+                      <div class="info-text">
+                        <span class="info-label">เวลา</span>
+                        <span class="info-value">
+                          {{ course.programItems[0].dates[0].stime.substring(0, 5) }}
+                        </span>
+                      </div>
+                    </div>
+
+                    <!-- Seats -->
+                    <div class="info-item" v-if="course.programItems?.[0]">
+                      <div class="info-icon">
+                        <q-icon name="people_alt" />
+                      </div>
+                      <div class="info-text">
+                        <span class="info-label">ที่นั่ง</span>
+                        <span class="info-value">
+                          {{ course.programItems[0].enrollmentCount }}/
+                          {{ course.programItems[0].maxParticipants }}
+                        </span>
+                      </div>
+                    </div>
                   </div>
-                </template>
-              </q-img>
-              <div class="image-overlay"></div>
-            </div>
 
-            <!-- Content Section -->
-            <div class="course-content">
-              <!-- Title -->
-              <h3 class="course-title">{{ course.name }}</h3>
-
-              <!-- Description with truncation -->
-              <p class="course-desc" v-if="course.description">
-                {{ course.description }}
-              </p>
-
-              <!-- Info Grid -->
-              <div class="info-grid">
-                <!-- Date -->
-                <div class="info-item" v-if="course.programItems?.[0]?.dates?.[0]">
-                  <div class="info-icon">
-                    <q-icon name="calendar_today" />
-                  </div>
-                  <div class="info-text">
-                    <span class="info-label">วันที่จัด</span>
-                    <span class="info-value">
+                  <!-- Progress Bar -->
+                  <div class="progress-section" v-if="course.programItems?.[0]">
+                    <div class="progress-bar">
+                      <div
+                        class="progress-fill"
+                        :style="{
+                          width:
+                            (course.programItems[0].enrollmentCount /
+                              course.programItems[0].maxParticipants) *
+                              100 +
+                            '%',
+                        }"
+                      ></div>
+                    </div>
+                    <span class="progress-text">
                       {{
-                        new Date(
-                          course.programItems[0].dates[0].date,
-                        ).toLocaleDateString('th-TH', {
-                          month: 'short',
-                          day: 'numeric',
-                        })
-                      }}
+                        Math.round(
+                          (course.programItems[0].enrollmentCount /
+                            course.programItems[0].maxParticipants) *
+                            100,
+                        )
+                      }}% เต็มแล้ว
                     </span>
                   </div>
-                </div>
 
-                <!-- Time -->
-                <div class="info-item" v-if="course.programItems?.[0]?.dates?.[0]">
-                  <div class="info-icon">
-                    <q-icon name="schedule" />
-                  </div>
-                  <div class="info-text">
-                    <span class="info-label">เวลา</span>
-                    <span class="info-value">
-                      {{ course.programItems[0].dates[0].stime.substring(0, 5) }}
-                    </span>
-                  </div>
-                </div>
-
-                <!-- Seats -->
-                <div class="info-item" v-if="course.programItems?.[0]">
-                  <div class="info-icon">
-                    <q-icon name="people_alt" />
-                  </div>
-                  <div class="info-text">
-                    <span class="info-label">ที่นั่ง</span>
-                    <span class="info-value">
-                      {{ course.programItems[0].enrollmentCount }}/
-                      {{ course.programItems[0].maxParticipants }}
-                    </span>
-                  </div>
+                  <!-- CTA Button -->
+                  <button class="course-cta-btn">ลงทะเบียนเข้าเรียน</button>
                 </div>
               </div>
-
-              <!-- Progress Bar -->
-              <div class="progress-section" v-if="course.programItems?.[0]">
-                <div class="progress-bar">
-                  <div
-                    class="progress-fill"
-                    :style="{
-                      width:
-                        (course.programItems[0].enrollmentCount /
-                          course.programItems[0].maxParticipants) *
-                        100 +
-                        '%',
-                    }"
-                  ></div>
-                </div>
-                <span class="progress-text">
-                  {{
-                    Math.round(
-                      (course.programItems[0].enrollmentCount /
-                        course.programItems[0].maxParticipants) *
-                        100,
-                    )
-                  }}%
-                  เต็มแล้ว
-                </span>
-              </div>
-
-              <!-- CTA Button -->
-              <button class="course-cta-btn">ลงทะเบียนเข้าเรียน</button>
             </div>
-          </div>
+          </transition-group>
         </div>
-      </transition-group>
+      </div>
     </div>
-  </div>
-</div>
-
-
 
     <div class="menu">
       <p class="menu-title">เมนู</p>

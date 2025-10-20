@@ -73,7 +73,11 @@ const cancel = () => {
 
 const submit = async () => {
   try {
-    await courseStore.addCourse(course.value)
+    if (selectedImageFile.value) {
+      await courseStore.createCourseWithImage(course.value, selectedImageFile.value)
+    } else {
+      await courseStore.addCourse(course.value)
+    }
     $q.notify({ message: 'บันทึกข้อมูลสำเร็จ', type: 'positive' })
     void router.push('/admin/CourseTablePage')
   } catch (err) {
@@ -96,6 +100,7 @@ const submit = async () => {
           <ImageDetail
             ref="imageRef"
             :imageFileName="course.file"
+            folder="course"
             :disable="false"
             @file-selected="handleFileSelected"
           />
@@ -126,16 +131,9 @@ const submit = async () => {
 
             <!-- ชื่อหัวข้อ (ไทย) -->
             <div class="input-group">
-              <p class="label label_minWidth">
-                ชื่อหัวข้อ (ไทย) :
-              </p>
+              <p class="label label_minWidth">ชื่อหัวข้อ (ไทย) :</p>
               <div class="input-container">
-                <q-input
-                  outlined
-                  v-model="course.name"
-                  class="fix-q-input-height"
-                  hide-bottom
-                />
+                <q-input outlined v-model="course.name" class="fix-q-input-height" hide-bottom />
               </div>
             </div>
 
@@ -157,9 +155,7 @@ const submit = async () => {
 
             <!-- ประเภทโครงการ (isHardSkill) -->
             <div class="input-group">
-              <p class="label label_minWidth">
-                ประเภทโครงการ :
-              </p>
+              <p class="label label_minWidth">ประเภทโครงการ :</p>
               <div class="status-inline-group">
                 <q-btn
                   :class="[
@@ -191,9 +187,7 @@ const submit = async () => {
 
             <!-- ลิงก์คอร์ส -->
             <div class="input-group">
-              <p class="label label_minWidth">
-                ลิงก์ :
-              </p>
+              <p class="label label_minWidth">ลิงก์ :</p>
               <div class="input-container">
                 <q-input
                   outlined
@@ -206,9 +200,7 @@ const submit = async () => {
 
             <!-- จำนวนชั่วโมง -->
             <div class="input-group">
-              <p class="label label_minWidth">
-                จำนวนชั่วโมง :
-              </p>
+              <p class="label label_minWidth">จำนวนชั่วโมง :</p>
               <div class="input-container">
                 <q-input
                   type="number"
@@ -222,9 +214,7 @@ const submit = async () => {
 
             <!-- หน่วยงานผู้ออก -->
             <div class="input-group">
-              <p class="label label_minWidth">
-                หน่วยงานผู้ออก :
-              </p>
+              <p class="label label_minWidth">หน่วยงานผู้ออก :</p>
               <div class="input-container">
                 <q-input outlined v-model="course.issuer" class="fix-q-input-height" />
               </div>
@@ -232,9 +222,7 @@ const submit = async () => {
 
             <!-- ประเภทแพลตฟอร์ม (type)-->
             <div class="input-group">
-              <p class="label label_minWidth">
-                ประเภท :
-              </p>
+              <p class="label label_minWidth">ประเภท :</p>
               <div class="status-inline-group">
                 <q-btn
                   :class="[
@@ -263,9 +251,7 @@ const submit = async () => {
 
             <!-- วิดีโอสอนการขอใบประกาศ -->
             <div class="input-group">
-              <p class="label label_minWidth">
-                วิดีโอสอนการขอใบประกาศ :
-              </p>
+              <p class="label label_minWidth">วิดีโอสอนการขอใบประกาศ :</p>
               <div class="input-container">
                 <q-input
                   outlined

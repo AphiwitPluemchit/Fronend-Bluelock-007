@@ -150,7 +150,11 @@ onMounted(async () => {
           <!-- Course Image/Icon -->
           <div class="col-12 col-md-4 text-center">
             <q-img
-              src="https://i.pinimg.com/736x/ee/12/55/ee1255cd4f98b3282b02033cf58e3506.jpg"
+              :src="
+                selectedCourse && selectedCourse.file
+                  ? `${baseurl}/uploads/course/images/${selectedCourse.file}`
+                  : 'https://i.pinimg.com/736x/ee/12/55/ee1255cd4f98b3282b02033cf58e3506.jpg'
+              "
               alt="Certificate Example"
               class="course-img"
               error-src="/default-placeholder.jpg"
