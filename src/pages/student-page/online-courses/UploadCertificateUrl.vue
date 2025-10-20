@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed, ref, onMounted } from 'vue'
+import type { AxiosResponse } from 'axios'
 import { api } from 'boot/axios'
 import { useCourseStore } from 'src/stores/course'
 import { useAuthStore } from 'src/stores/auth'
@@ -20,10 +21,27 @@ const url = ref(
 )
 const $q = useQuasar()
 
+// Types
+interface UrlVerifyResponse {
+  isVerified?: boolean
+  isDuplicate?: boolean
+  // allow extra fields but keep them unknown to avoid `any`
+  [key: string]: unknown
+}
+
 // Button states for background verification UX
 const isLoading = ref(false) // shows spinner for 2s
 const isChecking = ref(false) // after initial loading, show "กำลังตรวจสอบ"
-const buttonLabel = computed(() => (isChecking.value ? 'กำลังตรวจสอบ' : 'ขออนุมัติ'))
+const latestStatus = ref<string | null>(null) // 'pending' | 'approved' | 'rejected' | null
+
+const buttonLabel = computed(() => {
+  if (latestStatus.value === 'approved') return 'อนุมัติแล้ว'
+  if (latestStatus.value === 'pending' || isChecking.value) return 'กำลังตรวจสอบ'
+  if (latestStatus.value === 'rejected') return 'ขออนุมัติใหม่'
+  return 'ขออนุมัติ'
+})
+
+const isDisabled = computed(() => isChecking.value || latestStatus.value === 'approved')
 
 // Course information
 const selectedCourse = ref<Course | null>(null)
@@ -41,9 +59,9 @@ const courseName = computed(() => selectedCourse.value?.name || '')
 const certificateName = computed(
   () => selectedCourse.value?.certificateName || selectedCourse.value?.name || '',
 )
-const certificateNameEng = computed(
-  () => selectedCourse.value?.certificateNameEng || selectedCourse.value?.name || '',
-)
+// const certificateNameEng = computed(
+//   () => selectedCourse.value?.certificateNameEng || selectedCourse.value?.name || '',
+// )
 const courseHours = computed(() => selectedCourse.value?.hour || 0)
 const courseSource = computed(() => {
   if (!selectedCourse.value) return ''
@@ -57,6 +75,8 @@ const loadCourseById = async () => {
     try {
       const course = await courseStore.getOneCourse(courseId)
       selectedCourse.value = course
+      // fetch latest upload status for this student+course
+      fetchLatestUpload().catch((e) => console.error('fetchLatestUpload error', e))
     } catch (error) {
       console.error('Error loading course:', error)
       $q.notify({
@@ -92,7 +112,7 @@ async function verifyUrl() {
 
   // Start API call and a minimum spinner delay (2s) in parallel
   const delay = new Promise((res) => setTimeout(res, 2000))
-  let res: any = null
+  let res: AxiosResponse<UrlVerifyResponse> | null = null
   try {
     const apiPromise = api.get(baseurl + '/certificates/url-verify', {
       params: {
@@ -124,6 +144,8 @@ async function verifyUrl() {
   if (res && res.status === 202) {
     // switch the button to a persistent checking state
     isChecking.value = true
+    // refresh latest status from backend
+    fetchLatestUpload().catch((e) => console.error('fetchLatestUpload after 202', e))
     return
   }
 
@@ -161,6 +183,36 @@ onMounted(async () => {
   await loadCourseById()
   screen.value = true
 })
+
+// Fetch latest UploadCertificate record for the current student & course
+async function fetchLatestUpload() {
+  if (!authStore.getUser?.id) return
+  if (!selectedCourse.value?.id) return
+  try {
+    const res = await api.get(baseurl + '/certificates', {
+      params: {
+        studentId: authStore.getUser?.id,
+        courseId: selectedCourse.value.id,
+        page: 1,
+        limit: 1,
+        sortBy: 'uploadAt',
+        order: 'desc',
+      },
+    })
+
+    const list = res.data?.data || []
+    if (list.length > 0) {
+      latestStatus.value = list[0].status
+      // if the latest is pending, set checking state
+      isChecking.value = list[0].status === 'pending'
+    } else {
+      latestStatus.value = null
+      isChecking.value = false
+    }
+  } catch (err) {
+    console.error('Failed to fetch latest upload:', err)
+  }
+}
 </script>
 
 <template>
@@ -176,7 +228,7 @@ onMounted(async () => {
               :src="
                 selectedCourse && selectedCourse.file
                   ? `${baseurl}/uploads/course/images/${selectedCourse.file}`
-                  : 'https://i.pinimg.com/736x/ee/12/55/ee1255cd4f98b3282b02033cf58e3506.jpg'
+                  : `${baseurl}/uploads/no-image.jpg`
               "
               alt="Certificate Example"
               class="course-img"
@@ -193,20 +245,18 @@ onMounted(async () => {
               </div>
 
               <div class="field-pair">
-                <div class="field-label">ชื่อในใบประกาศ (ไทย) :</div>
+                <div class="field-label">ชื่อในใบประกาศ :</div>
                 <div class="field-value">{{ certificateName }}</div>
               </div>
 
-              <div class="field-pair">
+              <!-- <div class="field-pair">
                 <div class="field-label">ชื่อในใบประกาศ (อังกฤษ) :</div>
                 <div class="field-value">{{ certificateNameEng }}</div>
-              </div>
-
+              </div> -->
               <div class="field-pair">
                 <div class="field-label">ผู้ให้ :</div>
                 <div class="field-value">{{ selectedCourse.issuer }}</div>
               </div>
-
               <div class="field-pair">
                 <div class="field-label">จำนวนชั่วโมงที่ได้รับ :</div>
                 <div class="field-value">{{ courseHours }} ชั่วโมง</div>
@@ -273,7 +323,7 @@ onMounted(async () => {
               class="btnconfirm"
               @click="verifyUrl"
               :loading="isLoading"
-              :disable="isChecking"
+              :disable="isDisabled"
               unelevated
               rounded
             />
