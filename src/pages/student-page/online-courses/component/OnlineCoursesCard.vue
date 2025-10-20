@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed } from 'vue'
+import { api } from 'boot/axios'
 import ProgramType from 'src/components/programType.vue'
 import { useQuasar } from 'quasar'
 import { useRouter } from 'vue-router'
@@ -21,6 +22,14 @@ const skillType = computed(() => (props.course.isHardSkill ? 'hardSkill' : 'soft
 const platformType = computed(() => (props.course.type === 'buumooc' ? 'Buu Mooc' : 'Thai Mooc'))
 const hours = computed(() => props.course.hour)
 
+const imageSrc = computed(() => {
+  const file = props.course.file
+  if (file && file !== '' && file !== 'undefined') {
+    return `${api.defaults.baseURL}/uploads/course/images/${file}`
+  }
+  return `${api.defaults.baseURL}/uploads/no-image.jpg`
+})
+
 // ฟังก์ชันสำหรับไปยังหน้าอัปโหลดใบประกาศ
 const goToCertificatePage = () => {
   void router.push(`/student/UploadCertificate/${props.course.id}`)
@@ -35,6 +44,9 @@ const goToCertificatePage = () => {
   >
     <q-card-section class="outer-box">
       <div class="inner-box">
+        <div class="image-wrapper">
+          <q-img :src="imageSrc" class="oc-image" :ratio="16 / 9" />
+        </div>
         <!-- ปุ่มแสดงประเภทคอร์ส -->
         <div class="oc-title text-h6 text-bold ellipsis-2-lines q-mb-md">{{ title }}</div>
         <div class="oc-type q-mb-md">
@@ -96,6 +108,19 @@ const goToCertificatePage = () => {
   height: 100%;
   border-radius: 12px;
   background: transparent; /* ใช้สีพื้นหลังจาก q-card */
+}
+
+.image-wrapper {
+  width: 100%;
+  height: 160px;
+  margin-bottom: 12px;
+  overflow: hidden;
+  border-radius: 12px;
+}
+.oc-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
 
 .oc-type {
