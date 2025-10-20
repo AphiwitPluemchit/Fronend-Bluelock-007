@@ -88,22 +88,26 @@ async function verifyUrl() {
         courseId: selectedCourse.value?.id,
       },
     })
+
+    // If server returns 202 Accepted it means verification runs in background
+    if (res.status === 202) {
+      $q.notify({
+        type: 'info',
+        message: 'ระบบได้รับคำขอแล้ว กำลังตรวจสอบในเบื้องหลัง คุณจะได้รับผลลัพธ์เมื่อเสร็จ',
+      })
+      return
+    }
+
     const { isVerified, isDuplicate } = res.data
     if (isVerified && !isDuplicate) {
-      $q.notify({
-        type: 'positive',
-        message: 'อัปโหลดสำเร็จ',
-      })
+      $q.notify({ type: 'positive', message: 'อัปโหลดสำเร็จ' })
     } else if (isDuplicate) {
       $q.notify({
         type: 'negative',
         message: 'ไม่สามารถรับชั่วโมงได้ เนื่องจากมีใบประกาศนียบัตรที่ซ้ำ',
       })
     } else {
-      $q.notify({
-        type: 'negative',
-        message: 'อัปโหลดไม่สำเร็จ เนื่องจากไม่พบใบประกาศนียบัตร',
-      })
+      $q.notify({ type: 'negative', message: 'อัปโหลดไม่สำเร็จ เนื่องจากไม่พบใบประกาศนียบัตร' })
     }
   } catch (err) {
     console.error('❌ Upload failed:', err)
