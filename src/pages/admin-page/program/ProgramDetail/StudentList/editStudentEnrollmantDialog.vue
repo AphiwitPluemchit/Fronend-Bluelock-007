@@ -1,116 +1,3 @@
-<template>
-  <q-dialog v-model="dialog" persistent>
-    <q-card
-      style="width: 90vw; max-width: 650px; max-height: 80vh; overflow-y: auto; border-radius: 10px"
-    >
-    
-
-      <q-card-section class="q-gutter-y-md">
-        <div class="q-mb-sm text-h6">ข้อมูลการเช็คชื่อนิสิต</div>
-        <div class="row q-ma-sm ">
-          <div class="col-12 q-mt-sm">{{ display.studentCode }} {{ display.studentName }}</div>
-        </div>
-
-        <q-separator class="q-mt-md" />
-
-        <div class="row q-mt-md">
-          <div class="q-mb-sm text-h6">รายการเช็คชื่อรายวัน</div>
-        </div>
-
-        <div class="q-table__container q-table--flat q-table--bordered">
-          <table class="q-table">
-            <thead>
-              <tr>
-                <th style="width: 28%">วันที่</th>
-                <th style="width: 36%">เวลาเข้า</th>
-                <th style="width: 36%">เวลาออก</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr v-for="(row, idx) in rows" :key="row.recordId">
-                <!-- วันที่ (read-only) -->
-                <td class="text-no-wrap">
-                  {{ row.dateLabel }}
-                </td>
-
-                <!-- เวลาเข้า -->
-                <td>
-                  <div class="row q-col-gutter-sm">
-                    <div class="col">
-                      <q-input
-                        v-model="row.checkinTime"
-                        outlined
-                        dense
-                        placeholder="HH:mm"
-                        :error="!!rowErrors[idx]?.in"
-                        :error-message="rowErrors[idx]?.in"
-                      >
-                        <template #append>
-                          <q-icon name="access_time" class="cursor-pointer">
-                            <q-popup-proxy cover transition-show="scale" transition-hide="scale">
-                              <q-time v-model="row.checkinTime" format24h />
-                            </q-popup-proxy>
-                          </q-icon>
-                        </template>
-                      </q-input>
-                    </div>
-                  </div>
-                </td>
-
-                <!-- เวลาออก -->
-                <td>
-                  <div class="row q-col-gutter-sm">
-                    <div class="col">
-                      <q-input
-                        v-model="row.checkoutTime"
-                        outlined
-                        dense
-                        placeholder="HH:mm"
-                        :error="!!rowErrors[idx]?.out"
-                        :error-message="rowErrors[idx]?.out"
-                      >
-                        <template #append>
-                          <q-icon name="access_time" class="cursor-pointer">
-                            <q-popup-proxy cover transition-show="scale" transition-hide="scale">
-                              <q-time v-model="row.checkoutTime" format24h />
-                            </q-popup-proxy>
-                          </q-icon>
-                        </template>
-                      </q-input>
-                    </div>
-                  </div>
-                </td>
-              </tr>
-
-              <tr v-if="rows.length === 0">
-                <td colspan="3" class="text-center text-grey">ยังไม่มีข้อมูลเช็คชื่อ</td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-
-        <q-banner
-          v-if="errorMessage"
-          class="q-mt-md"
-          rounded
-          dense
-          inline-actions
-          :class="errorBannerClass"
-        >
-          {{ errorMessage }}
-        </q-banner>
-      </q-card-section>
-
-      <q-card-actions align="right">
-        <q-card-actions align="right">
-          <q-btn label="ยกเลิก" class="btnreject" @click="close" />
-          <q-btn label="ยืนยัน" class="btnconfirm" @click="onSave" />
-        </q-card-actions>
-      </q-card-actions>
-    </q-card>
-  </q-dialog>
-</template>
-
 <script setup lang="ts">
 // import
 import { computed, reactive, ref, watch } from 'vue'
@@ -309,6 +196,120 @@ async function onSave() {
   }
 }
 </script>
+<template>
+  <q-dialog v-model="dialog" persistent>
+    <q-card
+      style="width: 90vw; max-width: 650px; max-height: 80vh; overflow-y: auto; border-radius: 10px"
+    >
+
+
+      <q-card-section class="q-gutter-y-md">
+        <div class="q-mb-sm text-h6">ข้อมูลการเช็คชื่อนิสิต</div>
+        <div class="row q-ma-sm ">
+          <div class="col-12 q-mt-sm">{{ display.studentCode }} {{ display.studentName }}</div>
+        </div>
+
+        <q-separator class="q-mt-md" />
+
+        <div class="row q-mt-md">
+          <div class="q-mb-sm text-h6">รายการเช็คชื่อรายวัน</div>
+        </div>
+
+        <div class="q-table__container q-table--flat q-table--bordered">
+          <table class="q-table">
+            <thead>
+              <tr>
+                <th style="width: 28%">วันที่</th>
+                <th style="width: 36%">เวลาเข้า</th>
+                <th style="width: 36%">เวลาออก</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr v-for="(row, idx) in rows" :key="row.recordId">
+                <!-- วันที่ (read-only) -->
+                <td class="text-no-wrap">
+                  {{ row.dateLabel }}
+                </td>
+
+                <!-- เวลาเข้า -->
+                <td>
+                  <div class="row q-col-gutter-sm">
+                    <div class="col">
+                      <q-input
+                        v-model="row.checkinTime"
+                        outlined
+                        dense
+                        placeholder="HH:mm"
+                        :error="!!rowErrors[idx]?.in"
+                        :error-message="rowErrors[idx]?.in"
+                      >
+                        <template #append>
+                          <q-icon name="access_time" class="cursor-pointer">
+                            <q-popup-proxy cover transition-show="scale" transition-hide="scale">
+                              <q-time v-model="row.checkinTime" format24h />
+                            </q-popup-proxy>
+                          </q-icon>
+                        </template>
+                      </q-input>
+                    </div>
+                  </div>
+                </td>
+
+                <!-- เวลาออก -->
+                <td>
+                  <div class="row q-col-gutter-sm">
+                    <div class="col">
+                      <q-input
+                        v-model="row.checkoutTime"
+                        outlined
+                        dense
+                        placeholder="HH:mm"
+                        :error="!!rowErrors[idx]?.out"
+                        :error-message="rowErrors[idx]?.out"
+                      >
+                        <template #append>
+                          <q-icon name="access_time" class="cursor-pointer">
+                            <q-popup-proxy cover transition-show="scale" transition-hide="scale">
+                              <q-time v-model="row.checkoutTime" format24h />
+                            </q-popup-proxy>
+                          </q-icon>
+                        </template>
+                      </q-input>
+                    </div>
+                  </div>
+                </td>
+              </tr>
+
+              <tr v-if="rows.length === 0">
+                <td colspan="3" class="text-center text-grey">ยังไม่มีข้อมูลเช็คชื่อ</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <q-banner
+          v-if="errorMessage"
+          class="q-mt-md"
+          rounded
+          dense
+          inline-actions
+          :class="errorBannerClass"
+        >
+          {{ errorMessage }}
+        </q-banner>
+      </q-card-section>
+
+      <q-card-actions align="right">
+        <q-card-actions align="right">
+          <q-btn label="ยกเลิก" class="btnreject" @click="close" />
+          <q-btn label="ยืนยัน" class="btnconfirm" @click="onSave" />
+        </q-card-actions>
+      </q-card-actions>
+    </q-card>
+  </q-dialog>
+</template>
+
+
 
 <style scoped lang="scss">
 .q-table__container {

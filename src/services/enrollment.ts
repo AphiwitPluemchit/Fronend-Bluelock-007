@@ -45,6 +45,19 @@ export class EnrollmentService {
       throw error
     }
   }
+
+  static async enrollmentByAdmin(obj: object): Promise<number> {
+    try {
+      const res = await api.post(`${this.path}/by-admin`, obj)
+      showSuccess('ลงทะเบียนสำเร็จ')
+      return res.status
+    } catch (error: unknown) {
+      const message = getErrorMessage(error, 'ลงทะเบียนไม่สำเร็จ')
+      showError(message)
+      console.error('Error creating enrollment:', error)
+      throw error
+    }
+  }
   // 🔹 อัปเดต CheckInOut
   static async updateOne(enrollmentId: string, data: Partial<CheckInOut>): Promise<unknown> {
     try {
@@ -162,7 +175,7 @@ static async removeOne(id: string): Promise<number> {
       throw error
     }
   }
-  
+
 
   // static async getEnrollmentsHistoryByStudentID(studentId: string, params: Pagination) {
   //   try {

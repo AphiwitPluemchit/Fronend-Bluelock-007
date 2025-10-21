@@ -1,6 +1,6 @@
 <template>
   <q-dialog v-model="dialog" persistent>
-    <q-card style="min-width: 420px">
+    <q-card  style="width: 90vw; max-width: 400px; border-radius: 10px">
       <q-card-section class="row items-center q-gutter-sm">
         <q-icon name="warning" color="red-7" size="md" />
         <div class="text-h6">ยืนยันการลบการลงทะเบียน</div>
@@ -28,11 +28,11 @@
       </q-card-section>
 
       <q-card-actions align="right">
-        <q-btn flat label="ยกเลิก" color="grey-8" :disable="loading" @click="close" />
+        <q-btn class="btnreject " label="ยกเลิก"  :disable="loading" @click="close" />
         <q-btn
+        class="btnconfirm"
           unelevated
-          color="red-7"
-          label="ลบ"
+          label="ยืนยัน"
           :loading="loading"
           @click="onConfirmRemove"
         />

@@ -115,30 +115,29 @@ onMounted(async () => {
           <h1>{{ programDetail?.name || 'Loading...' }}</h1>
         </div>
       </div>
-<!-- Main Statistics Cards -->
-<div class="stats-grid">
-  <q-card class="stat-card blue">
-    <q-card-section class="stat-content">
-      <div class="stat-label">จำนวนที่รับ</div>
-      <div class="stat-number">{{ enrollmentSummary?.maxParticipants || 0 }}</div>
-    </q-card-section>
-  </q-card>
+      <!-- Main Statistics Cards -->
+      <div class="stats-grid">
+        <q-card class="stat-card blue">
+          <q-card-section class="stat-content">
+            <div class="stat-label">จำนวนที่รับ</div>
+            <div class="stat-number">{{ enrollmentSummary?.maxParticipants || 0 }}</div>
+          </q-card-section>
+        </q-card>
 
-  <q-card class="stat-card green">
-    <q-card-section class="stat-content">
-      <div class="stat-label">จำนวนนิสิตที่ลงทะเบียน</div>
-      <div class="stat-number">{{ enrollmentSummary?.totalRegistered || 0 }}</div>
-    </q-card-section>
-  </q-card>
+        <q-card class="stat-card green">
+          <q-card-section class="stat-content">
+            <div class="stat-label">จำนวนนิสิตที่ลงทะเบียน</div>
+            <div class="stat-number">{{ enrollmentSummary?.totalRegistered || 0 }}</div>
+          </q-card-section>
+        </q-card>
 
-  <q-card class="stat-card orange">
-    <q-card-section class="stat-content">
-      <div class="stat-label">จำนวนที่ว่าง</div>
-      <div class="stat-number">{{ enrollmentSummary?.remainingSlots || 0 }}</div>
-    </q-card-section>
-  </q-card>
-</div>
-
+        <q-card class="stat-card orange">
+          <q-card-section class="stat-content">
+            <div class="stat-label">จำนวนที่ว่าง</div>
+            <div class="stat-number">{{ enrollmentSummary?.remainingSlots || 0 }}</div>
+          </q-card-section>
+        </q-card>
+      </div>
 
       <!-- Major Distribution -->
       <div class="section-divider">
@@ -835,6 +834,4 @@ onMounted(async () => {
 .orange .stat-number {
   color: #f59e0b;
 }
-
 </style>
-

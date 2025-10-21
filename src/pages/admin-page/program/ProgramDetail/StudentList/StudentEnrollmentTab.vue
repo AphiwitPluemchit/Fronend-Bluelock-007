@@ -6,6 +6,7 @@ import type { QTableColumn } from 'quasar'
 import { useRoute } from 'vue-router'
 import RemoveStudentEnrollment from './removeStudentDialog.vue'
 import EditStudentEnrollmentDialog from './editStudentEnrollmantDialog.vue'
+import EnrollStudentDialog from './enrollmentByAdminDialog.vue'
 
 import { ProgramService } from 'src/services/program'
 import { useEnrollmentStore } from 'src/stores/enrollment'
@@ -29,6 +30,7 @@ const programId = route.params.id as string
 
 const removeDialog = ref(false)
 const editDialog = ref(false)
+const addDialogOpen = ref(false)
 
 const filterCategories1 = ref(['year', 'major', 'studentStatus'])
 const program = ref<Program | null>(null)
@@ -117,6 +119,9 @@ const students = computed(() => {
 const editCheckinout = (row: StudentEnrollment) => {
   selectedStudent.value = row
   editDialog.value = true
+}
+function openAddDialog() {
+  addDialogOpen.value = true
 }
 const removeStudentFromProgram = (id: string) => {
   const row = students.value.find((s) => s.id === id) || null
@@ -337,231 +342,273 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <div class="q-mb-sm student-container">
-    <div class="student-table-wrapper">
-      <div class="row q-col-gutter-sm form-toolbar">
-        <!-- Row 1 -->
-        <div class="search-row">
-          <q-input
-            dense
-            outlined
-            v-model="search1"
-            @keyup.enter="fetchStudents"
-            label="ค้นหาชื่อ-สกุล/ รหัสนิสิต"
-            class="searchbox"
-            :style="{ border: 'none' }"
-          >
-            <template v-slot:append>
-              <q-icon name="search" />
-            </template>
-          </q-input>
-        </div>
+  <div class="student-container">
+    <!-- <div class="student-table-wrapper "> -->
+    <div class="program-header">
+      <div class="row justify-between items-center">
+        <div class="textsubtitle">{{ program?.name }}</div>
+        <q-btn
+          dense
+          outlined
+          label="เพิ่มนิสิต"
+          class="btnadd"
+          style="width: 130px"
+          @click="openAddDialog"
+        >
+        </q-btn>
+      </div>
+    </div>
 
-        <!-- Row 2 -->
-        <div class="select-filter-row">
-          <q-select
-            v-if="programItemDatesOptions.length > 1"
-            dense
-            outlined
-            v-model="selectProgramItemDate"
-            :options="programItemDatesOptions"
-            label="เลือกวัน"
-            option-label="label"
-            option-value="value"
-            emit-value
-            map-options
-            @update:model-value="fetchStudents"
-            class="dropdown"
-            popup-content-class="dropdown-menu"
-            :style="{ border: 'none' }"
-            behavior="menu"
-          />
-          <q-select
-            v-if="programItemOptions.length > 1"
-            dense
-            outlined
-            v-model="selectProgramItem"
-            :options="programItemOptions"
-            label="เลือกโครงการ"
-            option-label="label"
-            option-value="value"
-            emit-value
-            map-options
-            @update:model-value="fetchStudents"
-            class="dropdown"
-            popup-content-class="dropdown-menu"
-            :style="{ border: 'none' }"
-            behavior="menu"
-          />
-          <FilterDialog :categories="filterCategories1" @apply="applyStudentFilters" />
-        </div>
+    <div class="row q-col-gutter-sm form-toolbar q-mt-md">
+      <!-- Row 1 -->
+      <div class="search-row">
+        <q-input
+          dense
+          outlined
+          v-model="search1"
+          @keyup.enter="fetchStudents"
+          label="ค้นหาชื่อ-สกุล/ รหัสนิสิต"
+          class="searchbox"
+          :style="{ border: 'none' }"
+        >
+          <template v-slot:append>
+            <q-icon name="search" />
+          </template>
+        </q-input>
       </div>
 
-      <q-table
-        v-if="!isMobile"
-        flat
-        bordered
-        :rows="students"
-        :columns="visibleColumns"
-        row-key="id"
-        class="q-mt-md new-sticky-header"
-        @request="onRequest"
-        v-model:pagination="pagination"
-        :rows-per-page-options="[10, 20, 30, 40, 50]"
-        :rows-number="enrollmentStore.total"
-      >
-        <!-- หัวตาราง Sticky -->
-        <template v-slot:header="props">
-          <q-tr :props="props">
-            <q-th v-for="col in props.cols" :key="col.name" :props="props" class="sticky-header">
-              {{ col.label }}
-            </q-th>
-          </q-tr>
-        </template>
+      <!-- Row 2 -->
+      <div class="select-filter-row">
+        <q-select
+          v-if="programItemDatesOptions.length > 1"
+          dense
+          outlined
+          v-model="selectProgramItemDate"
+          :options="programItemDatesOptions"
+          label="เลือกวัน"
+          option-label="label"
+          option-value="value"
+          emit-value
+          map-options
+          @update:model-value="fetchStudents"
+          class="dropdown"
+          popup-content-class="dropdown-menu"
+          :style="{ border: 'none' }"
+          behavior="menu"
+        />
+        <q-select
+          v-if="programItemOptions.length > 1"
+          dense
+          outlined
+          v-model="selectProgramItem"
+          :options="programItemOptions"
+          label="เลือกโครงการ"
+          option-label="label"
+          option-value="value"
+          emit-value
+          map-options
+          @update:model-value="fetchStudents"
+          class="dropdown"
+          popup-content-class="dropdown-menu"
+          :style="{ border: 'none' }"
+          behavior="menu"
+        />
+        <FilterDialog :categories="filterCategories1" @apply="applyStudentFilters" />
+      </div>
+    </div>
 
-        <template v-slot:body-cell-index="props">
-          <q-td :props="props" class="text-center table-text bold-text">
-            {{ props.rowIndex + 1 }}
-          </q-td>
-        </template>
+    <q-table
+      v-if="!isMobile"
+      flat
+      bordered
+      :rows="students"
+      :columns="visibleColumns"
+      row-key="id"
+      class="q-mt-md new-sticky-header"
+      @request="onRequest"
+      v-model:pagination="pagination"
+      :rows-per-page-options="[10, 20, 30, 40, 50]"
+      :rows-number="enrollmentStore.total"
+    >
+      <!-- หัวตาราง Sticky -->
+      <template v-slot:header="props">
+        <q-tr :props="props">
+          <q-th v-for="col in props.cols" :key="col.name" :props="props" class="sticky-header">
+            {{ col.label }}
+          </q-th>
+        </q-tr>
+      </template>
 
-        <template v-slot:body-cell-status="props">
-          <q-td :props="props">
-            <q-badge
-              :label="studentStore.getStatusText(parseInt(props.row.status))"
-              rounded
-              unelevated
-              class="status-badge"
-              :class="studentStore.getStatusClass(parseInt(props.row.status))"
-            />
-          </q-td>
-        </template>
+      <template v-slot:body-cell-index="props">
+        <q-td :props="props" class="text-center table-text bold-text">
+          {{ props.rowIndex + 1 }}
+        </q-td>
+      </template>
 
-        <!-- ปุ่มลบ -->
-        <template v-slot:body-cell-actions="props">
-          <q-td class="q-gutter-x-sm" key="action">
-            <q-icon
-              clickable
-              name="edit"
-              @click.stop="editCheckinout(props.row)"
-              class="bg-primary text-white q-pa-xs rounded-borders q-mr-sm"
-            >
-              <q-tooltip>แก้ไข</q-tooltip>
-            </q-icon>
-            <q-icon
-              clickable
-              name="delete"
-              @click.stop="removeStudentFromProgram(props.row.id)"
-              class="bg-red-7 text-white q-pa-xs rounded-borders q-mr-sm"
-            >
-              <q-tooltip>ลบ</q-tooltip></q-icon
-            >
-          </q-td>
-        </template>
-        <template v-slot:body-cell-checkIn="props">
-          <q-td :props="props">
-            <div v-if="getRowCheckins(props.row).length">
-              <div v-for="(rec, idx) in getRowCheckins(props.row)" :key="idx">
-                {{ formatDate(rec) }} {{ formatTime(rec) }}
-              </div>
+      <template v-slot:body-cell-status="props">
+        <q-td :props="props">
+          <q-badge
+            :label="studentStore.getStatusText(parseInt(props.row.status))"
+            rounded
+            unelevated
+            class="status-badge"
+            :class="studentStore.getStatusClass(parseInt(props.row.status))"
+          />
+        </q-td>
+      </template>
+
+      <!-- ปุ่มลบ -->
+      <template v-slot:body-cell-actions="props">
+        <q-td class="q-gutter-x-sm" key="action">
+          <q-icon
+            clickable
+            name="edit"
+            @click.stop="editCheckinout(props.row)"
+            class="bg-primary text-white q-pa-xs rounded-borders q-mr-sm"
+          >
+            <q-tooltip>แก้ไข</q-tooltip>
+          </q-icon>
+          <q-icon
+            clickable
+            name="delete"
+            @click.stop="removeStudentFromProgram(props.row.id)"
+            class="bg-red-7 text-white q-pa-xs rounded-borders q-mr-sm"
+          >
+            <q-tooltip>ลบ</q-tooltip></q-icon
+          >
+        </q-td>
+      </template>
+      <template v-slot:body-cell-checkIn="props">
+        <q-td :props="props">
+          <div v-if="getRowCheckins(props.row).length">
+            <div v-for="(rec, idx) in getRowCheckins(props.row)" :key="idx">
+              {{ formatDate(rec) }} {{ formatTime(rec) }}
             </div>
-
-            <div v-else>-</div>
-          </q-td>
-        </template>
-        <template v-slot:body-cell-checkOut="props">
-          <q-td :props="props">
-            <div v-if="getRowCheckouts(props.row).length">
-              <div v-for="(rec, idx) in getRowCheckouts(props.row)" :key="idx">
-                {{ formatDate(rec) }} {{ formatTime(rec) }}
-              </div>
-            </div>
-            <div v-else>-</div>
-          </q-td>
-        </template>
-        <template v-slot:body-cell-participation="props">
-          <q-td :props="props">
-            {{ props.row.checkInOut[0]?.participation }}
-          </q-td>
-        </template>
-
-        <template v-slot:no-data>
-          <div class="full-width text-center q-pa-md text-grey" style="font-size: 20px">
-            ไม่มีนิสิตที่ลงทะเบียน
           </div>
-        </template>
-      </q-table>
 
-      <!-- Card layout for mobile -->
-      <div v-else style="margin-top: 20px">
-        <q-card v-for="student in students" :key="student.id" class="student-card" bordered flat>
-          <!-- HEADER -->
-          <q-card-section
-            class="backgroundheader"
+          <div v-else>-</div>
+        </q-td>
+      </template>
+      <template v-slot:body-cell-checkOut="props">
+        <q-td :props="props">
+          <div v-if="getRowCheckouts(props.row).length">
+            <div v-for="(rec, idx) in getRowCheckouts(props.row)" :key="idx">
+              {{ formatDate(rec) }} {{ formatTime(rec) }}
+            </div>
+          </div>
+          <div v-else>-</div>
+        </q-td>
+      </template>
+      <template v-slot:body-cell-participation="props">
+        <q-td :props="props">
+          {{ props.row.checkInOut[0]?.participation }}
+        </q-td>
+      </template>
+
+      <template v-slot:no-data>
+        <div class="full-width text-center q-pa-md text-grey" style="font-size: 20px">
+          ไม่มีนิสิตที่ลงทะเบียน
+        </div>
+      </template>
+    </q-table>
+
+    <!-- Card layout for mobile -->
+    <!-- Card layout for mobile -->
+    <div v-else style="margin-top: 20px">
+      <q-card v-for="student in students" :key="student.id" class="student-card" bordered flat>
+        <!-- HEADER -->
+        <q-card-section class=" row items-center justify-between">
+          <div
+            class="ProgramNamelabel row items-center"
             @click="toggleCard(student.id)"
             style="cursor: pointer"
           >
-            <div class="student-header-row row justify-between">
-              <div class="ProgramNamelabel row items-center">
-                <span class="student-code" style="margin-right: 10px"> {{ student.code }}</span>
-                <span class="student-name">{{ formatStudentName(student.name) }}</span>
-                <q-icon
-                  :name="expanded[student.id] ? 'keyboard_arrow_up' : 'keyboard_arrow_down'"
-                  size="28px"
-                  class="q-ml-sm"
-                  style="transition: transform 0.2s"
-                />
-              </div>
-            </div>
-          </q-card-section>
+            <span class="student-code q-mr-sm">{{ student.code }}</span>
+            <span class="student-name">{{ formatStudentName(student.name) }}</span>
+            <q-icon
+              :name="expanded[student.id] ? 'keyboard_arrow_up' : 'keyboard_arrow_down'"
+              size="28px"
+              class="q-ml-sm"
+              style="transition: transform 0.2s"
+            />
+          </div>
 
-          <!-- CONTENT -->
-          <q-card-section v-if="expanded[student.id]">
-            <div class="info-row" style="display: flex; align-items: center; margin-bottom: 10px">
-              <div class="label" style="margin-right: 5px">สาขา</div>
-              <div class="value">: {{ student.major || '-' }}</div>
+          <!-- ACTIONS (always visible on mobile header) -->
+          <div class="row items-center q-gutter-xs ">
+            <q-btn
+              round
+              dense
+              size="sm"
+              icon="edit"
+                class="bg-primary text-white q-pa-xs rounded-borders q-mr-sm"
+              aria-label="แก้ไข"
+              @click.stop="editCheckinout(student)"
+            />
+            <q-btn
+              round
+              dense
+              size="sm"
+              icon="delete"
+              class="bg-red-7 text-white q-pa-xs rounded-borders q-mr-sm"
+              aria-label="ลบ"
+              @click.stop="removeStudentFromProgram(student.id)"
+            />
+          </div>
+        </q-card-section>
+
+        <!-- CONTENT -->
+        <q-card-section v-if="expanded[student.id]">
+          <div class="info-row" style="display: flex; align-items: center; margin-bottom: 10px">
+            <div class="label">สาขา</div>
+            <div class="value">{{ student.major || '-' }}</div>
+          </div>
+
+          <div
+            class="info-row"
+            v-if="student.food && student.food.trim() !== ''"
+            style="display: flex; align-items: center; margin-bottom: 10px"
+          >
+            <div class="label" >อาหาร</div>
+            <div class="value">{{ student.food }}</div>
+          </div>
+
+          <div class="info-row" style="display: flex; align-items: center; margin-bottom: 10px">
+            <div class="label">เช็คชื่อเข้า</div>
+            <div class="value">
+              <template v-if="getStudentCheckins(student).length">
+                <div v-for="(rec, idx) in getStudentCheckins(student)" :key="idx">
+                  {{ formatDate(rec) }} {{ formatTime(rec) }}
+                </div>
+              </template>
+              <div v-else>-</div>
             </div>
-            <div
-              class="info-row"
-              v-if="student.food && student.food.trim() !== ''"
-              style="display: flex; align-items: center; margin-bottom: 10px"
-            >
-              <div class="label" style="margin-right: 5px">อาหาร</div>
-              <div class="value">: {{ student.food }}</div>
+          </div>
+
+          <div class="info-row" style="display: flex; align-items: center; margin-bottom: 10px">
+            <div class="label">เช็คชื่อออก</div>
+            <div class="value">
+              <template v-if="getStudentCheckouts(student).length">
+                <div v-for="(rec, idx) in getStudentCheckouts(student)" :key="idx">
+                  {{ formatDate(rec) }} {{ formatTime(rec) }}
+                </div>
+              </template>
+              <div v-else>-</div>
             </div>
-            <div class="info-row">
-              <div class="label">เช็คชื่อเข้า</div>
-              <div class="value">
-                <template v-if="getStudentCheckins(student).length">
-                  <div v-for="(rec, idx) in getStudentCheckins(student)" :key="idx">
-                    {{ formatDate(rec) }} {{ formatTime(rec) }}
-                  </div>
-                </template>
-                <div v-else>-</div>
-              </div>
-            </div>
-            <div class="info-row">
-              <div class="label">เช็คชื่อออก</div>
-              <div class="value">
-                <template v-if="getStudentCheckouts(student).length">
-                  <div v-for="(rec, idx) in getStudentCheckouts(student)" :key="idx">
-                    {{ formatDate(rec) }} {{ formatTime(rec) }}
-                  </div>
-                </template>
-                <div v-else>-</div>
-              </div>
-            </div>
-          </q-card-section>
-        </q-card>
-        <div
-          v-if="students.length === 0"
-          class="full-width text-center q-pa-md text-grey"
-          style="font-size: 20px"
-        >
-          ไม่มีนิสิตที่ลงทะเบียน
-        </div>
+          </div>
+        </q-card-section>
+
+
+      </q-card>
+
+      <div
+        v-if="students.length === 0"
+        class="full-width text-center q-pa-md text-grey"
+        style="font-size: 20px"
+      >
+        ไม่มีนิสิตที่ลงทะเบียน
       </div>
     </div>
+    <!-- </div> -->
   </div>
   <RemoveStudentEnrollment
     v-model="removeDialog"
@@ -574,11 +621,16 @@ onUnmounted(() => {
     :student="selectedStudent"
     @updated="fetchStudents"
   />
+  <EnrollStudentDialog v-model="addDialogOpen" :program="program" @saved="fetchStudents" />
 </template>
 
 <style lang="scss" scoped>
+.program-header {
+  justify-content: space-between;
+}
+
 .student-container {
-  height: 680px;
+  height: calc(80vh - 200px);
   width: 100%;
 }
 .q-table table {
@@ -714,9 +766,9 @@ onUnmounted(() => {
   width: 100% !important;
   box-sizing: border-box;
 }
-.backgroundheader {
-  background-color: #90b2ee;
-}
+// .backgroundheader {
+//   background-color: #90b2ee;
+// }
 
 .student-header-row {
   flex-direction: column !important;
@@ -736,6 +788,12 @@ onUnmounted(() => {
 }
 .ProgramNamelabel .q-icon {
   margin-left: auto;
+}
+.student-card .q-card__section.backgroundheader {
+  padding: 8px 12px;
+}
+.student-card .q-card__section + .q-card__section {
+  padding-top: 8px;
 }
 @media (max-width: 690px) {
   .form-toolbar {
@@ -768,8 +826,26 @@ onUnmounted(() => {
   }
 }
 @media (max-width: 450px) {
+  /* ชื่อในหัวการ์ด (มีอยู่แล้วก็ไม่เป็นไร) */
   .ProgramNamelabel {
     font-size: 12px;
   }
+
+  /* ↓ ส่วนรายละเอียด (expanded) ให้เล็กลงตามหัวการ์ด */
+  .label,
+  .value {
+    font-size: 12px;
+  }
+
+  /* กัน label ดันบรรทัดบนจอเล็กมาก ๆ */
+  .label {
+    min-width: 120px;
+  }
+
+  /* ให้ระยะห่างแถวกระชับขึ้นบนจอเล็ก */
+  .student-card .info-row {
+    margin-bottom: 6px !important;
+  }
 }
+
 </style>
