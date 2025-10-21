@@ -167,7 +167,28 @@ onMounted(async () => {
     </div>
     <div class="q-mt-md activity-carousel">
       <p class="head-title">โครงการ</p>
-      <div class="carousel-container">
+
+      <!-- ✅ มือถือ: แสดงเฉพาะภาพแนวนอน -->
+      <div v-if="$q.screen.lt.md" class="mobile-activity-scroll">
+        <div
+          v-for="(item, index) in activities"
+          :key="index"
+          class="mobile-activity-card"
+          @click="goToDetail(item.id)"
+        >
+          <q-img
+            :src="
+              item.file
+                ? `${api.defaults.baseURL}/uploads/program/images/${item.file}`
+                : `${api.defaults.baseURL}/uploads/no-image.jpg`
+            "
+            class="mobile-activity-img"
+          />
+        </div>
+      </div>
+
+      <!-- ✅ Desktop ใช้ carousel -->
+      <div v-else class="carousel-container">
         <!-- Cards Container -->
 
         <div class="cards-container">
@@ -259,131 +280,34 @@ onMounted(async () => {
 
     <!-- Courses Carousel - แบบใหม่ -->
     <div class="q-mt-md course-carousel">
-      <p class="head-title">หลักสูตร</p>
+      <!-- ✅ หัวข้อซ้าย / ดูทั้งหมดขวา -->
+      <div class="row items-center justify-between q-mb-sm">
+        <p class="head-title q-mb-none">หลักสูตร</p>
+        <div class="see-all" @click="OnlineCoursesPage">
+          ดูทั้งหมด
+          <q-icon name="chevron_right" size="18px" />
+        </div>
+      </div>
 
       <div class="course-carousel-container">
         <!-- Grid Layout for Courses -->
         <div class="courses-grid">
           <transition-group name="course-item" tag="div" class="grid-wrapper">
-            <div
-              v-for="(course, index) in courses"
-              :key="`course-${index}`"
-              class="course-grid-item"
-              @click="goToCourseDetail(course.id)"
-            >
-              <div class="course-card-modern">
-                <!-- Badge -->
-                <div class="course-badge" v-if="course.skill">
-                  {{ course.skill === 'hard' ? 'Hard Skill' : 'Soft Skill' }}
-                </div>
-
-                <!-- Image Section -->
-                <div class="course-image-section">
-                  <q-img
-                    :src="getCourseImageUrl(course)"
-                    class="course-image-modern"
-                    @error="
-                      console.log('Image error for course:', course.name, 'file:', course.file)
-                    "
-                    loading="lazy"
-                  >
-                    <template v-slot:error>
-                      <div class="absolute-full flex flex-center bg-grey-3 text-grey-8">
-                        <q-icon name="image_not_supported" size="48px" />
-                      </div>
-                    </template>
-                  </q-img>
-                  <div class="image-overlay"></div>
-                </div>
-
-                <!-- Content Section -->
-                <div class="course-content">
-                  <!-- Title -->
-                  <h3 class="course-title">{{ course.name }}</h3>
-
-                  <!-- Description with truncation -->
-                  <p class="course-desc" v-if="course.description">
-                    {{ course.description }}
-                  </p>
-
-                  <!-- Info Grid -->
-                  <div class="info-grid">
-                    <!-- Date -->
-                    <div class="info-item" v-if="course.programItems?.[0]?.dates?.[0]">
-                      <div class="info-icon">
-                        <q-icon name="calendar_today" />
-                      </div>
-                      <div class="info-text">
-                        <span class="info-label">วันที่จัด</span>
-                        <span class="info-value">
-                          {{
-                            new Date(course.programItems[0].dates[0].date).toLocaleDateString(
-                              'th-TH',
-                              {
-                                month: 'short',
-                                day: 'numeric',
-                              },
-                            )
-                          }}
-                        </span>
-                      </div>
-                    </div>
-
-                    <!-- Time -->
-                    <div class="info-item" v-if="course.programItems?.[0]?.dates?.[0]">
-                      <div class="info-icon">
-                        <q-icon name="schedule" />
-                      </div>
-                      <div class="info-text">
-                        <span class="info-label">เวลา</span>
-                        <span class="info-value">
-                          {{ course.programItems[0].dates[0].stime.substring(0, 5) }}
-                        </span>
-                      </div>
-                    </div>
-
-                    <!-- Seats -->
-                    <div class="info-item" v-if="course.programItems?.[0]">
-                      <div class="info-icon">
-                        <q-icon name="people_alt" />
-                      </div>
-                      <div class="info-text">
-                        <span class="info-label">ที่นั่ง</span>
-                        <span class="info-value">
-                          {{ course.programItems[0].enrollmentCount }}/
-                          {{ course.programItems[0].maxParticipants }}
-                        </span>
-                      </div>
-                    </div>
+            <!-- ✅ ปรับหลักสูตรให้เป็นแนวนอน 1 แถวเสมอ -->
+            <div class="courses-scroll">
+              <div
+                v-for="(course, index) in courses.slice(0, 5)"
+                :key="`course-${index}`"
+                class="course-scroll-item"
+                @click="goToCourseDetail(course.id)"
+              >
+                <div class="course-card-modern">
+                  <div class="course-image-section">
+                    <q-img :src="getCourseImageUrl(course)" class="course-image-modern" />
                   </div>
-
-                  <!-- Progress Bar -->
-                  <div class="progress-section" v-if="course.programItems?.[0]">
-                    <div class="progress-bar">
-                      <div
-                        class="progress-fill"
-                        :style="{
-                          width:
-                            (course.programItems[0].enrollmentCount /
-                              course.programItems[0].maxParticipants) *
-                              100 +
-                            '%',
-                        }"
-                      ></div>
-                    </div>
-                    <span class="progress-text">
-                      {{
-                        Math.round(
-                          (course.programItems[0].enrollmentCount /
-                            course.programItems[0].maxParticipants) *
-                            100,
-                        )
-                      }}% เต็มแล้ว
-                    </span>
+                  <div class="course-content">
+                    <h3 class="course-title">{{ course.name }}</h3>
                   </div>
-
-                  <!-- CTA Button -->
-                  <button class="course-cta-btn">ลงทะเบียนเข้าเรียน</button>
                 </div>
               </div>
             </div>
@@ -664,7 +588,7 @@ onMounted(async () => {
 
 .menu-card {
   width: 100%;
-  height: 150px;
+  /* height: 150px; */
   padding: 20px;
   text-align: left;
   border-radius: 8px;
@@ -699,106 +623,46 @@ onMounted(async () => {
   color: #3b82f6;
 }
 
-/* Tablet styles */
 @media (max-width: 1024px) {
-  .page-wrap {
-    padding: 0 20px;
-  }
-
-  .my-card {
-    width: 700px;
-  }
-
-  .activity-image,
-  .course-image {
-    height: 250px;
-  }
-
-  .menu-row {
-    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-    gap: 16px;
-  }
-
-  .menu-card {
-    height: 140px;
-    padding: 16px;
-  }
-}
-
-/* Mobile styles */
-@media (max-width: 768px) {
-  .page-wrap {
-    padding: 0 16px;
-  }
-
-  .texttitle {
-    font-size: 20px;
-    margin-bottom: 16px;
-  }
-
-  .activity-carousel {
-    margin-bottom: 30px;
-  }
-
-  .carousel-container {
-    padding: 20px 0;
-    min-height: 400px;
-  }
-
-  .my-card {
-    width: 450px;
-    height: 100%;
-    margin: 0 auto;
-  }
-
-  .activity-image,
-  .course-image {
-    height: 200px;
-  }
-
-  /* Navigation buttons removed */
-
-  .menu {
-    margin-top: 30px;
-  }
-
-  .menu-title {
-    font-size: 18px;
-    margin-bottom: 16px;
-  }
-
-  .menu-row {
-    grid-template-columns: 1fr;
+  /* โครงการแสดงเฉพาะภาพ */
+  .mobile-activity-scroll {
+    display: flex;
     gap: 12px;
+    overflow-x: auto;
+    padding: 8px 4px;
+    scroll-snap-type: x mandatory;
+    -webkit-overflow-scrolling: touch;
+    scroll-behavior: smooth;
   }
 
-  .menu-card {
-    height: auto;
-    min-height: 120px;
-    padding: 16px;
+  .mobile-activity-card {
+    flex: 0 0 auto;
+    width: 85%;
+    max-width: 340px;
+    border-radius: 10px;
+    overflow: hidden;
+    scroll-snap-align: center;
   }
 
-  .label-title {
-    font-size: 15px;
-    margin: 12px 0 4px 0;
+  .mobile-activity-img {
+    width: 100%;
+    height: 180px;
+    border-radius: 10px;
+    object-fit: cover;
   }
 
-  .label {
-    font-size: 13px;
+  /* ปุ่มดูทั้งหมด */
+  .see-all {
+    font-size: 14px;
+    font-weight: 600;
+    color: #060478;
+    display: flex;
+    align-items: center;
+    cursor: pointer;
   }
 
-  .icon {
-    font-size: 30px;
-  }
-
-  .activity-info {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 8px;
-  }
-
-  .info-block {
-    font-size: 12px;
+  .see-all q-icon {
+    margin-left: 2px;
   }
 }
 
@@ -819,7 +683,7 @@ onMounted(async () => {
 
   .my-card {
     width: 350px;
-    height: 100%;
+    /* height: 100%; */
   }
 
   .activity-image,
@@ -927,11 +791,21 @@ onMounted(async () => {
   width: 100%;
 }
 
-.courses-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-  gap: 24px;
-  padding: 20px 0;
+/* Tablet */
+@media (max-width: 1024px) {
+  .courses-grid {
+    grid-template-columns: repeat(3, 1fr); /* ✅ Tablet: 3 ช่อง */
+    gap: 20px;
+  }
+}
+
+/* Mobile */
+@media (max-width: 768px) {
+  .courses-grid {
+    grid-template-columns: 1fr; /* ✅ มือถือ: 1 ช่องต่อแถว */
+    gap: 16px;
+    padding: 16px 0;
+  }
 }
 
 .grid-wrapper {
@@ -1173,7 +1047,7 @@ onMounted(async () => {
 /* Tablet */
 @media (max-width: 1024px) {
   .courses-grid {
-    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    grid-template-columns: repeat(3, 1fr); /* ✅ Tablet: 3 ช่อง */
     gap: 20px;
   }
 
@@ -1190,7 +1064,7 @@ onMounted(async () => {
 /* Mobile */
 @media (max-width: 768px) {
   .courses-grid {
-    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    grid-template-columns: 1fr; /* ✅ มือถือ: 1 ช่อง */
     gap: 16px;
     padding: 16px 0;
   }
@@ -1256,4 +1130,90 @@ onMounted(async () => {
     padding: 12px;
   }
 }
+.see-all {
+  font-size: 15px;
+  font-weight: 600;
+  color: #041d78;
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  transition: color 0.2s ease;
+}
+
+.see-all:hover {
+  color: #054196;
+}
+
+.see-all q-icon {
+  margin-left: 4px;
+}
+
+/* ✅ แสดงหลักสูตรแบบแนวนอนตลอด */
+.courses-scroll {
+  display: flex;
+  gap: 20px;
+  overflow-x: auto;
+  overflow-y: hidden;
+  scroll-snap-type: x mandatory;
+  padding: 12px 4px;
+  -webkit-overflow-scrolling: touch;
+  scroll-behavior: smooth;
+}
+
+.course-scroll-item {
+  flex: 0 0 auto;
+  width: 280px; /* ✅ ขนาดคงที่ของแต่ละการ์ด */
+  scroll-snap-align: start;
+}
+
+.course-scroll-item:last-child {
+  margin-right: 12px;
+}
+
+/* ✅ ปรับ hover + responsive */
+.course-card-modern {
+  border-radius: 12px;
+  border: 1px solid #f0f0f0;
+  background: white;
+  overflow: hidden;
+  transition: all 0.3s ease;
+  display: flex;
+  flex-direction: column;
+}
+
+.course-card-modern:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+}
+
+.course-image-section {
+  height: 180px;
+}
+
+.course-image-modern {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* Responsive */
+@media (max-width: 1024px) {
+  .course-scroll-item {
+    width: 240px;
+  }
+  .course-image-section {
+    height: 160px;
+  }
+}
+
+@media (max-width: 768px) {
+  .course-scroll-item {
+    width: 80%;
+    max-width: 320px;
+  }
+  .course-image-section {
+    height: 150px;
+  }
+}
+
 </style>
