@@ -1,5 +1,5 @@
 <template>
-  <q-card flat>
+
     <!-- Grid Table -->
     <div class="q-mb-md">
       <div class="row q-col-gutter-md">
@@ -13,6 +13,7 @@
           >
             <div>{{ rowIndex + 1 }}.</div>
             <q-input
+            flat
               dense
               outlined
               :model-value="row.title"
@@ -51,8 +52,8 @@
       </div>
     </div>
 
-    <!-- Footer -->
-  </q-card>
+
+
 </template>
 
 <script setup lang="ts">

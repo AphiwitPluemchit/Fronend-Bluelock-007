@@ -16,13 +16,6 @@
               :disable="!formData.title || formData.blocks?.length === 0"
               class="preview-btn"
             />
-            <!-- <q-btn
-              class="btnconfirm"
-              label="บันทึก"
-              icon="save"
-              @click="saveForm"
-              :disable="!formData.title || formData.blocks?.length === 0"
-            /> -->
           </div>
         </div>
       </div>

@@ -1,5 +1,5 @@
 <template>
-  <q-card flat>
+
     <div class="q-mb-md">
       <div class="row q-col-gutter-md">
         <!-- Rows -->
@@ -48,7 +48,6 @@
       </div>
     </div>
 
-  </q-card>
 </template>
 
 <script setup lang="ts">
