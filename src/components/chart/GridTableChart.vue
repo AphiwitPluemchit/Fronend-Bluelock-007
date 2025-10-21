@@ -12,7 +12,7 @@
           <th class="center sticky">แปลความ</th>
         </tr>
         <tr>
-          <th class="left substicky">หัวข้อ</th>
+          <th class="left substicky"></th>
           <th class="center substicky">มากที่สุด</th>
           <th class="center substicky">มาก</th>
           <th class="center substicky">ปานกลาง</th>
