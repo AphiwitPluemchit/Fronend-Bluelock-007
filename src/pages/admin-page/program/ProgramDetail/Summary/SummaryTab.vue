@@ -12,23 +12,18 @@ import dayjs from 'dayjs'
 
 const route = useRoute()
 const programId = route.params.id as string
-const selectProgramItemDate = ref<string>('') // เดิม: ref(-1)
+const selectProgramItemDate = ref<string>('')
 
 const program = ref<Program | null>(null)
-// ตัวอย่าง type ของแถว (ให้ตรงกับที่ EvaluationTable ใช้)
 interface ProgramRow {
   _id: string
   name: string
   formId?: string | null
-  // ...field อื่นๆตามจริง
 }
-const query = ref<Pagination>({
-  date: '',
-})
+const query = ref<Pagination>({ date: '' })
 const isDialogOpen = ref(false)
 const enrollmentSummary = ref<EnrollmentSummary | null>(null)
 
-// ✅ เตรียม rows ให้ตาราง
 const rows = ref<ProgramRow[]>([])
 const programItemDatesOptions = computed(() => {
   const items = program.value?.programItems ?? []
@@ -36,52 +31,39 @@ const programItemDatesOptions = computed(() => {
   const uniq = Array.from(new Set(dates)).sort()
   return uniq.map((d) => ({ label: d, value: d }))
 })
-const showCreateQR_CodeDialog = () => {
-  isDialogOpen.value = true
-}
-const cancelCreateQR_Code = () => {
-  isDialogOpen.value = false
-}
-const confirmCreateQR_Code = () => {
-  console.log('QR-Code เช็คชื่อถูกสร้างแล้ว!')
-}
+
+const showCreateQR_CodeDialog = () => (isDialogOpen.value = true)
+const cancelCreateQR_Code = () => (isDialogOpen.value = false)
+const confirmCreateQR_Code = () => console.log('QR-Code เช็คชื่อถูกสร้างแล้ว!')
+
 const canShowCheckInBtn = computed(() => {
   const today = dayjs().format('YYYY-MM-DD')
-  return programItemDatesOptions.value.some((o) => {
-    // กันกรณีค่ามาเป็น ISO/มีเวลา ตัดให้เหลือ YYYY-MM-DD เทียบเสมอ
-    const v = dayjs(String(o.value)).format('YYYY-MM-DD')
-    return v === today
-  })
+  return programItemDatesOptions.value.some((o) => dayjs(String(o.value)).format('YYYY-MM-DD') === today)
 })
+
 async function setDefaultDate() {
   const res = await ProgramService.getOne(programId)
   program.value = res.data
   buildRows()
   const opts = programItemDatesOptions.value
   if (!opts.length) return
-
   const today = dayjs().format('YYYY-MM-DD')
   const foundToday = opts.find((o) => o.value === today)
-
-  if (foundToday) {
-    selectProgramItemDate.value = foundToday.value
-  } else {
-    selectProgramItemDate.value = opts[0]!.value // วันแรกในรายการ
-  }
+  selectProgramItemDate.value = foundToday ? foundToday.value : opts[0]!.value
 }
 
 const fetchSamaryEnrollment = async () => {
   query.value.date = selectProgramItemDate.value
-
   const resSum = await SammaryReportService.getSamaryEnrollment(programId, query.value.date)
   enrollmentSummary.value = resSum.data
 }
+
 const buildRows = () => {
   const items = program.value?.programItems ?? []
   rows.value = items.map((it) => ({
     _id: it.id || crypto.randomUUID(),
     name: it.name || '—',
-    formId: program.value?.formsId ?? null,  
+    formId: program.value?.formsId ?? null,
   }))
 }
 
@@ -93,106 +75,79 @@ onMounted(async () => {
 
 <template>
   <div>
-    <div class="row q-col-gutter-sm form-toolbar q-mb-md">
-      <div class="select-filter-row">
-        <q-select
-          v-if="programItemDatesOptions.length > 0"
-          dense
-          outlined
-          v-model="selectProgramItemDate"
-          :options="programItemDatesOptions"
-          label="เลือกวัน"
-          option-label="label"
-          option-value="value"
-          emit-value
-          map-options
-          @update:model-value="fetchSamaryEnrollment"
-          class="dropdown"
-          popup-content-class="dropdown-menu"
-          :style="{ border: 'none' }"
-          behavior="menu"
-        />
-      </div>
+    <!-- ตัวกรองวัน -->
+    <div class="form-toolbar q-mb-md">
+      <h2 class="program-title">{{ program?.name || 'กำลังโหลด...' }}</h2>
+      <q-select
+        v-if="programItemDatesOptions.length > 0"
+        dense
+        outlined
+        v-model="selectProgramItemDate"
+        :options="programItemDatesOptions"
+        label="เลือกวัน"
+        option-label="label"
+        option-value="value"
+        emit-value
+        map-options
+        @update:model-value="fetchSamaryEnrollment"
+        class="dropdown"
+        popup-content-class="dropdown-menu"
+        behavior="menu"
+      />
     </div>
-    <!-- ฝั่งขวา: ข้อมูล + ตาราง -->
-    <div class="registration-details">
-      <!-- การ์ดบนสุด -->
-      <q-card class="stat-card enrolled-card">
-        <q-card-section class="stat-content">
-          <div class="stat-icon">
-            <q-icon name="how_to_reg" size="40px" />
-          </div>
-          <div class="stat-details">
-            <div class="stat-number">{{ enrollmentSummary?.registered || 0 }}</div>
-            <div class="stat-label">จำนวนนิสิตที่ลงทะเบียน</div>
-          </div>
+
+    <!-- ✅ การ์ดแถวเดียว 5 ใบ -->
+    <div class="cards-row">
+      <q-card class="summary-card green">
+        <q-card-section class="card-content">
+          <div class="label">ลงทะเบียน</div>
+          <div class="number">{{ enrollmentSummary?.registered || 0 }}</div>
         </q-card-section>
       </q-card>
 
-      <!-- 4 การ์ดที่อยู่ในบรรทัดเดียวกัน -->
-      <div class="info-row">
-        <q-card class="checkin-card ontime-card">
-          <q-card-section class="stat-content">
-            <div class="stat-icon">
-              <q-icon name="login" size="40px" />
-            </div>
-            <div class="stat-details">
-              <div class="stat-number">{{ enrollmentSummary?.checkin || 0 }}</div>
-              <div class="stat-label">จำนวนนิสิตที่เช็คชื่อเข้า</div>
-            </div>
-          </q-card-section>
-        </q-card>
+      <q-card class="summary-card blue">
+        <q-card-section class="card-content">
+          <div class="label">เช็คชื่อเข้า</div>
+          <div class="number">{{ enrollmentSummary?.checkin || 0 }}</div>
+        </q-card-section>
+      </q-card>
 
-        <q-card class="checkin-card late-card">
-          <q-card-section class="stat-content">
-            <div class="stat-icon">
-              <q-icon name="schedule" size="40px" />
-            </div>
-            <div class="stat-details">
-              <div class="stat-number">{{ enrollmentSummary?.checkinLate || 0 }}</div>
-              <div class="stat-label">จำนวนนิสิตที่เช็คชื่อสาย</div>
-            </div>
-          </q-card-section>
-        </q-card>
+      <q-card class="summary-card orange">
+        <q-card-section class="card-content">
+          <div class="label">เช็คชื่อสาย</div>
+          <div class="number">{{ enrollmentSummary?.checkinLate || 0 }}</div>
+        </q-card-section>
+      </q-card>
 
-        <q-card class="checkin-card out-card">
-          <q-card-section class="stat-content">
-            <div class="stat-icon">
-              <q-icon name="logout" size="40px" />
-            </div>
-            <div class="stat-details">
-              <div class="stat-number">{{ enrollmentSummary?.checkout || 0 }}</div>
-              <div class="stat-label">จำนวนนิสิตที่เช็คชื่อออก</div>
-            </div>
-          </q-card-section>
-        </q-card>
+      <q-card class="summary-card brown">
+        <q-card-section class="card-content">
+          <div class="label">เช็คชื่อออก</div>
+          <div class="number">{{ enrollmentSummary?.checkout || 0 }}</div>
+        </q-card-section>
+      </q-card>
 
-        <q-card class="checkin-card missing-card">
-          <q-card-section class="stat-content">
-            <div class="stat-icon">
-              <q-icon name="cancel" size="40px" />
-            </div>
-            <div class="stat-details">
-              <div class="stat-number">{{ enrollmentSummary?.notParticipating || 0 }}</div>
-              <div class="stat-label">จำนวนนิสิตที่ไม่มา</div>
-            </div>
-          </q-card-section>
-        </q-card>
-      </div>
+      <q-card class="summary-card red">
+        <q-card-section class="card-content">
+          <div class="label">ไม่มา</div>
+          <div class="number">{{ enrollmentSummary?.notParticipating || 0 }}</div>
+        </q-card-section>
+      </q-card>
+    </div>
 
-      <div class="image-section">
-        <q-btn
-          v-if="canShowCheckInBtn"
-          label="สร้าง QR-Code เช็คชื่อ"
-          @click="showCreateQR_CodeDialog"
-          class="check-in-btn"
-          icon="qr_code"
-        />
-      </div>
-      <!-- ตารางผลการประเมิน -->
-      <div class="evaluation-container">
-        <EvaluationTable v-if="program" :program="program" />
-      </div>
+    <!-- ปุ่มสร้าง QR Code -->
+    <div class="image-section">
+      <q-btn
+        v-if="canShowCheckInBtn"
+        label="สร้าง QR-Code เช็คชื่อ"
+        icon="qr_code"
+        @click="showCreateQR_CodeDialog"
+        class="check-in-btn"
+      />
+    </div>
+
+    <!-- ตารางผลการประเมิน -->
+    <div class="evaluation-container">
+      <EvaluationTable v-if="program" :program="program" />
     </div>
   </div>
 
@@ -204,122 +159,117 @@ onMounted(async () => {
 </template>
 
 <style lang="scss" scoped>
-.stats-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-  gap: 20px;
+/* ส่วนหัว */
+.form-toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+.program-title {
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: #111827;
+  margin: 0;
+}
+
+/* ✅ แถวการ์ด 5 ใบ */
+.cards-row {
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
   margin-bottom: 32px;
 }
-.stat-card {
-  border-radius: 16px;
-  overflow: hidden;
-  margin-bottom: 24px;
-  background: #10b981;
-  color: white;
+
+.summary-card {
+  flex: 1 1 calc(20% - 16px);
+  min-width: 200px;
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  color: #333;
+  transition: all 0.25s ease;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  height: 140px;
+  position: relative;
 }
 
-.stat-card:hover {
+.summary-card:hover {
   transform: translateY(-4px);
-  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.15);
-}
-.checkin-card {
-  flex: 1 1 250px;
-  max-width: 400px;
-  margin-top: 10px;
-  margin-bottom: 10px;
-  border-radius: 16px;
-  overflow: hidden;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-}
-.checkin-card:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.15);
-}
-.info-row {
-  display: flex;
-  flex-wrap: nowrap;
-  gap: 20px;
-  overflow-x: auto;
-  margin-bottom: 24px;
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.08);
 }
 
-.enrolled-card {
-  background: #10b981;
-  color: white;
-}
-.ontime-card {
-  background: #4169e1;
-  color: white;
-}
-.late-card {
-  background: #d6c94e;
-  color: white;
-}
-.out-card {
-  background: #2196f3;
-  color: white;
-}
-.missing-card {
-  background: #cd5c5c;
-  color: white;
-}
-
-.stat-content {
+.card-content {
   display: flex;
+  flex-direction: column;
+  height: 100%;
+  justify-content: center;
   align-items: center;
-  gap: 16px;
-  padding: 24px;
-}
-.stat-icon {
-  opacity: 0.9;
-}
-.stat-details {
-  flex: 1;
-}
-.stat-number {
-  font-size: 36px; /* เพิ่มขนาด */
-  font-weight: 700;
-  line-height: 1;
-  margin-bottom: 4px;
+  position: relative;
+  text-align: center;
+  padding: 16px;
 }
 
-.stat-label {
-  font-size: 16px; /* เพิ่มขนาด */
-  opacity: 0.9;
+/* ข้อความหัวมุมบนซ้าย (สีดำ) */
+.label {
+  position: absolute;
+  top: 12px;
+  left: 16px;
+  font-size: 0.95rem;
   font-weight: 600;
+  color: #000;
 }
 
+/* ตัวเลขกลางการ์ด */
+.number {
+  font-size: 2.5rem;
+  font-weight: 700;
+  margin-top: auto;
+  margin-bottom: auto;
+}
+
+/* สีตัวเลขแต่ละการ์ด */
+.green .number {
+  color: #16a34a;
+}
+.blue .number {
+  color: #2563eb;
+}
+.orange .number {
+  color: #f59e0b;
+}
+.red .number {
+  color: #dc2626;
+}
+.brown .number {
+  color: #92400e;
+}
+
+/* ปุ่มสร้าง QR Code */
+.image-section {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 8px;
+  margin-bottom: 24px;
+}
 .check-in-btn {
   background-color: #000 !important;
   color: white !important;
-  justify-content: flex-end;
   padding: 10px 20px;
   border-radius: 8px;
   font-weight: 600;
 }
-.select-filter-row {
-  display: flex;
-  gap: 8px;
-  align-items: center;
-}
-.form-toolbar {
-  display: flex;
-  flex-direction: row;
-  flex-wrap: wrap;
-  gap: 8px;
-  justify-content: flex-end;
-  align-items: center;
-}
-.dropdown-menu {
-  max-width: 300px !important;
-  width: 100% !important;
-  box-sizing: border-box;
-}
-.image-section {
-  display: flex;
-  justify-content: flex-end; /* ✅ ชิดขวา */
-  margin-top: 8px;
-  margin-bottom: 24px;
-}
 
+/* Responsive */
+@media (max-width: 1024px) {
+  .summary-card {
+    flex: 1 1 calc(50% - 16px);
+  }
+}
+@media (max-width: 640px) {
+  .summary-card {
+    flex: 1 1 100%;
+  }
+}
 </style>
