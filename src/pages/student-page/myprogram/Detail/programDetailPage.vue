@@ -102,6 +102,7 @@ watch(
 </template>
 
 <style scoped>
+
 .custom-tabs .q-tab--active,
 .custom-tabs .q-tab:hover {
   background-color: #283393 !important;
@@ -111,7 +112,8 @@ watch(
 .custom-panels {
   background-color: #edf0f5;
   font-size: 20px;
-  height: 700px;
+  height: calc(80vh - 150px);
+  width: 100%;
   overflow: hidden;
 }
 </style>

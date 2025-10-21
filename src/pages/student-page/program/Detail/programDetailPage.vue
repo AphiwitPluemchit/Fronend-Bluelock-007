@@ -95,11 +95,11 @@ onMounted(async () => {
 })
 </script>
 <template>
-  <q-page class="q-pa-md">
+  <q-page class="q-pa-md card-container">
     <div style="margin-top: 20px;">
     <AppBreadcrumbs :breadcrumbs="breadcrumbs"/>
 
-    <div class="program-detail-card q-mt-md" v-if="screen">
+    <div class="program-detail-card card-container q-mt-md" v-if="screen">
       <q-card-section class="q-col-gutter-md row items-start q-mb-md">
         <!-- ภาพโครงการ -->
         <div class="col-12 col-md-4 text-center">
@@ -161,6 +161,10 @@ onMounted(async () => {
 </template>
 
 <style scoped>
+.card-container {
+  height: calc(80vh - 150px);
+  width: 100%;
+}
 .program-detail-card {
   background-color: #edf0f5; /*f5f7fa */
   padding: 16px;

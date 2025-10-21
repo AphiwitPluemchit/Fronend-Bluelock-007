@@ -150,6 +150,7 @@ onMounted(async () => {
 </template>
 
 <style scoped>
+
 .search-filter-wrapper {
   flex-wrap: wrap;
 }
