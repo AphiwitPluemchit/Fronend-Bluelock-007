@@ -29,7 +29,7 @@ const screen = ref(false)
 const auth = useAuthStore()
 const breadcrumbs = ref({
   previousPage: { title: 'โครงการทั้งหมด', path: '/Student/ProgramTablePage' },
-  currentPage: { title: 'รายละเอียดโครงการ', path: `/Student/ProgramTablePage/ProgramDetail` },
+  currentPage: { title: 'รายละเอียดโครงการ', path: `/Student/Program/ProgramDetail/${route.params.id as string}}` },
   icon: 'event',
 })
 

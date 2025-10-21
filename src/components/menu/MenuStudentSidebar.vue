@@ -3,11 +3,16 @@
     <q-toolbar class="justify-between">
       <!-- เมนูหลัก -->
       <div class="row items-center q-gutter-x-lg">
+        <img
+          src="/icons/Logo_of_Burapha_University.png"
+          alt="Logo"
+          class="logo-img hide-below-600"
+        />
         <!-- ปุ่มเมนูหลัก -->
-        <q-btn flat no-caps label="หน้าหลัก" to="/Student/Home" />
+        <q-btn dense flat no-caps label="หน้าหลัก" to="/Student/Home" />
 
         <!-- เมนูมีโครงการ (dropdown) -->
-        <q-btn flat no-caps label="โครงการ">
+        <q-btn dense flat no-caps label="โครงการ">
           <q-menu fit>
             <q-list style="min-width: 150px">
               <q-item clickable v-ripple to="/Student/ProgramCalendar">
@@ -41,7 +46,7 @@
             <q-list style="min-width: 180px">
               <q-item clickable v-ripple tag="router-link" to="/Student/RecordPage">
                 <q-item-section avatar>
-                  <q-icon name="person"  color="indigo-10"/>
+                  <q-icon name="person" color="indigo-10" />
                 </q-item-section>
                 <q-item-section>ประวัติของฉัน</q-item-section>
               </q-item>
@@ -79,3 +84,15 @@ async function logout() {
   }
 }
 </script>
+<style scoped>
+.logo-img {
+  width: 38px;
+  height: auto;
+  margin-left: 40px;
+}
+@media (max-width: 600px) {
+  .hide-below-600 {
+    display: none !important;
+  }
+}
+</style>

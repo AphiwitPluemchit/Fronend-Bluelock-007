@@ -32,7 +32,7 @@ const imageSrc = computed(() => {
 
 // ฟังก์ชันสำหรับไปยังหน้าอัปโหลดใบประกาศ
 const goToCertificatePage = () => {
-  void router.push(`/student/UploadCertificate/${props.course.id}`)
+  void router.push(`/Student/UploadCertificate/${props.course.id}`)
 }
 </script>
 
