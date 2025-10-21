@@ -186,6 +186,7 @@ onMounted(async () => {
           label="สร้าง QR-Code เช็คชื่อ"
           @click="showCreateQR_CodeDialog"
           class="check-in-btn"
+          icon="qr_code"
         />
       </div>
       <!-- ตารางผลการประเมิน -->
@@ -314,4 +315,11 @@ onMounted(async () => {
   width: 100% !important;
   box-sizing: border-box;
 }
+.image-section {
+  display: flex;
+  justify-content: flex-end; /* ✅ ชิดขวา */
+  margin-top: 8px;
+  margin-bottom: 24px;
+}
+
 </style>

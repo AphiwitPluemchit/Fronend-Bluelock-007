@@ -112,48 +112,33 @@ onMounted(async () => {
     <div class="main-program-card">
       <div class="program-header">
         <div class="program-title">
-          <q-icon name="event" size="32px" class="text-primary" />
           <h1>{{ programDetail?.name || 'Loading...' }}</h1>
         </div>
       </div>
-      <!-- Main Statistics Cards -->
-      <div class="stats-grid">
-        <q-card class="stat-card capacity-card">
-          <q-card-section class="stat-content">
-            <div class="stat-icon">
-              <q-icon name="group" size="40px" />
-            </div>
-            <div class="stat-details">
-              <div class="stat-number">{{ enrollmentSummary?.maxParticipants || 0 }} คน</div>
-              <div class="stat-label">จำนวนที่รับ</div>
-            </div>
-          </q-card-section>
-        </q-card>
+<!-- Main Statistics Cards -->
+<div class="stats-grid">
+  <q-card class="stat-card blue">
+    <q-card-section class="stat-content">
+      <div class="stat-label">จำนวนที่รับ</div>
+      <div class="stat-number">{{ enrollmentSummary?.maxParticipants || 0 }}</div>
+    </q-card-section>
+  </q-card>
 
-        <q-card class="stat-card enrolled-card">
-          <q-card-section class="stat-content">
-            <div class="stat-icon">
-              <q-icon name="how_to_reg" size="40px" />
-            </div>
-            <div class="stat-details">
-              <div class="stat-number">{{ enrollmentSummary?.totalRegistered || 0 }} คน</div>
-              <div class="stat-label">จำนวนนิสิตที่ลงทะเบียน</div>
-            </div>
-          </q-card-section>
-        </q-card>
+  <q-card class="stat-card green">
+    <q-card-section class="stat-content">
+      <div class="stat-label">จำนวนนิสิตที่ลงทะเบียน</div>
+      <div class="stat-number">{{ enrollmentSummary?.totalRegistered || 0 }}</div>
+    </q-card-section>
+  </q-card>
 
-        <q-card class="stat-card remaining-card">
-          <q-card-section class="stat-content">
-            <div class="stat-icon">
-              <q-icon name="event_seat" size="40px" />
-            </div>
-            <div class="stat-details">
-              <div class="stat-number">{{ enrollmentSummary?.remainingSlots || 0 }} คน</div>
-              <div class="stat-label">จำนวนที่ว่าง</div>
-            </div>
-          </q-card-section>
-        </q-card>
-      </div>
+  <q-card class="stat-card orange">
+    <q-card-section class="stat-content">
+      <div class="stat-label">จำนวนที่ว่าง</div>
+      <div class="stat-number">{{ enrollmentSummary?.remainingSlots || 0 }}</div>
+    </q-card-section>
+  </q-card>
+</div>
+
 
       <!-- Major Distribution -->
       <div class="section-divider">
@@ -779,5 +764,77 @@ onMounted(async () => {
   margin-left: auto;
   font-weight: 500;
 }
+
+/* ✅ การ์ดหลักพื้นหลังขาว */
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 20px;
+  margin-bottom: 32px;
+}
+
+.stat-card {
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  transition: all 0.25s ease;
+  text-align: center;
+  height: 160px;
+  position: relative;
+}
+
+.stat-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.08);
+}
+
+.stat-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  position: relative;
+  padding: 16px;
+}
+
+/* หัวการ์ดมุมบนซ้าย */
+.stat-label {
+  position: absolute;
+  top: 12px;
+  left: 16px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #111827;
+}
+
+/* ตัวเลขกลาง */
+.stat-number {
+  font-size: 2.6rem;
+  font-weight: 700;
+  margin-top: auto;
+  margin-bottom: auto;
+}
+
+/* หน่วย "คน" ใต้ตัวเลข */
+.stat-unit {
+  font-size: 1rem;
+  font-weight: 500;
+  color: #4b5563;
+  margin-top: 4px;
+}
+
+/* สีของตัวเลขแต่ละการ์ด */
+.blue .stat-number {
+  color: #2563eb;
+}
+.green .stat-number {
+  color: #16a34a;
+}
+.orange .stat-number {
+  color: #f59e0b;
+}
+
 </style>
 

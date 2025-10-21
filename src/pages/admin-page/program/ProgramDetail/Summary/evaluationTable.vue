@@ -493,7 +493,7 @@ watch(
 <style scoped>
 .container {
   width: 100%;
-  max-width: 1200px;
+  /* max-width: 1200px; */
   margin: 0 auto;
   padding: 0 16px;
 }
@@ -516,6 +516,7 @@ watch(
 .answer-container {
   width: 100%;
   margin-bottom: 16px;
+  
 }
 
 .answer-wrapper {
@@ -525,6 +526,7 @@ watch(
   background-color: #f9f9f9;
   max-height: 200px;
   overflow-y: auto;
+  
 }
 
 .answer-wrapper::-webkit-scrollbar {
