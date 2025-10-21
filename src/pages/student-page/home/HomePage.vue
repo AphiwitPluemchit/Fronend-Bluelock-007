@@ -15,15 +15,8 @@ interface Course {
   file?: string
   status: string
   skill?: string
-  programItems?: Array<{
-    dates?: Array<{
-      date: string
-      stime: string
-      etime: string
-    }>
-    enrollmentCount: number
-    maxParticipants: number
-  }>
+  hour?: number
+  isHardSkill?: boolean
 }
 const router = useRouter()
 const authStore = useAuthStore()
@@ -144,9 +137,22 @@ const visibleActivities = computed(() => {
 //   startAutoSlide()
 // }
 
-const goToSlide = (index: number) => {
-  slide.value = index
-  startAutoSlide()
+// const goToSlide = (index: number) => {
+//   slide.value = index
+//   startAutoSlide()
+// }
+
+// ✅ สำหรับ sync indicator เมื่อ scroll บนมือถือ
+const activityScroll = ref<HTMLElement | null>(null)
+
+const onActivityScroll = () => {
+  if (!activityScroll.value || activities.value.length === 0) return
+
+  const scrollLeft = activityScroll.value.scrollLeft
+  const cardWidth = activityScroll.value.clientWidth * 0.85 // กว้างแต่ละ card
+  const currentIndex = Math.round(scrollLeft / cardWidth)
+
+  slide.value = Math.min(currentIndex, activities.value.length - 1)
 }
 
 onMounted(async () => {
@@ -169,7 +175,12 @@ onMounted(async () => {
       <p class="head-title">โครงการ</p>
 
       <!-- ✅ มือถือ: แสดงเฉพาะภาพแนวนอน -->
-      <div v-if="$q.screen.lt.md" class="mobile-activity-scroll">
+      <div
+        v-if="$q.screen.lt.md"
+        ref="activityScroll"
+        class="mobile-activity-scroll"
+        @scroll="onActivityScroll"
+      >
         <div
           v-for="(item, index) in activities"
           :key="index"
@@ -268,14 +279,14 @@ onMounted(async () => {
       </div>
 
       <!-- Indicators -->
-      <div class="carousel-indicators">
+      <!-- <div class="carousel-indicators">
         <div
           v-for="(activity, index) in activities"
           :key="`indicator-${index}`"
           :class="['indicator', { active: index === slide }]"
           @click="goToSlide(index)"
         ></div>
-      </div>
+      </div> -->
     </div>
 
     <!-- Courses Carousel - แบบใหม่ -->
@@ -307,6 +318,10 @@ onMounted(async () => {
                   </div>
                   <div class="course-content">
                     <h3 class="course-title">{{ course.name }}</h3>
+                    <div class="info-block">
+                      <q-icon name="schedule" class=".info-block" />
+                      <span class="info-block">{{ course.hour }} ชั่วโมง</span>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -635,6 +650,15 @@ onMounted(async () => {
     scroll-behavior: smooth;
   }
 
+  .mobile-activity-scroll {
+    scroll-snap-type: x mandatory;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .mobile-activity-card {
+    scroll-snap-align: center;
+  }
+
   .mobile-activity-card {
     flex: 0 0 auto;
     width: 85%;
@@ -844,7 +868,7 @@ onMounted(async () => {
 .course-card-modern:hover {
   transform: translateY(-6px);
   box-shadow: 0 12px 24px rgba(0, 0, 0, 0.12);
-  border-color: #3b82f6;
+  /* border-color: #3b82f6; */
 }
 
 /* Badge */
@@ -1159,6 +1183,23 @@ onMounted(async () => {
   -webkit-overflow-scrolling: touch;
   scroll-behavior: smooth;
 }
+/* ✅ ซ่อน scrollbar ทั้งหมดในส่วนหลักสูตรแนวนอน */
+.courses-scroll {
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* IE & Edge */
+}
+
+.courses-scroll::-webkit-scrollbar {
+  display: none; /* Chrome, Safari, Opera */
+}
+
+.mobile-activity-scroll {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+.mobile-activity-scroll::-webkit-scrollbar {
+  display: none;
+}
 
 .course-scroll-item {
   flex: 0 0 auto;
@@ -1214,6 +1255,40 @@ onMounted(async () => {
   .course-image-section {
     height: 150px;
   }
+}
+
+.course-content {
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.course-title {
+  font-size: 16px;
+  font-weight: 700;
+  color: #1f2937;
+  margin: 0;
+  line-height: 1.4;
+}
+
+/* ✅ ส่วนแสดงเวลา */
+.course-meta {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 14px;
+  color: #6b7280;
+}
+
+.meta-icon {
+  font-size: 18px;
+  color: #3b82f6;
+}
+
+.meta-text {
+  font-weight: 500;
+  color: #4b5563;
 }
 
 </style>
