@@ -78,6 +78,24 @@ const confirm = async () => {
     isLoading.value = false
   }
 }
+
+// Add date formatting function
+const formatDate = (dateString: string | null | undefined) => {
+  if (!dateString) return '-'
+  try {
+    const date = new Date(dateString)
+    return date.toLocaleDateString('th-TH', {
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+      hour: '2-digit',
+      minute: '2-digit',
+    })
+  } catch (error) {
+    console.error('Error formatting date:', error)
+    return dateString
+  }
+}
 </script>
 
 <template>
@@ -95,14 +113,17 @@ const confirm = async () => {
         {{ props.data.course?.isHardSkill ? 'ทักษะด้านวิชาการ' : 'เตรียมความพร้อม' }}
       </div>
       <div class="q-mb-sm"><b>จำนวนชั่วโมง : </b> {{ props.data.course?.hour }} ชั่วโมง</div>
-      <div class="q-mb-sm"><b>รูปใบประกาศนียบัตร</b></div>
-
-      <q-img
-        :src="props.data.url"
-        style="border: 1px solid #333"
-        class="q-my-md"
-        spinner-color="primary"
-      />
+      <div class="q-mb-sm"><b>คะแนนชื่อนิสิตภาษาไทย : </b> {{ props.data.nameMatch }}</div>
+      <div class="q-mb-sm"><b>คะแนนชื่อนิสิตภาษาอังกฤษ : </b> {{ props.data.nameEngMatch }}</div>
+      <div class="q-mb-sm"><b>คะแนนหัวข้ออบรมภาษาไทย : </b> {{ props.data.courseMatch }}</div>
+      <div class="q-mb-sm"><b>คะแนนหัวข้ออบรมภาษาอังกฤษ : </b> {{ props.data.courseEngMatch }}</div>
+      <div class="q-mb-sm"><b>ลิงก์ใบประกาศนียบัตร : </b> {{ props.data.url }}</div>
+      <!-- uploadAt, changeStatusAt, useOcr? -->
+      <div class="q-mb-sm"><b>วันที่อัปโหลด : </b> {{ formatDate(props.data.uploadAt) }}</div>
+      <div class="q-mb-sm">
+        <b>วันที่เปลี่ยนสถานะ : </b> {{ formatDate(props.data.changedStatusAt) }}
+      </div>
+      <div class="q-mb-sm"><b>ใช้ OCR : </b> {{ props.data.useOcr ? 'ใช่' : 'ไม่ใช่' }}</div>
 
       <!-- รออนุมัติ -->
       <template v-if="props.data.status === StatusType.PENDING">
