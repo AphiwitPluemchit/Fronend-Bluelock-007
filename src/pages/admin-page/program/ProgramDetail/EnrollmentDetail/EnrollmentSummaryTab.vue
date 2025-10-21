@@ -107,12 +107,12 @@ onMounted(async () => {
 </script>
 
 <template>
-  <div>
+  <div class="enrollment-container">
     <!-- Main Program Section -->
     <div class="main-program-card">
       <div class="program-header">
         <div class="program-title">
-          <h1>{{ programDetail?.name || 'Loading...' }}</h1>
+          <div class="textsubtitle">{{ programDetail?.name || 'Loading...' }}</div>
         </div>
       </div>
       <!-- Main Statistics Cards -->
@@ -255,6 +255,10 @@ onMounted(async () => {
 </template>
 
 <style scoped>
+.enrollment-container {
+  height: calc(80vh - 150px);
+  width: 100%;
+}
 .main-program-card {
   margin-bottom: 48px; /* เพิ่ม margin-bottom ให้ช่องว่างก่อนโครงการย่อย */
 }
@@ -652,10 +656,6 @@ onMounted(async () => {
 @media (max-width: 768px) {
   .dashboard-container {
     padding: 16px;
-  }
-
-  .main-program-card {
-    padding: 24px;
   }
 
   .stats-grid {

@@ -74,10 +74,17 @@ onMounted(async () => {
 </script>
 
 <template>
-  <div>
+  <div class="summary-container">
+
     <!-- ตัวกรองวัน -->
-    <div class="form-toolbar q-mb-md">
-      <h2 class="program-title">{{ program?.name || 'กำลังโหลด...' }}</h2>
+    <div class="row form-toolbar ">
+      <!-- <div class=" textsubtitle">{{ program?.name || 'กำลังโหลด...' }}</div> -->
+
+      <div class="program-header">
+        <div class="program-title">
+          <div class="textsubtitle">{{ program?.name || 'Loading...' }}</div>
+        </div>
+      </div>
       <q-select
         v-if="programItemDatesOptions.length > 0"
         dense
@@ -97,7 +104,7 @@ onMounted(async () => {
     </div>
 
     <!-- ✅ การ์ดแถวเดียว 5 ใบ -->
-    <div class="cards-row">
+    <div class="row cards-row ">
       <q-card class="summary-card green">
         <q-card-section class="card-content">
           <div class="label">ลงทะเบียน</div>
@@ -159,19 +166,27 @@ onMounted(async () => {
 </template>
 
 <style lang="scss" scoped>
+.summary-container {
+  height: calc(80vh - 150px);
+  width: 100%;
+}
+.program-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 32px;
+}
+.program-title {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
 /* ส่วนหัว */
 .form-toolbar {
   display: flex;
   justify-content: space-between;
   align-items: center;
   flex-wrap: wrap;
-  gap: 12px;
-}
-.program-title {
-  font-size: 1.4rem;
-  font-weight: 700;
-  color: #111827;
-  margin: 0;
 }
 
 /* ✅ แถวการ์ด 5 ใบ */
