@@ -26,7 +26,7 @@ const showSuccess = (message: string) => {
 const getErrorMessage = (error: unknown, defaultMessage: string): string => {
   if (typeof error === 'object' && error !== null && 'response' in error) {
     const axiosErr = error as AxiosError<{ message?: string }>
-    return axiosErr.response?.data?.message ?? defaultMessage
+    return axiosErr.message
   }
   return defaultMessage
 }
