@@ -32,8 +32,8 @@ const selectedImageFile = ref<File | null>(null)
 
 // Breadcrumbs
 const breadcrumbs = ref({
-  previousPage: { title: 'รายการหัวข้อทั้งหมด', path: '/admin/CourseTablePage' },
-  currentPage: { title: 'เพิ่มหัวข้อการอบรม', path: '/admin/CourseTablePage/AddCourse' },
+  previousPage: { title: 'จัดการหลักสูตร', path: '/admin/CourseTablePage' },
+  currentPage: { title: 'เพิ่มหลักสูตร', path: '/admin/CourseTablePage/AddCourse' },
   icon: 'school',
 })
 

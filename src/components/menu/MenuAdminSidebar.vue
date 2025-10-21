@@ -99,7 +99,7 @@ const linksList = [
     title: 'จัดการใบประกาศนียบัตร',
     icon: 'workspace_premium',
     children: [
-      { title: 'จัดการหัวข้อการอบรม', link: '/Admin/CourseTablePage' },
+      { title: 'จัดการหลักสูตร', link: '/Admin/CourseTablePage' },
       { title: 'รายการใบประกาศนียบัตร', link: '/Admin/ManageCertificateTable' },
     ],
   },
