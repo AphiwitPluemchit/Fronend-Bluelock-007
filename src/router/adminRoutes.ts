@@ -102,6 +102,10 @@ const adminChildren: RouteRecordRaw[] = [
     path: 'forms/:id/submissions',
     component: () => import('pages/admin-page/forms/FormSubmissionsPage.vue'),
   },
+  {
+    path: 'AdminManagement',
+    component: () => import('pages/admin-page/admin/AdminTablePage.vue')
+  }
 ].map((route) => ({
   ...route,
   meta: { role: EnumUserRole.ADMIN },

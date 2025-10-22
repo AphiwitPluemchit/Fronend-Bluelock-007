@@ -104,6 +104,7 @@ const linksList = [
     ],
   },
   { title: 'จัดการแบบประเมิน', icon: 'edit_document', link: '/Admin/Forms' },
+  { title: 'จัดการผู้ดูแล', icon:'person', link:'/Admin/AdminManagement'}
 ]
 
 // const linksList = [
