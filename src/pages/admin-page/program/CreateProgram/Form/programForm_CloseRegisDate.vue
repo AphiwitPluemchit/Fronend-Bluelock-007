@@ -148,6 +148,7 @@ defineExpose({ validate, focus })
             class="cursor-pointer"
             :class="{ 'disabled-icon': disable }"
             style="color: black"
+            @focus="focus"
           />
         </template>
       </q-input>
@@ -166,7 +167,7 @@ defineExpose({ validate, focus })
           color="blue-8"
           text-color="white"
           minimal
-          first-day-of-week="1"
+          :first-day-of-week="0"
           class="my-custom-calendar"
           @keydown.enter.stop.prevent="handleKeydown"
           @update:model-value="onDateChange"

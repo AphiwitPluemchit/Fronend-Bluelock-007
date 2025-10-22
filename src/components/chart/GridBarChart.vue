@@ -50,17 +50,7 @@ const yAxisMax = computed(() => {
 })
 
 /** palette สีสำหรับหลายคอลัมน์ในกริด */
-const palette = [
-  '#2E3192',
-  '#6A36B0',
-  '#A34FD6',
-  '#D474F0',
-  '#F29CF9',
-  '#7E57C2',
-  '#26A69A',
-  '#42A5F5',
-  '#FF7043',
-]
+const PALETTE5 = ['#0D0221', '#0F084B', '#26408B', '#A6CFD5', '#C2E7D9']
 
 function render() {
   if (!cv.value) return
@@ -82,23 +72,20 @@ function render() {
 
   // เตรียม datasets: เคารพสีที่ส่งมา ถ้าไม่ระบุใช้ palette
   const datasets = props.datasets.map((ds, i) => {
-    const bg =
-      (Array.isArray(ds.backgroundColor) ? ds.backgroundColor[0] : ds.backgroundColor) ??
-      palette[i % palette.length]
-    const bd = (Array.isArray(ds.borderColor) ? ds.borderColor[0] : ds.borderColor) ?? bg
-    return {
-      ...ds,
-      backgroundColor: bg,
-      borderColor: bd,
-      borderWidth: 1,
-      datalabels: {
-        anchor: 'end' as const,
-        align: 'top' as const,
-        color: '#000',
-        font: { weight: 'bold' as const, size: 14 },
-      },
-    }
-  })
+  const color = PALETTE5[i % PALETTE5.length]   // ← ใช้พาเลตเสมอ
+  return {
+    ...ds,
+    backgroundColor: color,
+    borderColor: color,
+    borderWidth: 1,
+    datalabels: {
+      anchor: 'end' as const,
+      align: 'top' as const,
+      color: '#000',
+      font: { weight: 'bold' as const, size: 14 },
+    },
+  }
+})
 
   chart = new Chart(cv.value, {
     type: 'bar',

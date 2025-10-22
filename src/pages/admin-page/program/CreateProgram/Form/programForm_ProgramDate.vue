@@ -144,6 +144,7 @@ watch(
             class="cursor-pointer"
             :class="{ 'disabled-icon': disable }"
             style="color: black"
+             @focus="focus"
             @click="datePopupRef?.show()"
           />
         </template>
@@ -158,7 +159,8 @@ watch(
             color="blue-8"
             text-color="white"
             minimal
-            first-day-of-week="1"
+            
+            :first-day-of-week="0"
             class="my-custom-calendar"
             multiple
             @keyup.enter="$emit('enter')"
