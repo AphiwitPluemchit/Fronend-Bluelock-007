@@ -18,13 +18,18 @@ export class SammaryReportService {
    * ✨ NEW: ดึงข้อมูล summary จาก enrollment โดยตรง (แทนการใช้ Summary_Check_In_Out_Reports)
    * @param programId - ID ของ program
    * @param date - วันที่ต้องการ query (YYYY-MM-DD)
+   * @param programItemId - (Optional) ID ของ programItem สำหรับกรณีมีหลาย programItems ในวันเดียวกัน
    * @returns ข้อมูล summary { registered, checkin, checkinLate, checkout, notParticipating }
    */
-  static async getEnrollmentSummary(programId: string, date: string) {
+  static async getEnrollmentSummary(programId: string, date: string, programItemId?: string) {
     try {
       if (!programId) throw new Error('programId is required')
       if (!date) throw new Error('date is required')
-      const res = await api.get(`${this.path}/enrollment/${programId}?date=${date}`)
+      let url = `${this.path}/enrollment/${programId}?date=${date}`
+      if (programItemId) {
+        url += `&programItemId=${programItemId}`
+      }
+      const res = await api.get(url)
       return res.data
     } catch (error) {
       showError('ไม่สามารถโหลดสรุปข้อมูลการลงทะเบียนได้')
@@ -37,13 +42,18 @@ export class SammaryReportService {
    * ✨ NEW (V2): ดึงข้อมูล summary จาก enrollment โดยใช้ aggregation (ประสิทธิภาพสูงกว่า)
    * @param programId - ID ของ program
    * @param date - วันที่ต้องการ query (YYYY-MM-DD)
+   * @param programItemId - (Optional) ID ของ programItem สำหรับกรณีมีหลาย programItems ในวันเดียวกัน
    * @returns ข้อมูล summary { registered, checkin, checkinLate, checkout, notParticipating }
    */
-  static async getEnrollmentSummaryV2(programId: string, date: string) {
+  static async getEnrollmentSummaryV2(programId: string, date: string, programItemId?: string) {
     try {
       if (!programId) throw new Error('programId is required')
       if (!date) throw new Error('date is required')
-      const res = await api.get(`${this.path}/enrollment-v2/${programId}?date=${date}`)
+      let url = `${this.path}/enrollment-v2/${programId}?date=${date}`
+      if (programItemId) {
+        url += `&programItemId=${programItemId}`
+      }
+      const res = await api.get(url)
       return res.data
     } catch (error) {
       showError('ไม่สามารถโหลดสรุปข้อมูลการลงทะเบียนได้')

@@ -13,6 +13,7 @@ import dayjs from 'dayjs'
 const route = useRoute()
 const programId = route.params.id as string
 const selectProgramItemDate = ref<string>('')
+const selectProgramItem = ref<string>('') // เก็บ programItemId ที่เลือก
 
 const program = ref<Program | null>(null)
 interface ProgramRow {
@@ -25,11 +26,34 @@ const isDialogOpen = ref(false)
 const enrollmentSummary = ref<EnrollmentSummary | null>(null)
 
 const rows = ref<ProgramRow[]>([])
+
+// Options สำหรับเลือกวัน
 const programItemDatesOptions = computed(() => {
   const items = program.value?.programItems ?? []
   const dates = items.flatMap((it) => (it.dates ?? []).map((d) => d.date).filter(Boolean))
   const uniq = Array.from(new Set(dates)).sort()
   return uniq.map((d) => ({ label: d, value: d }))
+})
+
+// Options สำหรับเลือก programItem ตามวันที่เลือก
+const programItemOptionsForDate = computed(() => {
+  if (!selectProgramItemDate.value || !program.value) return []
+
+  const items = program.value.programItems ?? []
+  const itemsOnDate = items.filter((item) =>
+    (item.dates ?? []).some((d) => d.date === selectProgramItemDate.value),
+  )
+
+  // ถ้ามีมากกว่า 1 item ให้แสดง dropdown
+  if (itemsOnDate.length <= 1) return []
+
+  return [
+    { label: 'ทั้งหมด', value: '' }, // option สำหรับดูทั้งหมด
+    ...itemsOnDate.map((item) => ({
+      label: item.name || 'Unnamed Item',
+      value: item.id || '',
+    })),
+  ]
 })
 
 const showCreateQR_CodeDialog = () => (isDialogOpen.value = true)
@@ -56,9 +80,20 @@ async function setDefaultDate() {
 
 const fetchSamaryEnrollment = async () => {
   query.value.date = selectProgramItemDate.value
-  // ใช้ API ใหม่ที่ query จาก enrollment โดยตรง
-  const resSum = await SammaryReportService.getEnrollmentSummaryV2(programId, query.value.date)
+  // ใช้ API ใหม่ที่ query จาก enrollment โดยตรง พร้อม filter programItem ถ้ามี
+  const programItemId = selectProgramItem.value || undefined
+  const resSum = await SammaryReportService.getEnrollmentSummaryV2(
+    programId,
+    query.value.date,
+    programItemId,
+  )
   enrollmentSummary.value = resSum.data
+}
+
+const onDateChange = async () => {
+  // Reset programItem selection เมื่อเปลี่ยนวัน
+  selectProgramItem.value = ''
+  await fetchSamaryEnrollment()
 }
 
 const buildRows = () => {
@@ -80,29 +115,50 @@ onMounted(async () => {
   <div class="summary-container">
     <!-- ตัวกรองวัน -->
     <div class="row form-toolbar">
-      <!-- <div class=" textsubtitle">{{ program?.name || 'กำลังโหลด...' }}</div> -->
-
       <div class="program-header">
         <div class="program-title">
           <div class="textsubtitle">{{ program?.name || 'Loading...' }}</div>
         </div>
       </div>
-      <q-select
-        v-if="programItemDatesOptions.length > 0"
-        dense
-        outlined
-        v-model="selectProgramItemDate"
-        :options="programItemDatesOptions"
-        label="เลือกวัน"
-        option-label="label"
-        option-value="value"
-        emit-value
-        map-options
-        @update:model-value="fetchSamaryEnrollment"
-        class="dropdown"
-        popup-content-class="dropdown-menu"
-        behavior="menu"
-      />
+
+      <!-- Filters Section -->
+      <div class="filters-section">
+        <!-- เลือกวัน -->
+        <q-select
+          v-if="programItemDatesOptions.length > 0"
+          dense
+          outlined
+          v-model="selectProgramItemDate"
+          :options="programItemDatesOptions"
+          label="เลือกวัน"
+          option-label="label"
+          option-value="value"
+          emit-value
+          map-options
+          @update:model-value="onDateChange"
+          class="dropdown date-dropdown"
+          popup-content-class="dropdown-menu"
+          behavior="menu"
+        />
+
+        <!-- เลือก ProgramItem (แสดงเฉพาะเมื่อมีมากกว่า 1 item ในวันนั้น) -->
+        <q-select
+          v-if="programItemOptionsForDate.length > 0"
+          dense
+          outlined
+          v-model="selectProgramItem"
+          :options="programItemOptionsForDate"
+          label="เลือกกิจกรรม"
+          option-label="label"
+          option-value="value"
+          emit-value
+          map-options
+          @update:model-value="fetchSamaryEnrollment"
+          class="dropdown item-dropdown"
+          popup-content-class="dropdown-menu"
+          behavior="menu"
+        />
+      </div>
     </div>
 
     <!-- ✅ การ์ดแถวเดียว 5 ใบ -->
@@ -189,6 +245,23 @@ onMounted(async () => {
   justify-content: space-between;
   align-items: center;
   flex-wrap: wrap;
+  gap: 16px;
+}
+
+/* Filters Section */
+.filters-section {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.date-dropdown {
+  min-width: 200px;
+}
+
+.item-dropdown {
+  min-width: 250px;
 }
 
 /* ✅ แถวการ์ด 5 ใบ */
