@@ -2,6 +2,7 @@ import type { CheckinoutRecord } from './checkinout'
 import type { Food, FoodVote } from './food'
 
 export type Program = {
+  rooms?: string[]
   id?: string
   formsId?: string
   name: string

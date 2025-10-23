@@ -42,6 +42,15 @@ function enrollmentSummary(programItems: ProgramItem[]) {
   const totalAccepted = programItems.reduce((total, item) => total + (item.maxParticipants ?? 0), 0)
   return `${totalEnrolled}/${totalAccepted}`
 }
+
+function getProgramLocation(programItems: ProgramItem[] | null | undefined): string {
+  if (!programItems || programItems.length === 0 || !programItems[0]?.rooms) {
+    return 'ไม่ระบุ'
+  }
+  
+  const rooms = programItems[0].rooms
+  return rooms && rooms.length > 0 ? rooms.join(', ') : 'ไม่ระบุ'
+}
 </script>
 
 <template>
@@ -90,6 +99,10 @@ function enrollmentSummary(programItems: ProgramItem[]) {
           <div class="text-subtitle2 q-mt-sm label">
             <q-icon name="chair" class="q-mb-xs" />
             จำนวนที่รับ : {{ enrollmentSummary(program.programItems ?? []) }}
+          </div>
+          <div class="text-subtitle2 q-mt-sm label">
+            <q-icon name="place" class="q-mb-xs" />
+            สถานที่ : {{ getProgramLocation(program.programItems) }}
           </div>
         </div>
 
