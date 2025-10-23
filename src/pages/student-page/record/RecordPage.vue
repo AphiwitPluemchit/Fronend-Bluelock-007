@@ -72,7 +72,8 @@ onMounted(async () => {
   if (!code) return
 
   try {
-    const summary = await StudentService.getSummaryByCode(code)
+    // ใช้ API ใหม่ที่ดึงชั่วโมงจาก hour history แทนที่จะใช้ค่าจาก student collection
+    const summary = await StudentService.getSummaryByCodeWithHours(code)
 
     studentData.value = {
       name: summary.name,
@@ -81,6 +82,7 @@ onMounted(async () => {
       studentId: summary.code,
     }
 
+    // ใช้ชั่วโมงที่คำนวณจาก hour history
     academicData.value.current = summary.hardSkill
     prepData.value.current = summary.softSkill
   } catch (err) {

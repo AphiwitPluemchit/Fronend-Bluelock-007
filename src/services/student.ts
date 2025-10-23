@@ -158,6 +158,22 @@ export class StudentService {
     }
   }
 
+  /**
+   * ดึงข้อมูลสรุปนักศึกษาพร้อมชั่วโมงจาก hour history
+   * @param code - รหัสนักศึกษา
+   * @returns ข้อมูลสรุปพร้อมชั่วโมงจาก hour history
+   */
+  static async getSummaryByCodeWithHours(code: string) {
+    try {
+      const res = await api.get(`${this.path}/sammary-with-hours/${code}`)
+      return res.data
+    } catch (error) {
+      showError('ไม่สามารถโหลดข้อมูลสรุปนักศึกษาได้')
+      console.error(`Error fetching student summary with hours by code: ${code}`, error)
+      throw error
+    }
+  }
+
   // เพิ่มฟังก์ชันดึงประวัติการอบรมของนิสิตตามรหัส
   static async getTrainingHistory(code: string) {
     try {
