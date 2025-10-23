@@ -38,7 +38,9 @@ const confirmCreateQR_Code = () => console.log('QR-Code เช็คชื่อ
 
 const canShowCheckInBtn = computed(() => {
   const today = dayjs().format('YYYY-MM-DD')
-  return programItemDatesOptions.value.some((o) => dayjs(String(o.value)).format('YYYY-MM-DD') === today)
+  return programItemDatesOptions.value.some(
+    (o) => dayjs(String(o.value)).format('YYYY-MM-DD') === today,
+  )
 })
 
 async function setDefaultDate() {
@@ -54,7 +56,8 @@ async function setDefaultDate() {
 
 const fetchSamaryEnrollment = async () => {
   query.value.date = selectProgramItemDate.value
-  const resSum = await SammaryReportService.getSamaryEnrollment(programId, query.value.date)
+  // ใช้ API ใหม่ที่ query จาก enrollment โดยตรง
+  const resSum = await SammaryReportService.getEnrollmentSummaryV2(programId, query.value.date)
   enrollmentSummary.value = resSum.data
 }
 
@@ -75,9 +78,8 @@ onMounted(async () => {
 
 <template>
   <div class="summary-container">
-
     <!-- ตัวกรองวัน -->
-    <div class="row form-toolbar ">
+    <div class="row form-toolbar">
       <!-- <div class=" textsubtitle">{{ program?.name || 'กำลังโหลด...' }}</div> -->
 
       <div class="program-header">
@@ -104,7 +106,7 @@ onMounted(async () => {
     </div>
 
     <!-- ✅ การ์ดแถวเดียว 5 ใบ -->
-    <div class="row cards-row ">
+    <div class="row cards-row">
       <q-card class="summary-card green">
         <q-card-section class="card-content">
           <div class="label">ลงทะเบียน</div>
