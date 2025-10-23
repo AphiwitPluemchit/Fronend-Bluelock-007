@@ -22,27 +22,51 @@ watch(
       // Reset ค่าทุกครั้งที่เปิด dialog
       selectedAction.value = null
       rejectReason.value = ''
+      isEditing.value = false
     }
   },
 )
 watch(dialogVisible, (val) => emit('update:modelValue', val))
 
-const selectedAction = ref<'อนุมัติ' | 'ไม่อนุมัติ' | null>(null)
+const selectedAction = ref<'อนุมัติ' | 'ไม่อนุมัติ' | 'รออนุมัติ' | null>(null)
 const rejectReason = ref<string>('')
+const isEditing = ref(false)
 
 const isConfirmDisabled = computed(() => {
   if (selectedAction.value === 'อนุมัติ') {
     return false // อนุมัติไม่ต้องใส่เหตุผล
   } else if (selectedAction.value === 'ไม่อนุมัติ') {
     return !rejectReason.value.trim() // ไม่อนุมัติต้องใส่เหตุผล
+  } else if (selectedAction.value === 'รออนุมัติ') {
+    return false // รออนุมัติไม่ต้องใส่เหตุผล
   }
   return true // ยังไม่ได้เลือกอะไร
 })
+
+const startEditing = () => {
+  isEditing.value = true
+  // Set default action based on current status
+  if (props.data.status === StatusType.APPROVED) {
+    selectedAction.value = 'อนุมัติ'
+  } else if (props.data.status === StatusType.REJECTED) {
+    selectedAction.value = 'ไม่อนุมัติ'
+    rejectReason.value = props.data.remark || ''
+  } else {
+    selectedAction.value = 'รออนุมัติ'
+  }
+}
+
+const cancelEditing = () => {
+  isEditing.value = false
+  selectedAction.value = null
+  rejectReason.value = ''
+}
 
 const closeDialog = () => {
   dialogVisible.value = false
   selectedAction.value = null
   rejectReason.value = ''
+  isEditing.value = false
 }
 
 const confirm = async () => {
@@ -52,17 +76,29 @@ const confirm = async () => {
     isLoading.value = true
 
     // แปลงจากภาษาไทยเป็น StatusType
-    const status = selectedAction.value === 'อนุมัติ' ? StatusType.APPROVED : StatusType.REJECTED
+    let status: StatusType
+    let message: string
+    
+    if (selectedAction.value === 'อนุมัติ') {
+      status = StatusType.APPROVED
+      message = 'อนุมัติใบประกาศนียบัตรเรียบร้อยแล้ว'
+    } else if (selectedAction.value === 'ไม่อนุมัติ') {
+      status = StatusType.REJECTED
+      message = 'ปฏิเสธใบประกาศนียบัตรเรียบร้อยแล้ว'
+    } else {
+      status = StatusType.PENDING
+      message = 'เปลี่ยนสถานะเป็นรออนุมัติเรียบร้อยแล้ว'
+    }
 
     // เรียก API
     await CertificateService.updateStatus(props.data.id, {
       status,
-      remark: rejectReason.value || '', // ส่ง remark ไป (ถ้าอนุมัติจะเป็นค่าว่าง)
+      remark: rejectReason.value || '', // ส่ง remark ไป
     })
 
     // แจ้งเตือนสำเร็จ
     $q.notify({
-      message: `${selectedAction.value === 'อนุมัติ' ? 'อนุมัติ' : 'ปฏิเสธ'}ใบประกาศนียบัตรเรียบร้อยแล้ว`,
+      message,
       type: 'positive',
       position: 'bottom',
       timeout: 2000,
@@ -125,12 +161,56 @@ const formatDate = (dateString: string | null | undefined) => {
       </div>
       <div class="q-mb-sm"><b>ใช้ OCR : </b> {{ props.data.useOcr ? 'ใช่' : 'ไม่ใช่' }}</div>
 
-      <!-- รออนุมัติ -->
-      <template v-if="props.data.status === StatusType.PENDING">
+      <!-- Mode: View/Edit -->
+      <template v-if="!isEditing">
+        <!-- แสดงสถานะปัจจุบัน -->
+        <div class="row justify-center q-gutter-sm q-mb-md">
+          <q-badge
+            v-if="props.data.status === StatusType.APPROVED"
+            label="อนุมัติ"
+            class="badge-approve"
+            rounded
+          />
+          <q-badge
+            v-else-if="props.data.status === StatusType.REJECTED"
+            label="ไม่อนุมัติ"
+            class="badge-reject"
+            rounded
+          />
+          <q-badge
+            v-else-if="props.data.status === StatusType.PENDING"
+            label="รออนุมัติ"
+            class="badge-pending"
+            rounded
+          />
+        </div>
+
+        <!-- แสดง remark ถ้ามี -->
+        <div v-if="props.data.remark" class="q-mb-md">
+          <div class="text-body1"><b>หมายเหตุ : </b> {{ props.data.remark }}</div>
+        </div>
+
+        <!-- ปุ่มแก้ไขและปิด -->
+        <div class="row justify-end q-gutter-sm">
+          <q-btn class="btnreject" @click="closeDialog">ปิด</q-btn>
+          <q-btn class="btnedit" @click="startEditing">
+            <q-icon name="edit" class="q-mr-sm" />
+            แก้ไขสถานะ
+          </q-btn>
+        </div>
+      </template>
+
+      <!-- Mode: Editing -->
+      <template v-else>
         <div class="row justify-center q-gutter-sm q-mb-md">
           <q-btn
+            label="รออนุมัติ"
+            :class="['custom-pending', { 'custom-pending--active': selectedAction === 'รออนุมัติ' }]"
+            unelevated
+            @click="selectedAction = 'รออนุมัติ'"
+          />
+          <q-btn
             label="อนุมัติ"
-            class="custom-approve q-mr-lg"
             :class="['custom-approve', { 'custom-approve--active': selectedAction === 'อนุมัติ' }]"
             unelevated
             @click="selectedAction = 'อนุมัติ'"
@@ -143,14 +223,21 @@ const formatDate = (dateString: string | null | undefined) => {
           />
         </div>
 
-        <div v-if="selectedAction === 'อนุมัติ'" class="row q-col-gutter-md q-mb-md"></div>
-
-        <div v-if="selectedAction === 'ไม่อนุมัติ'" class="q-mb-md">
-          <q-input dense outlined v-model="rejectReason" label="หมายเหตุ" type="textarea" />
+        <!-- ช่องกรอก remark เมื่อเลือก "ไม่อนุมัติ" หรือ "รออนุมัติ" -->
+        <div v-if="selectedAction === 'ไม่อนุมัติ' || selectedAction === 'รออนุมัติ'" class="q-mb-md">
+          <q-input
+            dense
+            outlined
+            v-model="rejectReason"
+            label="หมายเหตุ"
+            type="textarea"
+            rows="3"
+            :rules="[val => selectedAction === 'ไม่อนุมัติ' ? !!val || 'กรุณาระบุเหตุผล' : true]"
+          />
         </div>
 
         <div class="row justify-end q-gutter-sm">
-          <q-btn class="btnreject" :disable="isLoading" @click="closeDialog">ยกเลิก</q-btn>
+          <q-btn class="btnreject" :disable="isLoading" @click="cancelEditing">ยกเลิก</q-btn>
           <q-btn
             class="btnconfirm"
             :disable="isConfirmDisabled"
@@ -159,40 +246,6 @@ const formatDate = (dateString: string | null | undefined) => {
           >
             ยืนยัน
           </q-btn>
-        </div>
-      </template>
-
-      <!-- อนุมัติแล้ว -->
-      <template v-else-if="props.data.status === StatusType.APPROVED">
-        <div class="row justify-center q-gutter-sm q-mb-md">
-          <q-badge
-            v-if="props.data.status === StatusType.APPROVED"
-            label="อนุมัติ"
-            class="badge-approve"
-            rounded
-          />
-        </div>
-        <div class="q-mb-sm row"></div>
-        <div class="row justify-end">
-          <q-btn class="btnreject" @click="closeDialog">ปิด</q-btn>
-        </div>
-      </template>
-
-      <!-- ไม่อนุมัติแล้ว -->
-      <template v-else-if="props.data.status === StatusType.REJECTED">
-        <div class="row justify-center q-gutter-sm q-mb-md">
-          <q-badge
-            v-if="props.data.status === StatusType.REJECTED"
-            label="ไม่อนุมัติ"
-            class="badge-reject"
-            rounded
-          />
-        </div>
-        <div class="row q-col-gutter-md q-mb-md">
-          <div class="col-12"><b>หมายเหตุ : </b> {{ props.data.remark }}</div>
-        </div>
-        <div class="row justify-end">
-          <q-btn class="btnreject" @click="closeDialog">ปิด</q-btn>
         </div>
       </template>
     </q-card>
@@ -214,15 +267,26 @@ const formatDate = (dateString: string | null | undefined) => {
   border: 1px solid #ccc;
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
 }
+.custom-pending {
+  background-color: #ffe7ba;
+  color: #ff6f00;
+  border: 2px solid #ffa500;
+  height: 32px;
+  padding: 0 24px;
+  border-radius: 999px;
+  font-size: 14px;
+  min-width: 110px;
+}
+
 .custom-approve {
   background-color: #d0ffc5;
   color: #009812;
   border: 2px solid #00bb16;
   height: 32px;
-  padding: 0 32px;
+  padding: 0 24px;
   border-radius: 999px;
-  font-size: 16px;
-  width: 130px;
+  font-size: 14px;
+  min-width: 110px;
 }
 
 .custom-reject {
@@ -230,10 +294,16 @@ const formatDate = (dateString: string | null | undefined) => {
   color: #ff0000;
   border: 2px solid #f32323;
   height: 32px;
-  padding: 0 32px;
+  padding: 0 24px;
   border-radius: 999px;
-  font-size: 16px;
-  width: 130px;
+  font-size: 14px;
+  min-width: 110px;
+}
+
+.custom-pending--active {
+  background-color: #ff6f00;
+  border: 2px solid #ff6f00;
+  color: white;
 }
 
 .custom-approve--active {
@@ -247,6 +317,18 @@ const formatDate = (dateString: string | null | undefined) => {
   border: 2px solid #ff0000;
   color: white;
 }
+
+.badge-pending {
+  background-color: #ff6f00;
+  color: white;
+  height: 40px;
+  padding: 12px 30px;
+  border-radius: 999px;
+  font-size: 16px;
+  min-width: 130px;
+  display: inline-block;
+}
+
 .badge-approve {
   background-color: #009812;
   color: white;
@@ -254,9 +336,10 @@ const formatDate = (dateString: string | null | undefined) => {
   padding: 12px 45px;
   border-radius: 999px;
   font-size: 16px;
-  width: 130px;
+  min-width: 130px;
   display: inline-block;
 }
+
 .badge-reject {
   background-color: #ff0000;
   color: white;
@@ -264,7 +347,7 @@ const formatDate = (dateString: string | null | undefined) => {
   padding: 12px 40px;
   border-radius: 999px;
   font-size: 16px;
-  width: 130px;
+  min-width: 130px;
   display: inline-block;
 }
 
@@ -272,8 +355,14 @@ const formatDate = (dateString: string | null | undefined) => {
   background-color: #f44336;
   color: white;
 }
+
 .btnconfirm {
   background-color: #2979ff;
+  color: white;
+}
+
+.btnedit {
+  background-color: #4caf50;
   color: white;
 }
 </style>

@@ -72,17 +72,6 @@ const openManageCer = (row: UploadCertificate) => {
   }
 }
 
-const viewDetail = (row: UploadCertificate) => {
-  const found = rows.value.find((cert) => cert.id === row.id)
-  if (found) {
-    selectedCert.value = { ...found }
-    console.log(selectedCert.value)
-
-    showDialog.value = true
-  }
-  console.log(row)
-}
-
 const handleConfirm = async () => {
   // Refresh ข้อมูลหลังจากอัปเดตสถานะสำเร็จ
   await fetchCertificates()
@@ -244,23 +233,12 @@ onMounted(async () => {
             </q-td>
             <td key="action" class="text-center q-gutter-x-sm">
               <q-icon
-                v-if="props.row.status === 'รออนุมัติ'"
                 clickable
                 name="edit"
                 class="bg-primary text-white q-pa-xs rounded-borders q-mr-sm"
                 @click="openManageCer(props.row)"
               >
-                <q-tooltip>แก้ไข</q-tooltip>
-              </q-icon>
-
-              <q-icon
-                v-else
-                clickable
-                name="visibility"
-                class="bg-black text-white q-pa-xs rounded-borders q-mr-sm"
-                @click="viewDetail(props.row)"
-              >
-                <q-tooltip>ดูรายละเอียด</q-tooltip>
+                <q-tooltip>จัดการใบประกาศนียบัตร</q-tooltip>
               </q-icon>
             </td>
           </q-tr>
