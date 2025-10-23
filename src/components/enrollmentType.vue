@@ -20,13 +20,15 @@ const props = defineProps<Props>()
 
 const buttonLabel = computed(() => {
   if (props.status === hourhistoryStore.HCStatusUpcoming) return 'ยังไม่เข้าร่วม'
+  if (props.status === hourhistoryStore.HCStatusParticipating) return 'กำลังเข้าร่วม'
   if (props.status === hourhistoryStore.HCStatusAttended) return 'เข้าร่วมแล้ว'
   if (props.status === hourhistoryStore.HCStatusAbsent) return 'ขาด'
   return 'ไม่ทราบสถานะ'
 })
 
 const buttonClass = computed(() => {
-  if (props.status === hourhistoryStore.HCStatusParticipating) return 'status-dot--yellow'
+  if (props.status === hourhistoryStore.HCStatusUpcoming) return 'status-dot--yellow'
+  if (props.status === hourhistoryStore.HCStatusParticipating) return 'status-dot--blue'
   if (props.status === hourhistoryStore.HCStatusAttended) return 'status-dot--green'
   return 'status-dot--red'
 })
