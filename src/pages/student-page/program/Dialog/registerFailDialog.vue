@@ -14,7 +14,7 @@
       <q-card-actions align="right">
         <q-btn
           class="btnconfirm"
-          label="ตรวจสอบ"
+          label="ยืนยัน"
           style="background-color: #3676f4; color: white"
           @click="confirm"
         />
