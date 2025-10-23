@@ -23,13 +23,17 @@ const route = useRoute()
 const showRegisterDialog = ref(false)
 const showUnRegisterDialog = ref(false)
 const showFailDialog = ref(false)
+const errorMessage = ref<string>('')
 const program = ref<Program | null>(null)
 const enrollment = ref<Enroll>({ isEnrolled: false, enrollmentId: '' })
 const screen = ref(false)
 const auth = useAuthStore()
 const breadcrumbs = ref({
   previousPage: { title: 'โครงการทั้งหมด', path: '/Student/ProgramTablePage' },
-  currentPage: { title: 'รายละเอียดโครงการ', path: `/Student/Program/ProgramDetail/${route.params.id as string}}` },
+  currentPage: {
+    title: 'รายละเอียดโครงการ',
+    path: `/Student/Program/ProgramDetail/${route.params.id as string}}`,
+  },
   icon: 'event',
 })
 
@@ -50,8 +54,12 @@ const register = async (programItemId: string, selectedFood: string | null) => {
     console.log('ส่ง payload:', payload)
     await StudentProgramStore.enrollment(payload)
     await fetchData()
-  } catch (error) {
+  } catch (error: unknown) {
     console.log('error:', error)
+    // ดึง error message จาก response
+    const err = error as { response?: { data?: { error?: string } }; message?: string }
+    errorMessage.value =
+      err?.response?.data?.error || err?.message || 'เกิดข้อผิดพลาดในการลงทะเบียน'
     showFailDialog.value = true
   }
 }
@@ -96,67 +104,66 @@ onMounted(async () => {
 </script>
 <template>
   <q-page class="q-pa-md card-container">
-    <div style="margin-top: 20px;">
-    <AppBreadcrumbs :breadcrumbs="breadcrumbs"/>
+    <div style="margin-top: 20px">
+      <AppBreadcrumbs :breadcrumbs="breadcrumbs" />
 
-    <div class="program-detail-card card-container q-mt-md" v-if="screen">
-      <q-card-section class="q-col-gutter-md row items-start q-mb-md">
-        <!-- ภาพโครงการ -->
-        <div class="col-12 col-md-4 text-center">
-          <q-img
-            :src="
-            program?.file
-              ? baseurl + '/uploads/program/images/' + program.file
-              : baseurl + '/uploads/no-image.jpg'
-          "
-            class="program-img"
-            error-src="/default-placeholder.jpg"
+      <div class="program-detail-card card-container q-mt-md" v-if="screen">
+        <q-card-section class="q-col-gutter-md row items-start q-mb-md">
+          <!-- ภาพโครงการ -->
+          <div class="col-12 col-md-4 text-center">
+            <q-img
+              :src="
+                program?.file
+                  ? baseurl + '/uploads/program/images/' + program.file
+                  : baseurl + '/uploads/no-image.jpg'
+              "
+              class="program-img"
+              error-src="/default-placeholder.jpg"
+            />
+          </div>
+
+          <!-- รายละเอียด -->
+          <div class="col-12 col-md-8" v-if="program">
+            <div v-if="Array.isArray(program?.programItems) && program.programItems.length > 1">
+              <DetailMany :program="program ?? {}" />
+            </div>
+            <div v-else>
+              <DetailOne :program="program ?? {}" />
+            </div>
+          </div>
+        </q-card-section>
+
+        <div class="q-mt-md q-mb-md row justify-center q-gutter-sm">
+          <q-btn
+            v-if="enrollment.isEnrolled && !isRegistrationNotAllowed"
+            label="ยกเลิกลงทะเบียน"
+            class="btnreject"
+            @click="handleUnRegisterClick"
+            unelevated
+            rounded
           />
+          <q-btn
+            v-else-if="!enrollment.isEnrolled && !isRegistrationNotAllowed"
+            label="ลงทะเบียน"
+            class="btnsecces"
+            @click="handleRegisterClick"
+            unelevated
+            rounded
+          />
+          <q-btn v-else label="ปิดลงทะเบียน" class="btngrey" :disabled="true" unelevated rounded />
         </div>
-
-        <!-- รายละเอียด -->
-        <div class="col-12 col-md-8" v-if="program">
-          <div v-if="Array.isArray(program?.programItems) && program.programItems.length > 1">
-            <DetailMany :program="program ?? {}" />
-          </div>
-          <div v-else>
-            <DetailOne :program="program ?? {}" />
-          </div>
-        </div>
-      </q-card-section>
-
-      <div class="q-mt-md q-mb-md row justify-center q-gutter-sm">
-        <q-btn
-          v-if="enrollment.isEnrolled && !isRegistrationNotAllowed"
-          label="ยกเลิกลงทะเบียน"
-          class="btnreject"
-          @click="handleUnRegisterClick"
-          unelevated
-          rounded
-        />
-        <q-btn
-          v-else-if="!enrollment.isEnrolled && !isRegistrationNotAllowed"
-          label="ลงทะเบียน"
-          class="btnsecces"
-          @click="handleRegisterClick"
-          unelevated
-          rounded
-        />
-        <q-btn v-else label="ปิดลงทะเบียน" class="btngrey" :disabled="true" unelevated rounded />
       </div>
+
+      <!-- Confirm Dialog-->
+      <registerConfirmDialog
+        v-model="showRegisterDialog"
+        :programItems="program?.programItems ?? []"
+        :food="program?.foodVotes ?? []"
+        @confirm="register"
+      />
+      <registerFailDialog v-model="showFailDialog" :errorMessage="errorMessage" />
+      <unRegisterDialog v-model="showUnRegisterDialog" @confirm="unRegister" />
     </div>
-
-    <!-- Confirm Dialog-->
-    <registerConfirmDialog
-      v-model="showRegisterDialog"
-      :programItems="program?.programItems ?? []"
-      :food="program?.foodVotes ?? []"
-      @confirm="register"
-    />
-    <registerFailDialog v-model="showFailDialog" />
-    <unRegisterDialog v-model="showUnRegisterDialog" @confirm="unRegister" />
-        </div>
-
   </q-page>
 </template>
 
