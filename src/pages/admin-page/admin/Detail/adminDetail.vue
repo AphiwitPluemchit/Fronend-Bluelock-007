@@ -83,8 +83,7 @@ const save = async () => {
 
   if (!adminId.value) {
     await adminStore.createAdmin(adminStore.admin) // ให้รีเทิร์น id ใหม่
-    // ไปหน้า detail ของ id ที่สร้าง หรืออยู่หน้าเดิมก็ได้
-    isEditMode.value = false
+    void router.push('/Admin/AdminManagement')
   } else {
     await adminStore.updateAdmin(adminId.value, adminStore.admin)
     originalAdminData.value = { ...adminStore.admin }
