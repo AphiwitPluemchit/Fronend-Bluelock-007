@@ -2,12 +2,15 @@
 import { computed, onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAdminStore } from 'src/stores/admin'
-
+import RemoveDialog from 'src/components/Dialog/RemoveDialog.vue'
 const adminStore = useAdminStore()
 const router = useRouter()
 const show = ref(false)
 const admins = computed(() => adminStore.admins ?? [])
 const query = computed(() => adminStore.query)
+const isRemoveDialogOpen = ref(false)
+const selectedId = ref<string | null>(null)
+
 
 async function onRequest(requestProp: {
   pagination: { sortBy: string; descending: boolean; page: number; rowsPerPage: number }
@@ -36,12 +39,21 @@ const goToDetail = (id: string, editMode: boolean = false) => {
 const goToAdd = () => {
   void router.push('/Admin/AdminManagement/CreateAdmin')
 }
-const removeAdmin = async (id: string) => {
-  if (!id) return
-  await adminStore.removeAdmin(id)
-  await data()
+const openRemoveDialog = (id: string) => {
+  selectedId.value = id
+  isRemoveDialogOpen.value = true
 }
-
+const removeAdmin = async () => {
+  if (!selectedId.value) return
+  try {
+    await adminStore.removeAdmin(selectedId.value)
+    isRemoveDialogOpen.value = false
+    selectedId.value = null
+    await data() // 🔁 refresh table
+  } catch (err) {
+    console.error('Delete error:', err)
+  }
+}
 const columns = [
   { name: 'index', label: 'ลำดับ', field: 'index', align: 'left' as const },
   { name: 'email', label: 'Email', field: 'email', align: 'left' as const },
@@ -178,7 +190,7 @@ onMounted(async () => {
                 dense
                 icon="delete"
                 class="bg-red-7 text-red-1"
-                @click.stop="removeAdmin(props.row.id)"
+                @click.stop="openRemoveDialog(props.row.id)"
               >
                 <q-tooltip>ลบ</q-tooltip>
               </q-btn>
@@ -193,6 +205,7 @@ onMounted(async () => {
         </template>
       </q-table>
     </section>
+    <RemoveDialog v-model="isRemoveDialogOpen" @confirm="removeAdmin" />
   </q-page>
 </template>
 

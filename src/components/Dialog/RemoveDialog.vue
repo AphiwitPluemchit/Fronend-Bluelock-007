@@ -5,10 +5,10 @@
   >
     <q-card class="cancel-card">
       <q-card-section>
-        <div class="text-h6">ลบโครงการ</div>
+        <div class="text-h6">ลบข้อมูล</div>
       </q-card-section>
       <q-card-section>
-        หากคุณกดยืนยัน โครงการนี้จะถูกลบออก
+        หากคุณกดยืนยัน ข้อมูลนี้จะถูกลบออก
       </q-card-section>
       <q-card-actions align="right">
         <q-btn flat label="ยกเลิก" class="btnreject" v-close-popup />
