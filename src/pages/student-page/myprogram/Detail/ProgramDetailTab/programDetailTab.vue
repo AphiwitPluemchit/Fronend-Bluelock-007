@@ -74,7 +74,7 @@ async function fetchData() {
       String(auth.getUser?.id),
       String(route.params.id),
     )
-    console.log(response);
+    console.log(response)
 
     if (response.isEnrolled && response.program) {
       // Map program response to Program type for compatibility with existing components
@@ -104,7 +104,7 @@ onMounted(async () => {
 })
 </script>
 <template>
-  <q-page class="q-pa-none" v-if="screen">
+  <div v-if="screen" >
     <!-- กรอบข้อมูลโครงการ -->
     <q-card-section class="q-col-gutter-md row items-start q-mb-md">
       <!-- ภาพโครงการ -->
@@ -127,7 +127,17 @@ onMounted(async () => {
           v-if="Array.isArray(program?.programItems) && program.programItems.length > 1"
           :program="program"
         />
-        <DetailMany v-else :program="{ ...program, programItems: Array.isArray(program?.programItems) ? program.programItems : (program?.programItems ? [program.programItems] : []) }" />
+        <DetailMany
+          v-else
+          :program="{
+            ...program,
+            programItems: Array.isArray(program?.programItems)
+              ? program.programItems
+              : program?.programItems
+                ? [program.programItems]
+                : [],
+          }"
+        />
       </div>
     </q-card-section>
 
@@ -175,7 +185,7 @@ onMounted(async () => {
     />
     <RegisterFailDialog v-model="showFailDialog" />
     <UnRegisterDialog v-model="showUnRegisterDialog" @confirm="unRegister" />
-  </q-page>
+  </div>
 </template>
 
 <style scoped>

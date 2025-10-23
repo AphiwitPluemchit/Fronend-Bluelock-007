@@ -107,7 +107,7 @@ onMounted(async () => {
     <div style="margin-top: 20px">
       <AppBreadcrumbs :breadcrumbs="breadcrumbs" />
 
-      <div class="program-detail-card card-container q-mt-md" v-if="screen">
+      <div class="program-detail-card  q-mt-md" v-if="screen">
         <q-card-section class="q-col-gutter-md row items-start q-mb-md">
           <!-- ภาพโครงการ -->
           <div class="col-12 col-md-4 text-center">

@@ -1,5 +1,5 @@
 <template>
-  <div class="q-pa-md" v-if="screen">
+  <div class="q-pa-md" v-if="screen" >
     <div>
       <div class="row q-mb-md">
         <div class="column">

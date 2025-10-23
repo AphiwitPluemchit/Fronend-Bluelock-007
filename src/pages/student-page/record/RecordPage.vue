@@ -309,9 +309,9 @@ onMounted(async () => {
 }
 .custom-tabs .q-tab--active,
 .custom-tabs .q-tab:hover {
-  background-color: #283393 !important;
+  background-color: #edf0f5 !important;
   border-radius: 12px 12px 0 0;
-  color: white;
+  color: rgb(0, 0, 0);
 }
 .custom-panels {
   background-color: #edf0f5;
