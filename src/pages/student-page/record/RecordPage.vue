@@ -73,8 +73,8 @@ onMounted(async () => {
 
   try {
     // ใช้ API ใหม่ที่ดึงชั่วโมงจาก hour history แทนที่จะใช้ค่าจาก student collection
-    // const summary = await StudentService.getSummaryByCodeWithHours(code)
-    const summary = await StudentService.getSummaryByCode(code)
+    const summary = await StudentService.getSummaryByCodeWithHours(code)
+    // const summary = await StudentService.getSummaryByCode(code)
 
     studentData.value = {
       name: summary.name,
