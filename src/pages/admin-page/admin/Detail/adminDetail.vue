@@ -18,11 +18,7 @@ const originalAdminData = ref<Admin | null>(null)
 const breadcrumbs = computed(() => ({
   previousPage: { title: 'จัดการข้อมูลผู้ดูแล', path: '/Admin/AdminManagement' },
   currentPage: {
-    title: !isEditMode.value
-      ? 'สร้างผู้ดูแล'
-      : isEditMode.value
-        ? 'แก้ไขผู้ดูแล'
-        : 'รายละเอียดผู้ดูแล',
+    title: !adminId.value ? 'สร้างผู้ดูแล' : adminId.value ? 'แก้ไขผู้ดูแล' : 'รายละเอียดผู้ดูแล',
     path: route.fullPath,
   },
   icon: 'people',
@@ -68,7 +64,7 @@ const validate = (): boolean => {
   if (!name || name.trim().length < 2) {
     return false
   }
-  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+  const emailRegex = /^[^\s@]+@go\.buu\.ac\.th$/i
   if (!emailRegex.test(email)) {
     return false
   }
@@ -126,35 +122,37 @@ watch(
       <AppBreadcrumbs :breadcrumbs="breadcrumbs" />
     </div>
 
-    <q-card flat class="q-mt-lg" v-if="show">
-      <div class="row q-col-gutter-md">
+    <q-card flat class="q-mt-lg  q-mx-md" v-if="show">
+      <div class="row q-col-gutter-md q-mx-auto">
         <!-- แถวข้อมูลผู้ดูแล -->
-        <div class="col-12 row items-center q-pa-sm">
-          <div class="col-12 col-md-1 text-right q-pr-md"><p class="q-my-none">ชื่อ :</p></div>
-          <div class="col-12 col-md-4">
-            <q-input
-              v-model="adminStore.admin.name"
-              :readonly="!isEditMode"
-              :class="isEditMode ? 'editable' : 'readonly'"
-              class="qinput"
-              borderless
-              dense
-              :rules="[(val) => (!!val && val.length >= 2) || 'กรุณากรอกชื่ออย่างน้อย 2 ตัวอักษร']"
-            />
-          </div>
-
-          <div class="col-12 col-md-2 text-right q-pr-md"><p class="q-my-none">Email :</p></div>
-          <div class="col-12 col-md-4">
-            <q-input
-              v-model="adminStore.admin.email"
-              :readonly="!isEditMode"
-              :class="isEditMode ? 'editable' : 'readonly'"
-              class="qinput"
-              borderless
-              dense
-              :rules="[(val) => !!val || 'กรุณากรอกอีเมล']"
-            />
-          </div>
+        <div class="col-12 items-center q-pa-sm">
+          <p class="q-my-none">ชื่อ :</p>
+          <q-input
+            v-model="adminStore.admin.name"
+            :readonly="!isEditMode"
+            :class="isEditMode ? 'editable' : 'readonly'"
+            class="qinput"
+            borderless
+            dense
+            :rules="[(val) => (!!val && val.length >= 2) || 'กรุณากรอกชื่ออย่างน้อย 2 ตัวอักษร']"
+          />
+        </div>
+        <div class="col-12 items-center q-pa-sm">
+          <p class="q-my-none">Email :</p>
+          <q-input
+            v-model="adminStore.admin.email"
+            :readonly="!isEditMode"
+            :class="isEditMode ? 'editable' : 'readonly'"
+            class="qinput"
+            borderless
+            dense
+            :rules="[
+              (val) => !!val || 'กรุณากรอกอีเมล',
+              (val) =>
+                /^[^\s@]+@go\.buu\.ac\.th$/i.test(val) ||
+                'อีเมลต้องเป็นโดเมน @go.buu.ac.th เท่านั้น',
+            ]"
+          />
         </div>
       </div>
 
@@ -168,8 +166,6 @@ watch(
         </template>
       </div>
     </q-card>
-
-    <q-skeleton v-else type="rect" height="200px" />
   </q-page>
 </template>
 
