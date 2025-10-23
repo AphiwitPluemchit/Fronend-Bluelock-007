@@ -616,7 +616,7 @@ onMounted(async () => {
   cursor: pointer;
   transform: translateY(-2px);
   box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
-  border-color: #3b82f6;
+  /* border-color: #3b82f6; */
 }
 
 .label {
@@ -635,7 +635,7 @@ onMounted(async () => {
 
 .icon {
   font-size: 35px;
-  color: #3b82f6;
+  color: #2e3f80;
 }
 
 @media (max-width: 1024px) {

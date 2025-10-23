@@ -41,8 +41,8 @@ const majorFullName = computed(() => {
   const majorMap: Record<string, string> = {
     CS: 'วิทยาการคอมพิวเตอร์',
     SE: 'วิศวกรรมซอฟต์แวร์',
-    AAI: 'ปัญญาประดิษฐ์ประยุกต์',
-    ITDI: 'นวัตกรรมดิจิทัล',
+    AAI: 'ปัญญาประดิษฐ์ประยุกต์และเทคโนโลยีอัจฉริยะ',
+    ITDI: 'เทคโนโลยีสารสนเทศเพื่ออุตสาหกรรมดิจิทัล',
   }
   return majorMap[studentData.value.major] || studentData.value.major
 })
