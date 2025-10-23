@@ -1,10 +1,10 @@
 <script setup lang="ts">
 // import
 import { computed, reactive, ref, watch } from 'vue'
-import { useQuasar } from 'quasar'
 import dayjs from 'dayjs'
 import type { StudentEnrollment } from 'src/types/enrollment'
 import { useEnrollmentStore } from 'src/stores/enrollment'
+import programForm_ProgramTime from '../../CreateProgram/Form/programForm_ProgramTime.vue'
 // แนะนำให้มีเมธอดนี้ใน service:
 //   EnrollmentService.updateCheckRecord(payload: { recordId: string; checkin: string; checkout: string })
 
@@ -20,7 +20,6 @@ const emit = defineEmits<{
 }>()
 
 // ===== ui state =====
-const $q = useQuasar()
 const loading = ref(false)
 const errorMessage = ref('')
 const store = useEnrollmentStore()
@@ -186,7 +185,6 @@ async function onSave() {
       // await EnrollmentService.updateCheckRecord(payload)
     }
 
-    $q.notify({ type: 'positive', message: 'บันทึกเวลาเช็คชื่อสำเร็จ' })
     emit('updated', { id: props.student.id })
     close()
   } catch {
@@ -199,13 +197,11 @@ async function onSave() {
 <template>
   <q-dialog v-model="dialog" persistent>
     <q-card
-      style="width: 90vw; max-width: 650px; max-height: 80vh; overflow-y: auto; border-radius: 10px"
+      style="width: 90vw; max-width: 570px; max-height: 80vh; overflow-y: auto; border-radius: 10px"
     >
-
-
       <q-card-section class="q-gutter-y-md">
         <div class="q-mb-sm text-h6">ข้อมูลการเช็คชื่อนิสิต</div>
-        <div class="row q-ma-sm ">
+        <div class="row q-ma-sm">
           <div class="col-12 q-mt-sm">{{ display.studentCode }} {{ display.studentName }}</div>
         </div>
 
@@ -219,69 +215,34 @@ async function onSave() {
           <table class="q-table">
             <thead>
               <tr>
-                <th style="width: 28%">วันที่</th>
-                <th style="width: 36%">เวลาเข้า</th>
-                <th style="width: 36%">เวลาออก</th>
+                <th style="width: 70%">เวลาเข้า / เวลาออก</th>
               </tr>
             </thead>
             <tbody>
               <tr v-for="(row, idx) in rows" :key="row.recordId">
                 <!-- วันที่ (read-only) -->
-                <td class="text-no-wrap">
-                  {{ row.dateLabel }}
-                </td>
 
-                <!-- เวลาเข้า -->
-                <td>
-                  <div class="row q-col-gutter-sm">
-                    <div class="col">
-                      <q-input
-                        v-model="row.checkinTime"
-                        outlined
-                        dense
-                        placeholder="HH:mm"
-                        :error="!!rowErrors[idx]?.in"
-                        :error-message="rowErrors[idx]?.in"
-                      >
-                        <template #append>
-                          <q-icon name="access_time" class="cursor-pointer">
-                            <q-popup-proxy cover transition-show="scale" transition-hide="scale">
-                              <q-time v-model="row.checkinTime" format24h />
-                            </q-popup-proxy>
-                          </q-icon>
-                        </template>
-                      </q-input>
-                    </div>
-                  </div>
-                </td>
 
-                <!-- เวลาออก -->
-                <td>
-                  <div class="row q-col-gutter-sm">
-                    <div class="col">
-                      <q-input
-                        v-model="row.checkoutTime"
-                        outlined
-                        dense
-                        placeholder="HH:mm"
-                        :error="!!rowErrors[idx]?.out"
-                        :error-message="rowErrors[idx]?.out"
-                      >
-                        <template #append>
-                          <q-icon name="access_time" class="cursor-pointer">
-                            <q-popup-proxy cover transition-show="scale" transition-hide="scale">
-                              <q-time v-model="row.checkoutTime" format24h />
-                            </q-popup-proxy>
-                          </q-icon>
-                        </template>
-                      </q-input>
-                    </div>
+                <!-- เวลาเข้า/ออก (ใช้คอมโพเนนต์เดียว) -->
+                <td :colspan="1" >
+                  <programForm_ProgramTime
+                    v-model:startTime="row.checkinTime"
+                    v-model:endTime="row.checkoutTime"
+                    :formattedDate="row.dateLabel"
+                    :disable="loading"
+                  />
+                  <!-- ถ้าต้องการแสดง error ต่อวันเช่นเดิม -->
+                  <div
+                    class="text-negative text-caption q-mt-xs"
+                    v-if="rowErrors[idx]?.in || rowErrors[idx]?.out"
+                  >
+                    {{ rowErrors[idx]?.in || rowErrors[idx]?.out }}
                   </div>
                 </td>
               </tr>
 
               <tr v-if="rows.length === 0">
-                <td colspan="3" class="text-center text-grey">ยังไม่มีข้อมูลเช็คชื่อ</td>
+                <td colspan="2" class="text-center text-grey">ยังไม่มีข้อมูลเช็คชื่อ</td>
               </tr>
             </tbody>
           </table>
@@ -309,10 +270,9 @@ async function onSave() {
   </q-dialog>
 </template>
 
-
-
 <style scoped lang="scss">
 .q-table__container {
+  width: 100%;
   max-height: 360px;
   overflow: auto;
 }
