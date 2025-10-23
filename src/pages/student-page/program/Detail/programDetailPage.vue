@@ -107,7 +107,7 @@ onMounted(async () => {
     <div style="margin-top: 20px">
       <AppBreadcrumbs :breadcrumbs="breadcrumbs" />
 
-      <div class="program-detail-card  q-mt-md" v-if="screen">
+      <div class="program-detail-card q-mt-md" v-if="screen">
         <q-card-section class="q-col-gutter-md row items-start q-mb-md">
           <!-- ภาพโครงการ -->
           <div class="col-12 col-md-4 text-center">
@@ -135,7 +135,15 @@ onMounted(async () => {
 
         <div class="q-mt-md q-mb-md row justify-center q-gutter-sm">
           <q-btn
-            v-if="enrollment.isEnrolled && !isRegistrationNotAllowed"
+            v-if="program?.programState !== 'open'"
+            label="ไม่สามารถยกเลิกการลงทะเบียนได้"
+            class="btn-disabled"
+            :disabled="true"
+            unelevated
+            rounded
+          />
+          <q-btn
+            v-else-if="enrollment.isEnrolled && !isRegistrationNotAllowed"
             label="ยกเลิกลงทะเบียน"
             class="btnreject"
             @click="handleUnRegisterClick"
@@ -150,7 +158,6 @@ onMounted(async () => {
             unelevated
             rounded
           />
-          <q-btn v-else label="ปิดลงทะเบียน" class="btngrey" :disabled="true" unelevated rounded />
         </div>
       </div>
 
@@ -199,7 +206,7 @@ onMounted(async () => {
   background-color: #4caf50;
   color: white;
 }
-.btngrey {
+.btn-disabled {
   background-color: #bdbdbd;
   color: white;
 }

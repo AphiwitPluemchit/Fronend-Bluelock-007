@@ -104,7 +104,7 @@ onMounted(async () => {
 })
 </script>
 <template>
-  <div v-if="screen" >
+  <div v-if="screen">
     <!-- กรอบข้อมูลโครงการ -->
     <q-card-section class="q-col-gutter-md row items-start q-mb-md">
       <!-- ภาพโครงการ -->
@@ -144,7 +144,15 @@ onMounted(async () => {
     <!-- ปุ่มลงทะเบียน / ยกเลิก -->
     <div class="row justify-center q-gutter-sm q-mt-md">
       <q-btn
-        v-if="enrollment && !isRegistrationNotAllowed"
+        v-if="program?.programState !== 'open'"
+        label="ไม่สามารถยกเลิกการลงทะเบียนได้"
+        class="btn-disabled"
+        :disabled="true"
+        unelevated
+        rounded
+      />
+      <q-btn
+        v-else-if="enrollment && !isRegistrationNotAllowed"
         label="ยกเลิกลงทะเบียน"
         class="btnreject"
         @click="handleUnRegisterClick"
@@ -156,14 +164,6 @@ onMounted(async () => {
         label="ลงทะเบียน"
         class="btnsecces"
         @click="handleRegisterClick"
-        unelevated
-        rounded
-      />
-      <q-btn
-        v-else
-        label="ไม่สามารถยกเลิกการลงทะเบียนได้"
-        class="btn-disabled"
-        :disabled="true"
         unelevated
         rounded
       />
