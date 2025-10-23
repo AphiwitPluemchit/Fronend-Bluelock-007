@@ -51,30 +51,25 @@ function showAlertDialog(title: string, message: string) {
   alertDialogMessage.value = message
   alertDialogModel.value = true
 }
-
-const downloadTemplate = () => {
-  const sampleData = [
-    {
-      name: 'สมชาย',
-      engName: 'Somchai S.',
-      code: '123456',
-      major: 'SE',
-      softSkill: 0,
-      hardSkill: 0,
-    },
-    {
-      name: 'สมหญิง',
-      engName: 'Somying K.',
-      code: '123457',
-      major: 'CS',
-      softSkill: 0,
-      hardSkill: 0,
-    },
-  ]
-  const worksheet = XLSX.utils.json_to_sheet(sampleData)
-  const workbook = XLSX.utils.book_new()
-  XLSX.utils.book_append_sheet(workbook, worksheet, 'Students')
-  XLSX.writeFile(workbook, 'students_template.xlsx')
+const TEMPLATE_FILE_NAME = 'ตัวอย่างข้อมูลนิสิตที่จะอัพโหลด.xlsx'
+const TEMPLATE_PATH = `${import.meta.env.BASE_URL || '/'}upload-student/${encodeURIComponent(TEMPLATE_FILE_NAME)}`
+const downloadTemplate = async () => {
+  try {
+    const res = await fetch(TEMPLATE_PATH)
+    if (!res.ok) throw new Error('โหลดไฟล์ไม่สำเร็จ')
+    const blob = await res.blob()
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = TEMPLATE_FILE_NAME // ตั้งชื่อไฟล์ตอนดาวน์โหลด
+    document.body.appendChild(a)
+    a.click()
+    a.remove()
+    URL.revokeObjectURL(url)
+  } catch (e) {
+    console.error(e)
+    showAlertDialog('ข้อผิดพลาด', 'ไม่สามารถดาวน์โหลดไฟล์ตัวอย่างได้')
+  }
 }
 
 const handleFileChange = async () => {
@@ -177,13 +172,14 @@ const clearFile = () => {
           @update:model-value="handleFileChange"
         >
           <template v-slot:append>
-            <q-btn color="red"  dense flat icon="delete" @click="clearFile" /> <q-tooltip>ลบข้อมูลไฟล์</q-tooltip>
+            <q-btn color="red" dense flat icon="delete" @click="clearFile" />
+            <q-tooltip>ลบข้อมูลไฟล์</q-tooltip>
           </template>
         </q-file>
 
         <q-btn
           icon="download"
-          color="secondary"
+          class="btngrey"
           label="ดาวน์โหลดตัวอย่างไฟล์"
           dense
           style="height: 40px; width: 200px"
@@ -233,13 +229,7 @@ const clearFile = () => {
       </q-table>
 
       <div class="row justify-end q-mt-md">
-        <q-btn
-          dense
-          outlined
-          label="บันทึก"
-          class="btnconfirm"
-          @click="uploadFile"
-        />
+        <q-btn dense outlined label="บันทึก" class="btnconfirm" @click="uploadFile" />
       </div>
     </section>
 
