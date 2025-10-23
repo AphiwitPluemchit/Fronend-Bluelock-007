@@ -1,27 +1,13 @@
 <script setup lang="ts">
 import { computed, onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
-import FilterDialog from 'src/components/Dialog/FilterDialog.vue'
 import { useAdminStore } from 'src/stores/admin'
 
 const adminStore = useAdminStore()
 const router = useRouter()
 const show = ref(false)
 const admins = computed(() => adminStore.admins ?? [])
-
-const goToDetail = (code: string, editMode: boolean = false) => {
-  void router.push({
-    path: `/Admin/AdminManagement/AdminDetail/${code}`,
-    query: { edit: editMode ? 'true' : 'false' },
-  })
-}
-interface SelectedFilters {
-  year: string[]
-  major: string[]
-  adminStatus: string[]
-}
-const showFilterDialog1 = ref(false)
-const filterCategories1 = ref(['major', 'year', 'adminStatus'])
+const query = computed(() => adminStore.query)
 
 async function onRequest(requestProp: {
   pagination: { sortBy: string; descending: boolean; page: number; rowsPerPage: number }
@@ -33,23 +19,6 @@ async function onRequest(requestProp: {
   await data()
 }
 
-const applyFilters = async (selectedFilters: SelectedFilters) => {
-  console.log(selectedFilters)
-  await data()
-}
-
-const data = async () => {
-  await adminStore.getAdmins() // ✅ เรียกจาก store
-
-  // อัปเดต pagination ให้ sync
-  pagination.value.page = adminStore.query.page || 1
-  pagination.value.rowsPerPage = adminStore.query.limit || 5
-  pagination.value.sortBy = adminStore.query.sortBy || ''
-  pagination.value.rowsNumber = adminStore.totalAdminsCount
-}
-
-const query = computed(() => adminStore.query)
-
 const pagination = ref({
   sortBy: query.value.sortBy || '',
   descending: query.value.order === 'desc',
@@ -58,14 +27,24 @@ const pagination = ref({
   rowsNumber: 0,
 })
 // const manageDialogRef = ref<InstanceType<typeof ManageAdminDialog> | null>(null)
-
-const goToUplaodPage = () => {
-  void router.push('/Admin/AdminManagement/UploadAdmin')
+const goToDetail = (id: string, editMode: boolean = false) => {
+  void router.push({
+    path: `/Admin/AdminManagement/AdminDetail/${id}`,
+    query: { edit: editMode ? 'true' : 'false' },
+  })
+}
+const goToAdd = () => {
+  void router.push('/Admin/AdminManagement/CreateAdmin')
+}
+const removeAdmin = async (id: string) => {
+  if (!id) return
+  await adminStore.removeAdmin(id)
+  await data()
 }
 
 const columns = [
   { name: 'index', label: 'ลำดับ', field: 'index', align: 'left' as const },
-  { name: 'email', label: 'รหัสผู้ดูแล', field: 'email', align: 'left' as const },
+  { name: 'email', label: 'Email', field: 'email', align: 'left' as const },
   {
     name: 'name',
     label: 'ชื่อ-สกุล',
@@ -75,13 +54,21 @@ const columns = [
 
   { name: 'action', label: '', field: 'action', align: 'center' as const },
 ]
+const data = async () => {
+  await adminStore.getAdmins() // ✅ เรียกจาก store
 
+  // อัปเดต pagination ให้ sync
+  pagination.value.page = adminStore.query.page || 1
+  pagination.value.rowsPerPage = adminStore.query.limit || 5
+  pagination.value.sortBy = adminStore.query.sortBy || ''
+  pagination.value.rowsNumber = adminStore.totalAdminsCount
+}
 onMounted(async () => {
   show.value = false
   adminStore.query = {
     page: 1,
     limit: 10,
-    sortBy: 'code',
+    sortBy: 'name',
     order: 'asc',
     search: '',
   }
@@ -100,7 +87,7 @@ onMounted(async () => {
         dense
         outlined
         label="เพิ่มผู้ดูแล"
-        @click="goToUplaodPage"
+        @click="goToAdd"
         class="btnadd"
         style="width: 130px"
       >
@@ -117,7 +104,7 @@ onMounted(async () => {
           label="ค้นหา ชื่อผู้ดูแล"
           class="q-mr-sm searchbox"
           :style="{ border: 'none' }"
-          @keyup.enter="applyFilters"
+          @keyup.enter="data"
         >
           <template v-slot:append>
             <q-icon name="search" />
@@ -125,14 +112,6 @@ onMounted(async () => {
         </q-input>
 
         <!-- Buttons -->
-        <div class="btn-filter-wrapper row no-wrap">
-          <FilterDialog
-            v-model="showFilterDialog1"
-            :categories="filterCategories1"
-            @apply="applyFilters"
-            class="q-mr-sm"
-          />
-        </div>
       </div>
 
       <!-- ตาราง -->
@@ -158,8 +137,10 @@ onMounted(async () => {
         <!-- เนื้อหาตาราง -->
         <template v-slot:body="props">
           <q-tr :props="props">
-            <q-td key="index">{{ props.rowIndex + 1 }}</q-td>
-            <q-td key="code">{{ props.row.code }}</q-td>
+            <q-td key="index">{{
+              (pagination.page - 1) * pagination.rowsPerPage + props.rowIndex + 1
+            }}</q-td>
+            <q-td key="email">{{ props.row.email }}</q-td>
             <q-td
               key="name"
               style="
@@ -168,19 +149,17 @@ onMounted(async () => {
                 overflow: hidden;
                 text-overflow: ellipsis;
               "
-              >{{ props.row.name }}</q-td
             >
-        
-            <!-- แสดงสถานะพร้อมสี -->
- 
+              {{ props.row.name }}
+            </q-td>
 
-            <q-td class="q-gutter-x-sm">
+            <q-td key="action" class="q-gutter-x-sm">
               <q-btn
                 flat
                 dense
                 icon="edit"
                 class="bg-primary text-white q-pa-xs rounded-borders q-mr-sm"
-                @click="goToDetail(props.row.code, true)"
+                @click="goToDetail(props.row.id, true)"
               >
                 <q-tooltip>แก้ไข</q-tooltip>
               </q-btn>
@@ -189,13 +168,24 @@ onMounted(async () => {
                 dense
                 icon="visibility"
                 class="bg-black text-white q-pa-xs rounded-borders q-mr-sm"
-                @click="goToDetail(props.row.code)"
+                @click="goToDetail(props.row.id)"
               >
                 <q-tooltip>ดูรายละเอียด</q-tooltip>
+              </q-btn>
+
+              <q-btn
+                flat
+                dense
+                icon="delete"
+                class="bg-red-7 text-red-1"
+                @click.stop="removeAdmin(props.row.id)"
+              >
+                <q-tooltip>ลบ</q-tooltip>
               </q-btn>
             </q-td>
           </q-tr>
         </template>
+
         <template v-slot:no-data>
           <div class="full-width text-center q-pa-md text-grey" style="font-size: 20px">
             ไม่มีรายชื่อผู้ดูแล

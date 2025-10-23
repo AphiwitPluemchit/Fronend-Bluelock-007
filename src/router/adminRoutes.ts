@@ -105,6 +105,14 @@ const adminChildren: RouteRecordRaw[] = [
   {
     path: 'AdminManagement',
     component: () => import('pages/admin-page/admin/AdminTablePage.vue')
+  },
+  {
+    path: 'AdminManagement/CreateAdmin',
+    component: () => import('pages/admin-page/admin/Detail/adminDetail.vue')
+  },
+  {
+    path: 'AdminManagement/AdminDetail/:id',
+    component: () => import('pages/admin-page/admin/Detail/adminDetail.vue')
   }
 ].map((route) => ({
   ...route,

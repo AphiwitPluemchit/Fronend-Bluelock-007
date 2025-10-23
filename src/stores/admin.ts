@@ -13,7 +13,6 @@ export const useAdminStore = defineStore('admin', () => {
     id: '',
     name: '',
     email: '',
-    password: '',
   })
 
   // เพิ่ม state เก็บประวัติการอบรม
@@ -57,6 +56,10 @@ export const useAdminStore = defineStore('admin', () => {
       return false
     }
   }
+  const removeAdmin = async (id: string) => {
+    await AdminService.deleteOne(id)
+  }
+
 
   return {
     createAdmin,
@@ -68,5 +71,6 @@ export const useAdminStore = defineStore('admin', () => {
     code,
     totalAdminsCount,
     updateAdmin,
+    removeAdmin,
   }
 })
