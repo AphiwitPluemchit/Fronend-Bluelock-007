@@ -78,7 +78,7 @@ const confirm = async () => {
     // แปลงจากภาษาไทยเป็น StatusType
     let status: StatusType
     let message: string
-    
+
     if (selectedAction.value === 'อนุมัติ') {
       status = StatusType.APPROVED
       message = 'อนุมัติใบประกาศนียบัตรเรียบร้อยแล้ว'
@@ -205,7 +205,10 @@ const formatDate = (dateString: string | null | undefined) => {
         <div class="row justify-center q-gutter-sm q-mb-md">
           <q-btn
             label="รออนุมัติ"
-            :class="['custom-pending', { 'custom-pending--active': selectedAction === 'รออนุมัติ' }]"
+            :class="[
+              'custom-pending',
+              { 'custom-pending--active': selectedAction === 'รออนุมัติ' },
+            ]"
             unelevated
             @click="selectedAction = 'รออนุมัติ'"
           />
@@ -224,7 +227,10 @@ const formatDate = (dateString: string | null | undefined) => {
         </div>
 
         <!-- ช่องกรอก remark เมื่อเลือก "ไม่อนุมัติ" หรือ "รออนุมัติ" -->
-        <div v-if="selectedAction === 'ไม่อนุมัติ' || selectedAction === 'รออนุมัติ'" class="q-mb-md">
+        <div
+          v-if="selectedAction === 'ไม่อนุมัติ' || selectedAction === 'รออนุมัติ'"
+          class="q-mb-md"
+        >
           <q-input
             dense
             outlined
@@ -232,7 +238,9 @@ const formatDate = (dateString: string | null | undefined) => {
             label="หมายเหตุ"
             type="textarea"
             rows="3"
-            :rules="[val => selectedAction === 'ไม่อนุมัติ' ? !!val || 'กรุณาระบุเหตุผล' : true]"
+            :rules="[
+              (val) => (selectedAction === 'ไม่อนุมัติ' ? !!val || 'กรุณาระบุเหตุผล' : true),
+            ]"
           />
         </div>
 
