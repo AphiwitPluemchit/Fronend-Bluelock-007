@@ -171,7 +171,7 @@ const data = async () => {
     })
 
     const majorResults = await Promise.all(promises)
-    
+
     majorResults.forEach(({ major, data }) => {
       perMajorData[major] = {
         completed: data.completed,
@@ -266,7 +266,7 @@ onMounted(async () => {
     <!-- Progress Overview -->
     <div v-if="!isLoading && summaryReport" class="q-mb-lg">
       <q-card class="progress-overview" flat bordered>
-        <q-card-section class="custom-header-section">
+        <q-card-section class="custom-header-section bg-primary">
           <div class="text-h6">สรุปผลตามประเภทชั่วโมง</div>
         </q-card-section>
 
@@ -332,7 +332,7 @@ onMounted(async () => {
 
     <!-- Chart Comparison -->
     <q-card class="chart-card q-mb-lg" flat bordered v-if="summaryReport?.perMajor">
-      <q-card-section class="custom-header-section">
+      <q-card-section class="custom-header-section bg-primary">
         <div class="text-h6">สรุปผลตามสาขา</div>
       </q-card-section>
 
@@ -367,7 +367,6 @@ onMounted(async () => {
   transform: scale(1.05);
 }
 .custom-header-section {
-  background-color: #14279b;/* #162aae */
   color: white;
 }
 

@@ -92,7 +92,7 @@ function getcategoryCourse(row: Course) {
 }
 
 function getActiveText(isActive: boolean) {
-  return isActive ? 'status-planning' : 'status-close'
+  return isActive ? 'status-approved' : 'status-close'
 }
 
 const router = useRouter()
@@ -389,10 +389,11 @@ function goToAddCourse() {
   background-color: #d2ffc7;
 }
 
-.status-planning {
-  background-color: #ffe7ba;
-  color: #ff6f00;
-  border: 1px solid #ffa500;
+.status-approved {
+  background-color: #d0ffc5;
+  color: #009812;
+  border: 1px solid #00bb16;
+  padding: 3px 30px;
   width: 130px;
 }
 
