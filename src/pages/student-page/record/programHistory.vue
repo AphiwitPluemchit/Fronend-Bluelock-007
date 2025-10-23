@@ -151,7 +151,7 @@ onMounted(async () => {
         <q-card-section class="q-pt-md q-pb-sm">
           <div class="row items-center justify-between q-mb-sm">
             <div class="row items-center q-gutter-xs">
-              <EnrollmentType :status="/* map to numeric if needed */ 1" />
+              <EnrollmentType :status="history.status" />
             </div>
             <ProgramType
               v-if="history.skillType === 'hard' || history.skillType === 'soft'"

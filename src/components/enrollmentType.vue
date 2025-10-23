@@ -9,21 +9,25 @@
 
 <script setup lang="ts">
 import { computed } from 'vue'
+import { useHourHistoryStore } from 'src/stores/hourHistory'
+
+const hourhistoryStore = useHourHistoryStore()
 
 interface Props {
-  status: number
+  status: string
 }
 const props = defineProps<Props>()
 
 const buttonLabel = computed(() => {
-  if (props.status === 1) return 'ยังไม่เข้าร่วม'
-  if (props.status === 2) return 'เข้าร่วมแล้ว'
-  return 'ขาด'
+  if (props.status === hourhistoryStore.HCStatusUpcoming) return 'ยังไม่เข้าร่วม'
+  if (props.status === hourhistoryStore.HCStatusAttended) return 'เข้าร่วมแล้ว'
+  if (props.status === hourhistoryStore.HCStatusAbsent) return 'ขาด'
+  return 'ไม่ทราบสถานะ'
 })
 
 const buttonClass = computed(() => {
-  if (props.status === 1) return 'status-dot--yellow'
-  if (props.status === 2) return 'status-dot--green'
+  if (props.status === hourhistoryStore.HCStatusParticipating) return 'status-dot--yellow'
+  if (props.status === hourhistoryStore.HCStatusAttended) return 'status-dot--green'
   return 'status-dot--red'
 })
 </script>

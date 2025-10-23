@@ -21,6 +21,17 @@ export const useHourHistoryStore = defineStore('hourHistory', () => {
     totalPages: 0,
   })
 
+  // Program statuses
+  const HCStatusUpcoming = 'upcoming' // กำลังมาถึง - ลงทะเบียนแล้ว รอเข้าร่วมกิจกรรม
+  const HCStatusParticipating = 'participating' // กำลังเข้าร่วมกิจกรรม (เช็คอินแล้ว กำลังเข้าร่วม)
+  const HCStatusAttended = 'attended' // เข้าร่วมแล้ว (อาจได้หรือไม่ได้ชั่วโมง ขึ้นอยู่กับการเข้าร่วมและทำฟอร์ม)
+  const HCStatusAbsent = 'absent' // ไม่มาเข้าร่วม (ไม่ได้ checkin เลย → จะถูกลบชั่วโมง)
+
+  // Certificate statuses
+  const HCStatusPending = 'pending' // รออนุมัติ (certificate)
+  const HCStatusApproved = 'approved' // อนุมัติแล้ว (certificate)
+  const HCStatusRejected = 'rejected' // ปฏิเสธแล้ว (certificate)
+
   /**
    * ดึงข้อมูล hour history ทั้งหมด
    */
@@ -170,6 +181,15 @@ export const useHourHistoryStore = defineStore('hourHistory', () => {
     loading,
     params,
     meta,
+
+    // Constants
+    HCStatusUpcoming,
+    HCStatusParticipating,
+    HCStatusAttended,
+    HCStatusAbsent,
+    HCStatusPending,
+    HCStatusApproved,
+    HCStatusRejected,
 
     // Actions
     fetchHistories,
