@@ -1,44 +1,30 @@
 <template>
-  <q-header class="bg-primary text-white shadow-2" elevated>
-    <q-toolbar class="justify-between">
+  <q-header class="text-white shadow-2" elevated>
+    <q-toolbar class="justify-between bg-primary">
       <!-- เมนูหลัก -->
-      <div class="row items-center q-gutter-x-lg">
+      <div class="row items-center q-gutter-x-md">
         <img
           src="/icons/Logo_of_Burapha_University.png"
           alt="Logo"
-          class="logo-img hide-below-600"
+          style="width: 45px; height: 45px"
+          class="q-ml-lg"
         />
+        <div class="text-left textsubtitle" v-show="$q.screen.gt.xs">
+          <div>ระบบเก็บชั่วโมงอบรมสหกิจศึกษา</div>
+        </div>
         <!-- ปุ่มเมนูหลัก -->
-        <q-btn dense flat no-caps label="หน้าหลัก" to="/Student/Home" />
-
-        <!-- เมนูมีโครงการ (dropdown) -->
-        <q-btn dense flat no-caps label="โครงการ">
-          <q-menu fit>
-            <q-list style="min-width: 150px">
-              <q-item clickable v-ripple to="/Student/ProgramCalendar">
-                <q-item-section>ปฏิทิน</q-item-section>
-              </q-item>
-              <q-item clickable v-ripple to="/Student/ProgramTablePage">
-                <q-item-section>โครงการ</q-item-section>
-              </q-item>
-              <q-item clickable v-ripple to="/Student/OnlineCoursesPage">
-                <q-item-section>หลักสูตร</q-item-section>
-              </q-item>
-            </q-list>
-          </q-menu>
-        </q-btn>
       </div>
 
       <!-- ข้อมูลผู้ใช้ + เมนู dropdown -->
-      <div class="row items-center">
-        <div class="text-right" v-show="$q.screen.gt.xs">
+      <div class="row items-center q-mt-sm">
+        <div class="text-right textsubtitle" v-show="$q.screen.gt.sm">
           <div>{{ authStore.getName }}</div>
-          <div style="font-size: 13px">
+          <div>
             {{ authStore.getRole === EnumUserRole.STUDENT ? 'นิสิต' : 'ผู้ดูแล' }}
           </div>
         </div>
         <q-btn flat no-caps>
-          <q-avatar size="32px" class="bg-white text-primary">
+          <q-avatar size="45px" class="bg-white text-primary">
             <q-icon name="person" />
           </q-avatar>
 
@@ -48,19 +34,39 @@
                 <q-item-section avatar>
                   <q-icon name="person" color="indigo-10" />
                 </q-item-section>
-                <q-item-section>ประวัติของฉัน</q-item-section>
+                <q-item-section class="textcontent">ประวัติของฉัน</q-item-section>
               </q-item>
 
               <q-item clickable v-ripple @click="logout">
                 <q-item-section avatar>
                   <q-icon name="logout" color="red" />
                 </q-item-section>
-                <q-item-section>ออกจากระบบ</q-item-section>
+                <q-item-section class="textcontent">ออกจากระบบ</q-item-section>
               </q-item>
             </q-list>
           </q-menu>
         </q-btn>
       </div>
+    </q-toolbar>
+    <q-toolbar class="justify-start bg-accent" style="max-height: 30px;">
+      <q-btn dense flat no-caps label="หน้าหลัก" to="/Student/Home" class="q-mx-md textsubtitle" />
+
+      <!-- เมนูมีโครงการ (dropdown) -->
+      <q-btn dense flat no-caps label="โครงการ" class="q-mx-md textsubtitle">
+        <q-menu fit>
+          <q-list style="min-width: 150px">
+            <q-item clickable v-ripple to="/Student/ProgramCalendar">
+              <q-item-section class="textcontent">ปฏิทิน</q-item-section>
+            </q-item>
+            <q-item clickable v-ripple to="/Student/ProgramTablePage">
+              <q-item-section class="textcontent">โครงการ</q-item-section>
+            </q-item>
+            <q-item clickable v-ripple to="/Student/OnlineCoursesPage">
+              <q-item-section class="textcontent">หลักสูตร</q-item-section>
+            </q-item>
+          </q-list>
+        </q-menu>
+      </q-btn>
     </q-toolbar>
   </q-header>
 </template>
@@ -84,15 +90,4 @@ async function logout() {
   }
 }
 </script>
-<style scoped>
-.logo-img {
-  width: 38px;
-  height: auto;
-  margin-left: 40px;
-}
-@media (max-width: 600px) {
-  .hide-below-600 {
-    display: none !important;
-  }
-}
-</style>
+<style scoped></style>

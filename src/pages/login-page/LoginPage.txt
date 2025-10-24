@@ -12,7 +12,7 @@
             <div class="text-h4 text-white q-mb-xs brand-title">C.E.T.H. Informatics<br /></div>
 
             <div class="text-subtitle1 text-white brand-subtitle">
-              ระบบสารสนเทศเพื่อการเก็บชั่วโมงอบรมสหกิจศึกษาผ่านเว็บแอปพลิเคชัน
+              ระบบเก็บชั่วโมงอบรมสหกิจศึกษา
             </div>
             <q-separator class="q-mt-md" style="background-color: aliceblue" />
           </div>

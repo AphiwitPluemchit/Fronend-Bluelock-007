@@ -14,12 +14,13 @@
 
 $primary: #2e3f80;
 $secondary: #26a69a;
-$accent: #9c27b0;
+$accent: #415298;
 
 $sky: #d0e3ff;
 
 $dark: #1d1d1d;
 $dark-page: #121212;
+
 
 .btnconfirm {
   background-color: #3676f4;
@@ -233,6 +234,10 @@ $dark-page: #121212;
 }
 .textsubtitle {
   font-size: 28px;
+  font-weight: 400;
+}
+.textcontent{
+  font-size: 22px;
   font-weight: 400;
 }
 // .btnadd {
