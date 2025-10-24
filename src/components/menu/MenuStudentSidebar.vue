@@ -29,26 +29,26 @@
           </q-avatar>
 
           <q-menu anchor="bottom right" self="top right">
-            <q-list style="min-width: 180px">
+            <q-list style="min-width: 160px">
               <q-item clickable v-ripple tag="router-link" to="/Student/RecordPage">
-                <q-item-section avatar>
+                <!-- <q-item-section avatar>
                   <q-icon name="person" color="indigo-10" />
-                </q-item-section>
-                <q-item-section class="textcontent">ประวัติของฉัน</q-item-section>
+                </q-item-section> -->
+                <q-item-section class="textcontent1">ประวัติของฉัน</q-item-section>
               </q-item>
 
               <q-item clickable v-ripple @click="logout">
-                <q-item-section avatar>
+                <!-- <q-item-section avatar>
                   <q-icon name="logout" color="red" />
-                </q-item-section>
-                <q-item-section class="textcontent">ออกจากระบบ</q-item-section>
+                </q-item-section> -->
+                <q-item-section class="textcontent1">ออกจากระบบ</q-item-section>
               </q-item>
             </q-list>
           </q-menu>
         </q-btn>
       </div>
     </q-toolbar>
-    <q-toolbar class="justify-start bg-accent" style="max-height: 30px;">
+    <q-toolbar class="justify-start bg-primary">
       <q-btn dense flat no-caps label="หน้าหลัก" to="/Student/Home" class="q-mx-md textsubtitle" />
 
       <!-- เมนูมีโครงการ (dropdown) -->
@@ -56,13 +56,13 @@
         <q-menu fit>
           <q-list style="min-width: 150px">
             <q-item clickable v-ripple to="/Student/ProgramCalendar">
-              <q-item-section class="textcontent">ปฏิทิน</q-item-section>
+              <q-item-section class="textcontent1">ปฏิทิน</q-item-section>
             </q-item>
             <q-item clickable v-ripple to="/Student/ProgramTablePage">
-              <q-item-section class="textcontent">โครงการ</q-item-section>
+              <q-item-section class="textcontent1">โครงการ</q-item-section>
             </q-item>
             <q-item clickable v-ripple to="/Student/OnlineCoursesPage">
-              <q-item-section class="textcontent">หลักสูตร</q-item-section>
+              <q-item-section class="textcontent1">หลักสูตร</q-item-section>
             </q-item>
           </q-list>
         </q-menu>

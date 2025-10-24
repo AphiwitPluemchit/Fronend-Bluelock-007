@@ -229,16 +229,19 @@ $dark-page: #121212;
   background-color: #f0f0f0; /* เปลี่ยนสีเมื่อ Hover */
 }
 .texttitle {
-  font-size: 34px;
-  font-weight: 400;
+  font-size: 26px;
 }
 .textsubtitle {
-  font-size: 28px;
-  font-weight: 400;
-}
-.textcontent{
   font-size: 22px;
-  font-weight: 400;
+}
+.textcontent1{
+  font-size: 18px;
+}
+.textcontent2{
+  font-size: 16px;
+}
+.textcontent3{
+  font-size: 14px;
 }
 // .btnadd {
 //   background-color: #ffffff;
