@@ -72,7 +72,7 @@ const getCourseImageUrl = (course: Course) => {
 const query = ref<Pagination>({
   page: 1,
   limit: 10,
-  search: '', 
+  search: '',
   sortBy: 'dates',
   order: 'desc',
   skill: [],
@@ -190,10 +190,10 @@ onMounted(async () => {
 <template>
   <q-page class="q-pa-md page-wrap">
     <div class="row justify-between items-center q-mb-md" style="margin-top: 20px">
-      <div class="texttitle">สวัสดี, {{ authStore.getName }}</div>
+      <div class="textcontent1">สวัสดี, {{ authStore.getName }}</div>
     </div>
     <div class="q-mt-md activity-carousel">
-      <p class="head-title">โครงการ</p>
+      <p class="texttitle">โครงการ</p>
 
       <!-- ✅ มือถือ: แสดงเฉพาะภาพแนวนอน -->
       <div
@@ -314,7 +314,7 @@ onMounted(async () => {
     <div class="q-mt-md course-carousel">
       <!-- ✅ หัวข้อซ้าย / ดูทั้งหมดขวา -->
       <div class="row items-center justify-between q-mb-sm">
-        <p class="head-title q-mb-none">หลักสูตร</p>
+        <p class="texttitle q-mb-none">หลักสูตร</p>
         <div class="see-all" @click="OnlineCoursesPage">
           ดูทั้งหมด
           <q-icon name="chevron_right" size="18px" />
@@ -353,38 +353,38 @@ onMounted(async () => {
     </div>
 
     <div class="menu">
-      <p class="menu-title">เมนู</p>
+      <p class="texttitle">เมนู</p>
       <div class="menu-row">
         <!-- calendar -->
         <q-card class="menu-card" @click="gotoCalendarPage">
           <q-icon name="calendar_today" class="icon" />
-          <p class="label-title">ตารางโครงการ</p>
-          <p class="label">ตรวจสอบโครงการทั้งหมด</p>
-          <p class="label">เพื่อลงทะเบียนเข้าร่วม</p>
+          <p class="textcontent2">ตารางโครงการ</p>
+          <p class="textcontent1">ตรวจสอบโครงการทั้งหมด</p>
+          <p class="textcontent1">เพื่อลงทะเบียนเข้าร่วม</p>
         </q-card>
 
         <!-- activity -->
         <q-card class="menu-card" @click="gotoProgramTablePage">
           <q-icon name="event" class="icon" />
-          <p class="label-title">โครงการทั้งหมด</p>
-          <p class="label">ตรวจสอบกิจกรรมทั้งหมด</p>
-          <p class="label">เพื่อลงทะเบียนเข้าร่วม</p>
+          <p class="textcontent2">โครงการทั้งหมด</p>
+          <p class="textcontent1">ตรวจสอบกิจกรรมทั้งหมด</p>
+          <p class="textcontent1">เพื่อลงทะเบียนเข้าร่วม</p>
         </q-card>
 
         <!-- course -->
         <q-card class="menu-card" @click="OnlineCoursesPage">
           <q-icon name="book" class="icon" />
-          <p class="label-title">หลักสูตรทั้งหมด</p>
-          <p class="label">ตรวจสอบหลักสูตรทั้งหมด</p>
-          <p class="label">เพื่อเข้าเรียนและขออนุมัติชั่วโมง</p>
+          <p class="textcontent2">หลักสูตรทั้งหมด</p>
+          <p class="textcontent1">ตรวจสอบหลักสูตรทั้งหมด</p>
+          <p class="textcontent1">เพื่อเข้าเรียนและขออนุมัติชั่วโมง</p>
         </q-card>
 
         <!-- profile -->
         <q-card class="menu-card" @click="gotoProfile">
           <q-icon name="account_circle" class="icon" />
-          <p class="label-title">ประวัติของฉัน</p>
-          <p class="label">ตรวจสอบจำนวนชั่วโมง</p>
-          <p class="label">และโครงการที่ลงทะเบียน และใบรับรองที่ขออนุมัติ</p>
+          <p class="textcontent2">ประวัติของฉัน</p>
+          <p class="textcontent1">ตรวจสอบจำนวนชั่วโมง</p>
+          <p class="textcontent1">และโครงการที่ลงทะเบียน และใบรับรองที่ขออนุมัติ</p>
         </q-card>
       </div>
     </div>
@@ -607,13 +607,13 @@ onMounted(async () => {
   margin-top: 40px;
 }
 
-.menu-title {
+/* .menu-title {
   font-size: 20px;
   font-weight: bold;
   text-align: left;
   margin-bottom: 20px;
   color: #1f2937;
-}
+} */
 
 .menu-row {
   display: grid;
@@ -640,7 +640,7 @@ onMounted(async () => {
   /* border-color: #3b82f6; */
 }
 
-.label {
+/* .label {
   font-size: 14px;
   margin: 0;
   color: #6b7280;
@@ -652,7 +652,7 @@ onMounted(async () => {
   font-weight: bold;
   margin: 15px 0 4px 0;
   color: #1f2937;
-}
+} */
 
 .icon {
   font-size: 35px;
@@ -717,9 +717,9 @@ onMounted(async () => {
     padding: 0 12px;
   }
 
-  .texttitle {
+  /* .texttitle {
     font-size: 18px;
-  }
+  } */
 
   .carousel-container {
     padding: 16px 0;
@@ -738,24 +738,24 @@ onMounted(async () => {
 
   /* Navigation buttons removed */
 
-  .menu-title {
+  /* .menu-title {
     font-size: 16px;
     margin-bottom: 12px;
-  }
+  } */
 
   .menu-card {
     min-height: 100px;
     padding: 12px;
   }
 
-  .label-title {
+  /* .label-title {
     font-size: 14px;
     margin: 10px 0 3px 0;
   }
 
   .label {
     font-size: 12px;
-  }
+  } */
 
   .icon {
     font-size: 28px;
@@ -789,9 +789,9 @@ onMounted(async () => {
     padding: 0 8px;
   }
 
-  .texttitle {
+  /* .texttitle {
     font-size: 16px;
-  }
+  } */
 
   .my-card {
     width: 200px;
@@ -807,13 +807,13 @@ onMounted(async () => {
     padding: 10px;
   }
 
-  .label-title {
+  /* .label-title {
     font-size: 13px;
   }
 
   .label {
     font-size: 11px;
-  }
+  } */
 
   .icon {
     font-size: 24px;
@@ -984,7 +984,7 @@ onMounted(async () => {
   border-radius: 8px;
 }
 
-.info-icon {
+/* .info-icon {
   width: 32px;
   height: 32px;
   display: flex;
@@ -998,28 +998,28 @@ onMounted(async () => {
 .info-icon q-icon {
   color: white;
   font-size: 16px;
-}
+} */
 
-.info-text {
+/* .info-text {
   display: flex;
   flex-direction: column;
   gap: 2px;
   min-width: 0;
-}
+} */
 
-.info-label {
+/* .info-label {
   font-size: 11px;
   color: #9ca3af;
   font-weight: 500;
   text-transform: uppercase;
   letter-spacing: 0.5px;
-}
+} */
 
-.info-value {
+/* .info-value {
   font-size: 13px;
   font-weight: 600;
   color: #1f2937;
-}
+} */
 
 /* Progress Section */
 .progress-section {

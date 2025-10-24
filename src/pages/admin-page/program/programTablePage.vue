@@ -595,7 +595,7 @@ watchEffect(() => {
 <template>
   <q-page class="q-pa-md">
     <!-- ชื่อหน้า -->
-    <div class="row justify-between items-center q-mb-md" style="margin-top: 20px">
+    <div class="row justify-between items-center " style="margin-top: 20px">
       <div class="texttitle">จัดการโครงการ</div>
       <q-btn
         dense

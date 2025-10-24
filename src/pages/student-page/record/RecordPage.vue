@@ -318,8 +318,7 @@ onMounted(async () => {
 }
 .custom-panels {
   background-color: #edf0f5;
-  height: 700px;
-  overflow: hidden;
+  height: 100%;
 }
 
 /* Ensure tabs stay rounded on all interaction states (hover, focus, active, keyboard focus)

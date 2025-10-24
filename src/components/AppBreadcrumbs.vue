@@ -46,7 +46,7 @@
   </q-breadcrumbs>
 
   <!-- หัวข้อหลักของหน้า -->
-  <div class="texttitle q-mt-sm" style="margin-top: 30px">
+  <div class="texttitle q-mt-md" >
     {{ breadcrumbs.nextPage?.title ?? breadcrumbs.currentPage.title }}
   </div>
 </template>
@@ -82,7 +82,7 @@ a {
   height: 24px;
 }
 .texttitle {
-  font-size: 34px;
+  font-size: 28px;
   font-weight: 400;
 }
 .textbreadcrumbs {
@@ -92,11 +92,11 @@ a {
 }
 @media (max-width: 450px) {
   .texttitle {
-    font-size: 28px;
+    font-size: 24px;
     font-weight: 400;
   }
   .textbreadcrumbs {
-    font-size: 18px;
+    font-size: 16px;
   }
 }
 

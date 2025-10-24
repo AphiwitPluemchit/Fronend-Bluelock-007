@@ -34,15 +34,15 @@ const toggleLeftDrawer = () => {
         />
         <img width="45" src="/icons/Logo_of_Burapha_University.png" alt="Logo" class="logo-img" />
         <div class="hidden-xs" v-show="$q.screen.gt.xs">
-          <div class="text-weight-bold" style="line-height: 1.2">คณะวิทยาการสารสนเทศ</div>
-          <div style="font-size: 16px; line-height: 1.2">มหาวิทยาลัยบูรพา</div>
+          <div class="text-weight-bold textcontent1" >คณะวิทยาการสารสนเทศ</div>
+          <div class="textcontent2">มหาวิทยาลัยบูรพา</div>
         </div>
       </q-toolbar-title>
       <!-- โลโก้ + ชื่อ -->
 
       <!-- ข้อมูลผู้ใช้ -->
-      <div class="row items-center q-gutter-sm">
-        <div style="font-size: 16px">
+      <div class="row items-center q-gutter-sm textcontent2" >
+        <div >
           <div>{{ store.getName }}</div>
           <div class="flex justify-end">
             {{ store.getRole === EnumUserRole.STUDENT ? 'นิสิต' : 'ผู้ดูแล' }}
