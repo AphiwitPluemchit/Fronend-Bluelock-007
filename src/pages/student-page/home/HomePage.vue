@@ -6,6 +6,8 @@ import { CourseService } from 'src/services/course'
 import type { Program } from 'src/types/program'
 import ProgramType from 'src/components/programType.vue'
 import { useAuthStore } from 'src/stores/auth'
+import type { Pagination } from 'src/types/pagination'
+import { ProgramService } from 'src/services/program'
 
 // Types for courses
 interface Course {
@@ -67,15 +69,34 @@ const getCourseImageUrl = (course: Course) => {
   return `${api.defaults.baseURL}${imagePath}`
 }
 
+const query = ref<Pagination>({
+  page: 1,
+  limit: 10,
+  search: '', 
+  sortBy: 'dates',
+  order: 'desc',
+  skill: [],
+  programState: ['open'],
+  major: [],
+  studentYear: [],
+})
+async function getProgramData(qeury: Pagination) {
+  const data = await ProgramService.getAll(qeury)
+  return data
+}
 const fetchActivities = async () => {
   try {
-    const response = await api.get('/programs', {
-      params: {
-        status: 'open',
-        limit: 10,
-      },
-    })
-    activities.value = response.data.data
+    const response = await getProgramData(query.value)
+    // const response = await api.get('/programs', {
+    //   params: {
+    //     limit: 10,
+    //     programState: ['open'],
+    //   },
+    // })
+
+    activities.value = response.data
+    console.log(activities.value);
+
     if (activities.value.length > 0) {
       startAutoSlide()
     }
