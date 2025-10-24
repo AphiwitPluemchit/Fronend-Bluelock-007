@@ -56,6 +56,11 @@ export const useStudentStore = defineStore('student', () => {
     student.value = data
   }
 
+  const getSummaryByCodeWithHours = async (code: string) => {
+    const data = await StudentService.getSummaryByCodeWithHours(code)
+
+    student.value = data
+  }
   // ฟังก์ชันดึงประวัติการอบรมตามรหัสนิสิต (เพิ่ม)
   const getTrainingHistory = async (code: string) => {
     try {
@@ -141,6 +146,7 @@ export const useStudentStore = defineStore('student', () => {
     getTrainingHistory, // เพิ่ม
     getStatusText,
     getStatusClass,
+    getSummaryByCodeWithHours,
     student,
     query,
     students,

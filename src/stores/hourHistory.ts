@@ -73,7 +73,7 @@ export const useHourHistoryStore = defineStore('hourHistory', () => {
       const queryParams: Record<string, string | number> = {}
 
       if (merged.page) queryParams.page = merged.page
-      if (merged.limit) queryParams.limit = merged.limit
+      if (merged.limit) queryParams.limit = 100
       if (merged.search) queryParams.search = merged.search
       if (merged.status) queryParams.status = merged.status
       if (studentId) queryParams.studentId = studentId
