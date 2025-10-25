@@ -165,7 +165,7 @@ onMounted(async () => {
         v-model:pagination="pagination"
         @request="onRequest"
         row-key="id"
-        class="q-mt-md my-table"
+        class="q-mt-md "
       >
         <!-- <q-table bordered flat :rows="students" :columns="columns" @request="applyFilters" row-key="id" class="q-mt-md"> -->
         <!-- หัวตาราง Sticky -->
@@ -244,9 +244,7 @@ onMounted(async () => {
   cursor: pointer;
   width: 60px;
 }
-.my-table {
-  min-height: 580px;
-}
+
 .status-badge {
   height: 32px;
   line-height: 28px;

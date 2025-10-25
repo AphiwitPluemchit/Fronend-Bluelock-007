@@ -190,11 +190,21 @@ onMounted(async () => {
 <template>
   <q-page class="q-pa-md page-wrap">
     <div class="row justify-between items-center q-mb-md" style="margin-top: 20px">
-      <div class="textcontent1">สวัสดี, {{ authStore.getName }}</div>
+      <div class="textcontent1 text-bold">สวัสดี, {{ authStore.getName }}</div>
     </div>
+    <div class="row items-center justify-between q-mb-sm">
+        <p class="texttitle q-mb-none text-bold">โครงการ</p>
+        <div class="see-all textcontent2" @click="gotoProgramTablePage">
+          ดูทั้งหมด
+          <q-icon name="chevron_right" size="18px" />
+        </div>
+      </div>
     <div class="q-mt-md activity-carousel">
-      <p class="texttitle">โครงการ</p>
-
+      <!-- <p class="texttitle">โครงการ</p>
+      <div class="see-all" @click="OnlineCoursesPage">
+          ดูทั้งหมด
+          <q-icon name="chevron_right" size="18px" />
+        </div> -->
       <!-- ✅ มือถือ: แสดงเฉพาะภาพแนวนอน -->
       <div
         v-if="$q.screen.lt.md"
@@ -245,7 +255,7 @@ onMounted(async () => {
 
                 <q-card-section>
                   <div class="row items-center q-gutter-sm justify-between">
-                    <div class="text-h6 q-mb-sm">{{ item.activity?.name }}</div>
+                    <div class="textsubtitle q-mb-sm text-bold">{{ item.activity?.name }}</div>
                     <ProgramType
                       style="align-items: end"
                       v-if="
@@ -260,7 +270,7 @@ onMounted(async () => {
 
                   <!-- ข้อมูลวันที่ / เวลา / จำนวน -->
                   <div
-                    class="text-subtitle2 q-mt-xs activity-info"
+                    class="textcontent3 q-mt-xs activity-info"
                     v-if="item.activity && item.activity.programItems?.[0]?.dates?.[0]"
                   >
                     <span class="info-block">
@@ -311,10 +321,10 @@ onMounted(async () => {
     </div>
 
     <!-- Courses Carousel - แบบใหม่ -->
-    <div class="q-mt-md course-carousel">
+    <div class="q-mt-md course-carousel" >
       <!-- ✅ หัวข้อซ้าย / ดูทั้งหมดขวา -->
       <div class="row items-center justify-between q-mb-sm">
-        <p class="texttitle q-mb-none">หลักสูตร</p>
+        <p class="texttitle q-mb-none text-bold">หลักสูตร</p>
         <div class="see-all" @click="OnlineCoursesPage">
           ดูทั้งหมด
           <q-icon name="chevron_right" size="18px" />
@@ -323,7 +333,7 @@ onMounted(async () => {
 
       <div class="course-carousel-container">
         <!-- Grid Layout for Courses -->
-        <div class="courses-grid">
+        <div class="courses-grid" >
           <transition-group name="course-item" tag="div" class="grid-wrapper">
             <!-- ✅ ปรับหลักสูตรให้เป็นแนวนอน 1 แถวเสมอ -->
             <div class="courses-scroll">
@@ -337,9 +347,9 @@ onMounted(async () => {
                   <div class="course-image-section">
                     <q-img :src="getCourseImageUrl(course)" class="course-image-modern" />
                   </div>
-                  <div class="course-content">
-                    <h3 class="course-title">{{ course.name }}</h3>
-                    <div class="info-block">
+                  <div class="course-content" >
+                    <div class="textsubtitle text-bold">{{ course.name }}</div>
+                    <div class="info-block textcontent3">
                       <q-icon name="schedule" class=".info-block" />
                       <span class="info-block">{{ course.hour }} ชั่วโมง</span>
                     </div>
@@ -353,38 +363,38 @@ onMounted(async () => {
     </div>
 
     <div class="menu">
-      <p class="texttitle">เมนู</p>
-      <div class="menu-row">
+      <p class="texttitle text-bold">เมนู</p>
+      <div class="menu-row" style="color: #1f2937;">
         <!-- calendar -->
         <q-card class="menu-card" @click="gotoCalendarPage">
           <q-icon name="calendar_today" class="icon" />
-          <p class="textcontent2">ตารางโครงการ</p>
-          <p class="textcontent1">ตรวจสอบโครงการทั้งหมด</p>
-          <p class="textcontent1">เพื่อลงทะเบียนเข้าร่วม</p>
+          <p class="textcontent1 text-bold">ตารางโครงการ</p>
+          <p class="textcontent2">ตรวจสอบโครงการทั้งหมด</p>
+          <p class="textcontent2">เพื่อลงทะเบียนเข้าร่วม</p>
         </q-card>
 
         <!-- activity -->
-        <q-card class="menu-card" @click="gotoProgramTablePage">
+        <q-card class="menu-card" @click="gotoProgramTablePage" >
           <q-icon name="event" class="icon" />
-          <p class="textcontent2">โครงการทั้งหมด</p>
-          <p class="textcontent1">ตรวจสอบกิจกรรมทั้งหมด</p>
-          <p class="textcontent1">เพื่อลงทะเบียนเข้าร่วม</p>
+          <p class="textcontent1 text-bold">โครงการทั้งหมด</p>
+          <p class="textcontent2">ตรวจสอบกิจกรรมทั้งหมด</p>
+          <p class="textcontent2">เพื่อลงทะเบียนเข้าร่วม</p>
         </q-card>
 
         <!-- course -->
         <q-card class="menu-card" @click="OnlineCoursesPage">
           <q-icon name="book" class="icon" />
-          <p class="textcontent2">หลักสูตรทั้งหมด</p>
-          <p class="textcontent1">ตรวจสอบหลักสูตรทั้งหมด</p>
-          <p class="textcontent1">เพื่อเข้าเรียนและขออนุมัติชั่วโมง</p>
+          <p class="textcontent1 text-bold">หลักสูตรทั้งหมด</p>
+          <p class="textcontent2">ตรวจสอบหลักสูตรทั้งหมด</p>
+          <p class="textcontent2">เพื่อเข้าเรียนและขออนุมัติชั่วโมง</p>
         </q-card>
 
         <!-- profile -->
         <q-card class="menu-card" @click="gotoProfile">
           <q-icon name="account_circle" class="icon" />
-          <p class="textcontent2">ประวัติของฉัน</p>
-          <p class="textcontent1">ตรวจสอบจำนวนชั่วโมง</p>
-          <p class="textcontent1">และโครงการที่ลงทะเบียน และใบรับรองที่ขออนุมัติ</p>
+          <p class="textcontent1 text-bold">ประวัติของฉัน</p>
+          <p class="textcontent2">ตรวจสอบจำนวนชั่วโมง</p>
+          <p class="textcontent2">และโครงการที่ลงทะเบียน และใบรับรองที่ขออนุมัติ</p>
         </q-card>
       </div>
     </div>
@@ -535,12 +545,10 @@ onMounted(async () => {
   display: flex;
   align-items: center;
   gap: 4px;
-  font-size: 13px;
   color: #6b7280;
 }
 
 .info-block q-icon {
-  font-size: 18px;
   color: #3b82f6;
 }
 
@@ -698,8 +706,6 @@ onMounted(async () => {
 
   /* ปุ่มดูทั้งหมด */
   .see-all {
-    font-size: 14px;
-    font-weight: 600;
     color: #060478;
     display: flex;
     align-items: center;
@@ -765,13 +771,13 @@ onMounted(async () => {
     gap: 6px;
   }
 
-  .info-block {
+  /* .info-block {
     font-size: 11px;
   }
 
   .info-block q-icon {
     font-size: 16px;
-  }
+  } */
 
   .indicator {
     width: 8px;
@@ -944,7 +950,7 @@ onMounted(async () => {
   gap: 12px;
 }
 
-.course-title {
+/* .course-title {
   font-size: 18px;
   font-weight: 700;
   margin: 0;
@@ -954,7 +960,7 @@ onMounted(async () => {
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
-}
+} */
 
 .course-desc {
   font-size: 13px;
@@ -1118,9 +1124,9 @@ onMounted(async () => {
     height: 160px;
   }
 
-  .course-title {
+  /* .course-title {
     font-size: 16px;
-  }
+  } */
 
   .course-desc {
     font-size: 12px;
@@ -1154,9 +1160,9 @@ onMounted(async () => {
     height: 150px;
   }
 
-  .course-title {
+  /* .course-title {
     font-size: 15px;
-  }
+  } */
 
   .course-badge {
     font-size: 10px;
@@ -1176,7 +1182,6 @@ onMounted(async () => {
   }
 }
 .see-all {
-  font-size: 15px;
   font-weight: 600;
   color: #041d78;
   display: flex;
@@ -1285,13 +1290,13 @@ onMounted(async () => {
   gap: 8px;
 }
 
-.course-title {
+/* .course-title {
   font-size: 16px;
   font-weight: 700;
   color: #1f2937;
   margin: 0;
   line-height: 1.4;
-}
+} */
 
 /* ✅ ส่วนแสดงเวลา */
 .course-meta {

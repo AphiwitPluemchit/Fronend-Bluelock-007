@@ -243,6 +243,23 @@ $dark-page: #121212;
 .textcontent3{
   font-size: 14px;
 }
+@media screen and (max-width: 600px){
+  .texttitle {
+    font-size: 24px;
+  }
+  .textsubtitle {
+    font-size: 20px;
+  }
+  .textcontent1{
+    font-size: 16px;
+  }
+  .textcontent2{
+    font-size: 14px;
+  }
+  .textcontent3{
+    font-size: 12px;
+  }
+}
 // .btnadd {
 //   background-color: #ffffff;
 //   border-radius: 15px;

@@ -92,7 +92,7 @@ const getProgramDetailHtml = (programItems: ProgramItem[] | null | undefined): s
 </script>
 
 <template>
-  <q-list dense>
+  <q-list dense class="textcontent1">
     <div class="field-pair">
       <div class="field-label">ชื่อโครงการ : </div>
       <div class="field-value">{{ program?.name ?? 'ไม่ระบุ' }}</div>
@@ -158,13 +158,11 @@ const getProgramDetailHtml = (programItems: ProgramItem[] | null | undefined): s
 /* มือถือ: แสดงแนวตั้งเหมือนเดิม */
 .field-label {
   font-weight: bold;
-  font-size: 16px;
   color: #333;
   margin-bottom: 4px;
 }
 
 .field-value {
-  font-size: 16px;
   color: #555;
   word-break: break-word;
 }

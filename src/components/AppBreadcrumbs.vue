@@ -1,6 +1,6 @@
 <template>
   <q-breadcrumbs separator=" ">
-    <q-breadcrumbs-el>
+    <q-breadcrumbs-el style="color: black">
       <!-- ตรวจว่าเป็นรูปภาพหรือ icon -->
       <template v-if="isImageIcon(breadcrumbs.icon)">
         <img :src="breadcrumbs.icon" alt="icon" class="icon-image q-mr-sm" />
@@ -13,7 +13,7 @@
       <!-- previousPage -->
       <router-link
         :to="breadcrumbs.previousPage?.path ?? '/'"
-        class="textbreadcrumbs"
+         class="textsubtitle"
         style="text-decoration: none"
       >
         {{ breadcrumbs.previousPage?.title }}
@@ -25,7 +25,7 @@
     <q-breadcrumbs-el>
       <router-link
         :to="breadcrumbs.currentPage.path"
-        class="textbreadcrumbs"
+        class="textsubtitle"
         :style="{ 'text-decoration-line': breadcrumbs.nextPage ? 'none' : 'underline' }"
       >
         {{ breadcrumbs.currentPage.title }}
@@ -37,7 +37,7 @@
     <q-breadcrumbs-el v-if="breadcrumbs.nextPage">
       <router-link
         :to="breadcrumbs.nextPage.path"
-        class="textbreadcrumbs"
+         class="textsubtitle"
         style="text-decoration-line: underline"
       >
         {{ breadcrumbs.nextPage.title }}
@@ -46,7 +46,7 @@
   </q-breadcrumbs>
 
   <!-- หัวข้อหลักของหน้า -->
-  <div class="texttitle q-mt-md" >
+  <div class="texttitle text-bold q-mt-md" >
     {{ breadcrumbs.nextPage?.title ?? breadcrumbs.currentPage.title }}
   </div>
 </template>
@@ -81,23 +81,23 @@ a {
   width: 24px;
   height: 24px;
 }
-.texttitle {
+/* .texttitle {
   font-size: 28px;
   font-weight: 400;
-}
-.textbreadcrumbs {
+} */
+/* .textbreadcrumbs {
   font-size: 20px;
   font-weight: 700;
   color: black;
-}
+} */
 @media (max-width: 450px) {
-  .texttitle {
+  /* .texttitle {
     font-size: 24px;
     font-weight: 400;
-  }
-  .textbreadcrumbs {
+  } */
+  /* .textbreadcrumbs {
     font-size: 16px;
-  }
+  } */
 }
 
 </style>

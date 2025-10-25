@@ -346,7 +346,7 @@ watch(selectedDate, (val) => {
 <template>
   <q-page class="q-pa-md">
     <div class="row justify-between items-center q-mb-md" style="margin-top: 20px">
-      <div class="texttitle" style="margin-bottom: 20px">ตารางโครงการ</div>
+      <div class="texttitle text-bold">ตารางโครงการ</div>
     </div>
 
     <div v-if="!isMobile">

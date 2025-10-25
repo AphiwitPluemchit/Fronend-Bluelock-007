@@ -96,7 +96,7 @@ onMounted(async () => {
   <q-page class="q-pa-md">
     <div class="container q-mx-auto q-px-sm q-mb-md" style="max-width: 1024px">
       <div class="row justify-between items-center q-mb-md" style="margin-top: 20px">
-        <div class="texttitle">ประวัติของฉัน</div>
+        <div class="texttitle text-bold">ประวัติของฉัน</div>
       </div>
       <!-- Student Profile Card -->
       <q-card bordered class="q-mb-md shadow-3 rounded-borders">

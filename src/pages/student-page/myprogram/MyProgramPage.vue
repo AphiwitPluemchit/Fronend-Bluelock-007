@@ -85,7 +85,7 @@ onMounted(async () => {
   <q-page class="q-pa-md">
     <!-- ชื่อหน้า -->
     <div class="q-mb-md" style="margin-top: 20px">
-      <div class="texttitle">โครงการของฉัน</div>
+      <div class="texttitle text-bold">โครงการของฉัน</div>
     </div>
 
     <!-- ค้นหา + ฟิลเตอร์ -->

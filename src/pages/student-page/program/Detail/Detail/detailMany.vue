@@ -64,7 +64,7 @@ function linkifyText(text?: string) {
 </script>
 
 <template>
-  <div class="q-pa-sm">
+  <div class="textcontent1">
     <!-- ข้อมูลทั่วไป -->
     <div class="field-pair">
       <div class="field-label">ชื่อโครงการหลัก :</div>
@@ -143,12 +143,10 @@ function linkifyText(text?: string) {
 }
 .field-label {
   font-weight: bold;
-  font-size: 16px;
   color: #333;
   margin-bottom: 4px;
 }
 .field-value {
-  font-size: 16px;
   color: #555;
   word-break: break-word;
   overflow-wrap: anywhere; /* กัน URL ยาวล้น */
