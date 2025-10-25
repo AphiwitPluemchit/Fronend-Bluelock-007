@@ -87,15 +87,8 @@ async function getProgramData(qeury: Pagination) {
 const fetchActivities = async () => {
   try {
     const response = await getProgramData(query.value)
-    // const response = await api.get('/programs', {
-    //   params: {
-    //     limit: 10,
-    //     programState: ['open'],
-    //   },
-    // })
 
     activities.value = response.data
-    console.log(activities.value);
 
     if (activities.value.length > 0) {
       startAutoSlide()
@@ -177,6 +170,13 @@ const onActivityScroll = () => {
 }
 
 onMounted(async () => {
+  const userMajor = authStore.getMajor // เช่น 'CS'
+  const useYear = authStore.getStudentYear?.toString()
+
+  // ✅ ใช้กรองข้อมูลตั้งแต่โหลดครั้งแรก
+  query.value.major = userMajor ? [userMajor] : []
+  query.value.studentYear = useYear ? [useYear] : []
+
   await fetchActivities()
   await fetchCourses()
   return () => {
@@ -193,12 +193,12 @@ onMounted(async () => {
       <div class="textcontent1 text-bold">สวัสดี, {{ authStore.getName }}</div>
     </div>
     <div class="row items-center justify-between q-mb-sm">
-        <p class="texttitle q-mb-none text-bold">โครงการ</p>
-        <div class="see-all textcontent2" @click="gotoProgramTablePage">
-          ดูทั้งหมด
-          <q-icon name="chevron_right" size="18px" />
-        </div>
+      <p class="texttitle q-mb-none text-bold">โครงการ</p>
+      <div class="see-all textcontent2" @click="gotoProgramTablePage">
+        ดูทั้งหมด
+        <q-icon name="chevron_right" size="18px" />
       </div>
+    </div>
     <div class="q-mt-md activity-carousel">
       <!-- <p class="texttitle">โครงการ</p>
       <div class="see-all" @click="OnlineCoursesPage">
@@ -1316,5 +1316,4 @@ onMounted(async () => {
   font-weight: 500;
   color: #4b5563;
 }
-
 </style>
