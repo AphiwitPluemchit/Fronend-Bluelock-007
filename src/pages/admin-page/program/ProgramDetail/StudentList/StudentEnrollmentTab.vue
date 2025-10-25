@@ -10,7 +10,7 @@ import EnrollStudentDialog from './enrollmentByAdminDialog.vue'
 
 import { ProgramService } from 'src/services/program'
 import { useEnrollmentStore } from 'src/stores/enrollment'
-import { useStudentStore } from 'src/stores/student'
+// import { useStudentStore } from 'src/stores/student'
 import { EnrollmentService } from 'src/services/enrollment'
 import FilterDialog from 'src/components/Dialog/FilterDialog.vue'
 import type { Program } from 'src/types/program'
@@ -23,7 +23,7 @@ import type { StudentEnrollment } from 'src/types/enrollment'
 dayjs.locale('th')
 const $q = useQuasar()
 const isMobile = computed(() => $q.screen.width <= 600)
-const studentStore = useStudentStore()
+// const studentStore = useStudentStore()
 const route = useRoute()
 const enrollmentStore = useEnrollmentStore()
 const programId = route.params.id as string
@@ -39,7 +39,7 @@ const selectProgramItemDate = ref(-1)
 const selectedStudent = ref<StudentEnrollment | null>(null)
 const query = ref<Pagination>({
   page: 1,
-  limit: 5,
+  limit: 10,
   search: '',
   sortBy: '_id',
   order: 'desc',
@@ -64,7 +64,7 @@ const pagination = ref({
   sortBy: query.value.sortBy || '',
   descending: query.value.order === 'desc',
   page: query.value.page || 1,
-  rowsPerPage: query.value.limit || 5,
+  rowsPerPage: query.value.limit || 10,
   rowsNumber: 0,
 })
 interface QTableRequestProps {
@@ -304,7 +304,7 @@ const fetchStudents = async () => {
       const data = await EnrollmentService.getEnrollmentsByProgramIDs(programId, query.value)
 
       pagination.value.page = query.value.page || 1
-      pagination.value.rowsPerPage = query.value.limit || 5
+      pagination.value.rowsPerPage = query.value.limit || 10
       pagination.value.sortBy = query.value.sortBy || ''
       pagination.value.descending = query.value.order === 'desc'
       pagination.value.rowsNumber = data.meta.total
@@ -316,7 +316,7 @@ const fetchStudents = async () => {
       const data = await EnrollmentService.getEnrollmentsByProgramID(programItemId, query.value)
 
       pagination.value.page = query.value.page || 1
-      pagination.value.rowsPerPage = query.value.limit || 5
+      pagination.value.rowsPerPage = query.value.limit || 10
       pagination.value.sortBy = query.value.sortBy || ''
       pagination.value.descending = query.value.order === 'desc'
       pagination.value.rowsNumber = data.meta.total
@@ -445,7 +445,7 @@ onUnmounted(() => {
         </q-td>
       </template>
 
-      <template v-slot:body-cell-status="props">
+      <!-- <template v-slot:body-cell-status="props">
         <q-td :props="props">
           <q-badge
             :label="studentStore.getStatusText(parseInt(props.row.status))"
@@ -455,7 +455,7 @@ onUnmounted(() => {
             :class="studentStore.getStatusClass(parseInt(props.row.status))"
           />
         </q-td>
-      </template>
+      </template> -->
 
       <!-- ปุ่มลบ -->
       <template v-slot:body-cell-actions="props">
