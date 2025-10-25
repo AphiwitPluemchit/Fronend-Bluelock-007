@@ -2,10 +2,9 @@
 import { ref, computed, onMounted, watch, onUnmounted } from 'vue'
 import { useAuthStore } from 'src/stores/auth'
 import { useHourHistoryStore } from 'src/stores/hourHistory'
-import type { HourChangeHistory } from 'src/types/hourHistory'
 import CertificateStatusType from 'src/components/CertificateStatusType.vue'
 import ProgramType from 'src/components/programType.vue'
-import HourChangeFilterDialog from 'src/components/Dialog/HourChangeFilterDialog.vue'
+// import HourChangeFilterDialog from 'src/components/Dialog/HourChangeFilterDialog.vue'
 
 const auth = useAuthStore()
 const hourHistoryStore = useHourHistoryStore()
@@ -36,11 +35,6 @@ const formatDateTime = (iso?: string) => {
   } catch {
     return d.toISOString()
   }
-}
-
-// สีแถบซ้ายตามประเภท skill
-const typeStripeClass = (history: HourChangeHistory) => {
-  return history.skillType === 'hard' ? 'stripe--blue' : 'stripe--green'
 }
 
 // เปลี่ยนหน้า
@@ -88,25 +82,25 @@ onUnmounted(() => {
 })
 
 // Apply filters from dialog
-const applyFilters = async (filters: { skillType: string[]; status: string[] }) => {
-  selectedFilters.value = filters
+// const applyFilters = async (filters: { skillType: string[]; status: string[] }) => {
+//   selectedFilters.value = filters
 
-  // Set skill type filter
-  if (filters.skillType.length > 0) {
-    // Note: Backend may not support skillType filter, adjust accordingly
-    // For now, we'll filter on frontend
-  }
+//   // Set skill type filter
+//   if (filters.skillType.length > 0) {
+//     // Note: Backend may not support skillType filter, adjust accordingly
+//     // For now, we'll filter on frontend
+//   }
 
-  // Set status filter
-  if (filters.status.length > 0) {
-    hourHistoryStore.params.status = filters.status.join(',')
-  } else {
-    delete hourHistoryStore.params.status
-  }
+//   // Set status filter
+//   if (filters.status.length > 0) {
+//     hourHistoryStore.params.status = filters.status.join(',')
+//   } else {
+//     delete hourHistoryStore.params.status
+//   }
 
-  hourHistoryStore.params.page = 1
-  await fetchCertificateHistory()
-}
+//   hourHistoryStore.params.page = 1
+//   await fetchCertificateHistory()
+// }
 
 // Filter histories by skillType on frontend (if needed)
 const filteredHistories = computed(() => {
@@ -149,9 +143,9 @@ onMounted(async () => {
         </template>
       </q-input>
 
-      <div class="filter-btn-wrapper">
+      <!-- <div class="filter-btn-wrapper">
         <HourChangeFilterDialog @apply="applyFilters" />
-      </div>
+      </div> -->
     </div>
   </div>
 
@@ -170,8 +164,6 @@ onMounted(async () => {
         flat
         bordered
       >
-        <div class="program-card__stripe" :class="typeStripeClass(history)"></div>
-
         <q-card-section class="q-pt-md q-pb-sm">
           <!-- แถวบน: สถานะซ้าย / ทักษะขวา -->
           <div class="row items-center justify-between q-mb-sm">

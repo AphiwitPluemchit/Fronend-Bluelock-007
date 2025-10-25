@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import EnrollmentType from 'src/components/enrollmentType.vue'
 import ProgramType from 'src/components/programType.vue'
-import HourChangeFilterDialog from 'src/components/Dialog/HourChangeFilterDialog.vue'
+// import HourChangeFilterDialog from 'src/components/Dialog/HourChangeFilterDialog.vue'
 
 import { useAuthStore } from 'src/stores/auth'
 import { useHourHistoryStore } from 'src/stores/hourHistory'
@@ -73,18 +73,18 @@ onUnmounted(() => {
 })
 
 // Apply filters from dialog
-const applyFilters = async (filters: { skillType: string[]; status: string[] }) => {
-  selectedFilters.value = filters
+// const applyFilters = async (filters: { skillType: string[]; status: string[] }) => {
+//   selectedFilters.value = filters
 
-  if (filters.status.length > 0) {
-    hourHistoryStore.params.status = filters.status.join(',')
-  } else {
-    delete hourHistoryStore.params.status
-  }
+//   if (filters.status.length > 0) {
+//     hourHistoryStore.params.status = filters.status.join(',')
+//   } else {
+//     delete hourHistoryStore.params.status
+//   }
 
-  hourHistoryStore.params.page = 1
-  await fetchProgramHistory()
-}
+//   hourHistoryStore.params.page = 1
+//   await fetchProgramHistory()
+// }
 
 // Frontend skillType filter (if backend doesn't support it)
 const filteredHistories = computed(() => {
@@ -124,9 +124,9 @@ onMounted(async () => {
         </template>
       </q-input>
 
-      <div class="filter-btn-wrapper">
+      <!-- <div class="filter-btn-wrapper">
         <HourChangeFilterDialog @apply="applyFilters" />
-      </div>
+      </div> -->
     </div>
   </div>
 

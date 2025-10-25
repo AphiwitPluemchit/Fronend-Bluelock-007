@@ -297,7 +297,7 @@ onMounted(async () => {
   width: 130px;
 }
 
-.status-waiting {
+.status-pending {
   background-color: #ffe7ba;
   color: #ff6f00;
   border: 1px solid #ffa500;
