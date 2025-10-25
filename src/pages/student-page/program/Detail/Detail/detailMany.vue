@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { Program, ProgramItem } from 'src/types/program'
+import type { Program } from 'src/types/program'
 import dayjs from 'dayjs'
 import 'dayjs/locale/th'
 import buddhistEra from 'dayjs/plugin/buddhistEra'
@@ -12,22 +12,6 @@ function formatDateToThai(dateString: string): string {
 }
 
 defineProps<{ program: Program }>()
-
-// วันที่จาก programItems
-const getProgramdates = (programItems: ProgramItem[] | null | undefined): string => {
-  const firstItem = programItems?.find((item) => item.dates && item.dates.length > 0)
-  return firstItem?.dates
-    ? firstItem.dates.map((d) => formatDateToThai(d.date)).join(', ')
-    : 'ไม่ระบุ'
-}
-
-// เวลา
-const getProgramTime = (programItems: ProgramItem[] | null | undefined): string => {
-  const firstItem = programItems?.find((item) => item.dates && item.dates.length > 0)
-  return firstItem?.dates
-    ? firstItem.dates.map((d) => `${d.stime} - ${d.etime}`).join(', ')
-    : 'ไม่ระบุ'
-}
 
 /** ---------- ทำให้รายละเอียดเป็นลิงก์คลิกได้ ---------- **/
 const URL_REGEX = /((https?:\/\/|www\.)[^\s<]+)/gi
@@ -71,14 +55,6 @@ function linkifyText(text?: string) {
       <div class="field-value">{{ program?.name ?? 'ไม่ระบุ' }}</div>
     </div>
     <div class="field-pair">
-      <div class="field-label">วันที่จัดโครงการ :</div>
-      <div class="field-value">{{ getProgramdates(program?.programItems) }}</div>
-    </div>
-    <div class="field-pair">
-      <div class="field-label">เวลาที่จัดโครงการ :</div>
-      <div class="field-value">{{ getProgramTime(program?.programItems) }}</div>
-    </div>
-    <div class="field-pair">
       <div class="field-label">ประเภทโครงการ :</div>
       <div class="field-value">
         {{
@@ -104,6 +80,26 @@ function linkifyText(text?: string) {
         <div class="field-value">{{ item.name ?? 'ไม่ระบุ' }}</div>
       </div>
       <div class="field-pair">
+        <div class="field-label">วันที่จัดโครงการ :</div>
+        <div class="field-value">
+          {{
+            item.dates && item.dates.length > 0
+              ? item.dates.map((d) => formatDateToThai(d.date)).join(', ')
+              : 'ไม่ระบุ'
+          }}
+        </div>
+      </div>
+      <div class="field-pair">
+        <div class="field-label">เวลาที่จัดโครงการ :</div>
+        <div class="field-value">
+          {{
+            item.dates && item.dates.length > 0
+              ? item.dates.map((d) => `${d.stime} - ${d.etime}`).join(', ')
+              : 'ไม่ระบุ'
+          }}
+        </div>
+      </div>
+      <div class="field-pair">
         <div class="field-label">สถานที่จัดโครงการ :</div>
         <div class="field-value">
           {{ Array.isArray(item.rooms) ? item.rooms.join(', ') : (item.rooms ?? 'ไม่ระบุ') }}
@@ -117,6 +113,26 @@ function linkifyText(text?: string) {
         <div class="field-label">จำนวนที่ลงทะเบียน :</div>
         <div class="field-value">
           {{ item.enrollmentCount ?? 'ไม่ระบุ' }}/{{ item.maxParticipants ?? 'ไม่ระบุ' }}
+        </div>
+      </div>
+      <div class="field-pair">
+        <div class="field-label">ชั้นปีที่ลงทะเบียนได้ :</div>
+        <div class="field-value">
+          {{
+            Array.isArray(item.studentYears) && item.studentYears.length > 0
+              ? item.studentYears.join(', ')
+              : 'ทุกชั้นปี'
+          }}
+        </div>
+      </div>
+      <div class="field-pair">
+        <div class="field-label">สาขาที่ลงทะเบียนได้ :</div>
+        <div class="field-value">
+          {{
+            Array.isArray(item.majors) && item.majors.length > 0
+              ? item.majors.join(', ')
+              : 'ทุกสาขา'
+          }}
         </div>
       </div>
       <div class="field-pair">
