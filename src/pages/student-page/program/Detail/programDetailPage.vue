@@ -5,7 +5,6 @@ import AppBreadcrumbs from 'src/components/AppBreadcrumbs.vue'
 import registerConfirmDialog from '../Dialog/registerConfirmDialog.vue'
 import registerFailDialog from '../Dialog/registerFailDialog.vue'
 import unRegisterDialog from '../Dialog/unRegisterDialog.vue'
-import DetailOne from './Detail/detailOne.vue'
 import DetailMany from './Detail/detailMany.vue'
 import { useStudentProgramstore } from 'src/stores/program'
 import { EnrollmentService } from 'src/services/enrollment'
@@ -124,11 +123,8 @@ onMounted(async () => {
 
           <!-- รายละเอียด -->
           <div class="col-12 col-md-8" v-if="program">
-            <div v-if="Array.isArray(program?.programItems) && program.programItems.length > 1">
+            <div>
               <DetailMany :program="program ?? {}" />
-            </div>
-            <div v-else>
-              <DetailOne :program="program ?? {}" />
             </div>
           </div>
         </q-card-section>
