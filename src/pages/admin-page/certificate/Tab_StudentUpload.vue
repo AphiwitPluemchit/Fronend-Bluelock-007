@@ -116,26 +116,29 @@ const handleFilterApply = async (filterData: {
   major?: string[]
   year?: string[]
 }) => {
-  await certificateStore.applyFilters({
-    status: filterData.statusCertificate ?? [],
-    major: filterData.major ?? [],
-    year: filterData.year ?? [],
-    search: searchText.value,
-  })
+  await certificateStore.applyFilters(
+    {
+      status: filterData.statusCertificate ?? [],
+      major: filterData.major ?? [],
+      year: filterData.year ?? [],
+      search: searchText.value,
+    },
+    courseId.value,
+  )
 }
 
 // Handle search
 const handleSearch = async () => {
-  await certificateStore.searchCertificates(searchText.value)
+  await certificateStore.searchCertificates(searchText.value, courseId.value)
 }
 
 // Handle pagination
 const handlePageChange = async (page: number) => {
-  await certificateStore.changePage(page)
+  await certificateStore.changePage(page, courseId.value)
 }
 
 const handleLimitChange = async (limit: number) => {
-  await certificateStore.changeLimit(limit)
+  await certificateStore.changeLimit(limit, courseId.value)
 }
 
 // Watch search input with debounce
@@ -182,7 +185,7 @@ onMounted(async () => {
       <div class="row justify-end items-center q-mb-md">
         <q-input
           v-model="searchText"
-          placeholder="ค้นหารหัสนิสิต, ชื่อ-สกุล, หรือชื่อคอร์ส..."
+          placeholder="ค้นหารหัสนิสิต, ชื่อ-สกุล"
           outlined
           dense
           clearable

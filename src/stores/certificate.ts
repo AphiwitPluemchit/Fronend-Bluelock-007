@@ -168,65 +168,82 @@ export const useCertificateStore = defineStore('certificate', () => {
   }
 
   /**
+   * Helper function: เลือก fetch method ตาม context (courseId, studentId, หรือ all)
+   */
+  const refetchData = async (courseId?: string, studentId?: string) => {
+    if (courseId) {
+      await fetchCertificatesByCourse(courseId)
+    } else if (studentId) {
+      await fetchCertificatesByStudent(studentId)
+    } else {
+      await fetchCertificates()
+    }
+  }
+
+  /**
    * เปลี่ยนหน้า
    */
-  const changePage = async (page: number) => {
+  const changePage = async (page: number, courseId?: string, studentId?: string) => {
     query.value.page = page
-    await fetchCertificates()
+    await refetchData(courseId, studentId)
   }
 
   /**
    * เปลี่ยนจำนวนรายการต่อหน้า
    */
-  const changeLimit = async (limit: number) => {
+  const changeLimit = async (limit: number, courseId?: string, studentId?: string) => {
     query.value.limit = limit
     query.value.page = 1
-    await fetchCertificates()
+    await refetchData(courseId, studentId)
   }
 
   /**
    * ค้นหา
    */
-  const searchCertificates = async (searchText: string) => {
+  const searchCertificates = async (searchText: string, courseId?: string, studentId?: string) => {
     query.value.search = searchText
     query.value.page = 1
-    await fetchCertificates()
+    await refetchData(courseId, studentId)
   }
 
   /**
    * กรอง status
    */
-  const filterByStatus = async (statuses: string[]) => {
+  const filterByStatus = async (statuses: string[], courseId?: string, studentId?: string) => {
     query.value.status = statuses
     query.value.page = 1
-    await fetchCertificates()
+    await refetchData(courseId, studentId)
   }
 
   /**
    * กรอง major
    */
-  const filterByMajor = async (majors: string[]) => {
+  const filterByMajor = async (majors: string[], courseId?: string, studentId?: string) => {
     query.value.major = majors
     query.value.page = 1
-    await fetchCertificates()
+    await refetchData(courseId, studentId)
   }
 
   /**
    * กรอง year
    */
-  const filterByYear = async (years: string[]) => {
+  const filterByYear = async (years: string[], courseId?: string, studentId?: string) => {
     query.value.year = years
     query.value.page = 1
-    await fetchCertificates()
+    await refetchData(courseId, studentId)
   }
 
   /**
    * ใช้ filters ทั้งหมด
    */
-  const applyFilters = async (newFilters: Partial<CertificateQuery>) => {
+  const applyFilters = async (
+    newFilters: Partial<CertificateQuery>,
+    courseId?: string,
+    studentId?: string,
+  ) => {
     Object.assign(query.value, newFilters)
     query.value.page = 1
-    await fetchCertificates()
+    await refetchData(courseId, studentId)
   }
 
   /**
