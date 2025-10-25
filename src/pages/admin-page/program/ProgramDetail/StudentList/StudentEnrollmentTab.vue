@@ -31,7 +31,7 @@ const programId = route.params.id as string
 const removeDialog = ref(false)
 const editDialog = ref(false)
 const addDialogOpen = ref(false)
-
+const canManage = computed(() => program.value?.programState !== 'success')
 const filterCategories1 = ref(['year', 'major', 'studentStatus'])
 const program = ref<Program | null>(null)
 const selectProgramItem = ref(-1)
@@ -217,7 +217,6 @@ const baseColumns: QTableColumn[] = [
     style: 'width: 15%;',
     headerStyle: 'width: 16%;',
   },
-  { name: 'actions', label: '', field: 'actions', align: 'center' as const },
 ]
 
 const participationCol: QTableColumn = {
@@ -228,17 +227,21 @@ const participationCol: QTableColumn = {
   style: 'width: 15%;',
   headerStyle: 'width: 16%;',
 }
-
+const actionsCol: QTableColumn = {
+  name: 'actions',
+  label: '',
+  field: 'actions',
+  align: 'center' as const,
+}
 const showParticipation = computed(() => selectProgramItemDate.value !== -1)
 
 const columns = computed<QTableColumn[]>(() => {
-  // สำเนา base ก่อน
   const cols = [...baseColumns]
   if (showParticipation.value) {
-    // แทรกหลัง 'checkOut'
     const afterCheckOut = cols.findIndex((c) => c.name === 'checkOut') + 1
     cols.splice(afterCheckOut, 0, participationCol)
   }
+  if (canManage.value) cols.push(actionsCol) // ✅ ใส่เฉพาะตอนเปิดแก้ไขได้
   return cols
 })
 
@@ -348,6 +351,7 @@ onUnmounted(() => {
       <div class="row justify-between items-center">
         <div class="textsubtitle">{{ program?.name }}</div>
         <q-btn
+          v-if="canManage"
           dense
           outlined
           label="เพิ่มนิสิต"
@@ -458,26 +462,6 @@ onUnmounted(() => {
       </template> -->
 
       <!-- ปุ่มลบ -->
-      <template v-slot:body-cell-actions="props">
-        <q-td class="q-gutter-x-sm" key="action">
-          <q-icon
-            clickable
-            name="edit"
-            @click.stop="editCheckinout(props.row)"
-            class="bg-primary text-white q-pa-xs rounded-borders q-mr-sm"
-          >
-            <q-tooltip>แก้ไข</q-tooltip>
-          </q-icon>
-          <q-icon
-            clickable
-            name="delete"
-            @click.stop="removeStudentFromProgram(props.row.id)"
-            class="bg-red-7 text-white q-pa-xs rounded-borders q-mr-sm"
-          >
-            <q-tooltip>ลบ</q-tooltip></q-icon
-          >
-        </q-td>
-      </template>
       <template v-slot:body-cell-checkIn="props">
         <q-td :props="props">
           <div v-if="getRowCheckins(props.row).length">
@@ -504,7 +488,26 @@ onUnmounted(() => {
           {{ props.row.checkInOut[0]?.participation }}
         </q-td>
       </template>
-
+      <template v-slot:body-cell-actions="props" v-if="canManage">
+        <q-td class="q-gutter-x-sm" key="action">
+          <q-icon
+            clickable
+            name="edit"
+            @click.stop="editCheckinout(props.row)"
+            class="bg-primary text-white q-pa-xs rounded-borders q-mr-sm"
+          >
+            <q-tooltip>แก้ไข</q-tooltip>
+          </q-icon>
+          <q-icon
+            clickable
+            name="delete"
+            @click.stop="removeStudentFromProgram(props.row.id)"
+            class="bg-red-7 text-white q-pa-xs rounded-borders q-mr-sm"
+          >
+            <q-tooltip>ลบ</q-tooltip>
+          </q-icon>
+        </q-td>
+      </template>
       <template v-slot:no-data>
         <div class="full-width text-center q-pa-md text-grey" style="font-size: 20px">
           ไม่มีนิสิตที่ลงทะเบียน
@@ -513,11 +516,10 @@ onUnmounted(() => {
     </q-table>
 
     <!-- Card layout for mobile -->
-    <!-- Card layout for mobile -->
     <div v-else style="margin-top: 20px">
       <q-card v-for="student in students" :key="student.id" class="student-card" bordered flat>
         <!-- HEADER -->
-        <q-card-section class=" row items-center justify-between">
+        <q-card-section class="row items-center justify-between">
           <div
             class="ProgramNamelabel row items-center"
             @click="toggleCard(student.id)"
@@ -534,13 +536,13 @@ onUnmounted(() => {
           </div>
 
           <!-- ACTIONS (always visible on mobile header) -->
-          <div class="row items-center q-gutter-xs ">
+          <div class="row items-center q-gutter-xs" v-if="canManage">
             <q-btn
               round
               dense
               size="sm"
               icon="edit"
-                class="bg-primary text-white q-pa-xs rounded-borders q-mr-sm"
+              class="bg-primary text-white q-pa-xs rounded-borders q-mr-sm"
               aria-label="แก้ไข"
               @click.stop="editCheckinout(student)"
             />
@@ -568,7 +570,7 @@ onUnmounted(() => {
             v-if="student.food && student.food.trim() !== ''"
             style="display: flex; align-items: center; margin-bottom: 10px"
           >
-            <div class="label" >อาหาร</div>
+            <div class="label">อาหาร</div>
             <div class="value">{{ student.food }}</div>
           </div>
 
@@ -596,8 +598,6 @@ onUnmounted(() => {
             </div>
           </div>
         </q-card-section>
-
-
       </q-card>
 
       <div
@@ -847,5 +847,4 @@ onUnmounted(() => {
     margin-bottom: 6px !important;
   }
 }
-
 </style>

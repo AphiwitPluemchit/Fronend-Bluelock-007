@@ -243,6 +243,9 @@ $dark-page: #121212;
 .textcontent3{
   font-size: 14px;
 }
+.textcontent4{
+  font-size: 12px;
+}
 @media screen and (max-width: 600px){
   .texttitle {
     font-size: 24px;
@@ -258,6 +261,9 @@ $dark-page: #121212;
   }
   .textcontent3{
     font-size: 12px;
+  }
+  .textcontent4{
+    font-size: 10px;
   }
 }
 // .btnadd {
