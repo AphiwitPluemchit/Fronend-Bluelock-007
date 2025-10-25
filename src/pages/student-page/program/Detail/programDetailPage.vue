@@ -71,7 +71,7 @@ const unRegister = async (modelValue: boolean) => {
   }
 }
 
-const isRegistrationNotAllowed = computed(() => {
+const isNotAllowDate = computed(() => {
   if (!program.value?.endDateEnroll) {
     return false // ถ้าไม่มี endDateEnroll ให้อนุญาตลงทะเบียนไว้ก่อน
   }
@@ -143,15 +143,24 @@ onMounted(async () => {
             rounded
           />
           <q-btn
-            v-else-if="enrollment.isEnrolled && !isRegistrationNotAllowed"
-            label="ยกเลิกลงทะเบียน"
-            class="btnreject"
-            @click="handleUnRegisterClick"
+            v-else-if="isNotAllowDate && !enrollment.isEnrolled"
+            label="หมดช่วงลงทะเบียนแล้ว"
+            class="btn-disabled"
+            :disabled="true"
             unelevated
             rounded
           />
           <q-btn
-            v-else-if="!enrollment.isEnrolled && !isRegistrationNotAllowed"
+            v-else-if="enrollment.isEnrolled"
+            label="ยกเลิกลงทะเบียน"
+            class="btnreject"
+            @click="handleUnRegisterClick"
+            :disabled="isNotAllowDate"
+            unelevated
+            rounded
+          />
+          <q-btn
+            v-else-if="!enrollment.isEnrolled && !isNotAllowDate"
             label="ลงทะเบียน"
             class="btnsecces"
             @click="handleRegisterClick"
