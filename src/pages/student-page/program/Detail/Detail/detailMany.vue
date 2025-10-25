@@ -67,6 +67,12 @@ function linkifyText(text?: string) {
       </div>
     </div>
     <div class="field-pair">
+      <div class="field-label">ลงทะเบียนได้ถึง :</div>
+      <div class="field-value">
+        {{ program.endDateEnroll ? formatDateToThai(program.endDateEnroll) : 'ไม่ระบุ' }}
+      </div>
+    </div>
+    <div class="field-pair">
       <div class="field-label">จำนวนโครงการ :</div>
       <div class="field-value">{{ program.programItems?.length }} โครงการ</div>
     </div>
