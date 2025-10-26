@@ -220,9 +220,9 @@ const baseColumns: QTableColumn[] = [
 ]
 
 const participationCol: QTableColumn = {
-  name: 'participation',
+  name: 'checkInStatus',
   label: 'สถานะเช็คชื่อ',
-  field: 'participation',
+  field: 'checkInStatus',
   align: 'center',
   style: 'width: 15%;',
   headerStyle: 'width: 16%;',
@@ -282,6 +282,107 @@ function getStudentCheckins(student: { checkInOut?: unknown }): string[] {
 function getStudentCheckouts(student: { checkInOut?: unknown }): string[] {
   if (!Array.isArray(student.checkInOut)) return []
   return (student.checkInOut as CheckInOut[]).map((r) => r.checkout).filter((v): v is string => !!v)
+}
+
+// ฟังก์ชันคำนวณสถานะเช็คชื่อ
+const getCheckInStatus = (student: StudentEnrollment): string => {
+  if (!program.value || !program.value.programItems) return 'ไม่มา'
+
+  // หา programItem ที่ student ลงทะเบียน
+  // ใช้ enrollment ID หรือข้อมูลอื่นในการเชื่อมโยง
+  // สมมติว่าเราต้องเทียบกับ date ที่เลือก (selectProgramItemDate)
+
+  const selectedDate =
+    selectProgramItemDate.value !== -1 ? selectProgramItemDate.value.toString() : null
+
+  // ถ้าไม่ได้เลือกวัน หรือเลือก "ทุกวัน" (-1) ไม่สามารถแสดงสถานะได้
+  if (!selectedDate) return '-'
+
+  // หา programItem และ date ที่ตรงกับวันที่เลือก
+  let targetTime: string | null = null
+
+  if (selectProgramItem.value === -1) {
+    // กรณีเลือก "ทุกโครงการ" ให้หา stime จากโครงการใดๆที่มีวันตรงกัน
+    for (const item of program.value.programItems) {
+      const dateObj = item.dates?.find((d) => d.date === selectedDate)
+      if (dateObj && dateObj.stime) {
+        targetTime = dateObj.stime
+        break
+      }
+    }
+  } else {
+    // กรณีเลือกโครงการเฉพาะ
+    const selectedItem = program.value.programItems[selectProgramItem.value]
+    if (selectedItem && selectedItem.dates) {
+      const dateObj = selectedItem.dates.find((d) => d.date === selectedDate)
+      if (dateObj && dateObj.stime) {
+        targetTime = dateObj.stime
+      }
+    }
+  }
+
+  if (!targetTime) return '-'
+
+  // ตรวจสอบข้อมูล checkInOut ของ student
+  const checkInOuts = Array.isArray(student.checkInOut) ? student.checkInOut : []
+
+  if (checkInOuts.length === 0) return 'ไม่มา'
+
+  // กรองเฉพาะ check-in/out ที่ตรงกับวันที่เลือก
+  const relevantCheckInOut = checkInOuts.filter((record) => {
+    if (!record.checkin) return false
+    const checkinDate = dayjs(record.checkin).format('YYYY-MM-DD')
+    return checkinDate === selectedDate
+  })
+
+  if (relevantCheckInOut.length === 0) return 'ไม่มา'
+
+  // ตรวจสอบสถานะ
+  const record = relevantCheckInOut[0]
+  if (!record) return 'ไม่มา'
+
+  const hasCheckIn = !!record.checkin
+  const hasCheckOut = !!record.checkout
+
+  // กรณีมาไม่ครบ (เช็คอย่างใดอย่างหนึ่งเท่านั้น)
+  if (hasCheckIn && !hasCheckOut) return 'มาไม่ครบ'
+  if (!hasCheckIn && hasCheckOut) return 'มาไม่ครบ'
+
+  // กรณีไม่มาเลย
+  if (!hasCheckIn && !hasCheckOut) return 'ไม่มา'
+
+  // เปรียบเทียบเวลาเช็คอินกับ stime
+  const checkinTime = dayjs(record.checkin)
+  // สร้าง datetime โดยใช้วันจาก checkin และเวลาจาก stime
+  const [hours, minutes] = targetTime.split(':').map(Number)
+  if (hours === undefined || minutes === undefined) return '-'
+
+  const startTime = dayjs(record.checkin).hour(hours).minute(minutes).second(0)
+  // เพิ่มเวลา grace period 30 นาที
+  const graceTime = startTime.add(30, 'minute')
+
+  // ถ้าเช็คอินหลังจาก grace period (stime + 30 นาที) ถือว่ามาสาย
+  if (checkinTime.isAfter(graceTime)) {
+    return 'มาสาย'
+  } else {
+    return 'ทันเวลา'
+  }
+}
+
+// ฟังก์ชันกำหนดคลาสของ badge
+const getCheckInStatusClass = (status: string): string => {
+  switch (status) {
+    case 'ทันเวลา':
+      return 'status-ontime'
+    case 'มาสาย':
+      return 'status-late'
+    case 'มาไม่ครบ':
+      return 'status-incomplete'
+    case 'ไม่มา':
+      return 'status-absent'
+    default:
+      return ''
+  }
 }
 
 const fetchStudents = async () => {
@@ -483,9 +584,17 @@ onUnmounted(() => {
           <div v-else>-</div>
         </q-td>
       </template>
-      <template v-slot:body-cell-participation="props">
+      <template v-slot:body-cell-checkInStatus="props">
         <q-td :props="props">
-          {{ props.row.checkInOut[0]?.participation }}
+          <q-badge
+            v-if="getCheckInStatus(props.row) !== '-'"
+            :label="getCheckInStatus(props.row)"
+            rounded
+            unelevated
+            class="status-badge"
+            :class="getCheckInStatusClass(getCheckInStatus(props.row))"
+          />
+          <span v-else>-</span>
         </q-td>
       </template>
       <template v-slot:body-cell-actions="props" v-if="canManage">
@@ -595,6 +704,21 @@ onUnmounted(() => {
                 </div>
               </template>
               <div v-else>-</div>
+            </div>
+          </div>
+
+          <div class="info-row" style="display: flex; align-items: center; margin-bottom: 10px">
+            <div class="label">สถานะเช็คชื่อ</div>
+            <div class="value">
+              <q-badge
+                v-if="getCheckInStatus(student) !== '-'"
+                :label="getCheckInStatus(student)"
+                rounded
+                unelevated
+                class="status-badge"
+                :class="getCheckInStatusClass(getCheckInStatus(student))"
+              />
+              <span v-else>-</span>
             </div>
           </div>
         </q-card-section>
@@ -735,6 +859,34 @@ onUnmounted(() => {
   background-color: #d4edda;
   color: #155724;
   border: 1px solid #28a745;
+  padding: 3px 30px;
+  width: 130px;
+}
+.status-ontime {
+  background-color: #cfe2ff;
+  color: #084298;
+  border: 1px solid #6ea8fe;
+  padding: 3px 30px;
+  width: 130px;
+}
+.status-late {
+  background-color: #ffe7ba;
+  color: #cc5500;
+  border: 1px solid #ffb347;
+  padding: 3px 30px;
+  width: 130px;
+}
+.status-absent {
+  background-color: #ffc5c5;
+  color: #cc0000;
+  border: 1px solid #ff6b6b;
+  padding: 3px 30px;
+  width: 130px;
+}
+.status-incomplete {
+  background-color: #e0e0e0;
+  color: #5a5a5a;
+  border: 1px solid #9e9e9e;
   padding: 3px 30px;
   width: 130px;
 }
