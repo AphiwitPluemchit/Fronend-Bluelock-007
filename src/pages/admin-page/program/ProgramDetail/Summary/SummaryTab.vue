@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, onMounted, computed, watch } from 'vue'
+import { ref, onMounted, computed } from 'vue'
 import EvaluationTable from './evaluationTable.vue'
 import checkInOutDialog from './CheckInOut/checkInOutDialog.vue'
 import type { EnrollmentSummary } from 'src/types/program'
@@ -13,7 +13,7 @@ import dayjs from 'dayjs'
 const route = useRoute()
 const programId = route.params.id as string
 const selectProgramItemDate = ref<string>('')
-const selectProgramItem = ref<string>('') // เก็บ programItemId ที่เลือก
+const selectProgramItem = ref(-1) // เก็บ index ของ programItem ที่เลือก (-1 = ทั้งหมด)
 
 const program = ref<Program | null>(null)
 interface ProgramRow {
@@ -27,56 +27,68 @@ const enrollmentSummary = ref<EnrollmentSummary | null>(null)
 
 const rows = ref<ProgramRow[]>([])
 
-// Options สำหรับเลือกวัน
-const programItemDatesOptions = computed(() => {
+// Options สำหรับเลือก programItem
+const programItemOptions = computed(() => {
   const items = program.value?.programItems ?? []
-  const dates = items.flatMap((it) => (it.dates ?? []).map((d) => d.date).filter(Boolean))
-  const uniq = Array.from(new Set(dates)).sort()
-  return uniq.map((d) => ({ label: d, value: d }))
-})
-
-// Options สำหรับเลือก programItem ตามวันที่เลือก
-const programItemOptionsForDate = computed(() => {
-  // ตรวจสอบว่ามีข้อมูลครบหรือไม่
-  if (!selectProgramItemDate.value || !program.value) return []
-
-  console.log('Selected Date:', program.value.programItems)
-
-  // หากิจกรรมทั้งหมดที่มีในวันที่เลือก
-  const allProgramItems = program.value.programItems ?? []
-  const itemsOnSelectedDate = allProgramItems.filter((item) => {
-    const itemDates = item.dates ?? []
-    return itemDates.some((d) => d.date === selectProgramItemDate.value)
-  })
-
-  const totalItems = itemsOnSelectedDate.length
-
-  // กรณีที่ 1: ไม่มีกิจกรรมเลย -> ไม่แสดง dropdown
-  if (totalItems === 0) return []
-
-  // แปลงเป็น options format
-  const itemOptions = itemsOnSelectedDate.map((item) => ({
-    label: item.name || 'ไม่มีชื่อกิจกรรม',
-    value: item.id || '',
+  const opts = items.map((item, index) => ({
+    label: item.name,
+    value: index,
   }))
 
-  // กรณีที่ 2: มีกิจกรรมเดียว -> แสดงแค่กิจกรรมนั้น
-  if (totalItems === 1) return itemOptions
-
-  // กรณีที่ 3: มีหลายกิจกรรม -> แสดง "ทั้งหมด" + รายการทั้งหมด
-  return [{ label: 'ทั้งหมด', value: '' }, ...itemOptions]
+  // ถ้า programItems > 1 ให้เติม "ทั้งหมด" ไว้หัวรายการ
+  if (items.length > 1) {
+    return [{ label: 'ทั้งหมด', value: -1 }, ...opts]
+  }
+  return opts
 })
 
-// เลือกกิจกรรมอัตโนมัติเมื่อมีแค่กิจกรรมเดียว
-watch(programItemOptionsForDate, async (options) => {
-  const hasSingleItem = options.length === 1
-  const notYetSelected = !selectProgramItem.value
+// Options สำหรับเลือกวันตาม programItem ที่เลือก
+const programItemDatesOptions = computed(() => {
+  const items = program.value?.programItems ?? []
 
-  if (hasSingleItem && notYetSelected) {
-    selectProgramItem.value = options[0]?.value || ''
-    await fetchSamaryEnrollment()
+  // ถ้าเลือก "ทั้งหมด" (-1) ให้แสดงวันทั้งหมดจากทุกโครงการ
+  if (selectProgramItem.value === -1) {
+    const dates = items.flatMap((it) => (it.dates ?? []).map((d) => d.date).filter(Boolean))
+    const uniq = Array.from(new Set(dates)).sort()
+
+    // ไม่มี "ทุกวัน" - แสดงเฉพาะวันที่จริง
+    return uniq.map((d) => ({
+      label: d,
+      value: d,
+    }))
+  } else {
+    // ถ้าเลือกโครงการเฉพาะ ให้แสดงเฉพาะวันของโครงการนั้น
+    const selectedItem = items[selectProgramItem.value]
+    if (!selectedItem || !selectedItem.dates) return []
+
+    const dates = selectedItem.dates.map((d) => d.date).filter(Boolean)
+    const uniq = Array.from(new Set(dates)).sort()
+
+    // ไม่มี "ทุกวัน" - แสดงเฉพาะวันที่จริง
+    return uniq.map((d) => ({
+      label: d,
+      value: d,
+    }))
   }
 })
+
+// ฟังก์ชันจัดการเมื่อเปลี่ยนโครงการ
+const onProgramItemChange = async () => {
+  // เมื่อเปลี่ยนโครงการ ต้องเลือกวันที่ default
+  const dateOptions = programItemDatesOptions.value
+
+  if (dateOptions.length === 0) {
+    selectProgramItemDate.value = ''
+    return
+  }
+
+  // หาวันปัจจุบันในรายการ ถ้าไม่มีก็เลือกวันแรก
+  const today = dayjs().format('YYYY-MM-DD')
+  const foundToday = dateOptions.find((o) => o.value === today)
+  selectProgramItemDate.value = foundToday ? foundToday.value : dateOptions[0]!.value
+
+  await fetchSamaryEnrollment()
+}
 
 const showCreateQR_CodeDialog = () => (isDialogOpen.value = true)
 const cancelCreateQR_Code = () => (isDialogOpen.value = false)
@@ -93,28 +105,45 @@ async function setDefaultDate() {
   const res = await ProgramService.getOne(programId)
   program.value = res.data
   buildRows()
+
+  // Set default programItem to "ทั้งหมด" (-1)
+  selectProgramItem.value = -1
+
+  // Set default date - ต้องมีวันที่เสมอ
   const opts = programItemDatesOptions.value
   if (!opts.length) return
+
   const today = dayjs().format('YYYY-MM-DD')
   const foundToday = opts.find((o) => o.value === today)
+
+  // เลือกวันปัจจุบันถ้ามี ไม่งั้นเลือกวันแรก
   selectProgramItemDate.value = foundToday ? foundToday.value : opts[0]!.value
 }
 
 const fetchSamaryEnrollment = async () => {
-  query.value.date = selectProgramItemDate.value
+  // ใช้ selectProgramItemDate โดยตรงเพราะเป็น string แล้ว
+  const dateValue = selectProgramItemDate.value
+  query.value.date = dateValue
+
   // ใช้ API ใหม่ที่ query จาก enrollment โดยตรง พร้อม filter programItem ถ้ามี
-  const programItemId = selectProgramItem.value || undefined
+  let programItemId: string | undefined = undefined
+
+  if (selectProgramItem.value !== -1 && program.value?.programItems) {
+    const selectedItem = program.value.programItems[selectProgramItem.value]
+    programItemId = selectedItem?.id
+  }
+
+  // ถ้าไม่มี dateValue ให้ใช้ empty string
   const resSum = await SammaryReportService.getEnrollmentSummaryV2(
     programId,
-    query.value.date,
+    dateValue,
     programItemId,
   )
   enrollmentSummary.value = resSum.data
 }
 
 const onDateChange = async () => {
-  // Reset programItem selection เมื่อเปลี่ยนวัน
-  selectProgramItem.value = ''
+  // ไม่ต้อง Reset programItem เพราะเราเลือก programItem ก่อนแล้ว
   await fetchSamaryEnrollment()
 }
 
@@ -145,6 +174,24 @@ onMounted(async () => {
 
       <!-- Filters Section -->
       <div class="filters-section">
+        <!-- เลือก ProgramItem -->
+        <q-select
+          v-if="programItemOptions.length > 1"
+          dense
+          outlined
+          v-model="selectProgramItem"
+          :options="programItemOptions"
+          label="เลือกกิจกรรม"
+          option-label="label"
+          option-value="value"
+          emit-value
+          map-options
+          @update:model-value="onProgramItemChange"
+          class="dropdown item-dropdown"
+          popup-content-class="dropdown-menu"
+          behavior="menu"
+        />
+
         <!-- เลือกวัน -->
         <q-select
           v-if="programItemDatesOptions.length > 0"
@@ -159,24 +206,6 @@ onMounted(async () => {
           map-options
           @update:model-value="onDateChange"
           class="dropdown date-dropdown"
-          popup-content-class="dropdown-menu"
-          behavior="menu"
-        />
-
-        <!-- เลือก ProgramItem (แสดงเฉพาะเมื่อมีมากกว่า 1 item ในวันนั้น) -->
-        <q-select
-          v-if="programItemOptionsForDate.length > 0"
-          dense
-          outlined
-          v-model="selectProgramItem"
-          :options="programItemOptionsForDate"
-          label="เลือกกิจกรรม"
-          option-label="label"
-          option-value="value"
-          emit-value
-          map-options
-          @update:model-value="fetchSamaryEnrollment"
-          class="dropdown item-dropdown"
           popup-content-class="dropdown-menu"
           behavior="menu"
         />
