@@ -70,7 +70,7 @@ const unRegister = async (modelValue: boolean) => {
   }
 }
 
-const isNotAllowDate = computed(() => {
+const isAllowDate = computed(() => {
   if (!program.value?.endDateEnroll) {
     return false // ถ้าไม่มี endDateEnroll ให้อนุญาตลงทะเบียนไว้ก่อน
   }
@@ -78,7 +78,13 @@ const isNotAllowDate = computed(() => {
   const endDate = new Date(program.value.endDateEnroll)
   const now = new Date()
 
-  return now > endDate // ถ้าวันปัจจุบันเลยวันสิ้นสุดแล้ว ไม่ให้ลงทะเบียน
+  // เปรียบเทียบเฉพาะวันที่โดยไม่รวมเวลา
+  endDate.setHours(23, 59, 59, 999) // ตั้งเวลาสิ้นสุดของวันเป็น 23:59:59.999
+  now.setHours(now.getHours(), now.getMinutes(), now.getSeconds(), now.getMilliseconds())
+
+  console.log('endDate:', endDate, 'now:', now)
+
+  return now <= endDate // ถ้าวันปัจจุบันเลยวันสิ้นสุดแล้ว ไม่ให้ลงทะเบียน
 })
 
 async function fetchData() {
@@ -139,7 +145,7 @@ onMounted(async () => {
             rounded
           />
           <q-btn
-            v-else-if="isNotAllowDate && !enrollment.isEnrolled"
+            v-else-if="!isAllowDate && !enrollment.isEnrolled"
             label="หมดช่วงลงทะเบียนแล้ว"
             class="btn-disabled"
             :disabled="true"
@@ -151,12 +157,12 @@ onMounted(async () => {
             label="ยกเลิกลงทะเบียน"
             class="btnreject"
             @click="handleUnRegisterClick"
-            :disabled="isNotAllowDate"
+            :disabled="isAllowDate"
             unelevated
             rounded
           />
           <q-btn
-            v-else-if="!enrollment.isEnrolled && !isNotAllowDate"
+            v-else-if="!enrollment.isEnrolled && isAllowDate"
             label="ลงทะเบียน"
             class="btnsecces"
             @click="handleRegisterClick"
