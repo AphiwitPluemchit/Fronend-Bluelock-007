@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, onMounted, computed } from 'vue'
+import { ref, onMounted, computed, watch } from 'vue'
 import EvaluationTable from './evaluationTable.vue'
 import checkInOutDialog from './CheckInOut/checkInOutDialog.vue'
 import type { EnrollmentSummary } from 'src/types/program'
@@ -37,23 +37,45 @@ const programItemDatesOptions = computed(() => {
 
 // Options สำหรับเลือก programItem ตามวันที่เลือก
 const programItemOptionsForDate = computed(() => {
+  // ตรวจสอบว่ามีข้อมูลครบหรือไม่
   if (!selectProgramItemDate.value || !program.value) return []
 
-  const items = program.value.programItems ?? []
-  const itemsOnDate = items.filter((item) =>
-    (item.dates ?? []).some((d) => d.date === selectProgramItemDate.value),
-  )
+  console.log('Selected Date:', program.value.programItems)
 
-  // ถ้ามีมากกว่า 1 item ให้แสดง dropdown
-  if (itemsOnDate.length <= 1) return []
+  // หากิจกรรมทั้งหมดที่มีในวันที่เลือก
+  const allProgramItems = program.value.programItems ?? []
+  const itemsOnSelectedDate = allProgramItems.filter((item) => {
+    const itemDates = item.dates ?? []
+    return itemDates.some((d) => d.date === selectProgramItemDate.value)
+  })
 
-  return [
-    { label: 'ทั้งหมด', value: '' }, // option สำหรับดูทั้งหมด
-    ...itemsOnDate.map((item) => ({
-      label: item.name || 'Unnamed Item',
-      value: item.id || '',
-    })),
-  ]
+  const totalItems = itemsOnSelectedDate.length
+
+  // กรณีที่ 1: ไม่มีกิจกรรมเลย -> ไม่แสดง dropdown
+  if (totalItems === 0) return []
+
+  // แปลงเป็น options format
+  const itemOptions = itemsOnSelectedDate.map((item) => ({
+    label: item.name || 'ไม่มีชื่อกิจกรรม',
+    value: item.id || '',
+  }))
+
+  // กรณีที่ 2: มีกิจกรรมเดียว -> แสดงแค่กิจกรรมนั้น
+  if (totalItems === 1) return itemOptions
+
+  // กรณีที่ 3: มีหลายกิจกรรม -> แสดง "ทั้งหมด" + รายการทั้งหมด
+  return [{ label: 'ทั้งหมด', value: '' }, ...itemOptions]
+})
+
+// เลือกกิจกรรมอัตโนมัติเมื่อมีแค่กิจกรรมเดียว
+watch(programItemOptionsForDate, async (options) => {
+  const hasSingleItem = options.length === 1
+  const notYetSelected = !selectProgramItem.value
+
+  if (hasSingleItem && notYetSelected) {
+    selectProgramItem.value = options[0]?.value || ''
+    await fetchSamaryEnrollment()
+  }
 })
 
 const showCreateQR_CodeDialog = () => (isDialogOpen.value = true)
