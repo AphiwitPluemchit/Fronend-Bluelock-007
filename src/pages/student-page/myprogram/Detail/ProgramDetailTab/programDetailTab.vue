@@ -7,7 +7,6 @@ import RegisterConfirmDialog from 'src/pages/student-page/program/Dialog/registe
 import RegisterFailDialog from 'src/pages/student-page/program/Dialog/registerFailDialog.vue'
 import UnRegisterDialog from 'src/pages/student-page/program/Dialog/unRegisterDialog.vue'
 import type { Program } from 'src/types/program'
-import DetailOne from 'src/pages/student-page/program/Detail/Detail/detailOne.vue'
 import DetailMany from 'src/pages/student-page/program/Detail/Detail/detailMany.vue'
 import { useAuthStore } from 'src/stores/auth'
 import { api } from 'boot/axios'
