@@ -35,7 +35,7 @@ const canManage = computed(() => program.value?.programState !== 'success')
 const filterCategories1 = ref(['year', 'major', 'studentStatus'])
 const program = ref<Program | null>(null)
 const selectProgramItem = ref(-1)
-const selectProgramItemDate = ref(-1)
+const selectProgramItemDate = ref<number | string>(-1)
 const selectedStudent = ref<StudentEnrollment | null>(null)
 const query = ref<Pagination>({
   page: 1,
@@ -144,20 +144,56 @@ const programItemOptions = computed(() => {
 
 const programItemDatesOptions = computed(() => {
   const items = program.value?.programItems ?? []
-  const dates = items.flatMap((it) => (it.dates ?? []).map((d) => d.date).filter(Boolean))
-  const uniq = Array.from(new Set(dates)).sort()
 
-  const opts = uniq.map((d) => ({
-    label: d, // หรือ dayjs(d).format('D MMM YYYY')
-    value: d,
-  }))
+  // ถ้าเลือก "ทุกโครงการ" (-1) ให้แสดงวันทั้งหมดจากทุกโครงการ
+  if (selectProgramItem.value === -1) {
+    const dates = items.flatMap((it) => (it.dates ?? []).map((d) => d.date).filter(Boolean))
+    const uniq = Array.from(new Set(dates)).sort()
 
-  // ✅ ถ้าวันมากกว่า 1 วัน ให้มีตัวเลือก "ทุกวัน" (value:-1)
-  if (uniq.length > 1) {
-    return [{ label: 'ทุกวัน', value: -1 }, ...opts]
+    const opts = uniq.map((d) => ({
+      label: d,
+      value: d,
+    }))
+
+    // ✅ ถ้าวันมากกว่า 1 วัน ให้มีตัวเลือก "ทุกวัน" (value:-1)
+    if (uniq.length > 1) {
+      return [{ label: 'ทุกวัน', value: -1 }, ...opts]
+    }
+    // ถ้ามีวันเดียว ก็แสดงวันนั้น (ไม่ต้องมี "ทุกวัน")
+    return opts
+  } else {
+    // ถ้าเลือกโครงการเฉพาะ ให้แสดงเฉพาะวันของโครงการนั้น
+    const selectedItem = items[selectProgramItem.value]
+    if (!selectedItem || !selectedItem.dates) return []
+
+    const dates = selectedItem.dates.map((d) => d.date).filter(Boolean)
+    const uniq = Array.from(new Set(dates)).sort()
+
+    const opts = uniq.map((d) => ({
+      label: d,
+      value: d,
+    }))
+
+    // ✅ ถ้าวันมากกว่า 1 วัน ให้มีตัวเลือก "ทุกวัน" (value:-1)
+    if (uniq.length > 1) {
+      return [{ label: 'ทุกวัน', value: -1 }, ...opts]
+    }
+    // ถ้ามีวันเดียว ก็แสดงวันนั้น (ไม่ต้องมี "ทุกวัน")
+    return opts
   }
-  return opts
-})
+}) // ฟังก์ชันจัดการเมื่อเปลี่ยนโครงการ
+const onProgramItemChange = async () => {
+  // รีเซ็ตการเลือกวัน
+  selectProgramItemDate.value = -1
+
+  // ถ้ามีวันเดียว ให้เลือกวันนั้นอัตโนมัติ
+  const dateOptions = programItemDatesOptions.value
+  if (dateOptions.length === 1 && dateOptions[0]) {
+    selectProgramItemDate.value = dateOptions[0].value
+  }
+
+  await fetchStudents()
+}
 
 const baseColumns: QTableColumn[] = [
   {
@@ -326,8 +362,6 @@ const getCheckInStatus = (student: StudentEnrollment): string => {
   // ตรวจสอบข้อมูล checkInOut ของ student
   const checkInOuts = Array.isArray(student.checkInOut) ? student.checkInOut : []
 
-  if (checkInOuts.length === 0) return 'ไม่มา'
-
   // กรองเฉพาะ check-in/out ที่ตรงกับวันที่เลือก
   const relevantCheckInOut = checkInOuts.filter((record) => {
     if (!record.checkin) return false
@@ -335,6 +369,19 @@ const getCheckInStatus = (student: StudentEnrollment): string => {
     return checkinDate === selectedDate
   })
 
+  // ตรวจสอบว่าถึงเวลาเริ่มกิจกรรมหรือยัง
+  const [hours, minutes] = targetTime.split(':').map(Number)
+  if (hours === undefined || minutes === undefined) return '-'
+
+  const activityStartTime = dayjs(selectedDate).hour(hours).minute(minutes).second(0)
+  const now = dayjs()
+
+  // ถ้ายังไม่ถึงเวลาเริ่มกิจกรรม และยังไม่มีคนเช็คอิน ให้แสดง "-"
+  if (now.isBefore(activityStartTime) && relevantCheckInOut.length === 0) {
+    return '-'
+  }
+
+  // ถ้าไม่มีข้อมูลเช็คชื่อเลย และเลยเวลาเริ่มแล้ว
   if (relevantCheckInOut.length === 0) return 'ไม่มา'
 
   // ตรวจสอบสถานะ
@@ -353,10 +400,7 @@ const getCheckInStatus = (student: StudentEnrollment): string => {
 
   // เปรียบเทียบเวลาเช็คอินกับ stime
   const checkinTime = dayjs(record.checkin)
-  // สร้าง datetime โดยใช้วันจาก checkin และเวลาจาก stime
-  const [hours, minutes] = targetTime.split(':').map(Number)
-  if (hours === undefined || minutes === undefined) return '-'
-
+  // สร้าง datetime โดยใช้วันจาก checkin และเวลาจาก stime (ใช้ hours, minutes ที่ประกาศไว้ด้านบนแล้ว)
   const startTime = dayjs(record.checkin).hour(hours).minute(minutes).second(0)
   // เพิ่มเวลา grace period 30 นาที
   const graceTime = startTime.add(30, 'minute')
@@ -485,29 +529,29 @@ onUnmounted(() => {
       <!-- Row 2 -->
       <div class="select-filter-row">
         <q-select
-          v-if="programItemDatesOptions.length > 1"
-          dense
-          outlined
-          v-model="selectProgramItemDate"
-          :options="programItemDatesOptions"
-          label="เลือกวัน"
-          option-label="label"
-          option-value="value"
-          emit-value
-          map-options
-          @update:model-value="fetchStudents"
-          class="dropdown"
-          popup-content-class="dropdown-menu"
-          :style="{ border: 'none' }"
-          behavior="menu"
-        />
-        <q-select
           v-if="programItemOptions.length > 1"
           dense
           outlined
           v-model="selectProgramItem"
           :options="programItemOptions"
           label="เลือกโครงการ"
+          option-label="label"
+          option-value="value"
+          emit-value
+          map-options
+          @update:model-value="onProgramItemChange"
+          class="dropdown"
+          popup-content-class="dropdown-menu"
+          :style="{ border: 'none' }"
+          behavior="menu"
+        />
+        <q-select
+          v-if="programItemDatesOptions.length > 0"
+          dense
+          outlined
+          v-model="selectProgramItemDate"
+          :options="programItemDatesOptions"
+          label="เลือกวัน"
           option-label="label"
           option-value="value"
           emit-value
