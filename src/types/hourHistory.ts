@@ -8,8 +8,34 @@ export interface HourChangeHistory {
   title: string
   studentId: string
   enrollmentId?: string
+  programItemId?: string
   sourceType: 'program' | 'certificate'
   sourceId: string
+  // Populated objects (not stored in DB, only for API response)
+  program?: {
+    id: string
+    name: string
+    skill: string
+    file: string
+    // เพิ่ม fields อื่นๆ ถ้าต้องการ
+  }
+  programItem?: {
+    id: string
+    name?: string
+    description?: string
+    rooms?: string[]
+    dates?: {
+      date: string
+      stime: string
+      etime: string
+    }[]
+    hour?: number
+  }
+  certificate?: {
+    id: string
+    url?: string
+    uploadAt?: string
+  }
 }
 
 // Status constants

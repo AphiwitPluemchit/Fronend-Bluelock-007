@@ -51,10 +51,7 @@ export const useHourHistoryStore = defineStore('hourHistory', () => {
   }
 
   /**
-   * ดึงข้อมูล program history
-   */
-  /**
-   * ดึงข้อมูล program history
+   * ดึงข้อมูล program history พร้อม ProgramItem details
    * @param studentId - optional student id
    * @param paramsOverride - optional local params to avoid mutating the shared store.params
    */
@@ -78,7 +75,7 @@ export const useHourHistoryStore = defineStore('hourHistory', () => {
       if (merged.status) queryParams.status = merged.status
       if (studentId) queryParams.studentId = studentId
 
-      const res = await HourHistoryService.getProgramHistory(queryParams)
+      const res = await HourHistoryService.getProgramHistoryWithDetails(queryParams)
       histories.value = res.data
       meta.value = res.meta
     } catch (error) {
@@ -89,7 +86,7 @@ export const useHourHistoryStore = defineStore('hourHistory', () => {
   }
 
   /**
-   * ดึงข้อมูล certificate history
+   * ดึงข้อมูล certificate history พร้อม Certificate details
    */
   const fetchCertificateHistories = async (studentId?: string) => {
     loading.value = true
@@ -102,7 +99,7 @@ export const useHourHistoryStore = defineStore('hourHistory', () => {
       if (params.value.status) queryParams.status = params.value.status
       if (studentId) queryParams.studentId = studentId
 
-      const res = await HourHistoryService.getCertificateHistory(queryParams)
+      const res = await HourHistoryService.getCertificateHistoryWithDetails(queryParams)
       histories.value = res.data
       meta.value = res.meta
     } catch (error) {

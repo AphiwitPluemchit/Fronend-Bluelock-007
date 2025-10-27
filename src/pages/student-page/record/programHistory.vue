@@ -36,6 +36,39 @@ const formatDateTime = (iso?: string) => {
   }
 }
 
+// Format date from programItem.dates
+const formatProgramDate = (dateStr?: string) => {
+  if (!dateStr) return '-'
+  try {
+    const d = new Date(dateStr)
+    return d.toLocaleDateString('th-TH', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
+    })
+  } catch {
+    return dateStr
+  }
+}
+
+// Get first and last date from programItem.dates
+const getProgramDateRange = (dates?: { date: string; stime: string; etime: string }[]) => {
+  if (!dates || dates.length === 0) return '-'
+  if (dates.length === 1 && dates[0]) {
+    return formatProgramDate(dates[0].date)
+  }
+  const firstDate = dates[0] ? formatProgramDate(dates[0].date) : '-'
+  const lastItem = dates[dates.length - 1]
+  const lastDate = lastItem ? formatProgramDate(lastItem.date) : '-'
+  return `${firstDate} - ${lastDate}`
+}
+
+// Get location/rooms from programItem
+const getProgramLocation = (rooms?: string[]) => {
+  if (!rooms || rooms.length === 0) return '-'
+  return rooms.join(', ')
+}
+
 const typeStripeClass = (history: HourChangeHistory) => {
   return history.skillType === 'hard' ? 'stripe--blue' : 'stripe--green'
 }
@@ -163,8 +196,27 @@ onMounted(async () => {
             {{ history.title }}
           </div>
 
+          <!-- แสดงข้อมูล ProgramItem ถ้ามี -->
+          <template v-if="history.programItem">
+            <div
+              v-if="history.programItem.dates && history.programItem.dates.length > 0"
+              class="text-weight-medium text-subtitle2 ellipsis-2 q-mb-xs label"
+            >
+              <q-icon name="event" size="18px" />
+              วันที่จัดโครงการ : {{ getProgramDateRange(history.programItem.dates) }}
+            </div>
+
+            <div
+              v-if="history.programItem.rooms && history.programItem.rooms.length > 0"
+              class="text-weight-medium text-subtitle2 ellipsis-2 q-mb-xs label"
+            >
+              <q-icon name="place" size="18px" />
+              สถานที่ : {{ getProgramLocation(history.programItem.rooms) }}
+            </div>
+          </template>
+
           <div class="text-weight-medium text-subtitle2 ellipsis-2 q-mb-xs label">
-            <q-icon name="event" size="18px" />
+            <q-icon name="event_available" size="18px" />
             วันที่อนุมัติ : {{ history.changeAt ? formatDateTime(history.changeAt) : '-' }}
           </div>
 
