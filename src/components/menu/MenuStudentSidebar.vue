@@ -29,6 +29,7 @@
           </q-avatar>
 
           <q-menu anchor="bottom right" self="top right">
+
             <q-list style="min-width: 160px">
               <q-item clickable v-ripple tag="router-link" to="/Student/RecordPage">
                 <!-- <q-item-section avatar>
@@ -52,7 +53,8 @@
       <q-btn dense flat no-caps label="หน้าหลัก" to="/Student/Home" class="q-mx-md textsubtitle" />
 
       <!-- เมนูมีโครงการ (dropdown) -->
-      <q-btn dense flat no-caps label="โครงการ" class="q-mx-md textsubtitle">
+      <q-btn dense flat no-caps label="โครงการ" class="q-mx-md textsubtitle" @click="menu = !menu">
+        <q-icon :name="menu ? 'arrow_drop_up' : 'arrow_drop_down'" size="sm" />
         <q-menu fit>
           <q-list style="min-width: 150px">
             <q-item clickable v-ripple to="/Student/ProgramCalendar">
@@ -76,10 +78,11 @@ import { useRouter } from 'vue-router'
 import { useAuthStore } from 'src/stores/auth'
 import { EnumUserRole } from 'src/data/roles'
 import { useQuasar } from 'quasar'
+import { ref } from 'vue'
 const $q = useQuasar()
 const router = useRouter()
 const authStore = useAuthStore()
-
+const menu = ref(false)
 async function logout() {
   try {
     await authStore.logout()
