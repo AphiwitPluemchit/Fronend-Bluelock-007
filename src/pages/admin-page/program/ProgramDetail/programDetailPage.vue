@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, ref, onMounted, watch } from 'vue'
+import { computed, ref, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import type { Program } from 'src/types/program'
 import { ProgramService } from 'src/services/program'
@@ -18,11 +18,11 @@ const search = ref<string>('')
 
 /** ---------- เงื่อนไข disable ---------- */
 // 1) มาจาก query: ?disable=true|false
-const disableFromQuery = computed(() => String(route.query.disable) === 'true')
+// const disableFromQuery = computed(() => String(route.query.disable) === 'true')
 // 2) มาจากสถานะกิจกรรม (planning)
-const isPlanning = computed(() => program.value?.programState === 'planning')
+// const isPlanning = computed(() => program.value?.programState === 'planning')
 // 3) รวมทุกเงื่อนไข
-const isDisabled = computed(() => disableFromQuery.value || isPlanning.value)
+// const isDisabled = computed(() => disableFromQuery.value || isPlanning.value)
 
 /** ---------- responsive ---------- */
 const isSmallScreen = ref(false)
@@ -94,10 +94,10 @@ onMounted(async () => {
   }
 
   // ถ้าโดน disable (query/planning) บังคับกลับ program
-  if (isDisabled.value && tab.value !== 'program') {
-    tab.value = 'program'
-    void pushTabToRoute('program')
-  }
+  // if (isDisabled.value && tab.value !== 'program') {
+  //   tab.value = 'program'
+  //   void pushTabToRoute('program')
+  // }
 })
 
 onMounted(() => {
@@ -107,34 +107,34 @@ onMounted(() => {
 
 /** ---------- watchers ---------- */
 // เมื่อ tab ใน state เปลี่ยน → อัปเดต URL (และ enforce disable)
-watch(tab, (next) => {
-  if (isDisabled.value && next !== 'program') {
-    tab.value = 'program'
-    void pushTabToRoute('program')
-    return
-  }
-  const inUrl = route.params.tab as string
-  if (next !== inUrl) void pushTabToRoute(next)
-})
+// watch(tab, (next) => {
+//   if (isDisabled.value && next !== 'program') {
+//     tab.value = 'program'
+//     void pushTabToRoute('program')
+//     return
+//   }
+//   const inUrl = route.params.tab as string
+//   if (next !== inUrl) void pushTabToRoute(next)
+// })
 
 // เมื่อ URL เปลี่ยน (Back/Forward) → sync เข้า state และ enforce disable
-watch(
-  () => route.params.tab,
-  () => {
-    syncTabFromRoute()
-    if (isDisabled.value && tab.value !== 'program') {
-      tab.value = 'program'
-      void pushTabToRoute('program')
-    }
-  },
-)
+// watch(
+//   () => route.params.tab,
+//   () => {
+//     syncTabFromRoute()
+//     if (isDisabled.value && tab.value !== 'program') {
+//       tab.value = 'program'
+//       void pushTabToRoute('program')
+//     }
+//   },
+// )
 
 /** dropdown options (จอเล็ก) */
 const tabOptions = computed(() => [
-  { label: 'รายละเอียดกิจกรรม', value: 'program', disable: false },
-  { label: 'รายละเอียดการลงทะเบียน', value: 'registration', disable: isDisabled.value },
-  { label: 'รายชื่อนิสิต', value: 'students', disable: isDisabled.value },
-  { label: 'สรุปผลกิจกรรม', value: 'summary', disable: isDisabled.value },
+  { label: 'รายละเอียดกิจกรรม', value: 'program'},
+  { label: 'รายละเอียดการลงทะเบียน', value: 'registration'},
+  { label: 'รายชื่อนิสิต', value: 'students'},
+  { label: 'สรุปผลกิจกรรม', value: 'summary'},
 ])
 </script>
 

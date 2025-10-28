@@ -29,10 +29,7 @@ const breadcrumbs = ref({
 
 const showCancelDialog = ref(false)
 
-const cancelEdit = () => {
-  studentStore.student = { ...originalStudentData.value } as Student
-  isEditMode.value = false
-}
+
 
 const onSearch = async () => {
   hourHistoryStore.params.search = searchText.value
@@ -41,6 +38,27 @@ const onSearch = async () => {
 }
 async function fetchProgramHistory() {
   await hourHistoryStore.fetchProgramHistories(studentStore.student.id || '')
+}
+
+const cancelEdit = () => {
+  studentStore.student = { ...originalStudentData.value } as Student
+  isEditMode.value = false
+}
+
+const enableEditMode = () => {
+  isEditMode.value = true
+  originalStudentData.value = { ...studentStore.student }
+}
+
+const saveChanges = async () => {
+  const result = await studentStore.updateStudent(studentStore.student)
+  if (result) {
+    isEditMode.value = false
+  }
+}
+
+const confirmCancel = () => {
+  showCancelDialog.value = true
 }
 
 let searchTimer: ReturnType<typeof setTimeout> | null = null
@@ -178,6 +196,22 @@ onMounted(async () => {
           </div>
         </div>
       </q-card>
+      <div class="q-mt-md q-pa-md text-right">
+        <template v-if="!isEditMode">
+          <q-btn label="แก้ไข" class="btnedit" unelevated rounded @click="enableEditMode" />
+        </template>
+        <template v-else>
+          <q-btn
+            label="ยกเลิก"
+            class="btnreject q-mr-md"
+            unelevated
+            rounded
+            @click="confirmCancel"
+          ></q-btn>
+          <q-btn label="บันทึก" class="btnconfirm" unelevated rounded @click="saveChanges" />
+
+        </template>
+      </div>
 
       <div class="q-mb-md q-mt-xl">
         <!-- <q-card bordered class="rounded-borders shadow-2 full-height"> -->

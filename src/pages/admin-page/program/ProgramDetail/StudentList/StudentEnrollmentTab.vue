@@ -22,9 +22,10 @@ import type { StudentEnrollment } from 'src/types/enrollment'
 
 dayjs.locale('th')
 const $q = useQuasar()
-const isMobile = computed(() => $q.screen.width <= 600)
-// const studentStore = useStudentStore()
 const route = useRoute()
+const isMobile = computed(() => $q.screen.width <= 600)
+const isEditing = ref(route.query.disable !== 'true')
+// const studentStore = useStudentStore()
 const enrollmentStore = useEnrollmentStore()
 const programId = route.params.id as string
 
@@ -277,7 +278,7 @@ const columns = computed<QTableColumn[]>(() => {
     const afterCheckOut = cols.findIndex((c) => c.name === 'checkOut') + 1
     cols.splice(afterCheckOut, 0, participationCol)
   }
-  if (canManage.value) cols.push(actionsCol) // ✅ ใส่เฉพาะตอนเปิดแก้ไขได้
+  if (canManage.value && isEditing.value) cols.push(actionsCol) // ✅ ใส่เฉพาะตอนเปิดแก้ไขได้
   return cols
 })
 
@@ -496,7 +497,7 @@ onUnmounted(() => {
       <div class="row justify-between items-center">
         <div class="textsubtitle">{{ program?.name }}</div>
         <q-btn
-          v-if="canManage"
+          v-if="canManage && isEditing"
           dense
           outlined
           label="เพิ่มนิสิต"
@@ -510,7 +511,7 @@ onUnmounted(() => {
 
     <div class="row q-col-gutter-sm form-toolbar q-mt-md">
       <!-- Row 1 -->
-      <div class="search-row">
+      <div class="search-row" >
         <q-input
           dense
           outlined
@@ -689,7 +690,7 @@ onUnmounted(() => {
           </div>
 
           <!-- ACTIONS (always visible on mobile header) -->
-          <div class="row items-center q-gutter-xs" v-if="canManage">
+          <div class="row items-center q-gutter-xs" v-if="canManage && isEditing">
             <q-btn
               round
               dense
