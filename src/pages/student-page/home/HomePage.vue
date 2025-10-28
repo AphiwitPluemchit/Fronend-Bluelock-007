@@ -369,7 +369,7 @@ onMounted(async () => {
         <q-card class="menu-card" @click="gotoCalendarPage">
           <q-icon name="calendar_today" class="icon" />
           <p class="textcontent1 text-bold q-mt-md" >ตารางโครงการ</p>
-          <p class="textcontent2 info-block">ตรวจสอบโครงการทั้งหมด</p>
+          <p class="textcontent2 info-block q-mb-xs">ตรวจสอบโครงการทั้งหมด</p>
           <p class="textcontent2 info-block">เพื่อลงทะเบียนเข้าร่วม</p>
         </q-card>
 
@@ -377,7 +377,7 @@ onMounted(async () => {
         <q-card class="menu-card" @click="gotoProgramTablePage" >
           <q-icon name="event" class="icon" />
           <p class="textcontent1 text-bold q-mt-md">โครงการทั้งหมด</p>
-          <p class="textcontent2 info-block">ตรวจสอบกิจกรรมทั้งหมด</p>
+          <p class="textcontent2 info-block q-mb-xs">ตรวจสอบกิจกรรมทั้งหมด</p>
           <p class="textcontent2 info-block">เพื่อลงทะเบียนเข้าร่วม</p>
         </q-card>
 
@@ -385,7 +385,7 @@ onMounted(async () => {
         <q-card class="menu-card" @click="OnlineCoursesPage">
           <q-icon name="book" class="icon" />
           <p class="textcontent1 text-bold q-mt-md">หลักสูตรทั้งหมด</p>
-          <p class="textcontent2 info-block">ตรวจสอบหลักสูตรทั้งหมด</p>
+          <p class="textcontent2 info-block q-mb-xs">ตรวจสอบหลักสูตรทั้งหมด</p>
           <p class="textcontent2 info-block">เพื่อเข้าเรียนและขออนุมัติชั่วโมง</p>
         </q-card>
 
@@ -393,7 +393,7 @@ onMounted(async () => {
         <q-card class="menu-card" @click="gotoProfile">
           <q-icon name="account_circle" class="icon" />
           <p class="textcontent1 text-bold q-mt-md">ประวัติของฉัน</p>
-          <p class="textcontent2 info-block">ตรวจสอบจำนวนชั่วโมง</p>
+          <p class="textcontent2 info-block q-mb-xs">ตรวจสอบจำนวนชั่วโมง</p>
           <p class="textcontent2 info-block">และโครงการที่ลงทะเบียน และใบรับรองที่ขออนุมัติ</p>
         </q-card>
       </div>
@@ -545,6 +545,7 @@ onMounted(async () => {
   display: flex;
   align-items: center;
   color: #6b7280;
+  gap: 6px;
 }
 
 .info-block q-icon {
@@ -631,7 +632,7 @@ onMounted(async () => {
 
 .menu-card {
   width: 100%;
-  /* height: 150px; */
+  height: auto;
   padding: 20px;
   text-align: left;
   border-radius: 8px;
