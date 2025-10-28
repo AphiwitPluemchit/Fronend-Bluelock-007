@@ -22,7 +22,7 @@ const buttonLabel = computed(() => {
   if (props.status === hourhistoryStore.HCStatusUpcoming) return 'ยังไม่เข้าร่วม'
   if (props.status === hourhistoryStore.HCStatusParticipating) return 'กำลังเข้าร่วม'
   if (props.status === hourhistoryStore.HCStatusAttended) return 'เข้าร่วมแล้ว'
-  if (props.status === hourhistoryStore.HCStatusAbsent) return 'ขาด'
+  if (props.status === hourhistoryStore.HCStatusAbsent) return 'ไม่มาเข้าร่วม'
   return 'ไม่ทราบสถานะ'
 })
 

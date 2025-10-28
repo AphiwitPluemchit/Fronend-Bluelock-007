@@ -22,7 +22,7 @@ const buttonLabel = computed(() => {
     case 'approved':
       return 'อนุมัติแล้ว'
     case 'rejected':
-      return 'ปฏิเสธ'
+      return 'ไม่อนุมัติ'
     default:
       return props.status
   }

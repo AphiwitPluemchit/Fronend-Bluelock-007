@@ -348,7 +348,7 @@ onMounted(async () => {
                     <q-img :src="getCourseImageUrl(course)" class="course-image-modern" />
                   </div>
                   <div class="course-content" >
-                    <div class="textsubtitle text-bold">{{ course.name }}</div>
+                    <div class="textcontent1 text-bold">{{ course.name }}</div>
                     <div class="info-block textcontent3">
                       <q-icon name="schedule" class=".info-block" />
                       <span class="info-block">{{ course.hour }} ชั่วโมง</span>
@@ -362,39 +362,39 @@ onMounted(async () => {
       </div>
     </div>
 
-    <div class="menu">
+    <div class="menu q-mb-lg">
       <p class="texttitle text-bold">เมนู</p>
       <div class="menu-row" style="color: #1f2937;">
         <!-- calendar -->
         <q-card class="menu-card" @click="gotoCalendarPage">
           <q-icon name="calendar_today" class="icon" />
-          <p class="textcontent1 text-bold">ตารางโครงการ</p>
-          <p class="textcontent2">ตรวจสอบโครงการทั้งหมด</p>
-          <p class="textcontent2">เพื่อลงทะเบียนเข้าร่วม</p>
+          <p class="textcontent1 text-bold q-mt-md" >ตารางโครงการ</p>
+          <p class="textcontent2 info-block">ตรวจสอบโครงการทั้งหมด</p>
+          <p class="textcontent2 info-block">เพื่อลงทะเบียนเข้าร่วม</p>
         </q-card>
 
         <!-- activity -->
         <q-card class="menu-card" @click="gotoProgramTablePage" >
           <q-icon name="event" class="icon" />
-          <p class="textcontent1 text-bold">โครงการทั้งหมด</p>
-          <p class="textcontent2">ตรวจสอบกิจกรรมทั้งหมด</p>
-          <p class="textcontent2">เพื่อลงทะเบียนเข้าร่วม</p>
+          <p class="textcontent1 text-bold q-mt-md">โครงการทั้งหมด</p>
+          <p class="textcontent2 info-block">ตรวจสอบกิจกรรมทั้งหมด</p>
+          <p class="textcontent2 info-block">เพื่อลงทะเบียนเข้าร่วม</p>
         </q-card>
 
         <!-- course -->
         <q-card class="menu-card" @click="OnlineCoursesPage">
           <q-icon name="book" class="icon" />
-          <p class="textcontent1 text-bold">หลักสูตรทั้งหมด</p>
-          <p class="textcontent2">ตรวจสอบหลักสูตรทั้งหมด</p>
-          <p class="textcontent2">เพื่อเข้าเรียนและขออนุมัติชั่วโมง</p>
+          <p class="textcontent1 text-bold q-mt-md">หลักสูตรทั้งหมด</p>
+          <p class="textcontent2 info-block">ตรวจสอบหลักสูตรทั้งหมด</p>
+          <p class="textcontent2 info-block">เพื่อเข้าเรียนและขออนุมัติชั่วโมง</p>
         </q-card>
 
         <!-- profile -->
         <q-card class="menu-card" @click="gotoProfile">
           <q-icon name="account_circle" class="icon" />
-          <p class="textcontent1 text-bold">ประวัติของฉัน</p>
-          <p class="textcontent2">ตรวจสอบจำนวนชั่วโมง</p>
-          <p class="textcontent2">และโครงการที่ลงทะเบียน และใบรับรองที่ขออนุมัติ</p>
+          <p class="textcontent1 text-bold q-mt-md">ประวัติของฉัน</p>
+          <p class="textcontent2 info-block">ตรวจสอบจำนวนชั่วโมง</p>
+          <p class="textcontent2 info-block">และโครงการที่ลงทะเบียน และใบรับรองที่ขออนุมัติ</p>
         </q-card>
       </div>
     </div>
@@ -544,7 +544,6 @@ onMounted(async () => {
 .info-block {
   display: flex;
   align-items: center;
-  gap: 4px;
   color: #6b7280;
 }
 
