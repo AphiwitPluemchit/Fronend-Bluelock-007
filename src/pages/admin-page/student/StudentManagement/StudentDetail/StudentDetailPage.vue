@@ -7,7 +7,7 @@ import type { Student, StudentLegacyHours } from 'src/types/student'
 import { useHourHistoryStore } from 'src/stores/hourHistory'
 import ProgramHistory from './programHistory.vue'
 import CertificateHistory from './CertificateHistory.vue'
-
+import EditHourDialog from './editHourDialog.vue'
 const majorOptions = ['CS', 'AAI', 'ITDI', 'SE']
 const hourHistoryStore = useHourHistoryStore()
 const originalStudentData = ref<Student | null>(null)
@@ -34,7 +34,7 @@ const breadcrumbs = ref({
 })
 
 const showCancelDialog = ref(false)
-
+const showEditDialog = ref(false)
 const onSearch = async () => {
   hourHistoryStore.params.search = searchText.value
   hourHistoryStore.params.page = 1
@@ -76,7 +76,9 @@ const saveChanges = async () => {
     console.error('Error saving changes:', error)
   }
 }
-
+const openEditDialog = () => {
+  showEditDialog.value = true
+}
 const confirmCancel = () => {
   showCancelDialog.value = true
 }
@@ -298,6 +300,16 @@ onMounted(async () => {
         <!-- <q-card bordered class="rounded-borders shadow-2 full-height"> -->
         <div class="row justify-between items-center q-mb-sm" style="margin-top: 20px">
           <div class="textsubtitle">ประวัติการอบรม</div>
+          <q-btn
+            v-if="isEditMode"
+            dense
+            outlined
+            label="เพิ่มนิสิต"
+            class="btnadd"
+            style="width: 130px"
+            @click="openEditDialog"
+          >
+          </q-btn>
         </div>
         <div>
           <q-tabs v-model="tab" align="right" class="custom-tabs" indicator-color="transparent">
@@ -322,6 +334,7 @@ onMounted(async () => {
     </div>
 
     <!-- Dialog -->
+    <EditHourDialog v-model="showEditDialog"></EditHourDialog>
     <q-dialog v-model="showCancelDialog">
       <q-card
         style="
