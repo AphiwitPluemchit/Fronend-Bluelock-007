@@ -56,8 +56,8 @@
       <q-btn dense flat no-caps label="โครงการ" class="q-mx-md textsubtitle" @click="menu = !menu">
         <q-icon :name="menu ? 'arrow_drop_up' : 'arrow_drop_down'" size="sm" />
         <q-menu fit>
-          <q-list style="min-width: 150px">
-            <q-item clickable v-ripple to="/Student/ProgramCalendar">
+          <q-list style="min-width: 150px" @click="menu = !menu">
+            <q-item clickable v-ripple to="/Student/ProgramCalendar" >
               <q-item-section class="textcontent1">ปฏิทิน</q-item-section>
             </q-item>
             <q-item clickable v-ripple to="/Student/ProgramTablePage">

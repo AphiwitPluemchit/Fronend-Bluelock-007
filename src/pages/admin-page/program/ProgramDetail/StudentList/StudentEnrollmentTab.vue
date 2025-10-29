@@ -799,7 +799,7 @@ onUnmounted(() => {
 }
 
 .student-container {
-  height: calc(80vh - 150px);
+  height: auto;
   width: 100%;
 }
 .q-table table {

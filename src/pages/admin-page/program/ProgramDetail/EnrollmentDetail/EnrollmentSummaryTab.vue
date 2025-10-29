@@ -256,7 +256,7 @@ onMounted(async () => {
 
 <style scoped>
 .enrollment-container {
-  height: calc(80vh - 150px);
+  height: auto;
   width: 100%;
 }
 .main-program-card {
