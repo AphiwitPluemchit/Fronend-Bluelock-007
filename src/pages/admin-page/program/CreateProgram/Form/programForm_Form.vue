@@ -93,6 +93,10 @@ const confirmSelection = () => {
   if (localSelectedId.value) {
     selectedFormIds.value = [localSelectedId.value]
     formError.value = ''
+  } else {
+    // Clear the selection if no form is selected
+    selectedFormIds.value = []
+    formError.value = ''
   }
   showFormDialog.value = false
 }
@@ -105,7 +109,8 @@ const cancelSelection = () => {
 
 const pickOne = (id: string) => {
   if (props.disable) return
-  localSelectedId.value = id
+  // Toggle selection - if clicking the same item, deselect it
+  localSelectedId.value = localSelectedId.value === id ? null : id
 }
 
 const filterForms = () => {
@@ -243,7 +248,6 @@ watch(
           color="primary"
           unelevated
           @click="confirmSelection"
-          :disable="props.disable || !localSelectedId"
         />
       </div>
     </div>
