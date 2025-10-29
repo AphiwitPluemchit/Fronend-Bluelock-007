@@ -203,4 +203,43 @@ export class StudentService {
       throw error
     }
   }
+
+  /**
+   * ดึงข้อมูล legacy hours และ total hours แยกกัน
+   * @param code - รหัสนักศึกษา
+   * @returns ข้อมูล legacy hours และ total hours
+   */
+  static async getLegacyHours(code: string) {
+    try {
+      const res = await api.get(`${this.path}/${code}/legacy-hours`)
+      return res.data
+    } catch (error) {
+      showError('ไม่สามารถโหลดข้อมูล legacy hours ได้')
+      console.error(`Error fetching legacy hours for student code: ${code}`, error)
+      throw error
+    }
+  }
+
+  /**
+   * อัปเดต legacy hours ของนักศึกษา
+   * @param code - รหัสนักศึกษา
+   * @param legacyHours - ชั่วโมง legacy ที่ต้องการอัปเดต
+   * @returns ผลลัพธ์การอัปเดต
+   */
+  static async updateLegacyHours(
+    code: string,
+    legacyHours: { softSkill: number; hardSkill: number },
+  ) {
+    try {
+      const res = await api.put(`${this.path}/${code}/legacy-hours`, legacyHours)
+      if (res.data?.message) {
+        showSuccess(res.data.message)
+      }
+      return res.data
+    } catch (error) {
+      showError('ไม่สามารถอัปเดต legacy hours ได้')
+      console.error(`Error updating legacy hours for student code: ${code}`, error)
+      throw error
+    }
+  }
 }
