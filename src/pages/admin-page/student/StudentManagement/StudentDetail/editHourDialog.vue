@@ -64,8 +64,8 @@ const operationTypeOptions = [
 ]
 
 const skillTypeOptions = [
-  { label: 'ทักษะอ่อน (Soft Skill)', value: 'soft' },
-  { label: 'ทักษะแข็ง (Hard Skill)', value: 'hard' },
+  { label: 'ทักษะเตรียมความพร้อม', value: 'soft' },
+  { label: 'ทักษะความรู้ทางวิชาการ', value: 'hard' },
 ]
 
 // ===== auto preset + preload เมื่อเปิด dialog =====
@@ -180,16 +180,16 @@ async function onSave() {
 
 <template>
   <q-dialog v-model="dialog" persistent>
-    <q-card style="width: 90vw; max-width: 650px; border-radius: 12px">
+    <q-card style="width: 90vw; max-width: 650px; border-radius: 12px; padding: 10px">
       <q-card-section class="q-pb-sm">
-        <div class="text-h6 text-primary q-mb-md">
+        <div class="text-h6 text-primary q-mb-lg">
           <q-icon name="schedule" class="q-mr-sm" />
           เพิ่มชั่วโมงอบรมโดยตรง
         </div>
 
-        <div class="text-body2 text-grey-7 q-mb-lg">
+        <!-- <div class="text-body2 text-grey-7 q-mb-lg">
           เพิ่มหรือลดชั่วโมงการอบรมให้กับนิสิตโดยตรง โดยไม่ต้องผ่านโครงการหรือใบรับรอง
-        </div>
+        </div> -->
 
         <div class="q-gutter-y-md">
           <!-- หัวข้อ -->
@@ -199,9 +199,10 @@ async function onSave() {
               v-model="form.title"
               outlined
               dense
-              placeholder="เช่น การปรับปรุงชั่วโมงจากการตรวจสอบ"
+              placeholder="หัวข้อการอบรม/หัวข้อหลักสูตร"
               :error="!!errors.title"
               :error-message="errors.title"
+              class="rounded-input"
             />
           </div>
 
@@ -229,11 +230,12 @@ async function onSave() {
                 :key="op.value"
                 :outline="form.operationType !== op.value"
                 :unelevated="form.operationType === op.value"
-                :color="form.operationType === op.value ? op.color : 'grey-5'"
+                :color="form.operationType === op.value ? op.color : 'grey-8'"
                 :icon="op.icon"
                 :label="op.label"
                 @click="form.operationType = op.value as 'add' | 'subtract'"
                 class="q-px-lg"
+                style="border-radius: 8px"
               />
             </div>
             <div v-if="errors.operationType" class="text-red text-caption q-mt-xs">
@@ -256,6 +258,7 @@ async function onSave() {
               placeholder="เลือกประเภททักษะ"
               :error="!!errors.skillType"
               :error-message="errors.skillType"
+              class="rounded-input"
             />
           </div>
 
@@ -273,6 +276,7 @@ async function onSave() {
               :error="!!errors.hours"
               :error-message="errors.hours"
               suffix="ชั่วโมง"
+              class="rounded-input"
             />
           </div>
 
@@ -286,6 +290,7 @@ async function onSave() {
               type="textarea"
               rows="3"
               placeholder="เพิ่มหมายเหตุเพิ่มเติม (ไม่บังคับ)"
+              class="rounded-input"
             />
           </div>
         </div>
@@ -311,3 +316,59 @@ async function onSave() {
     </q-card>
   </q-dialog>
 </template>
+
+<style scoped>
+/* ปรับแต่งมุมโค้งและขนาดของ input สำหรับ dense */
+.rounded-input :deep(.q-field__control) {
+  border-radius: 8px;
+  min-height: 40px; /* ลดลงจาก 48px เพื่อให้เหมาะกับ dense */
+}
+
+.rounded-input :deep(.q-field__native) {
+  min-height: 40px; /* แก้ปัญหาการคลิกให้ครอบคลุมพื้นที่ทั้งหมด */
+  padding: 8px 12px; /* ลด padding เพื่อให้เหมาะกับ dense */
+}
+
+/* สำหรับ textarea */
+.rounded-input :deep(.q-field__native[rows]) {
+  min-height: auto;
+  padding: 8px 12px;
+}
+
+/* แก้ปัญหาการคลิกโดยให้ control element ครอบคลุมพื้นที่ทั้งหมด */
+.rounded-input :deep(.q-field__control) {
+  position: relative;
+}
+
+.rounded-input :deep(.q-field__control::before) {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  pointer-events: none; /* ให้คลิกผ่านไปยัง input ด้านล่าง */
+}
+
+/* ปรับแต่งเมื่อ focus */
+.rounded-input :deep(.q-field--focused .q-field__control) {
+  box-shadow: 0 0 0 2px rgba(25, 118, 210, 0.2);
+}
+
+/* ปรับแต่งเมื่อมี error */
+.rounded-input :deep(.q-field--error .q-field__control) {
+  border-color: #f44336;
+}
+
+/* ให้ label มีพื้นหลังสีขาวเมื่อลอย */
+.rounded-input :deep(.q-field--float .q-field__label) {
+  background-color: white;
+  padding: 0 4px;
+}
+
+/* สำหรับ dense - ปรับ margin ของ label */
+.rounded-input :deep(.q-field--dense .q-field__label) {
+  top: 50%;
+  transform: translateY(-50%);
+}
+</style>
