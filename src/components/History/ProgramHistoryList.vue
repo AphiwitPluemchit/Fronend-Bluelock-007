@@ -52,20 +52,14 @@ const formatProgramDate = (dateStr?: string) => {
   }
 }
 
-const getProgramDateRange = (dates?: { date: string; stime: string; etime: string }[]) => {
-  if (!dates || dates.length === 0) return '-'
-  if (dates.length === 1 && dates[0]) {
-    return formatProgramDate(dates[0].date)
-  }
-  const firstDate = dates[0] ? formatProgramDate(dates[0].date) : '-'
-  const lastItem = dates[dates.length - 1]
-  const lastDate = lastItem ? formatProgramDate(lastItem.date) : '-'
-  return `${firstDate} - ${lastDate}`
+const getProgramDates = (dates?: { date: string; stime: string; etime: string }[]) => {
+  if (!dates || dates.length === 0) return []
+  return dates.map((d) => formatProgramDate(d.date))
 }
 
-const getProgramLocation = (rooms?: string[]) => {
-  if (!rooms || rooms.length === 0) return '-'
-  return rooms.join(', ')
+const getProgramLocations = (rooms?: string[]) => {
+  if (!rooms || rooms.length === 0) return []
+  return rooms
 }
 
 const onClick = async (id: string) => {
@@ -194,18 +188,40 @@ onMounted(async () => {
             <template v-if="history.programItem">
               <div
                 v-if="history.programItem.dates && history.programItem.dates.length > 0"
-                class="text-weight-medium text-subtitle2 ellipsis-2 q-mb-xs label"
+                class="text-weight-medium text-subtitle2 q-mb-xs label"
               >
-                <q-icon name="event" size="18px" />
-                วันที่จัดโครงการ : {{ getProgramDateRange(history.programItem.dates) }}
+                <div class="row items-start">
+                  <q-icon name="event" size="18px" class="q-mr-xs" style="margin-top: 2px" />
+                  <div class="col">
+                    <span>วันที่จัดโครงการ :</span>
+                    <div
+                      v-for="(dateStr, index) in getProgramDates(history.programItem.dates)"
+                      :key="index"
+                      class="q-ml-sm"
+                    >
+                      • {{ dateStr }}
+                    </div>
+                  </div>
+                </div>
               </div>
 
               <div
                 v-if="history.programItem.rooms && history.programItem.rooms.length > 0"
-                class="text-weight-medium text-subtitle2 ellipsis-2 q-mb-xs label"
+                class="text-weight-medium text-subtitle2 q-mb-xs label"
               >
-                <q-icon name="place" size="18px" />
-                สถานที่ : {{ getProgramLocation(history.programItem.rooms) }}
+                <div class="row items-start">
+                  <q-icon name="place" size="18px" class="q-mr-xs" style="margin-top: 2px" />
+                  <div class="col">
+                    <span>สถานที่ :</span>
+                    <div
+                      v-for="(room, index) in getProgramLocations(history.programItem.rooms)"
+                      :key="index"
+                      class="q-ml-sm"
+                    >
+                      • {{ room }}
+                    </div>
+                  </div>
+                </div>
               </div>
             </template>
 
