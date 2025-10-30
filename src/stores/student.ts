@@ -1,12 +1,7 @@
 import { defineStore } from 'pinia'
 import { StudentService } from 'src/services/student'
 import type { Pagination } from 'src/types/pagination'
-import type {
-  ExcelStudentRow,
-  Student,
-  TrainingHistoryItem,
-  StudentLegacyHours,
-} from 'src/types/student' // เพิ่ม StudentLegacyHours
+import type { ExcelStudentRow, Student, TrainingHistoryItem } from 'src/types/student' // เพิ่ม TrainingHistoryItem ถ้ามี
 import { ref } from 'vue'
 
 export const useStudentStore = defineStore('student', () => {
@@ -28,9 +23,6 @@ export const useStudentStore = defineStore('student', () => {
 
   // เพิ่ม state เก็บประวัติการอบรม
   const trainingHistory = ref<TrainingHistoryItem[]>([]) // ต้องสร้าง type นี้ใน types/student.ts
-
-  // เพิ่ม state เก็บข้อมูล legacy hours
-  const studentLegacyHours = ref<StudentLegacyHours | null>(null)
 
   // query
   const query = ref<Pagination>({
@@ -77,35 +69,6 @@ export const useStudentStore = defineStore('student', () => {
     } catch (error) {
       console.error('Failed to load training history:', error)
       trainingHistory.value = []
-    }
-  }
-
-  // ฟังก์ชันดึงข้อมูล legacy hours
-  const getLegacyHours = async (code: string) => {
-    try {
-      const data = await StudentService.getLegacyHours(code)
-      studentLegacyHours.value = data
-      return data
-    } catch (error) {
-      console.error('Failed to load legacy hours:', error)
-      studentLegacyHours.value = null
-      throw error
-    }
-  }
-
-  // ฟังก์ชันอัปเดต legacy hours
-  const updateLegacyHours = async (
-    code: string,
-    legacyHours: { softSkill: number; hardSkill: number },
-  ) => {
-    try {
-      await StudentService.updateLegacyHours(code, legacyHours)
-      // รีเฟรชข้อมูลหลังจากอัปเดต
-      await getLegacyHours(code)
-      return true
-    } catch (error) {
-      console.error('Failed to update legacy hours:', error)
-      return false
     }
   }
 
@@ -184,15 +147,12 @@ export const useStudentStore = defineStore('student', () => {
     getStatusText,
     getStatusClass,
     getSummaryByCodeWithHours,
-    getLegacyHours, // เพิ่ม
-    updateLegacyHours, // เพิ่ม
     student,
     query,
     students,
     code,
     totalStudentsCount,
     trainingHistory, // เพิ่ม
-    studentLegacyHours, // เพิ่ม
     updateStudent,
     updateStudentStatusByIDs,
   }

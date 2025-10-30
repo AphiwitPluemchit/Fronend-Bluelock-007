@@ -30,25 +30,6 @@ export interface TrainingHistoryItem {
   hours: number // จำนวนชั่วโมง อาจเป็นบวกหรือลบ
 }
 
-// เพิ่ม interface สำหรับข้อมูล legacy hours
-export interface StudentLegacyHours {
-  id: string
-  studentId: string
-  code: string
-  name: string
-  major: string
-  email: string
-  status: number
-  legacyHours: {
-    softSkill: number
-    hardSkill: number
-  }
-  totalHours: {
-    softSkill: number
-    hardSkill: number
-  }
-}
-
 export interface SummaryReport {
   // จำนวนชั่วโมง อาจเป็นบวกหรือล
   total: number

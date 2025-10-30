@@ -3,7 +3,7 @@ import { onMounted, onUnmounted, ref, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import AppBreadcrumbs from 'src/components/AppBreadcrumbs.vue'
 import { useStudentStore } from 'src/stores/student'
-import type { Student, StudentLegacyHours } from 'src/types/student'
+import type { Student } from 'src/types/student'
 import { useHourHistoryStore } from 'src/stores/hourHistory'
 import ProgramHistory from './programHistory.vue'
 import CertificateHistory from './CertificateHistory.vue'
@@ -11,7 +11,6 @@ import EditHourDialog from './editHourDialog.vue'
 const majorOptions = ['CS', 'AAI', 'ITDI', 'SE']
 const hourHistoryStore = useHourHistoryStore()
 const originalStudentData = ref<Student | null>(null)
-const originalLegacyHours = ref<{ softSkill: number; hardSkill: number } | null>(null)
 const show = ref(false)
 const route = useRoute()
 const studentCode = ref(route.params.code as unknown as string)
@@ -19,10 +18,6 @@ const isEditMode = ref(route.query.edit === 'true')
 const studentStore = useStudentStore()
 const searchText = ref('')
 const tab = ref('program')
-
-// เพิ่ม state สำหรับ legacy hours
-const legacyHours = ref<{ softSkill: number; hardSkill: number }>({ softSkill: 0, hardSkill: 0 })
-const studentLegacyData = ref<StudentLegacyHours | null>(null)
 
 const breadcrumbs = ref({
   previousPage: { title: 'จัดการข้อมูลนิสิต', path: '/Admin/StudentManagement' },
@@ -46,34 +41,18 @@ async function fetchProgramHistory() {
 
 const cancelEdit = () => {
   studentStore.student = { ...originalStudentData.value } as Student
-  legacyHours.value = { ...originalLegacyHours.value } as { softSkill: number; hardSkill: number }
   isEditMode.value = false
 }
 
 const enableEditMode = () => {
   isEditMode.value = true
   originalStudentData.value = { ...studentStore.student }
-  originalLegacyHours.value = { ...legacyHours.value }
 }
 
 const saveChanges = async () => {
-  try {
-    // อัปเดต legacy hours ก่อน
-    const legacyResult = await studentStore.updateLegacyHours(
-      studentStore.student.code,
-      legacyHours.value,
-    )
-
-    // อัปเดตข้อมูลนิสิต
-    const studentResult = await studentStore.updateStudent(studentStore.student)
-
-    if (legacyResult && studentResult) {
-      // รีโหลดข้อมูลใหม่เพื่อให้ total hours อัปเดต
-      await loadStudentData()
-      isEditMode.value = false
-    }
-  } catch (error) {
-    console.error('Error saving changes:', error)
+  const result = await studentStore.updateStudent(studentStore.student)
+  if (result) {
+    isEditMode.value = false
   }
 }
 const openEditDialog = () => {
@@ -81,26 +60,6 @@ const openEditDialog = () => {
 }
 const confirmCancel = () => {
   showCancelDialog.value = true
-}
-
-// เพิ่มฟังก์ชันโหลดข้อมูลนิสิต
-const loadStudentData = async () => {
-  if (!studentCode.value) return
-
-  // โหลดข้อมูลทั่วไปของนิสิต
-  await studentStore.getSummaryByCodeWithHours(studentCode.value)
-
-  // โหลดข้อมูล legacy hours แยกต่างหาก
-  try {
-    const legacyData = await studentStore.getLegacyHours(studentCode.value)
-    studentLegacyData.value = legacyData
-    legacyHours.value = {
-      softSkill: legacyData.legacyHours.softSkill,
-      hardSkill: legacyData.legacyHours.hardSkill,
-    }
-  } catch (error) {
-    console.error('Error loading legacy hours:', error)
-  }
 }
 
 let searchTimer: ReturnType<typeof setTimeout> | null = null
@@ -126,9 +85,8 @@ onUnmounted(() => {
 onMounted(async () => {
   show.value = false
   if (!studentCode.value) return
-
-  // โหลดข้อมูลนิสิตและ legacy hours
-  await loadStudentData()
+  // await studentStore.getStudentByCode(studentCode.value)
+  await studentStore.getSummaryByCodeWithHours(studentCode.value)
 
   originalStudentData.value = { ...studentStore.student }
   await fetchProgramHistory()
@@ -185,18 +143,17 @@ onMounted(async () => {
               />
             </div>
             <div class="col-2 text-right q-pr-md">
-              <p class="q-my-none">ชั่วโมงเตรียมความพร้อม (Legacy) :</p>
+              <p class="q-my-none">ชั่วโมงเตรียมความพร้อม :</p>
             </div>
             <div class="col-4">
               <q-input
-                v-model.number="legacyHours.softSkill"
+                v-model="studentStore.student.softSkill"
                 :readonly="!isEditMode"
-                :class="isEditMode ? 'editable' : 'readonly'"
-                class="qinput"
+                class="readonly qinput"
+                disable
                 borderless
                 dense
                 type="number"
-                hint="ชั่วโมงจากระบบเก่า - สามารถแก้ไขได้"
               />
             </div>
           </div>
@@ -224,57 +181,17 @@ onMounted(async () => {
               />
             </div>
             <div class="col-2 text-right q-pr-md">
-              <p class="q-my-none">ชั่วโมงทักษะทางวิชาการ (Legacy) :</p>
+              <p class="q-my-none">ชั่วโมงทักษะทางวิชาการ :</p>
             </div>
             <div class="col-4">
               <q-input
-                v-model.number="legacyHours.hardSkill"
+                v-model="studentStore.student.hardSkill"
                 :readonly="!isEditMode"
-                :class="isEditMode ? 'editable' : 'readonly'"
-                class="qinput"
+                class="readonly qinput"
+                disable
                 borderless
                 dense
                 type="number"
-                hint="ชั่วโมงจากระบบเก่า - สามารถแก้ไขได้"
-              />
-            </div>
-          </div>
-
-          <!-- แสดง Total Hours (Read-only) -->
-          <div class="col-12 q-pa-sm">
-            <q-separator class="q-my-md" />
-            <p class="text-subtitle2 text-bold q-mb-md text-blue-8">
-              ชั่วโมงรวมทั้งหมด (อ่านอย่างเดียว)
-            </p>
-          </div>
-
-          <div class="col-12 row items-center q-pa-sm">
-            <div class="col-1 text-right q-pr-md">
-              <p class="q-my-none text-blue-8">รวมเตรียมความพร้อม :</p>
-            </div>
-            <div class="col-4">
-              <q-input
-                :model-value="studentLegacyData?.totalHours.softSkill || 0"
-                readonly
-                class="readonly qinput total-hours"
-                borderless
-                dense
-                type="number"
-                hint="รวมทั้งหมดจากทุกแหล่ง"
-              />
-            </div>
-            <div class="col-2 text-right q-pr-md">
-              <p class="q-my-none text-blue-8">รวมทักษะทางวิชาการ :</p>
-            </div>
-            <div class="col-4">
-              <q-input
-                :model-value="studentLegacyData?.totalHours.hardSkill || 0"
-                readonly
-                class="readonly qinput total-hours"
-                borderless
-                dense
-                type="number"
-                hint="รวมทั้งหมดจากทุกแหล่ง"
               />
             </div>
           </div>
@@ -293,6 +210,7 @@ onMounted(async () => {
             @click="confirmCancel"
           ></q-btn>
           <q-btn label="บันทึก" class="btnconfirm" unelevated rounded @click="saveChanges" />
+
         </template>
       </div>
 
@@ -384,16 +302,6 @@ onMounted(async () => {
 }
 .editable {
   background-color: white;
-}
-
-.total-hours {
-  background-color: #f0f8ff;
-  border-color: #2196f3;
-  font-weight: 600;
-}
-
-.total-hours .q-field__native {
-  color: #1976d2;
 }
 
 @media (max-width: 600px) {
