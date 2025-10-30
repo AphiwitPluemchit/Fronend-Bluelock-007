@@ -251,7 +251,11 @@ onMounted(async () => {
               />
             </q-tab-panel>
             <q-tab-panel name="certificate" class="q-my-none">
-              <CertificateHistory />
+              <CertificateHistory
+                v-if="studentStore.student?.id"
+                :student-id="studentStore.student.id"
+                :key="studentStore.student.id"
+              />
             </q-tab-panel>
           </q-tab-panels>
         </div>

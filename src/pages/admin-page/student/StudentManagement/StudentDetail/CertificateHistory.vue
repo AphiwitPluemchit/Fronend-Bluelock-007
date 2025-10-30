@@ -7,6 +7,13 @@ import CertificateStatusType from 'src/components/CertificateStatusType.vue'
 import ProgramType from 'src/components/programType.vue'
 import HourChangeFilterDialog from 'src/components/Dialog/HourChangeFilterDialog.vue'
 
+// Accept optional studentId prop so the admin "student detail" page can pass
+// the student id to query certificate histories for that student instead of
+// using the currently authenticated user (which would be the admin).
+const props = defineProps<{
+  studentId?: string
+}>()
+
 const auth = useAuthStore()
 const hourHistoryStore = useHourHistoryStore()
 
@@ -118,11 +125,23 @@ const filteredHistories = computed(() => {
 
 // ดึงข้อมูล
 const fetchCertificateHistory = async () => {
-  const studentId = auth.getUser?.id
-  if (!studentId) return
+  // Prefer studentId passed from parent (admin student-detail). Fallback to
+  // authenticated user id (used on student-facing pages).
+  const idToUse = props.studentId ?? auth.getUser?.id
+  if (!idToUse) return
 
-  await hourHistoryStore.fetchCertificateHistories(studentId)
+  await hourHistoryStore.fetchCertificateHistories(idToUse)
 }
+
+// If parent passes a studentId, re-fetch whenever it changes.
+watch(
+  () => props.studentId,
+  async (newId) => {
+    if (!newId) return
+    hourHistoryStore.params.page = 1
+    await fetchCertificateHistory()
+  },
+)
 
 onMounted(async () => {
   await fetchCertificateHistory()
