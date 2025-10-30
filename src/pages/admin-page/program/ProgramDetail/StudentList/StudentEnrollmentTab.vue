@@ -136,7 +136,8 @@ const programItemOptions = computed(() => {
     value: index, // index ปกติของรายการ
   }))
 
-  // ถ้า programItems > 2 ให้เติม "ทุกโครงการ" ไว้หัวรายการ
+  // ✅ ถ้า programItems > 1 ให้เติม "ทุกโครงการ" ไว้หัวรายการ
+  // และถ้ามี 1 รายการ ก็ไม่ต้องใส่ "ทุกโครงการ"
   if (items.length > 1) {
     return [{ label: 'ทุกโครงการ', value: -1 }, ...opts]
   }
@@ -441,6 +442,17 @@ const fetchStudents = async () => {
     Array.isArray(program.value.programItems) &&
     program.value.programItems.length > 0
   ) {
+    // ✅ เซ็ตค่า default เมื่อโหลดครั้งแรก
+    if (selectProgramItem.value === -1 && program.value.programItems.length === 1) {
+      selectProgramItem.value = 0 // เลือกโครงการแรก (และเดียว)
+    }
+
+    // ✅ เซ็ตค่า default วันเมื่อมีวันเดียว
+    const dateOptions = programItemDatesOptions.value
+    if (selectProgramItemDate.value === -1 && dateOptions.length === 1 && dateOptions[0]) {
+      selectProgramItemDate.value = dateOptions[0].value
+    }
+
     if (selectProgramItemDate.value === -1) {
       console.log('date = ', selectProgramItemDate.value)
       query.value.date = ''
@@ -483,6 +495,21 @@ const fetchStudents = async () => {
 onMounted(async () => {
   window.addEventListener('resize', handleResize)
   await fetchStudents()
+
+  // ✅ เซ็ตค่า default หลังจากโหลดข้อมูลเสร็จแล้ว
+  if (program.value?.programItems) {
+    // ถ้ามีโครงการเดียว ให้เลือกโครงการนั้นอัตโนมัติ
+    if (program.value.programItems.length === 1 && selectProgramItem.value === -1) {
+      selectProgramItem.value = 0
+    }
+
+    // ถ้ามีวันเดียว ให้เลือกวันนั้นอัตโนมัติ
+    const dateOptions = programItemDatesOptions.value
+    if (dateOptions.length === 1 && selectProgramItemDate.value === -1 && dateOptions[0]) {
+      selectProgramItemDate.value = dateOptions[0].value
+      await fetchStudents() // เรียกใหม่เพื่อให้ข้อมูลอัปเดต
+    }
+  }
 })
 
 onUnmounted(() => {
@@ -511,7 +538,7 @@ onUnmounted(() => {
 
     <div class="row q-col-gutter-sm form-toolbar q-mt-md">
       <!-- Row 1 -->
-      <div class="search-row" >
+      <div class="search-row">
         <q-input
           dense
           outlined
