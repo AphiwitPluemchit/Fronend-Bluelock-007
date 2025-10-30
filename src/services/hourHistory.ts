@@ -1,6 +1,11 @@
 import { api } from 'boot/axios'
 import { Notify } from 'quasar'
-import type { HourHistoryPaginatedResponse, HourHistoryParams } from 'src/types/hourHistory'
+import type {
+  HourHistoryPaginatedResponse,
+  HourHistoryParams,
+  CreateDirectHourChangeRequest,
+  HourChangeHistory,
+} from 'src/types/hourHistory'
 
 // 🔔 แสดงข้อความ error
 const showError = (message: string) => {
@@ -55,6 +60,23 @@ export class HourHistoryService {
     } catch (error) {
       showError('ไม่สามารถดึงประวัติใบรับรองได้')
       console.error('Error getting certificate history with details:', error)
+      throw error
+    }
+  }
+
+  /**
+   * สร้างการเปลี่ยนแปลงชั่วโมงโดยตรงโดย Admin
+   * @param data - ข้อมูลการเปลี่ยนแปลงชั่วโมง
+   */
+  static async createDirectHourChange(
+    data: CreateDirectHourChangeRequest,
+  ): Promise<HourChangeHistory> {
+    try {
+      const res = await api.post(`${this.path}/direct`, data)
+      return res.data
+    } catch (error) {
+      showError('ไม่สามารถเพิ่มชั่วโมงได้')
+      console.error('Error creating direct hour change:', error)
       throw error
     }
   }

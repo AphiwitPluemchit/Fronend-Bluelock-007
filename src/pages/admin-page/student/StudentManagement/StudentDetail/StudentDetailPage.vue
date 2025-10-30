@@ -62,6 +62,14 @@ const confirmCancel = () => {
   showCancelDialog.value = true
 }
 
+const onHourDialogSaved = async () => {
+  // Refresh student data and hour history after saving
+  if (studentCode.value) {
+    await studentStore.getSummaryByCodeWithHours(studentCode.value)
+    await fetchProgramHistory()
+  }
+}
+
 let searchTimer: ReturnType<typeof setTimeout> | null = null
 const DEBOUNCE_MS = 300
 
@@ -210,7 +218,6 @@ onMounted(async () => {
             @click="confirmCancel"
           ></q-btn>
           <q-btn label="บันทึก" class="btnconfirm" unelevated rounded @click="saveChanges" />
-
         </template>
       </div>
 
@@ -222,7 +229,7 @@ onMounted(async () => {
             v-if="isEditMode"
             dense
             outlined
-            label="เพิ่มนิสิต"
+            label="เพิ่มชั่วโมง"
             class="btnadd"
             style="width: 130px"
             @click="openEditDialog"
@@ -252,7 +259,7 @@ onMounted(async () => {
     </div>
 
     <!-- Dialog -->
-    <EditHourDialog v-model="showEditDialog"></EditHourDialog>
+    <EditHourDialog v-model="showEditDialog" @saved="onHourDialogSaved"></EditHourDialog>
     <q-dialog v-model="showCancelDialog">
       <q-card
         style="

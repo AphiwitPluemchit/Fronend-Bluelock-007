@@ -1,9 +1,9 @@
 <script setup lang="ts">
 import { computed, watch, ref } from 'vue'
 import { useQuasar } from 'quasar'
-import { EnrollmentService } from 'src/services/enrollment'
 import { useStudentStore } from 'src/stores/student'
-import type { Student } from 'src/types/student'
+import { HourHistoryService } from 'src/services/hourHistory'
+import type { CreateDirectHourChangeRequest } from 'src/types/hourHistory'
 
 // ===== props & emits =====
 interface Props {
@@ -27,71 +27,52 @@ const loading = ref(false)
 const errorMessage = ref('')
 const errorBannerClass = computed(() => (errorMessage.value ? 'bg-red-1 text-red-8' : ''))
 
-// ===== shared types =====
-interface Option<T extends string = string> {
-  label: string
-  value: T
-}
-
-// ===== form =====
+// ===== form data =====
 const form = ref<{
-  student: string | null
-  programItemId: string | null
-  foodVoteName: string | null
+  title: string
+  sourceType: 'program' | 'certificate' | null
+  operationType: 'add' | 'subtract' | null
+  skillType: 'soft' | 'hard' | null
+  hours: number | null
+  remark: string
 }>({
-  student: null,
-  programItemId: null,
-  foodVoteName: null,
+  title: '',
+  sourceType: null,
+  operationType: null,
+  skillType: null,
+  hours: null,
+  remark: '',
 })
 
-const errors = ref<{ studentId?: string; programItemId?: string; foodVoteName?: string }>({})
+const errors = ref<{
+  title?: string
+  sourceType?: string
+  operationType?: string
+  skillType?: string
+  hours?: string
+}>({})
 
-// ===== Students: preload จาก store + local filter =====
-const allStudentOptions = ref<Array<Option<string>>>([])
-const studentOptions = ref<Array<Option<string>>>([])
-const loadingStudents = ref(false)
+// ===== options =====
+const sourceTypeOptions = [
+  { label: 'โครงการ', value: 'program' },
+  { label: 'ใบรับรอง', value: 'certificate' },
+]
 
-const fetchStudents = async () => {
-  loadingStudents.value = true
-  try {
-    studentStore.query.page = 1
-    studentStore.query.limit = 50
-    studentStore.query.search = ''
-    studentStore.query.sortBy = 'code'
-    studentStore.query.order = 'asc'
-    studentStore.query.studentStatus = ['1', '2', '3'] // ปรับตามสภาวะที่ต้องการ
+const operationTypeOptions = [
+  { label: 'เพิ่มชั่วโมง', value: 'add', icon: 'add', color: 'positive' },
+  { label: 'ลดชั่วโมง', value: 'subtract', icon: 'remove', color: 'negative' },
+]
 
-    await studentStore.getStudents()
-
-    const items = Array.isArray(studentStore.students) ? studentStore.students : []
-    allStudentOptions.value = items
-      .filter((s: Student) => s?.id && (s?.code || s?.name))
-      .map((s: Student) => ({
-        label: `${s.code ?? ''} — ${s.name ?? ''}`.trim(),
-        value: String(s.id),
-      }))
-    studentOptions.value = allStudentOptions.value
-  } finally {
-    loadingStudents.value = false
-  }
-}
-
-
-
-// ===== ProgramItem & FoodVote (จาก props.program) =====
-
-
-
-
+const skillTypeOptions = [
+  { label: 'ทักษะอ่อน (Soft Skill)', value: 'soft' },
+  { label: 'ทักษะแข็ง (Hard Skill)', value: 'hard' },
+]
 
 // ===== auto preset + preload เมื่อเปิด dialog =====
 watch(
   () => dialog.value,
   (open) => {
-    if (open) {
-      void fetchStudents()
-
-    } else {
+    if (!open) {
       reset()
     }
   },
@@ -101,22 +82,47 @@ watch(
 function validate(): boolean {
   errors.value = {}
   let ok = true
-  if (!form.value.student) {
-    errors.value.studentId = 'กรุณาเลือกนิสิต'
+
+  if (!form.value.title.trim()) {
+    errors.value.title = 'กรุณากรอกหัวข้อ'
     ok = false
   }
 
+  if (!form.value.sourceType) {
+    errors.value.sourceType = 'กรุณาเลือกประเภท'
+    ok = false
+  }
+
+  if (!form.value.operationType) {
+    errors.value.operationType = 'กรุณาเลือกรูปแบบ'
+    ok = false
+  }
+
+  if (!form.value.skillType) {
+    errors.value.skillType = 'กรุณาเลือกประเภททักษะ'
+    ok = false
+  }
+
+  if (!form.value.hours || form.value.hours <= 0) {
+    errors.value.hours = 'กรุณากรอกจำนวนชั่วโมงที่ถูกต้อง'
+    ok = false
+  }
 
   return ok
 }
 
 // ===== actions =====
 function reset() {
-  form.value = { student: null, programItemId: null, foodVoteName: null }
+  form.value = {
+    title: '',
+    sourceType: null,
+    operationType: null,
+    skillType: null,
+    hours: null,
+    remark: '',
+  }
   errors.value = {}
   errorMessage.value = ''
-  studentOptions.value = []
-  allStudentOptions.value = []
 }
 
 function close() {
@@ -129,24 +135,38 @@ async function onSave() {
     return
   }
 
+  if (!studentStore.student?.id) {
+    errorMessage.value = 'ไม่พบข้อมูลนิสิต'
+    return
+  }
+
   loading.value = true
   errorMessage.value = ''
 
-  // สร้าง payload: ส่ง FoodVote เฉพาะกรณีมี foodVotes ให้เลือก
-  const payload: {
-    studentId: string
-    programItemId: string
-    food?: string
-  } = {
-    studentId: form.value.student as string,
-    programItemId: form.value.programItemId as string,
-  }
-
-
-
   try {
-    await EnrollmentService.enrollmentByAdmin(payload)
-    $q.notify({ type: 'positive', message: 'ลงทะเบียนสำเร็จ' })
+    // คำนวณจำนวนชั่วโมงที่เปลี่ยน (บวก/ลบ)
+    const hourChange = form.value.operationType === 'add' ? form.value.hours! : -form.value.hours!
+
+    const payload: CreateDirectHourChangeRequest = {
+      studentId: studentStore.student.id,
+      sourceType: form.value.sourceType!,
+      skillType: form.value.skillType!,
+      hourChange,
+      title: form.value.title.trim(),
+    }
+
+    // Add remark only if it has content
+    if (form.value.remark.trim()) {
+      payload.remark = form.value.remark.trim()
+    }
+
+    await HourHistoryService.createDirectHourChange(payload)
+
+    $q.notify({
+      type: 'positive',
+      message: `${form.value.operationType === 'add' ? 'เพิ่ม' : 'ลด'}ชั่วโมงสำเร็จ`,
+    })
+
     emit('saved')
     close()
     reset()
@@ -156,48 +176,137 @@ async function onSave() {
     loading.value = false
   }
 }
-const titel = ref('')
 </script>
 
 <template>
   <q-dialog v-model="dialog" persistent>
-    <q-card style="width: 90vw; max-width: 600px; border-radius: 10px" >
-      <q-card-section class="q-gutter-y-md ">
-        <div class="text-h6">ลงทะเบียนเข้าร่วมกิจกรรม</div>
+    <q-card style="width: 90vw; max-width: 650px; border-radius: 12px">
+      <q-card-section class="q-pb-sm">
+        <div class="text-h6 text-primary q-mb-md">
+          <q-icon name="schedule" class="q-mr-sm" />
+          เพิ่มชั่วโมงอบรมโดยตรง
+        </div>
 
-        <!-- เลือกนิสิต -->
-        <div>
-          <div class="text-subtitle2 q-mb-xs">หัวข้อ</div>
-         <q-input v-model="titel"></q-input>
+        <div class="text-body2 text-grey-7 q-mb-lg">
+          เพิ่มหรือลดชั่วโมงการอบรมให้กับนิสิตโดยตรง โดยไม่ต้องผ่านโครงการหรือใบรับรอง
         </div>
-        <div>
-          <div class="text-subtitle2 q-mb-xs">ประเภท</div>
-          <q-select v-model="titel" :options="['โครงการ','ใบรับรอง']" label="เลือกหัวข้อ"></q-select>
+
+        <div class="q-gutter-y-md">
+          <!-- หัวข้อ -->
+          <div>
+            <div class="text-subtitle2 q-mb-xs">หัวข้อ <span class="text-red">*</span></div>
+            <q-input
+              v-model="form.title"
+              outlined
+              dense
+              placeholder="เช่น การปรับปรุงชั่วโมงจากการตรวจสอบ"
+              :error="!!errors.title"
+              :error-message="errors.title"
+            />
+          </div>
+
+          <!-- ประเภท -->
+          <div>
+            <div class="text-subtitle2 q-mb-xs">ประเภท <span class="text-red">*</span></div>
+            <q-option-group
+              v-model="form.sourceType"
+              :options="sourceTypeOptions"
+              color="primary"
+              inline
+              class="q-mt-sm"
+            />
+            <div v-if="errors.sourceType" class="text-red text-caption q-mt-xs">
+              {{ errors.sourceType }}
+            </div>
+          </div>
+
+          <!-- รูปแบบ -->
+          <div>
+            <div class="text-subtitle2 q-mb-xs">รูปแบบ <span class="text-red">*</span></div>
+            <div class="row q-gutter-sm q-mt-sm">
+              <q-btn
+                v-for="op in operationTypeOptions"
+                :key="op.value"
+                :outline="form.operationType !== op.value"
+                :unelevated="form.operationType === op.value"
+                :color="form.operationType === op.value ? op.color : 'grey-5'"
+                :icon="op.icon"
+                :label="op.label"
+                @click="form.operationType = op.value as 'add' | 'subtract'"
+                class="q-px-lg"
+              />
+            </div>
+            <div v-if="errors.operationType" class="text-red text-caption q-mt-xs">
+              {{ errors.operationType }}
+            </div>
+          </div>
+
+          <!-- ประเภททักษะ -->
+          <div>
+            <div class="text-subtitle2 q-mb-xs">ประเภททักษะ <span class="text-red">*</span></div>
+            <q-select
+              v-model="form.skillType"
+              :options="skillTypeOptions"
+              option-label="label"
+              option-value="value"
+              emit-value
+              map-options
+              outlined
+              dense
+              placeholder="เลือกประเภททักษะ"
+              :error="!!errors.skillType"
+              :error-message="errors.skillType"
+            />
+          </div>
+
+          <!-- จำนวนชั่วโมง -->
+          <div>
+            <div class="text-subtitle2 q-mb-xs">จำนวนชั่วโมง <span class="text-red">*</span></div>
+            <q-input
+              v-model.number="form.hours"
+              outlined
+              dense
+              type="number"
+              min="1"
+              step="1"
+              placeholder="เช่น 8"
+              :error="!!errors.hours"
+              :error-message="errors.hours"
+              suffix="ชั่วโมง"
+            />
+          </div>
+
+          <!-- หมายเหตุ -->
+          <div>
+            <div class="text-subtitle2 q-mb-xs">หมายเหตุ</div>
+            <q-input
+              v-model="form.remark"
+              outlined
+              dense
+              type="textarea"
+              rows="3"
+              placeholder="เพิ่มหมายเหตุเพิ่มเติม (ไม่บังคับ)"
+            />
+          </div>
         </div>
-        <div>
-          <div class="text-subtitle2 q-mb-xs">ประเภท</div>
-          <q-select v-model="titel" :options="['+','-']" label="บวก/ลบ"></q-select>
-        </div>
-        <div>
-          <div class="text-subtitle2 q-mb-xs">จำนวนชั่วโมง</div>
-         <q-input v-model="titel"></q-input>
-        </div>
+
+        <!-- Error Banner -->
         <q-banner
           v-if="errorMessage"
-          class="q-mt-sm"
+          class="q-mt-md"
           rounded
           dense
           inline-actions
           :class="errorBannerClass"
         >
+          <q-icon name="warning" class="q-mr-sm" />
           {{ errorMessage }}
         </q-banner>
       </q-card-section>
 
-
-      <q-card-actions align="right">
-        <q-btn flat label="ยกเลิก" class="btnreject" :disable="loading" @click="close" />
-        <q-btn unelevated label="ยืนยัน" class="btnconfirm" :loading="loading" @click="onSave" />
+      <q-card-actions align="right" class="q-pa-md">
+        <q-btn flat label="ยกเลิก" class="btnreject q-mr-sm" :disable="loading" @click="close" />
+        <q-btn unelevated label="บันทึก" class="btnconfirm" :loading="loading" @click="onSave" />
       </q-card-actions>
     </q-card>
   </q-dialog>

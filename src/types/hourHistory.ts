@@ -81,3 +81,13 @@ export interface HourHistoryParams {
   status?: string
   search?: string
 }
+
+// Request type for creating direct hour change
+export interface CreateDirectHourChangeRequest {
+  studentId: string
+  sourceType: 'program' | 'certificate'
+  skillType: 'soft' | 'hard'
+  hourChange: number // บวก = เพิ่ม, ลบ = ลด
+  title: string
+  remark?: string
+}
