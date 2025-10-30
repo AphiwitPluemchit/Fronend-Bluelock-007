@@ -23,6 +23,8 @@ const buttonLabel = computed(() => {
       return 'อนุมัติแล้ว'
     case 'rejected':
       return 'ไม่อนุมัติ'
+    case 'manual':
+      return 'เพิ่มเติม'
     default:
       return props.status
   }
@@ -36,6 +38,8 @@ const buttonClass = computed(() => {
       return 'status-dot--green'
     case 'rejected':
       return 'status-dot--red'
+    case 'manual':
+      return 'status-dot--purple'
     default:
       return 'status-dot--gray'
   }
@@ -71,6 +75,9 @@ const buttonClass = computed(() => {
 }
 .status-dot--gray {
   background-color: #9e9e9e;
+}
+.status-dot--purple {
+  background-color: #9c27b0;
 }
 
 .status-label {
