@@ -50,6 +50,36 @@ class CheckinoutService {
     }
   }
 
+  /**
+   * Claim QR Token แบบ Anonymous (ไม่ต้อง Login)
+   * ใช้เมื่อเข้า QR Link ครั้งแรก
+   */
+  static async claimQRAnonymous(token: string) {
+    try {
+      const res = await api.get(`/public/qr/${token}`)
+      return res.data // { claimToken, programId, type, message }
+    } catch (err) {
+      let msg = 'ไม่สามารถ Claim QR ได้'
+      if (axios.isAxiosError(err)) {
+        const data = err.response?.data as unknown
+        if (typeof data === 'string') {
+          try {
+            const parsed = JSON.parse(data) as ErrorBody
+            msg = parsed.error || parsed.message || data
+          } catch {
+            msg = data
+          }
+        } else if (data && typeof data === 'object') {
+          const body = data as ErrorBody
+          msg = body.error || body.message || err.message || msg
+        } else {
+          msg = err.message || msg
+        }
+      }
+      throw new Error(msg)
+    }
+  }
+
   static async getTokenInfo(token: string) {
     try {
       const res = await api.get(`/checkInOuts/student/qr/${token}`)
@@ -75,9 +105,17 @@ class CheckinoutService {
       throw new Error(msg)
     }
   }
-  static async checkin(token: string) {
+  static async checkin(token: string, claimToken?: string) {
     try {
-      const res = await api.post('/checkInOuts/student/checkin', { token })
+      const payload: { token?: string; claimToken?: string } = {}
+
+      if (claimToken) {
+        payload.claimToken = claimToken
+      } else {
+        payload.token = token
+      }
+
+      const res = await api.post('/checkInOuts/student/checkin', payload)
       return res.data
     } catch (err) {
       let msg = 'เกิดข้อผิดพลาด'
@@ -100,9 +138,17 @@ class CheckinoutService {
       throw new Error(msg) // ✅ โยนข้อความจริงกลับไปให้ component
     }
   }
-  static async checkout(token: string) {
+  static async checkout(token: string, claimToken?: string) {
     try {
-      const res = await api.post('/checkInOuts/student/checkout', { token })
+      const payload: { token?: string; claimToken?: string } = {}
+
+      if (claimToken) {
+        payload.claimToken = claimToken
+      } else {
+        payload.token = token
+      }
+
+      const res = await api.post('/checkInOuts/student/checkout', payload)
       return res.data
     } catch (err) {
       let msg = 'เกิดข้อผิดพลาด'

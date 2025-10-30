@@ -8,7 +8,13 @@ import { useStudentProgramstore } from 'src/stores/program'
 
 const route = useRoute()
 const uuid = route.params.uuid?.toString() || ''
-const tokenInfo = ref<{ type: string; programId: string; token: string } | null>(null)
+const claimToken = route.params.claimToken?.toString() || '' // 🆕 Claim Token
+const tokenInfo = ref<{
+  type: string
+  programId: string
+  token: string
+  claimToken?: string
+} | null>(null)
 const loading = ref(true)
 const error = ref('')
 const programStore = useStudentProgramstore()
@@ -34,6 +40,25 @@ const loadProgramSafe = async (programId: string) => {
 }
 
 onMounted(async () => {
+  // 🆕 ถ้ามี Claim Token → ใช้ Claim Token (มาจากหน้า QRClaimPage)
+  if (claimToken) {
+    const storedProgramId = localStorage.getItem('temp_program_id')
+    const storedType = localStorage.getItem('temp_qr_type')
+
+    if (storedProgramId && storedType) {
+      tokenInfo.value = {
+        type: storedType,
+        programId: storedProgramId,
+        token: claimToken,
+        claimToken: claimToken,
+      }
+      await loadProgramSafe(storedProgramId)
+      loading.value = false
+      return
+    }
+  }
+
+  // Legacy: ใช้ UUID
   if (!uuid) {
     error.value = 'ไม่พบ QR Token'
     loading.value = false
@@ -137,13 +162,15 @@ onMounted(async () => {
       <template v-else>
         <Checkinpage
           v-if="tokenInfo?.type === 'checkin'"
-          :token="uuid"
+          :token="tokenInfo?.token || uuid"
           :program="programStore.form"
+          v-bind="tokenInfo?.claimToken ? { claimToken: tokenInfo.claimToken } : {}"
         />
         <Checkoutpage
           v-else-if="tokenInfo?.type === 'checkout'"
-          :token="uuid"
+          :token="tokenInfo?.token || uuid"
           :program="programStore.form"
+          v-bind="tokenInfo?.claimToken ? { claimToken: tokenInfo.claimToken } : {}"
         />
         <div v-else class="text-negative">QR ไม่ถูกต้อง</div>
       </template>

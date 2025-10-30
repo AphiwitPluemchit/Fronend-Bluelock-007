@@ -15,6 +15,7 @@ const isSubmitted = ref(false)
 const props = defineProps<{
   token: string
   program?: Partial<Program>
+  claimToken?: string // 🆕
 }>()
 
 async function checkin() {
@@ -24,7 +25,12 @@ async function checkin() {
   isSubmitted.value = false
 
   try {
-    await checkinoutStore.checkin(props.token)
+    // ถ้ามี claimToken ให้ใช้ claimToken แทน
+    if (props.claimToken) {
+      await checkinoutStore.checkinWithClaim(props.claimToken)
+    } else {
+      await checkinoutStore.checkin(props.token)
+    }
     isChecked.value = true
   } catch (error: unknown) {
     console.log(error)
@@ -81,5 +87,4 @@ console.log('token:', props.token)
       </div>
     </div>
   </div>
-  
 </template>

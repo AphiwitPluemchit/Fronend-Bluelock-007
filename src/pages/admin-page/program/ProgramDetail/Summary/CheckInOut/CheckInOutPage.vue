@@ -9,10 +9,14 @@ const programId = route.params.id as string
 const type = route.params.type as 'checkin' | 'checkout'
 
 const qrLink = ref('')
+const qrToken = ref('') // เก็บ token ล่าสุด
 const qrType = ref('')
 const programName = ref('')
+const countdown = ref(10) // นับถอยหลัง 10 วิ
 const appURL = import.meta.env.VITE_APP_URL
+
 let refreshInterval: ReturnType<typeof setInterval> | null = null
+let countdownInterval: ReturnType<typeof setInterval> | null = null
 
 const fetchProgram = async () => {
   try {
@@ -27,21 +31,38 @@ const fetchQR = async () => {
   try {
     const res = await CheckinoutService.getLink(programId, type)
     qrLink.value = res?.url || ''
+    qrToken.value = res?.token || ''
     qrType.value = res?.type || type
+    countdown.value = 10 // รีเซ็ต countdown
   } catch (err) {
     console.error('โหลด QR ล้มเหลว:', err)
   }
 }
 
+const startCountdown = () => {
+  countdownInterval = setInterval(() => {
+    countdown.value--
+    if (countdown.value <= 0) {
+      countdown.value = 10
+    }
+  }, 1000) // ลดลงทุก 1 วิ
+}
+
 onMounted(async () => {
   await Promise.all([fetchProgram(), fetchQR()])
+
+  // 🔄 Auto-refresh QR ทุก 10 วิ
   refreshInterval = setInterval(() => {
     void fetchQR()
-  }, 12000)
+  }, 10000) // 10 วินาที
+
+  // ⏱️ เริ่ม countdown
+  startCountdown()
 })
 
 onUnmounted(() => {
   if (refreshInterval) clearInterval(refreshInterval)
+  if (countdownInterval) clearInterval(countdownInterval)
 })
 
 const copyQRLink = () => {
@@ -62,6 +83,15 @@ const copyQRLink = () => {
         <div class="text-h6 q-mb-md" v-if="programName">
           {{ programName }}
         </div>
+
+        <!-- Countdown Timer -->
+        <div class="q-mb-md">
+          <div class="text-h2 text-primary q-mb-xs" style="font-weight: 700">
+            {{ countdown }}
+          </div>
+          <div class="text-subtitle1 text-grey-7">QR Code จะรีเฟรชใน {{ countdown }} วินาที</div>
+        </div>
+
         <div class="q-my-xl">
           <q-img
             v-if="qrLink"
@@ -101,6 +131,15 @@ const copyQRLink = () => {
         <div class="text-h6 q-mb-md" v-if="programName">
           {{ programName }}
         </div>
+
+        <!-- Countdown Timer (Mobile) -->
+        <div class="q-mb-md">
+          <div class="text-h2 text-primary q-mb-xs" style="font-weight: 700">
+            {{ countdown }}
+          </div>
+          <div class="text-subtitle2 text-grey-7">QR Code จะรีเฟรชใน {{ countdown }} วินาที</div>
+        </div>
+
         <q-img
           v-if="qrLink"
           :src="`https://api.qrserver.com/v1/create-qr-code/?size=350x350&data=${appURL + qrLink}`"

@@ -8,12 +8,34 @@ const qrRoutes: RouteRecordRaw[] = [
     component: () => import('layouts/LoginLayout.vue'), // lightweight neutral layout
     children: [
       {
+        path: ':token',
+        name: 'qr-public',
+        component: () => import('pages/student-page/checkinout/QRClaimPage.vue'),
+        props: true,
+        // Use alias instead of redirect so the original URL is preserved
+        alias: ['/Student/qr/:token', '/student/qr/:token'],
+        meta: {
+          scope: 'public', // ไม่ต้อง Login
+          requiresAuth: false,
+        },
+      },
+      {
+        path: 'claim/:claimToken',
+        name: 'qr-checkinout-claim',
+        component: () => import('pages/student-page/checkinout/CheckinoutPage.vue'),
+        props: true,
+        meta: {
+          scope: 'checkinout',
+          requiresAuth: true,
+          redirectToLogin: true,
+        },
+      },
+      // Legacy route (สำหรับ UUID แบบเก่า)
+      {
         path: ':uuid',
         name: 'qr-checkinout',
         component: () => import('pages/student-page/checkinout/CheckinoutPage.vue'),
         props: true,
-        // Use alias instead of redirect so the original URL is preserved
-        alias: ['/Student/qr/:uuid', '/student/qr/:uuid'],
         meta: {
           scope: 'checkinout',
           requiresAuth: true,

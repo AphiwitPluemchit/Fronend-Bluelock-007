@@ -35,6 +35,7 @@ watch(
 const props = defineProps<{
   token: string
   program?: Partial<Program>
+  claimToken?: string // 🆕
 }>()
 
 onMounted(async () => {
@@ -106,9 +107,12 @@ async function checkoutOnly() {
   errorMessage.value = ''
   loading.value = true
   try {
-    // สมมุติว่า store มีเมธอด checkout(token) สำหรับเช็คชื่อ "ออก"
-    // ถ้าชื่อเมธอดในโปรเจกต์จริงต่างกัน ให้เปลี่ยนเป็นของจริงได้เลย เช่น checkOut, doCheckout ฯลฯ
-    await checkinoutStore.checkout(props.token)
+    // ถ้ามี claimToken ให้ใช้ claimToken แทน
+    if (props.claimToken) {
+      await checkinoutStore.checkoutWithClaim(props.claimToken)
+    } else {
+      await checkinoutStore.checkout(props.token)
+    }
     checkedOut.value = true
     isSubmitted.value = true
   } catch (error: unknown) {
@@ -179,13 +183,7 @@ async function onPrimaryClick() {
           :disable="loading || hasForm === null"
           @click="onPrimaryClick"
         />
-        <q-btn
-          v-else
-          class="btnconfirm"
-          label="กลับหน้าหลัก"
-          color="secondary"
-          @click="goHome"
-        />
+        <q-btn v-else class="btnconfirm" label="กลับหน้าหลัก" color="secondary" @click="goHome" />
 
         <!-- ✅ ข้อความสำเร็จ: ย้ายมาไว้ใต้ปุ่ม -->
         <div
@@ -196,14 +194,10 @@ async function onPrimaryClick() {
         </div>
 
         <!-- ข้อความผิดพลาด (ถ้ามีและยังไม่สำเร็จ) -->
-        <div
-          v-else-if="errorMessage"
-          class="text-negative q-mt-md"
-        >
+        <div v-else-if="errorMessage" class="text-negative q-mt-md">
           {{ errorMessage }}
         </div>
       </div>
     </div>
   </div>
 </template>
-
