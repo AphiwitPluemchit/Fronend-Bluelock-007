@@ -315,6 +315,45 @@ onMounted(async () => {
   background-color: white;
 }
 
+.custom-tabs .q-tab--active,
+.custom-tabs .q-tab:hover {
+  background-color: #edf0f5 !important;
+  border-radius: 12px 12px 0 0;
+  color: rgb(0, 0, 0);
+}
+.custom-panels {
+  background-color: #edf0f5;
+  height: 100%;
+}
+
+/* Ensure tabs stay rounded on all interaction states (hover, focus, active, keyboard focus)
+   Quasar may add focus/active styles that override border-radius; force rounded corners
+   and remove default outlines/box-shadows that produce square visuals. */
+.custom-tabs .q-tab {
+  border-radius: 12px 12px 0 0 !important;
+  overflow: hidden;
+}
+.custom-tabs .q-tab,
+.custom-tabs .q-tab:hover,
+.custom-tabs .q-tab:active,
+.custom-tabs .q-tab:focus,
+.custom-tabs .q-tab:focus-visible,
+.custom-tabs .q-tab--active,
+.custom-tabs .q-tab--active:focus,
+.custom-tabs .q-tab--active:active {
+  border-radius: 12px 12px 0 0 !important;
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+/* If Quasar inserts inner elements that receive focus, make sure they don't show square outlines */
+.custom-tabs .q-focus-helper,
+.custom-tabs .q-focus-helper:before,
+.custom-tabs .q-focus-helper:after {
+  outline: none !important;
+  box-shadow: none !important;
+}
+
 @media (max-width: 600px) {
   .search-filter-wrapper {
     flex-direction: column;
