@@ -4,8 +4,8 @@ import { ref, computed, onMounted } from 'vue'
 import { useAuthStore } from 'src/stores/auth'
 import { StudentService } from 'src/services/student'
 // import type { CheckinoutRecord } from 'src/types/checkinout'
-import ProgramHistory from 'src/pages/student-page/record/programHistory.vue'
-import CertificateHistory from 'src/pages/student-page/record/CertificateHistory.vue'
+import ProgramHistoryList from 'src/components/History/ProgramHistoryList.vue'
+import CertificateHistoryList from 'src/components/History/CertificateHistoryList.vue'
 
 const auth = useAuthStore()
 // const $q = useQuasar()
@@ -260,10 +260,18 @@ onMounted(async () => {
 
           <q-tab-panels v-model="tab" animated class="custom-panels">
             <q-tab-panel name="program" class="q-my-none">
-              <ProgramHistory />
+              <ProgramHistoryList
+                v-if="auth.getUser?.id"
+                :student-id="auth.getUser.id"
+                :show-filter="false"
+              />
             </q-tab-panel>
             <q-tab-panel name="certificate" class="q-my-none">
-              <CertificateHistory />
+              <CertificateHistoryList
+                v-if="auth.getUser?.id"
+                :student-id="auth.getUser.id"
+                :show-filter="false"
+              />
             </q-tab-panel>
           </q-tab-panels>
         </div>

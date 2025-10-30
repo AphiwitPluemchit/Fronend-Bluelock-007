@@ -5,8 +5,8 @@ import AppBreadcrumbs from 'src/components/AppBreadcrumbs.vue'
 import { useStudentStore } from 'src/stores/student'
 import type { Student } from 'src/types/student'
 import { useHourHistoryStore } from 'src/stores/hourHistory'
-import ProgramHistory from './programHistory.vue'
-import CertificateHistory from './CertificateHistory.vue'
+import ProgramHistoryList from 'src/components/History/ProgramHistoryList.vue'
+import CertificateHistoryList from 'src/components/History/CertificateHistoryList.vue'
 import EditHourDialog from './editHourDialog.vue'
 const majorOptions = ['CS', 'AAI', 'ITDI', 'SE']
 const hourHistoryStore = useHourHistoryStore()
@@ -244,16 +244,18 @@ onMounted(async () => {
 
           <q-tab-panels v-model="tab" animated class="custom-panels">
             <q-tab-panel name="program" class="q-my-none">
-              <ProgramHistory
+              <ProgramHistoryList
                 v-if="studentStore.student?.id"
                 :student-id="studentStore.student.id"
+                :show-filter="true"
                 :key="studentStore.student.id"
               />
             </q-tab-panel>
             <q-tab-panel name="certificate" class="q-my-none">
-              <CertificateHistory
+              <CertificateHistoryList
                 v-if="studentStore.student?.id"
                 :student-id="studentStore.student.id"
+                :show-filter="true"
                 :key="studentStore.student.id"
               />
             </q-tab-panel>
