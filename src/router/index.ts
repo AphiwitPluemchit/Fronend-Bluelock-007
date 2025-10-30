@@ -65,8 +65,24 @@ export default route(function () {
     const matched = to.matched.findLast((m) => (m.meta as any)?.scope) ?? to.matched[0]
     const scope = (matched?.meta as { scope?: Scope })?.scope
 
-    // Public and checkinout routes are allowed to load; checkinout may require auth on page logic
+    // Public routes are always allowed
     if (scope === 'public') return true
+
+    // ✅ Checkinout scope: ถ้า user login อยู่แล้ว ให้ผ่านไปเลย (ไม่ต้องรอ ensureAuthenticated)
+    if (scope === 'checkinout') {
+      // ตรวจสอบว่า login อยู่หรือไม่ (ตรวจ token ที่ยังไม่หมดอายุ)
+      if (authStore.getIsAuthenticated) {
+        const role = authStore.getRole
+        // ถ้าเป็น student ให้ผ่าน
+        if (role === EnumUserRole.STUDENT) {
+          return true
+        }
+      }
+      // ถ้ายังไม่ login หรือไม่ใช่ student ให้ redirect ไป login
+      const redirect = to.fullPath
+      localStorage.setItem('redirectAfterLogin', redirect)
+      return { name: 'Login', query: { redirect } }
+    }
 
     // Try to ensure authentication (will refresh token if needed)
     const isAuthed = await authStore.ensureAuthenticated()
@@ -85,11 +101,6 @@ export default route(function () {
     }
     if (scope === 'student' && role !== EnumUserRole.STUDENT) {
       return { path: '/Student/Home' }
-    }
-
-    // checkinout scope: any authenticated student allowed
-    if (scope === 'checkinout' && role !== EnumUserRole.STUDENT) {
-      return { path: '/Student/ProgramCalendar' }
     }
 
     return true
