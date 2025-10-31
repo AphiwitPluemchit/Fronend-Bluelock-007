@@ -12,7 +12,7 @@ const handleFileSelected = (file: File) => {
 }
 const breadcrumbs = ref({
   previousPage: { title: 'จัดการโครงการ', path: '/Admin/ProgramManagement' },
-  currentPage: { title: 'สร้างโครงการ', path: '/Admin/ProgramManagement/CreateProgramPage' },
+  currentPage: { title: 'เพิ่มโครงการ', path: '/Admin/ProgramManagement/CreateProgramPage' },
   icon: 'edit_calendar',
 })
 </script>

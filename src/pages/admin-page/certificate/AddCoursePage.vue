@@ -131,9 +131,10 @@ const submit = async () => {
 
             <!-- ชื่อหัวข้อ (ไทย) -->
             <div class="input-group">
-              <p class="label label_minWidth">ชื่อหัวข้อ (ไทย) :</p>
+              <p class="label label_minWidth">ชื่อหลักสูตร:</p>
               <div class="input-container">
-                <q-input outlined v-model="course.name" class="fix-q-input-height" hide-bottom />
+                <q-input outlined v-model="course.name" class="fix-q-input-height" hide-bottom placeholder="เช่น การออกแบบสื่อและการนำเสนอ (Media Design and Presentation)"
+/>
               </div>
             </div>
 
@@ -141,7 +142,7 @@ const submit = async () => {
             <div class="input-group">
               <p class="label label_minWidth">ชื่อในใบประกาศ (ไทย) :</p>
               <div class="input-container">
-                <q-input outlined v-model="course.certificateName" class="fix-q-input-height" />
+                <q-input outlined v-model="course.certificateName" class="fix-q-input-height" placeholder="เช่น การออกแบบสื่อและการนำเสนอ" />
               </div>
             </div>
 
@@ -149,7 +150,7 @@ const submit = async () => {
             <div class="input-group">
               <p class="label label_minWidth">ชื่อในใบประกาศ (อังกฤษ) :</p>
               <div class="input-container">
-                <q-input outlined v-model="course.certificateNameEng" class="fix-q-input-height" />
+                <q-input outlined v-model="course.certificateNameEng" class="fix-q-input-height"  placeholder="เช่น Media Design and Presentation" />
               </div>
             </div>
 
@@ -208,6 +209,7 @@ const submit = async () => {
                   v-model.number="course.hour"
                   class="fix-q-input-height"
                   min="0"
+                  placeholder="เช่น 5"
                 />
               </div>
             </div>
@@ -216,7 +218,7 @@ const submit = async () => {
             <div class="input-group">
               <p class="label label_minWidth">หน่วยงานผู้ออก :</p>
               <div class="input-container">
-                <q-input outlined v-model="course.issuer" class="fix-q-input-height" />
+                <q-input outlined v-model="course.issuer" class="fix-q-input-height" placeholder="เช่น มหาวิทยาลัยเชียงใหม่"/>
               </div>
             </div>
 

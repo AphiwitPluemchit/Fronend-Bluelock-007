@@ -17,7 +17,7 @@ const courseStore = useCourseStore()
 const authStore = useAuthStore()
 const baseurl = api.defaults.baseURL
 const url = ref(
-  'https://learner.thaimooc.ac.th/credential-wallet/10793bb5-6e4f-4873-9309-f25f216a46c7/sahaphap.rit/public',
+  'https://',
 )
 const $q = useQuasar()
 
@@ -56,9 +56,9 @@ const breadcrumbs = ref({
 
 // Computed properties for course display
 const courseName = computed(() => selectedCourse.value?.name || '')
-const certificateName = computed(
-  () => selectedCourse.value?.certificateName || selectedCourse.value?.name || '',
-)
+// const certificateName = computed(
+//   () => selectedCourse.value?.certificateName || selectedCourse.value?.name || '',
+// )
 // const certificateNameEng = computed(
 //   () => selectedCourse.value?.certificateNameEng || selectedCourse.value?.name || '',
 // )
@@ -163,20 +163,20 @@ async function verifyUrl() {
   }
 }
 
-// Convert YouTube URL to embed format
-function getEmbedUrl(url: string): string {
-  if (!url) return ''
+// // Convert YouTube URL to embed format
+// function getEmbedUrl(url: string): string {
+//   if (!url) return ''
 
-  // YouTube URL conversion
-  const youtubeRegex = /(?:youtube\.com\/watch\?v=|youtu\.be\/)([^&\n?#]+)/
-  const youtubeMatch = url.match(youtubeRegex)
-  if (youtubeMatch) {
-    return `https://www.youtube.com/embed/${youtubeMatch[1]}`
-  }
+//   // YouTube URL conversion
+//   const youtubeRegex = /(?:youtube\.com\/watch\?v=|youtu\.be\/)([^&\n?#]+)/
+//   const youtubeMatch = url.match(youtubeRegex)
+//   if (youtubeMatch) {
+//     return `https://www.youtube.com/embed/${youtubeMatch[1]}`
+//   }
 
-  // Return original URL if not YouTube (fallback)
-  return url
-}
+//   // Return original URL if not YouTube (fallback)
+//   return url
+// }
 
 // เรียกใช้เมื่อ component mount
 onMounted(async () => {
@@ -240,21 +240,21 @@ async function fetchLatestUpload() {
           <div class="col-12 col-md-8" v-if="selectedCourse">
             <q-list dense>
               <div class="field-pair">
-                <div class="field-label">ชื่อคอร์ส :</div>
+                <div class="field-label">ชื่อหลักสูตร :</div>
                 <div class="field-value">{{ courseName }}</div>
               </div>
-
+<!-- 
               <div class="field-pair">
                 <div class="field-label">ชื่อในใบประกาศ :</div>
                 <div class="field-value">{{ certificateName }}</div>
-              </div>
+              </div> -->
 
               <!-- <div class="field-pair">
                 <div class="field-label">ชื่อในใบประกาศ (อังกฤษ) :</div>
                 <div class="field-value">{{ certificateNameEng }}</div>
               </div> -->
               <div class="field-pair">
-                <div class="field-label">ผู้ให้ :</div>
+                <div class="field-label">หน่วยงานผู้ออก :</div>
                 <div class="field-value">{{ selectedCourse.issuer }}</div>
               </div>
               <div class="field-pair">
@@ -275,7 +275,7 @@ async function fetchLatestUpload() {
         </q-card-section>
 
         <!-- Tutorial Video Section -->
-        <div v-if="selectedCourse?.videoUrl" class="tutorial-section q-mt-md q-mb-md">
+        <!-- <div v-if="selectedCourse?.videoUrl" class="tutorial-section q-mt-md q-mb-md">
           <div class="section-title">วิดีโอสอนการขอใบประกาศนียบัตร</div>
           <div class="video-container">
             <iframe
@@ -285,17 +285,17 @@ async function fetchLatestUpload() {
               class="tutorial-video"
             ></iframe>
           </div>
-        </div>
+        </div> -->
 
         <!-- No Tutorial Message -->
-        <div v-else class="no-tutorial-section q-mt-md q-mb-md">
+        <!-- <div v-else class="no-tutorial-section q-mt-md q-mb-md">
           <q-banner class="bg-grey-2 text-grey-7">
             <template v-slot:avatar>
               <q-icon name="info" color="grey-6" />
             </template>
             ไม่มีวิดีโอสอนการขอใบประกาศนียบัตรสำหรับคอร์สนี้
           </q-banner>
-        </div>
+        </div> -->
 
         <!-- Certificate Upload Section -->
         <div class="upload-section q-mt-md">
@@ -307,7 +307,6 @@ async function fetchLatestUpload() {
                   v-model="url"
                   outlined
                   dense
-                  placeholder="BUU IF001 Certificate | mooc.buu.ac.th"
                   class="input-url"
                 >
                 </q-input>
