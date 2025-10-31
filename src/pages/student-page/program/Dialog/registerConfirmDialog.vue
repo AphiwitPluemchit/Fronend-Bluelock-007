@@ -5,64 +5,48 @@
     persistent
   >
     <q-card class="q-pa-md" rounded>
-      <q-card-actions align="left">
+      <!-- Header with icon centered -->
+      <q-card-section class="text-center q-pb-none q-mb-md">
+        <q-icon name="info" color="primary" size="56px" />
+      </q-card-section>
+      
+      <q-card-section class="text-center q-pt-sm">
         <div class="text-h5">ยืนยันการลงทะเบียน</div>
-      </q-card-actions>
-
-      <q-card-section>
-        <div v-if="programItems.length > 1">
-          <div class="text-h6">เลือกโครงการ</div>
-          <!-- <q-option-group
-            v-model="selectedItemId"
-            :options="itemOptions"
-            type="radio"
-            label="เลือกรอบโครงการ"
-          /> -->
-
-          <div class="q-gutter-sm row items-center">
-            <q-chip
-              v-for="item in programItems"
-              :key="item.id ?? 'default-key'"
-              clickable
-              :class="{ selected: selectedItemId === item.id }"
-              text-color="black"
-              @click="selectedItemId = item.id ?? null"
-              :label="`${item.name} (${item.hour} ชม.)`"
-            >
-              <!-- {{ item.name }} ({{ item.hour }} ชม.) -->
-            </q-chip>
-          </div>
-        </div>
-        <div v-else>
-          <q-item-label>
-            <div class="text-h6">ชื่อโครงการ</div>
-            {{ programItems[0]?.name }} ({{ programItems[0]?.hour }} ชม.)</q-item-label
-          >
-        </div>
       </q-card-section>
-      <q-card-section>
-        <div v-if="food.length > 0">
-          <div class="text-h6">เลือกอาหาร</div>
-          <!-- <q-option-group
-            v-model="selectedFood"
-            :options="foodOptions"
-            type="radio"
-            label="เลือกรอบโครงการ"
-          /> -->
-          <div class="q-gutter-sm row items-center">
-            <q-chip
-              v-for="item in food"
-              :key="item.foodName"
-              clickable
-              text-color="black"
-              :class="{ selected: selectedFood === item.foodName }"
-              @click="selectedFood = item.foodName"
-            >
-              {{ item.foodName }}
-            </q-chip>
-          </div>
-        </div>
+
+      <!-- Program selection section - show only if multiple programs -->
+      <q-card-section v-if="programItems.length > 1">
+        <div class="text-subtitle1 q-mb-sm">เลือกโครงการ</div>
+        <q-option-group
+          v-model="selectedItemId"
+          :options="programOptions"
+          type="radio"
+          color="primary"
+        />
       </q-card-section>
+
+      <!-- Single program info - show only if one program -->
+      <q-card-section v-else-if="programItems.length === 1">
+        <div class="text-body1">ลงทะเบียนเข้าร่วมโครงการ <strong>{{ programItems[0]?.name }}</strong></div>
+      </q-card-section>
+
+      <!-- Food selection section - show only if food available -->
+      <q-card-section v-if="food.length > 0">
+        <div class="text-subtitle1 q-mb-sm">เลือกอาหาร</div>
+        <q-option-group
+          v-model="selectedFood"
+          :options="foodOptions"
+          type="radio"
+          color="primary"
+        />
+      </q-card-section>
+
+      <!-- Confirmation message if no selections needed -->
+      <q-card-section v-if="programItems.length === 1 && food.length === 0">
+        <div class="text-body2 text-grey-7">คุณต้องการลงทะเบียนใช่หรือไม่ โปรดยืนยัน</div>
+      </q-card-section>
+
+      <!-- Action buttons -->
       <q-card-actions align="right">
         <q-btn class="btnreject" label="ยกเลิก" color="red" @click="cancel" />
         <q-btn
@@ -70,7 +54,8 @@
           label="ยืนยัน"
           style="background-color: #3676f4; color: white"
           :disable="
-            (programItems.length > 1 && !selectedItemId) || (food.length > 0 && !selectedFood)
+            (programItems.length > 1 && !selectedItemId) || 
+            (food.length > 0 && !selectedFood)
           "
           @click="confirm"
         />
@@ -80,7 +65,7 @@
 </template>
 
 <script setup lang="ts">
-import { defineProps, defineEmits, ref, watch } from 'vue'
+import { defineProps, defineEmits, ref, watch, computed } from 'vue'
 import type { ProgramItem } from 'src/types/program'
 import type { FoodVote } from 'src/types/food'
 
@@ -97,18 +82,20 @@ const emit = defineEmits<{
 
 const selectedItemId = ref<string | null>(null)
 const selectedFood = ref<string | null>(null)
-// const itemOptions = computed(() =>
-//   props.programItems.map((item) => ({
-//     label: `${item.name ?? 'ไม่มีชื่อ'} | ${item.hour ?? 0} ชม.`,
-//     value: item.id,
-//   })),
-// )
-// const foodOptions = computed(() =>
-//   props.food.map((item) => ({
-//     label: `${item.foodName ?? 'ไม่มีชื่อ'}`,
-//     value: item.foodName,
-//   })),
-// )
+
+const programOptions = computed(() =>
+  props.programItems.map((item) => ({
+    label: `${item.name ?? 'ไม่มีชื่อ'} (${item.hour ?? 0} ชม.)`,
+    value: item.id,
+  })),
+)
+
+const foodOptions = computed(() =>
+  props.food.map((item) => ({
+    label: item.foodName ?? 'ไม่มีชื่อ',
+    value: item.foodName,
+  })),
+)
 
 watch(
   () => props.programItems,
