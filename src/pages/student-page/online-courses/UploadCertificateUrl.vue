@@ -465,9 +465,6 @@ async function fetchLatestUpload() {
     padding: 12px;
   }
 
-  .btnconfirm {
-    width: 100%;
-  }
 
   .tutorial-section {
     padding: 12px;

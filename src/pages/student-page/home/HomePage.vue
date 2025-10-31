@@ -367,7 +367,7 @@ onMounted(async () => {
       <div class="menu-row" style="color: #1f2937;">
         <!-- calendar -->
         <q-card class="menu-card" @click="gotoCalendarPage">
-          <q-icon name="calendar_today" class="icon" />
+          <q-icon name="calendar_today" class="icon q-mt-sm" />
           <p class="textcontent1 text-bold q-mt-md" >ตารางโครงการ</p>
           <p class="textcontent2 info-block q-mb-xs">ตรวจสอบโครงการทั้งหมด</p>
           <p class="textcontent2 info-block">เพื่อลงทะเบียนเข้าร่วม</p>
@@ -375,7 +375,7 @@ onMounted(async () => {
 
         <!-- activity -->
         <q-card class="menu-card" @click="gotoProgramTablePage" >
-          <q-icon name="event" class="icon" />
+          <q-icon name="event" class="icon q-mt-sm" />
           <p class="textcontent1 text-bold q-mt-md">โครงการทั้งหมด</p>
           <p class="textcontent2 info-block q-mb-xs">ตรวจสอบกิจกรรมทั้งหมด</p>
           <p class="textcontent2 info-block">เพื่อลงทะเบียนเข้าร่วม</p>
@@ -383,7 +383,7 @@ onMounted(async () => {
 
         <!-- course -->
         <q-card class="menu-card" @click="OnlineCoursesPage">
-          <q-icon name="book" class="icon" />
+          <q-icon name="book" class="icon q-mt-sm" />
           <p class="textcontent1 text-bold q-mt-md">หลักสูตรทั้งหมด</p>
           <p class="textcontent2 info-block q-mb-xs">ตรวจสอบหลักสูตรทั้งหมด</p>
           <p class="textcontent2 info-block">เพื่อเข้าเรียนและขออนุมัติชั่วโมง</p>
@@ -391,7 +391,7 @@ onMounted(async () => {
 
         <!-- profile -->
         <q-card class="menu-card" @click="gotoProfile">
-          <q-icon name="account_circle" class="icon" />
+          <q-icon name="account_circle" class="icon q-mt-sm" />
           <p class="textcontent1 text-bold q-mt-md">ประวัติของฉัน</p>
           <p class="textcontent2 info-block q-mb-xs">ตรวจสอบจำนวนชั่วโมง</p>
           <p class="textcontent2 info-block">และโครงการที่ลงทะเบียน และใบรับรองที่ขออนุมัติ</p>

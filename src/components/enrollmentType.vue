@@ -24,15 +24,16 @@ const buttonLabel = computed(() => {
   if (props.status === hourhistoryStore.HCStatusAttended) return 'เข้าร่วมแล้ว'
   if (props.status === hourhistoryStore.HCStatusAbsent) return 'ไม่มาเข้าร่วม'
   if (props.status === 'manual') return 'เพิ่มเติม'
-  return 'ไม่ทราบสถานะ'
+  return 'ข้อมูลเดิม'
 })
 
 const buttonClass = computed(() => {
   if (props.status === hourhistoryStore.HCStatusUpcoming) return 'status-dot--yellow'
   if (props.status === hourhistoryStore.HCStatusParticipating) return 'status-dot--blue'
   if (props.status === hourhistoryStore.HCStatusAttended) return 'status-dot--green'
+    if (props.status === hourhistoryStore.HCStatusAbsent) return 'status-dot--red'
   if (props.status === 'manual') return 'status-dot--purple'
-  return 'status-dot--red'
+  return 'status-dot--brown'
 })
 </script>
 
@@ -65,6 +66,10 @@ const buttonClass = computed(() => {
 }
 .status-dot--purple {
   background-color: #7E57C2;
+}
+
+.status-dot--brown {
+  background-color: #73635d;
 }
 
 .status-label {

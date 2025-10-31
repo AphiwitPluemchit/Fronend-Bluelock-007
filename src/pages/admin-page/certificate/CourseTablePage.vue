@@ -129,7 +129,7 @@ function goToAddCourse() {
             dense
             outlined
             v-model="courseStore.params.search"
-            placeholder="ค้นหาหัวข้อการอบรม..."
+            placeholder="ค้นหาหลักสูตร"
             class="searchbox q-pr-sm"
             :style="{ boxShadow: 'none', border: 'none' }"
             @update:model-value="

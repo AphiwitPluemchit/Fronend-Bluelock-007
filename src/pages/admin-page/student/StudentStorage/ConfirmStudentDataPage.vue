@@ -263,7 +263,7 @@ onMounted(async () => {
           dense
           outlined
           v-model="query.search"
-          label="ค้นหา ชื่อนิสิต"
+          label="ค้นหา ชื่อหรือรหัสนิสิต"
           class="q-mr-sm searchbox"
           :style="{ border: 'none' }"
           @keyup.enter="applyFilters"
