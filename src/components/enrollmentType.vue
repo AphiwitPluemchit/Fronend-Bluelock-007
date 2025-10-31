@@ -64,7 +64,7 @@ const buttonClass = computed(() => {
   background-color: #f44336;
 }
 .status-dot--purple {
-  background-color: #9c27b0;
+  background-color: #7E57C2;
 }
 
 .status-label {
