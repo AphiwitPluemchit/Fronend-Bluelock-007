@@ -352,6 +352,7 @@ onMounted(() => {
           class="fix-q-input-height"
           :error="programNameError !== ''"
           hide-bottom
+          placeholder="เช่น โครงการเตรียมความพร้อมสู่สหกิจศึกษา"
         />
         <div v-if="programNameError" class="text-negative text-subtitle2 q-mt-xs">
           {{ programNameError }}
@@ -378,7 +379,12 @@ onMounted(() => {
       <!-- SubProgram Name -->
       <div class="input-group">
         <p class="label label_minWidth">ชื่อโครงการ :</p>
-        <q-input outlined v-model="subProgram.subProgramName" class="input-container" />
+        <q-input
+          outlined
+          v-model="subProgram.subProgramName"
+          class="input-container"
+          placeholder="เช่น เตรียมความพร้อมสู่การเป็นผู้ตรวจสอบซอฟต์แวร์"
+        />
       </div>
 
       <!-- Date -->
@@ -424,7 +430,12 @@ onMounted(() => {
 
       <div class="input-group">
         <p class="label label_minWidth">วิทยากร :</p>
-        <q-input outlined v-model="subProgram.lecturer" class="input-container" />
+        <q-input
+          outlined
+          v-model="subProgram.lecturer"
+          class="input-container"
+          placeholder="เช่น บริษัท บลูล็อก จำกัด"
+        />
       </div>
 
       <div class="input-group">

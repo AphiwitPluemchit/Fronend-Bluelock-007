@@ -182,8 +182,8 @@ async function onSave() {
   <q-dialog v-model="dialog" persistent>
     <q-card style="width: 90vw; max-width: 650px; border-radius: 12px">
       <q-card-section>
-        <div class="text-h6 text-primary q-mb-lg">
-          <q-icon name="schedule" class="q-mr-sm" />
+        <div class="text-h6 text-primary q-mb-lg q-mt-sm">
+          <!-- <q-icon name="schedule" class="q-mr-sm" /> -->
           เพิ่มชั่วโมงอบรมโดยตรง
         </div>
 
@@ -191,7 +191,7 @@ async function onSave() {
           เพิ่มหรือลดชั่วโมงการอบรมให้กับนิสิตโดยตรง โดยไม่ต้องผ่านโครงการหรือใบรับรอง
         </div> -->
 
-        <div class="q-gutter-y-md">
+        <div class="q-gutter-y-md q-mt-xs">
           <!-- หัวข้อ -->
           <div>
             <div class="text-subtitle2 q-mb-xs">หัวข้อ <span class="text-red">*</span></div>
@@ -199,7 +199,7 @@ async function onSave() {
               v-model="form.title"
               outlined
               dense
-              placeholder="หัวข้อการอบรม/หัวข้อหลักสูตร"
+              placeholder="หัวข้อการอบรม หรือ หัวข้อหลักสูตร"
               :error="!!errors.title"
               :error-message="errors.title"
             />
@@ -230,7 +230,6 @@ async function onSave() {
                 :outline="form.operationType !== op.value"
                 :unelevated="form.operationType === op.value"
                 :color="form.operationType === op.value ? op.color : 'grey-8'"
-                :icon="op.icon"
                 :label="op.label"
                 @click="form.operationType = op.value as 'add' | 'subtract'"
                 class="q-px-lg"
@@ -273,7 +272,6 @@ async function onSave() {
               placeholder="เช่น 8"
               :error="!!errors.hours"
               :error-message="errors.hours"
-              suffix="ชั่วโมง"
             />
           </div>
 

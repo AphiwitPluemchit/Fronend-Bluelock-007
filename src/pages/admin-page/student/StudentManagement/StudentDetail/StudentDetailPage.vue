@@ -223,7 +223,7 @@ onMounted(async () => {
 
       <div class="q-mb-md q-mt-xl">
         <!-- <q-card bordered class="rounded-borders shadow-2 full-height"> -->
-        <div class="row justify-between items-center q-mb-sm" style="margin-top: 20px">
+        <div class="row justify-between items-center q-mb-lg" style="margin-top: 20px">
           <div class="textsubtitle">ประวัติการอบรม</div>
           <q-btn
             v-if="isEditMode"

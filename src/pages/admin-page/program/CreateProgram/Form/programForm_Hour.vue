@@ -72,6 +72,7 @@ defineExpose({ validate, focus })
         @keypress="isNumber"
         :disable="disable"
         :error="hoursError !== ''"
+        placeholder="เช่น 3"
       />
       <div v-if="hoursError" class="text-negative text-subtitle2 q-mt-xs">
         {{ hoursError }}

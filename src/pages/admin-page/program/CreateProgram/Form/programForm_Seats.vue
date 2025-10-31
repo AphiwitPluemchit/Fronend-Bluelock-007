@@ -65,6 +65,7 @@ defineExpose({ validate, focus })
         @keypress="isNumber($event)"
         :disable="disable"
         :error="seatsError !== ''"
+        placeholder="เช่น 250"
       />
       <div v-if="seatsError" class="text-negative text-subtitle2 q-mt-xs">
         {{ seatsError }}
