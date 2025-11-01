@@ -62,8 +62,8 @@ const register = async (programItemId: string, selectedFood: string | null) => {
     showFailDialog.value = true
   }
 }
-const unRegister = async (modelValue: boolean) => {
-  console.log('ยกเลิกลงทะเบียน', modelValue)
+const unRegister = async () => {
+  console.log('ยกเลิกลงทะเบียน')
   if (enrollment.value?.enrollmentId) {
     await EnrollmentService.removeOne(enrollment.value.enrollmentId)
     await fetchData()

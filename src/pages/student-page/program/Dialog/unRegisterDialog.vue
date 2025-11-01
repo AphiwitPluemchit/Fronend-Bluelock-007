@@ -1,11 +1,25 @@
 <template>
-  <q-dialog :model-value="props.modelValue" persistent>
-    <q-card class="q-pa-md" style="min-width: 300px" rounded standout>
-      <q-card-actions align="left"> <div class="text-h5">ยกเลิกลงทะเบียน</div></q-card-actions>
-      <q-card-section>
-        <div>ยกเลิกลงทะเบียน</div>
+  <q-dialog
+    @update:model-value="emit('update:modelValue', $event)"
+    persistent
+  >
+    <q-card class="q-pa-md" rounded>
+      <!-- Header with icon centered -->
+      <q-card-section class="text-center q-pb-none q-mb-md">
+        <q-icon name="warning" color="red" size="56px" />
       </q-card-section>
 
+      <q-card-section class="text-center q-pt-sm">
+        <div class="text-h5">ยกเลิกการลงทะเบียน</div>
+      </q-card-section>
+
+      <!-- Confirmation message -->
+      <q-card-section>
+        <div class="text-body1">ยกเลิกการลงทะเบียน</div>
+        <div class="text-body2 text-grey-7">คุณต้องยกเลิกการลงทะเบียนใช่หรือไม่ โปรดยืนยัน</div>
+      </q-card-section>
+
+      <!-- Action buttons -->
       <q-card-actions align="right">
         <q-btn class="btnreject" label="ยกเลิก" color="red" @click="cancel" />
         <q-btn
@@ -20,31 +34,23 @@
 </template>
 
 <script setup lang="ts">
-import { defineProps, defineEmits, ref, watch } from 'vue'
-const modelvalue = ref()
-const props = defineProps<{
-  modelValue: boolean
-}>()
+import { defineEmits } from 'vue'
+
+
 
 const emit = defineEmits<{
   (e: 'update:modelValue', value: boolean): void
-  (e: 'confirm', modelValue: boolean): void
+  (e: 'confirm'): void
 }>()
+
 const cancel = () => {
   emit('update:modelValue', false)
 }
 
 const confirm = () => {
   emit('update:modelValue', false)
-  emit('confirm', modelvalue.value)
+  emit('confirm')
 }
-
-watch(
-  () => props.modelValue,
-  (newValue) => {
-    modelvalue.value = newValue
-  },
-)
 </script>
 
 <style scoped>

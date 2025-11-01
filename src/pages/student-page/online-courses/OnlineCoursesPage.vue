@@ -85,7 +85,7 @@ onMounted(() => {
             dense
             outlined
             v-model="searchQuery"
-            placeholder="ค้นหา ชื่อคอร์ส"
+            placeholder="ค้นหา ชื่อหลักสูตร"
             class="q-mr-sm searchbox"
             :style="{ boxShadow: 'none' }"
             clearable

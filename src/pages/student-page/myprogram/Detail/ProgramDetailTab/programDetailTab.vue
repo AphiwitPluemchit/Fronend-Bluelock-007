@@ -47,12 +47,11 @@ const register = async (programItemId: string, selectedFood: string | null) => {
     showFailDialog.value = true
   }
 }
-const unRegister = async (modelValue: boolean) => {
-  console.log('ยกเลิกลงทะเบียน', modelValue)
+const unRegister = async () => {
+  console.log('ยกเลิกลงทะเบียน')
   if (enrollment.value) {
     await EnrollmentService.removeOne(enrollment.value.enrollmentId)
-    await fetchData()
-    await router.push(`/Student/MyProgramsPage`)
+    await router.push(`/Student/RecordPage`)
   }
 }
 
@@ -122,12 +121,7 @@ onMounted(async () => {
 
       <!-- รายละเอียดโครงการ -->
       <div class="col-12 col-md-8" v-if="program">
-        <DetailOne
-          v-if="Array.isArray(program?.programItems) && program.programItems.length > 1"
-          :program="program"
-        />
         <DetailMany
-          v-else
           :program="{
             ...program,
             programItems: Array.isArray(program?.programItems)
