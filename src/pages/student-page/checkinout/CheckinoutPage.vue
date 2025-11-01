@@ -46,7 +46,7 @@ onMounted(async () => {
   // 🆕 ถ้ามี Claim Token → ใช้ Claim Token (มาจากหน้า QRClaimPage)
   if (claimToken) {
     console.log('🔐 [CheckinoutPage] Using claim token:', claimToken)
-    
+
     // 1️⃣ ลองดึงจาก localStorage ก่อน (สำหรับกรณีปกติ)
     const storedProgramId = localStorage.getItem('temp_program_id')
     const storedType = localStorage.getItem('temp_qr_type')
@@ -80,7 +80,7 @@ onMounted(async () => {
         // เก็บกลับไปใน localStorage เพื่อใช้ครั้งถัดไป
         localStorage.setItem('temp_program_id', validationResult.programId)
         localStorage.setItem('temp_qr_type', validationResult.type)
-        
+
         await loadProgramSafe(validationResult.programId)
         loading.value = false
         return

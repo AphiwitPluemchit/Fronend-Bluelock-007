@@ -23,4 +23,3 @@ export type ClaimTokenValidation = {
   type: string
   expiresAt: number
 }
-

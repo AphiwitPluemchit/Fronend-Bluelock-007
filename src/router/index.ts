@@ -77,10 +77,10 @@ export default route(function () {
     // ✅ Checkinout scope: ต้องรอ ensureAuthenticated ก่อน (เพื่อให้ refresh หน้าได้)
     if (scope === 'checkinout') {
       console.log('🔐 [Router] Checkinout scope - ensuring authentication...')
-      
+
       // รอให้ authStore โหลดข้อมูล authentication จาก localStorage/token
       const isAuthed = await authStore.ensureAuthenticated()
-      
+
       if (isAuthed) {
         const role = authStore.getRole
         console.log('✅ [Router] User authenticated with role:', role)
@@ -93,7 +93,7 @@ export default route(function () {
       } else {
         console.warn('⚠️  [Router] User not authenticated')
       }
-      
+
       // ถ้ายังไม่ login หรือไม่ใช่ student ให้ redirect ไป login
       console.log('🔄 [Router] Redirecting to login...')
       const redirect = to.fullPath
