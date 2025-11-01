@@ -110,6 +110,31 @@ onMounted(async () => {
     <div style="margin-top: 20px">
       <AppBreadcrumbs :breadcrumbs="breadcrumbs" />
     </div>
+
+    <!-- แสดงชื่อนิสิตและสถานะ -->
+    <q-card flat class="q-mt-md" >
+      <div class="row items-center q-pa-md">
+        <div class="col-9 row items-center">
+          <div class="col-2 text-right q-pr-md">
+            <p class="q-my-none" style="font-size: 18px"><strong>ชื่อนิสิต :</strong></p>
+          </div>
+          <div class="col-4">
+            <p class="q-my-none" style="font-size: 18px">{{ studentStore.student.name }}</p>
+          </div>
+          <div class="col-2 text-right q-pr-md">
+            <p class="q-my-none" style="font-size: 18px"><strong>สถานะ :</strong></p>
+          </div>
+          <div class="col-4">
+            <q-badge
+              :label="studentStore.getStatusText(studentStore.student.status)"
+              :class="studentStore.getStatusClass(studentStore.student.status)"
+              class="status-badge"
+              unelevated
+            />
+          </div>
+        </div>
+      </div>
+    </q-card>
     <div class="q-mb-lg" v-if="show">
       <q-card flat class="q-mt-lg">
         <div class="row q-col-gutter-md">
@@ -205,6 +230,7 @@ onMounted(async () => {
           </div>
         </div>
       </q-card>
+
       <div class="q-mt-md q-pa-md text-right">
         <template v-if="!isEditMode">
           <q-btn label="แก้ไข" class="btnedit" unelevated rounded @click="enableEditMode" />
@@ -365,5 +391,47 @@ onMounted(async () => {
   .searchbox {
     width: 100%;
   }
+}
+
+/* Status badge styles */
+.status-badge {
+  height: 32px;
+  padding: 0 12px;
+  border-radius: 999px;
+  font-size: 15px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  white-space: nowrap;
+}
+
+.status-complete {
+  background-color: #cfd7ff;
+  color: #001780;
+  border: 1px solid #002dff;
+}
+
+.status-medium {
+  background-color: #ffe7ba;
+  color: #ff6f00;
+  border: 1px solid #ffa500;
+}
+
+.status-low {
+  background-color: #ffc5c5;
+  color: #ff0000;
+  border: 1px solid #f32323;
+}
+
+.status-out {
+  background-color: #dadada;
+  color: #000000;
+  border: 1px solid #575656;
+}
+
+.status-graduated {
+  background-color: #d4edda;
+  color: #155724;
+  border: 1px solid #28a745;
 }
 </style>

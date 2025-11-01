@@ -24,25 +24,24 @@
           </div>
         </div>
         <q-btn flat no-caps>
-          <q-avatar size="45px" class="bg-white text-primary">
+          <q-avatar size="45px" class="bg-white text-primary avatar-hover">
             <q-icon name="person" />
           </q-avatar>
 
           <q-menu anchor="bottom right" self="top right">
-
-            <q-list style="min-width: 160px">
-              <q-item clickable v-ripple tag="router-link" to="/Student/RecordPage">
-                <!-- <q-item-section avatar>
-                  <q-icon name="person" color="indigo-10" />
-                </q-item-section> -->
-                <q-item-section class="textcontent1">ประวัติของฉัน</q-item-section>
+            <q-list style="min-width: 200px">
+              <q-item clickable v-ripple to="/Student/RecordPage">
+                <q-item-section avatar>
+                  <q-icon name="person" color="primary" />
+                </q-item-section>
+                <q-item-section>ประวัติของฉัน</q-item-section>
               </q-item>
 
-              <q-item clickable v-ripple @click="logout">
-                <!-- <q-item-section avatar>
-                  <q-icon name="logout" color="red" />
-                </q-item-section> -->
-                <q-item-section class="textcontent1">ออกจากระบบ</q-item-section>
+              <q-item clickable v-ripple @click="logout" class="logout-item">
+                <q-item-section avatar>
+                  <q-icon name="logout" color="negative" />
+                </q-item-section>
+                <q-item-section>ออกจากระบบ</q-item-section>
               </q-item>
             </q-list>
           </q-menu>
@@ -57,7 +56,7 @@
         <q-icon :name="menu ? 'arrow_drop_up' : 'arrow_drop_down'" size="sm" />
         <q-menu fit>
           <q-list style="min-width: 150px" @click="menu = !menu">
-            <q-item clickable v-ripple to="/Student/ProgramCalendar" >
+            <q-item clickable v-ripple to="/Student/ProgramCalendar">
               <q-item-section class="textcontent1">ปฏิทิน</q-item-section>
             </q-item>
             <q-item clickable v-ripple to="/Student/ProgramTablePage">
@@ -93,4 +92,24 @@ async function logout() {
   }
 }
 </script>
-<style scoped></style>
+<style scoped>
+.logout-item:hover {
+  background-color: #c10015; /* สีแดง */
+  color: white !important;
+}
+
+.logout-item:hover .q-icon {
+  color: white !important;
+}
+
+.avatar-hover {
+  transition: transform 0.6s;
+  transform-style: preserve-3d;
+  cursor: pointer;
+}
+
+.avatar-hover:hover {
+  transform: rotateY(180deg);
+}
+
+</style>
