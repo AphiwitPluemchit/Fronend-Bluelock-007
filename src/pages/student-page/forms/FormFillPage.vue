@@ -550,15 +550,23 @@ async function handleNext() {
   window.scrollTo({ top: 0, behavior: 'smooth' })
 }
 
-async function handleCheckout(token: string) {
+async function handleCheckout(token: string, isClaimToken: boolean = false) {
+  console.log('📤 [FormFillPage] Starting checkout...', { token, isClaimToken })
   errorMessage.value = ''
   isProcessing.value = true
 
   try {
-    await checkinoutStore.checkout(token)
+    if (isClaimToken) {
+      console.log('🔐 [FormFillPage] Using claim token for checkout')
+      await checkinoutStore.checkoutWithClaim(token)
+    } else {
+      console.log('🎫 [FormFillPage] Using regular token for checkout')
+      await checkinoutStore.checkout(token)
+    }
+    console.log('✅ [FormFillPage] Checkout successful')
     return true
   } catch (error: unknown) {
-    console.error(error)
+    console.error('❌ [FormFillPage] Checkout failed:', error)
     let msg = 'เกิดข้อผิดพลาดในการเช็คเอาท์'
     if (error && typeof error === 'object' && 'isAxiosError' in error) {
       const axiosErr = error as AxiosError
@@ -578,24 +586,33 @@ async function handleCheckout(token: string) {
   }
 }
 async function handleSubmit() {
+  console.log('📝 [FormFillPage] Handle submit clicked')
+
   const total = totalSessions.value
+  console.log('📋 [FormFillPage] Validating', total, 'sessions...')
+
   for (let s = 1; s <= total; s++) {
     if (!validateSession(s)) {
+      console.warn('⚠️  [FormFillPage] Validation failed at session', s)
       currentSession.value = s
       return
     }
   }
+  console.log('✅ [FormFillPage] All sessions validated')
 
   if (!form.value?.id) {
+    console.error('❌ [FormFillPage] No form ID found')
     return
   }
 
   const userId = userStore.getUser?.id
   if (!userId) {
+    console.error('❌ [FormFillPage] No user ID found')
     return
   }
 
   const responses = buildResponses(form.value)
+  console.log('📊 [FormFillPage] Built', responses.length, 'responses')
 
   const payload: Submission = {
     formId: form.value.id,
@@ -603,35 +620,74 @@ async function handleSubmit() {
     responses,
   }
   try {
+    console.log('💾 [FormFillPage] Submitting form...')
     await submissionStore.addSubmission(payload)
+    console.log('✅ [FormFillPage] Form submitted successfully')
+
+    // ✅ ให้ความสำคัญกับ claimToken ก่อน (ระบบใหม่)
+    const claimToken = Array.isArray(route.query.claimToken)
+      ? route.query.claimToken[0]
+      : route.query.claimToken
 
     const checkoutToken = Array.isArray(route.query.checkoutToken)
       ? route.query.checkoutToken[0]
       : route.query.checkoutToken
 
-    if (checkoutToken) {
-      // First try to checkout
-      const checkoutSuccess = await handleCheckout(checkoutToken)
-      
+    console.log('📋 [FormFillPage] Query params:', {
+      claimToken,
+      checkoutToken,
+      programId: route.query.programId,
+    })
+
+    if (claimToken) {
+      console.log('🔐 [FormFillPage] Using claim token for checkout')
+      // ใช้ claimToken (ระบบใหม่)
+      const checkoutSuccess = await handleCheckout(claimToken, true)
+
       if (checkoutSuccess) {
+        console.log('✅ [FormFillPage] Redirecting after successful checkout')
         const programId = Array.isArray(route.query.programId)
           ? route.query.programId[0]
           : route.query.programId
-        
+
+        // เก็บ flag ไว้ใน localStorage สำหรับหน้า checkout
+        localStorage.setItem('formSubmissionSuccess', 'true')
+
+        await router.push({
+          path: `/qr/claim/${claimToken}`,
+          query: {
+            formSubmitted: 'true',
+            ...(programId && { programId }),
+          },
+        })
+      }
+    } else if (checkoutToken) {
+      console.log('🎫 [FormFillPage] Using regular token for checkout (legacy)')
+      // Legacy: ใช้ checkoutToken แบบเก่า
+      const checkoutSuccess = await handleCheckout(checkoutToken, false)
+
+      if (checkoutSuccess) {
+        console.log('✅ [FormFillPage] Redirecting after successful checkout (legacy)')
+        const programId = Array.isArray(route.query.programId)
+          ? route.query.programId[0]
+          : route.query.programId
+
+        localStorage.setItem('formSubmissionSuccess', 'true')
+
         await router.push({
           path: `/student/qr/${checkoutToken}`,
-          query: { 
+          query: {
             formSubmitted: 'true',
-            ...(programId && { programId })
-          }
+            ...(programId && { programId }),
+          },
         })
       }
     } else {
+      console.log('⚠️  [FormFillPage] No checkout token provided, going to forms list')
       await router.push('/student/forms')
     }
   } catch (error) {
-    console.error(error)
-   
+    console.error('❌ [FormFillPage] Error during submission:', error)
   }
 }
 </script>
