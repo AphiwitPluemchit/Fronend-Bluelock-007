@@ -17,3 +17,10 @@ export type CheckInOut = {
   participation: string
 }
 
+export type ClaimTokenValidation = {
+  claimToken: string
+  programId: string
+  type: string
+  expiresAt: number
+}
+

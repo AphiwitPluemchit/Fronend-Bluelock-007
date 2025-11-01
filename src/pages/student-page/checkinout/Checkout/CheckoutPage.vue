@@ -39,8 +39,16 @@ const props = defineProps<{
 }>()
 
 onMounted(async () => {
+  console.log('🎬 [CheckoutPage] Component mounted')
+  console.log('🎬 [CheckoutPage] Props:', {
+    token: props.token,
+    programId: props.program?.id,
+    claimToken: props.claimToken,
+  })
+
   // รับ flag กลับมาจากหน้าแบบฟอร์ม (เดิม)
   if (localStorage.getItem('formSubmissionSuccess') === 'true') {
+    console.log('✅ [CheckoutPage] Form submission flag found in localStorage')
     formSubmitted.value = true
     isSubmitted.value = true
     localStorage.removeItem('formSubmissionSuccess')
@@ -49,19 +57,27 @@ onMounted(async () => {
   // ✅ ตรวจว่ามีแบบประเมินหรือไม่ตั้งแต่ต้นหน้า
   try {
     if (!props.program?.id) {
+      console.warn('⚠️  [CheckoutPage] No program ID provided')
       hasForm.value = null
       return
     }
+    console.log('🔍 [CheckoutPage] Checking if program has form...')
     const res = await checkinoutStore.getProgramForm(props.program.id)
     hasForm.value = !!res?.formId
-  } catch {
+    console.log('📋 [CheckoutPage] Has form:', hasForm.value, 'FormId:', res?.formId)
+  } catch (error) {
     // ถ้าเรียกดู formId แล้ว error ให้ถือว่า "ไม่มีแบบประเมิน"
+    console.error('❌ [CheckoutPage] Error checking form:', error)
     hasForm.value = false
   }
 })
 
 /** ------- ฟังก์ชันเดิม: ไปทำแบบประเมิน ------- */
 async function goToForm() {
+  console.log('📝 [goToForm] Starting form navigation')
+  console.log('📝 [goToForm] Program ID:', props.program?.id)
+  console.log('📝 [goToForm] Claim Token:', props.claimToken)
+
   errorMessage.value = ''
   loading.value = true
   try {
@@ -72,24 +88,37 @@ async function goToForm() {
 
     // ✅ ตรวจสอบ claimToken ก่อนไปทำฟอร์ม
     if (props.claimToken) {
+      console.log('🔐 [goToForm] Validating claim token before going to form...')
       try {
         await checkinoutStore.validateClaimToken(props.claimToken)
+        console.log('✅ [goToForm] Claim token is valid, proceeding to form')
       } catch (validationError: unknown) {
         // ถ้า claimToken หมดอายุหรือไม่ถูกต้อง
         let msg = 'session หมดอายุ กรุณาสแกน QR ใหม่'
         if (validationError instanceof Error) {
           msg = validationError.message
         }
+        console.error('❌ [goToForm] Claim token validation failed:', msg)
         errorMessage.value = msg
         return
       }
+    } else {
+      console.warn('⚠️  [goToForm] No claim token provided')
     }
 
     const formData = await checkinoutStore.getProgramForm(props.program.id)
     if (!formData?.formId) {
+      console.error('❌ [goToForm] No form found for this program')
       errorMessage.value = 'โครงการนี้ไม่มีแบบฟอร์มให้ทำ'
       return
     }
+    console.log('📋 [goToForm] Form found:', formData.formId)
+    console.log('🚀 [goToForm] Navigating to form page with:', {
+      formId: formData.formId,
+      checkoutToken: props.token,
+      programId: props.program.id,
+      claimToken: props.claimToken,
+    })
     await router.push({
       name: 'student-form-fill',
       params: { id: formData.formId },
@@ -99,6 +128,7 @@ async function goToForm() {
         claimToken: props.claimToken, // ส่ง claimToken ไปด้วย
       },
     })
+    console.log('✅ [goToForm] Navigation successful')
   } catch (error: unknown) {
     console.error(error)
     let msg = 'เกิดข้อผิดพลาด'
@@ -121,19 +151,23 @@ async function goToForm() {
 
 /** ------- ฟังก์ชันใหม่: เช็คชื่อออก (กรณีไม่มีแบบประเมิน) ------- */
 async function checkoutOnly() {
+  console.log('📤 [checkoutOnly] Starting checkout without form')
   errorMessage.value = ''
   loading.value = true
   try {
     // ถ้ามี claimToken ให้ใช้ claimToken แทน
     if (props.claimToken) {
+      console.log('🔐 [checkoutOnly] Using claim token:', props.claimToken)
       await checkinoutStore.checkoutWithClaim(props.claimToken)
     } else {
+      console.log('🎫 [checkoutOnly] Using regular token:', props.token)
       await checkinoutStore.checkout(props.token)
     }
+    console.log('✅ [checkoutOnly] Checkout successful')
     checkedOut.value = true
     isSubmitted.value = true
   } catch (error: unknown) {
-    console.error(error)
+    console.error('❌ [checkoutOnly] Checkout failed:', error)
     let msg = 'เช็คชื่อออกไม่สำเร็จ'
     if (error && typeof error === 'object' && 'isAxiosError' in error) {
       const axiosErr = error as AxiosError
@@ -154,33 +188,50 @@ async function checkoutOnly() {
 
 /** ------- กลับหน้ารายละเอียดโครงการ/หน้าแรก ------- */
 async function goHome() {
+  console.log('🏠 [goHome] Navigating to home/program detail')
   if (props.program?.id) {
+    console.log('🏠 [goHome] Going to program detail:', props.program.id)
     await router.push(`/Student/Program/MyProgramDetail/${props.program.id}/checkInOut`)
   } else {
+    console.log('🏠 [goHome] Going to student home')
     await router.push('/Student/Home')
   }
 }
 
 async function onPrimaryClick() {
+  console.log('🖱️  [onPrimaryClick] Button clicked')
+  console.log('🖱️  [onPrimaryClick] State:', {
+    hasForm: hasForm.value,
+    formSubmitted: formSubmitted.value,
+    checkedOut: checkedOut.value,
+  })
+
   if (hasForm.value === true) {
     // เดิม: ไปทำแบบประเมิน หรือถ้าทำแล้วก็กลับรายละเอียด
+    console.log('📋 [onPrimaryClick] Program has form')
     if (formSubmitted.value) {
+      console.log('✅ [onPrimaryClick] Form already submitted, going home')
       await goHome()
     } else {
+      console.log('📝 [onPrimaryClick] Going to form')
       await goToForm()
     }
     return
   }
   if (hasForm.value === false) {
     // ใหม่: ไม่มีแบบประเมิน → เช็คชื่อออกก่อน แล้วค่อยดูรายละเอียด
+    console.log('❌ [onPrimaryClick] Program has no form')
     if (checkedOut.value) {
+      console.log('✅ [onPrimaryClick] Already checked out, going home')
       await goHome()
     } else {
+      console.log('📤 [onPrimaryClick] Checking out without form')
       await checkoutOnly()
     }
     return
   }
   // ยังไม่รู้สถานะก็ลองโหลดอีกครั้ง หรือ disable ปุ่มไว้
+  console.warn('⚠️  [onPrimaryClick] Form status unknown')
 }
 </script>
 

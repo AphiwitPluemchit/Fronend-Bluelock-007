@@ -29,23 +29,30 @@ const isInvalidQrErr = (msg: string) =>
 
 /** โหลดข้อมูลโครงการแบบปลอดภัย */
 const loadProgramSafe = async (programId: string) => {
+  console.log('📚 [CheckinoutPage] Loading program data:', programId)
   try {
     await programStore.fetchOneData(programId)
+    console.log('✅ [CheckinoutPage] Program data loaded successfully')
   } catch (e) {
-    // ถ้าต้อง log ให้ใช้ logger กลาง แทน console ใน prod
-    // console.error('โหลดข้อมูลโครงการล้มเหลว:', e)
+    console.error('❌ [CheckinoutPage] Failed to load program data:', e)
     error.value = 'ไม่สามารถโหลดข้อมูลโครงการได้'
     throw e
   }
 }
 
 onMounted(async () => {
+  console.log('🎬 [CheckinoutPage] Mounted with:', { uuid, claimToken })
+
   // 🆕 ถ้ามี Claim Token → ใช้ Claim Token (มาจากหน้า QRClaimPage)
   if (claimToken) {
+    console.log('🔐 [CheckinoutPage] Using claim token:', claimToken)
+    
+    // 1️⃣ ลองดึงจาก localStorage ก่อน (สำหรับกรณีปกติ)
     const storedProgramId = localStorage.getItem('temp_program_id')
     const storedType = localStorage.getItem('temp_qr_type')
 
     if (storedProgramId && storedType) {
+      console.log('✅ [CheckinoutPage] Found data in localStorage')
       tokenInfo.value = {
         type: storedType,
         programId: storedProgramId,
@@ -53,6 +60,37 @@ onMounted(async () => {
         claimToken: claimToken,
       }
       await loadProgramSafe(storedProgramId)
+      loading.value = false
+      return
+    }
+
+    // 2️⃣ ถ้าไม่มีใน localStorage (เช่น refresh หน้า) → เรียก API validate claim token
+    console.log('⚠️  [CheckinoutPage] No data in localStorage, validating claim token...')
+    try {
+      const validationResult = await CheckinoutService.validateClaimToken(claimToken)
+      console.log('✅ [CheckinoutPage] Claim token validated:', validationResult)
+
+      if (validationResult?.programId && validationResult?.type) {
+        tokenInfo.value = {
+          type: validationResult.type,
+          programId: validationResult.programId,
+          token: claimToken,
+          claimToken: claimToken,
+        }
+        // เก็บกลับไปใน localStorage เพื่อใช้ครั้งถัดไป
+        localStorage.setItem('temp_program_id', validationResult.programId)
+        localStorage.setItem('temp_qr_type', validationResult.type)
+        
+        await loadProgramSafe(validationResult.programId)
+        loading.value = false
+        return
+      } else {
+        throw new Error('ข้อมูล claim token ไม่ครบถ้วน')
+      }
+    } catch (e: unknown) {
+      console.error('❌ [CheckinoutPage] Failed to validate claim token:', e)
+      const msg = e instanceof Error ? e.message : String(e)
+      error.value = msg || 'session หมดอายุ กรุณาสแกน QR ใหม่'
       loading.value = false
       return
     }

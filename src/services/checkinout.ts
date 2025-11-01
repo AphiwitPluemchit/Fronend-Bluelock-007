@@ -1,6 +1,6 @@
 import { api } from 'boot/axios'
 import { Notify } from 'quasar'
-// import type { Checkinout } from 'src/types/checkinout'
+import type { ClaimTokenValidation } from 'src/types/checkinout'
 import axios from 'axios'
 type ErrorBody = { error?: string; message?: string }
 // 📌 Utility แสดงข้อความผิดพลาด
@@ -210,13 +210,22 @@ class CheckinoutService {
   /**
    * ตรวจสอบ Claim Token ว่ายังใช้งานได้อยู่หรือไม่
    */
-  static async validateClaimToken(claimToken: string) {
+  static async validateClaimToken(claimToken: string): Promise<ClaimTokenValidation> {
+    console.log('🔍 [validateClaimToken] Starting validation for claimToken:', claimToken)
     try {
-      const res = await api.get(`/checkInOuts/student/validate-claim/${claimToken}`)
-      return res.data // { valid: true, programId, type, ... }
+      const res = await api.get<ClaimTokenValidation>(
+        `/checkInOuts/student/validate-claim/${claimToken}`,
+      )
+      console.log('✅ [validateClaimToken] Validation successful:', res.data)
+      return res.data
     } catch (err) {
       let msg = 'Claim Token หมดอายุหรือไม่ถูกต้อง'
       if (axios.isAxiosError(err)) {
+        console.error('❌ [validateClaimToken] Axios error:', {
+          status: err.response?.status,
+          statusText: err.response?.statusText,
+          data: err.response?.data,
+        })
         const data = err.response?.data as unknown
         if (typeof data === 'string') {
           try {
@@ -231,7 +240,10 @@ class CheckinoutService {
         } else {
           msg = err.message || msg
         }
+      } else {
+        console.error('❌ [validateClaimToken] Unknown error:', err)
       }
+      console.error('❌ [validateClaimToken] Final error message:', msg)
       throw new Error(msg)
     }
   }
