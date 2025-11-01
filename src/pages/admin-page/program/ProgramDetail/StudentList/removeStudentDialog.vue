@@ -1,20 +1,17 @@
 <template>
   <q-dialog v-model="dialog" persistent>
-    <q-card  style="width: 90vw; max-width: 400px; border-radius: 10px">
-      <q-card-section class="row items-center q-gutter-sm">
+    <q-card style="width: 90vw; max-width: 400px; border-radius: 10px" class="q-pa-sm">
+      <q-card-section class="row items-center q-gutter-sm q-mt-sm ">
         <q-icon name="warning" color="red-7" size="md" />
-        <div class="text-h6">ยืนยันการลบการลงทะเบียน</div>
+        <div class="text-h6">ยืนยันการลบนิสิตออกจากโครงการ</div>
       </q-card-section>
 
       <q-card-section>
-        <div class="q-mb-sm">
-          ต้องการลบการลงทะเบียนของนิสิตคนนี้หรือไม่?
-        </div>
         <div class="text-body2">
           <div><b>รหัสนิสิต:</b> {{ student?.code ?? '-' }}</div>
-          <div><b>ชื่อ-สกุล:</b> {{ student?.name ?? '-' }}</div>
+          <div class="q-mt-sm"><b>ชื่อ-สกุล:</b> {{ student?.name ?? '-' }}</div>
         </div>
-
+        <div class="q-mt-md">ต้องการลบการนิสิตออกจากโครงการ ใช่หรือไม่?</div>
         <q-banner
           v-if="errorMessage"
           class="q-mt-md"
@@ -28,9 +25,9 @@
       </q-card-section>
 
       <q-card-actions align="right">
-        <q-btn class="btnreject " label="ยกเลิก"  :disable="loading" @click="close" />
+        <q-btn class="btnreject" label="ยกเลิก" :disable="loading" @click="close" />
         <q-btn
-        class="btnconfirm"
+          class="btnconfirm"
           unelevated
           label="ยืนยัน"
           :loading="loading"
@@ -82,7 +79,7 @@ watch(
   () => props.modelValue,
   (v) => {
     if (v) errorMessage.value = ''
-  }
+  },
 )
 
 // actions

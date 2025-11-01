@@ -182,7 +182,7 @@ async function onSave() {
   <q-dialog v-model="dialog" persistent>
     <q-card style="width: 90vw; max-width: 650px; border-radius: 12px">
       <q-card-section>
-        <div class="text-h6 text-primary q-mb-lg q-mt-sm">
+        <div class="text-h6 q-mb-lg q-mt-sm">
           <!-- <q-icon name="schedule" class="q-mr-sm" /> -->
           เพิ่มชั่วโมงอบรมโดยตรง
         </div>

@@ -112,7 +112,7 @@ onMounted(async () => {
     </div>
 
     <!-- แสดงชื่อนิสิตและสถานะ -->
-    <q-card flat class="q-mt-md" >
+    <q-card flat class="q-mt-md">
       <div class="row items-center q-pa-md">
         <div class="col-9 row items-center">
           <div class="col-2 text-right q-pr-md">
@@ -302,7 +302,11 @@ onMounted(async () => {
           box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.2);
         "
       >
-        <q-card-section><div class="text-h6">ยืนยันการยกเลิก</div></q-card-section>
+      <q-card-section class="row items-center q-gutter-sm q-mt-sm ">
+          <div class="text-h6">
+            <q-icon name="warning" color="red-7" size="md" /> ยืนยันการยกเลิก
+          </div></q-card-section
+        >
         <q-card-section
           >คุณแน่ใจหรือไม่ว่าต้องการยกเลิกการแก้ไข?
           การเปลี่ยนแปลงทั้งหมดจะไม่ถูกบันทึก</q-card-section

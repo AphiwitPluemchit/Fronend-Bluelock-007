@@ -193,14 +193,16 @@ async function onSave() {
     loading.value = false
   }
 }
+
 </script>
 
 <template>
   <q-dialog v-model="dialog" persistent>
     <q-card style="width: 90vw; max-width: 600px; border-radius: 10px" >
-      <q-card-section class="q-gutter-y-md ">
-        <div class="text-h6">ลงทะเบียนเข้าร่วมกิจกรรม</div>
-
+      <q-card-section>
+        <div class="text-h6 q-mb-lg q-mt-sm">
+          ลงทะเบียนนิสิตโดยเจ้าหน้าที่
+        </div>
         <!-- เลือกนิสิต -->
         <div>
           <div class="text-subtitle2 q-mb-xs">นิสิต</div>
@@ -216,7 +218,7 @@ async function onSave() {
             input-debounce="150"
             outlined
             dense
-            placeholder="พิมพ์รหัสนิสิต / ชื่อ เพื่อค้นหา"
+            placeholder="ค้นหา รหัสนิสิต หรือ ชื่อนิสิต"
             :loading="loadingStudents"
             :error="!!errors.studentId"
             :error-message="errors.studentId"
