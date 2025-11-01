@@ -69,6 +69,22 @@ async function goToForm() {
       errorMessage.value = 'ไม่พบข้อมูลโครงการ'
       return
     }
+
+    // ✅ ตรวจสอบ claimToken ก่อนไปทำฟอร์ม
+    if (props.claimToken) {
+      try {
+        await checkinoutStore.validateClaimToken(props.claimToken)
+      } catch (validationError: unknown) {
+        // ถ้า claimToken หมดอายุหรือไม่ถูกต้อง
+        let msg = 'session หมดอายุ กรุณาสแกน QR ใหม่'
+        if (validationError instanceof Error) {
+          msg = validationError.message
+        }
+        errorMessage.value = msg
+        return
+      }
+    }
+
     const formData = await checkinoutStore.getProgramForm(props.program.id)
     if (!formData?.formId) {
       errorMessage.value = 'โครงการนี้ไม่มีแบบฟอร์มให้ทำ'
@@ -80,6 +96,7 @@ async function goToForm() {
       query: {
         checkoutToken: props.token,
         programId: props.program.id,
+        claimToken: props.claimToken, // ส่ง claimToken ไปด้วย
       },
     })
   } catch (error: unknown) {

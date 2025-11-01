@@ -206,6 +206,35 @@ class CheckinoutService {
       throw error
     }
   }
+
+  /**
+   * ตรวจสอบ Claim Token ว่ายังใช้งานได้อยู่หรือไม่
+   */
+  static async validateClaimToken(claimToken: string) {
+    try {
+      const res = await api.get(`/checkInOuts/student/validate-claim/${claimToken}`)
+      return res.data // { valid: true, programId, type, ... }
+    } catch (err) {
+      let msg = 'Claim Token หมดอายุหรือไม่ถูกต้อง'
+      if (axios.isAxiosError(err)) {
+        const data = err.response?.data as unknown
+        if (typeof data === 'string') {
+          try {
+            const parsed = JSON.parse(data) as ErrorBody
+            msg = parsed.error || parsed.message || data
+          } catch {
+            msg = data
+          }
+        } else if (data && typeof data === 'object') {
+          const body = data as ErrorBody
+          msg = body.error || body.message || err.message || msg
+        } else {
+          msg = err.message || msg
+        }
+      }
+      throw new Error(msg)
+    }
+  }
 }
 
 export default CheckinoutService

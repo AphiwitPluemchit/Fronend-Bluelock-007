@@ -32,6 +32,11 @@ export const useCheckinoutStore = defineStore('checkinout', () => {
     return res
   }
 
+  async function validateClaimToken(claimToken: string) {
+    const res = await CheckinoutService.validateClaimToken(claimToken)
+    return res
+  }
+
   return {
     checkinout,
     checkin,
@@ -40,5 +45,6 @@ export const useCheckinoutStore = defineStore('checkinout', () => {
     checkoutWithClaim,
     getStatus,
     getProgramForm,
+    validateClaimToken,
   }
 })
