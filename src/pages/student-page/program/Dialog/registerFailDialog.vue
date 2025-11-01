@@ -1,21 +1,32 @@
 <template>
-  <q-dialog :model-value="props.modelValue" persistent>
-    <q-card class="q-pa-md" style="min-width: 300px; max-width: 500px" rounded standout>
-      <q-card-actions align="left">
-        <div class="text-h5">ลงทะเบียนไม่สำเร็จ</div>
-      </q-card-actions>
-      <q-card-section>
-        <div v-if="props.errorMessage" style="white-space: pre-line">
-          {{ props.errorMessage }}
-        </div>
-        <div v-else>กรุณาติดต่อเจ้าหน้าที่</div>
+  <q-dialog
+    :model-value="modelValue"
+    @update:model-value="emit('update:modelValue', $event)"
+    persistent
+  >
+    <q-card class="q-pa-md" rounded>
+      <!-- Header with icon centered -->
+      <q-card-section class="text-center q-pb-none q-mb-md">
+        <q-icon name="error_outline" color="red" size="56px" />
       </q-card-section>
 
+      <q-card-section class="text-center q-pt-sm">
+        <div class="text-h6">ลงทะเบียนไม่สำเร็จ</div>
+      </q-card-section>
+
+      <!-- Error Message -->
+      <q-card-section>
+        <div class="text-body1 text-start">
+          {{ errorMessage || 'กรุณาติดต่อเจ้าหน้าที่' }}
+        </div>
+      </q-card-section>
+
+      <!-- Action Buttons -->
       <q-card-actions align="right">
         <q-btn
           class="btnconfirm"
-          label="ยืนยัน"
-          style="background-color: #3676f4; color: white"
+          label="ปิด"
+          style="background-color: #ff0000; color: white"
           @click="confirm"
         />
       </q-card-actions>
