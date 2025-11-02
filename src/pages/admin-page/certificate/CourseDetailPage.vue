@@ -21,8 +21,8 @@ const activeTab = ref<'course' | 'submission'>('course') // v-model ของ ta
 const courseId = route.params.id as string // ส่ง id ให้แท็บลูก
 
 const tabOptions = [
-  { label: 'รายละเอียดหัวข้อการอบรม', value: 'course' },
-  { label: 'ประวัติการส่งหัวข้อโครงการ', value: 'submission' },
+  { label: 'รายละเอียดหลักสูตร', value: 'course' },
+  { label: 'รายชื่อนิสิตที่ขออนุมัติ', value: 'submission' },
 ]
 const courseStore = useCourseStore()
 const course = ref<Course | null>(null)
@@ -37,9 +37,9 @@ onMounted(async () => {
 })
 
 const breadcrumbs = ref({
-  previousPage: { title: 'รายการหัวข้อทั้งหมด', path: '/admin/CourseTablePage' },
-  currentPage: { title: 'รายละเอียดหัวข้อการอบรม', path: route.fullPath },
-  icon: 'school',
+  previousPage: { title: 'จัดการหลักสูตร', path: '/admin/CourseTablePage' },
+  currentPage: { title: 'รายละเอียดหลักสูตร', path: route.fullPath },
+  icon: 'workspace_premium',
 })
 
 
@@ -63,8 +63,8 @@ const originalCourseData = ref<Course | null>(null)
           class="tab-no-arrow"
           indicator-color="transparent"
         >
-          <q-tab name="course" label="รายละเอียดหัวข้ออบรม" />
-          <q-tab name="submission" label="ประวัติการส่งหัวข้อโครงการ" />
+          <q-tab name="course" label="รายละเอียดหลักสูตร" />
+          <q-tab name="submission" label="รายชื่อนิสิตที่ขออนุมัติ" />
         </q-tabs>
 
         <!-- ✅ จอเล็ก: ใช้ q-select dropdown -->

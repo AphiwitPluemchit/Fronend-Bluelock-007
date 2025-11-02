@@ -17,7 +17,7 @@ const breadcrumbs = ref({
     title: 'อัปโหลดข้อมูลนิสิต',
     path: '/Admin/StudentManagement/UploadStudent',
   },
-  icon: 'cloud_upload',
+  icon: 'people',
 })
 
 const columns = [
@@ -179,10 +179,13 @@ const clearFile = () => {
 
         <q-btn
           icon="download"
-          class="btngrey"
           label="ดาวน์โหลดตัวอย่างไฟล์"
+          color="cyan"
+          unelevated
+          no-caps
           dense
-          style="height: 40px; width: 200px"
+          rounded
+          class="download-btn"
           @click="downloadTemplate"
         />
       </div>
@@ -252,5 +255,14 @@ const clearFile = () => {
   text-align: center;
   display: inline-block;
   font-size: 15px;
+}
+.download-btn {
+  height: 44px;
+  width: 220px;
+  font-weight: 500;
+}
+
+.download-btn:active {
+  transform: scale(0.98);
 }
 </style>

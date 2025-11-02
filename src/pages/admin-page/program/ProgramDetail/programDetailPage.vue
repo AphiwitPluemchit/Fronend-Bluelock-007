@@ -59,17 +59,17 @@ const pushTabToRoute = async (nextTab: string) => {
 
 /** breadcrumb */
 const currentBreadcrumb = computed(() => {
-  if (tab.value === 'program') return 'รายละเอียดกิจกรรม'
+  if (tab.value === 'program') return 'รายละเอียดโครงการ'
   if (tab.value === 'registration') return 'รายละเอียดการลงทะเบียน'
-  if (tab.value === 'students') return 'รายชื่อนิสิต'
-  if (tab.value === 'summary') return 'สรุปผลกิจกรรม'
-  return 'รายละเอียดกิจกรรม'
+  if (tab.value === 'students') return 'รายชื่อนิสิตที่ลงทะเบียน'
+  if (tab.value === 'summary') return 'สรุปผลโครงการ'
+  return 'รายละเอียดโครงการ'
 })
 
 const breadcrumbs = computed(() => {
   const id = route.params.id as string
   return {
-    previousPage: { title: 'จัดการกิจกรรม', path: '/Admin/ProgramManagement' },
+    previousPage: { title: 'จัดการโครงการ', path: '/Admin/ProgramManagement' },
     currentPage: {
       title: currentBreadcrumb.value,
       path: `/Admin/ProgramsManagement/ProgramDetail/${id}/${tab.value}`,
@@ -131,10 +131,10 @@ onMounted(() => {
 
 /** dropdown options (จอเล็ก) */
 const tabOptions = computed(() => [
-  { label: 'รายละเอียดกิจกรรม', value: 'program'},
+  { label: 'รายละเอียดโครงการ', value: 'program'},
   { label: 'รายละเอียดการลงทะเบียน', value: 'registration'},
-  { label: 'รายชื่อนิสิต', value: 'students'},
-  { label: 'สรุปผลกิจกรรม', value: 'summary'},
+  { label: 'รายชื่อนิสิตที่ลงทะเบียน', value: 'students'},
+  { label: 'สรุปผลโครงการ', value: 'summary'},
 ])
 </script>
 
@@ -153,10 +153,10 @@ const tabOptions = computed(() => [
           class="tab-no-arrow"
           indicator-color="transparent"
         >
-          <q-tab name="program" label="รายละเอียดกิจกรรม" />
+          <q-tab name="program" label="รายละเอียดโครงการ" />
           <q-tab name="registration" label="รายละเอียดการลงทะเบียน"  />
-          <q-tab name="students" label="รายชื่อนิสิต" />
-          <q-tab name="summary" label="สรุปผลกิจกรรม"/>
+          <q-tab name="students" label="รายชื่อนิสิตที่ลงทะเบียน" />
+          <q-tab name="summary" label="สรุปผลโครงการ"/>
         </q-tabs>
 
         <!-- จอเล็ก -->

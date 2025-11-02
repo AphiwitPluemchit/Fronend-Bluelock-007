@@ -31,10 +31,10 @@ const courseId = computed(() => route.params.id as string)
 // Table columns
 const submissionColumns = [
   { name: 'index', label: 'ลำดับ', field: 'index', align: 'left' as const },
-  { name: 'uploadAt', label: 'วันที่อัปโหลด', field: 'uploadAt', align: 'left' as const },
   { name: 'studentCode', label: 'รหัสนิสิต', field: 'studentCode', align: 'left' as const },
   { name: 'studentName', label: 'ชื่อ-สกุล', field: 'studentName', align: 'left' as const },
   { name: 'major', label: 'สาขา', field: 'major', align: 'left' as const },
+  { name: 'uploadAt', label: 'วันที่ขออนุมัติ', field: 'uploadAt', align: 'left' as const },
   { name: 'status', label: 'สถานะ', field: 'status', align: 'center' as const },
   { name: 'action', label: '', field: 'action', align: 'center' as const },
 ]
@@ -224,10 +224,11 @@ onMounted(async () => {
               <q-td key="index">
                 {{ (meta.page - 1) * meta.limit + props.rowIndex + 1 }}
               </q-td>
-              <q-td key="uploadAt">{{ formatDate(props.row.uploadAt) }}</q-td>
               <q-td key="studentCode">{{ getStudentCode(props.row) }}</q-td>
               <q-td key="studentName">{{ getStudentName(props.row) }}</q-td>
               <q-td key="major">{{ getStudentMajor(props.row) }}</q-td>
+
+              <q-td key="uploadAt">{{ formatDate(props.row.uploadAt) }}</q-td>
               <q-td key="status" class="flex justify-center items-center">
                 <q-badge
                   :class="['status-badge', getStatusClass(props.row.status)]"
@@ -235,7 +236,6 @@ onMounted(async () => {
                   rounded
                 />
               </q-td>
-
               <q-td key="action">
                 <q-btn
                   flat
