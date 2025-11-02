@@ -322,97 +322,162 @@ function getStudentCheckouts(student: { checkInOut?: unknown }): string[] {
   return (student.checkInOut as CheckInOut[]).map((r) => r.checkout).filter((v): v is string => !!v)
 }
 
-// ฟังก์ชันคำนวณสถานะเช็คชื่อ
-const getCheckInStatus = (student: StudentEnrollment): string => {
-  if (!program.value || !program.value.programItems) return 'ไม่มา'
+// =====================================================================
+// Helper Functions สำหรับคำนวณสถานะเช็คชื่อ
+// =====================================================================
 
-  // หา programItem ที่ student ลงทะเบียน
-  // ใช้ enrollment ID หรือข้อมูลอื่นในการเชื่อมโยง
-  // สมมติว่าเราต้องเทียบกับ date ที่เลือก (selectProgramItemDate)
+/**
+ * หาเวลาเริ่มกิจกรรม (stime) จากโครงการและวันที่เลือก
+ */
+const getActivityStartTime = (selectedDate: string): string | null => {
+  if (!program.value || !program.value.programItems) return null
 
-  const selectedDate =
-    selectProgramItemDate.value !== -1 ? selectProgramItemDate.value.toString() : null
-
-  // ถ้าไม่ได้เลือกวัน หรือเลือก "ทุกวัน" (-1) ไม่สามารถแสดงสถานะได้
-  if (!selectedDate) return '-'
-
-  // หา programItem และ date ที่ตรงกับวันที่เลือก
-  let targetTime: string | null = null
-
+  // กรณีเลือก "ทุกโครงการ" (-1)
   if (selectProgramItem.value === -1) {
-    // กรณีเลือก "ทุกโครงการ" ให้หา stime จากโครงการใดๆที่มีวันตรงกัน
     for (const item of program.value.programItems) {
       const dateObj = item.dates?.find((d) => d.date === selectedDate)
-      if (dateObj && dateObj.stime) {
-        targetTime = dateObj.stime
-        break
-      }
+      if (dateObj?.stime) return dateObj.stime
     }
   } else {
     // กรณีเลือกโครงการเฉพาะ
     const selectedItem = program.value.programItems[selectProgramItem.value]
-    if (selectedItem && selectedItem.dates) {
-      const dateObj = selectedItem.dates.find((d) => d.date === selectedDate)
-      if (dateObj && dateObj.stime) {
-        targetTime = dateObj.stime
-      }
-    }
+    const dateObj = selectedItem?.dates?.find((d) => d.date === selectedDate)
+    if (dateObj?.stime) return dateObj.stime
   }
 
-  if (!targetTime) return '-'
+  return null
+}
 
-  // ตรวจสอบข้อมูล checkInOut ของ student
+/**
+ * กรองข้อมูล checkInOut ที่ตรงกับวันที่เลือก
+ */
+const getRelevantCheckInOut = (
+  student: StudentEnrollment,
+  selectedDate: string,
+): CheckInOut | null => {
   const checkInOuts = Array.isArray(student.checkInOut) ? student.checkInOut : []
 
-  // กรองเฉพาะ check-in/out ที่ตรงกับวันที่เลือก
-  const relevantCheckInOut = checkInOuts.filter((record) => {
-    if (!record.checkin) return false
-    const checkinDate = dayjs(record.checkin).format('YYYY-MM-DD')
-    return checkinDate === selectedDate
+  // กรองเฉพาะวันที่เลือก (ใช้ checkin หรือ checkout วันใดวันหนึ่งที่ตรงกัน)
+  const relevant = checkInOuts.find((record) => {
+    // เช็คจาก checkin ก่อน
+    if (record.checkin) {
+      const checkinDate = dayjs(record.checkin).format('YYYY-MM-DD')
+      if (checkinDate === selectedDate) return true
+    }
+    // ถ้าไม่มี checkin ให้เช็คจาก checkout
+    if (record.checkout) {
+      const checkoutDate = dayjs(record.checkout).format('YYYY-MM-DD')
+      if (checkoutDate === selectedDate) return true
+    }
+    return false
   })
 
-  // ตรวจสอบว่าถึงเวลาเริ่มกิจกรรมหรือยัง
+  // Debug log
+  if (relevant) {
+    console.log('🔍 Found record for', student.code, ':', {
+      selectedDate,
+      hasCheckIn: !!relevant.checkin,
+      hasCheckOut: !!relevant.checkout,
+      checkin: relevant.checkin,
+      checkout: relevant.checkout,
+    })
+  }
+
+  return relevant || null
+}
+
+/**
+ * ฟังก์ชันหลักคำนวณสถานะเช็คชื่อ
+ *
+ * กรณีต่างๆ:
+ * 1. ยังไม่ถึงเวลาเริ่ม + ยังไม่เช็ค → "-"
+ * 2. เลยเวลาแล้ว + ไม่เช็คทั้งคู่ → "ไม่มา"
+ * 3. เช็คอินอย่างเดียว หรือ เช็คเอาท์อย่างเดียว → "มาไม่ครบ"
+ * 4. เช็คครบทั้งคู่ + เช็คอินก่อนหรือเท่ากับ grace period → "ทันเวลา"
+ * 5. เช็คครบทั้งคู่ + เช็คอินหลัง grace period → "มาสาย"
+ */
+const getCheckInStatus = (student: StudentEnrollment): string => {
+  if (!program.value || !program.value.programItems) return 'ไม่มา'
+
+  // ต้องเลือกวันเฉพาะ จึงจะแสดงสถานะได้
+  const selectedDate =
+    selectProgramItemDate.value !== -1 ? selectProgramItemDate.value.toString() : null
+  if (!selectedDate) return '-'
+
+  // หาเวลาเริ่มกิจกรรม
+  const targetTime = getActivityStartTime(selectedDate)
+  if (!targetTime) return '-'
+
+  // แปลง stime เป็น dayjs object
   const [hours, minutes] = targetTime.split(':').map(Number)
   if (hours === undefined || minutes === undefined) return '-'
 
   const activityStartTime = dayjs(selectedDate).hour(hours).minute(minutes).second(0)
+  const graceTime = activityStartTime.add(30, 'minute') // grace period 30 นาที
   const now = dayjs()
 
-  // ถ้ายังไม่ถึงเวลาเริ่มกิจกรรม และยังไม่มีคนเช็คอิน ให้แสดง "-"
-  if (now.isBefore(activityStartTime) && relevantCheckInOut.length === 0) {
+  // หาข้อมูลเช็คชื่อที่ตรงกับวันที่เลือก
+  const record = getRelevantCheckInOut(student, selectedDate)
+
+  // =====================================================================
+  // กรณี 1: ยังไม่ถึงเวลาเริ่ม และยังไม่มีคนเช็ค
+  // =====================================================================
+  if (now.isBefore(activityStartTime) && !record) {
     return '-'
   }
 
-  // ถ้าไม่มีข้อมูลเช็คชื่อเลย และเลยเวลาเริ่มแล้ว
-  if (relevantCheckInOut.length === 0) return 'ไม่มา'
-
-  // ตรวจสอบสถานะ
-  const record = relevantCheckInOut[0]
-  if (!record) return 'ไม่มา'
+  // =====================================================================
+  // กรณี 2: เลยเวลาแล้ว แต่ไม่มีข้อมูลเช็คชื่อเลย
+  // =====================================================================
+  if (!record) {
+    console.log('❌ No record found for', student.code, 'on date:', selectedDate)
+    return 'ไม่มา'
+  }
 
   const hasCheckIn = !!record.checkin
   const hasCheckOut = !!record.checkout
 
-  // กรณีมาไม่ครบ (เช็คอย่างใดอย่างหนึ่งเท่านั้น)
-  if (hasCheckIn && !hasCheckOut) return 'มาไม่ครบ'
-  if (!hasCheckIn && hasCheckOut) return 'มาไม่ครบ'
+  console.log('📋 Status check for', student.code, ':', {
+    hasCheckIn,
+    hasCheckOut,
+    checkin: record.checkin,
+    checkout: record.checkout,
+  })
 
-  // กรณีไม่มาเลย
-  if (!hasCheckIn && !hasCheckOut) return 'ไม่มา'
+  // =====================================================================
+  // กรณี 3: เช็คไม่ครบ (เช็คอย่างใดอย่างหนึ่ง หรือ ไม่เช็คเลย)
+  // =====================================================================
 
-  // เปรียบเทียบเวลาเช็คอินกับ stime
+  // 3.1 ไม่เช็คทั้งคู่ → ไม่มา
+  if (!hasCheckIn && !hasCheckOut) {
+    console.log('➡️ Result: ไม่มา (no both)')
+    return 'ไม่มา'
+  }
+
+  // 3.2 เช็คอินอย่างเดียว → มาไม่ครบ
+  if (hasCheckIn && !hasCheckOut) {
+    console.log('➡️ Result: มาไม่ครบ (only check-in)')
+    return 'มาไม่ครบ'
+  }
+
+  // 3.3 เช็คเอาท์อย่างเดียว → มาไม่ครบ (นี่คือที่แก้ไข!)
+  if (!hasCheckIn && hasCheckOut) {
+    console.log('➡️ Result: มาไม่ครบ (only check-out)')
+    return 'มาไม่ครบ'
+  }
+
+  // =====================================================================
+  // กรณี 4-5: เช็คครบทั้งคู่ → ตรวจสอบว่ามาสายหรือไม่
+  // =====================================================================
   const checkinTime = dayjs(record.checkin)
-  // สร้าง datetime โดยใช้วันจาก checkin และเวลาจาก stime (ใช้ hours, minutes ที่ประกาศไว้ด้านบนแล้ว)
-  const startTime = dayjs(record.checkin).hour(hours).minute(minutes).second(0)
-  // เพิ่มเวลา grace period 30 นาที
-  const graceTime = startTime.add(30, 'minute')
 
-  // ถ้าเช็คอินหลังจาก grace period (stime + 30 นาที) ถือว่ามาสาย
+  // ถ้าเช็คอินหลัง grace period → มาสาย
   if (checkinTime.isAfter(graceTime)) {
     return 'มาสาย'
-  } else {
-    return 'ทันเวลา'
   }
+
+  // ถ้าเช็คอินก่อนหรือเท่ากับ grace period → ทันเวลา
+  return 'ทันเวลา'
 }
 
 // ฟังก์ชันกำหนดคลาสของ badge
