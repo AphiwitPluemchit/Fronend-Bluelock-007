@@ -154,7 +154,7 @@ onMounted(async () => {
             dense
             outlined
             v-model="params.search"
-            label="ค้นหา ชื่อ รหัสนิสิต"
+            label="ค้นหาชื่อหรือรหัสนิสิต"
             class="q-mr-sm searchbox"
             debounce="500"
             @update:model-value="fetchCertificates"

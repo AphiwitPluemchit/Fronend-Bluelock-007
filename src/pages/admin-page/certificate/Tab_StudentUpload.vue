@@ -185,7 +185,7 @@ onMounted(async () => {
       <div class="row justify-end items-center q-mb-md">
         <q-input
           v-model="searchText"
-          placeholder="ค้นหารหัสนิสิต, ชื่อ-สกุล"
+          placeholder="ค้นหาชื่อหรือรหัสนิสิต"
           outlined
           dense
           clearable
