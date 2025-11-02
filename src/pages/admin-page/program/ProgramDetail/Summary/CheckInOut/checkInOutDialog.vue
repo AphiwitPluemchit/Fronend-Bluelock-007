@@ -67,7 +67,7 @@ const onConfirm = () => {
       <q-card-actions align="right">
         <q-btn class="btnreject" label="ยกเลิก" @click="onCancel" />
         <q-btn
-          class="btnconfirm"
+          class="btnsecces"
           label="ยืนยัน"
           @click="onConfirm"
           :disable="!selectedType"

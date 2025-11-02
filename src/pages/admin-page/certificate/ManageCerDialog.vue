@@ -137,34 +137,49 @@ const formatDate = (dateString: string | null | undefined) => {
 <template>
   <q-dialog v-model="dialogVisible" persistent>
     <q-card class="q-pa-lg custom-dialog-card" style="min-width: 750px; max-width: 90vw">
-      <div class="text-h5 q-mb-md">จัดการใบประกาศนียบัตร</div>
+      <div class="text-h5 q-mb-md"><strong>จัดการใบประกาศนียบัตร</strong></div>
 
-      <div class="q-mb-sm row">
-        <div class="col-6"><b>ชื่อ-สกุล :</b> {{ props.data.student?.name }}</div>
-        <div class="col-6"><b>รหัสนิสิต : </b> {{ props.data.student?.code }}</div>
+      <div class="q-mb-sm textcontent1"><b>ชื่อ-สกุล :</b> {{ props.data.student?.name }}</div>
+      <div class="q-mb-sm textcontent1"><b>รหัสนิสิต : </b> {{ props.data.student?.code }}</div>
+      <div class="q-mb-sm textcontent1 cert-title">
+        <b>ชื่อหลักสูตร : </b> {{ props.data.course?.name }}
       </div>
-      <div class="q-mb-sm cert-title"><b>หัวข้ออบรม : </b> {{ props.data.course?.name }}</div>
-      <div class="q-mb-sm">
-        <b>ประเภทโครงการ : </b>
+      <div class="q-mb-sm textcontent1">
+        <b>ประเภทหลักสูตร : </b>
         {{ props.data.course?.isHardSkill ? 'ทักษะด้านวิชาการ' : 'เตรียมความพร้อม' }}
       </div>
-      <div class="q-mb-sm"><b>จำนวนชั่วโมง : </b> {{ props.data.course?.hour }} ชั่วโมง</div>
-      <div class="q-mb-sm"><b>คะแนนชื่อนิสิตภาษาไทย : </b> {{ props.data.nameMatch }}</div>
-      <div class="q-mb-sm"><b>คะแนนชื่อนิสิตภาษาอังกฤษ : </b> {{ props.data.nameEngMatch }}</div>
-      <div class="q-mb-sm"><b>คะแนนหัวข้ออบรมภาษาไทย : </b> {{ props.data.courseMatch }}</div>
-      <div class="q-mb-sm"><b>คะแนนหัวข้ออบรมภาษาอังกฤษ : </b> {{ props.data.courseEngMatch }}</div>
-      <div class="q-mb-sm"><b>ลิงก์ใบประกาศนียบัตร : </b> {{ props.data.url }}</div>
+      <!-- <div class="q-mb-sm textcontent1"><b>จำนวนชั่วโมง : </b> {{ props.data.course?.hour }} ชั่วโมง</div>
+      <div class="q-mb-sm textcontent1"><b>คะแนนชื่อนิสิตภาษาไทย : </b> {{ props.data.nameMatch }}</div>
+      <div class="q-mb-sm textcontent1"><b>คะแนนชื่อนิสิตภาษาอังกฤษ : </b> {{ props.data.nameEngMatch }}</div>
+      <div class="q-mb-sm textcontent1"><b>คะแนนหัวข้ออบรมภาษาไทย : </b> {{ props.data.courseMatch }}</div>
+      <div class="q-mb-sm textcontent1"><b>คะแนนหัวข้ออบรมภาษาอังกฤษ : </b> {{ props.data.courseEngMatch }}</div> -->
+      <div class="q-mb-sm textcontent1">
+        <b>ลิงก์ใบประกาศนียบัตร : </b>
+        <a
+          :href="props.data.url"
+          target="_blank"
+          rel="noopener noreferrer"
+          class="text-primary"
+          style="text-decoration: underline; word-break: break-all"
+        >
+          {{ props.data.url }}
+        </a>
+      </div>
       <!-- uploadAt, changeStatusAt, useOcr? -->
-      <div class="q-mb-sm"><b>วันที่อัปโหลด : </b> {{ formatDate(props.data.uploadAt) }}</div>
-      <div class="q-mb-sm">
+      <div class="q-mb-sm textcontent1">
+        <b>วันที่ขออนุมัติ : </b> {{ formatDate(props.data.uploadAt) }}
+      </div>
+      <div class="q-mb-sm textcontent1">
         <b>วันที่เปลี่ยนสถานะ : </b> {{ formatDate(props.data.changedStatusAt) }}
       </div>
-      <div class="q-mb-sm"><b>ใช้ OCR : </b> {{ props.data.useOcr ? 'ใช่' : 'ไม่ใช่' }}</div>
+      <!-- <div class="q-mb-sm textcontent1">
+        <b>ใช้ OCR : </b> {{ props.data.useOcr ? 'ใช่' : 'ไม่ใช่' }}
+      </div> -->
 
       <!-- Mode: View/Edit -->
       <template v-if="!isEditing">
         <!-- แสดงสถานะปัจจุบัน -->
-        <div class="row justify-center q-gutter-sm q-mb-md">
+        <div class="row justify-center q-gutter-sm textcontent1 q-mb-md">
           <q-badge
             v-if="props.data.status === StatusType.APPROVED"
             label="อนุมัติ"
@@ -191,18 +206,17 @@ const formatDate = (dateString: string | null | undefined) => {
         </div>
 
         <!-- ปุ่มแก้ไขและปิด -->
-        <div class="row justify-end q-gutter-sm">
+        <div class="row justify-end q-gutter-sm textcontent1">
           <q-btn class="btnreject" @click="closeDialog">ปิด</q-btn>
           <q-btn class="btnedit" @click="startEditing">
-            <q-icon name="edit" class="q-mr-sm" />
-            แก้ไขสถานะ
+            แก้ไข
           </q-btn>
         </div>
       </template>
 
       <!-- Mode: Editing -->
       <template v-else>
-        <div class="row justify-center q-gutter-sm q-mb-md">
+        <div class="row justify-center q-gutter-sm textcontent1 q-mb-md">
           <q-btn
             label="รออนุมัติ"
             :class="[
@@ -244,7 +258,7 @@ const formatDate = (dateString: string | null | undefined) => {
           />
         </div>
 
-        <div class="row justify-end q-gutter-sm">
+        <div class="row justify-end q-gutter-sm textcontent1">
           <q-btn class="btnreject" :disable="isLoading" @click="cancelEditing">ยกเลิก</q-btn>
           <q-btn
             class="btnconfirm"
@@ -369,8 +383,8 @@ const formatDate = (dateString: string | null | undefined) => {
   color: white;
 }
 
-.btnedit {
+/* .btnedit {
   background-color: #4caf50;
   color: white;
-}
+} */
 </style>

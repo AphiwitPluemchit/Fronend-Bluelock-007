@@ -50,9 +50,8 @@
       <q-card-actions align="right">
         <q-btn class="btnreject" label="ยกเลิก" color="red" @click="cancel" />
         <q-btn
-          class="btnconfirm"
+          class="btnsecces"
           label="ยืนยัน"
-          style="background-color: #3676f4; color: white"
           :disable="
             (programItems.length > 1 && !selectedItemId) || 
             (food.length > 0 && !selectedFood)

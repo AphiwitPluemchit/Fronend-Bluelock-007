@@ -27,7 +27,7 @@
       <q-card-actions align="right">
         <q-btn class="btnreject" label="ยกเลิก" :disable="loading" @click="close" />
         <q-btn
-          class="btnconfirm"
+          class="btnsecces"
           unelevated
           label="ยืนยัน"
           :loading="loading"

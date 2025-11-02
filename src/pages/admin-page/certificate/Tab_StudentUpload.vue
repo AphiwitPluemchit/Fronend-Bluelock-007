@@ -228,19 +228,21 @@ onMounted(async () => {
               <q-td key="studentCode">{{ getStudentCode(props.row) }}</q-td>
               <q-td key="studentName">{{ getStudentName(props.row) }}</q-td>
               <q-td key="major">{{ getStudentMajor(props.row) }}</q-td>
-              <q-td key="status">
+              <q-td key="status" class="flex justify-center items-center">
                 <q-badge
                   :class="['status-badge', getStatusClass(props.row.status)]"
                   :label="getStatus(props.row.status)"
+                  rounded
                 />
               </q-td>
+
               <q-td key="action">
                 <q-btn
                   flat
                   round
                   dense
                   icon="visibility"
-                  color="primary"
+                  class="bg-black text-white q-pa-xs rounded-borders q-mr-sm"
                   @click="openViewDialog(props.row)"
                 >
                   <q-tooltip>ดูรายละเอียด</q-tooltip>

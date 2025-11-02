@@ -291,7 +291,7 @@ async function onSave() {
 
       <q-card-actions align="right">
         <q-btn flat label="ยกเลิก" class="btnreject" :disable="loading" @click="close" />
-        <q-btn unelevated label="ยืนยัน" class="btnconfirm" :loading="loading" @click="onSave" />
+        <q-btn unelevated label="ยืนยัน" class="btnsecces" :loading="loading" @click="onSave" />
       </q-card-actions>
     </q-card>
   </q-dialog>

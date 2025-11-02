@@ -156,7 +156,7 @@ const submit = async () => {
 
             <!-- ประเภทโครงการ (isHardSkill) -->
             <div class="input-group">
-              <p class="label label_minWidth">ประเภทโครงการ :</p>
+              <p class="label label_minWidth">ประเภทหลักสูตร :</p>
               <div class="status-inline-group">
                 <q-btn
                   :class="[
@@ -270,7 +270,7 @@ const submit = async () => {
             <!-- ปุ่มบันทึก/ยกเลิก -->
             <div class="button-group">
               <q-btn class="btnreject" label="ยกเลิก" @click="cancel" />
-              <q-btn class="btnsecces" label="บันทึก" @click="submit" />
+              <q-btn class="btnconfirm" label="บันทึก" @click="submit" />
             </div>
           </q-page>
         </div>
@@ -307,7 +307,7 @@ const submit = async () => {
 
         <q-card-actions align="right">
           <q-btn class="btnreject" label="ยกเลิก" @click="closeDialog" />
-          <q-btn class="btnconfirm" label="ยืนยัน" @click="confirmStatusChange" />
+          <q-btn class="btnsecces" label="ยืนยัน" @click="confirmStatusChange" />
         </q-card-actions>
       </q-card>
     </q-dialog>
@@ -330,8 +330,8 @@ const submit = async () => {
   font-size: 20px;
   font-weight: normal;
   display: flex;
-  justify-content: center;
-  align-items: center;
+  /* justify-content: center;
+  align-items: center; */
   height: 40px;
 }
 

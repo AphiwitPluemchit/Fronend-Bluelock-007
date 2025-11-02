@@ -263,7 +263,7 @@ async function onSave() {
       <q-card-actions align="right">
         <q-card-actions align="right">
           <q-btn label="ยกเลิก" class="btnreject" @click="close" />
-          <q-btn label="ยืนยัน" class="btnconfirm" @click="onSave" />
+          <q-btn label="ยืนยัน" class="btnsecces" @click="onSave" />
         </q-card-actions>
       </q-card-actions>
     </q-card>

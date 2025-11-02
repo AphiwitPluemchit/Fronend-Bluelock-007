@@ -245,7 +245,7 @@ function confirmCancel() {
                 class="label label_minWidth"
                 :class="{ 'label-error-shift': CategoryError !== '' }"
               >
-                ประเภทโครงการ :
+                ประเภทหลักสูตร :
               </p>
               <div class="status-inline-group">
                 <!-- Always render both buttons so user can switch; active one gets 'active-btn', inactive gets 'bg-grey-3' -->
@@ -406,7 +406,7 @@ function confirmCancel() {
               <q-btn v-if="!isEditMode" class="btnedit" label="แก้ไข" @click="enableEditMode" />
               <template v-else>
                 <q-btn class="btnreject" label="ยกเลิก" @click="cancelEdit" />
-                <q-btn class="btnsecces" label="บันทึก" @click="saveChanges" />
+                <q-btn class="btnconfirm" label="บันทึก" @click="saveChanges" />
               </template>
             </div>
           </q-page>
@@ -444,7 +444,7 @@ function confirmCancel() {
 
         <q-card-actions align="right">
           <q-btn class="btnreject" label="ยกเลิก" @click="closeDialog" />
-          <q-btn class="btnconfirm" label="ยืนยัน" @click="confirmStatusChange" />
+          <q-btn class="btnsecces" label="ยืนยัน" @click="confirmStatusChange" />
         </q-card-actions>
       </q-card>
     </q-dialog>
@@ -458,7 +458,7 @@ function confirmCancel() {
         >
         <q-card-actions align="right">
           <q-btn flat label="ยกเลิก" class="btnreject q-mr-md" v-close-popup />
-          <q-btn flat label="ยืนยัน" class="btnconfirm" @click="confirmCancel" v-close-popup />
+          <q-btn flat label="ยืนยัน" class="btnsecces" @click="confirmCancel" v-close-popup />
         </q-card-actions>
       </q-card>
     </q-dialog>
@@ -477,8 +477,8 @@ function confirmCancel() {
   font-size: 20px;
   font-weight: normal;
   display: flex;
-  justify-content: center;
-  align-items: center;
+  /* justify-content: center;
+  align-items: center; */
   height: 40px;
 }
 .q-card-cancleDialog {

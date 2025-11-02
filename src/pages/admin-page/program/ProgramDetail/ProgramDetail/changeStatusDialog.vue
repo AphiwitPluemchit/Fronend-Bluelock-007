@@ -102,7 +102,7 @@ const confirmStatusChange = () => {
       <!-- ปุ่มยืนยัน & ยกเลิก -->
       <q-card-actions align="right">
         <q-btn class="btnreject" label="ยกเลิก" @click="closeDialog" />
-        <q-btn class="btnconfirm" label="ยืนยัน" @click="confirmStatusChange" />
+        <q-btn class="btnsecces" label="ยืนยัน" @click="confirmStatusChange" />
       </q-card-actions>
     </q-card>
   </q-dialog>

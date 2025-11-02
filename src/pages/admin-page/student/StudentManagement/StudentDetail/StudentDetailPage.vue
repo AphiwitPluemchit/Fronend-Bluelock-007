@@ -313,7 +313,7 @@ onMounted(async () => {
         >
         <q-card-actions align="right">
           <q-btn flat label="ยกเลิก" class="btnreject q-mr-md" v-close-popup />
-          <q-btn flat label="ยืนยัน" class="btnconfirm" @click="cancelEdit" v-close-popup />
+          <q-btn flat label="ยืนยัน" class="btnsecces" @click="cancelEdit" v-close-popup />
         </q-card-actions>
       </q-card>
     </q-dialog>
