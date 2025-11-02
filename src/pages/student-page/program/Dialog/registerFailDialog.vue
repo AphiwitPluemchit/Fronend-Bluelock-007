@@ -37,7 +37,7 @@
 <script setup lang="ts">
 import { defineProps, defineEmits } from 'vue'
 
-const props = defineProps<{
+defineProps<{
   modelValue: boolean
   errorMessage?: string
 }>()
