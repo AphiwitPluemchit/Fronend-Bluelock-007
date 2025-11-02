@@ -180,7 +180,7 @@ const clearFile = () => {
         <q-btn
           icon="download"
           label="ดาวน์โหลดตัวอย่างไฟล์"
-          color="cyan"
+          color="cyan-6"
           unelevated
           no-caps
           dense

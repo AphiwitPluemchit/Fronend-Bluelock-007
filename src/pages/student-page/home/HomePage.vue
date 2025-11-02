@@ -155,6 +155,17 @@ const visibleActivities = computed(() => {
 //   slide.value = index
 //   startAutoSlide()
 // }
+const nextSlide = () => {
+  if (activities.value.length === 0) return
+  slide.value = (slide.value + 1) % activities.value.length
+  startAutoSlide()
+}
+
+const prevSlide = () => {
+  if (activities.value.length === 0) return
+  slide.value = (slide.value - 1 + activities.value.length) % activities.value.length
+  startAutoSlide()
+}
 
 // ✅ สำหรับ sync indicator เมื่อ scroll บนมือถือ
 const activityScroll = ref<HTMLElement | null>(null)
@@ -190,7 +201,7 @@ onMounted(async () => {
 <template>
   <q-page class="q-pa-md page-wrap">
     <div class="row justify-between items-center q-mb-md" style="margin-top: 20px">
-      <div class="textcontent1 text-bold">สวัสดี, {{ authStore.getName }}</div>
+      <div class="texttitle text-bold">สวัสดี, {{ authStore.getName }}</div>
     </div>
     <div class="row items-center justify-between q-mb-sm">
       <p class="texttitle q-mb-none text-bold">โครงการ</p>
@@ -232,6 +243,9 @@ onMounted(async () => {
       <!-- ✅ Desktop ใช้ carousel -->
       <div v-else class="carousel-container">
         <!-- Cards Container -->
+        <!-- ปุ่มลูกศร -->
+        <q-btn flat round dense icon="chevron_left" class="nav-btn left" @click="prevSlide" />
+        <q-btn flat round dense icon="chevron_right" class="nav-btn right" @click="nextSlide" />
 
         <div class="cards-container">
           <transition-group name="card-slide" tag="div" class="cards-wrapper">
@@ -321,7 +335,7 @@ onMounted(async () => {
     </div>
 
     <!-- Courses Carousel - แบบใหม่ -->
-    <div class="q-mt-md course-carousel" >
+    <div class="q-mt-md course-carousel">
       <!-- ✅ หัวข้อซ้าย / ดูทั้งหมดขวา -->
       <div class="row items-center justify-between q-mb-sm">
         <p class="texttitle q-mb-none text-bold">หลักสูตร</p>
@@ -333,7 +347,7 @@ onMounted(async () => {
 
       <div class="course-carousel-container">
         <!-- Grid Layout for Courses -->
-        <div class="courses-grid" >
+        <div class="courses-grid">
           <transition-group name="course-item" tag="div" class="grid-wrapper">
             <!-- ✅ ปรับหลักสูตรให้เป็นแนวนอน 1 แถวเสมอ -->
             <div class="courses-scroll">
@@ -347,7 +361,7 @@ onMounted(async () => {
                   <div class="course-image-section">
                     <q-img :src="getCourseImageUrl(course)" class="course-image-modern" />
                   </div>
-                  <div class="course-content" >
+                  <div class="course-content">
                     <div class="textcontent1 text-bold">{{ course.name }}</div>
                     <div class="info-block textcontent3">
                       <q-icon name="schedule" class=".info-block" />
@@ -364,20 +378,20 @@ onMounted(async () => {
 
     <div class="menu q-mb-lg">
       <p class="texttitle text-bold">เมนู</p>
-      <div class="menu-row" style="color: #1f2937;">
+      <div class="menu-row" style="color: #1f2937">
         <!-- calendar -->
         <q-card class="menu-card" @click="gotoCalendarPage">
           <q-icon name="calendar_today" class="icon q-mt-sm" />
-          <p class="textcontent1 text-bold q-mt-md" >ตารางโครงการ</p>
+          <p class="textcontent1 text-bold q-mt-md">ตารางโครงการ</p>
           <p class="textcontent2 info-block q-mb-xs">ตรวจสอบโครงการทั้งหมด</p>
           <p class="textcontent2 info-block">เพื่อลงทะเบียนเข้าร่วม</p>
         </q-card>
 
         <!-- activity -->
-        <q-card class="menu-card" @click="gotoProgramTablePage" >
+        <q-card class="menu-card" @click="gotoProgramTablePage">
           <q-icon name="event" class="icon q-mt-sm" />
           <p class="textcontent1 text-bold q-mt-md">โครงการทั้งหมด</p>
-          <p class="textcontent2 info-block q-mb-xs">ตรวจสอบกิจกรรมทั้งหมด</p>
+          <p class="textcontent2 info-block q-mb-xs">ตรวจสอบโครงการทั้งหมด</p>
           <p class="textcontent2 info-block">เพื่อลงทะเบียนเข้าร่วม</p>
         </q-card>
 
@@ -1315,5 +1329,26 @@ onMounted(async () => {
 .meta-text {
   font-weight: 500;
   color: #4b5563;
+}
+
+.nav-btn {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  background: rgba(255, 255, 255, 0.8);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+  z-index: 20;
+}
+
+.nav-btn.left {
+  left: 10px;
+}
+
+.nav-btn.right {
+  right: 10px;
+}
+
+.nav-btn:hover {
+  background: white;
 }
 </style>
