@@ -372,17 +372,6 @@ const getRelevantCheckInOut = (
     return false
   })
 
-  // Debug log
-  if (relevant) {
-    console.log('🔍 Found record for', student.code, ':', {
-      selectedDate,
-      hasCheckIn: !!relevant.checkin,
-      hasCheckOut: !!relevant.checkout,
-      checkin: relevant.checkin,
-      checkout: relevant.checkout,
-    })
-  }
-
   return relevant || null
 }
 
@@ -430,19 +419,11 @@ const getCheckInStatus = (student: StudentEnrollment): string => {
   // กรณี 2: เลยเวลาแล้ว แต่ไม่มีข้อมูลเช็คชื่อเลย
   // =====================================================================
   if (!record) {
-    console.log('❌ No record found for', student.code, 'on date:', selectedDate)
     return 'ไม่มา'
   }
 
   const hasCheckIn = !!record.checkin
   const hasCheckOut = !!record.checkout
-
-  console.log('📋 Status check for', student.code, ':', {
-    hasCheckIn,
-    hasCheckOut,
-    checkin: record.checkin,
-    checkout: record.checkout,
-  })
 
   // =====================================================================
   // กรณี 3: เช็คไม่ครบ (เช็คอย่างใดอย่างหนึ่ง หรือ ไม่เช็คเลย)
@@ -450,23 +431,18 @@ const getCheckInStatus = (student: StudentEnrollment): string => {
 
   // 3.1 ไม่เช็คทั้งคู่ → ไม่มา
   if (!hasCheckIn && !hasCheckOut) {
-    console.log('➡️ Result: ไม่มา (no both)')
     return 'ไม่มา'
   }
 
   // 3.2 เช็คอินอย่างเดียว → มาไม่ครบ
   if (hasCheckIn && !hasCheckOut) {
-    console.log('➡️ Result: มาไม่ครบ (only check-in)')
     return 'มาไม่ครบ'
   }
 
   // 3.3 เช็คเอาท์อย่างเดียว → มาไม่ครบ (นี่คือที่แก้ไข!)
   if (!hasCheckIn && hasCheckOut) {
-    console.log('➡️ Result: มาไม่ครบ (only check-out)')
     return 'มาไม่ครบ'
-  }
-
-  // =====================================================================
+  } // =====================================================================
   // กรณี 4-5: เช็คครบทั้งคู่ → ตรวจสอบว่ามาสายหรือไม่
   // =====================================================================
   const checkinTime = dayjs(record.checkin)
