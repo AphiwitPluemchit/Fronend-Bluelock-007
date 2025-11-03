@@ -164,14 +164,6 @@ onMounted(async () => {
 <template>
   <q-page class="flex flex-center q-pa-md checkinout-page">
     <q-card class="q-pa-xl text-center checkinout-container">
-      <q-btn
-        flat
-        class="text-primary q-mb-md under-line"
-        style="text-decoration: underline"
-        label="กลับไปหน้าหลัก"
-        to="/home"
-        align="left"
-      />
       <div>
         <q-icon name="how_to_reg" size="64px" color="primary" />
       </div>
@@ -193,7 +185,6 @@ onMounted(async () => {
               : 'เช็คชื่อเข้าโครงการ'
         }}
       </div>
-
       <!-- <div class="text-h6 q-mt-md">เช็คชื่อเข้าโครงการ</div> -->
       <div v-if="loading" class="q-mt-md">กำลังโหลด...</div>
       <div v-else-if="error" class="text-negative q-mt-md">{{ error }}</div>

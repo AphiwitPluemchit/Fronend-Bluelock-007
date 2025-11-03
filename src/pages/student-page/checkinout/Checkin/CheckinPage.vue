@@ -67,8 +67,7 @@ console.log('token:', props.token)
 <template>
   <div class="q-pa-md">
     <div>
-      <div v-if="props.program?.name" class="q-mb-sm">โครงการ: {{ props.program?.name }}</div>
-
+      <div v-if="props.program?.name" class="q-mb-sm">{{ props.program?.name }}</div>
       <div class="q-pa-md">
         <!-- 🔹 ปุ่มเปลี่ยนตามสถานะ -->
         <q-btn
@@ -78,9 +77,8 @@ console.log('token:', props.token)
           color="primary"
           @click="checkin"
         />
-        <q-btn v-else class="btnconfirm" label="กลับหน้าหลัก" color="secondary" @click="goHome" />
+        <q-btn v-else class="btnconfirm" label="ดูรายละเอียด" color="secondary" @click="goHome" />
       </div>
-
       <div v-if="isSubmitted">
         <div v-if="isChecked" class="text-positive">เช็คชื่อเข้าร่วมสำเร็จ</div>
         <div v-else-if="errorMessage" class="text-negative q-mt-md">{{ errorMessage }}</div>

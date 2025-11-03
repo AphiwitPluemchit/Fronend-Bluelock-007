@@ -238,8 +238,7 @@ async function onPrimaryClick() {
 <template>
   <div class="q-pa-md">
     <div>
-      <div v-if="props.program?.name" class="q-mb-sm">โครงการ: {{ props.program?.name }}</div>
-
+      <div v-if="props.program?.name" class="q-mb-sm">{{ props.program?.name }}</div>
       <div class="q-pa-md">
         <!-- ปุ่มหลัก -->
         <q-btn
@@ -251,8 +250,7 @@ async function onPrimaryClick() {
           :disable="loading || hasForm === null"
           @click="onPrimaryClick"
         />
-        <q-btn v-else class="btnconfirm" label="กลับหน้าหลัก" color="secondary" @click="goHome" />
-
+        <q-btn v-else class="btnconfirm" label="ดูรายละเอียด" color="secondary" @click="goHome" />
         <!-- ✅ ข้อความสำเร็จ: ย้ายมาไว้ใต้ปุ่ม -->
         <div
           v-if="(hasForm === true && formSubmitted) || (hasForm === false && checkedOut)"
@@ -260,7 +258,6 @@ async function onPrimaryClick() {
         >
           {{ hasForm ? 'เช็คชื่อออกและทำแบบประเมินสำเร็จ' : 'เช็คชื่อออกสำเร็จ' }}
         </div>
-
         <!-- ข้อความผิดพลาด (ถ้ามีและยังไม่สำเร็จ) -->
         <div v-else-if="errorMessage" class="text-negative q-mt-md">
           {{ errorMessage }}

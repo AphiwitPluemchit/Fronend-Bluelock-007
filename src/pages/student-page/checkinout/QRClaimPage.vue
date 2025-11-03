@@ -71,11 +71,9 @@ onMounted(async () => {
         <div class="text-h6 q-mt-md text-white">กำลังประมวลผล QR Code...</div>
         <div class="text-body2 q-mt-sm text-grey-4">กรุณารอสักครู่</div>
       </div>
-
       <div v-else-if="error" class="text-center">
         <q-icon name="error_outline" size="64px" color="negative" />
         <div class="text-h6 q-mt-md text-negative">{{ error }}</div>
-        <q-btn class="q-mt-lg" color="primary" label="กลับหน้าหลัก" @click="router.push('/home')" />
       </div>
     </q-card>
   </q-page>
