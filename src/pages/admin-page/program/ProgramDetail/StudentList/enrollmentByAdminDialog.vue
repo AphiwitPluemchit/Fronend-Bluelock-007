@@ -86,7 +86,9 @@ function onFilterStudentLocal(val: string, update: (cb: () => void) => void) {
       : allStudentOptions.value
   })
 }
-function onAbortStudentFilter() {/* no-op */}
+function onAbortStudentFilter() {
+  /* no-op */
+}
 
 // ===== ProgramItem & FoodVote (จาก props.program) =====
 const programItemOptions = computed<Array<Option<string>>>(() =>
@@ -178,7 +180,7 @@ async function onSave() {
   }
 
   if (hasFoodVotes.value && form.value.foodVoteName) {
-    payload.food =form.value.foodVoteName
+    payload.food = form.value.foodVoteName
   }
 
   try {
@@ -193,16 +195,13 @@ async function onSave() {
     loading.value = false
   }
 }
-
 </script>
 
 <template>
   <q-dialog v-model="dialog" persistent>
-    <q-card style="width: 90vw; max-width: 600px; border-radius: 10px" >
+    <q-card style="width: 90vw; max-width: 600px; border-radius: 10px" class="dialog-box">
       <q-card-section>
-        <div class="text-h6 q-mb-lg q-mt-sm">
-          ลงทะเบียนนิสิตโดยเจ้าหน้าที่
-        </div>
+        <div class="text-h6 q-mb-lg q-mt-sm"><strong>เพิ่มนิสิตเข้าโครงการ</strong></div>
         <!-- เลือกนิสิต -->
         <div>
           <div class="text-subtitle2 q-mb-xs">นิสิต</div>
@@ -288,11 +287,18 @@ async function onSave() {
         </q-banner>
       </q-card-section>
 
-
       <q-card-actions align="right">
-        <q-btn flat label="ยกเลิก" class="btnreject" :disable="loading" @click="close" />
+        <q-btn unelevated label="ยกเลิก" class="btnreject" :disable="loading" @click="close" />
         <q-btn unelevated label="ยืนยัน" class="btnsecces" :loading="loading" @click="onSave" />
       </q-card-actions>
     </q-card>
   </q-dialog>
 </template>
+
+<style>
+.dialog-box {
+  width: 400px;
+  padding: 20px;
+  border-radius: 12px;
+}
+</style>

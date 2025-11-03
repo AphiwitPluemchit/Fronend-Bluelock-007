@@ -45,7 +45,7 @@ const onConfirm = () => {
   <q-dialog v-model="dialogVisible" persistent>
     <q-card class="dialog-box">
       <q-card-section>
-        <div class="label">สร้าง QR-Code เช็คชื่อ</div>
+        <div class="label"><strong>สร้าง QR-Code เช็คชื่อ</strong></div>
       </q-card-section>
 
       <!-- ปุ่มเลือกประเภท -->
@@ -87,7 +87,7 @@ const onConfirm = () => {
 .label {
   font-size: 20px;
   font-weight: normal;
-  margin-bottom: 10px;
+  text-align: start;
 }
 
 .status-section {

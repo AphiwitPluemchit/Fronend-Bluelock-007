@@ -154,7 +154,13 @@ const enableEditMode = () => {
   <div class="input-group">
     <p class="label label_minWidth">รายการอาหาร :</p>
     <div class="input-container">
-      <q-input outlined v-model="foodMenuDisplay" :disable="disable" @click="openFoodDialog" readonly>
+      <q-input
+        outlined
+        v-model="foodMenuDisplay"
+        :disable="disable"
+        @click="openFoodDialog"
+        readonly
+      >
         <template v-slot:prepend>
           <q-icon
             name="restaurant_menu"
@@ -249,7 +255,7 @@ const enableEditMode = () => {
       <div class="button-container">
         <q-btn class="btnreject" label="ยกเลิก" @click="cancelSelection" :disable="disable" />
         <q-btn
-          class="btnconfirm"
+          :class="isEditMode ? 'btnconfirm' : 'btnsecces'"
           :label="isEditMode ? 'บันทึก' : 'ยืนยัน'"
           @click="confirmSelection"
           :disable="disable"

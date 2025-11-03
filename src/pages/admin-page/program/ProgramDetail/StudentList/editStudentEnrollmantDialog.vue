@@ -194,21 +194,22 @@ async function onSave() {
   }
 }
 </script>
+
 <template>
   <q-dialog v-model="dialog" persistent>
     <q-card
-      style="width: 90vw; max-width: 570px; max-height: 80vh; overflow-y: auto; border-radius: 10px"
+      style="width: 90vw; max-width: 900px; max-height: 80vh; overflow-y: auto;" class="dialog-box"
     >
       <q-card-section class="q-gutter-y-md">
-        <div class="q-mb-sm text-h6">ข้อมูลการเช็คชื่อนิสิต</div>
-        <div class="row q-ma-sm">
-          <div class="col-12 q-mt-sm">{{ display.studentCode }} {{ display.studentName }}</div>
+        <div class="q-mb-sm q-mt-lg text-h5"><strong>ประวัติการเช็คชื่อ</strong></div>
+        <div class="row">
+          <div class="col-6 q-mt-sm textcontent2"><strong>รหัสนิสิต :</strong> {{ display.studentCode }}</div>
+          <div class="col-6 q-mt-sm textcontent2"><strong>ชื่อ - นามสกุล :</strong> {{ display.studentName }}</div>
         </div>
 
-        <q-separator class="q-mt-md" />
 
-        <div class="row q-mt-md">
-          <div class="q-mb-sm text-h6">รายการเช็คชื่อรายวัน</div>
+        <div class="row q-mt-lg">
+          <div class="q-mb-sm text-h6"><strong>ประวัติการเช็คชื่อรายวัน</strong></div>
         </div>
 
         <div class="q-table__container q-table--flat q-table--bordered">
@@ -281,5 +282,10 @@ async function onSave() {
   top: 0;
   background: #f5f5f5;
   z-index: 1;
+}
+
+.dialog-box {
+  padding: 20px;
+  border-radius: 12px;
 }
 </style>
