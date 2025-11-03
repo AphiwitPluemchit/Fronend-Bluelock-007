@@ -12,7 +12,11 @@ const qrLink = ref('')
 const qrToken = ref('') // เก็บ token ล่าสุด
 const qrType = ref('')
 const programName = ref('')
-const countdown = ref(10) // นับถอยหลัง 10 วิ
+
+// Frontend display duration for the QR countdown (in seconds).
+// Configure via Vite env var VITE_QR_DISPLAY_SECONDS (e.g. 5).
+const qrDisplaySeconds = Number(import.meta.env.VITE_QR_DISPLAY_SECONDS) || 5
+const countdown = ref(qrDisplaySeconds) // นับถอยหลัง (configurable)
 const appURL = import.meta.env.VITE_APP_URL
 
 let refreshInterval: ReturnType<typeof setInterval> | null = null
@@ -33,7 +37,7 @@ const fetchQR = async () => {
     qrLink.value = res?.url || ''
     qrToken.value = res?.token || ''
     qrType.value = res?.type || type
-    countdown.value = 10 // รีเซ็ต countdown
+    countdown.value = qrDisplaySeconds // รีเซ็ต countdown
   } catch (err) {
     console.error('โหลด QR ล้มเหลว:', err)
   }
@@ -43,7 +47,7 @@ const startCountdown = () => {
   countdownInterval = setInterval(() => {
     countdown.value--
     if (countdown.value <= 0) {
-      countdown.value = 10
+      countdown.value = qrDisplaySeconds
     }
   }, 1000) // ลดลงทุก 1 วิ
 }
@@ -51,10 +55,10 @@ const startCountdown = () => {
 onMounted(async () => {
   await Promise.all([fetchProgram(), fetchQR()])
 
-  // 🔄 Auto-refresh QR ทุก 10 วิ
+  // 🔄 Auto-refresh QR every `qrDisplaySeconds` seconds (frontend display)
   refreshInterval = setInterval(() => {
     void fetchQR()
-  }, 10000) // 10 วินาที
+  }, qrDisplaySeconds * 1000)
 
   // ⏱️ เริ่ม countdown
   startCountdown()
