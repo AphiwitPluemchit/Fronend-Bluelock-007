@@ -63,6 +63,7 @@ const getProgramLocations = (rooms?: string[]) => {
 }
 
 const onClick = async (id: string) => {
+  if (!id || id === "000000000000000000000000" ) return
   await router.push(`/Student/Program/MyProgramDetail/${id}`)
 }
 
