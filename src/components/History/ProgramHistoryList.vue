@@ -62,8 +62,8 @@ const getProgramLocations = (rooms?: string[]) => {
   return rooms
 }
 
-const onClick = async (id: string) => {
-  if (!id || id === "000000000000000000000000" ) return
+const onClick = async (id: string, status: string) => {
+  if (status === 'manual' || id === "000000000000000000000000" ) return
   await router.push(`/Student/Program/MyProgramDetail/${id}`)
 }
 
@@ -168,7 +168,7 @@ onMounted(async () => {
           class="program-card cursor-pointer"
           flat
           bordered
-          @click="onClick(history.sourceId)"
+          @click="onClick(history.sourceId, history.status)"
         >
           <q-card-section class="q-pt-md q-pb-sm">
             <div class="row items-center justify-between q-mb-sm">
