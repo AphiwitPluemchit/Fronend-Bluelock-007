@@ -50,7 +50,7 @@ const breadcrumbPath = computed(() => {
 })
 
 const breadcrumbs = computed(() => ({
-  previousPage: { title: 'โครงการของฉัน', path: '/Student/RecordPage' },
+  previousPage: { title: 'ประวัติของฉัน', path: '/Student/RecordPage' },
   currentPage: { title: currentBreadcrumb.value, path: breadcrumbPath.value },
   icon: 'event',
 }))
