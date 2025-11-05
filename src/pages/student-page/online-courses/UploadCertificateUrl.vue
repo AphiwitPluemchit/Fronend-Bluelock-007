@@ -16,9 +16,7 @@ const courseId = route.params.courseId as string
 const courseStore = useCourseStore()
 const authStore = useAuthStore()
 const baseurl = api.defaults.baseURL
-const url = ref(
-  'https://',
-)
+const url = ref('')
 const $q = useQuasar()
 
 // Types
@@ -243,7 +241,7 @@ async function fetchLatestUpload() {
                 <div class="field-label">ชื่อหลักสูตร :</div>
                 <div class="field-value">{{ courseName }}</div>
               </div>
-<!-- 
+              <!--
               <div class="field-pair">
                 <div class="field-label">ชื่อในใบประกาศ :</div>
                 <div class="field-value">{{ certificateName }}</div>
@@ -253,6 +251,20 @@ async function fetchLatestUpload() {
                 <div class="field-label">ชื่อในใบประกาศ (อังกฤษ) :</div>
                 <div class="field-value">{{ certificateNameEng }}</div>
               </div> -->
+              <div class="field-pair">
+                <div class="field-label">ประเภททักษะ :</div>
+                <div class="field-value">
+                  {{
+                    selectedCourse.isHardSkill ? 'ทักษะความรู้ทางวิชาการ' : 'ทักษะเตรียมความพร้อม'
+                  }}
+                </div>
+              </div>
+              <div class="field-pair">
+                <div class="field-label">แหล่งที่มา :</div>
+                <div class="field-value">
+                  {{ selectedCourse.type === 'buumooc' ? 'Buu Mooc' : 'Thai Mooc' }}
+                </div>
+              </div>
               <div class="field-pair">
                 <div class="field-label">หน่วยงานผู้ออก :</div>
                 <div class="field-value">{{ selectedCourse.issuer }}</div>
@@ -303,13 +315,7 @@ async function fetchLatestUpload() {
             <div class="field-pair">
               <div class="field-label">ลิงก์ใบประกาศนียบัตร :</div>
               <div class="field-value">
-                <q-input
-                  v-model="url"
-                  outlined
-                  dense
-                  class="input-url"
-                >
-                </q-input>
+                <q-input v-model="url" outlined dense class="input-url"> </q-input>
               </div>
             </div>
           </q-list>
@@ -464,7 +470,6 @@ async function fetchLatestUpload() {
   .certificate-upload-card {
     padding: 12px;
   }
-
 
   .tutorial-section {
     padding: 12px;
