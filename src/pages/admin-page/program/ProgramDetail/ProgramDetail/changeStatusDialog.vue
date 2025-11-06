@@ -77,7 +77,7 @@ const confirmStatusChange = () => {
   <q-dialog v-model="showDialog" persistent>
     <q-card class="dialog-box">
       <q-card-section>
-        <div class="label">เปลี่ยนสถานะโครงการ</div>
+        <div class="textsubtitle">เปลี่ยนสถานะโครงการ</div>
       </q-card-section>
 
       <q-card-section class="status-section">
@@ -100,7 +100,7 @@ const confirmStatusChange = () => {
       </q-card-section>
 
       <!-- ปุ่มยืนยัน & ยกเลิก -->
-      <q-card-actions align="right">
+      <q-card-actions align="right" class="q-mt-md">
         <q-btn class="btnreject" label="ยกเลิก" @click="closeDialog" />
         <q-btn class="btnsecces" label="ยืนยัน" @click="confirmStatusChange" />
       </q-card-actions>
@@ -109,14 +109,7 @@ const confirmStatusChange = () => {
 </template>
 
 <style scoped>
-.label {
-  font-size: 20px;
-  font-weight: normal;
-  display: flex;
-  justify-content: flex-start;
-  align-items: center;
-  height: 40px;
-}
+
 
 .dialog-box {
   width: 400px;
@@ -129,7 +122,6 @@ const confirmStatusChange = () => {
   flex-direction: column;
   align-items: center;
   gap: 15px;
-  margin-bottom: 10px;
 }
 
 .status-btn {

@@ -3,21 +3,33 @@ import { onMounted, onUnmounted, ref } from 'vue'
 import { useRoute } from 'vue-router'
 import CheckinoutService from 'src/services/checkinout'
 import { ProgramService } from 'src/services/program'
+import { useQuasar, copyToClipboard } from 'quasar'
 
+const $q = useQuasar()
 const route = useRoute()
 const programId = route.params.id as string
 const type = route.params.type as 'checkin' | 'checkout'
 
-const qrLink = ref('')
-const qrToken = ref('') // เก็บ token ล่าสุด
+const qrLink = ref('') // อาจเป็น path (เช่น /CheckIn/xxx) หรือ full URL
 const qrType = ref('')
 const programName = ref('')
 
-// Frontend display duration for the QR countdown (in seconds).
-// Configure via Vite env var VITE_QR_DISPLAY_SECONDS (e.g. 5).
+const baseURL = (import.meta.env.VITE_APP_URL as string) || window.location.origin
+
+// รวมลิงก์สุดท้ายให้คลิก/ก็อบได้เสมอ
+const fullQRUrl = () => {
+  try {
+    // ถ้า qrLink เป็น absolute URL อยู่แล้ว
+    return new URL(qrLink.value).toString()
+  } catch {
+    // ไม่ใช่ absolute → รวมกับ base
+    return new URL(qrLink.value, baseURL).toString()
+  }
+}
+
+// Frontend display duration for the QR countdown (in seconds)
 const qrDisplaySeconds = Number(import.meta.env.VITE_QR_DISPLAY_SECONDS) || 5
-const countdown = ref(qrDisplaySeconds) // นับถอยหลัง (configurable)
-const appURL = import.meta.env.VITE_APP_URL
+const countdown = ref(qrDisplaySeconds)
 
 let refreshInterval: ReturnType<typeof setInterval> | null = null
 let countdownInterval: ReturnType<typeof setInterval> | null = null
@@ -34,33 +46,29 @@ const fetchProgram = async () => {
 const fetchQR = async () => {
   try {
     const res = await CheckinoutService.getLink(programId, type)
-    qrLink.value = res?.url || ''
-    qrToken.value = res?.token || ''
+    qrLink.value = res?.url || '' // เก็บ “ค่าดิบ” ที่ backend ส่งมา
     qrType.value = res?.type || type
-    countdown.value = qrDisplaySeconds // รีเซ็ต countdown
+    countdown.value = qrDisplaySeconds
   } catch (err) {
     console.error('โหลด QR ล้มเหลว:', err)
   }
 }
 
 const startCountdown = () => {
+  if (countdownInterval) clearInterval(countdownInterval)
   countdownInterval = setInterval(() => {
     countdown.value--
-    if (countdown.value <= 0) {
-      countdown.value = qrDisplaySeconds
-    }
-  }, 1000) // ลดลงทุก 1 วิ
+    if (countdown.value <= 0) countdown.value = qrDisplaySeconds
+  }, 1000)
 }
 
 onMounted(async () => {
   await Promise.all([fetchProgram(), fetchQR()])
-
-  // 🔄 Auto-refresh QR every `qrDisplaySeconds` seconds (frontend display)
+  // Auto-refresh QR
+  if (refreshInterval) clearInterval(refreshInterval)
   refreshInterval = setInterval(() => {
     void fetchQR()
   }, qrDisplaySeconds * 1000)
-
-  // ⏱️ เริ่ม countdown
   startCountdown()
 })
 
@@ -69,8 +77,13 @@ onUnmounted(() => {
   if (countdownInterval) clearInterval(countdownInterval)
 })
 
-const copyQRLink = () => {
-  if (qrLink.value) void navigator.clipboard.writeText(appURL + qrLink.value)
+const copyQRLink = async () => {
+  try {
+    await copyToClipboard(fullQRUrl())
+    $q.notify({ type: 'positive', message: 'คัดลอกลิงก์เรียบร้อยแล้ว' })
+  } catch {
+    $q.notify({ type: 'negative', message: 'ไม่สามารถคัดลอกลิงก์ได้' })
+  }
 }
 </script>
 
@@ -99,7 +112,7 @@ const copyQRLink = () => {
         <div class="q-my-xl">
           <q-img
             v-if="qrLink"
-            :src="`https://api.qrserver.com/v1/create-qr-code/?size=350x350&data=${appURL + qrLink}`"
+            :src="`https://api.qrserver.com/v1/create-qr-code/?size=350x350&data=${encodeURIComponent(fullQRUrl())}`"
             style="width: 350px; height: 350px"
             spinner-color="primary"
           />
@@ -108,7 +121,7 @@ const copyQRLink = () => {
         <q-card-section class="bg-white rounded-borders q-pa-md">
           <div class="row items-center justify-center q-gutter-sm">
             <span class="text-body2 ellipsis" style="word-break: break-all">
-              {{ appURL + qrLink }}
+              {{ fullQRUrl() }}
             </span>
             <q-btn
               round
@@ -146,15 +159,16 @@ const copyQRLink = () => {
 
         <q-img
           v-if="qrLink"
-          :src="`https://api.qrserver.com/v1/create-qr-code/?size=350x350&data=${appURL + qrLink}`"
-          class="qr-image q-mb-md"
+          :src="`https://api.qrserver.com/v1/create-qr-code/?size=350x350&data=${encodeURIComponent(fullQRUrl())}`"
+          style="width: 350px; height: 350px"
           spinner-color="primary"
         />
+
         <div v-else class="text-grey text-subtitle1 q-my-md">กำลังโหลด QR...</div>
         <q-card-section class="bg-white rounded-borders q-pa-sm" style="width: 100%">
           <div class="row items-center justify-center q-gutter-sm">
             <span class="text-body2 ellipsis qr-link" style="word-break: break-all">
-              {{ appURL + qrLink }}
+              {{ fullQRUrl() }}
             </span>
             <q-btn
               round

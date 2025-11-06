@@ -18,6 +18,7 @@ import ProgramForm_ProgramTime from 'src/pages/admin-page/program/CreateProgram/
 import ProgramForm_StudentYears from 'src/pages/admin-page/program/CreateProgram/Form/programForm_StudentYears.vue'
 import ProgramForm_CloseRegisDate from 'src/pages/admin-page/program/CreateProgram/Form/programForm_CloseRegisDate.vue'
 import ChangeStatusDialog from 'src/pages/admin-page/program/ProgramDetail/ProgramDetail/changeStatusDialog.vue'
+import ShareProgramDialog from 'src/pages/admin-page/program/ProgramDetail/ProgramDetail/shareProgramDialog.vue'
 import CancelDialog from 'src/components/Dialog/CancelDialog.vue'
 import ProgramForm_Form from 'src/pages/admin-page/program/CreateProgram/Form/programForm_Form.vue'
 import { useFormStore } from 'src/stores/forms'
@@ -102,6 +103,7 @@ const foodMenuDisplay = ref('')
 const originalProgram = ref<Program | null>(null)
 const programLoaded = ref(false)
 const showChangeStatusDialog = ref(false)
+const showShareProgramDialog = ref(false)
 const subPrograms = ref<SubProgram[]>([])
 const sameTimeForAll = ref(false)
 const showCancelDialog = ref(false)
@@ -874,9 +876,16 @@ onMounted(() => {
           unelevated
           style="min-width: unset; width: auto"
         />
+        <q-avatar size="35px" class="bg-white text-primary avatar-hover" @click="showShareProgramDialog = true">
+          <q-icon name="share" />
+        </q-avatar>
       </div>
     </div>
 
+    <ShareProgramDialog
+      v-model="showShareProgramDialog"
+      :programId="props.program?.id ?? ''"
+    />
     <ChangeStatusDialog
       v-model="showChangeStatusDialog"
       :currentStatus="programStatus"
@@ -954,9 +963,7 @@ onMounted(() => {
             class="fix-q-input-height"
             @keyup.enter="onEnterField('subName', index)"
             :disable="!isEditing"
-            :error="
-              subProgramNameErrors[index] !== undefined && subProgramNameErrors[index] !== ''
-            "
+            :error="subProgramNameErrors[index] !== undefined && subProgramNameErrors[index] !== ''"
           />
 
           <div v-if="subProgramNameErrors[index]" class="text-negative text-subtitle2 q-mt-xs">
@@ -1127,6 +1134,11 @@ onMounted(() => {
 </template>
 
 <style scoped>
+.avatar-hover {
+  transition: transform 0.6s;
+  transform-style: preserve-3d;
+  cursor: pointer;
+}
 .status-group {
   align-items: flex-start;
 }
