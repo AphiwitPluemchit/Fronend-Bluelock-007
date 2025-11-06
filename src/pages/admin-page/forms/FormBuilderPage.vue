@@ -216,7 +216,7 @@ import { useRouter, useRoute } from 'vue-router'
 import AppBreadcrumbs from 'src/components/AppBreadcrumbs.vue'
 const breadcrumbs = ref({
   previousPage: { title: 'จัดการแบบประเมิน', path: '/Admin/Forms' },
-  currentPage: { title: 'สร้างแบบประเมิน', path: '/Admin/forms/builder' },
+  currentPage: { title: 'เพิ่มแบบประเมิน', path: '/Admin/forms/builder' },
   icon: 'edit_document',
 })
 const route = useRoute()

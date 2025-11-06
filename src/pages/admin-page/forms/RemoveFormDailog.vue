@@ -6,11 +6,11 @@
   >
     <q-card class="cancel-card">
       <q-card-section>
-        <div class="text-h6">ลบฟอร์ม</div>
+        <div class="text-h6">ลบแบบประเมิน</div>
       </q-card-section>
 
       <q-card-section>
-        หากคุณกดยืนยัน ฟอร์มนี้จะถูกลบออก
+        หากคุณกดยืนยันแบบประเมินนี้จะถูกลบออก
       </q-card-section>
 
       <q-card-actions align="right">
