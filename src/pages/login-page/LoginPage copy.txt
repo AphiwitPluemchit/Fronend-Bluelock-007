@@ -4,16 +4,16 @@
       <!-- โลโก้ -->
       <div class="text-center q-mb-lg">
         <div class="icon-container q-mb-md">
-          <q-icon name="school" size="80px" color="white"/>
+          <q-icon name="school" size="80px" color="white" />
         </div>
-        <div class="text-h4 text-primary brand-title q-mt-lg">Cooperative Education</div>
+        <div class="text-h4 text-primary brand-title q-mt-lg q-mb-sm">Cooperative Education</div>
         <div class="text-subtitle1 text-primary brand-subtitle">
-          ระบบสารสนเทศเพื่อการเก็บชั่วโมงอบรมสหกิจศึกษา
+          ระบบสารสนเทศเพื่อการเก็บชั่วโมง<br class="mobile-break" />อบรมสหกิจศึกษา
         </div>
       </div>
-        <div class="text-center q-mt-sm">
-          <div class="text-h6 text-grey-9">เข้าสู่ระบบเพื่อเริ่มต้นใช้งาน</div>
-          </div>
+      <div class="text-center q-mt-sm">
+        <div class="text-h6 text-grey-9 brand-welcome">เข้าสู่ระบบเพื่อเริ่มต้นใช้งาน</div>
+      </div>
       <!-- ปุ่มเข้าสู่ระบบด้วย Google -->
       <div class="text-center q-mt-md">
         <q-btn
@@ -41,9 +41,7 @@
         <!-- Security Badge -->
         <div class="security-badge text-center q-mt-lg">
           <q-icon name="shield" color="primary" size="18px" />
-          <span class="text-body2 text-grey-7 q-ml-xs"
-            >การเข้าสู่ระบบปลอดภัยด้วย Google</span
-          >
+          <span class="text-body2 text-grey-7 q-ml-xs">การเข้าสู่ระบบปลอดภัยด้วย Google</span>
         </div>
 
         <!-- Footer Text -->
@@ -51,8 +49,8 @@
           <div class="text-caption text-grey-6">© 2025 Cooperative Education System</div>
         </div>
       </div>
-      </q-card>
-    </q-page>
+    </q-card>
+  </q-page>
 </template>
 
 <script setup lang="ts">
@@ -120,7 +118,8 @@ const handleGoogleLogin = async () => {
 }
 
 @keyframes float {
-  0%, 100% {
+  0%,
+  100% {
     transform: translateY(0px);
   }
   50% {
@@ -161,5 +160,33 @@ const handleGoogleLogin = async () => {
 .google-icon {
   width: 22px;
   height: 22px;
+}
+
+/* ปรับเฉพาะจอเล็ก เช่น มือถือ */
+@media (max-width: 600px) {
+  .brand-title {
+    font-size: 1.5rem; /* เดิม text-h4 ~2rem */
+    line-height: 1.3;
+    margin-top: 0.5rem;
+  }
+
+  .brand-subtitle {
+    font-size: 1rem; /* เดิม text-subtitle1 ~1.25rem */
+    line-height: 1.4;
+    padding: 0 1rem; /* เพิ่มช่องว่างข้าง */
+    word-break: keep-all;
+    text-align: center;
+  }
+
+  .brand-welcome {
+    font-weight: 500;
+    font-size: 1rem; /* เดิม text-subtitle1 ~1.25rem */
+  }
+}
+
+@media (min-width: 601px) {
+  .mobile-break {
+    display: none;
+  }
 }
 </style>
