@@ -97,7 +97,7 @@ onMounted(async () => {
   <q-page class="q-pa-md">
     <!-- ชื่อหน้า -->
     <div class="row justify-between items-center q-mb-md" style="margin-top: 20px">
-      <div class="texttitle text-bold">โครงการทั้งหมด</div>
+      <div class="texttitle">โครงการทั้งหมด</div>
     </div>
 
     <div class="row justify-between items-center q-mb-md search-filter-wrapper q-col-gutter-md">
