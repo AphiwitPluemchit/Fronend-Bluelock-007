@@ -27,7 +27,7 @@
 
       <!-- Single program info - show only if one program -->
       <q-card-section v-else-if="programItems.length === 1">
-        <div class="text-body1">ลงทะเบียนเข้าร่วมโครงการ <strong>{{ programItems[0]?.name }}</strong></div>
+        <div class="text-body1">ลงทะเบียนเข้าร่วม <strong>{{ programItems[0]?.name }}</strong></div>
       </q-card-section>
 
       <!-- Food selection section - show only if food available -->

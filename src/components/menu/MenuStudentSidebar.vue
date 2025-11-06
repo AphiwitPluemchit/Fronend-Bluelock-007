@@ -10,7 +10,7 @@
           class="q-ml-lg"
         />
         <div class="text-left textsubtitle" v-show="$q.screen.gt.xs">
-          <div>ระบบเก็บชั่วโมงอบรมสหกิจศึกษา</div>
+          <div class="text-bold">ระบบเก็บชั่วโมงอบรมสหกิจศึกษา</div>
         </div>
         <!-- ปุ่มเมนูหลัก -->
       </div>

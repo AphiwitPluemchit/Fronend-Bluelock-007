@@ -101,7 +101,7 @@ onMounted(async () => {
       <!-- Student Profile Card -->
       <q-card bordered class="q-mb-md shadow-3 rounded-borders">
         <q-card-section class="bg-primary">
-          <div class="text-h6 text-bold text-white">
+          <div class="text-h6 text-white">
             <q-icon name="account_circle" class="q-mr-sm" />
             ข้อมูลนิสิต
           </div>
@@ -132,7 +132,7 @@ onMounted(async () => {
         <div class="col-12 col-md-6">
           <q-card bordered class="rounded-borders shadow-2 full-height">
             <q-card-section class="bg-primary q-mb-md">
-              <div class="text-h6 text-bold text-white">
+              <div class="text-h6 text-white">
                 <q-icon :name="programColors.academic.icon" class="q-mr-sm" />
                 {{ programColors.academic.label }}
               </div>
@@ -159,8 +159,8 @@ onMounted(async () => {
 
               <div class="full-width q-my-sm">
                 <div class="row items-center q-mb-xs">
-                  <div class="col text-subtitle2">ความคืบหน้า</div>
-                  <div class="col-auto text-caption">
+                  <div class="col textsubtitle2">ความคืบหน้า</div>
+                  <div class="col-auto textsubtitle2">
                     {{ Math.round(getProgressValue(academicData)) }}%
                   </div>
                 </div>
@@ -191,7 +191,7 @@ onMounted(async () => {
         <div class="col-12 col-md-6">
           <q-card bordered class="rounded-borders shadow-2 full-height">
             <q-card-section class="bg-primary q-mb-md">
-              <div class="text-h6 text-bold text-white">
+              <div class="text-h6 text-white">
                 <q-icon :name="programColors.preparation.icon" class="q-mr-sm" />
                 {{ programColors.preparation.label }}
               </div>
@@ -218,8 +218,8 @@ onMounted(async () => {
 
               <div class="full-width q-my-sm">
                 <div class="row items-center q-mb-xs">
-                  <div class="col text-subtitle2">ความคืบหน้า</div>
-                  <div class="col-auto text-caption">
+                  <div class="col textsubtitle2">ความคืบหน้า</div>
+                  <div class="col-auto textsubtitle2">
                     {{ Math.round(getProgressValue(prepData)) }}%
                   </div>
                 </div>
@@ -249,7 +249,7 @@ onMounted(async () => {
       </div>
       <div class="q-mb-md q-mt-xl">
         <!-- <q-card bordered class="rounded-borders shadow-2 full-height"> -->
-        <div class="row justify-between items-center q-mb-sm" style="margin-top: 20px">
+        <div class="row justify-between items-center q-mb-md" style="margin-top: 20px">
           <div class="textsubtitle">ประวัติการอบรม</div>
         </div>
         <div>

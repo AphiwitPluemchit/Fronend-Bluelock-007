@@ -63,7 +63,7 @@ const courseName = computed(() => selectedCourse.value?.name || '')
 const courseHours = computed(() => selectedCourse.value?.hour || 0)
 const courseSource = computed(() => {
   if (!selectedCourse.value) return ''
-  return selectedCourse.value.type === 'buumooc' ? 'mooc.buu.ac.th' : 'thaimooc'
+  return selectedCourse.value.type === 'buumooc' ? 'คลิกที่นี่' : 'คลิกที่นี่'
 })
 const courseLink = computed(() => selectedCourse.value?.link || '')
 

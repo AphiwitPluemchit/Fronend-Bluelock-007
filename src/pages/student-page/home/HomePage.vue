@@ -201,10 +201,10 @@ onMounted(async () => {
 <template>
   <q-page class="q-pa-md page-wrap">
     <div class="row justify-between items-center q-mb-md" style="margin-top: 20px">
-      <div class="texttitle text-bold">สวัสดี, {{ authStore.getName }}</div>
+      <div class="texttitle">สวัสดี, {{ authStore.getName }}</div>
     </div>
     <div class="row items-center justify-between q-mb-sm">
-      <p class="texttitle q-mb-none text-bold">โครงการ</p>
+      <p class="texttitle q-mb-none">โครงการ</p>
       <div class="see-all textcontent2" @click="gotoProgramTablePage">
         ดูทั้งหมด
         <q-icon name="chevron_right" size="18px" />
@@ -338,7 +338,7 @@ onMounted(async () => {
     <div class="q-mt-md course-carousel">
       <!-- ✅ หัวข้อซ้าย / ดูทั้งหมดขวา -->
       <div class="row items-center justify-between q-mb-sm">
-        <p class="texttitle q-mb-none text-bold">หลักสูตร</p>
+        <p class="texttitle q-mb-none">หลักสูตร</p>
         <div class="see-all" @click="OnlineCoursesPage">
           ดูทั้งหมด
           <q-icon name="chevron_right" size="18px" />
@@ -377,7 +377,7 @@ onMounted(async () => {
     </div>
 
     <div class="menu q-mb-lg">
-      <p class="texttitle text-bold">เมนู</p>
+      <p class="texttitle">เมนู</p>
       <div class="menu-row" style="color: #1f2937">
         <!-- calendar -->
         <q-card class="menu-card" @click="gotoCalendarPage">

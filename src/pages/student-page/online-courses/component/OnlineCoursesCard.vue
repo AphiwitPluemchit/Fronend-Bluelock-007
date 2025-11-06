@@ -18,7 +18,7 @@ const props = defineProps<Props>()
 // แสดงชื่อใบประกาศถ้ามี ถ้าไม่มีให้แสดงชื่อหลักสูตรปกติ
 const title = computed(() => props.course.name)
 const skillType = computed(() => (props.course.isHardSkill ? 'hardSkill' : 'softSkill'))
-const platformType = computed(() => (props.course.type === 'buumooc' ? 'Buu Mooc' : 'Thai Mooc'))
+const platformType = computed(() => (props.course.type === 'buumooc' ? 'BUU MOOC' : 'Thai MOOC'))
 const hours = computed(() => props.course.hour)
 
 
