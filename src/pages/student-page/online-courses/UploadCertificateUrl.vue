@@ -66,6 +66,7 @@ const courseSource = computed(() => {
   return selectedCourse.value.type === 'buumooc' ? 'คลิกที่นี่' : 'คลิกที่นี่'
 })
 const courseLink = computed(() => selectedCourse.value?.link || '')
+const videoUrl = computed(() => selectedCourse.value?.videoUrl || '')
 
 // โหลดข้อมูลคอร์สจาก courseId
 const loadCourseById = async () => {
@@ -89,6 +90,13 @@ const loadCourseById = async () => {
 function openCourseUrl() {
   if (courseLink.value) {
     window.open(courseLink.value, '_blank')
+  }
+}
+
+// เปิดวิธีการขออนุมัติ
+function openApprovalInstructions() {
+  if (videoUrl.value) {
+    window.open(videoUrl.value, '_blank')
   }
 }
 
@@ -279,6 +287,19 @@ async function fetchLatestUpload() {
                 <div class="field-value">
                   <a :href="courseLink" target="_blank" class="course-link" @click="openCourseUrl">
                     {{ courseSource }} <q-icon name="open_in_new" size="xs" />
+                  </a>
+                </div>
+              </div>
+              <div class="field-pair" v-if="videoUrl">
+                <div class="field-label">วิธีการขออนุมัติ :</div>
+                <div class="field-value">
+                  <a
+                    :href="videoUrl"
+                    target="_blank"
+                    class="course-link"
+                    @click="openApprovalInstructions"
+                  >
+                    คลิกที่นี่ <q-icon name="open_in_new" size="xs" />
                   </a>
                 </div>
               </div>
