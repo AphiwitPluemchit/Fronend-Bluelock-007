@@ -14,6 +14,12 @@ export const publicRoutes: RouteRecordRaw[] = [
         meta: { public: true },
       },
       {
+        path: '/lagacy-login',
+        name: 'LagacyLogin',
+        component: () => import('pages/login-page/LagacyLoginPage.vue'),
+        meta: { public: true },
+      },
+      {
         path: '/auth/callback',
         name: 'GoogleCallback',
         component: () => import('pages/login-page/GoogleCallback.vue'),
