@@ -7,7 +7,7 @@ import { useRoute } from 'vue-router'
 import RemoveStudentEnrollment from './removeStudentDialog.vue'
 import EditStudentEnrollmentDialog from './editStudentEnrollmantDialog.vue'
 import EnrollStudentDialog from './enrollmentByAdminDialog.vue'
-
+import * as XLSX from 'xlsx'
 import { ProgramService } from 'src/services/program'
 import { useEnrollmentStore } from 'src/stores/enrollment'
 // import { useStudentStore } from 'src/stores/student'
@@ -23,6 +23,7 @@ import type { StudentEnrollment } from 'src/types/enrollment'
 dayjs.locale('th')
 const $q = useQuasar()
 const route = useRoute()
+const isDownloading = ref(false)
 const isMobile = computed(() => $q.screen.width <= 600)
 const isEditing = ref(route.query.disable !== 'true')
 // const studentStore = useStudentStore()
@@ -34,6 +35,7 @@ const editDialog = ref(false)
 const addDialogOpen = ref(false)
 const canManage = computed(() => program.value?.programState !== 'success')
 const filterCategories1 = ref(['year', 'major', 'studentStatus'])
+
 const program = ref<Program | null>(null)
 const selectProgramItem = ref(-1)
 const selectProgramItemDate = ref<number | string>(-1)
@@ -374,6 +376,131 @@ const getRelevantCheckInOut = (
 
   return relevant || null
 }
+async function fetchAllEnrollmentsByProgramItem(programItemId: string, baseQuery: Pagination) {
+  const pageSize = -1 // ดึงทีละ 100 แถวเพื่อไม่หนักเกินไป
+  let page = 1
+  let total = 0
+  const all: StudentEnrollment[] = []
+
+  // clone query ป้องกันกระทบของจริง
+  const q: Pagination = {
+    ...baseQuery,
+    page,
+    limit: pageSize,
+  }
+
+  while (true) {
+    const res = await EnrollmentService.getEnrollmentsByProgramID(programItemId, q)
+    const rows: StudentEnrollment[] =
+      (res.data || res.data || [])
+    if (page === 1) total = res.meta.total || rows.length
+
+    all.push(...rows)
+
+    const fetched = all.length
+    if (fetched >= total || rows.length < pageSize) break
+
+    page += 1
+    q.page = page
+  }
+
+  return all
+}
+/** ตัดชื่อแผ่นงานให้ไม่เกิน 31 ตัวอักษร (ข้อจำกัด Excel) */
+function safeSheetName(name: string) {
+  if (!name) return 'Sheet'
+  // ห้ามมี:  :  \  /  ?  *  [  ]
+  // ปรับ regex ให้ไม่มี escape ที่ไม่จำเป็น
+  return name.length <= 31 ? name : name.slice(0, 31)
+}
+const MAJOR_MAP: Record<string, string> = {
+  CS:   'วิทยาการคอมพิวเตอร์',
+  SE:   'วิศวกรรมซอฟต์แวร์',
+  ITDI: 'เทคโนโลยีสารสนเทศเพื่ออุตสาหกรรมดิจิทัล',
+  AAI:  'ปัญญาประดิษฐ์ประยุกต์และเทคโนโลยีอัจฉริยะ',
+}
+
+function toMajorName(major?: string) {
+  if (!major) return '-'
+  const key = major.trim().toUpperCase()
+  return MAJOR_MAP[key] ?? major  // ถ้าไม่พบในแม็ป ให้คืนค่าที่ส่งมา
+}
+async function downloadExcel() {
+  try {
+    if (
+      !program.value ||
+      !Array.isArray(program.value.programItems) ||
+      program.value.programItems.length === 0
+    ) {
+      $q.notify({ type: 'warning', message: 'ยังไม่มีข้อมูลโครงการย่อย (ProgramItem)' })
+      return
+    }
+
+    isDownloading.value = true
+
+    // เตรียม workbook
+    const wb = XLSX.utils.book_new()
+
+    // วนทุก ProgramItem แล้วดึงข้อมูลทั้งหมดของแต่ละตัว
+    for (const item of program.value.programItems) {
+      const programItemId = item.id
+      if (!programItemId) continue
+
+      const allRows = await fetchAllEnrollmentsByProgramItem(programItemId, query.value)
+
+      // map ข้อมูลเป็น rows ของ XLSX
+      const rowsForSheet = allRows.map((stu, idx) => {
+        // เลือก record ของวันที่กำลังกรอง (getRelevantCheckInOut ใช้ selectedDate ภายใน getCheckInStatus อยู่แล้ว)
+
+        return {
+          ลำดับ: idx + 1,
+          รหัสนิสิต: stu.code || '',
+          'ชื่อ-สกุล': stu.name || '',
+          สาขา: toMajorName(stu.major),
+          อาหาร: (stu.food || '').trim() || '-',
+          // เช็คชื่อเข้า: checkin,
+          // เช็คชื่อออก: checkout,
+          // สถานะเช็คชื่อ: getCheckInStatus(stu), // ใช้ฟังก์ชันที่คุณมีอยู่แล้ว
+        }
+      })
+
+      // ถ้าไม่มีคนเลย ใส่ 1 แถวว่างเพื่อให้เห็นหัวตาราง
+      const dataForSheet =
+        rowsForSheet.length > 0
+          ? rowsForSheet
+          : [
+              {
+                ลำดับ: '',
+                รหัสนิสิต: '',
+                'ชื่อ-สกุล': '',
+                สาขา: '',
+                อาหาร: '',
+                // เช็คชื่อเข้า: '',
+                // เช็คชื่อออก: '',
+                // สถานะเช็คชื่อ: '',
+              },
+            ]
+
+      const ws = XLSX.utils.json_to_sheet(dataForSheet)
+      const sheetName = safeSheetName(item.name || 'ProgramItem')
+      XLSX.utils.book_append_sheet(wb, ws, sheetName)
+    }
+
+    // ตั้งชื่อไฟล์
+    const progName = (program.value?.name || 'ไม่มีชื่อ')
+    const ts = dayjs().format('YYYY-MM-DD_HH.mm')
+    const filename = `${progName}_${ts}.xlsx`
+
+    XLSX.writeFile(wb, filename)
+
+    $q.notify({ type: 'positive', message: 'ดาวน์โหลดไฟล์รายชื่อเรียบร้อย' })
+  } catch (err) {
+    console.error(err)
+    $q.notify({ type: 'negative', message: 'เกิดข้อผิดพลาดขณะดาวน์โหลดไฟล์' })
+  } finally {
+    isDownloading.value = false
+  }
+}
 
 /**
  * ฟังก์ชันหลักคำนวณสถานะเช็คชื่อ
@@ -564,16 +691,27 @@ onUnmounted(() => {
     <div class="program-header">
       <div class="row justify-between items-center">
         <div class="textsubtitle">{{ program?.name }}</div>
-        <q-btn
-          v-if="canManage && isEditing"
-          dense
-          outlined
-          label="เพิ่มนิสิต"
-          class="btnadd"
-          style="width: 130px"
-          @click="openAddDialog"
-        >
-        </q-btn>
+        <div class="row items-center q-gutter-x-sm">
+          <q-btn
+            dense
+            outlined
+            icon="download"
+            label="ดาวโหลดรายชื่อ"
+            class="btncyan q-px-sm"
+            @click="downloadExcel"
+          >
+          </q-btn>
+          <q-btn
+            v-if="canManage && isEditing"
+            dense
+            outlined
+            label="เพิ่มนิสิต"
+            class="btnadd"
+            @click="openAddDialog"
+            style="width: 130px"
+          >
+          </q-btn>
+        </div>
       </div>
     </div>
 

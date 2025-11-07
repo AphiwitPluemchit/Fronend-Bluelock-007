@@ -14,7 +14,7 @@ const route = useRoute()
 const programId = route.params.id as string
 const selectProgramItemDate = ref<string>('')
 const selectProgramItem = ref(-1) // เก็บ index ของ programItem ที่เลือก (-1 = ทั้งหมด)
-
+const isEditing = ref(route.query.disable !== 'true')
 const program = ref<Program | null>(null)
 interface ProgramRow {
   _id: string
@@ -253,7 +253,7 @@ onMounted(async () => {
     <!-- ปุ่มสร้าง QR Code -->
     <div class="image-section">
       <q-btn
-        v-if="canShowCheckInBtn"
+        v-if="canShowCheckInBtn && isEditing"
         label="สร้าง QR-Code เช็คชื่อ"
         icon="qr_code"
         @click="showCreateQR_CodeDialog"

@@ -168,7 +168,7 @@ const clearFile = () => {
           accept=".xls,.xlsx"
           emit-value
           map-options
-          class="q-mr-sm"
+          class="q-mr-sm file"
           @update:model-value="handleFileChange"
         >
           <template v-slot:append>
@@ -180,12 +180,10 @@ const clearFile = () => {
         <q-btn
           icon="download"
           label="ดาวน์โหลดตัวอย่างไฟล์"
-          color="cyan-6"
-          unelevated
-          no-caps
           dense
-          rounded
-          class="download-btn"
+          outlined
+          no-caps
+          class="btncyan q-px-md"
           @click="downloadTemplate"
         />
       </div>
@@ -256,13 +254,23 @@ const clearFile = () => {
   display: inline-block;
   font-size: 15px;
 }
-.download-btn {
+.file{
+  width: 200px;
+  height: 40px;
+  border-radius: 8px !important;
+  border: 1px solid #d1d1d1;
+  background-color: white;
+  white-space: nowrap;
+  text-overflow: unset;
+  transition: border-color 0.3s ease-in-out;
+}
+/* .download-btn {
   height: 44px;
   width: 220px;
   font-weight: 500;
-}
+} */
 
-.download-btn:active {
+/* .download-btn:active {
   transform: scale(0.98);
-}
+} */
 </style>

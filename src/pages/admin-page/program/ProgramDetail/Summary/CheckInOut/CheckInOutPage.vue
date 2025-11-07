@@ -160,7 +160,6 @@ const copyQRLink = async () => {
         <q-img
           v-if="qrLink"
           :src="`https://api.qrserver.com/v1/create-qr-code/?size=350x350&data=${encodeURIComponent(fullQRUrl())}`"
-          style="width: 350px; height: 350px"
           spinner-color="primary"
         />
 

@@ -187,9 +187,9 @@ watch(
           border-radius: 10px;
         "
       >
-        <q-card-section class="filter-section" style="max-height: 55vh; overflow-y: auto">
+        <q-card-section class="filter-section q-gutter-y-md" style="max-height: 55vh; overflow-y: auto">
           <!-- ประเภทโครงการ -->
-          <div v-if="availableCategories.includes('categoryProgram')" class="q-mt-md">
+          <div v-if="availableCategories.includes('categoryProgram')" class="">
             <p class="q-mb-sm text-h6">ประเภทโครงการ</p>
             <div class="chip-container">
               <q-chip
@@ -207,7 +207,7 @@ watch(
           </div>
 
           <!-- สถานะโครงการ -->
-          <div v-if="availableCategories.includes('statusProgram')" class="q-mt-md">
+          <div v-if="availableCategories.includes('statusProgram')" class="">
             <p class="q-mb-sm text-h6">สถานะโครงการ</p>
             <div class="chip-container">
               <q-chip
@@ -223,7 +223,7 @@ watch(
           </div>
 
           <!-- สาขา -->
-          <div v-if="availableCategories.includes('major')" class="q-mt-md">
+          <div v-if="availableCategories.includes('major')" class="">
             <p class="q-mb-sm text-h6">สาขา</p>
             <div class="chip-container">
               <q-chip
@@ -239,7 +239,7 @@ watch(
           </div>
 
           <!-- ชั้นปี -->
-          <div v-if="availableCategories.includes('year')" class="q-mt-md">
+          <div v-if="availableCategories.includes('year')" class="">
             <p class="q-mb-sm text-h6">ชั้นปี</p>
             <div class="chip-container">
               <q-chip
@@ -255,7 +255,7 @@ watch(
           </div>
 
           <!-- สถานะนิสิต -->
-          <div v-if="availableCategories.includes('studentStatus')" class="q-mt-md">
+          <div v-if="availableCategories.includes('studentStatus')" class="">
             <p class="q-mb-sm text-h6">สถานะนิสิต</p>
             <div class="chip-container">
               <q-chip
@@ -271,7 +271,7 @@ watch(
           </div>
 
           <!-- สถานะCertificate -->
-          <div v-if="availableCategories.includes('statusCertificate')" class="q-mt-md">
+          <div v-if="availableCategories.includes('statusCertificate')" class="">
             <p class="q-mb-sm text-h6">สถานะใบรับรอง</p>
             <div class="chip-container">
               <q-chip
@@ -349,7 +349,9 @@ watch(
   display: flex;
   flex-wrap: wrap;
 }
-
+.filter-section {
+  padding-top: 0px !important;
+}
 @media (max-width: 1024px) {
   .center-mobile-container {
     justify-content: center;
@@ -398,8 +400,8 @@ watch(
   }
 
   /* ปรับ margin-top หัวข้อ เช่น 'ประเภทโครงการ' */
-  .q-mt-md {
-    margin-top: 3px !important; /* ลดจากค่า md ปกติ */
-  }
+  /* .q-mt-md {
+    margin-top: 3px !important;
+  } */
 }
 </style>
