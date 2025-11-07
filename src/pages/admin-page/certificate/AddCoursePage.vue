@@ -19,9 +19,9 @@ const course = ref<Course>({
   certificateNameEng: '',
   link: '',
   issuer: '',
-  type: '',
+  type: 'buumooc', // ✅ Default เป็น BUU MOOC
   hour: 0,
-  isHardSkill: null as boolean | null,
+  isHardSkill: true, // ✅ Default เป็น ทักษะทางวิชาการ
   isActive: true,
   file: '',
   videoUrl: '',
@@ -30,6 +30,15 @@ const course = ref<Course>({
 const imageRef = ref<InstanceType<typeof ImageDetail> | null>(null)
 const selectedImageFile = ref<File | null>(null)
 
+// ✅ Touched state - เพื่อแสดง error เฉพาะเมื่อผู้ใช้เริ่มกรอกข้อมูลแล้ว
+const touched = ref({
+  name: false,
+  link: false,
+  isHardSkill: false,
+  hour: false,
+  type: false,
+})
+
 // Breadcrumbs
 const breadcrumbs = ref({
   previousPage: { title: 'จัดการหลักสูตร', path: '/admin/CourseTablePage' },
@@ -37,8 +46,36 @@ const breadcrumbs = ref({
   icon: 'school',
 })
 
-// Validation errors removed - form will submit without client-side validation
-// Server-side validation will handle any required field validation
+// ✅ Validation computed properties
+const isFormValid = computed(() => {
+  // ✅ ต้องกรอกชื่อในใบประกาศอย่างน้อย 1 ภาษา
+  const hasCertificateName =
+    (course.value.certificateName?.trim() ?? '') !== '' ||
+    (course.value.certificateNameEng?.trim() ?? '') !== ''
+
+  return (
+    course.value.name.trim() !== '' &&
+    course.value.link.trim() !== '' &&
+    hasCertificateName && // ✅ เช็คว่ามีชื่อในใบประกาศอย่างน้อย 1 ภาษา
+    course.value.isHardSkill !== null &&
+    course.value.hour > 0 &&
+    course.value.type.trim() !== ''
+  )
+})
+
+// ✅ Computed สำหรับแสดง error message (แสดงเฉพาะเมื่อ touched)
+const nameError = computed(() =>
+  touched.value.name && course.value.name.trim() === '' ? 'กรุณากรอกชื่อหลักสูตร' : '',
+)
+const linkError = computed(() =>
+  touched.value.link && course.value.link.trim() === '' ? 'กรุณากรอกลิงค์' : '',
+)
+const hourError = computed(() =>
+  touched.value.hour && course.value.hour <= 0 ? 'กรุณากรอกจำนวนชั่วโมง' : '',
+)
+// ✅ ลบ error messages สำหรับฟิลด์ที่มี default หรือไม่บังคับแสดง error
+const isHardSkillError = computed(() => '')
+const typeError = computed(() => '')
 
 const statusText = computed(() => (course.value.isActive ? 'เปิดใช้งาน' : 'ปิดชั่วคราว'))
 const statusClass = computed(() => (course.value.isActive ? 'status-open' : 'status-closed'))
@@ -48,10 +85,12 @@ function handleFileSelected(file: File) {
 }
 
 function setHardSkill(v: boolean) {
+  touched.value.isHardSkill = true
   course.value.isHardSkill = v
 }
 
 function setType(v: 'thaimooc' | 'buumooc') {
+  touched.value.type = true
   course.value.type = v
 }
 
@@ -72,6 +111,25 @@ const cancel = () => {
 }
 
 const submit = async () => {
+  // ✅ Mark all fields as touched เพื่อแสดง error ถ้ามี
+  touched.value = {
+    name: true,
+    link: true,
+    isHardSkill: true,
+    hour: true,
+    type: true,
+  }
+
+  // ตรวจสอบว่าฟอร์มถูกต้องหรือไม่
+  if (!isFormValid.value) {
+    $q.notify({
+      message: 'กรุณากรอกข้อมูลให้ครบถ้วน',
+      type: 'warning',
+      position: 'top',
+    })
+    return
+  }
+
   try {
     if (selectedImageFile.value) {
       await courseStore.createCourseWithImage(course.value, selectedImageFile.value)
@@ -131,15 +189,19 @@ const submit = async () => {
 
             <!-- ชื่อหัวข้อ (ไทย) -->
             <div class="input-group">
-              <p class="label label_minWidth">ชื่อหลักสูตร:</p>
+              <p class="label label_minWidth">ชื่อหลักสูตร: <span class="text-red">*</span></p>
               <div class="input-container">
                 <q-input
                   outlined
                   v-model="course.name"
                   class="fix-q-input-height"
-                  hide-bottom
                   placeholder="เช่น การออกแบบสื่อและการนำเสนอ (Media Design and Presentation)"
+                  :error="nameError !== ''"
+                  @blur="touched.name = true"
                 />
+                <div v-if="nameError" class="text-negative text-subtitle2 q-mt-xs">
+                  {{ nameError }}
+                </div>
               </div>
             </div>
 
@@ -177,7 +239,7 @@ const submit = async () => {
 
             <!-- ประเภทโครงการ (isHardSkill) -->
             <div class="input-group">
-              <p class="label label_minWidth">ประเภทหลักสูตร :</p>
+              <p class="label label_minWidth">ประเภทหลักสูตร : <span class="text-red">*</span></p>
               <div class="status-inline-group">
                 <q-btn
                   :class="[
@@ -205,24 +267,32 @@ const submit = async () => {
                   ชั่วโมงเตรียมความพร้อม
                 </q-btn>
               </div>
+              <div v-if="isHardSkillError" class="text-negative text-subtitle2 q-mt-xs">
+                {{ isHardSkillError }}
+              </div>
             </div>
 
             <!-- ลิงก์คอร์ส -->
             <div class="input-group">
-              <p class="label label_minWidth">ลิงก์ :</p>
+              <p class="label label_minWidth">ลิงก์ : <span class="text-red">*</span></p>
               <div class="input-container">
                 <q-input
                   outlined
                   v-model="course.link"
                   class="fix-q-input-height"
-                  placeholder="https://..."
+                  placeholder="https://learn.mooc.buu.ac.th/courses/example"
+                  :error="linkError !== ''"
+                  @blur="touched.link = true"
                 />
+                <div v-if="linkError" class="text-negative text-subtitle2 q-mt-xs">
+                  {{ linkError }}
+                </div>
               </div>
             </div>
 
             <!-- จำนวนชั่วโมง -->
             <div class="input-group">
-              <p class="label label_minWidth">จำนวนชั่วโมง :</p>
+              <p class="label label_minWidth">จำนวนชั่วโมง : <span class="text-red">*</span></p>
               <div class="input-container">
                 <q-input
                   type="number"
@@ -231,7 +301,12 @@ const submit = async () => {
                   class="fix-q-input-height"
                   min="0"
                   placeholder="เช่น 5"
+                  :error="hourError !== ''"
+                  @blur="touched.hour = true"
                 />
+                <div v-if="hourError" class="text-negative text-subtitle2 q-mt-xs">
+                  {{ hourError }}
+                </div>
               </div>
             </div>
 
@@ -250,7 +325,7 @@ const submit = async () => {
 
             <!-- ประเภทแพลตฟอร์ม (type)-->
             <div class="input-group">
-              <p class="label label_minWidth">ประเภท :</p>
+              <p class="label label_minWidth">ประเภท : <span class="text-red">*</span></p>
               <div class="status-inline-group">
                 <q-btn
                   :class="[
@@ -275,6 +350,9 @@ const submit = async () => {
                   BUU MOOC
                 </q-btn>
               </div>
+              <div v-if="typeError" class="text-negative text-subtitle2 q-mt-xs">
+                {{ typeError }}
+              </div>
             </div>
 
             <!-- วิดีโอสอนการขอใบประกาศ -->
@@ -296,7 +374,7 @@ const submit = async () => {
             <!-- ปุ่มบันทึก/ยกเลิก -->
             <div class="button-group">
               <q-btn class="btnreject" label="ยกเลิก" @click="cancel" />
-              <q-btn class="btnconfirm" label="บันทึก" @click="submit" />
+              <q-btn class="btnconfirm" label="บันทึก" @click="submit" :disable="!isFormValid" />
             </div>
           </q-page>
         </div>

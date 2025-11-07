@@ -58,16 +58,45 @@ const selectedImageFile = ref<File | null>(null)
 const statusText = computed(() => (courseState.value.isActive ? 'เปิดใช้งาน' : 'ปิดชั่วคราว'))
 const statusClass = computed(() => (courseState.value.isActive ? 'status-open ' : 'status-closed '))
 
-const nameError = computed(() => (courseState.value.name.trim() ? '' : 'กรุณากรอกชื่อหัวข้อ'))
-const linkError = computed(() => (courseState.value.link.trim() ? '' : 'กรุณากรอกลิงค์'))
-// show error only when isHardSkill is null/undefined (unset)
+// ✅ แสดง error เฉพาะตอนอยู่ในโหมดแก้ไข
+const nameError = computed(() =>
+  isEditMode.value && courseState.value.name.trim() === '' ? 'กรุณากรอกชื่อหัวข้อ' : '',
+)
+const linkError = computed(() =>
+  isEditMode.value && courseState.value.link.trim() === '' ? 'กรุณากรอกลิงค์' : '',
+)
+// show error only when isHardSkill is null/undefined (unset) และอยู่ในโหมดแก้ไข
 const CategoryError = computed(() =>
-  courseState.value.isHardSkill === null || courseState.value.isHardSkill === undefined
+  isEditMode.value &&
+  (courseState.value.isHardSkill === null || courseState.value.isHardSkill === undefined)
     ? 'กรุณาเลือกประเภทโครงการ'
     : '',
 )
-const hourError = computed(() => (courseState.value.hour ? '' : 'กรุณากรอกชั่วโมง'))
-const typeError = computed(() => (courseState.value.type ? '' : 'กรุณากรอกประเภท'))
+const hourError = computed(() =>
+  isEditMode.value && courseState.value.hour <= 0 ? 'กรุณากรอกชั่วโมง' : '',
+)
+const typeError = computed(() =>
+  isEditMode.value && courseState.value.type.trim() === '' ? 'กรุณากรอกประเภท' : '',
+)
+
+// ✅ เช็คว่าฟอร์มถูกต้องหรือไม่
+const isFormValid = computed(() => {
+  if (!isEditMode.value) return true // ถ้าไม่ได้อยู่ในโหมดแก้ไข ไม่ต้องเช็ค
+
+  // เช็คว่าต้องกรอก certificateName หรือ certificateNameEng อย่างน้อย 1 อัน
+  const hasCertificateName =
+    (courseState.value.certificateName?.trim() ?? '') !== '' ||
+    (courseState.value.certificateNameEng?.trim() ?? '') !== ''
+
+  return (
+    courseState.value.name.trim() !== '' &&
+    courseState.value.link.trim() !== '' &&
+    courseState.value.isHardSkill !== null &&
+    courseState.value.hour > 0 &&
+    courseState.value.type.trim() !== '' &&
+    hasCertificateName
+  )
+})
 
 function handleFileSelected(file: File) {
   selectedImageFile.value = file
@@ -427,7 +456,12 @@ function confirmCancel() {
               <q-btn v-if="!isEditMode" class="btnedit" label="แก้ไข" @click="enableEditMode" />
               <template v-else>
                 <q-btn class="btnreject" label="ยกเลิก" @click="cancelEdit" />
-                <q-btn class="btnconfirm" label="บันทึก" @click="saveChanges" />
+                <q-btn
+                  class="btnconfirm"
+                  label="บันทึก"
+                  @click="saveChanges"
+                  :disable="!isFormValid"
+                />
               </template>
             </div>
           </q-page>
