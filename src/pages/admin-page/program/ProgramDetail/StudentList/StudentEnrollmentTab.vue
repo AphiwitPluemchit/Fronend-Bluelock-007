@@ -723,7 +723,7 @@ onUnmounted(() => {
           outlined
           v-model="search1"
           @keyup.enter="fetchStudents"
-          label="ค้นหาชื่อ-สกุล/ รหัสนิสิต"
+          label="ค้นหา ชื่อหรือรหัสนิสิต"
           class="searchbox"
           :style="{ border: 'none' }"
         >

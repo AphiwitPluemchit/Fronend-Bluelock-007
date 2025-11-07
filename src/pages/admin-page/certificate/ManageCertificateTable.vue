@@ -41,7 +41,7 @@ const columns: QTableColumn<UploadCertificate>[] = [
   { name: 'major', label: 'สาขา', field: (row) => row.student?.major, align: 'left' },
   {
     name: 'courseName',
-    label: 'ชื่อหัวข้อการอบรม',
+    label: 'ชื่อหหลักสูตร',
     field: (row) => row.course?.name,
     align: 'left',
   },
@@ -154,7 +154,7 @@ onMounted(async () => {
             dense
             outlined
             v-model="params.search"
-            label="ค้นหาชื่อหรือรหัสนิสิต"
+            label="ค้นหา ชื่อหรือรหัสนิสิต"
             class="q-mr-sm searchbox"
             debounce="500"
             @update:model-value="fetchCertificates"
@@ -246,7 +246,7 @@ onMounted(async () => {
         <!-- no data -->
         <template v-slot:no-data>
           <div class="full-width text-center q-pa-md text-grey" style="font-size: 20px">
-            ไม่มีรายชื่อนิสิตที่อัปโหลดใบประกาศนียบัตร
+            ไม่มีรายชื่อนิสิตที่รออนุมัติใบประกาศนียบัตร
           </div>
         </template>
       </q-table>
