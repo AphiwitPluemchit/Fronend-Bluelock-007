@@ -133,8 +133,13 @@ const submit = async () => {
             <div class="input-group">
               <p class="label label_minWidth">ชื่อหลักสูตร:</p>
               <div class="input-container">
-                <q-input outlined v-model="course.name" class="fix-q-input-height" hide-bottom placeholder="เช่น การออกแบบสื่อและการนำเสนอ (Media Design and Presentation)"
-/>
+                <q-input
+                  outlined
+                  v-model="course.name"
+                  class="fix-q-input-height"
+                  hide-bottom
+                  placeholder="เช่น การออกแบบสื่อและการนำเสนอ (Media Design and Presentation)"
+                />
               </div>
             </div>
 
@@ -142,7 +147,15 @@ const submit = async () => {
             <div class="input-group">
               <p class="label label_minWidth">ชื่อในใบประกาศ (ไทย) :</p>
               <div class="input-container">
-                <q-input outlined v-model="course.certificateName" class="fix-q-input-height" placeholder="เช่น การออกแบบสื่อและการนำเสนอ" />
+                <q-input
+                  outlined
+                  v-model="course.certificateName"
+                  class="fix-q-input-height"
+                  placeholder='เช่น "การออกแบบสื่อ Media Design"'
+                />
+                <div class="text-caption text-grey-6 q-mt-xs">
+                  สำหรับคอร์สชื่อภาษาไทยหรือภาษาไทยรวมอังกฤษ
+                </div>
               </div>
             </div>
 
@@ -150,7 +163,15 @@ const submit = async () => {
             <div class="input-group">
               <p class="label label_minWidth">ชื่อในใบประกาศ (อังกฤษ) :</p>
               <div class="input-container">
-                <q-input outlined v-model="course.certificateNameEng" class="fix-q-input-height"  placeholder="เช่น Media Design and Presentation" />
+                <q-input
+                  outlined
+                  v-model="course.certificateNameEng"
+                  class="fix-q-input-height"
+                  placeholder='เช่น "Experiential English"'
+                />
+                <div class="text-caption text-grey-6 q-mt-xs">
+                  สำหรับคอร์สชื่อภาษาอังกฤษอย่างเดียว
+                </div>
               </div>
             </div>
 
@@ -218,7 +239,12 @@ const submit = async () => {
             <div class="input-group">
               <p class="label label_minWidth">หน่วยงานผู้ออก :</p>
               <div class="input-container">
-                <q-input outlined v-model="course.issuer" class="fix-q-input-height" placeholder="เช่น มหาวิทยาลัยเชียงใหม่"/>
+                <q-input
+                  outlined
+                  v-model="course.issuer"
+                  class="fix-q-input-height"
+                  placeholder="เช่น มหาวิทยาลัยเชียงใหม่"
+                />
               </div>
             </div>
 

@@ -233,7 +233,11 @@ function confirmCancel() {
                   class="fix-q-input-height"
                   :readonly="!isEditMode"
                   :class="{ readonly: !isEditMode }"
+                  placeholder='เช่น "การออกแบบสื่อ Media Design"'
                 />
+                <div class="text-caption text-grey-6 q-mt-xs">
+                  สำหรับคอร์สชื่อภาษาไทยหรือภาษาไทยรวมอังกฤษ
+                </div>
               </div>
             </div>
 
@@ -246,8 +250,12 @@ function confirmCancel() {
                   v-model="courseState.certificateNameEng"
                   class="fix-q-input-height"
                   :readonly="!isEditMode"
+                  placeholder='เช่น "Experiential English"'
                   :class="{ readonly: !isEditMode }"
                 />
+                <div class="text-caption text-grey-6 q-mt-xs">
+                  สำหรับคอร์สชื่อภาษาอังกฤษอย่างเดียว
+                </div>
               </div>
             </div>
 
@@ -304,10 +312,11 @@ function confirmCancel() {
                   v-model="courseState.link"
                   class="fix-q-input-height"
                   :readonly="!isEditMode"
-                  placeholder="https://..."
+                  placeholder="https://learn.mooc.buu.ac.th/courses/example"
                   :class="{ readonly: !isEditMode }"
                   :error="linkError !== ''"
                 />
+
                 <div v-if="linkError" class="text-negative text-subtitle2 q-mt-xs">
                   {{ linkError }}
                 </div>
