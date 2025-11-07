@@ -4,10 +4,16 @@ import { useCourseStore } from 'src/stores/course'
 import { useQuasar } from 'quasar'
 import type { Course } from 'src/types/course'
 import ImageDetail from 'src/pages/admin-page/program/ProgramDetail/ProgramDetail/imageDetail.vue'
+import { useRoute } from 'vue-router' // ✅ เพิ่ม useRoute
 const $q = useQuasar()
 const courseStore = useCourseStore()
+const route = useRoute() // ✅ สำหรับอ่าน query parameter
 
 const props = defineProps<{ isEditing?: boolean; id?: string }>()
+
+// ✅ ประกาศ isEditMode ก่อน เพื่อให้ใช้ใน loadCourse ได้
+const isEditMode = ref(false)
+
 onMounted(loadCourse)
 watch(() => props.id, loadCourse)
 
@@ -34,6 +40,11 @@ async function loadCourse() {
   const full: Course = { ...defaultCourse(), ...data }
   courseState.value = full
   originalCourseData.value = { ...full }
+
+  // ✅ ถ้ามี query parameter edit=true ให้เปิด edit mode ทันที
+  if (route.query.edit === 'true') {
+    isEditMode.value = true
+  }
 }
 
 const courseState = ref<Course>(defaultCourse())
@@ -81,7 +92,8 @@ function setType(v: 'thaimooc' | 'buumooc' | 'lms') {
 }
 
 const showChangeStatusDialog = ref(false)
-const isEditMode = ref(false)
+// ✅ ลบบรรทัดนี้ออก เพราะย้ายไปประกาศด้านบนแล้ว
+// const isEditMode = ref(false)
 
 const showCancelDialog = ref(false)
 const selectedStatus = ref<'เปิดใช้งาน' | 'ปิดชั่วคราว'>('เปิดใช้งาน')

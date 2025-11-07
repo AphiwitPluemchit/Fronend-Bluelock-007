@@ -106,6 +106,7 @@ function goToDetail(row: Course) {
 function goToPageDetailEdit(row: Course) {
   void router.push({
     path: `/admin/CourseDetail/${row.id}`,
+    query: { edit: 'true' }, // ✅ ส่ง query parameter เพื่อเปิด edit mode ทันที
   })
 }
 function goToAddCourse() {
