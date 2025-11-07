@@ -135,12 +135,7 @@ export class CertificateService {
   ): Promise<UploadCertificate> {
     try {
       const res = await api.put(`${this.path}/${id}/status`, payload)
-      Notify.create({
-        message: 'อัปเดตสถานะเรียบร้อยแล้ว',
-        type: 'positive',
-        position: 'bottom',
-        timeout: 2000,
-      })
+      // ✅ ลบการแจ้งเตือนออก ให้แจ้งที่ component แทน
       return res.data.data
     } catch (error: unknown) {
       const message =

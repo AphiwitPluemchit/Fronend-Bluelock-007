@@ -96,7 +96,7 @@ const confirm = async () => {
       remark: rejectReason.value || '', // ส่ง remark ไป
     })
 
-    // แจ้งเตือนสำเร็จ
+    // แจ้งเตือนสำเร็จ (ข้อความเดียว)
     $q.notify({
       message,
       type: 'positive',
@@ -208,9 +208,7 @@ const formatDate = (dateString: string | null | undefined) => {
         <!-- ปุ่มแก้ไขและปิด -->
         <div class="row justify-end q-gutter-sm textcontent1">
           <q-btn class="btnreject" @click="closeDialog">ปิด</q-btn>
-          <q-btn class="btnedit" @click="startEditing">
-            แก้ไข
-          </q-btn>
+          <q-btn class="btnedit" @click="startEditing"> แก้ไข </q-btn>
         </div>
       </template>
 
