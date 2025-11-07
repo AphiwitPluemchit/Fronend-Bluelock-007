@@ -66,7 +66,7 @@ const getStatusText = (status: string) => {
     case 3:
       return 'ชั่วโมงครบแล้ว'
     case 4:
-      return 'ออกผึกแล้ว'
+      return 'ออกฝึกแล้ว'
     default:
       return '-'
   }
@@ -187,7 +187,10 @@ watch(
           border-radius: 10px;
         "
       >
-        <q-card-section class="filter-section q-gutter-y-md" style="max-height: 55vh; overflow-y: auto">
+        <q-card-section
+          class="filter-section q-gutter-y-md"
+          style="max-height: 55vh; overflow-y: auto"
+        >
           <!-- ประเภทโครงการ -->
           <div v-if="availableCategories.includes('categoryProgram')" class="">
             <p class="q-mb-sm text-h6">ประเภทโครงการ</p>

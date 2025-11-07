@@ -163,9 +163,10 @@ onMounted(async () => {
         :rows="students"
         :columns="columns"
         v-model:pagination="pagination"
+        :rows-per-page-options="[5, 10, 15, 20]"
         @request="onRequest"
         row-key="id"
-        class="q-mt-md "
+        class="q-mt-md"
       >
         <!-- <q-table bordered flat :rows="students" :columns="columns" @request="applyFilters" row-key="id" class="q-mt-md"> -->
         <!-- หัวตาราง Sticky -->
