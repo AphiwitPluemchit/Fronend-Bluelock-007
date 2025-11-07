@@ -137,6 +137,7 @@ watch(
         :error="dateError !== ''"
         @focus="focus"
         @keydown.enter.prevent="$emit('enter')"
+         hide-bottom-space
       >
         <template v-slot:prepend>
           <q-icon

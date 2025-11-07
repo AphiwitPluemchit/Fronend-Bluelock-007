@@ -137,6 +137,7 @@ defineExpose({ validate, focus })
         ref="inputRef"
         outlined
         readonly
+        hide-bottom-space
         :model-value="formattedCloseRegisDate"
         :disable="disable"
         :error="closedateError !== ''"

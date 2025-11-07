@@ -908,6 +908,7 @@ onMounted(() => {
           hide-bottom
           :disable="!isEditing"
           @keyup.enter="onEnterField('mainName')"
+           hide-bottom-space
         />
         <div v-if="programNameError" class="text-negative text-subtitle2 q-mt-xs">
           {{ programNameError }}
@@ -1099,6 +1100,7 @@ onMounted(() => {
           v-model="subProgram.detailProgram"
           class="input-container"
           :disable="!isEditing"
+           hide-bottom-space
         />
       </div>
     </div>

@@ -163,6 +163,7 @@ watch(
         :error="formError !== ''"
         readonly
         @click="openDialog"
+         hide-bottom-space
       >
         <template #append>
           <q-icon name="arrow_drop_down" class="cursor-pointer" @click.stop="openDialog" />

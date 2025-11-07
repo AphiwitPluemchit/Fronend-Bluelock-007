@@ -160,6 +160,7 @@ const enableEditMode = () => {
         :disable="disable"
         @click="openFoodDialog"
         readonly
+         hide-bottom-space
       >
         <template v-slot:prepend>
           <q-icon

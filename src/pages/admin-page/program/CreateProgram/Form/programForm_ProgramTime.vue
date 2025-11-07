@@ -247,6 +247,7 @@ watch(
           input-mode="numeric"
           @keypress="(e: KeyboardEvent) => onTimeKeypressLimit(e, 'start')"
           @update:model-value="onTimeTyping"
+           hide-bottom-space
         >
           <template v-slot:prepend>
             <q-icon

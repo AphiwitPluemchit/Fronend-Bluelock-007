@@ -128,6 +128,7 @@ const handleEnter = async (e: KeyboardEvent) => {
         @focus="onFocus"
         @input="filterRooms"
         :error="roomError !== ''"
+         hide-bottom-space
       >
     </q-input>
         <q-menu

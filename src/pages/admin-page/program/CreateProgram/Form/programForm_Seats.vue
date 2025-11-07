@@ -57,6 +57,7 @@ defineExpose({ validate, focus })
     </p>
     <div class="input-container">
       <q-input
+         hide-bottom-space
         ref="inputRef"
         outlined
         class="fix-q-input-height"

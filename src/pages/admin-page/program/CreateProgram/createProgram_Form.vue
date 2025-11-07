@@ -435,6 +435,8 @@ onMounted(() => {
           v-model="subProgram.lecturer"
           class="input-container"
           placeholder="เช่น บริษัท บลูล็อก จำกัด"
+           hide-bottom-space
+           
         />
       </div>
 
@@ -443,9 +445,11 @@ onMounted(() => {
         <q-input
           type="textarea"
           rows="10"
+           hide-bottom-space
           outlined
           v-model="subProgram.detailProgram"
           class="input-container"
+          
         />
       </div>
     </div>

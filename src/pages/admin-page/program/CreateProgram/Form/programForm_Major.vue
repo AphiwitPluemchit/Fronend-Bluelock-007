@@ -67,6 +67,7 @@ watch(
         :label="option.label"
         class="department-btn"
         :disable="disable"
+         hide-bottom-space
       />
     </div>
     <div v-if="error" class="text-negative text-subtitle2 q-mt-xs">
