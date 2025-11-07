@@ -133,12 +133,12 @@ const uploadFile = async () => {
 
   try {
     await studentStore.createStudent(students.value)
-    showAlertDialog('สำเร็จ', '✅ อัปโหลดสำเร็จ!')
+    showAlertDialog('สำเร็จ', 'อัปโหลดสำเร็จ')
     file.value = null
     students.value = []
   } catch (err) {
     console.error(err)
-    showAlertDialog('ข้อผิดพลาด', '❌ เกิดข้อผิดพลาดในการอัปโหลด')
+    showAlertDialog('ข้อผิดพลาด', 'เกิดข้อผิดพลาดในการอัปโหลด')
   }
 }
 
