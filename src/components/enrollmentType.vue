@@ -22,7 +22,8 @@ const buttonLabel = computed(() => {
   if (props.status === hourhistoryStore.HCStatusUpcoming) return 'ยังไม่เข้าร่วม'
   if (props.status === hourhistoryStore.HCStatusParticipating) return 'กำลังเข้าร่วม'
   if (props.status === hourhistoryStore.HCStatusAttended) return 'เข้าร่วมแล้ว'
-  if (props.status === hourhistoryStore.HCStatusLate) return 'สาย'
+  if (props.status === hourhistoryStore.HCStatusLate) return 'มาสาย'
+  if (props.status === hourhistoryStore.HCStatusIncomplete) return 'มาไม่ครบ'
   if (props.status === hourhistoryStore.HCStatusAbsent) return 'ไม่มาเข้าร่วม'
   if (props.status === 'manual') return 'เพิ่มเติม'
   return 'ข้อมูลเดิม'
@@ -33,6 +34,7 @@ const buttonClass = computed(() => {
   if (props.status === hourhistoryStore.HCStatusParticipating) return 'status-dot--blue'
   if (props.status === hourhistoryStore.HCStatusAttended) return 'status-dot--green'
   if (props.status === hourhistoryStore.HCStatusLate) return 'status-dot--orange'
+  if (props.status === hourhistoryStore.HCStatusIncomplete) return 'status-dot--black'
   if (props.status === hourhistoryStore.HCStatusAbsent) return 'status-dot--red'
   if (props.status === 'manual') return 'status-dot--purple'
   return 'status-dot--brown'
@@ -66,6 +68,10 @@ const buttonClass = computed(() => {
 .status-dot--orange {
   background-color: #ff9800;
 }
+.status-dot--black {
+  background-color: #000000;
+  color: #ffffff;
+}
 .status-dot--red {
   background-color: #f44336;
 }
@@ -75,6 +81,10 @@ const buttonClass = computed(() => {
 
 .status-dot--brown {
   background-color: #73635d;
+}
+
+.status-dot--blue {
+  background-color: #2196f3;
 }
 
 .status-label {

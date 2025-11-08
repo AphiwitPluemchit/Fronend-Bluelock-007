@@ -391,8 +391,7 @@ async function fetchAllEnrollmentsByProgramItem(programItemId: string, baseQuery
 
   while (true) {
     const res = await EnrollmentService.getEnrollmentsByProgramID(programItemId, q)
-    const rows: StudentEnrollment[] =
-      (res.data || res.data || [])
+    const rows: StudentEnrollment[] = res.data || res.data || []
     if (page === 1) total = res.meta.total || rows.length
 
     all.push(...rows)
@@ -414,16 +413,16 @@ function safeSheetName(name: string) {
   return name.length <= 31 ? name : name.slice(0, 31)
 }
 const MAJOR_MAP: Record<string, string> = {
-  CS:   'วิทยาการคอมพิวเตอร์',
-  SE:   'วิศวกรรมซอฟต์แวร์',
+  CS: 'วิทยาการคอมพิวเตอร์',
+  SE: 'วิศวกรรมซอฟต์แวร์',
   ITDI: 'เทคโนโลยีสารสนเทศเพื่ออุตสาหกรรมดิจิทัล',
-  AAI:  'ปัญญาประดิษฐ์ประยุกต์และเทคโนโลยีอัจฉริยะ',
+  AAI: 'ปัญญาประดิษฐ์ประยุกต์และเทคโนโลยีอัจฉริยะ',
 }
 
 function toMajorName(major?: string) {
   if (!major) return '-'
   const key = major.trim().toUpperCase()
-  return MAJOR_MAP[key] ?? major  // ถ้าไม่พบในแม็ป ให้คืนค่าที่ส่งมา
+  return MAJOR_MAP[key] ?? major // ถ้าไม่พบในแม็ป ให้คืนค่าที่ส่งมา
 }
 async function downloadExcel() {
   try {
@@ -487,7 +486,7 @@ async function downloadExcel() {
     }
 
     // ตั้งชื่อไฟล์
-    const progName = (program.value?.name || 'ไม่มีชื่อ')
+    const progName = program.value?.name || 'ไม่มีชื่อ'
     const ts = dayjs().format('YYYY-MM-DD_HH.mm')
     const filename = `${progName}_${ts}.xlsx`
 
@@ -1135,9 +1134,9 @@ onUnmounted(() => {
   width: 130px;
 }
 .status-incomplete {
-  background-color: #e0e0e0;
-  color: #5a5a5a;
-  border: 1px solid #9e9e9e;
+  background-color: #000000;
+  color: #ffffff;
+  border: 1px solid #333333;
   padding: 3px 30px;
   width: 130px;
 }
