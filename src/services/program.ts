@@ -31,6 +31,11 @@ export class ProgramService {
         ? { studentYears: studentYear.join(',') }
         : {}),
     }
+    // log if it is open,close status then log
+    if (programState?.includes('open') || programState?.includes('close')) {
+      console.log('📦 getAll programs with params:', queryParams)
+    }
+    // console.log('📦 getAll programs with params:', queryParams)
 
     try {
       const res = await api.get<PaginationResponse<Program>>(this.path, {
@@ -148,5 +153,3 @@ export class ProgramService {
     })
   }
 }
-
-
