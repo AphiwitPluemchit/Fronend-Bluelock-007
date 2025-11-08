@@ -142,7 +142,7 @@ onMounted(async () => {
       <!-- Major Distribution -->
       <div class="section-divider">
         <q-icon name="school" size="24px" class="text-primary" />
-        <h3>รายละเอียดตามสาขา</h3>
+        <div class="textsubtitle">รายละเอียดตามสาขา</div>
       </div>
 
       <div class="major-grid">
@@ -164,7 +164,7 @@ onMounted(async () => {
       <div v-if="programDetail?.foodVotes?.length" class="food-section">
         <div class="section-divider">
           <q-icon name="restaurant" size="24px" class="text-primary" />
-          <h3>ผลการเลือกอาหาร</h3>
+          <div class="textsubtitle">ผลการเลือกอาหาร</div>
         </div>
 
         <div class="food-grid">
@@ -190,8 +190,8 @@ onMounted(async () => {
       <div class="sub-program-card">
         <div class="program-header">
           <div class="program-title">
-            <q-icon name="event_note" size="32px" class="text-primary" />
-            <h1>โครงการย่อย</h1>
+            <q-icon name="event_note" size="24px" class="text-primary" />
+            <div class="textsubtitle">โครงการย่อย</div>
           </div>
         </div>
         <div
@@ -202,11 +202,11 @@ onMounted(async () => {
           style="cursor: pointer"
         >
           <div class="row items-center justify-between q-gutter-sm">
-            <div class="text-h6 text-primary q-mb-xs">
+            <div class="textcontent1 text-primary q-mb-xs">
               {{ row.program }}
             </div>
 
-            <div class="text-h7 text-weight-bold">
+            <div class="textcontent2 text-weight-bold">
               รับ {{ row.max }} / ลงทะเบียนแล้ว {{ row.enrolled }} / เหลือ {{ row.remaining }}
             </div>
 
@@ -223,7 +223,7 @@ onMounted(async () => {
 
           <q-slide-transition>
             <div v-if="expandedIndices.includes(index)" class="q-mt-sm q-pt-sm q-border-top">
-              <div class="text-subtitle2 q-mb-sm">
+              <div class="textcontent2 q-mb-sm">
                 <q-icon name="school" class="q-mr-xs" />
                 จำนวนนิสิตจากแต่ละสาขา
               </div>
@@ -239,7 +239,7 @@ onMounted(async () => {
                         class="q-mr-sm"
                         :style="{ width: '10px', height: '30px', backgroundColor: major.color }"
                       ></div>
-                      <div class="text-body2">
+                      <div class="textcontent3">
                         {{ major.fullName }}: {{ row[major.majorName] || 0 }} คน
                       </div>
                     </div>

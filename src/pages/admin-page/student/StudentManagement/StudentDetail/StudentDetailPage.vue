@@ -112,7 +112,7 @@ onMounted(async () => {
     </div>
 
     <!-- แสดงชื่อนิสิตและสถานะ -->
-    <q-card flat class="q-mt-md">
+    <!-- <q-card flat class="q-mt-md">
       <div class="row items-center q-pa-md">
         <div class="col-9 row items-center">
           <div class="col-2 text-right q-pr-md">
@@ -124,24 +124,35 @@ onMounted(async () => {
           <div class="col-2 text-right q-pr-md">
             <p class="q-my-none" style="font-size: 18px"><strong>สถานะ :</strong></p>
           </div>
-          <div class="col-4">
-            <q-badge
-              :label="studentStore.getStatusText(studentStore.student.status)"
-              :class="studentStore.getStatusClass(studentStore.student.status)"
-              class="status-badge"
-              unelevated
-            />
-          </div>
         </div>
       </div>
-    </q-card>
+    </q-card> -->
     <div class="q-mb-lg" v-if="show">
       <q-card flat class="q-mt-lg">
+        <!-- แถวสถานะ -->
+        <div class="row q-col-gutter-md items-center">
+          <div class="col-12 col-sm-12 col-md-12">
+            <div class="row justify-center">
+              <q-badge
+                :label="studentStore.getStatusText(studentStore.student.status)"
+                :class="studentStore.getStatusClass(studentStore.student.status)"
+                class="status-badge q-mb-md"
+                unelevated
+              />
+            </div>
+          </div>
+        </div>
+
+        <!-- แถวข้อมูลนิสิต -->
         <div class="row q-col-gutter-md">
-          <!-- แถวข้อมูลนิสิต -->
-          <div class="col-12 row items-center q-pa-sm">
-            <div class="col-1 text-right q-pr-md"><p class="q-my-none">ชื่อ :</p></div>
-            <div class="col-4">
+          <!-- ชื่อ / Email -->
+          <div class="col-12 row items-center q-pa-sm q-col-gutter-sm">
+            <!-- label -->
+            <div class="col-12 col-md-1 q-pr-md ">
+              <p class="q-my-none text-right">ชื่อ :</p>
+            </div>
+            <!-- input -->
+            <div class="col-12 col-md-4">
               <q-input
                 v-model="studentStore.student.name"
                 :readonly="!isEditMode"
@@ -151,8 +162,13 @@ onMounted(async () => {
                 dense
               />
             </div>
-            <div class="col-2 text-right q-pr-md"><p class="q-my-none">Email :</p></div>
-            <div class="col-4">
+
+            <!-- label -->
+            <div class="col-12 col-md-2 q-pr-md">
+              <p class="q-my-none text-right">Email :</p>
+            </div>
+            <!-- input -->
+            <div class="col-12 col-md-4">
               <q-input
                 v-model="studentStore.student.email"
                 :readonly="!isEditMode"
@@ -164,9 +180,12 @@ onMounted(async () => {
             </div>
           </div>
 
-          <div class="col-12 row items-center q-pa-sm">
-            <div class="col-1 text-right q-pr-md"><p class="q-my-none">รหัสนิสิต :</p></div>
-            <div class="col-4">
+          <!-- รหัสนิสิต / ชั่วโมงเตรียมความพร้อม -->
+          <div class="col-12 row items-center q-pa-sm q-col-gutter-sm">
+            <div class="col-12 col-md-1 q-pr-md">
+              <p class="q-my-none text-right">รหัสนิสิต :</p>
+            </div>
+            <div class="col-12 col-md-4">
               <q-input
                 v-model="studentStore.student.code"
                 class="readonly qinput"
@@ -175,10 +194,11 @@ onMounted(async () => {
                 dense
               />
             </div>
-            <div class="col-2 text-right q-pr-md">
-              <p class="q-my-none">ชั่วโมงเตรียมความพร้อม :</p>
+
+            <div class="col-12 col-md-2 q-pr-md">
+              <p class="q-my-none text-right">ชั่วโมงเตรียมความพร้อม :</p>
             </div>
-            <div class="col-4">
+            <div class="col-12 col-md-4">
               <q-input
                 v-model="studentStore.student.softSkill"
                 :readonly="!isEditMode"
@@ -191,10 +211,13 @@ onMounted(async () => {
             </div>
           </div>
 
-          <div class="col-12 row items-center q-pa-sm">
-            <div class="col-1 text-right q-pr-md"><p class="q-my-none">สาขา :</p></div>
+          <!-- สาขา / ชั่วโมงทักษะทางวิชาการ -->
+          <div class="col-12 row items-center q-pa-sm q-col-gutter-sm">
+            <div class="col-12 col-md-1 q-pr-md">
+              <p class="q-my-none text-right">สาขา :</p>
+            </div>
 
-            <div class="col-4">
+            <div class="col-12 col-md-4">
               <q-select
                 v-if="isEditMode"
                 v-model="studentStore.student.major"
@@ -213,10 +236,11 @@ onMounted(async () => {
                 dense
               />
             </div>
-            <div class="col-2 text-right q-pr-md">
-              <p class="q-my-none">ชั่วโมงทักษะทางวิชาการ :</p>
+
+            <div class="col-12 col-md-2 q-pr-md">
+              <p class="q-my-none text-right">ชั่วโมงทักษะทางวิชาการ :</p>
             </div>
-            <div class="col-4">
+            <div class="col-12 col-md-4">
               <q-input
                 v-model="studentStore.student.hardSkill"
                 :readonly="!isEditMode"
@@ -302,7 +326,7 @@ onMounted(async () => {
           box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.2);
         "
       >
-      <q-card-section class="row items-center q-gutter-sm q-mt-sm ">
+        <q-card-section class="row items-center q-gutter-sm q-mt-sm">
           <div class="text-h6">
             <q-icon name="warning" color="red-7" size="md" /> ยืนยันการยกเลิก
           </div></q-card-section
@@ -321,6 +345,10 @@ onMounted(async () => {
 </template>
 
 <style scoped>
+.label-cell { text-align: left; }
+@media (min-width: 1024px) { /* หรือใช้ 992px ตามดีไซน์ */
+  .label-cell { text-align: right; }
+}
 .search-filter-wrapper {
   flex-wrap: wrap;
 }
