@@ -461,14 +461,14 @@ const pagination4 = ref({
   rowsPerPage: query4.value.limit || 5,
   rowsNumber: 0,
 })
-
+  
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 async function onRequest1(props: any) {
   const { page, rowsPerPage, sortBy, descending } = props.pagination
 
   query1.value.page = page
   query1.value.limit = rowsPerPage
-  query1.value.sortBy = sortBy
+  query1.value.sortBy = sortBy || '_id'
   query1.value.order = descending ? 'desc' : 'asc'
 
   await data1()
