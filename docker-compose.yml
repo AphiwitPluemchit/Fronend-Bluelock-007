@@ -7,5 +7,5 @@ services:
     volumes:
       - ./.env.prod:/app/.env
     ports:
-      - '8888:80'
+      - "9050:80"
     restart: always
